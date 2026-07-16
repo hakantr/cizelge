@@ -81,8 +81,8 @@ pub fn im_alanlarını_çiz(
         );
         yüzey.dikdörtgen(d, &dolgu, [0.0; 4], None);
 
-        if let Some(ad) = ad {
-            if alan_imi.etiket.göster || !ad.is_empty() {
+        if let Some(ad) = ad
+            && (alan_imi.etiket.göster || !ad.is_empty()) {
                 let boyut = alan_imi.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
                 let renk = alan_imi.etiket.yazı.renk.unwrap_or(seri_rengi);
                 yüzey.yazı(
@@ -95,7 +95,6 @@ pub fn im_alanlarını_çiz(
                     false,
                 );
             }
-        }
     }
 }
 

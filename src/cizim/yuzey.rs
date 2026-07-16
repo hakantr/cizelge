@@ -230,12 +230,11 @@ pub trait ÇizimYüzeyi {
             let yol = daire_yolu(merkez, yarıçap);
             self.yol_doldur(&yol, dolgu);
         }
-        if let Some((kalınlık, renk)) = kenarlık {
-            if kalınlık > 0.0 {
+        if let Some((kalınlık, renk)) = kenarlık
+            && kalınlık > 0.0 {
                 let yol = daire_yolu(merkez, yarıçap);
                 self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
             }
-        }
     }
 
     /// Pasta dilimi (halka parçası) boyar. Açılar radyandır ve ekran
@@ -270,12 +269,11 @@ pub trait ÇizimYüzeyi {
             let yol = dilim_yolu(merkez, iç_yarıçap, dış_yarıçap, açı0, açı1);
             self.yol_doldur(&yol, dolgu);
         }
-        if let Some((kalınlık, renk)) = kenarlık {
-            if kalınlık > 0.0 {
+        if let Some((kalınlık, renk)) = kenarlık
+            && kalınlık > 0.0 {
                 let yol = dilim_yolu(merkez, iç_yarıçap, dış_yarıçap, açı0, açı1);
                 self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
             }
-        }
     }
 
     /// `self`i trait nesnesi olarak verir (varsayılan yöntemlerin yardımcı

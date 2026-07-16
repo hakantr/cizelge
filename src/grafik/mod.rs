@@ -2,6 +2,7 @@
 
 pub mod cizgi;
 pub mod imleyici;
+pub mod mum;
 pub mod pasta;
 pub mod sacilim;
 pub mod sutun;

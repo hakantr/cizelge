@@ -127,8 +127,8 @@ pub fn sütunları_çiz(
             });
 
             // Değer etiketi.
-            if seri.etiket.göster {
-                if let Some(değer) = veri_öğesi.değer.sayı() {
+            if seri.etiket.göster
+                && let Some(değer) = veri_öğesi.değer.sayı() {
                     let metin = match &seri.etiket.biçimleyici {
                         Some(b) => b.uygula(değer, &binlik_ayır(değer)),
                         None => binlik_ayır(değer),
@@ -164,7 +164,6 @@ pub fn sütunları_çiz(
                         );
                     }
                 }
-            }
         }
     }
 }

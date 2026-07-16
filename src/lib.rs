@@ -53,7 +53,8 @@ pub use model::imleyici::{
 };
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
-    Basamak, GülTürü, PastaSerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, ÇizgiSerisi,
+    Basamak, GülTürü, KutuSerisi, MumSerisi, PastaSerisi, SaçılımSerisi, Sembol, Seri,
+    SütunSerisi, ÇizgiSerisi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, Etiket, EtiketKonumu, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili,
@@ -81,7 +82,8 @@ pub mod hazir {
     };
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
-        Basamak, GülTürü, PastaSerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, ÇizgiSerisi,
+        Basamak, GülTürü, KutuSerisi, MumSerisi, PastaSerisi, SaçılımSerisi, Sembol, Seri,
+    SütunSerisi, ÇizgiSerisi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, Etiket, EtiketKonumu, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili,

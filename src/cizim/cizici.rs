@@ -371,11 +371,10 @@ impl ÇizimYüzeyi for Çizici<'_, '_> {
         let yükseklik = boyut * SATIR_ORANI;
         if let Some(önbellek) = &self.ölçüm_önbelleği {
             let anahtar = (metin.to_string(), boyut.to_bits());
-            if let Ok(kayıt) = önbellek.try_borrow() {
-                if let Some(genişlik) = kayıt.get(&anahtar) {
+            if let Ok(kayıt) = önbellek.try_borrow()
+                && let Some(genişlik) = kayıt.get(&anahtar) {
                     return (*genişlik, yükseklik);
                 }
-            }
             let satır = self.şekillendir(metin, boyut, false, Renk::SİYAH);
             let genişlik = f32::from(satır.width());
             // Önbellek kilitliyse ölçüm yine de geçerlidir; kayıt atlanır.

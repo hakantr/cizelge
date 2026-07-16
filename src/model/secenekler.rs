@@ -169,14 +169,13 @@ impl GrafikSeçenekleri {
             });
         }
         for eksen in [&self.x_ekseni, &self.y_ekseni].into_iter().flatten() {
-            if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok) {
-                if en_az >= en_çok {
+            if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
+                && en_az >= en_çok {
                     return Err(BilesenHatasi::GeçersizSeçenek {
                         alan: "eksen.en_az/en_çok",
                         ayrıntı: format!("en_az ({en_az}) < en_çok ({en_çok}) olmalı"),
                     });
                 }
-            }
             if eksen.tür == crate::model::eksen::EksenTürü::Log && eksen.log_tabanı <= 1.0 {
                 return Err(BilesenHatasi::GeçersizSeçenek {
                     alan: "eksen.log_tabanı",
@@ -185,14 +184,13 @@ impl GrafikSeçenekleri {
             }
         }
         for seri in &self.seriler {
-            if let Seri::Pasta(p) = seri {
-                if p.başlangıç_açısı.is_nan() {
+            if let Seri::Pasta(p) = seri
+                && p.başlangıç_açısı.is_nan() {
                     return Err(BilesenHatasi::GeçersizSeçenek {
                         alan: "pasta.başlangıç_açısı",
                         ayrıntı: "başlangıç açısı sayı olmalı".to_string(),
                     });
                 }
-            }
         }
         Ok(())
     }
@@ -213,6 +211,14 @@ impl GrafikSeçenekleri {
                 }
                 (VeriDeğeri::Çift([ax, ay]), VeriDeğeri::Çift([bx, by])) => {
                     VeriDeğeri::Çift([ax + (bx - ax) * t, ay + (by - ay) * t])
+                }
+                (VeriDeğeri::Dizi(a), VeriDeğeri::Dizi(b)) if a.len() == b.len() => {
+                    VeriDeğeri::Dizi(
+                        a.iter()
+                            .zip(b.iter())
+                            .map(|(av, bv)| av + (bv - av) * t)
+                            .collect(),
+                    )
                 }
                 _ => y.değer.clone(),
             };
@@ -235,6 +241,8 @@ impl GrafikSeçenekleri {
                 Seri::Sütun(s) => karıştır(&mut s.veri),
                 Seri::Pasta(s) => karıştır(&mut s.veri),
                 Seri::Saçılım(s) => karıştır(&mut s.veri),
+                Seri::Mum(s) => karıştır(&mut s.veri),
+                Seri::Kutu(s) => karıştır(&mut s.veri),
             }
         }
         sonuç

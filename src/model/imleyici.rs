@@ -170,6 +170,7 @@ pub struct İmAlanıTanımı {
 
 /// İm alanı (`markArea`): vurgulanan bölgeler.
 #[derive(Clone, PartialEq, Debug)]
+#[derive(Default)]
 pub struct İmAlanı {
     pub veri: Vec<(Option<String>, İmAlanıTanımı)>,
     /// Öntanımlı: seri renginin %15 opaklısı.
@@ -177,15 +178,6 @@ pub struct İmAlanı {
     pub etiket: Etiket,
 }
 
-impl Default for İmAlanı {
-    fn default() -> Self {
-        İmAlanı {
-            veri: Vec::new(),
-            stil: ÖğeStili::default(),
-            etiket: Etiket::default(),
-        }
-    }
-}
 
 impl İmAlanı {
     pub fn yeni() -> Self {

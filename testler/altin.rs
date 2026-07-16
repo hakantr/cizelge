@@ -203,6 +203,27 @@ fn ara_çentikler_ve_bölme_alanı() {
 }
 
 #[test]
+fn mum_ve_kutu() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["Pzt", "Sal", "Çar", "Per"]))
+        .y_ekseni(Eksen::değer().ölçekli(true))
+        .animasyon(false)
+        .seri(MumSerisi::yeni().ad("Hisse").veri([
+            [20.0, 34.0, 10.0, 38.0],
+            [40.0, 35.0, 30.0, 50.0],
+            [31.0, 38.0, 33.0, 44.0],
+            [38.0, 15.0, 5.0, 42.0],
+        ]))
+        .seri(KutuSerisi::yeni().ad("Dağılım").veri([
+            [8.0, 14.0, 20.0, 27.0, 35.0],
+            [10.0, 18.0, 25.0, 32.0, 45.0],
+            [12.0, 16.0, 22.0, 28.0, 36.0],
+            [7.0, 11.0, 15.0, 21.0, 30.0],
+        ]));
+    altın_karşılaştır("mum_ve_kutu", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

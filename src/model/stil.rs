@@ -190,13 +190,16 @@ pub enum EtiketKonumu {
     Alt,
 }
 
+/// Biçimleyici işlev imzası: `(değer, ham metin) → biçimli metin`.
+pub type Biçimleyiciİşlevi = Arc<dyn Fn(f64, &str) -> String + Send + Sync>;
+
 /// Değer biçimleyici: `"{value} °C"` tarzı şablon ya da işlev.
 #[derive(Clone)]
 pub enum Biçimleyici {
     /// `{value}` yer tutucusu değerle değiştirilir; kategori eksenlerinde
     /// `{value}` kategori adıdır.
     Şablon(String),
-    İşlev(Arc<dyn Fn(f64, &str) -> String + Send + Sync>),
+    İşlev(Biçimleyiciİşlevi),
 }
 
 impl Biçimleyici {

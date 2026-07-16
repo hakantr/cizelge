@@ -27,6 +27,7 @@ use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::grafik::cizgi::{nokta_listeleri, çizgi_serisi_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
+use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
 use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımNoktası};
 use crate::grafik::sutun::{sütunları_çiz, SütunGirdisi};
@@ -195,6 +196,18 @@ fn kartezyen_kur(
             continue;
         }
         let sütun_mu = matches!(seri, Seri::Sütun(_));
+        // Çok değerli seriler (mum/kutu): dizinin tüm bileşenleri kapsanır.
+        if matches!(seri, Seri::Mum(_) | Seri::Kutu(_)) {
+            for (j, öğe) in seri.veri().iter().enumerate() {
+                if let Some(dizi) = öğe.değer.dizi() {
+                    for v in dizi {
+                        kapsa(&mut değer_kapsamı, *v);
+                    }
+                }
+                kapsa(&mut x_değer_kapsamı, j as f64);
+            }
+            continue;
+        }
         let Some(seri_aralıkları) = aralıklar.get(i) else { continue };
         for (j, aralık) in seri_aralıkları.iter().enumerate() {
             let Some((taban, tepe)) = aralık else { continue };
@@ -324,10 +337,18 @@ fn eksen_ipucu_derle(
             continue;
         }
         let Some(öğe) = seri.veri().get(sıra) else { continue };
-        let Some(değer) = öğe.değer.sayı() else { continue };
-        let metin = match &ipucu.değer_biçimleyici {
-            Some(b) => b.uygula(değer, &binlik_ayır(değer)),
-            None => binlik_ayır(değer),
+        let metin = if let Some(dizi) = öğe.değer.dizi() {
+            // Mum: A/K/D/Y — Kutu: beş sayının özeti.
+            dizi.iter()
+                .map(|v| binlik_ayır(*v))
+                .collect::<Vec<_>>()
+                .join(" / ")
+        } else {
+            let Some(değer) = öğe.değer.sayı() else { continue };
+            match &ipucu.değer_biçimleyici {
+                Some(b) => b.uygula(değer, &binlik_ayır(değer)),
+                None => binlik_ayır(değer),
+            }
         };
         satırlar.push(İpucuSatırı {
             im_rengi: Some(seçenekler.seri_rengi(i)),
@@ -375,7 +396,9 @@ pub fn grafiği_boya(
 
     // 4) Kartezyen bölüm.
     let kurulum = kartezyen_kur(yüzey, seçenekler, kapalı);
-    let mut bekleyen_ipucu: Option<(Option<String>, Vec<İpucuSatırı>, (f32, f32))> = None;
+    /// `(başlık, satırlar, konum)`.
+    type Bekleyenİpucu = (Option<String>, Vec<İpucuSatırı>, (f32, f32));
+    let mut bekleyen_ipucu: Option<Bekleyenİpucu> = None;
 
     if let Some(kurulum) = &kurulum {
         let kartezyen = &kurulum.kartezyen;
@@ -390,8 +413,8 @@ pub fn grafiği_boya(
             _ => None,
         };
 
-        if let (Some(ipucu), Some(eksen_ip)) = (&ipucu_seçeneği, &eksen_ipucu) {
-            if ipucu.imleç == İmleçTürü::Gölge {
+        if let (Some(ipucu), Some(eksen_ip)) = (&ipucu_seçeneği, &eksen_ipucu)
+            && ipucu.imleç == İmleçTürü::Gölge {
                 let bant_x = kartezyen.x.ölçek.kategorik_mi();
                 let bant_ekseni = if bant_x { &kartezyen.x } else { &kartezyen.y };
                 let merkez = bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64);
@@ -404,7 +427,6 @@ pub fn grafiği_boya(
                 };
                 yüzey.dikdörtgen(d, &Dolgu::Düz(tema::İMLEÇ_GÖLGESİ), [0.0; 4], None);
             }
-        }
 
         eksenleri_çiz(yüzey, kartezyen);
 
@@ -413,8 +435,8 @@ pub fn grafiği_boya(
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                 continue;
             }
-            if let Some(imleyiciler) = seri.imleyiciler() {
-                if imleyiciler.alan.is_some() {
+            if let Some(imleyiciler) = seri.imleyiciler()
+                && imleyiciler.alan.is_some() {
                     im_alanlarını_çiz(
                         yüzey,
                         imleyiciler,
@@ -423,7 +445,6 @@ pub fn grafiği_boya(
                         seçenekler.seri_rengi(i),
                     );
                 }
-            }
         }
 
         // Seriler: sütunlar toplu (yerleşim paylaşımı), diğerleri sırayla.
@@ -449,7 +470,9 @@ pub fn grafiği_boya(
         let mut sütunlar_çizildi = false;
 
         // Saçılım vurgusu (öğe ipucu) için önden isabet araması.
-        let mut saçılım_vurguları: Vec<(usize, Option<usize>, Vec<SaçılımNoktası>)> = Vec::new();
+        // `(seri sırası, vurgulu veri sırası, noktalar)`.
+        type SaçılımVurgusu = (usize, Option<usize>, Vec<SaçılımNoktası>);
+        let mut saçılım_vurguları: Vec<SaçılımVurgusu> = Vec::new();
         for (i, seri) in seçenekler.seriler.iter().enumerate() {
             if let Seri::Saçılım(s) = seri {
                 if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
@@ -551,8 +574,8 @@ pub fn grafiği_boya(
                             });
                         }
                         // Öğe ipucu.
-                        if let (Some(sıra), Some(f)) = (vurgu, fare) {
-                            if let Some(nokta) = noktalar.iter().find(|n| n.sıra == *sıra) {
+                        if let (Some(sıra), Some(f)) = (vurgu, fare)
+                            && let Some(nokta) = noktalar.iter().find(|n| n.sıra == *sıra) {
                                 bekleyen_ipucu = Some((
                                     seri.ad().map(str::to_string),
                                     vec![İpucuSatırı {
@@ -567,9 +590,24 @@ pub fn grafiği_boya(
                                     f,
                                 ));
                             }
-                        }
                     }
                 }
+                Seri::Mum(s) => mum_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    kartezyen,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                ),
+                Seri::Kutu(s) => kutu_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    kartezyen,
+                    seçenekler.seri_rengi(i),
+                    &mut çıktı.isabetler,
+                ),
                 Seri::Pasta(_) => {}
             }
         }
@@ -579,8 +617,8 @@ pub fn grafiği_boya(
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                 continue;
             }
-            if let Some(imleyiciler) = seri.imleyiciler() {
-                if imleyiciler.çizgi.is_some() || imleyiciler.nokta.is_some() {
+            if let Some(imleyiciler) = seri.imleyiciler()
+                && (imleyiciler.çizgi.is_some() || imleyiciler.nokta.is_some()) {
                     im_çizgi_ve_noktalarını_çiz(
                         yüzey,
                         imleyiciler,
@@ -589,12 +627,11 @@ pub fn grafiği_boya(
                         seçenekler.seri_rengi(i),
                     );
                 }
-            }
         }
 
         // Eksen imleci çizgisi + eksen ipucu penceresi.
-        if let Some(eksen_ip) = eksen_ipucu {
-            if let Some(ipucu) = &ipucu_seçeneği {
+        if let Some(eksen_ip) = eksen_ipucu
+            && let Some(ipucu) = &ipucu_seçeneği {
                 if ipucu.imleç == İmleçTürü::Çizgi || ipucu.imleç == İmleçTürü::Çapraz {
                     let bant_x = kartezyen.x.ölçek.kategorik_mi();
                     let bant_ekseni = if bant_x { &kartezyen.x } else { &kartezyen.y };
@@ -623,7 +660,6 @@ pub fn grafiği_boya(
                     bekleyen_ipucu = Some((Some(eksen_ip.başlık), eksen_ip.satırlar, f));
                 }
             }
-        }
     }
 
     // 5) Pasta serileri.
@@ -683,6 +719,9 @@ pub fn grafiği_boya(
     çıktı
 }
 
+/// Gösterge öğelerinin pencere-mutlak isabet kutuları (tıklama için).
+type GöstergeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, String)>>>;
+
 /// ECharts grafik örneğinin gpui görünümü.
 pub struct GrafikGörünümü {
     seçenekler: Arc<GrafikSeçenekleri>,
@@ -694,7 +733,7 @@ pub struct GrafikGörünümü {
     /// Pencere-mutlak fare konumu.
     fare: Option<(f32, f32)>,
     kapalı: HashSet<String>,
-    gösterge_kutuları: Rc<RefCell<Vec<(Bounds<Pixels>, String)>>>,
+    gösterge_kutuları: GöstergeKutuları,
     /// Pencere-mutlak isabet bölgeleri (tıklama olayları için).
     isabetler: Rc<RefCell<Vec<İsabetBölgesi>>>,
     /// Boyama sırasında biriken, bir sonraki karede olay olarak yayımlanacak
@@ -829,7 +868,7 @@ impl Render for GrafikGörünümü {
                             yerel_fare,
                             &kapalı,
                         );
-                        let mut tanı_bildir = |bileşen: &'static str| {
+                        let tanı_bildir = |bileşen: &'static str| {
                             if let Ok(mut kayıt) = tanılar.try_borrow_mut() {
                                 kayıt.push(BilesenTanisi::yeni(
                                     bileşen,

@@ -11,17 +11,30 @@ pub enum VeriDeğeri {
     Sayı(f64),
     /// `[x, y]` biçiminde çift (saçılım / değer-değer eksenleri).
     Çift([f64; 2]),
+    /// Çok değerli öğe: mum `[açılış, kapanış, en düşük, en yüksek]`,
+    /// kutu `[en düşük, Ç1, ortanca, Ç3, en yüksek]`.
+    Dizi(Vec<f64>),
     Metin(String),
 }
 
 impl VeriDeğeri {
-    /// Birincil sayısal değer (çiftlerde `y`).
+    /// Birincil sayısal değer (çiftlerde `y`; çok değerli dizilerde yok —
+    /// yorum seriye aittir).
     pub fn sayı(&self) -> Option<f64> {
         match self {
             VeriDeğeri::Sayı(s) => Some(*s),
             VeriDeğeri::Çift([_, y]) => Some(*y),
+            VeriDeğeri::Dizi(_) => None,
             VeriDeğeri::Metin(m) => m.parse().ok(),
             VeriDeğeri::Boş => None,
+        }
+    }
+
+    /// Çok değerli dizi içeriği.
+    pub fn dizi(&self) -> Option<&[f64]> {
+        match self {
+            VeriDeğeri::Dizi(d) => Some(d),
+            _ => None,
         }
     }
 
@@ -38,6 +51,7 @@ impl VeriDeğeri {
             VeriDeğeri::Boş => true,
             VeriDeğeri::Sayı(s) => s.is_nan(),
             VeriDeğeri::Çift([x, y]) => x.is_nan() || y.is_nan(),
+            VeriDeğeri::Dizi(d) => d.is_empty() || d.iter().any(|v| v.is_nan()),
             VeriDeğeri::Metin(_) => false,
         }
     }
@@ -106,6 +120,24 @@ impl From<[f64; 2]> for VeriDeğeri {
 impl From<(f64, f64)> for VeriDeğeri {
     fn from((x, y): (f64, f64)) -> Self {
         VeriDeğeri::Çift([x, y])
+    }
+}
+
+impl From<[f64; 4]> for VeriDeğeri {
+    fn from(d: [f64; 4]) -> Self {
+        VeriDeğeri::Dizi(d.to_vec())
+    }
+}
+
+impl From<[f64; 5]> for VeriDeğeri {
+    fn from(d: [f64; 5]) -> Self {
+        VeriDeğeri::Dizi(d.to_vec())
+    }
+}
+
+impl From<Vec<f64>> for VeriDeğeri {
+    fn from(d: Vec<f64>) -> Self {
+        VeriDeğeri::Dizi(d)
     }
 }
 

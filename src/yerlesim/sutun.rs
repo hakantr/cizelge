@@ -60,24 +60,21 @@ pub fn sütun_yerleşimi(
         }
         let yığın = yığınlar.entry(kimlik.clone()).or_default();
 
-        if let Some(g) = uzunluk_çöz(&bilgi.genişlik, bant_genişliği) {
-            if yığın.genişlik == 0.0 && g > 0.0 {
+        if let Some(g) = uzunluk_çöz(&bilgi.genişlik, bant_genişliği)
+            && yığın.genişlik == 0.0 && g > 0.0 {
                 // #6312: genişlik burada kısıtlanmaz.
                 yığın.genişlik = g;
                 let kırpılmış = g.min(kalan_genişlik);
                 kalan_genişlik -= kırpılmış;
             }
-        }
-        if let Some(eç) = uzunluk_çöz(&bilgi.en_çok_genişlik, bant_genişliği) {
-            if eç > 0.0 {
+        if let Some(eç) = uzunluk_çöz(&bilgi.en_çok_genişlik, bant_genişliği)
+            && eç > 0.0 {
                 yığın.en_çok = eç;
             }
-        }
-        if let Some(ea) = uzunluk_çöz(&bilgi.en_az_genişlik, bant_genişliği) {
-            if ea > 0.0 {
+        if let Some(ea) = uzunluk_çöz(&bilgi.en_az_genişlik, bant_genişliği)
+            && ea > 0.0 {
                 yığın.en_az = Some(ea);
             }
-        }
         if let Some(b) = &bilgi.sütun_boşluğu {
             sütun_boşluğu_oranı = b.çöz(1.0);
         }
@@ -109,11 +106,10 @@ pub fn sütun_yerleşimi(
                 son_genişlik = yığın.en_çok.min(kalan_genişlik);
             }
             // `minWidth` önceliklidir: sütunun görünür kalmasını belirler.
-            if let Some(ea) = yığın.en_az {
-                if ea > son_genişlik {
+            if let Some(ea) = yığın.en_az
+                && ea > son_genişlik {
                     son_genişlik = ea;
                 }
-            }
             if son_genişlik != otomatik_genişlik {
                 yığın.genişlik = son_genişlik;
                 kalan_genişlik -= son_genişlik + sütun_boşluğu_oranı * son_genişlik;

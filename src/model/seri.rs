@@ -206,6 +206,7 @@ impl ÇizgiSerisi {
 
 /// Sütun serisi (`series-bar`).
 #[derive(Clone, Debug)]
+#[derive(Default)]
 pub struct SütunSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
@@ -227,23 +228,6 @@ pub struct SütunSerisi {
     pub imleyiciler: İmleyiciler,
 }
 
-impl Default for SütunSerisi {
-    fn default() -> Self {
-        SütunSerisi {
-            ad: None,
-            veri: Vec::new(),
-            yığın: None,
-            genişlik: None,
-            en_çok_genişlik: None,
-            en_az_genişlik: None,
-            sütun_boşluğu: None,
-            kategori_boşluğu: None,
-            öğe_stili: ÖğeStili::default(),
-            etiket: Etiket::default(),
-            imleyiciler: İmleyiciler::default(),
-        }
-    }
-}
 
 impl SütunSerisi {
     pub fn yeni() -> Self {
@@ -430,6 +414,116 @@ impl PastaSerisi {
     }
 }
 
+
+/// Mum serisi (`series-candlestick`). Veri öğeleri
+/// `[açılış, kapanış, en düşük, en yüksek]` dizileridir.
+#[derive(Clone, Debug)]
+pub struct MumSerisi {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    /// Yükselen (kapanış ≥ açılış) mum rengi (`itemStyle.color`).
+    pub yükselen_renk: crate::renk::Renk,
+    /// Düşen mum rengi (`itemStyle.color0`).
+    pub düşen_renk: crate::renk::Renk,
+    /// Gövde genişliğinin bant genişliğine oranı.
+    pub gövde_oranı: f32,
+    pub kenarlık_kalınlığı: f32,
+    pub imleyiciler: İmleyiciler,
+}
+
+impl Default for MumSerisi {
+    fn default() -> Self {
+        MumSerisi {
+            ad: None,
+            veri: Vec::new(),
+            // ECharts v5 öntanımlıları: color '#eb5454', color0 '#47b262'.
+            yükselen_renk: crate::renk::Renk::onaltılık(0xeb5454),
+            düşen_renk: crate::renk::Renk::onaltılık(0x47b262),
+            gövde_oranı: 0.6,
+            kenarlık_kalınlığı: 1.0,
+            imleyiciler: İmleyiciler::default(),
+        }
+    }
+}
+
+impl MumSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Veri: `[açılış, kapanış, en düşük, en yüksek]` dizileri.
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn yükselen_renk(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.yükselen_renk = renk.into();
+        self
+    }
+
+    pub fn düşen_renk(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.düşen_renk = renk.into();
+        self
+    }
+
+    pub fn im_çizgisi(mut self, im: İmÇizgisi) -> Self {
+        self.imleyiciler.çizgi = Some(im);
+        self
+    }
+}
+
+/// Kutu serisi (`series-boxplot`). Veri öğeleri
+/// `[en düşük, Ç1, ortanca, Ç3, en yüksek]` dizileridir.
+#[derive(Clone, Debug)]
+pub struct KutuSerisi {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    pub öğe_stili: ÖğeStili,
+    /// Gövde genişliğinin bant genişliğine oranı.
+    pub gövde_oranı: f32,
+    pub imleyiciler: İmleyiciler,
+}
+
+impl Default for KutuSerisi {
+    fn default() -> Self {
+        KutuSerisi {
+            ad: None,
+            veri: Vec::new(),
+            öğe_stili: ÖğeStili::default(),
+            gövde_oranı: 0.5,
+            imleyiciler: İmleyiciler::default(),
+        }
+    }
+}
+
+impl KutuSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Veri: `[en düşük, Ç1, ortanca, Ç3, en yüksek]` dizileri.
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+}
+
 /// Saçılım serisi (`series-scatter`).
 #[derive(Clone, Debug)]
 pub struct SaçılımSerisi {
@@ -523,6 +617,8 @@ pub enum Seri {
     Sütun(SütunSerisi),
     Pasta(PastaSerisi),
     Saçılım(SaçılımSerisi),
+    Mum(MumSerisi),
+    Kutu(KutuSerisi),
 }
 
 impl Seri {
@@ -532,12 +628,17 @@ impl Seri {
             Seri::Sütun(s) => s.ad.as_deref(),
             Seri::Pasta(s) => s.ad.as_deref(),
             Seri::Saçılım(s) => s.ad.as_deref(),
+            Seri::Mum(s) => s.ad.as_deref(),
+            Seri::Kutu(s) => s.ad.as_deref(),
         }
     }
 
     /// Kartezyen koordinat sisteminde mi çizilir?
     pub fn kartezyen_mi(&self) -> bool {
-        matches!(self, Seri::Çizgi(_) | Seri::Sütun(_) | Seri::Saçılım(_))
+        matches!(
+            self,
+            Seri::Çizgi(_) | Seri::Sütun(_) | Seri::Saçılım(_) | Seri::Mum(_) | Seri::Kutu(_)
+        )
     }
 
     pub fn veri(&self) -> &[VeriÖğesi] {
@@ -546,6 +647,8 @@ impl Seri {
             Seri::Sütun(s) => &s.veri,
             Seri::Pasta(s) => &s.veri,
             Seri::Saçılım(s) => &s.veri,
+            Seri::Mum(s) => &s.veri,
+            Seri::Kutu(s) => &s.veri,
         }
     }
 
@@ -555,6 +658,8 @@ impl Seri {
             Seri::Çizgi(s) => Some(&s.imleyiciler),
             Seri::Sütun(s) => Some(&s.imleyiciler),
             Seri::Saçılım(s) => Some(&s.imleyiciler),
+            Seri::Mum(s) => Some(&s.imleyiciler),
+            Seri::Kutu(s) => Some(&s.imleyiciler),
             Seri::Pasta(_) => None,
         }
     }
@@ -566,6 +671,7 @@ impl Seri {
             Seri::Sütun(s) => s.öğe_stili.renk.as_ref(),
             Seri::Pasta(s) => s.öğe_stili.renk.as_ref(),
             Seri::Saçılım(s) => s.öğe_stili.renk.as_ref(),
+            Seri::Mum(_) | Seri::Kutu(_) => None,
         }
     }
 }
@@ -591,5 +697,17 @@ impl From<PastaSerisi> for Seri {
 impl From<SaçılımSerisi> for Seri {
     fn from(s: SaçılımSerisi) -> Seri {
         Seri::Saçılım(s)
+    }
+}
+
+impl From<MumSerisi> for Seri {
+    fn from(s: MumSerisi) -> Seri {
+        Seri::Mum(s)
+    }
+}
+
+impl From<KutuSerisi> for Seri {
+    fn from(s: KutuSerisi) -> Seri {
+        Seri::Kutu(s)
     }
 }

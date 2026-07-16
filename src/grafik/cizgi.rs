@@ -11,12 +11,15 @@ use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
 use crate::yerlesim::yigin::YığınAralığı;
 
+/// Boş değerleri `None` olan piksel noktası listesi.
+pub type NoktaListesi = Vec<Option<(f32, f32)>>;
+
 /// Serinin `(tepe, taban)` piksel noktalarını üretir; boş değerler `None`.
 pub fn nokta_listeleri(
     seri: &ÇizgiSerisi,
     kartezyen: &Kartezyen2B,
     aralıklar: &[YığınAralığı],
-) -> (Vec<Option<(f32, f32)>>, Vec<Option<(f32, f32)>>) {
+) -> (NoktaListesi, NoktaListesi) {
     let mut tepeler = Vec::with_capacity(seri.veri.len());
     let mut tabanlar = Vec::with_capacity(seri.veri.len());
     for (i, öğe) in seri.veri.iter().enumerate() {

@@ -30,16 +30,14 @@ pub fn güzel_çentikler(
 ) -> GüzelÇentikSonucu {
     let açıklık = kapsam[1] - kapsam[0];
     let mut adım = güzel_sayı(açıklık / bölme_sayısı.max(1) as f64, GüzelKip::Yuvarlak);
-    if let Some(ek) = en_küçük_adım {
-        if adım < ek {
+    if let Some(ek) = en_küçük_adım
+        && adım < ek {
             adım = ek;
         }
-    }
-    if let Some(eb) = en_büyük_adım {
-        if adım > eb {
+    if let Some(eb) = en_büyük_adım
+        && adım > eb {
             adım = eb;
         }
-    }
     let h = adım_hassasiyeti(adım);
     // Özgün kapsamın içinde kalan "güzelleştirilmiş" kapsam.
     let güzel_kapsam = [
@@ -184,11 +182,10 @@ impl AralıkÖlçeği {
             değer += adım;
             sayaç += 1;
         }
-        if let Some(son) = sonuç.last() {
-            if self.kapsam[1] > son.değer {
+        if let Some(son) = sonuç.last()
+            && self.kapsam[1] > son.değer {
                 sonuç.push(Çentik { değer: self.kapsam[1] });
             }
-        }
         sonuç
     }
 
