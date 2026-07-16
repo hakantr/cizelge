@@ -375,6 +375,7 @@ pub fn grafiği_boya(
     yüzey: &mut dyn ÇizimYüzeyi,
     seçenekler: &GrafikSeçenekleri,
     ilerleme: f32,
+    zaman_sn: f32,
     fare: Option<(f32, f32)>,
     kapalı: &HashSet<String>,
 ) -> BoyamaÇıktısı {
@@ -563,6 +564,7 @@ pub fn grafiği_boya(
                             noktalar,
                             seçenekler.seri_rengi(i),
                             ilerleme,
+                            zaman_sn,
                             *vurgu,
                         );
                         for n in noktalar {
@@ -874,9 +876,15 @@ impl Render for GrafikGörünümü {
         }
 
         let (etkin_seçenekler, ilerleme, sürüyor) = self.boyama_durumu();
-        if sürüyor {
+        // Dalga efektli seriler sürekli kare ister.
+        let sürekli = etkin_seçenekler
+            .seriler
+            .iter()
+            .any(|s| matches!(s, Seri::Saçılım(sa) if sa.efektli));
+        if sürüyor || sürekli {
             pencere.request_animation_frame();
         }
+        let zaman_sn = self.başlangıç.elapsed().as_secs_f32();
 
         let fare = self.fare;
         let kapalı = self.kapalı.clone();
@@ -900,6 +908,7 @@ impl Render for GrafikGörünümü {
                             &mut çizici,
                             &etkin_seçenekler,
                             ilerleme,
+                            zaman_sn,
                             yerel_fare,
                             &kapalı,
                         );

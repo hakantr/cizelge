@@ -591,6 +591,12 @@ pub struct SaçılımSerisi {
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
     pub imleyiciler: İmleyiciler,
+    /// Dalga efekti (`effectScatter` karşılığı): `efektli(true)` ile açılır.
+    pub efektli: bool,
+    /// Dalganın ulaştığı en büyük ölçek (`rippleEffect.scale`, öntanımlı 2.5).
+    pub efekt_ölçeği: f32,
+    /// Bir dalga turunun süresi, saniye (`rippleEffect.period`, öntanımlı 4).
+    pub efekt_süresi_sn: f32,
 }
 
 impl Default for SaçılımSerisi {
@@ -603,6 +609,9 @@ impl Default for SaçılımSerisi {
             öğe_stili: ÖğeStili::default(),
             etiket: Etiket::default(),
             imleyiciler: İmleyiciler::default(),
+            efektli: false,
+            efekt_ölçeği: 2.5,
+            efekt_süresi_sn: 4.0,
         }
     }
 }
@@ -629,6 +638,22 @@ impl SaçılımSerisi {
 
     pub fn sembol_boyutu(mut self, boyut: impl Into<SembolBoyutu>) -> Self {
         self.sembol_boyutu = boyut.into();
+        self
+    }
+
+    /// Dalga efektini açar (ECharts `effectScatter` serisinin karşılığı).
+    pub fn efektli(mut self, açık: bool) -> Self {
+        self.efektli = açık;
+        self
+    }
+
+    pub fn efekt_ölçeği(mut self, ölçek: f32) -> Self {
+        self.efekt_ölçeği = ölçek.max(1.0);
+        self
+    }
+
+    pub fn efekt_süresi_sn(mut self, saniye: f32) -> Self {
+        self.efekt_süresi_sn = saniye.max(0.1);
         self
     }
 

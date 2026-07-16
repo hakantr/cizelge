@@ -231,6 +231,21 @@ galerisinde; golden testleri yeşil.
 
 **Tahmin:** 4–5 hafta. (Bağımlılık: Faz 1.)
 
+**Durum (2026-07-17):**
+- ✅ 2.4 İmleyiciler: markLine (sabit/ortalama/min/maks, yatay-dikey),
+  markPoint (raptiye), markArea — üç kartezyen seriye bağlı, altın testli.
+- ✅ 2.2 (kısmi) Ara çentikler (`minorTick`), ara bölme çizgileri
+  (`minorSplitLine`), bölme alanı (`splitArea`) — aralık ölçeğinde eşit,
+  log ölçeğinde geometrik bölme.
+- ✅ 2.5 (kısmi) Mum (candlestick) ve kutu (boxplot) serileri —
+  VeriDeğeri::Dizi çok değerli öğelerle; efektli saçılım (effectScatter,
+  `SaçılımSerisi::efektli(true)` + sürekli dalga animasyonu); kartezyen
+  ısı haritası + GörselEşleme (visualMap sürekli kip çekirdeği).
+- ⏳ Açık: çoklu ızgara/çoklu eksen (2.1), axisPointer `cross`/`link`
+  (2.3), etiket döndürme + `alignTicks` + zaman ölçeği tam kademe (2.2
+  kalanı), pictorialBar ve `custom` seri (2.5 kalanı), çizgi `sampling`
+  (2.6).
+
 ---
 
 ## Faz 3 — Etkileşim bileşenleri

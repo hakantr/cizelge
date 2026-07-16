@@ -49,7 +49,7 @@ fn altın_karşılaştır(ad: &str, içerik: &str) {
 fn boya_ve_dök(seçenekler: GrafikSeçenekleri) -> String {
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
     // Animasyonsuz, faresiz, tüm seriler açık.
-    grafiği_boya(&mut yüzey, &seçenekler, 1.0, None, &HashSet::new());
+    grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
     yüzey.döküm()
 }
 
@@ -161,6 +161,7 @@ fn ipucu_ve_imlec() {
         &mut yüzey,
         &seçenekler,
         1.0,
+        0.0,
         Some((400.0, 300.0)),
         &HashSet::new(),
     );
@@ -253,6 +254,22 @@ fn ısı_haritası() {
 }
 
 #[test]
+fn efektli_saçılım() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::değer().ölçekli(true))
+        .y_ekseni(Eksen::değer().ölçekli(true))
+        .animasyon(false)
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("Sinyal")
+                .sembol_boyutu(14.0)
+                .efektli(true)
+                .veri([[2.0, 3.0], [5.0, 6.0]]),
+        );
+    altın_karşılaştır("efektli_sacilim", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
@@ -261,7 +278,7 @@ fn isabet_bölgeleri_üretilir() {
         .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]))
         .seri(PastaSerisi::yeni().ad("P").yarıçap("30%").veri([("X", 1.0), ("Y", 2.0)]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, None, &HashSet::new());
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
     // 2 sütun + 2 dilim = 4 tıklanabilir bölge.
     assert_eq!(çıktı.isabetler.len(), 4);
     // Sütun bölgesinin içi gerçekten isabet sayılmalı.

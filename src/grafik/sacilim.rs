@@ -42,12 +42,15 @@ pub fn saçılım_noktaları(
 }
 
 /// Saçılım serisini çizer; `vurgulu` ipucuyla öne çıkarılan noktadır.
+/// `zaman_sn`, sürekli dalga efekti için geçen süredir (saniye).
+#[allow(clippy::too_many_arguments)]
 pub fn saçılım_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     seri: &SaçılımSerisi,
     noktalar: &[SaçılımNoktası],
     seri_rengi: Renk,
     ilerleme: f32,
+    zaman_sn: f32,
     vurgulu: Option<usize>,
 ) {
     // ECharts saçılım öğeleri öntanımlı 0.8 opaklıkla çizilir.
@@ -58,6 +61,29 @@ pub fn saçılım_çiz(
         .as_ref()
         .map(|d| d.temsilî())
         .unwrap_or(seri_rengi);
+    // Dalga efekti (effectScatter): iç içe genişleyip solan halkalar.
+    if seri.efektli && ilerleme >= 0.999 {
+        const DALGA_SAYISI: usize = 3;
+        let tur = (zaman_sn / seri.efekt_süresi_sn.max(0.1)).fract();
+        for nokta in noktalar {
+            for d in 0..DALGA_SAYISI {
+                let evre = (tur + d as f32 / DALGA_SAYISI as f32).fract();
+                let yarıçap =
+                    (nokta.boyut / 2.0) * (1.0 + evre * (seri.efekt_ölçeği - 1.0));
+                let alfa = (1.0 - evre) * 0.35;
+                if alfa <= 0.01 {
+                    continue;
+                }
+                çizici.daire(
+                    nokta.konum,
+                    yarıçap,
+                    Some(&crate::renk::Dolgu::Düz(renk.alfa_ile(alfa))),
+                    None,
+                );
+            }
+        }
+    }
+
     for nokta in noktalar {
         let vurgulu_mu = vurgulu == Some(nokta.sıra);
         let boyut = nokta.boyut * ilerleme.clamp(0.0, 1.0)
