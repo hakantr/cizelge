@@ -5,6 +5,19 @@ edition = "2024"
 description = "Apache ECharts'ın gpui (Zed) üzerinde çalışan yerli Rust uyarlaması"
 license = "Apache-2.0"
 
+# Panik yasağı (bkz. FAZ_PLANI.md — değiştirilemez kural): çalışma zamanı
+# kodunda panik üretebilen yapılar clippy ile derleme düzeyinde yasaktır.
+# Test modülleri ve test hedefleri, test-zamanı olduğundan yerel `allow`
+# taşır. Tamsayı aritmetiği denetimi aşamalı sıkılaştırmadadır (Faz 1 notu).
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+indexing_slicing = "deny"
+
 [dependencies]
 gpui = { path = "../zed/crates/gpui" }
 lyon = "1.0"
@@ -26,3 +39,10 @@ name = "sacilim"
 
 [[example]]
 name = "pano"
+
+[[example]]
+name = "olaylar"
+
+[[test]]
+name = "altin"
+path = "testler/altin.rs"

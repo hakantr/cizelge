@@ -66,5 +66,5 @@ pub const ALT_BAŞLIK_BOYUTU: f32 = 12.0;
 
 /// Palet içinden sıra numarasıyla renk seçer (dolanarak).
 pub fn palet_rengi(sıra: usize) -> Renk {
-    PALET[sıra % PALET.len()]
+    PALET.get(sıra % PALET.len()).copied().unwrap_or(NÖTR_50)
 }

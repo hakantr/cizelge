@@ -5,14 +5,14 @@ pub mod pasta;
 pub mod sacilim;
 pub mod sutun;
 
-use crate::cizim::Çizici;
+use crate::cizim::ÇizimYüzeyi;
 use crate::model::seri::Sembol;
 use crate::model::stil::ÇizgiTürü;
 use crate::renk::{Dolgu, Renk};
 
 /// Bir veri noktası sembolü çizer. `boyut`, ECharts'taki gibi çaptır.
 pub fn sembol_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     sembol: Sembol,
     merkez: (f32, f32),
     boyut: f32,

@@ -43,10 +43,9 @@ impl KategorikÖlçek {
 
     pub fn etiket(&self, değer: f64) -> String {
         let i = değer.round() as isize;
-        if i >= 0 && (i as usize) < self.kategoriler.len() {
-            self.kategoriler[i as usize].clone()
-        } else {
-            String::new()
+        if i < 0 {
+            return String::new();
         }
+        self.kategoriler.get(i as usize).cloned().unwrap_or_default()
     }
 }

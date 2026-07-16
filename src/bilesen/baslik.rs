@@ -1,6 +1,6 @@
 //! Başlık bileşeni çizimi — `echarts/src/component/title.ts` karşılığı.
 
-use crate::cizim::{DikeyHiza, YatayHiza, Çizici};
+use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::model::bilesen::Başlık;
 use crate::model::YatayKonum;
 use crate::tema;
@@ -9,8 +9,8 @@ const İÇ_BOŞLUK: f32 = 8.0;
 const SATIR_ARASI: f32 = 4.0;
 
 /// Başlığı çizer.
-pub fn başlık_çiz(çizici: &mut Çizici, başlık: &Başlık) {
-    let tuval_genişliği = çizici.genişlik;
+pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
+    let tuval_genişliği = çizici.genişlik();
 
     let metin_boyutu = başlık.yazı.boyut.unwrap_or(tema::BAŞLIK_BOYUTU);
     let alt_boyut = başlık.alt_yazı.boyut.unwrap_or(tema::ALT_BAŞLIK_BOYUTU);
@@ -46,7 +46,7 @@ pub fn başlık_çiz(çizici: &mut Çizici, başlık: &Başlık) {
 
     let mut y = başlık
         .üst
-        .map(|u| u.çöz(çizici.yükseklik))
+        .map(|u| u.çöz(çizici.yükseklik()))
         .unwrap_or(İÇ_BOŞLUK);
 
     if let Some(metin) = &başlık.metin {

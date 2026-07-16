@@ -1,6 +1,6 @@
 //! İpucu (tooltip) penceresi — `echarts/src/component/tooltip` karşılığı.
 
-use crate::cizim::{DikeyHiza, YatayHiza, Çizici, SATIR_ORANI};
+use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi, SATIR_ORANI};
 use crate::koordinat::Dikdörtgen;
 use crate::model::bilesen::İpucu;
 use crate::renk::{Dolgu, Renk};
@@ -22,7 +22,7 @@ const İMLEÇ_KAÇIĞI: f32 = 14.0;
 /// İpucu penceresini çizer. `konum` grafik yerel fare noktasıdır; pencere
 /// tuval sınırları içinde kalacak biçimde konumlanır.
 pub fn ipucu_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     seçenek: &İpucu,
     konum: (f32, f32),
     başlık: Option<&str>,
@@ -53,14 +53,14 @@ pub fn ipucu_çiz(
     // Konumlandırma: sağ alta; taşarsa çevir, tuvale kıstır.
     let mut x = konum.0 + İMLEÇ_KAÇIĞI;
     let mut y = konum.1 + İMLEÇ_KAÇIĞI;
-    if x + kutu_genişliği > çizici.genişlik {
+    if x + kutu_genişliği > çizici.genişlik() {
         x = konum.0 - İMLEÇ_KAÇIĞI - kutu_genişliği;
     }
-    if y + kutu_yüksekliği > çizici.yükseklik {
+    if y + kutu_yüksekliği > çizici.yükseklik() {
         y = konum.1 - İMLEÇ_KAÇIĞI - kutu_yüksekliği;
     }
-    x = x.clamp(0.0, (çizici.genişlik - kutu_genişliği).max(0.0));
-    y = y.clamp(0.0, (çizici.yükseklik - kutu_yüksekliği).max(0.0));
+    x = x.clamp(0.0, (çizici.genişlik() - kutu_genişliği).max(0.0));
+    y = y.clamp(0.0, (çizici.yükseklik() - kutu_yüksekliği).max(0.0));
 
     let kutu = Dikdörtgen::yeni(x, y, kutu_genişliği, kutu_yüksekliği);
 

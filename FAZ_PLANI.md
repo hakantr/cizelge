@@ -1,9 +1,20 @@
 # çizelge — ECharts Tam Eşdeğerlik Faz Planı
 
-Hedef: `../echarts` (v6) deposundaki işlevselliğin tamamını, gpui üzerinde
-yerli Rust olarak `cizelge`ye taşımak. Fazlar kullanım sıklığına ve teknik
-bağımlılığa göre sıralanmıştır; her faz kendi başına yayınlanabilir bir
-bütündür.
+Hedef: `../echarts` (v6) deposundaki işlevselliği, aşağıdaki kapsam sınırları
+içinde, gpui üzerinde yerli Rust olarak `cizelge`ye taşımak. Fazlar kullanım
+sıklığına ve teknik bağımlılığa göre sıralanmıştır; her faz kendi başına
+yayınlanabilir bir bütündür. **Faz geçişlerinde onay beklenmez**: bir fazın
+kabul ölçütleri sağlandığında bir sonraki faza doğrudan geçilir.
+
+## Kapsam dışı (kesin)
+
+Aşağıdakiler bu projenin parçası DEĞİLDİR ve hiçbir faza eklenmez:
+
+- **Coğrafi katman**: `geo` koordinat sistemi, `map` serisi, GeoJSON/harita
+  kaydı, projeksiyonlar — ayrı bir çalışmanın konusudur.
+- **3B görünümler ve GL serileri**: 3B destekli hiçbir grafik yok;
+  `scatterGL`, `linesGL`, `flowGL`, `graphGL` ve `echarts-gl` ekosisteminin
+  tamamı kapsam dışıdır.
 
 Ölçek notu: ECharts ~138.000 satır TS + zrender ~50.000 satır. Mevcut taban
 (Faz 0) ~7.000 satır. Aşağıdaki tahminler tam zamanlı çalışma haftası
@@ -33,8 +44,7 @@ esnetemez:
    açıkça `license = "Apache-2.0"` yazan crate'lere (bugün: `gpui`,
    `gpui_platform`) bağımlılık kurulabilir; Zed'in GPL lisanslı editör
    crate'lerinden kod kopyalanamaz, uyarlanamaz, bağımlılık alınamaz.
-5. **Varlıklar da kapsamdadır:** Örnek verileri, GeoJSON/harita verileri
-   (Faz 6), yazı tipleri ve görseller Apache-2.0 ile uyumlu lisanslı olmalı
+5. **Varlıklar da kapsamdadır:** Örnek verileri, yazı tipleri ve görseller Apache-2.0 ile uyumlu lisanslı olmalı
    ve kaynağı `NOTICE`'a işlenmelidir.
 6. **Doğrulama otomatiktir:** Faz 1'de CI'a `cargo deny check licenses`
    (izin listesi: Apache-2.0, MIT, BSD-2/3, Zlib, ISC, Unicode) eklenir ve
@@ -42,6 +52,44 @@ esnetemez:
 7. **Depo yükümlülükleri:** Kök dizinde `LICENSE` (Apache-2.0 tam metni) ve
    Apache ECharts atfını taşıyan `NOTICE` dosyası bulunur; Apache-2.0 §4
    gereği bunlar dağıtımlarda korunur.
+
+---
+
+## 🚫 DEĞİŞTİRİLEMEZ KURAL: Çalışma zamanında panik yasaktır
+
+Kütüphane ve örnek kodunda (tüm `src/` ve `examples/`) aşağıdaki yapılar
+**kesinlikle** kullanılamaz; `Cargo.toml [lints.clippy]` bunları derleme
+düzeyinde `deny` eder:
+
+| Yasak | Yerine |
+|---|---|
+| `panic!`, `todo!`, `unimplemented!`, `unreachable!` | `Result<T, BilesenHatasi>` dönen yollar; imkânsız dallarda güvenli varsayılan |
+| `unwrap`, `unwrap_unchecked`, `expect` | `Option::ok_or_else`, `unwrap_or`/`unwrap_or_else`, `let-else` |
+| Çalışma zamanı `assert!`/`assert_eq!`/`assert_ne!`/`debug_assert!` | Tipli doğrulama (`doğrula() -> Result`) + işlem geri alma |
+| Doğrulanmamış `[]` dizinleme/dilimleme | `get`/`get_mut`, `first`/`last`, desen eşleme (`if let [a, b] = …`) |
+| Panikleyebilecek kontrolsüz aritmetik | `checked_*` ya da gerekçeli `saturating_*` |
+| `RefCell::borrow` / `borrow_mut` | `try_borrow` / `try_borrow_mut` + kilitli durumda tanı |
+| Metinden panikli dönüşüm | `TryFrom`, `Renk::çöz`, `Option` dönen çözümleyiciler |
+
+Tamamlayıcı mekanizmalar (Faz 1'de kuruldu, tüm fazlarda zorunlu):
+
+- **`BilesenHatasi`** — bileşenlerden dönen tipli hata; `Display` ile güvenli
+  hata görünümü (`src/hata.rs`).
+- **`BilesenTanisi` olay kanalı** — boyama hattı kurtarılabilir sorunda
+  durmaz: sorunlu öğeyi atlar, tanıyı biriktirir; `GrafikGörünümü` bunları
+  `EventEmitter<BilesenTanisi>` üzerinden yayımlar.
+- **İşlem geri alma (transaction rollback)** — `seçenekleri_değiştir`, yeni
+  seçenekleri `doğrula()` ile denetler; hata varsa mevcut durum korunur,
+  `Err` döner ve tanı yayımlanır.
+- **Tipli yetenek/iptal sonuçları** — durum değiştiren API'ler `Result`
+  döner; sessiz başarısızlık yoktur.
+- **Test-zamanı istisnası** — `#[cfg(test)]` modülleri ve `testler/`
+  hedefleri test raporlaması için `assert`/`panic` kullanabilir (yerel
+  `#[allow]` ile); bu istisna çalışma zamanı koduna taşınamaz.
+- **Aşamalı sıkılaştırma** — tamsayı aritmetiği denetimi
+  (`clippy::arithmetic_side_effects`) bugün gürültü oranı nedeniyle kapalı;
+  taşma riskli çıkarmalar `saturating_sub` ile yazılır ve Faz 6'da lint
+  tam açılır.
 
 ---
 
@@ -89,6 +137,31 @@ ayrı ayrı yansır.
 tıklanan dilimi raporlayan yeni örnek; golden test altyapısı CI'da koşuyor.
 
 **Tahmin:** 3–4 hafta.
+
+**Durum (2026-07-17):**
+- ✅ 1.1 `ÇizimYüzeyi` trait'i (`cizim/yuzey.rs`): gpui gerçeklemesi `Çizici`,
+  test gerçeklemesi `KayıtYüzeyi`; boyama hattı `grafiği_boya` saf işleve
+  ayrıldı.
+- ✅ 1.2 Gradyan tamlığı: eksene hizalı çok duraklı doğrusal gradyanlar
+  kırpma bantlarıyla birebir; `Dolgu::RadyalGradyan` eşmerkezli halkalarla.
+- ✅ 1.4 Kırpma (`kırpılı`, iç içe kullanılabilir).
+- ✅ 1.5 Piksel netliği: `keskin` (yarım piksel) hizalama — eksen, çentik,
+  bölme çizgileri, eksen imleci.
+- ✅ 1.6 Olay sistemi: `GrafikOlayı::{ÖğeTıklandı, GöstergeDeğişti}`;
+  sütun/dilim/sembol/saçılım isabet bölgeleri; `examples/olaylar.rs`.
+- ✅ 1.7 `seçenekleri_değiştir`: `doğrula()` + işlem geri alma + veri geçiş
+  animasyonu (`ara_değerle`, `animasyon_süresi_güncelleme`).
+- ✅ 1.8 Metin ölçüm önbelleği (kareler arası, `try_borrow` korumalı).
+- ✅ 1.9 Altın test altyapısı: `testler/altin.rs` + 6 altın dosyası
+  (`ALTIN_GUNCELLE=1` ile yenilenir).
+- ✅ Panik yasağı süpürmesi: tüm `src/` clippy `deny` setiyle temiz;
+  `BilesenHatasi` + `BilesenTanisi` kanalı çalışıyor.
+- ⏳ 1.3 Döndürülmüş metin: gpui metin sistemi döndürme desteklemiyor.
+  Karar: kısa vadede yatay geri düşüş; kalıcı çözüm gpui'ye upstream katkı
+  (metin koşusuna dönüşüm matrisi) ya da glif konturlarını yol olarak
+  doldurma. Faz 2'deki etiket döndürme kalemi bu karara bağlı.
+- ⏳ CI hattı yok (depo yerel); `cargo deny` yapılandırması `deny.toml`de
+  hazır, CI kurulunca bağlanacak.
 
 ---
 
@@ -144,7 +217,7 @@ galerisinde; golden testleri yeşil.
    (continuous + piecewise) bileşenleri.
 3. **Gösterge genişletmeleri:** kaydırmalı gösterge, `selectedMode`,
    zengin biçimleyici.
-4. **Toolbox:** PNG dışa aktarım (Faz 8.4 ile ortak çekirdek), veri
+4. **Toolbox:** PNG dışa aktarım (Faz 7.4 ile ortak çekirdek), veri
    görünümü, dataZoom/restore düğmeleri.
 5. **Brush** (dikdörtgen/çokgen seçim) + seçim olayları.
 6. **Timeline** bileşeni (seçenek dizisi üzerinde oynatma).
@@ -209,30 +282,7 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
 
 ---
 
-## Faz 6 — Coğrafi görselleştirme
-
-**Amaç:** geo/map ekosistemi.
-
-**Kaynak karşılığı:** `coord/geo/`, `component/geo/`, `chart/{map,lines}`,
-`chart/effectScatter` (geo üstünde).
-
-**İş kalemleri:**
-1. GeoJSON çözümleyici (+ TopoJSON değerlendirmesi), harita kaydı API'si
-   (`harita_kaydet("türkiye", geojson)`).
-2. **Geo koordinat sistemi:** projeksiyonlar (varsayılan + Mercator +
-   özel projeksiyon kancası), roam, bölge seçimi/vurgusu.
-3. **map serisi** (visualMap ile koroplet), geo üstünde scatter/effectScatter/
-   **lines** (uçuş rotası efektleri).
-4. Büyük çokgen setlerinde tessellation önbelleği.
-
-**Kabul ölçütü:** Türkiye il haritasında koroplet + il tıklama olayı; uçuş
-rotaları örneği.
-
-**Tahmin:** 5–6 hafta. (Bağımlılık: Faz 3 — visualMap, roam.)
-
----
-
-## Faz 7 — Veri katmanı ve ölçeklenebilirlik
+## Faz 6 — Veri katmanı ve ölçeklenebilirlik
 
 **Amaç:** ECharts'ın veri boru hattının tam karşılığı; büyük veri.
 
@@ -259,7 +309,7 @@ tek veri kaynağından 3 farklı grafik örneği.
 
 ---
 
-## Faz 8 — Tema, erişilebilirlik, çıktı ve yayın
+## Faz 7 — Tema, erişilebilirlik, çıktı ve yayın
 
 **Amaç:** Ürünleşme.
 
@@ -305,7 +355,7 @@ tek veri kaynağından 3 farklı grafik örneği.
    (upstream katkı) planlanmalı.
 2. **gpui sürümlenmesi:** yol bağımlılığı crates.io yayınını engeller;
    gpui'nin yayımlanan sürümüne geçiş ya da git bağımlılığıyla yayın
-   stratejisi Faz 8'de netleşmeli.
+   stratejisi Faz 7'de netleşmeli.
 3. **Metin ölçüm farkları:** font sistemine bağlı ölçümler golden testleri
    kırılgan yapabilir → testlerde sabit ölçümlü sahte metin sistemi.
 4. **Performans:** lyon tessellation'ın kare başına maliyeti büyük veride
@@ -323,8 +373,7 @@ tek veri kaynağından 3 farklı grafik örneği.
 | 3 — Etkileşim | 5–6 | 15 |
 | 4 — Koordinat sistemleri | 4–5 | 20 |
 | 5 — Hiyerarşik/ilişkisel | 6–8 | 28 |
-| 6 — Coğrafi | 5–6 | 34 |
-| 7 — Veri katmanı | 4–6 | 40 |
-| 8 — Ürünleşme | 3–4 | ~44 |
+| 6 — Veri katmanı | 4–6 | 34 |
+| 7 — Ürünleşme | 3–4 | ~38 |
 
-Tam zamanlı ~10–11 ay; fazlar 3+4 ve 5+6 kısmen paralelleştirilebilir.
+Tam zamanlı ~9 ay; fazlar 3+4 ve 5+6 kısmen paralelleştirilebilir.

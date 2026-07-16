@@ -138,7 +138,7 @@ impl ZamanÖlçeği {
                 let adım = self.birim_adımı.max(1.0) as u32;
                 let mut yıl = ilk.yıl;
                 // Ay dizinini adım katına hizala (0 tabanlı).
-                let mut ay0 = ilk.ay - 1;
+                let mut ay0 = ilk.ay.saturating_sub(1);
                 ay0 = ay0.div_ceil(adım) * adım;
                 let mut sayaç = 0;
                 loop {
@@ -165,13 +165,14 @@ impl ZamanÖlçeği {
             }
             _ => {
                 let adım_ms = match self.birim {
-                    ZamanBirimi::Milisaniye => self.birim_adımı,
                     ZamanBirimi::Saniye => self.birim_adımı * SANİYE,
                     ZamanBirimi::Dakika => self.birim_adımı * DAKİKA,
                     ZamanBirimi::Saat => self.birim_adımı * SAAT,
                     ZamanBirimi::Gün => self.birim_adımı * GÜN,
-                    _ => unreachable!(),
+                    // Milisaniye ve (yukarıda ele alınan) diğer birimler.
+                    _ => self.birim_adımı,
                 };
+                let adım_ms = if adım_ms > 0.0 { adım_ms } else { 1.0 };
                 let mut t = (self.kapsam[0] / adım_ms).ceil() * adım_ms;
                 let mut sayaç = 0;
                 while t <= self.kapsam[1] && sayaç < güvenlik_sınırı {
@@ -188,25 +189,20 @@ impl ZamanÖlçeği {
     /// `formatter` yaklaşımının sade karşılığı).
     pub fn etiket(&self, değer: f64) -> String {
         let t = andan_takvime(değer);
+        let ay_adı = ay_kısaltması(t.ay);
         match self.birim {
             ZamanBirimi::Yıl => format!("{}", t.yıl),
             ZamanBirimi::Ay => {
                 if t.ay == 1 {
                     format!("{}", t.yıl)
                 } else {
-                    AY_KISALTMALARI[(t.ay - 1) as usize].to_string()
+                    ay_adı.to_string()
                 }
             }
-            ZamanBirimi::Gün => {
-                if t.gün == 1 {
-                    format!("{} {}", t.gün, AY_KISALTMALARI[(t.ay - 1) as usize])
-                } else {
-                    format!("{} {}", t.gün, AY_KISALTMALARI[(t.ay - 1) as usize])
-                }
-            }
+            ZamanBirimi::Gün => format!("{} {}", t.gün, ay_adı),
             ZamanBirimi::Saat | ZamanBirimi::Dakika => {
                 if t.saat == 0 && t.dakika == 0 {
-                    format!("{} {}", t.gün, AY_KISALTMALARI[(t.ay - 1) as usize])
+                    format!("{} {}", t.gün, ay_adı)
                 } else {
                     format!("{:02}:{:02}", t.saat, t.dakika)
                 }
@@ -220,6 +216,14 @@ impl ZamanÖlçeği {
     }
 }
 
+/// Ay numarasını (1–12) kısaltmaya çevirir; aralık dışı değerde `"?"`.
+fn ay_kısaltması(ay: u32) -> &'static str {
+    AY_KISALTMALARI
+        .get((ay.saturating_sub(1)) as usize)
+        .copied()
+        .unwrap_or("?")
+}
+
 fn güzel_yıl_adımı(ham: f64) -> f64 {
     let adaylar = [1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 50.0, 100.0, 200.0, 500.0, 1000.0];
     for a in adaylar {
@@ -231,6 +235,7 @@ fn güzel_yıl_adımı(ham: f64) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
 

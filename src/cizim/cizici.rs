@@ -1,94 +1,25 @@
-//! Çizici — gpui `Window` boyama API'si üzerine kurulmuş, grafik yerel
-//! koordinatlarında çalışan çizim yardımcısı (zrender `Painter` karşılığı).
+//! Çizici — [`ÇizimYüzeyi`]nin gpui gerçeklemesi: yolları lyon üzerinden
+//! döşer, metni gpui metin sistemiyle biçimler, çok duraklı doğrusal
+//! gradyanları kırpma bantlarıyla birebir çizer.
+
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 
 use gpui::{
     App, BorderStyle, Bounds, BoxShadow, Corners, Edges, FontWeight, PathBuilder, PathStyle,
-    Pixels, Point, SharedString, ShapedLine, StrokeOptions, TextAlign, TextRun, Window, point,
-    px, quad, size,
+    Pixels, Point, SharedString, ShapedLine, StrokeOptions, TextAlign, TextRun, Window,
+    linear_color_stop, linear_gradient, point, px, quad, size,
 };
 use lyon::tessellation::{LineCap, LineJoin};
 
+use crate::cizim::yuzey::{DikeyHiza, SATIR_ORANI, YatayHiza, Yol, YolKomutu, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::stil::ÇizgiTürü;
-use crate::renk::{Dolgu, Renk};
+use crate::renk::{Dolgu, Renk, RenkDurağı};
 
-/// Yazı satır yüksekliğinin yazı boyutuna oranı.
-pub const SATIR_ORANI: f32 = 1.4;
-
-/// Yatay yazı hizası.
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub enum YatayHiza {
-    #[default]
-    Sol,
-    Orta,
-    Sağ,
-}
-
-/// Dikey yazı hizası.
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub enum DikeyHiza {
-    Üst,
-    #[default]
-    Orta,
-    Alt,
-}
-
-/// Yol komutu — koordinatlar grafik yerelidir.
-#[derive(Clone, Copy, Debug)]
-pub enum YolKomutu {
-    Taşı((f32, f32)),
-    Çiz((f32, f32)),
-    /// Kübik Bezier: kontrol noktaları `k1`, `k2`, bitiş `uç`.
-    Kübik {
-        k1: (f32, f32),
-        k2: (f32, f32),
-        uç: (f32, f32),
-    },
-    /// Yay: `yarıçap`, `büyük_yay`, `süpürme` (SVG bayrakları) ile `uç`a.
-    Yay {
-        yarıçap: f32,
-        büyük_yay: bool,
-        süpürme: bool,
-        uç: (f32, f32),
-    },
-    Kapat,
-}
-
-/// Komut listesinden oluşan yol (zrender `PathProxy` karşılığı).
-#[derive(Clone, Debug, Default)]
-pub struct Yol {
-    pub komutlar: Vec<YolKomutu>,
-}
-
-impl Yol {
-    pub fn yeni() -> Self {
-        Self::default()
-    }
-
-    pub fn taşı(&mut self, n: (f32, f32)) {
-        self.komutlar.push(YolKomutu::Taşı(n));
-    }
-
-    pub fn çiz(&mut self, n: (f32, f32)) {
-        self.komutlar.push(YolKomutu::Çiz(n));
-    }
-
-    pub fn kübik(&mut self, k1: (f32, f32), k2: (f32, f32), uç: (f32, f32)) {
-        self.komutlar.push(YolKomutu::Kübik { k1, k2, uç });
-    }
-
-    pub fn yay(&mut self, yarıçap: f32, büyük_yay: bool, süpürme: bool, uç: (f32, f32)) {
-        self.komutlar.push(YolKomutu::Yay { yarıçap, büyük_yay, süpürme, uç });
-    }
-
-    pub fn kapat(&mut self) {
-        self.komutlar.push(YolKomutu::Kapat);
-    }
-
-    pub fn boş_mu(&self) -> bool {
-        self.komutlar.len() < 2
-    }
-}
+/// Kareler arası metin ölçüm önbelleği: `(metin, boyut bitleri) → genişlik`.
+pub type ÖlçümÖnbelleği = Rc<RefCell<HashMap<(String, u32), f32>>>;
 
 /// Çizgi türünü kesik desenine çevirir.
 fn kesik_deseni(tür: ÇizgiTürü, kalınlık: f32) -> Option<[Pixels; 2]> {
@@ -100,14 +31,15 @@ fn kesik_deseni(tür: ÇizgiTürü, kalınlık: f32) -> Option<[Pixels; 2]> {
     }
 }
 
-/// gpui `Window` üzerinde, grafik yerel koordinatlarıyla çizim yapan katman.
+/// gpui `Window` üzerinde, yüzey yerel koordinatlarıyla çizim yapan katman.
 pub struct Çizici<'a, 'b> {
     pub pencere: &'a mut Window,
     pub uygulama: &'b mut App,
     /// Tuvalin pencere içindeki sol üst köşesi.
     pub köken: (f32, f32),
-    pub genişlik: f32,
-    pub yükseklik: f32,
+    genişlik: f32,
+    yükseklik: f32,
+    ölçüm_önbelleği: Option<ÖlçümÖnbelleği>,
 }
 
 impl<'a, 'b> Çizici<'a, 'b> {
@@ -115,6 +47,7 @@ impl<'a, 'b> Çizici<'a, 'b> {
         pencere: &'a mut Window,
         uygulama: &'b mut App,
         sınırlar: Bounds<Pixels>,
+        ölçüm_önbelleği: Option<ÖlçümÖnbelleği>,
     ) -> Self {
         Çizici {
             pencere,
@@ -125,15 +58,16 @@ impl<'a, 'b> Çizici<'a, 'b> {
             ),
             genişlik: f32::from(sınırlar.size.width),
             yükseklik: f32::from(sınırlar.size.height),
+            ölçüm_önbelleği,
         }
     }
 
-    /// Grafik yerel noktayı pencere koordinatına çevirir.
+    /// Yüzey yerel noktayı pencere koordinatına çevirir.
     pub fn mutlak(&self, n: (f32, f32)) -> Point<Pixels> {
         point(px(self.köken.0 + n.0), px(self.köken.1 + n.1))
     }
 
-    /// Grafik yerel dikdörtgeni pencere sınırlarına çevirir.
+    /// Yüzey yerel dikdörtgeni pencere sınırlarına çevirir.
     pub fn sınırlar(&self, d: Dikdörtgen) -> Bounds<Pixels> {
         Bounds {
             origin: self.mutlak((d.x, d.y)),
@@ -161,20 +95,156 @@ impl<'a, 'b> Çizici<'a, 'b> {
         }
     }
 
-    /// Yolu dolgu ile boyar.
-    pub fn yol_doldur(&mut self, yol: &Yol, dolgu: &Dolgu) {
-        if yol.boş_mu() {
-            return;
-        }
+    fn yolu_boya(&mut self, yol: &Yol, arkaplan: gpui::Background) {
         let mut kurucu = PathBuilder::fill();
         self.yol_kur(yol, &mut kurucu);
         if let Ok(gpui_yolu) = kurucu.build() {
-            self.pencere.paint_path(gpui_yolu, dolgu.gpui_arkaplan());
+            self.pencere.paint_path(gpui_yolu, arkaplan);
         }
     }
 
-    /// Yolu verilen kalınlık ve türde çizgiler.
-    pub fn yol_çiz(&mut self, yol: &Yol, kalınlık: f32, renk: Renk, tür: ÇizgiTürü) {
+    /// Eksene hizalı, ikiden çok duraklı doğrusal gradyanı, her ardışık
+    /// durak çifti için yolun o banda kırpılmış kopyasını iki duraklı gpui
+    /// gradyanıyla boyayarak birebir çizer.
+    fn bantlı_gradyan_doldur(
+        &mut self,
+        yol: &Yol,
+        x: f32,
+        y: f32,
+        x2: f32,
+        y2: f32,
+        duraklar: &[RenkDurağı],
+    ) {
+        let Some(kutu) = yol.sınır_kutusu() else { return };
+
+        // Gradyanı ileri yöne çevir (x2 ≥ x, y2 ≥ y).
+        let dikey = (x - x2).abs() < 1e-6;
+        let (baş, son) = if dikey { (y, y2) } else { (x, x2) };
+        let mut duraklar: Vec<RenkDurağı> = duraklar.to_vec();
+        let (baş, son) = if son < baş {
+            duraklar = duraklar
+                .into_iter()
+                .rev()
+                .map(|d| RenkDurağı { konum: 1.0 - d.konum, renk: d.renk })
+                .collect();
+            (son, baş)
+        } else {
+            (baş, son)
+        };
+        duraklar.sort_by(|a, b| {
+            a.konum
+                .partial_cmp(&b.konum)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        // Durak konumunu (gradyan doğrusu üzerinde) sınır kutusu eksen
+        // oranına çevirir; gpui gradyanı yol sınırları üzerinden örneklenir.
+        let eksen_oranı = |k: f32| (baş + k * (son - baş)).clamp(0.0, 1.0);
+
+        // Uçlardaki düz bölgeler dahil ardışık çiftler.
+        let (Some(ilk), Some(sonuncu)) = (duraklar.first(), duraklar.last()) else {
+            return;
+        };
+        let mut çiftler: Vec<(f32, f32, Renk, Renk)> = Vec::new();
+        if eksen_oranı(ilk.konum) > 0.0 {
+            çiftler.push((0.0, eksen_oranı(ilk.konum), ilk.renk, ilk.renk));
+        }
+        for p in duraklar.windows(2) {
+            if let [a, b] = p {
+                çiftler.push((eksen_oranı(a.konum), eksen_oranı(b.konum), a.renk, b.renk));
+            }
+        }
+        if eksen_oranı(sonuncu.konum) < 1.0 {
+            çiftler.push((eksen_oranı(sonuncu.konum), 1.0, sonuncu.renk, sonuncu.renk));
+        }
+
+        let açı = if dikey { 180.0 } else { 90.0 };
+        for (k0, k1, r0, r1) in çiftler {
+            let bant = if dikey {
+                Dikdörtgen::yeni(
+                    kutu.x,
+                    kutu.y + k0 * kutu.yükseklik,
+                    kutu.genişlik,
+                    (k1 - k0) * kutu.yükseklik,
+                )
+            } else {
+                Dikdörtgen::yeni(
+                    kutu.x + k0 * kutu.genişlik,
+                    kutu.y,
+                    (k1 - k0) * kutu.genişlik,
+                    kutu.yükseklik,
+                )
+            };
+            if bant.genişlik <= 0.0 || bant.yükseklik <= 0.0 {
+                continue;
+            }
+            let arkaplan = linear_gradient(
+                açı,
+                linear_color_stop(r0.gpui_hsla(), k0),
+                linear_color_stop(r1.gpui_hsla(), k1),
+            );
+            let sınır = self.sınırlar(bant);
+            let köken = self.köken;
+            let (g, yük) = (self.genişlik, self.yükseklik);
+            let uygulama: &mut App = self.uygulama;
+            let önbellek = self.ölçüm_önbelleği.clone();
+            self.pencere.paint_layer(sınır, |pencere| {
+                let mut iç = Çizici {
+                    pencere,
+                    uygulama,
+                    köken,
+                    genişlik: g,
+                    yükseklik: yük,
+                    ölçüm_önbelleği: önbellek,
+                };
+                iç.yolu_boya(yol, arkaplan);
+            });
+        }
+    }
+
+    fn şekillendir(&self, metin: &str, boyut: f32, kalın: bool, renk: Renk) -> ShapedLine {
+        let temiz: String = metin.replace(['\n', '\r'], " ");
+        let paylaşımlı: SharedString = SharedString::from(temiz);
+        let mut yazı_tipi = self.pencere.text_style().font();
+        yazı_tipi.weight = if kalın { FontWeight::BOLD } else { FontWeight::NORMAL };
+        let koşu = TextRun {
+            len: paylaşımlı.len(),
+            font: yazı_tipi,
+            color: renk.gpui_hsla(),
+            background_color: None,
+            underline: None,
+            strikethrough: None,
+        };
+        self.pencere
+            .text_system()
+            .shape_line(paylaşımlı, px(boyut), &[koşu], None)
+    }
+}
+
+impl ÇizimYüzeyi for Çizici<'_, '_> {
+    fn genişlik(&self) -> f32 {
+        self.genişlik
+    }
+
+    fn yükseklik(&self) -> f32 {
+        self.yükseklik
+    }
+
+    fn yol_doldur(&mut self, yol: &Yol, dolgu: &Dolgu) {
+        if yol.boş_mu() {
+            return;
+        }
+        if let Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar } = dolgu {
+            let eksene_hizalı = (x - x2).abs() < 1e-6 || (y - y2).abs() < 1e-6;
+            if duraklar.len() > 2 && eksene_hizalı {
+                self.bantlı_gradyan_doldur(yol, *x, *y, *x2, *y2, duraklar);
+                return;
+            }
+        }
+        self.yolu_boya(yol, dolgu.gpui_arkaplan());
+    }
+
+    fn yol_çiz(&mut self, yol: &Yol, kalınlık: f32, renk: Renk, tür: ÇizgiTürü) {
         if yol.boş_mu() || kalınlık <= 0.0 || renk.alfa <= 0.0 {
             return;
         }
@@ -194,43 +264,7 @@ impl<'a, 'b> Çizici<'a, 'b> {
         }
     }
 
-    /// İki nokta arasına çizgi çeker.
-    pub fn çizgi(
-        &mut self,
-        a: (f32, f32),
-        b: (f32, f32),
-        kalınlık: f32,
-        renk: Renk,
-        tür: ÇizgiTürü,
-    ) {
-        let mut yol = Yol::yeni();
-        yol.taşı(a);
-        yol.çiz(b);
-        self.yol_çiz(&yol, kalınlık, renk, tür);
-    }
-
-    /// Ardışık noktalardan çoklu çizgi çeker.
-    pub fn çoklu_çizgi(
-        &mut self,
-        noktalar: &[(f32, f32)],
-        kalınlık: f32,
-        renk: Renk,
-        tür: ÇizgiTürü,
-    ) {
-        if noktalar.len() < 2 {
-            return;
-        }
-        let mut yol = Yol::yeni();
-        yol.taşı(noktalar[0]);
-        for n in &noktalar[1..] {
-            yol.çiz(*n);
-        }
-        self.yol_çiz(&yol, kalınlık, renk, tür);
-    }
-
-    /// Dikdörtgen boyar; `yarıçap` köşe sırası `[sol üst, sağ üst, sağ alt,
-    /// sol alt]`, `kenarlık` `(kalınlık, renk)` çiftidir.
-    pub fn dikdörtgen(
+    fn dikdörtgen(
         &mut self,
         d: Dikdörtgen,
         dolgu: &Dolgu,
@@ -257,83 +291,7 @@ impl<'a, 'b> Çizici<'a, 'b> {
         ));
     }
 
-    /// Daire boyar; istenirse ayrıca kenarlık halkası çizer.
-    pub fn daire(
-        &mut self,
-        merkez: (f32, f32),
-        yarıçap: f32,
-        dolgu: Option<&Dolgu>,
-        kenarlık: Option<(f32, Renk)>,
-    ) {
-        if yarıçap <= 0.0 {
-            return;
-        }
-        let (mx, my) = merkez;
-        let mut yol = Yol::yeni();
-        yol.taşı((mx + yarıçap, my));
-        yol.yay(yarıçap, false, true, (mx - yarıçap, my));
-        yol.yay(yarıçap, false, true, (mx + yarıçap, my));
-        yol.kapat();
-        if let Some(dolgu) = dolgu {
-            self.yol_doldur(&yol, dolgu);
-        }
-        if let Some((kalınlık, renk)) = kenarlık {
-            if kalınlık > 0.0 {
-                self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
-            }
-        }
-    }
-
-    /// Pasta dilimi (halka parçası) boyar. Açılar radyandır ve ekran
-    /// koordinatındadır (0 → sağ, pozitif yön saat yönü).
-    pub fn dilim(
-        &mut self,
-        merkez: (f32, f32),
-        iç_yarıçap: f32,
-        dış_yarıçap: f32,
-        açı0: f32,
-        açı1: f32,
-        dolgu: &Dolgu,
-        kenarlık: Option<(f32, Renk)>,
-    ) {
-        if dış_yarıçap <= 0.0 || (açı1 - açı0).abs() < 1e-5 {
-            return;
-        }
-        // Tam daireye çok yakın dilimler yay uçlarının çakışmaması için
-        // kırpılır.
-        let tam_tur = std::f32::consts::TAU;
-        let açıklık = (açı1 - açı0).clamp(-tam_tur * 0.9999, tam_tur * 0.9999);
-        let açı1 = açı0 + açıklık;
-
-        let (mx, my) = merkez;
-        let uç = |yarıçap: f32, açı: f32| (mx + yarıçap * açı.cos(), my + yarıçap * açı.sin());
-        let büyük = açıklık.abs() > std::f32::consts::PI;
-        let süpürme = açıklık > 0.0;
-
-        let mut yol = Yol::yeni();
-        if iç_yarıçap > 0.5 {
-            yol.taşı(uç(iç_yarıçap, açı0));
-            yol.çiz(uç(dış_yarıçap, açı0));
-            yol.yay(dış_yarıçap, büyük, süpürme, uç(dış_yarıçap, açı1));
-            yol.çiz(uç(iç_yarıçap, açı1));
-            yol.yay(iç_yarıçap, büyük, !süpürme, uç(iç_yarıçap, açı0));
-            yol.kapat();
-        } else {
-            yol.taşı(merkez);
-            yol.çiz(uç(dış_yarıçap, açı0));
-            yol.yay(dış_yarıçap, büyük, süpürme, uç(dış_yarıçap, açı1));
-            yol.kapat();
-        }
-        self.yol_doldur(&yol, dolgu);
-        if let Some((kalınlık, renk)) = kenarlık {
-            if kalınlık > 0.0 {
-                self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
-            }
-        }
-    }
-
-    /// Gölge boyar (ipucu penceresi vb. için).
-    pub fn gölge(&mut self, d: Dikdörtgen, yarıçap: f32, renk: Renk, bulanıklık: f32) {
+    fn gölge(&mut self, d: Dikdörtgen, yarıçap: f32, renk: Renk, bulanıklık: f32) {
         self.pencere.paint_drop_shadows(
             self.sınırlar(d),
             Corners::all(px(yarıçap)),
@@ -347,49 +305,26 @@ impl<'a, 'b> Çizici<'a, 'b> {
         );
     }
 
-    /// Çizimi verilen dikdörtgene kırparak `işlev`i çalıştırır
-    /// (animasyon kırpması ve ızgara taşma denetimi için).
-    pub fn kırp<R>(&mut self, d: Dikdörtgen, işlev: impl FnOnce(&mut Çizici) -> R) -> R {
+    fn kırpılı(&mut self, d: Dikdörtgen, işlev: &mut dyn FnMut(&mut dyn ÇizimYüzeyi)) {
         let sınır = self.sınırlar(d);
         let köken = self.köken;
         let (genişlik, yükseklik) = (self.genişlik, self.yükseklik);
+        let önbellek = self.ölçüm_önbelleği.clone();
         let uygulama: &mut App = self.uygulama;
         self.pencere.paint_layer(sınır, |pencere| {
-            let mut iç = Çizici { pencere, uygulama, köken, genişlik, yükseklik };
-            işlev(&mut iç)
-        })
+            let mut iç = Çizici {
+                pencere,
+                uygulama,
+                köken,
+                genişlik,
+                yükseklik,
+                ölçüm_önbelleği: önbellek,
+            };
+            işlev(&mut iç);
+        });
     }
 
-    fn şekillendir(&self, metin: &str, boyut: f32, kalın: bool, renk: Renk) -> ShapedLine {
-        let temiz: String = metin.replace(['\n', '\r'], " ");
-        let paylaşımlı: SharedString = SharedString::from(temiz);
-        let mut yazı_tipi = self.pencere.text_style().font();
-        yazı_tipi.weight = if kalın { FontWeight::BOLD } else { FontWeight::NORMAL };
-        let koşu = TextRun {
-            len: paylaşımlı.len(),
-            font: yazı_tipi,
-            color: renk.gpui_hsla(),
-            background_color: None,
-            underline: None,
-            strikethrough: None,
-        };
-        self.pencere
-            .text_system()
-            .shape_line(paylaşımlı, px(boyut), &[koşu], None)
-    }
-
-    /// Yazının kaplayacağı `(genişlik, yükseklik)` boyutunu ölçer.
-    pub fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32) {
-        if metin.is_empty() {
-            return (0.0, 0.0);
-        }
-        let satır = self.şekillendir(metin, boyut, false, Renk::SİYAH);
-        (f32::from(satır.width()), boyut * SATIR_ORANI)
-    }
-
-    /// Tek satır yazı boyar; `konum`, hizaya göre çapa noktasıdır.
-    /// Çizilen `(genişlik, yükseklik)` döner.
-    pub fn yazı(
+    fn yazı(
         &mut self,
         metin: &str,
         konum: (f32, f32),
@@ -427,5 +362,33 @@ impl<'a, 'b> Çizici<'a, 'b> {
             )
             .ok();
         (genişlik, satır_yüksekliği)
+    }
+
+    fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32) {
+        if metin.is_empty() {
+            return (0.0, 0.0);
+        }
+        let yükseklik = boyut * SATIR_ORANI;
+        if let Some(önbellek) = &self.ölçüm_önbelleği {
+            let anahtar = (metin.to_string(), boyut.to_bits());
+            if let Ok(kayıt) = önbellek.try_borrow() {
+                if let Some(genişlik) = kayıt.get(&anahtar) {
+                    return (*genişlik, yükseklik);
+                }
+            }
+            let satır = self.şekillendir(metin, boyut, false, Renk::SİYAH);
+            let genişlik = f32::from(satır.width());
+            // Önbellek kilitliyse ölçüm yine de geçerlidir; kayıt atlanır.
+            if let Ok(mut kayıt) = önbellek.try_borrow_mut() {
+                kayıt.insert(anahtar, genişlik);
+            }
+            return (genişlik, yükseklik);
+        }
+        let satır = self.şekillendir(metin, boyut, false, Renk::SİYAH);
+        (f32::from(satır.width()), yükseklik)
+    }
+
+    fn olarak(&mut self) -> &mut dyn ÇizimYüzeyi {
+        self
     }
 }

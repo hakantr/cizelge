@@ -149,6 +149,7 @@ pub fn geçerli_kapsam_sayısı(v: f64) -> bool {
 }
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
 

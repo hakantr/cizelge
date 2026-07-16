@@ -165,7 +165,10 @@ fn main() {
             },
             |_, cx| cx.new(Pano::yeni),
         )
-        .unwrap();
+        .unwrap_or_else(|hata| {
+            eprintln!("Pencere açılamadı: {hata}");
+            std::process::exit(1);
+        });
         cx.on_window_closed(|cx, _| cx.quit()).detach();
         cx.activate(true);
     });

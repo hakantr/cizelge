@@ -70,10 +70,23 @@ cargo run --example pano      # tek pencerede dört grafik
 
 Radar, ısı haritası, mum (candlestick), ağaç/halka (treemap/sunburst), grafo,
 sankey, gösterge saati (gauge); `dataZoom`, `visualMap`, fırça, araç kutusu;
-çoklu ızgara/eksen, kutupsal koordinat; `dataset`/dönüşümler; durum geçiş
-animasyonları.
+çoklu ızgara/eksen, kutupsal koordinat; `dataset`/dönüşümler.
+
+**Kapsam dışı (kesin):** coğrafi katman (`geo`/`map`) ayrı bir çalışmadır;
+3B görünümler ve GL serileri (`scatterGL`, `linesGL`, `flowGL`, `graphGL`)
+bu projeye dahil değildir.
 
 Ayrıntılı, fazlara bölünmüş plan için: **[FAZ_PLANI.md](FAZ_PLANI.md)**.
+
+## Güvence kuralları
+
+- **Panik yasağı:** çalışma zamanı kodunda `panic!`/`unwrap`/`expect`/
+  doğrulanmamış `[]` vb. yasaktır ve clippy `deny` lintleriyle derlemede
+  engellenir; hatalar `BilesenHatasi` olarak döner, boyama sırasındaki
+  kurtarılabilir sorunlar `BilesenTanisi` olay kanalından yayımlanır,
+  `seçenekleri_değiştir` doğrulama + işlem geri alma yapar.
+- **Lisans sınırı:** proje hiçbir koşulda Apache-2.0 dışına çıkmaz
+  (ayrıntılar FAZ_PLANI.md'de).
 
 ## Lisans ve atıf
 

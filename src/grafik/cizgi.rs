@@ -1,7 +1,7 @@
 //! Çizgi serisi çizimi — `echarts/src/chart/line/LineView.ts` ile
 //! `poly.ts` içindeki yumuşak eğri algoritmasının portu.
 
-use crate::cizim::{Yol, Çizici};
+use crate::cizim::{Yol, ÇizimYüzeyi};
 use crate::grafik::{sembol_çiz, çizgi_stili_çöz};
 use crate::koordinat::Kartezyen2B;
 use crate::model::seri::{Basamak, ÇizgiSerisi};
@@ -46,43 +46,33 @@ pub fn yumuşak_parça_ekle(
     yumuşaklık: f32,
     ilk_taşı: bool,
 ) {
-    if noktalar.is_empty() {
-        return;
+    let Some(&ilk) = noktalar.first() else { return };
+    if ilk_taşı {
+        yol.taşı(ilk);
+    } else {
+        yol.çiz(ilk);
     }
     if noktalar.len() == 1 || yumuşaklık <= 0.0 {
-        if ilk_taşı {
-            yol.taşı(noktalar[0]);
-        } else {
-            yol.çiz(noktalar[0]);
-        }
-        for n in &noktalar[1..] {
+        for n in noktalar.iter().skip(1) {
             yol.çiz(*n);
         }
         return;
     }
 
     let yumuşaklık = yumuşaklık as f64;
-    if ilk_taşı {
-        yol.taşı(noktalar[0]);
-    } else {
-        yol.çiz(noktalar[0]);
-    }
     // Bir sonraki parçanın başlangıç kontrol noktası.
-    let (mut kx0, mut ky0) = (noktalar[0].0 as f64, noktalar[0].1 as f64);
+    let (mut kx0, mut ky0) = (ilk.0 as f64, ilk.1 as f64);
+    let mut önceki = ilk;
 
     for i in 1..noktalar.len() {
-        let (öx, öy) = (noktalar[i - 1].0 as f64, noktalar[i - 1].1 as f64);
-        let (x, y) = (noktalar[i].0 as f64, noktalar[i].1 as f64);
-        let son_mu = i + 1 >= noktalar.len();
+        let Some(&şimdiki) = noktalar.get(i) else { break };
+        let (öx, öy) = (önceki.0 as f64, önceki.1 as f64);
+        let (x, y) = (şimdiki.0 as f64, şimdiki.1 as f64);
+        let sonraki = noktalar.get(i + 1);
 
         let (kx1, ky1, sonraki_kx0, sonraki_ky0);
-        if son_mu {
-            kx1 = x;
-            ky1 = y;
-            sonraki_kx0 = x;
-            sonraki_ky0 = y;
-        } else {
-            let (sx, sy) = (noktalar[i + 1].0 as f64, noktalar[i + 1].1 as f64);
+        if let Some(&(sx_f, sy_f)) = sonraki {
+            let (sx, sy) = (sx_f as f64, sy_f as f64);
             let vx = sx - öx;
             let vy = sy - öy;
 
@@ -117,6 +107,12 @@ pub fn yumuşak_parça_ekle(
             sonraki_ky0 = y + vy3 * sonraki_uzunluk / önceki_uzunluk.max(1e-12);
             kx1 = tkx1;
             ky1 = tky1;
+        } else {
+            // Son nokta: kontrol noktaları uca oturur.
+            kx1 = x;
+            ky1 = y;
+            sonraki_kx0 = x;
+            sonraki_ky0 = y;
         }
 
         yol.kübik(
@@ -126,18 +122,17 @@ pub fn yumuşak_parça_ekle(
         );
         kx0 = sonraki_kx0;
         ky0 = sonraki_ky0;
+        önceki = şimdiki;
     }
 }
 
 /// Basamaklı çizgi için ara noktaları üretir.
 fn basamaklı_noktalar(noktalar: &[(f32, f32)], basamak: Basamak) -> Vec<(f32, f32)> {
-    let mut sonuç = Vec::with_capacity(noktalar.len() * 2);
-    for (i, &n) in noktalar.iter().enumerate() {
-        if i == 0 {
-            sonuç.push(n);
-            continue;
-        }
-        let önceki = noktalar[i - 1];
+    let mut sonuç = Vec::with_capacity(noktalar.len().saturating_mul(2));
+    if let Some(&ilk) = noktalar.first() {
+        sonuç.push(ilk);
+    }
+    for (&önceki, &n) in noktalar.iter().zip(noktalar.iter().skip(1)) {
         match basamak {
             Basamak::Baş => sonuç.push((önceki.0, n.1)),
             Basamak::Son => sonuç.push((n.0, önceki.1)),
@@ -183,7 +178,7 @@ fn parçalara_ayır(
 /// Çizgi serisini çizer: alan dolgusu, çizgi, semboller ve etiketler.
 #[allow(clippy::too_many_arguments)]
 pub fn çizgi_serisi_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     seri: &ÇizgiSerisi,
     kartezyen: &Kartezyen2B,
     aralıklar: &[YığınAralığı],
@@ -193,7 +188,7 @@ pub fn çizgi_serisi_çiz(
     let (tepeler, tabanlar) = nokta_listeleri(seri, kartezyen, aralıklar);
     let alan = kartezyen.alan;
 
-    let gövde = |ç: &mut Çizici| {
+    let mut gövde = |ç: &mut dyn ÇizimYüzeyi| {
         let tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
         let tabanlar_parçalı = parçalara_ayır(&tabanlar, seri.boşları_bağla);
 
@@ -256,7 +251,8 @@ pub fn çizgi_serisi_çiz(
             let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
             for (i, nokta) in tepeler.iter().enumerate() {
                 let Some((x, y)) = nokta else { continue };
-                let Some(değer) = seri.veri[i].değer.sayı() else { continue };
+                let Some(öğe) = seri.veri.get(i) else { continue };
+                let Some(değer) = öğe.değer.sayı() else { continue };
                 let metin = match &seri.etiket.biçimleyici {
                     Some(b) => b.uygula(değer, &binlik_ayır(değer)),
                     None => binlik_ayır(değer),
@@ -286,8 +282,8 @@ pub fn çizgi_serisi_çiz(
             alan.x,
             0.0,
             alan.genişlik * ilerleme.clamp(0.0, 1.0),
-            çizici.yükseklik,
+            çizici.yükseklik(),
         );
-        çizici.kırp(kırpma, gövde);
+        çizici.kırpılı(kırpma, &mut gövde);
     }
 }

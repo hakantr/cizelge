@@ -57,9 +57,8 @@ pub fn sütun_yerleşimi(
         if !yığınlar.contains_key(kimlik) {
             otomatik_sayısı += 1;
             yığın_sırası.push(kimlik.clone());
-            yığınlar.insert(kimlik.clone(), YığınBilgisi::default());
         }
-        let yığın = yığınlar.get_mut(kimlik).unwrap();
+        let yığın = yığınlar.entry(kimlik.clone()).or_default();
 
         if let Some(g) = uzunluk_çöz(&bilgi.genişlik, bant_genişliği) {
             if yığın.genişlik == 0.0 && g > 0.0 {
@@ -103,7 +102,7 @@ pub fn sütun_yerleşimi(
 
     // Otomatik genişliğin en çok / en az sınırlarını aşan sütunları sabitle.
     for kimlik in &yığın_sırası {
-        let yığın = yığınlar.get_mut(kimlik).unwrap();
+        let Some(yığın) = yığınlar.get_mut(kimlik) else { continue };
         if yığın.genişlik == 0.0 {
             let mut son_genişlik = otomatik_genişlik;
             if yığın.en_çok > 0.0 && yığın.en_çok < son_genişlik {
@@ -143,7 +142,7 @@ pub fn sütun_yerleşimi(
     let mut genişlik_toplamı = 0.0;
     let mut son_genişlik = 0.0;
     for kimlik in &yığın_sırası {
-        let yığın = yığınlar.get_mut(kimlik).unwrap();
+        let Some(yığın) = yığınlar.get_mut(kimlik) else { continue };
         if yığın.genişlik == 0.0 {
             yığın.genişlik = otomatik_genişlik;
         }
@@ -157,7 +156,7 @@ pub fn sütun_yerleşimi(
     let mut sonuç = HashMap::new();
     let mut kaydırma = -genişlik_toplamı / 2.0;
     for kimlik in &yığın_sırası {
-        let yığın = &yığınlar[kimlik];
+        let Some(yığın) = yığınlar.get(kimlik) else { continue };
         sonuç.insert(
             kimlik.clone(),
             SütunKonumu { kaydırma, genişlik: yığın.genişlik },
@@ -168,6 +167,7 @@ pub fn sütun_yerleşimi(
 }
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
 

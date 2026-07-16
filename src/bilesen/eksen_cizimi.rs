@@ -1,7 +1,10 @@
 //! Eksen çizimi — `echarts/src/component/axis` (AxisBuilder) karşılığı:
 //! bölme çizgileri, eksen çizgisi, çentikler ve etiketler.
+//!
+//! İnce (1 px) çizgiler [`keskin`] ile fiziksel piksel ızgarasına oturtulur;
+//! eksen ve bölme çizgilerinin bulanıklaşması böyle önlenir.
 
-use crate::cizim::{DikeyHiza, YatayHiza, Çizici};
+use crate::cizim::{keskin, DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::{Kartezyen2B, ÇalışmaEkseni};
 use crate::model::eksen::EksenKonumu;
 use crate::model::stil::ÇizgiTürü;
@@ -18,7 +21,7 @@ fn etiket_metni(eksen: &ÇalışmaEkseni, değer: f64) -> String {
 
 /// Izgaranın bölme çizgilerini çizer (serilerin altında kalması için önce
 /// çağrılır).
-pub fn bölme_çizgilerini_çiz(çizici: &mut Çizici, kartezyen: &Kartezyen2B) {
+pub fn bölme_çizgilerini_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) {
     let alan = kartezyen.alan;
     for eksen in [&kartezyen.x, &kartezyen.y] {
         if !eksen.seçenek.bölme_görünür_mü() {
@@ -27,6 +30,7 @@ pub fn bölme_çizgilerini_çiz(çizici: &mut Çizici, kartezyen: &Kartezyen2B) 
         let renk = eksen.seçenek.bölme_çizgisi.renk.unwrap_or(tema::BÖLME_ÇİZGİSİ);
         let tür = eksen.seçenek.bölme_çizgisi.tür;
         for konum in eksen.çizgi_çentikleri(false) {
+            let konum = keskin(konum);
             if eksen.yatay_mı() {
                 // Dikey bölme çizgisi.
                 çizici.çizgi((konum, alan.y), (konum, alan.alt()), 1.0, renk, tür);
@@ -38,7 +42,7 @@ pub fn bölme_çizgilerini_çiz(çizici: &mut Çizici, kartezyen: &Kartezyen2B) 
 }
 
 /// Eksen çizgisi, çentikler ve etiketleri çizer.
-pub fn eksenleri_çiz(çizici: &mut Çizici, kartezyen: &Kartezyen2B) {
+pub fn eksenleri_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) {
     let alan = kartezyen.alan;
     for eksen in [&kartezyen.x, &kartezyen.y] {
         // Eksenin sabit (dik) konumu.
@@ -52,15 +56,29 @@ pub fn eksenleri_çiz(çizici: &mut Çizici, kartezyen: &Kartezyen2B) {
             EksenKonumu::Alt | EksenKonumu::Sağ => 1.0,
             EksenKonumu::Üst | EksenKonumu::Sol => -1.0,
         };
+        let sabit_keskin = keskin(sabit);
 
         // 1) Eksen çizgisi.
         if eksen.seçenek.çizgi_görünür_mü() {
             let renk = eksen.seçenek.çizgi.renk.unwrap_or(tema::EKSEN_ÇİZGİSİ);
             let kalınlık = eksen.seçenek.çizgi.kalınlık;
+            let konum = if kalınlık <= 1.5 { sabit_keskin } else { sabit };
             if eksen.yatay_mı() {
-                çizici.çizgi((alan.x, sabit), (alan.sağ(), sabit), kalınlık, renk, ÇizgiTürü::Düz);
+                çizici.çizgi(
+                    (alan.x, konum),
+                    (alan.sağ(), konum),
+                    kalınlık,
+                    renk,
+                    ÇizgiTürü::Düz,
+                );
             } else {
-                çizici.çizgi((sabit, alan.y), (sabit, alan.alt()), kalınlık, renk, ÇizgiTürü::Düz);
+                çizici.çizgi(
+                    (konum, alan.y),
+                    (konum, alan.alt()),
+                    kalınlık,
+                    renk,
+                    ÇizgiTürü::Düz,
+                );
             }
         }
 
@@ -69,18 +87,19 @@ pub fn eksenleri_çiz(çizici: &mut Çizici, kartezyen: &Kartezyen2B) {
             let renk = tema::EKSEN_ÇENTİĞİ;
             let uzunluk = eksen.seçenek.çentik.uzunluk;
             for konum in eksen.çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala) {
+                let konum = keskin(konum);
                 if eksen.yatay_mı() {
                     çizici.çizgi(
-                        (konum, sabit),
-                        (konum, sabit + dış_yön * uzunluk),
+                        (konum, sabit_keskin),
+                        (konum, sabit_keskin + dış_yön * uzunluk),
                         1.0,
                         renk,
                         ÇizgiTürü::Düz,
                     );
                 } else {
                     çizici.çizgi(
-                        (sabit, konum),
-                        (sabit + dış_yön * uzunluk, konum),
+                        (sabit_keskin, konum),
+                        (sabit_keskin + dış_yön * uzunluk, konum),
                         1.0,
                         renk,
                         ÇizgiTürü::Düz,

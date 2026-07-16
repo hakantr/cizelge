@@ -23,6 +23,9 @@ pub struct GrafikSeçenekleri {
     pub animasyon: bool,
     /// Giriş animasyonu süresi, ms (`animationDuration`).
     pub animasyon_süresi: f32,
+    /// Veri güncelleme (geçiş) animasyonu süresi, ms
+    /// (`animationDurationUpdate`, ECharts öntanımlısı 300).
+    pub animasyon_süresi_güncelleme: f32,
     pub animasyon_eğrisi: Yumuşatma,
 }
 
@@ -40,6 +43,7 @@ impl Default for GrafikSeçenekleri {
             arkaplan: None,
             animasyon: true,
             animasyon_süresi: ÖNTANIMLI_SÜRE_MS,
+            animasyon_süresi_güncelleme: 300.0,
             animasyon_eğrisi: Yumuşatma::KübikÇıkış,
         }
     }
@@ -110,6 +114,11 @@ impl GrafikSeçenekleri {
         self
     }
 
+    pub fn animasyon_süresi_güncelleme(mut self, ms: f32) -> Self {
+        self.animasyon_süresi_güncelleme = ms;
+        self
+    }
+
     pub fn animasyon_eğrisi(mut self, eğri: Yumuşatma) -> Self {
         self.animasyon_eğrisi = eğri;
         self
@@ -121,22 +130,146 @@ impl GrafikSeçenekleri {
             .get(sıra)
             .and_then(|s| s.açık_renk())
             .map(|d| d.temsilî())
-            .unwrap_or_else(|| {
-                if self.palet.is_empty() {
-                    tema::palet_rengi(sıra)
-                } else {
-                    self.palet[sıra % self.palet.len()]
-                }
-            })
+            .unwrap_or_else(|| self.palet_rengi(sıra))
     }
 
     /// Paletten sıra numarasıyla renk (pasta dilimleri gibi öğe-bazlı
     /// renklendirme için).
     pub fn palet_rengi(&self, sıra: usize) -> Renk {
         if self.palet.is_empty() {
-            tema::palet_rengi(sıra)
-        } else {
-            self.palet[sıra % self.palet.len()]
+            return tema::palet_rengi(sıra);
         }
+        self.palet
+            .get(sıra % self.palet.len())
+            .copied()
+            .unwrap_or_else(|| tema::palet_rengi(sıra))
+    }
+
+    /// Seçenekleri doğrular; ilk sorun [`BilesenHatasi`] olarak döner.
+    /// `GrafikGörünümü::seçenekleri_değiştir`, hata durumunda işlemi geri
+    /// alır (mevcut seçenekler korunur).
+    pub fn doğrula(&self) -> Result<(), crate::hata::BilesenHatasi> {
+        use crate::hata::BilesenHatasi;
+
+        if !self.animasyon_süresi.is_finite() || self.animasyon_süresi < 0.0 {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "animasyon_süresi",
+                ayrıntı: format!("{} geçerli bir süre değil", self.animasyon_süresi),
+            });
+        }
+        if !self.animasyon_süresi_güncelleme.is_finite()
+            || self.animasyon_süresi_güncelleme < 0.0
+        {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "animasyon_süresi_güncelleme",
+                ayrıntı: format!(
+                    "{} geçerli bir süre değil",
+                    self.animasyon_süresi_güncelleme
+                ),
+            });
+        }
+        for eksen in [&self.x_ekseni, &self.y_ekseni].into_iter().flatten() {
+            if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok) {
+                if en_az >= en_çok {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "eksen.en_az/en_çok",
+                        ayrıntı: format!("en_az ({en_az}) < en_çok ({en_çok}) olmalı"),
+                    });
+                }
+            }
+            if eksen.tür == crate::model::eksen::EksenTürü::Log && eksen.log_tabanı <= 1.0 {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "eksen.log_tabanı",
+                    ayrıntı: format!("log tabanı 1'den büyük olmalı ({})", eksen.log_tabanı),
+                });
+            }
+        }
+        for seri in &self.seriler {
+            if let Seri::Pasta(p) = seri {
+                if p.başlangıç_açısı.is_nan() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "pasta.başlangıç_açısı",
+                        ayrıntı: "başlangıç açısı sayı olmalı".to_string(),
+                    });
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// Veri geçiş animasyonu için iki seçenek arasında ara değer üretir:
+    /// aynı sıradaki serilerin eşit uzunluktaki sayısal verileri doğrusal
+    /// olarak karıştırılır; eşleşmeyen her şey `yeni`den alınır (ECharts
+    /// güncelleme animasyonunun sade karşılığı).
+    pub fn ara_değerle(eski: &Self, yeni: &Self, t: f32) -> Self {
+        use crate::model::deger::{VeriDeğeri, VeriÖğesi};
+        let t = t.clamp(0.0, 1.0) as f64;
+        let mut sonuç = yeni.clone();
+
+        let öğe_karıştır = |e: &VeriÖğesi, y: &VeriÖğesi| -> VeriÖğesi {
+            let değer = match (&e.değer, &y.değer) {
+                (VeriDeğeri::Sayı(a), VeriDeğeri::Sayı(b)) => {
+                    VeriDeğeri::Sayı(a + (b - a) * t)
+                }
+                (VeriDeğeri::Çift([ax, ay]), VeriDeğeri::Çift([bx, by])) => {
+                    VeriDeğeri::Çift([ax + (bx - ax) * t, ay + (by - ay) * t])
+                }
+                _ => y.değer.clone(),
+            };
+            VeriÖğesi { değer, ..y.clone() }
+        };
+
+        for (sıra, seri) in sonuç.seriler.iter_mut().enumerate() {
+            let Some(eski_seri) = eski.seriler.get(sıra) else { continue };
+            let eski_veri = eski_seri.veri();
+            let karıştır = |yeni_veri: &mut Vec<VeriÖğesi>| {
+                if eski_veri.len() != yeni_veri.len() {
+                    return;
+                }
+                for (e, y) in eski_veri.iter().zip(yeni_veri.iter_mut()) {
+                    *y = öğe_karıştır(e, y);
+                }
+            };
+            match seri {
+                Seri::Çizgi(s) => karıştır(&mut s.veri),
+                Seri::Sütun(s) => karıştır(&mut s.veri),
+                Seri::Pasta(s) => karıştır(&mut s.veri),
+                Seri::Saçılım(s) => karıştır(&mut s.veri),
+            }
+        }
+        sonuç
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+mod testler {
+    use super::*;
+    use crate::model::seri::ÇizgiSerisi;
+
+    #[test]
+    fn ara_değerleme() {
+        let eski = GrafikSeçenekleri::yeni().seri(ÇizgiSerisi::yeni().veri([0.0, 10.0]));
+        let yeni = GrafikSeçenekleri::yeni().seri(ÇizgiSerisi::yeni().veri([10.0, 30.0]));
+        let ara = GrafikSeçenekleri::ara_değerle(&eski, &yeni, 0.5);
+        let değerler: Vec<f64> = ara.seriler[0]
+            .veri()
+            .iter()
+            .filter_map(|ö| ö.değer.sayı())
+            .collect();
+        assert_eq!(değerler, vec![5.0, 20.0]);
+    }
+
+    #[test]
+    fn uzunluk_uyuşmazlığında_yeniye_atlar() {
+        let eski = GrafikSeçenekleri::yeni().seri(ÇizgiSerisi::yeni().veri([1.0]));
+        let yeni = GrafikSeçenekleri::yeni().seri(ÇizgiSerisi::yeni().veri([4.0, 8.0]));
+        let ara = GrafikSeçenekleri::ara_değerle(&eski, &yeni, 0.5);
+        let değerler: Vec<f64> = ara.seriler[0]
+            .veri()
+            .iter()
+            .filter_map(|ö| ö.değer.sayı())
+            .collect();
+        assert_eq!(değerler, vec![4.0, 8.0]);
     }
 }

@@ -68,12 +68,12 @@ impl Renk {
                 .split(',')
                 .map(|p| p.trim().parse::<f32>().unwrap_or(0.0))
                 .collect();
-            if parçalar.len() >= 3 {
+            if let [kırmızı, yeşil, mavi, kalan @ ..] = parçalar.as_slice() {
                 return Some(Renk::kyma(
-                    parçalar[0] / 255.0,
-                    parçalar[1] / 255.0,
-                    parçalar[2] / 255.0,
-                    if parçalar.len() > 3 { parçalar[3] } else { 1.0 },
+                    kırmızı / 255.0,
+                    yeşil / 255.0,
+                    mavi / 255.0,
+                    kalan.first().copied().unwrap_or(1.0),
                 ));
             }
             return None;
@@ -158,8 +158,8 @@ impl RenkDurağı {
     }
 }
 
-/// Dolgu boyası: düz renk ya da doğrusal gradyan. ECharts'taki
-/// `color: '#abc' | new graphic.LinearGradient(x, y, x2, y2, duraklar)`
+/// Dolgu boyası: düz renk, doğrusal ya da radyal gradyan. ECharts'taki
+/// `color: '#abc' | new graphic.LinearGradient(...) | new graphic.RadialGradient(...)`
 /// seçeneğinin karşılığı.
 #[derive(Clone, PartialEq, Debug)]
 pub enum Dolgu {
@@ -173,6 +173,16 @@ pub enum Dolgu {
         y2: f32,
         duraklar: Vec<RenkDurağı>,
     },
+    /// Radyal gradyan (`echarts.graphic.RadialGradient` karşılığı).
+    /// Merkez `(x, y)` ve `yarıçap` birim sınır kutusundadır; daire/dilim
+    /// ilkellerinde durak konumu iç→dış yarıçapa eşlenerek eşmerkezli
+    /// halkalarla yaklaşıklanır.
+    RadyalGradyan {
+        x: f32,
+        y: f32,
+        yarıçap: f32,
+        duraklar: Vec<RenkDurağı>,
+    },
 }
 
 impl Dolgu {
@@ -180,15 +190,27 @@ impl Dolgu {
         Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar }
     }
 
+    pub fn radyal(x: f32, y: f32, yarıçap: f32, duraklar: Vec<RenkDurağı>) -> Self {
+        Dolgu::RadyalGradyan { x, y, yarıçap, duraklar }
+    }
+
     /// Temsilî düz renk (gradyanlarda ilk durak) — gösterge imleri ve ipucu
     /// noktaları için kullanılır.
     pub fn temsilî(&self) -> Renk {
         match self {
             Dolgu::Düz(r) => *r,
-            Dolgu::DoğrusalGradyan { duraklar, .. } => {
+            Dolgu::DoğrusalGradyan { duraklar, .. }
+            | Dolgu::RadyalGradyan { duraklar, .. } => {
                 duraklar.first().map(|d| d.renk).unwrap_or(Renk::SİYAH)
             }
         }
+    }
+
+    fn durakları_soldur(duraklar: &[RenkDurağı], çarpan: f32) -> Vec<RenkDurağı> {
+        duraklar
+            .iter()
+            .map(|d| RenkDurağı { konum: d.konum, renk: d.renk.opaklık(çarpan) })
+            .collect()
     }
 
     pub fn opaklık(&self, çarpan: f32) -> Dolgu {
@@ -199,10 +221,13 @@ impl Dolgu {
                 y: *y,
                 x2: *x2,
                 y2: *y2,
-                duraklar: duraklar
-                    .iter()
-                    .map(|d| RenkDurağı { konum: d.konum, renk: d.renk.opaklık(çarpan) })
-                    .collect(),
+                duraklar: Self::durakları_soldur(duraklar, çarpan),
+            },
+            Dolgu::RadyalGradyan { x, y, yarıçap, duraklar } => Dolgu::RadyalGradyan {
+                x: *x,
+                y: *y,
+                yarıçap: *yarıçap,
+                duraklar: Self::durakları_soldur(duraklar, çarpan),
             },
         }
     }
@@ -210,19 +235,27 @@ impl Dolgu {
     /// gpui [`Background`] tipine dönüştürür.
     ///
     /// gpui doğal olarak iki duraklı doğrusal gradyan destekler; daha çok
-    /// duraklı gradyanlar ilk ve son durakla yaklaşıklanır.
+    /// duraklı gradyanlar ilk ve son durakla yaklaşıklanır (çok duraklı
+    /// doğrusal gradyanların tam karşılığı, gpui yüzeyinde bantlama ile
+    /// çizilir — bkz. `cizim::cizici`). Radyal gradyan burada orta renge
+    /// düşer; daire/dilim ilkellerinde halkalarla yaklaşıklanır.
     pub fn gpui_arkaplan(&self) -> Background {
         match self {
             Dolgu::Düz(r) => r.gpui_hsla().into(),
+            Dolgu::RadyalGradyan { duraklar, .. } => {
+                let orta = duraklar
+                    .get(duraklar.len() / 2)
+                    .map(|d| d.renk)
+                    .unwrap_or(Renk::SAYDAM);
+                orta.gpui_hsla().into()
+            }
             Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar } => {
-                if duraklar.is_empty() {
+                let (Some(ilk), Some(son)) = (duraklar.first(), duraklar.last()) else {
                     return Renk::SAYDAM.gpui_hsla().into();
-                }
+                };
                 if duraklar.len() == 1 {
-                    return duraklar[0].renk.gpui_hsla().into();
+                    return ilk.renk.gpui_hsla().into();
                 }
-                let ilk = duraklar.first().unwrap();
-                let son = duraklar.last().unwrap();
                 // gpui açısı: 0° yukarıyı gösterir, saat yönünde artar.
                 let dx = (x2 - x) as f64;
                 let dy = (y2 - y) as f64;
@@ -256,6 +289,7 @@ impl From<&str> for Dolgu {
 }
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
 

@@ -50,6 +50,7 @@ impl Yumuşatma {
 pub const ÖNTANIMLI_SÜRE_MS: f32 = 1000.0;
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
 

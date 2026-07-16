@@ -58,19 +58,18 @@ pub fn yığın_aralıkları(seriler: &[Seri], görünür: &[bool]) -> Vec<Vec<Y
                     negatif.resize(veri.len(), 0.0);
                 }
                 for (i, öğe) in veri.iter().enumerate() {
-                    match öğe.değer.sayı() {
-                        Some(d) if d.is_finite() => {
-                            if d >= 0.0 {
-                                let taban = pozitif[i];
-                                pozitif[i] = taban + d;
-                                seri_aralıkları.push(Some((taban, taban + d)));
-                            } else {
-                                let taban = negatif[i];
-                                negatif[i] = taban + d;
-                                seri_aralıkları.push(Some((taban, taban + d)));
-                            }
+                    let birikim = match öğe.değer.sayı() {
+                        Some(d) if d.is_finite() && d >= 0.0 => pozitif.get_mut(i).map(|b| (b, d)),
+                        Some(d) if d.is_finite() => negatif.get_mut(i).map(|b| (b, d)),
+                        _ => None,
+                    };
+                    match birikim {
+                        Some((birikmiş, d)) => {
+                            let taban = *birikmiş;
+                            *birikmiş = taban + d;
+                            seri_aralıkları.push(Some((taban, taban + d)));
                         }
-                        _ => seri_aralıkları.push(None),
+                        None => seri_aralıkları.push(None),
                     }
                 }
             }
@@ -89,6 +88,7 @@ pub fn yığın_aralıkları(seriler: &[Seri], görünür: &[bool]) -> Vec<Vec<Y
 }
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
     use crate::model::seri::{Seri, ÇizgiSerisi};

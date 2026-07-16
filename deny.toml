@@ -1,0 +1,29 @@
+# cargo-deny yapılandırması — FAZ_PLANI.md'deki değiştirilemez lisans
+# kuralının otomatik denetimi: yalnızca Apache-2.0 ile uyumlu, izin verici
+# lisanslara izin verilir. Çalıştırma: `cargo deny check licenses`
+
+[licenses]
+allow = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "0BSD",
+    "OFL-1.1",
+]
+confidence-threshold = 0.9
+
+[bans]
+multiple-versions = "allow"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+# gpui, yerel yol bağımlılığıyla Zed deposundan gelir (Apache-2.0 beyanlı
+# crate'ler); bkz. FAZ_PLANI.md lisans kuralı madde 4.

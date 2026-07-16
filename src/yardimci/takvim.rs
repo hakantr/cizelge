@@ -83,6 +83,7 @@ pub fn birime_indirge(ms: f64, birim_ms: f64) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
 

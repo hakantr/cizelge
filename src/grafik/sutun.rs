@@ -1,7 +1,8 @@
 //! Sütun serisi çizimi — `echarts/src/chart/bar/BarView.ts` karşılığı.
 //! Genişlik/kaydırma hesabı [`crate::yerlesim::sutun`] portunu kullanır.
 
-use crate::cizim::{DikeyHiza, YatayHiza, Çizici};
+use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
+use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
 use crate::model::seri::SütunSerisi;
 use crate::renk::{Dolgu, Renk};
@@ -45,17 +46,23 @@ pub fn yerleşim_hesapla(
     let düzen = sütun_yerleşimi(bant_genişliği, &bilgiler);
     girdiler
         .iter()
-        .map(|g| düzen[&yığın_kimliği(g.seri, g.genel_sıra)])
+        .map(|g| {
+            düzen
+                .get(&yığın_kimliği(g.seri, g.genel_sıra))
+                .copied()
+                .unwrap_or(SütunKonumu { kaydırma: 0.0, genişlik: 0.0 })
+        })
         .collect()
 }
 
 /// Tüm görünür sütun serilerini çizer. Kategori ekseni y ise sütunlar yatay
-/// çizilir.
+/// çizilir. Çizilen her sütun için `isabetler`e tıklama bölgesi eklenir.
 pub fn sütunları_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     girdiler: &[SütunGirdisi],
     kartezyen: &Kartezyen2B,
     ilerleme: f32,
+    isabetler: &mut Vec<İsabetBölgesi>,
 ) {
     if girdiler.is_empty() {
         return;
@@ -69,6 +76,7 @@ pub fn sütunları_çiz(
         let seri = girdi.seri;
         for (i, aralık) in girdi.aralıklar.iter().enumerate() {
             let Some((taban, tepe)) = aralık else { continue };
+            let Some(veri_öğesi) = seri.veri.get(i) else { continue };
             let bant_merkezi = bant_ekseni.veriden_piksele(i as f64);
             let kenar = bant_merkezi + konum.kaydırma;
 
@@ -93,7 +101,7 @@ pub fn sütunları_çiz(
                 )
             };
 
-            let öğe_stili = girdi.aralıklar.get(i).and_then(|_| seri.veri[i].stil.as_ref());
+            let öğe_stili = veri_öğesi.stil.as_ref();
             let dolgu = öğe_stili
                 .and_then(|s| s.renk.clone())
                 .or_else(|| seri.öğe_stili.renk.clone())
@@ -109,9 +117,18 @@ pub fn sütunları_çiz(
 
             çizici.dikdörtgen(d, &dolgu.opaklık(opaklık), yarıçap, kenarlık);
 
+            isabetler.push(İsabetBölgesi {
+                seri_sırası: girdi.genel_sıra,
+                veri_sırası: i,
+                seri_adı: seri.ad.clone(),
+                ad: veri_öğesi.ad.clone(),
+                değer: veri_öğesi.değer.sayı(),
+                geometri: İsabetGeometrisi::Dikdörtgen(d),
+            });
+
             // Değer etiketi.
             if seri.etiket.göster {
-                if let Some(değer) = seri.veri[i].değer.sayı() {
+                if let Some(değer) = veri_öğesi.değer.sayı() {
                     let metin = match &seri.etiket.biçimleyici {
                         Some(b) => b.uygula(değer, &binlik_ayır(değer)),
                         None => binlik_ayır(değer),

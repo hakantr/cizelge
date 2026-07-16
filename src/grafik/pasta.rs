@@ -3,7 +3,7 @@
 
 use std::collections::HashSet;
 
-use crate::cizim::{DikeyHiza, YatayHiza, Yol, Çizici};
+use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::{GülTürü, PastaSerisi};
@@ -140,7 +140,7 @@ pub fn pasta_yerleşimi(
 
 /// Pasta serisini çizer; `vurgulu` ipucuyla öne çıkarılan dilimin sırasıdır.
 pub fn pasta_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     seri: &PastaSerisi,
     dilimler: &[Dilim],
     vurgulu: Option<usize>,

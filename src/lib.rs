@@ -27,6 +27,7 @@ pub mod animasyon;
 pub mod bilesen;
 pub mod cizim;
 pub mod grafik;
+pub mod hata;
 pub mod koordinat;
 pub mod model;
 pub mod olcek;
@@ -35,7 +36,11 @@ pub mod tema;
 pub mod yardimci;
 pub mod yerlesim;
 
-pub use cizim::gorunum::GrafikGörünümü;
+pub use cizim::gorunum::{grafiği_boya, BoyamaÇıktısı, GrafikGörünümü};
+pub use cizim::{
+    GrafikOlayı, KayıtYüzeyi, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
+};
+pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::bilesen::{Başlık, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu};
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
@@ -54,7 +59,9 @@ pub use renk::{Dolgu, Renk, RenkDurağı};
 /// Sık kullanılan tiplerin topluca içe aktarımı (ECharts'taki `echarts` ana
 /// girişinin karşılığı).
 pub mod hazir {
-    pub use crate::cizim::gorunum::GrafikGörünümü;
+    pub use crate::cizim::gorunum::{grafiği_boya, BoyamaÇıktısı, GrafikGörünümü};
+    pub use crate::cizim::{GrafikOlayı, KayıtYüzeyi, ÇizimYüzeyi};
+    pub use crate::hata::{BilesenHatasi, BilesenTanisi};
     pub use crate::model::bilesen::{
         Başlık, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
     };

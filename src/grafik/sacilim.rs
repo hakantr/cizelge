@@ -1,6 +1,6 @@
 //! Saçılım serisi çizimi — `echarts/src/chart/scatter` karşılığı.
 
-use crate::cizim::Çizici;
+use crate::cizim::ÇizimYüzeyi;
 use crate::grafik::sembol_çiz;
 use crate::koordinat::Kartezyen2B;
 use crate::model::seri::SaçılımSerisi;
@@ -43,7 +43,7 @@ pub fn saçılım_noktaları(
 
 /// Saçılım serisini çizer; `vurgulu` ipucuyla öne çıkarılan noktadır.
 pub fn saçılım_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     seri: &SaçılımSerisi,
     noktalar: &[SaçılımNoktası],
     seri_rengi: Renk,

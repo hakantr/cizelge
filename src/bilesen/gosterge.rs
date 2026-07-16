@@ -3,7 +3,7 @@
 //! Öğeler yatay tek satır ya da dikey sütun olarak yerleştirilir; tıklama
 //! isabet kutuları çağırana bildirilir.
 
-use crate::cizim::{DikeyHiza, YatayHiza, Çizici};
+use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::bilesen::{Gösterge, GöstergeSimgesi, Yön};
 use crate::model::YatayKonum;
@@ -25,7 +25,7 @@ const SİMGE_METİN_ARASI: f32 = 5.0;
 /// Göstergeyi çizer ve her öğenin `(isabet kutusu, ad)` çiftini döndürür.
 /// Kutular grafik yerel koordinatındadır.
 pub fn gösterge_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     seçenek: &Gösterge,
     öğeler: &[GöstergeÖğesi],
 ) -> Vec<(Dikdörtgen, String)> {
@@ -43,7 +43,7 @@ pub fn gösterge_çiz(
         })
         .collect();
 
-    let üst = seçenek.üst.map(|u| u.çöz(çizici.yükseklik)).unwrap_or(ÜST_BOŞLUK);
+    let üst = seçenek.üst.map(|u| u.çöz(çizici.yükseklik())).unwrap_or(ÜST_BOŞLUK);
 
     let mut kutular = Vec::with_capacity(öğeler.len());
     match seçenek.yön {
@@ -52,9 +52,9 @@ pub fn gösterge_çiz(
                 + seçenek.öğe_boşluğu * (öğeler.len().saturating_sub(1)) as f32;
             let mut x = match seçenek.sol {
                 YatayKonum::Sol => ÜST_BOŞLUK,
-                YatayKonum::Orta => (çizici.genişlik - toplam) / 2.0,
-                YatayKonum::Sağ => çizici.genişlik - toplam - ÜST_BOŞLUK,
-                YatayKonum::Değer(u) => u.çöz(çizici.genişlik),
+                YatayKonum::Orta => (çizici.genişlik() - toplam) / 2.0,
+                YatayKonum::Sağ => çizici.genişlik() - toplam - ÜST_BOŞLUK,
+                YatayKonum::Değer(u) => u.çöz(çizici.genişlik()),
             };
             for (öğe, genişlik) in öğeler.iter().zip(&genişlikler) {
                 let kutu = Dikdörtgen::yeni(x, üst, *genişlik, satır_yüksekliği);
@@ -67,9 +67,9 @@ pub fn gösterge_çiz(
             let en_geniş = genişlikler.iter().copied().fold(0.0f32, f32::max);
             let x = match seçenek.sol {
                 YatayKonum::Sol => ÜST_BOŞLUK,
-                YatayKonum::Orta => (çizici.genişlik - en_geniş) / 2.0,
-                YatayKonum::Sağ => çizici.genişlik - en_geniş - ÜST_BOŞLUK,
-                YatayKonum::Değer(u) => u.çöz(çizici.genişlik),
+                YatayKonum::Orta => (çizici.genişlik() - en_geniş) / 2.0,
+                YatayKonum::Sağ => çizici.genişlik() - en_geniş - ÜST_BOŞLUK,
+                YatayKonum::Değer(u) => u.çöz(çizici.genişlik()),
             };
             let mut y = üst;
             for (öğe, genişlik) in öğeler.iter().zip(&genişlikler) {
@@ -84,7 +84,7 @@ pub fn gösterge_çiz(
 }
 
 fn öğe_çiz(
-    çizici: &mut Çizici,
+    çizici: &mut dyn ÇizimYüzeyi,
     seçenek: &Gösterge,
     öğe: &GöstergeÖğesi,
     kutu: Dikdörtgen,
