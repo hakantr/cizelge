@@ -4,6 +4,7 @@ use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
 use crate::model::bilesen::{Başlık, Gösterge, Izgara, İpucu};
 use crate::model::eksen::Eksen;
 use crate::model::gorsel_esleme::GörselEşleme;
+use crate::model::radar::RadarKoordinatı;
 use crate::model::seri::Seri;
 use crate::renk::Renk;
 use crate::tema;
@@ -21,6 +22,8 @@ pub struct GrafikSeçenekleri {
     /// Görsel eşleme bileşeni (`visualMap`); ısı haritası hücre renkleri
     /// buradan çözülür.
     pub görsel_eşleme: Option<GörselEşleme>,
+    /// Radar koordinat sistemi (`radar`).
+    pub radar: Option<RadarKoordinatı>,
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
     pub arkaplan: Option<Renk>,
@@ -44,6 +47,7 @@ impl Default for GrafikSeçenekleri {
             seriler: Vec::new(),
             ipucu: None,
             görsel_eşleme: None,
+            radar: None,
             palet: tema::PALET.to_vec(),
             arkaplan: None,
             animasyon: true,
@@ -101,6 +105,11 @@ impl GrafikSeçenekleri {
 
     pub fn görsel_eşleme(mut self, eşleme: GörselEşleme) -> Self {
         self.görsel_eşleme = Some(eşleme);
+        self
+    }
+
+    pub fn radar(mut self, koordinat: RadarKoordinatı) -> Self {
+        self.radar = Some(koordinat);
         self
     }
 
@@ -256,6 +265,7 @@ impl GrafikSeçenekleri {
                 Seri::Isı(s) => karıştır(&mut s.veri),
                 Seri::Huni(s) => karıştır(&mut s.veri),
                 Seri::GöstergeSaati(s) => karıştır(&mut s.veri),
+                Seri::Radar(s) => karıştır(&mut s.veri),
             }
         }
         sonuç

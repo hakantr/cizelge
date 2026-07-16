@@ -308,8 +308,12 @@ gauge ve kutupsal sütun örneklerinin eşdeğerleri.
 - ✅ 4.4 Huni (funnel): sıralama (azalan/artan/yok), dilim boşluğu,
   min/maks genişlik, iç/dış etiket + kılavuz çizgisi, gösterge (legend)
   entegrasyonu, öğe ipucu.
-- ⏳ Açık: kutupsal koordinat (4.1), radar (4.2), singleAxis/themeRiver
-  (4.5), takvim koordinatı (4.6).
+- ✅ 4.2 Radar: RadarKoordinatı (göstergeler, çokgen/daire ağ, dönüşümlü
+  bölme alanları, kollar + gösterge adları) ve RadarSerisi (öğe başına
+  çokgen, alan dolgusu, semboller, gösterge/legend ve öğe ipucu
+  entegrasyonu, merkezden büyüme animasyonu).
+- ⏳ Açık: kutupsal koordinat (4.1), singleAxis/themeRiver (4.5), takvim
+  koordinatı (4.6).
 
 ---
 

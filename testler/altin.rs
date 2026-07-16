@@ -297,6 +297,25 @@ fn gösterge_saati() {
 }
 
 #[test]
+fn radar() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .gösterge(Gösterge::yeni())
+        .radar(RadarKoordinatı::yeni().göstergeler([
+            ("Satış", 100.0),
+            ("Pazarlama", 100.0),
+            ("Geliştirme", 100.0),
+            ("Destek", 100.0),
+            ("Yönetim", 100.0),
+        ]))
+        .animasyon(false)
+        .seri(RadarSerisi::yeni().ad("Bütçe").alan_stili(AlanStili::yeni().opaklık(0.3)).veri([
+            ("Plan", vec![80.0, 60.0, 90.0, 40.0, 70.0]),
+            ("Gerçekleşen", vec![70.0, 75.0, 60.0, 55.0, 50.0]),
+        ]));
+    altın_karşılaştır("radar", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

@@ -52,9 +52,10 @@ pub use model::imleyici::{
     İmÇizgisi, İmÇizgisiTanımı,
 };
 pub use model::gorsel_esleme::GörselEşleme;
+pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
-    Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması,
+    Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     SaçılımSerisi, Sembol, Seri,
     SütunSerisi, ÇizgiSerisi,
@@ -84,9 +85,10 @@ pub mod hazir {
         İmÇizgisi, İmÇizgisiTanımı,
     };
     pub use crate::model::gorsel_esleme::GörselEşleme;
+    pub use crate::model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
-        Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması,
+        Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     SaçılımSerisi, Sembol, Seri,
     SütunSerisi, ÇizgiSerisi,

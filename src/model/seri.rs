@@ -882,6 +882,67 @@ impl GöstergeSaatiSerisi {
     }
 }
 
+
+/// Radar serisi (`series-radar`). Her veri öğesi, koordinattaki gösterge
+/// sayısı kadar değerli bir dizidir; öğe adı göstergede (legend) listelenir.
+#[derive(Clone, Debug)]
+pub struct RadarSerisi {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    pub çizgi_stili: ÇizgiStili,
+    pub alan_stili: Option<AlanStili>,
+    pub sembol: Sembol,
+    pub sembol_boyutu: f32,
+    pub sembol_göster: bool,
+}
+
+impl Default for RadarSerisi {
+    fn default() -> Self {
+        RadarSerisi {
+            ad: None,
+            veri: Vec::new(),
+            çizgi_stili: ÇizgiStili::default(),
+            alan_stili: None,
+            sembol: Sembol::Daire,
+            sembol_boyutu: 6.0,
+            sembol_göster: true,
+        }
+    }
+}
+
+impl RadarSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Veri öğeleri: `(ad, değerler)` çiftleri.
+    pub fn veri<S: Into<String>>(
+        mut self,
+        veri: impl IntoIterator<Item = (S, Vec<f64>)>,
+    ) -> Self {
+        self.veri = veri
+            .into_iter()
+            .map(|(ad, değerler)| VeriÖğesi::adlı(ad, değerler))
+            .collect();
+        self
+    }
+
+    pub fn alan_stili(mut self, stil: AlanStili) -> Self {
+        self.alan_stili = Some(stil);
+        self
+    }
+
+    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.çizgi_stili = stil;
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -894,6 +955,7 @@ pub enum Seri {
     Isı(IsıHaritasıSerisi),
     Huni(HuniSerisi),
     GöstergeSaati(GöstergeSaatiSerisi),
+    Radar(RadarSerisi),
 }
 
 impl Seri {
@@ -908,6 +970,7 @@ impl Seri {
             Seri::Isı(s) => s.ad.as_deref(),
             Seri::Huni(s) => s.ad.as_deref(),
             Seri::GöstergeSaati(s) => s.ad.as_deref(),
+            Seri::Radar(s) => s.ad.as_deref(),
         }
     }
 
@@ -935,6 +998,7 @@ impl Seri {
             Seri::Isı(s) => &s.veri,
             Seri::Huni(s) => &s.veri,
             Seri::GöstergeSaati(s) => &s.veri,
+            Seri::Radar(s) => &s.veri,
         }
     }
 
@@ -946,7 +1010,11 @@ impl Seri {
             Seri::Saçılım(s) => Some(&s.imleyiciler),
             Seri::Mum(s) => Some(&s.imleyiciler),
             Seri::Kutu(s) => Some(&s.imleyiciler),
-            Seri::Pasta(_) | Seri::Isı(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) => None,
+            Seri::Pasta(_)
+            | Seri::Isı(_)
+            | Seri::Huni(_)
+            | Seri::GöstergeSaati(_)
+            | Seri::Radar(_) => None,
         }
     }
 
@@ -961,7 +1029,8 @@ impl Seri {
             | Seri::Kutu(_)
             | Seri::Isı(_)
             | Seri::Huni(_)
-            | Seri::GöstergeSaati(_) => None,
+            | Seri::GöstergeSaati(_)
+            | Seri::Radar(_) => None,
         }
     }
 }
@@ -1017,5 +1086,11 @@ impl From<HuniSerisi> for Seri {
 impl From<GöstergeSaatiSerisi> for Seri {
     fn from(s: GöstergeSaatiSerisi) -> Seri {
         Seri::GöstergeSaati(s)
+    }
+}
+
+impl From<RadarSerisi> for Seri {
+    fn from(s: RadarSerisi) -> Seri {
+        Seri::Radar(s)
     }
 }

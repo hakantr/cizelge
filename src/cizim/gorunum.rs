@@ -32,6 +32,7 @@ use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_�
 use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
+use crate::grafik::radar::{radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz};
 use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımNoktası};
 use crate::grafik::sutun::{sütunları_çiz, SütunGirdisi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
@@ -74,6 +75,20 @@ fn gösterge_öğeleri(
     let mut öğeler = Vec::new();
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         match seri {
+            Seri::Radar(r) => {
+                for (j, öğe) in r.veri.iter().enumerate() {
+                    let Some(ad) = öğe.ad.clone() else { continue };
+                    if !süzgeç.is_empty() && !süzgeç.contains(&ad) {
+                        continue;
+                    }
+                    öğeler.push(GöstergeÖğesi {
+                        kapalı: kapalı.contains(&ad),
+                        ad,
+                        renk: seçenekler.palet_rengi(j),
+                        simge: GöstergeSimgesi::Çizgi,
+                    });
+                }
+            }
             Seri::Huni(h) => {
                 for (j, öğe) in h.veri.iter().enumerate() {
                     let Some(ad) = öğe.ad.clone() else { continue };
@@ -648,7 +663,7 @@ pub fn grafiği_boya(
                         &mut çıktı.isabetler,
                     );
                 }
-                Seri::Pasta(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) => {}
+                Seri::Pasta(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) | Seri::Radar(_) => {}
             }
         }
 
@@ -764,7 +779,7 @@ pub fn grafiği_boya(
         }
     }
 
-    // 5b) Huni ve gösterge saati serileri.
+    // 5b) Huni, gösterge saati ve radar serileri.
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         match seri {
             Seri::Huni(h) => {
@@ -798,6 +813,54 @@ pub fn grafiği_boya(
                     continue;
                 }
                 gösterge_saati_çiz(yüzey, g, i, tüm_alan, ilerleme, &mut çıktı.isabetler);
+            }
+            Seri::Radar(r) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let Some(koordinat) = &seçenekler.radar else { continue };
+                if koordinat.göstergeler.len() < 3 {
+                    continue;
+                }
+                let düzen = radar_düzeni(koordinat, tüm_alan);
+                radar_ağı_çiz(yüzey, koordinat, &düzen);
+                radar_serisi_çiz(
+                    yüzey,
+                    r,
+                    i,
+                    koordinat,
+                    &düzen,
+                    seçenekler,
+                    kapalı,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
+                // Öğe ipucu: köşe sembolü isabeti.
+                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                    && ipucu.tetikleme != Tetikleme::Kapalı {
+                        let vurgu = çıktı
+                            .isabetler
+                            .iter()
+                            .rev()
+                            .find(|b| {
+                                b.seri_sırası == i && b.geometri.içeriyor_mu(f)
+                            })
+                            .map(|b| (b.veri_sırası, b.ad.clone()));
+                        if let Some((veri_sırası, ad)) = vurgu {
+                            let satırlar: Vec<İpucuSatırı> =
+                                radar_ipucu_satırları(r, koordinat, veri_sırası)
+                                    .into_iter()
+                                    .map(|(gösterge_adı, değer)| İpucuSatırı {
+                                        im_rengi: None,
+                                        ad: gösterge_adı,
+                                        değer,
+                                    })
+                                    .collect();
+                            if !satırlar.is_empty() {
+                                bekleyen_ipucu = Some((ad, satırlar, f));
+                            }
+                        }
+                    }
             }
             _ => {}
         }
