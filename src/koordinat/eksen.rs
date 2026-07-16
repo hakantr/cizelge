@@ -108,6 +108,15 @@ impl ÇalışmaEkseni {
         }
     }
 
+    /// Ara (minör) çentiklerin piksel konumları.
+    pub fn ara_çentik_pikselleri(&self, bölme_sayısı: usize) -> Vec<f32> {
+        self.ölçek
+            .ara_çentikler(bölme_sayısı)
+            .into_iter()
+            .map(|d| self.veriden_piksele(d))
+            .collect()
+    }
+
     /// Yatay eksen mi?
     pub fn yatay_mı(&self) -> bool {
         matches!(self.konum, EksenKonumu::Alt | EksenKonumu::Üst)

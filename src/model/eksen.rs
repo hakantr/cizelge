@@ -3,6 +3,7 @@
 
 use crate::model::stil::{Biçimleyici, YazıStili, ÇizgiTürü};
 use crate::renk::Renk;
+use crate::tema;
 
 /// Eksen türü (`axis.type`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -73,6 +74,37 @@ impl Default for EksenEtiketi {
     }
 }
 
+/// Ara (minör) çentikler (`minorTick`).
+#[derive(Clone, PartialEq, Debug)]
+pub struct AraÇentik {
+    pub göster: bool,
+    /// Ana çentik aralığının kaça bölüneceği (`splitNumber`, öntanımlı 5).
+    pub bölme_sayısı: usize,
+    /// Çentik uzunluğu (`length`, öntanımlı 3).
+    pub uzunluk: f32,
+}
+
+impl Default for AraÇentik {
+    fn default() -> Self {
+        AraÇentik { göster: false, bölme_sayısı: 5, uzunluk: 3.0 }
+    }
+}
+
+/// Bölme alanı (`splitArea`): ana çentikler arasında dönüşümlü renkli
+/// bantlar.
+#[derive(Clone, PartialEq, Debug)]
+pub struct BölmeAlanı {
+    pub göster: bool,
+    /// Dönüşümlü bant renkleri (`areaStyle.color`).
+    pub renkler: Vec<Renk>,
+}
+
+impl Default for BölmeAlanı {
+    fn default() -> Self {
+        BölmeAlanı { göster: false, renkler: tema::BÖLME_ALANI_RENKLERİ.to_vec() }
+    }
+}
+
 /// Bölme çizgileri (`splitLine`).
 #[derive(Clone, PartialEq, Debug)]
 pub struct BölmeÇizgisi {
@@ -114,8 +146,14 @@ pub struct Eksen {
     pub konum: Option<EksenKonumu>,
     pub çizgi: EksenÇizgisi,
     pub çentik: EksenÇentiği,
+    /// Ara (minör) çentikler (`minorTick`); yalnız değer/log eksenlerinde.
+    pub ara_çentik: AraÇentik,
     pub etiket: EksenEtiketi,
     pub bölme_çizgisi: BölmeÇizgisi,
+    /// Ara bölme çizgileri (`minorSplitLine`); ara çentik konumlarında.
+    pub ara_bölme_çizgisi: BölmeÇizgisi,
+    /// Bölme alanı (`splitArea`).
+    pub bölme_alanı: BölmeAlanı,
 }
 
 impl Default for Eksen {
@@ -136,8 +174,11 @@ impl Default for Eksen {
             konum: None,
             çizgi: EksenÇizgisi::default(),
             çentik: EksenÇentiği::default(),
+            ara_çentik: AraÇentik::default(),
             etiket: EksenEtiketi::default(),
             bölme_çizgisi: BölmeÇizgisi::default(),
+            ara_bölme_çizgisi: BölmeÇizgisi { göster: Some(false), ..Default::default() },
+            bölme_alanı: BölmeAlanı::default(),
         }
     }
 }
@@ -251,6 +292,31 @@ impl Eksen {
 
     pub fn bölme_çizgisi_göster(mut self, göster: bool) -> Self {
         self.bölme_çizgisi.göster = Some(göster);
+        self
+    }
+
+    pub fn ara_çentik(mut self, ara: AraÇentik) -> Self {
+        self.ara_çentik = ara;
+        self
+    }
+
+    pub fn ara_çentik_göster(mut self, göster: bool) -> Self {
+        self.ara_çentik.göster = göster;
+        self
+    }
+
+    pub fn ara_bölme_çizgisi_göster(mut self, göster: bool) -> Self {
+        self.ara_bölme_çizgisi.göster = Some(göster);
+        self
+    }
+
+    pub fn bölme_alanı(mut self, alan: BölmeAlanı) -> Self {
+        self.bölme_alanı = alan;
+        self
+    }
+
+    pub fn bölme_alanı_göster(mut self, göster: bool) -> Self {
+        self.bölme_alanı.göster = göster;
         self
     }
 

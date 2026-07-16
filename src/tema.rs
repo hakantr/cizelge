@@ -39,8 +39,17 @@ pub const DEVRE_DIŞI: Renk = NÖTR_20;
 // Eksen belirteçleri (`tokens.color.axis*`).
 pub const EKSEN_ÇİZGİSİ: Renk = NÖTR_70;
 pub const EKSEN_ÇENTİĞİ: Renk = NÖTR_70;
+/// Ara çentik rengi (`axisTickMinor`).
+pub const EKSEN_ARA_ÇENTİĞİ: Renk = NÖTR_60;
 pub const EKSEN_ETİKETİ: Renk = NÖTR_70;
 pub const BÖLME_ÇİZGİSİ: Renk = NÖTR_15;
+/// Ara bölme çizgisi rengi (`axisMinorSplitLine`).
+pub const ARA_BÖLME_ÇİZGİSİ: Renk = NÖTR_05;
+/// Bölme alanı (`splitArea`) dönüşümlü bant renkleri.
+pub const BÖLME_ALANI_RENKLERİ: [Renk; 2] = [
+    Renk::kyma(250.0 / 255.0, 250.0 / 255.0, 250.0 / 255.0, 0.2),
+    Renk::kyma(210.0 / 255.0, 219.0 / 255.0, 238.0 / 255.0, 0.2),
+];
 
 /// Vurgu rengi (`tokens.color.highlight`).
 pub const VURGU: Renk = Renk::kyma(1.0, 231.0 / 255.0, 130.0 / 255.0, 0.8);

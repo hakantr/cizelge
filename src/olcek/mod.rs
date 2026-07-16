@@ -69,6 +69,45 @@ impl Ölçek {
         }
     }
 
+    /// Ana çentikler arasındaki ara (minör) çentik değerleri
+    /// (`Scale#getMinorTicks`). Aralık ölçeğinde eşit, log ölçeğinde
+    /// log-uzayında eşit (geometrik) bölme uygulanır; kategori ve zaman
+    /// ölçeklerinde üretilmez.
+    pub fn ara_çentikler(&self, bölme_sayısı: usize) -> Vec<f64> {
+        let bölme = bölme_sayısı.max(2);
+        let ana: Vec<f64> = self.çentikler().iter().map(|ç| ç.değer).collect();
+        let mut sonuç = Vec::new();
+        match self {
+            Ölçek::Aralık(_) => {
+                for çift in ana.windows(2) {
+                    if let [a, b] = çift {
+                        let adım = (b - a) / bölme as f64;
+                        for i in 1..bölme {
+                            sonuç.push(a + adım * i as f64);
+                        }
+                    }
+                }
+            }
+            Ölçek::Log(_) => {
+                for çift in ana.windows(2) {
+                    if let [a, b] = çift {
+                        if *a <= 0.0 || *b <= 0.0 {
+                            continue;
+                        }
+                        let oran = (b / a).powf(1.0 / bölme as f64);
+                        let mut değer = *a;
+                        for _ in 1..bölme {
+                            değer *= oran;
+                            sonuç.push(değer);
+                        }
+                    }
+                }
+            }
+            Ölçek::Kategorik(_) | Ölçek::Zaman(_) => {}
+        }
+        sonuç
+    }
+
     /// Çentik değerinin görüntülenecek etiketi (`Scale#getLabel`).
     pub fn etiket(&self, değer: f64) -> String {
         match self {

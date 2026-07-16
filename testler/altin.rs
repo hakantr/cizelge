@@ -185,6 +185,24 @@ fn imleyiciler() {
 }
 
 #[test]
+fn ara_çentikler_ve_bölme_alanı() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(["A", "B", "C"])
+                .bölme_alanı_göster(true),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .ara_çentik_göster(true)
+                .ara_bölme_çizgisi_göster(true),
+        )
+        .animasyon(false)
+        .seri(ÇizgiSerisi::yeni().ad("S").veri([2.0, 9.0, 5.0]));
+    altın_karşılaştır("ara_centikler_ve_bolme_alani", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

@@ -44,11 +44,15 @@ esnetemez:
    yapılması gerekirse o değişiklikler MPL-2.0 gereği **açık kaynak olarak
    yayımlanır** ve bu durum `NOTICE` dosyasındaki MPL bölümüne işlenir.
    MPL'li bağımlılıklar ve durumları `NOTICE`'ta liste olarak tutulur.
-4. **Zed deposu özel durumu:** Zed çalışma alanı karma lisanslıdır
-   (Apache-2.0 **ve** GPL bölümler içerir). Yalnızca `Cargo.toml`'unda
-   açıkça `license = "Apache-2.0"` yazan crate'lere (bugün: `gpui`,
-   `gpui_platform`) bağımlılık kurulabilir; Zed'in GPL lisanslı editör
-   crate'lerinden kod kopyalanamaz, uyarlanamaz, bağımlılık alınamaz.
+4. **Zed deposu özel durumu (kesinleştirildi, 2026-07-17):** Zed çalışma
+   alanı karma lisanslıdır (Apache-2.0 **ve** GPL bölümler içerir).
+   **Yalnızca `Cargo.toml`'unda açıkça `license = "Apache-2.0"` beyan eden
+   crate'ler kullanılır** (bugün: `gpui`, `gpui_platform`); **GPL-3
+   sınırına dokunulmaz**: GPL lisanslı hiçbir Zed crate'inden kod
+   kopyalanamaz, uyarlanamaz, doğrudan bağımlılık alınamaz, yama yapılamaz.
+   `gpui`nin kendi içinden geçişli olarak gelen GPL crate'leri (zlog,
+   ztracing) üst-akımın tutarsızlığıdır; bizim tarafımızda kullanılmaz,
+   yalnızca bulgu olarak izlenir (aşağıda).
 5. **Varlıklar da kapsamdadır:** Örnek verileri, yazı tipleri ve görseller Apache-2.0 ile uyumlu lisanslı olmalı
    ve kaynağı `NOTICE`'a işlenmelidir.
 6. **Doğrulama otomatiktir:** `deny.toml`, madde 3'teki onaylı listeyi

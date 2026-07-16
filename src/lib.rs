@@ -44,7 +44,8 @@ pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::bilesen::{Başlık, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu};
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
-    BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü, EksenÇentiği, EksenÇizgisi,
+    AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü,
+    EksenÇentiği, EksenÇizgisi,
 };
 pub use model::imleyici::{
     İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
@@ -71,7 +72,8 @@ pub mod hazir {
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{
-        BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü, EksenÇentiği, EksenÇizgisi,
+        AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü,
+        EksenÇentiği, EksenÇizgisi,
     };
     pub use crate::model::imleyici::{
         İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,

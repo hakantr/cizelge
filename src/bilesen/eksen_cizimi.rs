@@ -19,10 +19,65 @@ fn etiket_metni(eksen: &ÇalışmaEkseni, değer: f64) -> String {
     }
 }
 
-/// Izgaranın bölme çizgilerini çizer (serilerin altında kalması için önce
-/// çağrılır).
+/// Izgaranın bölme alanlarını ve bölme çizgilerini çizer (serilerin altında
+/// kalması için önce çağrılır).
 pub fn bölme_çizgilerini_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) {
     let alan = kartezyen.alan;
+
+    // 1) Bölme alanları (`splitArea`): ana çentikler arasında dönüşümlü
+    //    bantlar; çizgilerin de altında kalır.
+    for eksen in [&kartezyen.x, &kartezyen.y] {
+        if !eksen.seçenek.bölme_alanı.göster
+            || eksen.seçenek.bölme_alanı.renkler.is_empty()
+        {
+            continue;
+        }
+        let renkler = &eksen.seçenek.bölme_alanı.renkler;
+        let konumlar = eksen.çizgi_çentikleri(false);
+        for (i, çift) in konumlar.windows(2).enumerate() {
+            let [a, b] = çift else { continue };
+            let Some(renk) = renkler.get(i % renkler.len()) else { continue };
+            let d = if eksen.yatay_mı() {
+                crate::koordinat::Dikdörtgen::yeni(
+                    a.min(*b),
+                    alan.y,
+                    (b - a).abs(),
+                    alan.yükseklik,
+                )
+            } else {
+                crate::koordinat::Dikdörtgen::yeni(
+                    alan.x,
+                    a.min(*b),
+                    alan.genişlik,
+                    (b - a).abs(),
+                )
+            };
+            çizici.dikdörtgen(d, &crate::renk::Dolgu::Düz(*renk), [0.0; 4], None);
+        }
+    }
+
+    // 2) Ara bölme çizgileri (`minorSplitLine`).
+    for eksen in [&kartezyen.x, &kartezyen.y] {
+        if !eksen.seçenek.ara_bölme_çizgisi.göster.unwrap_or(false) {
+            continue;
+        }
+        let renk = eksen
+            .seçenek
+            .ara_bölme_çizgisi
+            .renk
+            .unwrap_or(tema::ARA_BÖLME_ÇİZGİSİ);
+        let tür = eksen.seçenek.ara_bölme_çizgisi.tür;
+        for konum in eksen.ara_çentik_pikselleri(eksen.seçenek.ara_çentik.bölme_sayısı) {
+            let konum = keskin(konum);
+            if eksen.yatay_mı() {
+                çizici.çizgi((konum, alan.y), (konum, alan.alt()), 1.0, renk, tür);
+            } else {
+                çizici.çizgi((alan.x, konum), (alan.sağ(), konum), 1.0, renk, tür);
+            }
+        }
+    }
+
+    // 3) Ana bölme çizgileri (`splitLine`).
     for eksen in [&kartezyen.x, &kartezyen.y] {
         if !eksen.seçenek.bölme_görünür_mü() {
             continue;
@@ -87,6 +142,33 @@ pub fn eksenleri_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) 
             let renk = tema::EKSEN_ÇENTİĞİ;
             let uzunluk = eksen.seçenek.çentik.uzunluk;
             for konum in eksen.çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala) {
+                let konum = keskin(konum);
+                if eksen.yatay_mı() {
+                    çizici.çizgi(
+                        (konum, sabit_keskin),
+                        (konum, sabit_keskin + dış_yön * uzunluk),
+                        1.0,
+                        renk,
+                        ÇizgiTürü::Düz,
+                    );
+                } else {
+                    çizici.çizgi(
+                        (sabit_keskin, konum),
+                        (sabit_keskin + dış_yön * uzunluk, konum),
+                        1.0,
+                        renk,
+                        ÇizgiTürü::Düz,
+                    );
+                }
+            }
+        }
+
+        // 2b) Ara çentikler (`minorTick`).
+        if eksen.seçenek.ara_çentik.göster {
+            let renk = tema::EKSEN_ARA_ÇENTİĞİ;
+            let uzunluk = eksen.seçenek.ara_çentik.uzunluk;
+            for konum in eksen.ara_çentik_pikselleri(eksen.seçenek.ara_çentik.bölme_sayısı)
+            {
                 let konum = keskin(konum);
                 if eksen.yatay_mı() {
                     çizici.çizgi(
