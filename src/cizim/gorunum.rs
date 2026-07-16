@@ -27,6 +27,7 @@ use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::grafik::cizgi::{nokta_listeleri, çizgi_serisi_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
+use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
 use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımNoktası};
@@ -196,6 +197,10 @@ fn kartezyen_kur(
             continue;
         }
         let sütun_mu = matches!(seri, Seri::Sütun(_));
+        // Isı haritası: her iki eksen kategorik; sayısal kapsama girmez.
+        if matches!(seri, Seri::Isı(_)) {
+            continue;
+        }
         // Çok değerli seriler (mum/kutu): dizinin tüm bileşenleri kapsanır.
         if matches!(seri, Seri::Mum(_) | Seri::Kutu(_)) {
             for (j, öğe) in seri.veri().iter().enumerate() {
@@ -608,6 +613,23 @@ pub fn grafiği_boya(
                     seçenekler.seri_rengi(i),
                     &mut çıktı.isabetler,
                 ),
+                Seri::Isı(s) => {
+                    let eşleme = seçenekler
+                        .görsel_eşleme
+                        .clone()
+                        .unwrap_or_default();
+                    let kapsam = eşleme.kapsam_çöz(ısı_değer_kapsamı(s));
+                    ısı_haritası_çiz(
+                        yüzey,
+                        s,
+                        i,
+                        kartezyen,
+                        &eşleme,
+                        kapsam,
+                        ilerleme,
+                        &mut çıktı.isabetler,
+                    );
+                }
                 Seri::Pasta(_) => {}
             }
         }
@@ -660,6 +682,19 @@ pub fn grafiği_boya(
                     bekleyen_ipucu = Some((Some(eksen_ip.başlık), eksen_ip.satırlar, f));
                 }
             }
+    }
+
+    // 4b) Görsel eşleme bileşeni (gradyan çubuğu).
+    if let Some(eşleme) = &seçenekler.görsel_eşleme {
+        let veri_kapsamı = seçenekler
+            .seriler
+            .iter()
+            .find_map(|s| match s {
+                Seri::Isı(ısı) => Some(ısı_değer_kapsamı(ısı)),
+                _ => None,
+            })
+            .unwrap_or([0.0, 1.0]);
+        görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
     }
 
     // 5) Pasta serileri.

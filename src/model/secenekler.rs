@@ -3,6 +3,7 @@
 use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
 use crate::model::bilesen::{Başlık, Gösterge, Izgara, İpucu};
 use crate::model::eksen::Eksen;
+use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::Seri;
 use crate::renk::Renk;
 use crate::tema;
@@ -17,6 +18,9 @@ pub struct GrafikSeçenekleri {
     pub y_ekseni: Option<Eksen>,
     pub seriler: Vec<Seri>,
     pub ipucu: Option<İpucu>,
+    /// Görsel eşleme bileşeni (`visualMap`); ısı haritası hücre renkleri
+    /// buradan çözülür.
+    pub görsel_eşleme: Option<GörselEşleme>,
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
     pub arkaplan: Option<Renk>,
@@ -39,6 +43,7 @@ impl Default for GrafikSeçenekleri {
             y_ekseni: None,
             seriler: Vec::new(),
             ipucu: None,
+            görsel_eşleme: None,
             palet: tema::PALET.to_vec(),
             arkaplan: None,
             animasyon: true,
@@ -91,6 +96,11 @@ impl GrafikSeçenekleri {
 
     pub fn ipucu(mut self, ipucu: İpucu) -> Self {
         self.ipucu = Some(ipucu);
+        self
+    }
+
+    pub fn görsel_eşleme(mut self, eşleme: GörselEşleme) -> Self {
+        self.görsel_eşleme = Some(eşleme);
         self
     }
 
@@ -243,6 +253,7 @@ impl GrafikSeçenekleri {
                 Seri::Saçılım(s) => karıştır(&mut s.veri),
                 Seri::Mum(s) => karıştır(&mut s.veri),
                 Seri::Kutu(s) => karıştır(&mut s.veri),
+                Seri::Isı(s) => karıştır(&mut s.veri),
             }
         }
         sonuç

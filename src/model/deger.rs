@@ -123,6 +123,12 @@ impl From<(f64, f64)> for VeriDeğeri {
     }
 }
 
+impl From<[f64; 3]> for VeriDeğeri {
+    fn from(d: [f64; 3]) -> Self {
+        VeriDeğeri::Dizi(d.to_vec())
+    }
+}
+
 impl From<[f64; 4]> for VeriDeğeri {
     fn from(d: [f64; 4]) -> Self {
         VeriDeğeri::Dizi(d.to_vec())

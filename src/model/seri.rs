@@ -524,6 +524,63 @@ impl KutuSerisi {
     }
 }
 
+/// Isı haritası serisi (`series-heatmap`, kartezyen kip). Veri öğeleri
+/// `[x sırası, y sırası, değer]` dizileridir; her iki eksen de kategorik
+/// olmalıdır. Hücre renkleri seçeneklerdeki görsel eşlemeden çözülür.
+#[derive(Clone, Debug)]
+pub struct IsıHaritasıSerisi {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    pub öğe_stili: ÖğeStili,
+    /// Hücreler arası boşluk, piksel.
+    pub hücre_boşluğu: f32,
+    pub etiket: Etiket,
+}
+
+impl Default for IsıHaritasıSerisi {
+    fn default() -> Self {
+        IsıHaritasıSerisi {
+            ad: None,
+            veri: Vec::new(),
+            öğe_stili: ÖğeStili::default(),
+            hücre_boşluğu: 1.0,
+            etiket: Etiket::default(),
+        }
+    }
+}
+
+impl IsıHaritasıSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Veri: `[x sırası, y sırası, değer]` dizileri.
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn hücre_boşluğu(mut self, boşluk: f32) -> Self {
+        self.hücre_boşluğu = boşluk;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+}
+
 /// Saçılım serisi (`series-scatter`).
 #[derive(Clone, Debug)]
 pub struct SaçılımSerisi {
@@ -619,6 +676,7 @@ pub enum Seri {
     Saçılım(SaçılımSerisi),
     Mum(MumSerisi),
     Kutu(KutuSerisi),
+    Isı(IsıHaritasıSerisi),
 }
 
 impl Seri {
@@ -630,6 +688,7 @@ impl Seri {
             Seri::Saçılım(s) => s.ad.as_deref(),
             Seri::Mum(s) => s.ad.as_deref(),
             Seri::Kutu(s) => s.ad.as_deref(),
+            Seri::Isı(s) => s.ad.as_deref(),
         }
     }
 
@@ -637,7 +696,12 @@ impl Seri {
     pub fn kartezyen_mi(&self) -> bool {
         matches!(
             self,
-            Seri::Çizgi(_) | Seri::Sütun(_) | Seri::Saçılım(_) | Seri::Mum(_) | Seri::Kutu(_)
+            Seri::Çizgi(_)
+                | Seri::Sütun(_)
+                | Seri::Saçılım(_)
+                | Seri::Mum(_)
+                | Seri::Kutu(_)
+                | Seri::Isı(_)
         )
     }
 
@@ -649,6 +713,7 @@ impl Seri {
             Seri::Saçılım(s) => &s.veri,
             Seri::Mum(s) => &s.veri,
             Seri::Kutu(s) => &s.veri,
+            Seri::Isı(s) => &s.veri,
         }
     }
 
@@ -660,7 +725,7 @@ impl Seri {
             Seri::Saçılım(s) => Some(&s.imleyiciler),
             Seri::Mum(s) => Some(&s.imleyiciler),
             Seri::Kutu(s) => Some(&s.imleyiciler),
-            Seri::Pasta(_) => None,
+            Seri::Pasta(_) | Seri::Isı(_) => None,
         }
     }
 
@@ -671,7 +736,7 @@ impl Seri {
             Seri::Sütun(s) => s.öğe_stili.renk.as_ref(),
             Seri::Pasta(s) => s.öğe_stili.renk.as_ref(),
             Seri::Saçılım(s) => s.öğe_stili.renk.as_ref(),
-            Seri::Mum(_) | Seri::Kutu(_) => None,
+            Seri::Mum(_) | Seri::Kutu(_) | Seri::Isı(_) => None,
         }
     }
 }
@@ -709,5 +774,11 @@ impl From<MumSerisi> for Seri {
 impl From<KutuSerisi> for Seri {
     fn from(s: KutuSerisi) -> Seri {
         Seri::Kutu(s)
+    }
+}
+
+impl From<IsıHaritasıSerisi> for Seri {
+    fn from(s: IsıHaritasıSerisi) -> Seri {
+        Seri::Isı(s)
     }
 }

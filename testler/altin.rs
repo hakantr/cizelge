@@ -224,6 +224,35 @@ fn mum_ve_kutu() {
 }
 
 #[test]
+fn ısı_haritası() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["00:00", "06:00", "12:00", "18:00"]))
+        .y_ekseni(Eksen::kategori().veri(["Pzt", "Sal", "Çar"]))
+        .görsel_eşleme(GörselEşleme::yeni())
+        .animasyon(false)
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .ad("Yoğunluk")
+                .etiket(Etiket::yeni().göster(true))
+                .veri([
+                    [0.0, 0.0, 5.0],
+                    [1.0, 0.0, 7.0],
+                    [2.0, 0.0, 12.0],
+                    [3.0, 0.0, 3.0],
+                    [0.0, 1.0, 8.0],
+                    [1.0, 1.0, 2.0],
+                    [2.0, 1.0, 10.0],
+                    [3.0, 1.0, 6.0],
+                    [0.0, 2.0, 1.0],
+                    [1.0, 2.0, 9.0],
+                    [2.0, 2.0, 4.0],
+                    [3.0, 2.0, 11.0],
+                ]),
+        );
+    altın_karşılaştır("isi_haritasi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
