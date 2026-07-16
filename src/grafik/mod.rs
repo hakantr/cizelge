@@ -1,6 +1,7 @@
 //! Seri çizicileri — `echarts/src/chart` dizininin karşılığı.
 
 pub mod cizgi;
+pub mod imleyici;
 pub mod pasta;
 pub mod sacilim;
 pub mod sutun;

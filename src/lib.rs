@@ -46,6 +46,10 @@ pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
     BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü, EksenÇentiği, EksenÇizgisi,
 };
+pub use model::imleyici::{
+    İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
+    İmÇizgisi, İmÇizgisiTanımı,
+};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     Basamak, GülTürü, PastaSerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, ÇizgiSerisi,
@@ -68,6 +72,10 @@ pub mod hazir {
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{
         BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü, EksenÇentiği, EksenÇizgisi,
+    };
+    pub use crate::model::imleyici::{
+        İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
+        İmÇizgisi, İmÇizgisiTanımı,
     };
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{

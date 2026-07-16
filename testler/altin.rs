@@ -168,6 +168,23 @@ fn ipucu_ve_imlec() {
 }
 
 #[test]
+fn imleyiciler() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["A", "B", "C", "D"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Satış")
+                .veri([12.0, 30.0, 18.0, 24.0])
+                .im_çizgisi(İmÇizgisi::yeni().yatay(İmDeğeri::Ortalama))
+                .im_noktası(İmNoktası::yeni().en_büyük().en_küçük())
+                .im_alanı(İmAlanı::yeni().x_aralığı("Kampanya", 1.0, 2.0)),
+        );
+    altın_karşılaştır("imleyiciler", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

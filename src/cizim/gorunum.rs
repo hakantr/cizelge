@@ -26,6 +26,7 @@ use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::grafik::cizgi::{nokta_listeleri, çizgi_serisi_çiz};
+use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
 use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımNoktası};
 use crate::grafik::sutun::{sütunları_çiz, SütunGirdisi};
@@ -407,6 +408,24 @@ pub fn grafiği_boya(
 
         eksenleri_çiz(yüzey, kartezyen);
 
+        // İm alanları serilerin altına boyanır.
+        for (i, seri) in seçenekler.seriler.iter().enumerate() {
+            if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
+                continue;
+            }
+            if let Some(imleyiciler) = seri.imleyiciler() {
+                if imleyiciler.alan.is_some() {
+                    im_alanlarını_çiz(
+                        yüzey,
+                        imleyiciler,
+                        seri,
+                        kartezyen,
+                        seçenekler.seri_rengi(i),
+                    );
+                }
+            }
+        }
+
         // Seriler: sütunlar toplu (yerleşim paylaşımı), diğerleri sırayla.
         let sütun_girdileri: Vec<SütunGirdisi> = seçenekler
             .seriler
@@ -552,6 +571,24 @@ pub fn grafiği_boya(
                     }
                 }
                 Seri::Pasta(_) => {}
+            }
+        }
+
+        // İm çizgileri ve raptiyeler serilerin üstüne boyanır.
+        for (i, seri) in seçenekler.seriler.iter().enumerate() {
+            if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
+                continue;
+            }
+            if let Some(imleyiciler) = seri.imleyiciler() {
+                if imleyiciler.çizgi.is_some() || imleyiciler.nokta.is_some() {
+                    im_çizgi_ve_noktalarını_çiz(
+                        yüzey,
+                        imleyiciler,
+                        seri,
+                        kartezyen,
+                        seçenekler.seri_rengi(i),
+                    );
+                }
             }
         }
 

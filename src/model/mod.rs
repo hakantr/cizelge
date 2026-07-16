@@ -4,6 +4,7 @@
 pub mod bilesen;
 pub mod deger;
 pub mod eksen;
+pub mod imleyici;
 pub mod secenekler;
 pub mod seri;
 pub mod stil;

@@ -5,6 +5,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::model::deger::{veri_listesi, VeriÖğesi};
+use crate::model::imleyici::{İmleyiciler, İmAlanı, İmNoktası, İmÇizgisi};
 use crate::model::stil::{AlanStili, Etiket, ÇizgiStili, ÖğeStili};
 use crate::model::Uzunluk;
 use crate::renk::Dolgu;
@@ -87,6 +88,7 @@ pub struct ÇizgiSerisi {
     pub yığın: Option<String>,
     pub boşları_bağla: bool,
     pub etiket: Etiket,
+    pub imleyiciler: İmleyiciler,
 }
 
 impl Default for ÇizgiSerisi {
@@ -105,6 +107,7 @@ impl Default for ÇizgiSerisi {
             yığın: None,
             boşları_bağla: false,
             etiket: Etiket::default(),
+            imleyiciler: İmleyiciler::default(),
         }
     }
 }
@@ -184,6 +187,21 @@ impl ÇizgiSerisi {
         self.etiket = etiket;
         self
     }
+
+    pub fn im_çizgisi(mut self, im: İmÇizgisi) -> Self {
+        self.imleyiciler.çizgi = Some(im);
+        self
+    }
+
+    pub fn im_noktası(mut self, im: İmNoktası) -> Self {
+        self.imleyiciler.nokta = Some(im);
+        self
+    }
+
+    pub fn im_alanı(mut self, im: İmAlanı) -> Self {
+        self.imleyiciler.alan = Some(im);
+        self
+    }
 }
 
 /// Sütun serisi (`series-bar`).
@@ -206,6 +224,7 @@ pub struct SütunSerisi {
     pub kategori_boşluğu: Option<Uzunluk>,
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
+    pub imleyiciler: İmleyiciler,
 }
 
 impl Default for SütunSerisi {
@@ -221,6 +240,7 @@ impl Default for SütunSerisi {
             kategori_boşluğu: None,
             öğe_stili: ÖğeStili::default(),
             etiket: Etiket::default(),
+            imleyiciler: İmleyiciler::default(),
         }
     }
 }
@@ -277,6 +297,21 @@ impl SütunSerisi {
 
     pub fn etiket(mut self, etiket: Etiket) -> Self {
         self.etiket = etiket;
+        self
+    }
+
+    pub fn im_çizgisi(mut self, im: İmÇizgisi) -> Self {
+        self.imleyiciler.çizgi = Some(im);
+        self
+    }
+
+    pub fn im_noktası(mut self, im: İmNoktası) -> Self {
+        self.imleyiciler.nokta = Some(im);
+        self
+    }
+
+    pub fn im_alanı(mut self, im: İmAlanı) -> Self {
+        self.imleyiciler.alan = Some(im);
         self
     }
 }
@@ -404,6 +439,7 @@ pub struct SaçılımSerisi {
     pub sembol_boyutu: SembolBoyutu,
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
+    pub imleyiciler: İmleyiciler,
 }
 
 impl Default for SaçılımSerisi {
@@ -415,6 +451,7 @@ impl Default for SaçılımSerisi {
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
             öğe_stili: ÖğeStili::default(),
             etiket: Etiket::default(),
+            imleyiciler: İmleyiciler::default(),
         }
     }
 }
@@ -462,6 +499,21 @@ impl SaçılımSerisi {
         self.etiket = etiket;
         self
     }
+
+    pub fn im_çizgisi(mut self, im: İmÇizgisi) -> Self {
+        self.imleyiciler.çizgi = Some(im);
+        self
+    }
+
+    pub fn im_noktası(mut self, im: İmNoktası) -> Self {
+        self.imleyiciler.nokta = Some(im);
+        self
+    }
+
+    pub fn im_alanı(mut self, im: İmAlanı) -> Self {
+        self.imleyiciler.alan = Some(im);
+        self
+    }
 }
 
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
@@ -494,6 +546,16 @@ impl Seri {
             Seri::Sütun(s) => &s.veri,
             Seri::Pasta(s) => &s.veri,
             Seri::Saçılım(s) => &s.veri,
+        }
+    }
+
+    /// Serinin imleyicileri (kartezyen olmayanlarda `None`).
+    pub fn imleyiciler(&self) -> Option<&İmleyiciler> {
+        match self {
+            Seri::Çizgi(s) => Some(&s.imleyiciler),
+            Seri::Sütun(s) => Some(&s.imleyiciler),
+            Seri::Saçılım(s) => Some(&s.imleyiciler),
+            Seri::Pasta(_) => None,
         }
     }
 
