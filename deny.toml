@@ -1,23 +1,45 @@
 # cargo-deny yapılandırması — FAZ_PLANI.md'deki değiştirilemez lisans
-# kuralının otomatik denetimi: yalnızca Apache-2.0 ile uyumlu, izin verici
-# lisanslara izin verilir. Çalıştırma: `cargo deny check licenses`
+# kuralının otomatik denetimi. Çalıştırma: `cargo deny check licenses`
+#
+# POLİTİKA (kullanıcı onaylı, 2026-07-17): MIT, BSD-2/3, ISC, CC0,
+# Apache-2.0 ve MPL-2.0. MPL-2.0 koşulu: MPL'li kod DEĞİŞTİRİLMEZ;
+# değiştirilirse o değişiklikler açık kaynak olarak yayımlanır (bkz. NOTICE).
 
 [licenses]
 allow = [
-    "Apache-2.0",
-    "Apache-2.0 WITH LLVM-exception",
+    # --- Onaylı politika listesi ---
     "MIT",
     "BSD-2-Clause",
     "BSD-3-Clause",
     "ISC",
-    "Zlib",
-    "Unicode-3.0",
-    "Unicode-DFS-2016",
     "CC0-1.0",
-    "0BSD",
-    "OFL-1.1",
+    "Apache-2.0",
+    "MPL-2.0",
+
+    # --- Zorunlu ekosistem ekleri (izin verici; kullanıcı onayına sunuldu) ---
+    # unicode-ident ve ICU crate'leri: Unicode veri tablosu lisansı; Rust
+    # ekosisteminde fiilen kaçınılmaz (proc-macro2/syn zinciri).
+    "Unicode-3.0",
+    # foldhash, nanorand (gpui geçişli): Zlib — izin verici, MIT eşdeğeri.
+    "Zlib",
+    # linux-raw-sys/rustix/ar_archive_writer: Apache-2.0'ın LLVM istisnalı
+    # biçimi (ek özgürlük tanır, kısıt eklemez).
+    "Apache-2.0 WITH LLVM-exception",
+    # libbz2-rs-sys: bzip2 lisansı — BSD tarzı izin verici.
+    "bzip2-1.0.6",
+    # aho-corasick/byteorder ikili lisansı; MIT dalı da mevcut, Unlicense
+    # sıralamada öne çıkabildiği için listede.
+    "Unlicense",
 ]
 confidence-threshold = 0.9
+
+# BİLİNEN İHLAL (çözüm bekliyor): Zed çalışma alanındaki `zlog`, `ztracing`,
+# `ztracing_macro` GPL-3.0-or-later lisanslıdır ve Apache-2.0 beyanlı
+# `gpui`, `sum_tree` üzerinden bunlara bağımlıdır (üst-akım tutarsızlığı).
+# Politika gereği GPL izin listesine EKLENMEZ; bu denetim, sorun üst-akımda
+# ya da yama ile çözülene dek bu üç crate için kırmızı kalır.
+# Ayrıca `gpui_shared_string` ve `gpui_util` lisans alanı bildirmiyor
+# (BELİRSİZ) — üst-akıma bildirilecek.
 
 [bans]
 multiple-versions = "allow"

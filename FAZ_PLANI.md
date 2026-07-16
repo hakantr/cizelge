@@ -35,10 +35,15 @@ esnetemez:
    seçenek modeli yalnızca `../echarts` (Apache-2.0) ve onun bağımlılığı
    zrender'dan (BSD-3, uyumlu) uyarlanır; atıf `NOTICE` ve `README` içinde
    korunur.
-3. **Bağımlılık sınırı:** Yalnızca Apache-2.0 ile uyumlu, izin verici
-   lisanslı crate'lere bağımlılık eklenebilir (Apache-2.0, MIT, BSD, Zlib,
-   ISC vb.). **GPL / LGPL / AGPL / SSPL lisanslı veya lisanssız hiçbir kod,
-   crate ya da kod parçası projeye giremez.**
+3. **Bağımlılık sınırı (onaylı liste, 2026-07-17):** Bağımlılıklarda
+   yalnızca şu lisanslar kullanılabilir: **MIT, BSD-2-Clause, BSD-3-Clause,
+   ISC, CC0, Apache-2.0 ve MPL-2.0**. **GPL / LGPL / AGPL / SSPL lisanslı
+   veya lisanssız hiçbir kod, crate ya da kod parçası projeye giremez.**
+
+   **MPL-2.0 özel koşulu:** MPL lisanslı kodda **değişiklik yapılmaz**;
+   yapılması gerekirse o değişiklikler MPL-2.0 gereği **açık kaynak olarak
+   yayımlanır** ve bu durum `NOTICE` dosyasındaki MPL bölümüne işlenir.
+   MPL'li bağımlılıklar ve durumları `NOTICE`'ta liste olarak tutulur.
 4. **Zed deposu özel durumu:** Zed çalışma alanı karma lisanslıdır
    (Apache-2.0 **ve** GPL bölümler içerir). Yalnızca `Cargo.toml`'unda
    açıkça `license = "Apache-2.0"` yazan crate'lere (bugün: `gpui`,
@@ -46,9 +51,25 @@ esnetemez:
    crate'lerinden kod kopyalanamaz, uyarlanamaz, bağımlılık alınamaz.
 5. **Varlıklar da kapsamdadır:** Örnek verileri, yazı tipleri ve görseller Apache-2.0 ile uyumlu lisanslı olmalı
    ve kaynağı `NOTICE`'a işlenmelidir.
-6. **Doğrulama otomatiktir:** Faz 1'de CI'a `cargo deny check licenses`
-   (izin listesi: Apache-2.0, MIT, BSD-2/3, Zlib, ISC, Unicode) eklenir ve
-   her fazın kabul ölçütüne "lisans denetimi yeşil" koşulu dahildir.
+6. **Doğrulama otomatiktir:** `deny.toml`, madde 3'teki onaylı listeyi
+   uygular (`cargo deny check licenses`); her fazın kabul ölçütüne "lisans
+   denetimi yeşil" koşulu dahildir. Onaylı listenin dışında kalan ama Rust
+   ekosisteminde fiilen kaçınılmaz izin verici lisanslar (Unicode-3.0, Zlib,
+   Apache-2.0 LLVM istisnası, bzip2, Unlicense-ikili) `deny.toml`de
+   gerekçeli olarak işaretlenmiştir ve kullanıcı vetosuna açıktır.
+
+   **Bilinen lisans bulguları (2026-07-17 taraması):**
+   - ❗ Zed'in `zlog`, `ztracing`, `ztracing_macro` crate'leri
+     **GPL-3.0-or-later** ve Apache-2.0 beyanlı `gpui`, `sum_tree` üzerinden
+     bunlara bağımlı (üst-akım tutarsızlığı). Politika gereği izinli
+     DEĞİLDİR; çözüm seçenekleri: üst-akıma bildirim, Zed'de yama/`[patch]`
+     ile GPL'siz eşdeğer, ya da kullanıcı kararı. Çözülene dek lisans
+     denetimi bu üç crate için kırmızıdır.
+   - ❗ `gpui_shared_string`, `gpui_util` lisans alanı bildirmiyor —
+     üst-akıma bildirilecek.
+   - ✅ MPL-2.0 bağımlılıkları (değiştirilmeden kullanılır, NOTICE'ta
+     listeli): `option-ext`, `dwrote` (yalnız Windows hedefi), `cbindgen`
+     (derleme aracı; mevcut derleme grafiğinde etkin değil).
 7. **Depo yükümlülükleri:** Kök dizinde `LICENSE` (Apache-2.0 tam metni) ve
    Apache ECharts atfını taşıyan `NOTICE` dosyası bulunur; Apache-2.0 §4
    gereği bunlar dağıtımlarda korunur.
