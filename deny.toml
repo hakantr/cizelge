@@ -4,6 +4,9 @@
 # POLİTİKA (kullanıcı onaylı, 2026-07-17): MIT, BSD-2/3, ISC, CC0,
 # Apache-2.0 ve MPL-2.0. MPL-2.0 koşulu: MPL'li kod DEĞİŞTİRİLMEZ;
 # değiştirilirse o değişiklikler açık kaynak olarak yayımlanır (bkz. NOTICE).
+# KENDİMİZ GELİŞTİRİRİZ İLKESİ: bir gereksinim yalnızca bu listenin
+# dışındaki bir lisansla karşılanabiliyorsa bağımlılık alınmaz; eşdeğeri
+# bu projede Apache-2.0 altında geliştirilir (FAZ_PLANI madde 3).
 
 [licenses]
 allow = [

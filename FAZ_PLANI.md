@@ -40,6 +40,14 @@ esnetemez:
    ISC, CC0, Apache-2.0 ve MPL-2.0**. **GPL / LGPL / AGPL / SSPL lisanslı
    veya lisanssız hiçbir kod, crate ya da kod parçası projeye giremez.**
 
+   **Kendimiz geliştiririz ilkesi (bağlayıcı):** Gereksinim duyduğumuz bir
+   yetenek yalnızca onaylı liste dışındaki (Apache-2.0 sınırını aşan) bir
+   lisansla sunuluyorsa, o bağımlılık ALINMAZ — **eşdeğeri bu projede,
+   Apache-2.0 altında kendimiz geliştirilir.** (Bugüne kadarki uygulama da
+   budur: takvim/tarih dönüşümleri `chrono` yerine `yardimci::takvim`
+   olarak, çentik/yerleşim/eğri matematiği harici crate yerine yerli port
+   olarak yazılmıştır.)
+
    **MPL-2.0 özel koşulu:** MPL lisanslı kodda **değişiklik yapılmaz**;
    yapılması gerekirse o değişiklikler MPL-2.0 gereği **açık kaynak olarak
    yayımlanır** ve bu durum `NOTICE` dosyasındaki MPL bölümüne işlenir.
