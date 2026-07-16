@@ -1,0 +1,24 @@
+# Derleme çıktıları
+/target/
+
+# Kitaplık projelerinde kilit dosyası sürüme eklenmez
+Cargo.lock
+
+# Hata ayıklama ve profil çıktıları
+*.pdb
+perf.data*
+flamegraph.svg
+
+# Düzenleyici / IDE dosyaları
+.idea/
+.vscode/
+*.iml
+
+# İşletim sistemi artıkları
+.DS_Store
+Thumbs.db
+
+# Geçici ve yedek dosyalar
+*.swp
+*.swo
+*~

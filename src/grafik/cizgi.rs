@@ -1,0 +1,293 @@
+//! Çizgi serisi çizimi — `echarts/src/chart/line/LineView.ts` ile
+//! `poly.ts` içindeki yumuşak eğri algoritmasının portu.
+
+use crate::cizim::{Yol, Çizici};
+use crate::grafik::{sembol_çiz, çizgi_stili_çöz};
+use crate::koordinat::Kartezyen2B;
+use crate::model::seri::{Basamak, ÇizgiSerisi};
+use crate::model::stil::EtiketKonumu;
+use crate::renk::{Dolgu, Renk};
+use crate::tema;
+use crate::yardimci::bicim::binlik_ayır;
+use crate::yerlesim::yigin::YığınAralığı;
+
+/// Serinin `(tepe, taban)` piksel noktalarını üretir; boş değerler `None`.
+pub fn nokta_listeleri(
+    seri: &ÇizgiSerisi,
+    kartezyen: &Kartezyen2B,
+    aralıklar: &[YığınAralığı],
+) -> (Vec<Option<(f32, f32)>>, Vec<Option<(f32, f32)>>) {
+    let mut tepeler = Vec::with_capacity(seri.veri.len());
+    let mut tabanlar = Vec::with_capacity(seri.veri.len());
+    for (i, öğe) in seri.veri.iter().enumerate() {
+        let x_değeri = öğe.değer.x().unwrap_or(i as f64);
+        match aralıklar.get(i).copied().flatten() {
+            Some((taban, tepe)) => {
+                let x = kartezyen.x.veriden_piksele(x_değeri);
+                tepeler.push(Some((x, kartezyen.y.veriden_piksele(tepe))));
+                tabanlar.push(Some((x, kartezyen.y.veriden_piksele(taban))));
+            }
+            None => {
+                tepeler.push(None);
+                tabanlar.push(None);
+            }
+        }
+    }
+    (tepeler, tabanlar)
+}
+
+/// `poly.ts` içindeki `drawSegment`in yumuşak dal portu: ardışık noktalara,
+/// uç aşımını sınırlayan kontrol noktalı kübik Bezier parçaları ekler.
+///
+/// `ilk_taşı` doğruysa parça `taşı` ile başlar, değilse `çiz` ile bağlanır.
+pub fn yumuşak_parça_ekle(
+    yol: &mut Yol,
+    noktalar: &[(f32, f32)],
+    yumuşaklık: f32,
+    ilk_taşı: bool,
+) {
+    if noktalar.is_empty() {
+        return;
+    }
+    if noktalar.len() == 1 || yumuşaklık <= 0.0 {
+        if ilk_taşı {
+            yol.taşı(noktalar[0]);
+        } else {
+            yol.çiz(noktalar[0]);
+        }
+        for n in &noktalar[1..] {
+            yol.çiz(*n);
+        }
+        return;
+    }
+
+    let yumuşaklık = yumuşaklık as f64;
+    if ilk_taşı {
+        yol.taşı(noktalar[0]);
+    } else {
+        yol.çiz(noktalar[0]);
+    }
+    // Bir sonraki parçanın başlangıç kontrol noktası.
+    let (mut kx0, mut ky0) = (noktalar[0].0 as f64, noktalar[0].1 as f64);
+
+    for i in 1..noktalar.len() {
+        let (öx, öy) = (noktalar[i - 1].0 as f64, noktalar[i - 1].1 as f64);
+        let (x, y) = (noktalar[i].0 as f64, noktalar[i].1 as f64);
+        let son_mu = i + 1 >= noktalar.len();
+
+        let (kx1, ky1, sonraki_kx0, sonraki_ky0);
+        if son_mu {
+            kx1 = x;
+            ky1 = y;
+            sonraki_kx0 = x;
+            sonraki_ky0 = y;
+        } else {
+            let (sx, sy) = (noktalar[i + 1].0 as f64, noktalar[i + 1].1 as f64);
+            let vx = sx - öx;
+            let vy = sy - öy;
+
+            let dx0 = x - öx;
+            let dy0 = y - öy;
+            let dx1 = sx - x;
+            let dy1 = sy - y;
+            let önceki_uzunluk = (dx0 * dx0 + dy0 * dy0).sqrt();
+            let sonraki_uzunluk = (dx1 * dx1 + dy1 * dy1).sqrt();
+
+            // Parça uzunluklarının oranı.
+            let oran = sonraki_uzunluk / (sonraki_uzunluk + önceki_uzunluk).max(1e-12);
+
+            let mut skx0 = x + vx * yumuşaklık * oran;
+            let mut sky0 = y + vy * yumuşaklık * oran;
+            // Uç aşımını önleyen yumuşaklık kısıtı: nokta ile sonraki nokta
+            // arasında kal.
+            skx0 = skx0.min(sx.max(x)).max(sx.min(x));
+            sky0 = sky0.min(sy.max(y)).max(sy.min(y));
+            // Düzeltilmiş kontrol noktasından cp1'i yeniden hesapla.
+            let vx2 = skx0 - x;
+            let vy2 = sky0 - y;
+            let mut tkx1 = x - vx2 * önceki_uzunluk / sonraki_uzunluk.max(1e-12);
+            let mut tky1 = y - vy2 * önceki_uzunluk / sonraki_uzunluk.max(1e-12);
+            // Önceki nokta ile arada kal.
+            tkx1 = tkx1.min(öx.max(x)).max(öx.min(x));
+            tky1 = tky1.min(öy.max(y)).max(öy.min(y));
+            // cp1 kırpıldıysa sonraki cp0'ı tekrar ayarla.
+            let vx3 = x - tkx1;
+            let vy3 = y - tky1;
+            sonraki_kx0 = x + vx3 * sonraki_uzunluk / önceki_uzunluk.max(1e-12);
+            sonraki_ky0 = y + vy3 * sonraki_uzunluk / önceki_uzunluk.max(1e-12);
+            kx1 = tkx1;
+            ky1 = tky1;
+        }
+
+        yol.kübik(
+            (kx0 as f32, ky0 as f32),
+            (kx1 as f32, ky1 as f32),
+            (x as f32, y as f32),
+        );
+        kx0 = sonraki_kx0;
+        ky0 = sonraki_ky0;
+    }
+}
+
+/// Basamaklı çizgi için ara noktaları üretir.
+fn basamaklı_noktalar(noktalar: &[(f32, f32)], basamak: Basamak) -> Vec<(f32, f32)> {
+    let mut sonuç = Vec::with_capacity(noktalar.len() * 2);
+    for (i, &n) in noktalar.iter().enumerate() {
+        if i == 0 {
+            sonuç.push(n);
+            continue;
+        }
+        let önceki = noktalar[i - 1];
+        match basamak {
+            Basamak::Baş => sonuç.push((önceki.0, n.1)),
+            Basamak::Son => sonuç.push((n.0, önceki.1)),
+            Basamak::Orta => {
+                let orta_x = (önceki.0 + n.0) / 2.0;
+                sonuç.push((orta_x, önceki.1));
+                sonuç.push((orta_x, n.1));
+            }
+        }
+        sonuç.push(n);
+    }
+    sonuç
+}
+
+/// `None` boşluklarına göre bitişik parçalara ayırır; `boşları_bağla`
+/// doğruysa boşluklar atlanarak tek parça üretilir.
+fn parçalara_ayır(
+    noktalar: &[Option<(f32, f32)>],
+    boşları_bağla: bool,
+) -> Vec<Vec<(f32, f32)>> {
+    if boşları_bağla {
+        let dolu: Vec<(f32, f32)> = noktalar.iter().flatten().copied().collect();
+        return if dolu.is_empty() { Vec::new() } else { vec![dolu] };
+    }
+    let mut parçalar = Vec::new();
+    let mut geçerli = Vec::new();
+    for n in noktalar {
+        match n {
+            Some(nokta) => geçerli.push(*nokta),
+            None => {
+                if !geçerli.is_empty() {
+                    parçalar.push(std::mem::take(&mut geçerli));
+                }
+            }
+        }
+    }
+    if !geçerli.is_empty() {
+        parçalar.push(geçerli);
+    }
+    parçalar
+}
+
+/// Çizgi serisini çizer: alan dolgusu, çizgi, semboller ve etiketler.
+#[allow(clippy::too_many_arguments)]
+pub fn çizgi_serisi_çiz(
+    çizici: &mut Çizici,
+    seri: &ÇizgiSerisi,
+    kartezyen: &Kartezyen2B,
+    aralıklar: &[YığınAralığı],
+    seri_rengi: Renk,
+    ilerleme: f32,
+) {
+    let (tepeler, tabanlar) = nokta_listeleri(seri, kartezyen, aralıklar);
+    let alan = kartezyen.alan;
+
+    let gövde = |ç: &mut Çizici| {
+        let tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
+        let tabanlar_parçalı = parçalara_ayır(&tabanlar, seri.boşları_bağla);
+
+        // 1) Alan dolgusu (çizginin altına).
+        if let Some(alan_stili) = &seri.alan_stili {
+            let dolgu = alan_stili
+                .renk
+                .clone()
+                .unwrap_or(Dolgu::Düz(seri_rengi))
+                .opaklık(alan_stili.opaklık);
+            for (tepe_parça, taban_parça) in tepeler_parçalı.iter().zip(&tabanlar_parçalı) {
+                if tepe_parça.len() < 2 {
+                    continue;
+                }
+                let mut yol = Yol::yeni();
+                let üst: Vec<(f32, f32)> = match seri.basamak {
+                    Some(b) => basamaklı_noktalar(tepe_parça, b),
+                    None => tepe_parça.clone(),
+                };
+                let alt_kaynak: Vec<(f32, f32)> = match seri.basamak {
+                    Some(b) => basamaklı_noktalar(taban_parça, b),
+                    None => taban_parça.clone(),
+                };
+                let yumuşaklık = if seri.basamak.is_some() { 0.0 } else { seri.yumuşaklık };
+                yumuşak_parça_ekle(&mut yol, &üst, yumuşaklık, true);
+                let mut alt: Vec<(f32, f32)> = alt_kaynak;
+                alt.reverse();
+                yumuşak_parça_ekle(&mut yol, &alt, yumuşaklık, false);
+                yol.kapat();
+                ç.yol_doldur(&yol, &dolgu);
+            }
+        }
+
+        // 2) Çizgi.
+        let (çizgi_rengi, kalınlık, tür) = çizgi_stili_çöz(&seri.çizgi_stili, seri_rengi);
+        for parça in &tepeler_parçalı {
+            if parça.len() < 2 {
+                continue;
+            }
+            let noktalar: Vec<(f32, f32)> = match seri.basamak {
+                Some(b) => basamaklı_noktalar(parça, b),
+                None => parça.clone(),
+            };
+            let mut yol = Yol::yeni();
+            let yumuşaklık = if seri.basamak.is_some() { 0.0 } else { seri.yumuşaklık };
+            yumuşak_parça_ekle(&mut yol, &noktalar, yumuşaklık, true);
+            ç.yol_çiz(&yol, kalınlık, çizgi_rengi, tür);
+        }
+
+        // 3) Semboller.
+        if seri.sembol_göster && seri.sembol != crate::model::seri::Sembol::Yok {
+            for nokta in tepeler.iter().flatten() {
+                sembol_çiz(ç, seri.sembol, *nokta, seri.sembol_boyutu, seri_rengi);
+            }
+        }
+
+        // 4) Değer etiketleri.
+        if seri.etiket.göster {
+            let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+            let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+            for (i, nokta) in tepeler.iter().enumerate() {
+                let Some((x, y)) = nokta else { continue };
+                let Some(değer) = seri.veri[i].değer.sayı() else { continue };
+                let metin = match &seri.etiket.biçimleyici {
+                    Some(b) => b.uygula(değer, &binlik_ayır(değer)),
+                    None => binlik_ayır(değer),
+                };
+                let (hiza, kaydırma) = match seri.etiket.konum {
+                    EtiketKonumu::Alt => (crate::cizim::DikeyHiza::Üst, 6.0),
+                    _ => (crate::cizim::DikeyHiza::Alt, -6.0),
+                };
+                ç.yazı(
+                    &metin,
+                    (*x, *y + kaydırma),
+                    crate::cizim::YatayHiza::Orta,
+                    hiza,
+                    boyut,
+                    renk,
+                    false,
+                );
+            }
+        }
+    };
+
+    if ilerleme >= 0.999 {
+        gövde(çizici);
+    } else {
+        // Giriş animasyonu: ECharts'taki gibi soldan sağa açılan kırpma.
+        let kırpma = crate::koordinat::Dikdörtgen::yeni(
+            alan.x,
+            0.0,
+            alan.genişlik * ilerleme.clamp(0.0, 1.0),
+            çizici.yükseklik,
+        );
+        çizici.kırp(kırpma, gövde);
+    }
+}

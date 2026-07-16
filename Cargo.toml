@@ -1,0 +1,28 @@
+[package]
+name = "cizelge"
+version = "0.1.0"
+edition = "2024"
+description = "Apache ECharts'ın gpui (Zed) üzerinde çalışan yerli Rust uyarlaması"
+license = "Apache-2.0"
+
+[dependencies]
+gpui = { path = "../zed/crates/gpui" }
+lyon = "1.0"
+
+[dev-dependencies]
+gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "wayland", "x11"] }
+
+[[example]]
+name = "cizgi"
+
+[[example]]
+name = "sutun"
+
+[[example]]
+name = "pasta"
+
+[[example]]
+name = "sacilim"
+
+[[example]]
+name = "pano"

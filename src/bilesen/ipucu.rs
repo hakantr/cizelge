@@ -1,0 +1,120 @@
+//! İpucu (tooltip) penceresi — `echarts/src/component/tooltip` karşılığı.
+
+use crate::cizim::{DikeyHiza, YatayHiza, Çizici, SATIR_ORANI};
+use crate::koordinat::Dikdörtgen;
+use crate::model::bilesen::İpucu;
+use crate::renk::{Dolgu, Renk};
+use crate::tema;
+
+/// İpucundaki bir satır: renkli im + ad + değer.
+#[derive(Clone, Debug)]
+pub struct İpucuSatırı {
+    pub im_rengi: Option<Renk>,
+    pub ad: String,
+    pub değer: String,
+}
+
+const İÇ_BOŞLUK: f32 = 10.0;
+const İM_ÇAPI: f32 = 10.0;
+const SÜTUN_ARASI: f32 = 20.0;
+const İMLEÇ_KAÇIĞI: f32 = 14.0;
+
+/// İpucu penceresini çizer. `konum` grafik yerel fare noktasıdır; pencere
+/// tuval sınırları içinde kalacak biçimde konumlanır.
+pub fn ipucu_çiz(
+    çizici: &mut Çizici,
+    seçenek: &İpucu,
+    konum: (f32, f32),
+    başlık: Option<&str>,
+    satırlar: &[İpucuSatırı],
+) {
+    if satırlar.is_empty() && başlık.is_none() {
+        return;
+    }
+    let boyut = seçenek.yazı.boyut.unwrap_or(tema::YAZI_ORTA);
+    let satır_yüksekliği = boyut * SATIR_ORANI + 2.0;
+
+    // Ölçüm.
+    let başlık_genişliği = başlık.map(|b| çizici.yazı_ölç(b, boyut).0).unwrap_or(0.0);
+    let mut içerik_genişliği = başlık_genişliği;
+    for satır in satırlar {
+        let im = if satır.im_rengi.is_some() { İM_ÇAPI + 6.0 } else { 0.0 };
+        let genişlik = im
+            + çizici.yazı_ölç(&satır.ad, boyut).0
+            + SÜTUN_ARASI
+            + çizici.yazı_ölç(&satır.değer, boyut).0;
+        içerik_genişliği = içerik_genişliği.max(genişlik);
+    }
+    let kutu_genişliği = içerik_genişliği + İÇ_BOŞLUK * 2.0;
+    let başlık_yüksekliği = if başlık.is_some() { satır_yüksekliği } else { 0.0 };
+    let kutu_yüksekliği =
+        başlık_yüksekliği + satırlar.len() as f32 * satır_yüksekliği + İÇ_BOŞLUK * 2.0;
+
+    // Konumlandırma: sağ alta; taşarsa çevir, tuvale kıstır.
+    let mut x = konum.0 + İMLEÇ_KAÇIĞI;
+    let mut y = konum.1 + İMLEÇ_KAÇIĞI;
+    if x + kutu_genişliği > çizici.genişlik {
+        x = konum.0 - İMLEÇ_KAÇIĞI - kutu_genişliği;
+    }
+    if y + kutu_yüksekliği > çizici.yükseklik {
+        y = konum.1 - İMLEÇ_KAÇIĞI - kutu_yüksekliği;
+    }
+    x = x.clamp(0.0, (çizici.genişlik - kutu_genişliği).max(0.0));
+    y = y.clamp(0.0, (çizici.yükseklik - kutu_yüksekliği).max(0.0));
+
+    let kutu = Dikdörtgen::yeni(x, y, kutu_genişliği, kutu_yüksekliği);
+
+    // Kutu: gölge + arka plan + kenarlık.
+    çizici.gölge(kutu, 4.0, tema::İPUCU_GÖLGESİ, 10.0);
+    let arkaplan = seçenek.arkaplan.unwrap_or(tema::İPUCU_ARKAPLANI);
+    çizici.dikdörtgen(kutu, &Dolgu::Düz(arkaplan), [4.0; 4], Some((1.0, tema::İPUCU_KENARLIĞI)));
+
+    let metin_rengi = seçenek.yazı.renk.unwrap_or(tema::İPUCU_METNİ);
+    let mut satır_y = y + İÇ_BOŞLUK + satır_yüksekliği / 2.0;
+
+    if let Some(b) = başlık {
+        çizici.yazı(
+            b,
+            (x + İÇ_BOŞLUK, satır_y),
+            YatayHiza::Sol,
+            DikeyHiza::Orta,
+            boyut,
+            metin_rengi,
+            false,
+        );
+        satır_y += satır_yüksekliği;
+    }
+
+    for satır in satırlar {
+        let mut metin_x = x + İÇ_BOŞLUK;
+        if let Some(renk) = satır.im_rengi {
+            çizici.daire(
+                (metin_x + İM_ÇAPI / 2.0, satır_y),
+                İM_ÇAPI / 2.0,
+                Some(&Dolgu::Düz(renk)),
+                None,
+            );
+            metin_x += İM_ÇAPI + 6.0;
+        }
+        çizici.yazı(
+            &satır.ad,
+            (metin_x, satır_y),
+            YatayHiza::Sol,
+            DikeyHiza::Orta,
+            boyut,
+            metin_rengi,
+            false,
+        );
+        // Değer sağa hizalı ve kalın (ECharts görünümü).
+        çizici.yazı(
+            &satır.değer,
+            (x + kutu_genişliği - İÇ_BOŞLUK, satır_y),
+            YatayHiza::Sağ,
+            DikeyHiza::Orta,
+            boyut,
+            metin_rengi,
+            true,
+        );
+        satır_y += satır_yüksekliği;
+    }
+}
