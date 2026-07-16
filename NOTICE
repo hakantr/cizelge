@@ -1,0 +1,19 @@
+çizelge
+Copyright 2026 çizelge katkıcıları
+
+Bu ürün, Apache Software Foundation (https://www.apache.org/) tarafından
+geliştirilen ve Apache License 2.0 ile lisanslanan Apache ECharts
+(https://github.com/apache/echarts) projesinden uyarlanmış algoritmalar ve
+seçenek modeli içerir:
+
+- "Güzel" çentik üretimi (src/util/number.ts, src/scale/helper.ts,
+  src/scale/Interval.ts)
+- Sütun genişlik/kaydırma yerleşimi (src/layout/barGrid.ts)
+- Yumuşak eğri kontrol noktaları (src/chart/line/poly.ts)
+- Yığınlama davranışı ve v6 tema belirteçleri (src/visual/tokens.ts)
+
+Apache ECharts:
+  Copyright 2017-2026 The Apache Software Foundation
+
+Çizim, Zed Industries tarafından geliştirilen ve Apache License 2.0 ile
+lisanslanan gpui kütüphanesi (https://gpui.rs) üzerinden yapılır.

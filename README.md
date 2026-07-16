@@ -73,8 +73,15 @@ sankey, gösterge saati (gauge); `dataZoom`, `visualMap`, fırça, araç kutusu;
 çoklu ızgara/eksen, kutupsal koordinat; `dataset`/dönüşümler; durum geçiş
 animasyonları.
 
+Ayrıntılı, fazlara bölünmüş plan için: **[FAZ_PLANI.md](FAZ_PLANI.md)**.
+
 ## Lisans ve atıf
 
-Apache-2.0. Algoritmalar ve seçenek modeli, Apache Software Foundation'ın
-Apache-2.0 lisanslı [Apache ECharts](https://github.com/apache/echarts)
-projesinden uyarlanmıştır.
+Apache-2.0 (bkz. [LICENSE](LICENSE) ve [NOTICE](NOTICE)). Algoritmalar ve
+seçenek modeli, Apache Software Foundation'ın Apache-2.0 lisanslı
+[Apache ECharts](https://github.com/apache/echarts) projesinden
+uyarlanmıştır.
+
+**Değiştirilemez kural:** Proje hiçbir koşulda Apache-2.0 lisans sınırının
+dışına çıkmaz; GPL/LGPL/AGPL lisanslı kod veya bağımlılık kabul edilmez.
+Ayrıntı: [FAZ_PLANI.md](FAZ_PLANI.md) içindeki lisans kuralı bölümü.
