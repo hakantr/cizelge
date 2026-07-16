@@ -270,6 +270,33 @@ fn efektli_saçılım() {
 }
 
 #[test]
+fn huni() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .başlık(Başlık::yeni().metin("Dönüşüm"))
+        .animasyon(false)
+        .seri(HuniSerisi::yeni().ad("Dönüşüm").veri([
+            ("Ziyaret", 100.0),
+            ("Tıklama", 80.0),
+            ("Sepet", 40.0),
+            ("Sipariş", 20.0),
+        ]));
+    altın_karşılaştır("huni", &boya_ve_dök(seçenekler));
+}
+
+#[test]
+fn gösterge_saati() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("Basınç")
+                .değer(72.5, "Yük")
+                .değer_biçimleyici("{value} %"),
+        );
+    altın_karşılaştır("gosterge_saati", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

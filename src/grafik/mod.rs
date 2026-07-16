@@ -1,6 +1,8 @@
 //! Seri çizicileri — `echarts/src/chart` dizininin karşılığı.
 
 pub mod cizgi;
+pub mod gosterge_saati;
+pub mod huni;
 pub mod imleyici;
 pub mod isi;
 pub mod mum;

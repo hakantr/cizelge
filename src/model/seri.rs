@@ -692,6 +692,196 @@ impl SaçılımSerisi {
     }
 }
 
+
+/// Huni sıralaması (`funnel.sort`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum HuniSıralaması {
+    #[default]
+    Azalan,
+    Artan,
+    Yok,
+}
+
+/// Huni serisi (`series-funnel`).
+#[derive(Clone, Debug)]
+pub struct HuniSerisi {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    pub sol: Uzunluk,
+    pub üst: Uzunluk,
+    pub genişlik: Uzunluk,
+    pub yükseklik: Uzunluk,
+    pub sıralama: HuniSıralaması,
+    /// Dilimler arası dikey boşluk (`gap`).
+    pub dilim_boşluğu: f32,
+    /// En dar dilimin genişliği (`minSize`).
+    pub en_az_genişlik: Uzunluk,
+    /// En geniş dilimin genişliği (`maxSize`).
+    pub en_çok_genişlik: Uzunluk,
+    pub öğe_stili: ÖğeStili,
+    pub etiket: Etiket,
+}
+
+impl Default for HuniSerisi {
+    fn default() -> Self {
+        HuniSerisi {
+            ad: None,
+            veri: Vec::new(),
+            sol: Uzunluk::Yüzde(10.0),
+            üst: Uzunluk::Piksel(60.0),
+            genişlik: Uzunluk::Yüzde(80.0),
+            yükseklik: Uzunluk::Yüzde(70.0),
+            sıralama: HuniSıralaması::Azalan,
+            dilim_boşluğu: 2.0,
+            en_az_genişlik: Uzunluk::Yüzde(0.0),
+            en_çok_genişlik: Uzunluk::Yüzde(100.0),
+            öğe_stili: ÖğeStili {
+                kenarlık_rengi: Some(crate::renk::Renk::BEYAZ),
+                kenarlık_kalınlığı: 1.0,
+                ..Default::default()
+            },
+            etiket: Etiket {
+                göster: true,
+                konum: crate::model::stil::EtiketKonumu::İç,
+                ..Default::default()
+            },
+        }
+    }
+}
+
+impl HuniSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn sıralama(mut self, sıralama: HuniSıralaması) -> Self {
+        self.sıralama = sıralama;
+        self
+    }
+
+    pub fn dilim_boşluğu(mut self, boşluk: f32) -> Self {
+        self.dilim_boşluğu = boşluk.max(0.0);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+}
+
+/// Gösterge saati serisi (`series-gauge`). Tek değerli veri beklenir.
+#[derive(Clone, Debug)]
+pub struct GöstergeSaatiSerisi {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    pub en_az: f64,
+    pub en_çok: f64,
+    /// Başlangıç açısı, derece (`startAngle`, öntanımlı 225).
+    pub başlangıç_açısı: f32,
+    /// Bitiş açısı, derece (`endAngle`, öntanımlı -45).
+    pub bitiş_açısı: f32,
+    pub merkez: (Uzunluk, Uzunluk),
+    pub yarıçap: Uzunluk,
+    /// Renk bantları: `(bant sonu oranı 0..=1, renk)` — `axisLine.lineStyle.color`.
+    pub renk_bantları: Vec<(f32, crate::renk::Renk)>,
+    /// Yay şeridinin kalınlığı (`axisLine.lineStyle.width`).
+    pub şerit_kalınlığı: f32,
+    pub bölme_sayısı: usize,
+    pub çentik_uzunluğu: f32,
+    pub etiketleri_göster: bool,
+    pub etiket_boyutu: f32,
+    /// İbre uzunluğu, yarıçapa oranla ya da piksel (`pointer.length`).
+    pub ibre_uzunluğu: Uzunluk,
+    /// Değer yazısı (`detail.show`).
+    pub değeri_göster: bool,
+    pub değer_boyutu: f32,
+    pub değer_biçimleyici: Option<crate::model::stil::Biçimleyici>,
+}
+
+impl Default for GöstergeSaatiSerisi {
+    fn default() -> Self {
+        GöstergeSaatiSerisi {
+            ad: None,
+            veri: Vec::new(),
+            en_az: 0.0,
+            en_çok: 100.0,
+            başlangıç_açısı: 225.0,
+            bitiş_açısı: -45.0,
+            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
+            yarıçap: Uzunluk::Yüzde(75.0),
+            renk_bantları: vec![
+                (0.3, crate::renk::Renk::onaltılık(0x67e0e3)),
+                (0.7, crate::renk::Renk::onaltılık(0x37a2da)),
+                (1.0, crate::renk::Renk::onaltılık(0xfd666d)),
+            ],
+            şerit_kalınlığı: 18.0,
+            bölme_sayısı: 10,
+            çentik_uzunluğu: 8.0,
+            etiketleri_göster: true,
+            etiket_boyutu: crate::tema::YAZI_KÜÇÜK,
+            ibre_uzunluğu: Uzunluk::Yüzde(60.0),
+            değeri_göster: true,
+            değer_boyutu: 24.0,
+            değer_biçimleyici: None,
+        }
+    }
+}
+
+impl GöstergeSaatiSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Tek değer + ad (`data: [{ value, name }]`).
+    pub fn değer(mut self, değer: f64, ad: impl Into<String>) -> Self {
+        self.veri = vec![VeriÖğesi::adlı(ad, değer)];
+        self
+    }
+
+    pub fn aralık(mut self, en_az: f64, en_çok: f64) -> Self {
+        self.en_az = en_az;
+        self.en_çok = en_çok;
+        self
+    }
+
+    pub fn renk_bantları<R: Into<crate::renk::Renk>>(
+        mut self,
+        bantlar: impl IntoIterator<Item = (f32, R)>,
+    ) -> Self {
+        self.renk_bantları = bantlar.into_iter().map(|(o, r)| (o, r.into())).collect();
+        self
+    }
+
+    pub fn değer_biçimleyici(
+        mut self,
+        b: impl Into<crate::model::stil::Biçimleyici>,
+    ) -> Self {
+        self.değer_biçimleyici = Some(b.into());
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -702,6 +892,8 @@ pub enum Seri {
     Mum(MumSerisi),
     Kutu(KutuSerisi),
     Isı(IsıHaritasıSerisi),
+    Huni(HuniSerisi),
+    GöstergeSaati(GöstergeSaatiSerisi),
 }
 
 impl Seri {
@@ -714,6 +906,8 @@ impl Seri {
             Seri::Mum(s) => s.ad.as_deref(),
             Seri::Kutu(s) => s.ad.as_deref(),
             Seri::Isı(s) => s.ad.as_deref(),
+            Seri::Huni(s) => s.ad.as_deref(),
+            Seri::GöstergeSaati(s) => s.ad.as_deref(),
         }
     }
 
@@ -739,6 +933,8 @@ impl Seri {
             Seri::Mum(s) => &s.veri,
             Seri::Kutu(s) => &s.veri,
             Seri::Isı(s) => &s.veri,
+            Seri::Huni(s) => &s.veri,
+            Seri::GöstergeSaati(s) => &s.veri,
         }
     }
 
@@ -750,7 +946,7 @@ impl Seri {
             Seri::Saçılım(s) => Some(&s.imleyiciler),
             Seri::Mum(s) => Some(&s.imleyiciler),
             Seri::Kutu(s) => Some(&s.imleyiciler),
-            Seri::Pasta(_) | Seri::Isı(_) => None,
+            Seri::Pasta(_) | Seri::Isı(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) => None,
         }
     }
 
@@ -761,7 +957,11 @@ impl Seri {
             Seri::Sütun(s) => s.öğe_stili.renk.as_ref(),
             Seri::Pasta(s) => s.öğe_stili.renk.as_ref(),
             Seri::Saçılım(s) => s.öğe_stili.renk.as_ref(),
-            Seri::Mum(_) | Seri::Kutu(_) | Seri::Isı(_) => None,
+            Seri::Mum(_)
+            | Seri::Kutu(_)
+            | Seri::Isı(_)
+            | Seri::Huni(_)
+            | Seri::GöstergeSaati(_) => None,
         }
     }
 }
@@ -805,5 +1005,17 @@ impl From<KutuSerisi> for Seri {
 impl From<IsıHaritasıSerisi> for Seri {
     fn from(s: IsıHaritasıSerisi) -> Seri {
         Seri::Isı(s)
+    }
+}
+
+impl From<HuniSerisi> for Seri {
+    fn from(s: HuniSerisi) -> Seri {
+        Seri::Huni(s)
+    }
+}
+
+impl From<GöstergeSaatiSerisi> for Seri {
+    fn from(s: GöstergeSaatiSerisi) -> Seri {
+        Seri::GöstergeSaati(s)
     }
 }

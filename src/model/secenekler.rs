@@ -254,6 +254,8 @@ impl GrafikSeçenekleri {
                 Seri::Mum(s) => karıştır(&mut s.veri),
                 Seri::Kutu(s) => karıştır(&mut s.veri),
                 Seri::Isı(s) => karıştır(&mut s.veri),
+                Seri::Huni(s) => karıştır(&mut s.veri),
+                Seri::GöstergeSaati(s) => karıştır(&mut s.veri),
             }
         }
         sonuç

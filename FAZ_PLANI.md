@@ -302,6 +302,15 @@ gauge ve kutupsal sütun örneklerinin eşdeğerleri.
 
 **Tahmin:** 4–5 hafta. (Bağımlılık: Faz 1; visualMap'li örnekler için Faz 3.)
 
+**Durum (2026-07-17):**
+- ✅ 4.3 Gösterge saati (gauge): renk bantlı yay, çentik/etiketler, dönen
+  ibre, değer yazısı, banda göre renk çözümü, animasyonlu değer.
+- ✅ 4.4 Huni (funnel): sıralama (azalan/artan/yok), dilim boşluğu,
+  min/maks genişlik, iç/dış etiket + kılavuz çizgisi, gösterge (legend)
+  entegrasyonu, öğe ipucu.
+- ⏳ Açık: kutupsal koordinat (4.1), radar (4.2), singleAxis/themeRiver
+  (4.5), takvim koordinatı (4.6).
+
 ---
 
 ## Faz 5 — Hiyerarşik ve ilişkisel seriler

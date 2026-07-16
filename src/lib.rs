@@ -54,7 +54,8 @@ pub use model::imleyici::{
 pub use model::gorsel_esleme::GörselEşleme;
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
-    Basamak, GülTürü, IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
+    Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması,
+    IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     SaçılımSerisi, Sembol, Seri,
     SütunSerisi, ÇizgiSerisi,
 };
@@ -85,7 +86,8 @@ pub mod hazir {
     pub use crate::model::gorsel_esleme::GörselEşleme;
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
-        Basamak, GülTürü, IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
+        Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması,
+    IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     SaçılımSerisi, Sembol, Seri,
     SütunSerisi, ÇizgiSerisi,
     };

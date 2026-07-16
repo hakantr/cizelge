@@ -26,6 +26,8 @@ use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::grafik::cizgi::{nokta_listeleri, çizgi_serisi_çiz};
+use crate::grafik::gosterge_saati::gösterge_saati_çiz;
+use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
@@ -72,6 +74,20 @@ fn gösterge_öğeleri(
     let mut öğeler = Vec::new();
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         match seri {
+            Seri::Huni(h) => {
+                for (j, öğe) in h.veri.iter().enumerate() {
+                    let Some(ad) = öğe.ad.clone() else { continue };
+                    if !süzgeç.is_empty() && !süzgeç.contains(&ad) {
+                        continue;
+                    }
+                    öğeler.push(GöstergeÖğesi {
+                        kapalı: kapalı.contains(&ad),
+                        ad,
+                        renk: seçenekler.palet_rengi(j),
+                        simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                    });
+                }
+            }
             Seri::Pasta(p) => {
                 for (j, öğe) in p.veri.iter().enumerate() {
                     let Some(ad) = öğe.ad.clone() else { continue };
@@ -632,7 +648,7 @@ pub fn grafiği_boya(
                         &mut çıktı.isabetler,
                     );
                 }
-                Seri::Pasta(_) => {}
+                Seri::Pasta(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) => {}
             }
         }
 
@@ -745,6 +761,45 @@ pub fn grafiği_boya(
                 }],
                 f,
             ));
+        }
+    }
+
+    // 5b) Huni ve gösterge saati serileri.
+    for (i, seri) in seçenekler.seriler.iter().enumerate() {
+        match seri {
+            Seri::Huni(h) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let dilimler = huni_yerleşimi(h, seçenekler, tüm_alan, kapalı, ilerleme);
+                let vurgu = match (&ipucu_seçeneği, fare) {
+                    (Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => {
+                        dilimler.iter().position(|d| d.sınır_kutusu().içeriyor_mu(f))
+                    }
+                    _ => None,
+                };
+                huni_çiz(yüzey, h, i, &dilimler, vurgu, &mut çıktı.isabetler);
+                if let (Some(dilim), Some(f)) =
+                    (vurgu.and_then(|v| dilimler.get(v)), fare)
+                {
+                    bekleyen_ipucu = Some((
+                        seri.ad().map(str::to_string),
+                        vec![İpucuSatırı {
+                            im_rengi: Some(dilim.renk),
+                            ad: dilim.ad.clone(),
+                            değer: binlik_ayır(dilim.değer),
+                        }],
+                        f,
+                    ));
+                }
+            }
+            Seri::GöstergeSaati(g) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                gösterge_saati_çiz(yüzey, g, i, tüm_alan, ilerleme, &mut çıktı.isabetler);
+            }
+            _ => {}
         }
     }
 
