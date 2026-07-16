@@ -43,6 +43,30 @@ name = "pano"
 [[example]]
 name = "olaylar"
 
+[[example]]
+name = "mum"
+
+[[example]]
+name = "kutu"
+
+[[example]]
+name = "isi"
+
+[[example]]
+name = "huni"
+
+[[example]]
+name = "gosterge_saati"
+
+[[example]]
+name = "radar"
+
+[[example]]
+name = "efektli_sacilim"
+
+[[example]]
+name = "imleyiciler"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"
