@@ -364,6 +364,17 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
 
 **Tahmin:** 6–8 hafta. (Bağımlılık: Faz 1, roam için Faz 3.)
 
+**Durum (2026-07-17):**
+- ✅ 5.1 Hiyerarşik veri modeli: AğaçDüğümü (yaprak/dal, etkin değer).
+- ✅ 5.2 (kısmi) Ağaç haritası: kareselleştirilmiş (squarify) yerleşim,
+  iç içe derinlik (dal başlıkları + üst renkten türeyen tonlar), sığan
+  hücrelere etiket, öğe ipucu; içeri gezinme (breadcrumb) açık.
+- ✅ 5.3 (kısmi) Güneş patlaması: hiyerarşi iç içe halkalarda açısal
+  paylara bölünür, üst renkten türeyen tonlar, öğe ipucu; tıklamayla
+  odaklanma açık.
+- ⏳ Açık: tree (5.3 kalanı), graph/force (5.4), sankey + chord (5.5),
+  paralel koordinat (5.6), treemap breadcrumb/gezinme.
+
 ---
 
 ## Faz 6 — Veri katmanı ve ölçeklenebilirlik

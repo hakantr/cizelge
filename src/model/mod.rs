@@ -1,6 +1,7 @@
 //! Seçenek modeli — ECharts'ın bildirime dayalı `option` API'sinin Rust
 //! karşılığı (`echarts/src/model` ve bileşen tanımları).
 
+pub mod agac;
 pub mod bilesen;
 pub mod deger;
 pub mod eksen;

@@ -1160,6 +1160,105 @@ impl ÖzelSeri {
     }
 }
 
+/// Ağaç haritası serisi (`series-treemap`): kareselleştirilmiş yerleşim.
+#[derive(Clone, Debug)]
+pub struct AğaçHaritasıSerisi {
+    pub ad: Option<String>,
+    pub kökler: Vec<crate::model::agac::AğaçDüğümü>,
+    pub sol: Uzunluk,
+    pub üst: Uzunluk,
+    pub genişlik: Uzunluk,
+    pub yükseklik: Uzunluk,
+    /// Hücreler arası boşluk.
+    pub hücre_boşluğu: f32,
+    /// Gösterilecek en çok derinlik (0 = yalnız kökler).
+    pub en_çok_derinlik: usize,
+}
+
+impl Default for AğaçHaritasıSerisi {
+    fn default() -> Self {
+        AğaçHaritasıSerisi {
+            ad: None,
+            kökler: Vec::new(),
+            sol: Uzunluk::Yüzde(5.0),
+            üst: Uzunluk::Piksel(50.0),
+            genişlik: Uzunluk::Yüzde(90.0),
+            yükseklik: Uzunluk::Yüzde(80.0),
+            hücre_boşluğu: 2.0,
+            en_çok_derinlik: 2,
+        }
+    }
+}
+
+impl AğaçHaritasıSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn kökler(
+        mut self,
+        kökler: impl IntoIterator<Item = crate::model::agac::AğaçDüğümü>,
+    ) -> Self {
+        self.kökler = kökler.into_iter().collect();
+        self
+    }
+
+    pub fn en_çok_derinlik(mut self, derinlik: usize) -> Self {
+        self.en_çok_derinlik = derinlik;
+        self
+    }
+}
+
+/// Güneş patlaması serisi (`series-sunburst`): iç içe halkalar.
+#[derive(Clone, Debug)]
+pub struct GüneşPatlamasıSerisi {
+    pub ad: Option<String>,
+    pub kökler: Vec<crate::model::agac::AğaçDüğümü>,
+    pub merkez: (Uzunluk, Uzunluk),
+    /// `(iç, dış)` yarıçap.
+    pub yarıçap: (Uzunluk, Uzunluk),
+}
+
+impl Default for GüneşPatlamasıSerisi {
+    fn default() -> Self {
+        GüneşPatlamasıSerisi {
+            ad: None,
+            kökler: Vec::new(),
+            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
+            yarıçap: (Uzunluk::Yüzde(12.0), Uzunluk::Yüzde(75.0)),
+        }
+    }
+}
+
+impl GüneşPatlamasıSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn kökler(
+        mut self,
+        kökler: impl IntoIterator<Item = crate::model::agac::AğaçDüğümü>,
+    ) -> Self {
+        self.kökler = kökler.into_iter().collect();
+        self
+    }
+
+    pub fn halka(mut self, iç: impl Into<Uzunluk>, dış: impl Into<Uzunluk>) -> Self {
+        self.yarıçap = (iç.into(), dış.into());
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -1174,6 +1273,8 @@ pub enum Seri {
     GöstergeSaati(GöstergeSaatiSerisi),
     Radar(RadarSerisi),
     Özel(ÖzelSeri),
+    AğaçHaritası(AğaçHaritasıSerisi),
+    GüneşPatlaması(GüneşPatlamasıSerisi),
 }
 
 impl Seri {
@@ -1190,6 +1291,8 @@ impl Seri {
             Seri::GöstergeSaati(s) => s.ad.as_deref(),
             Seri::Radar(s) => s.ad.as_deref(),
             Seri::Özel(s) => s.ad.as_deref(),
+            Seri::AğaçHaritası(s) => s.ad.as_deref(),
+            Seri::GüneşPatlaması(s) => s.ad.as_deref(),
         }
     }
 
@@ -1232,6 +1335,7 @@ impl Seri {
             Seri::GöstergeSaati(s) => &s.veri,
             Seri::Radar(s) => &s.veri,
             Seri::Özel(s) => &s.veri,
+            Seri::AğaçHaritası(_) | Seri::GüneşPatlaması(_) => &[],
         }
     }
 
@@ -1262,7 +1366,9 @@ impl Seri {
             | Seri::Huni(_)
             | Seri::GöstergeSaati(_)
             | Seri::Radar(_)
-            | Seri::Özel(_) => None,
+            | Seri::Özel(_)
+            | Seri::AğaçHaritası(_)
+            | Seri::GüneşPatlaması(_) => None,
         }
     }
 
@@ -1279,7 +1385,9 @@ impl Seri {
             | Seri::Huni(_)
             | Seri::GöstergeSaati(_)
             | Seri::Radar(_)
-            | Seri::Özel(_) => None,
+            | Seri::Özel(_)
+            | Seri::AğaçHaritası(_)
+            | Seri::GüneşPatlaması(_) => None,
         }
     }
 }
@@ -1347,5 +1455,17 @@ impl From<RadarSerisi> for Seri {
 impl From<ÖzelSeri> for Seri {
     fn from(s: ÖzelSeri) -> Seri {
         Seri::Özel(s)
+    }
+}
+
+impl From<AğaçHaritasıSerisi> for Seri {
+    fn from(s: AğaçHaritasıSerisi) -> Seri {
+        Seri::AğaçHaritası(s)
+    }
+}
+
+impl From<GüneşPatlamasıSerisi> for Seri {
+    fn from(s: GüneşPatlamasıSerisi) -> Seri {
+        Seri::GüneşPatlaması(s)
     }
 }

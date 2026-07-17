@@ -26,7 +26,9 @@ use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::grafik::cizgi::{nokta_listeleri, çizgi_serisi_çiz};
+use crate::grafik::agac_haritasi::{ağaç_haritası_çiz, hücre_değer_metni};
 use crate::grafik::gosterge_saati::gösterge_saati_çiz;
+use crate::grafik::gunes::güneş_patlaması_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
@@ -1005,7 +1007,12 @@ pub fn grafiği_boya(
                         çizim(yüzey, &bağlam);
                     }
                 }
-                Seri::Pasta(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) | Seri::Radar(_) => {}
+                Seri::Pasta(_)
+                | Seri::Huni(_)
+                | Seri::GöstergeSaati(_)
+                | Seri::Radar(_)
+                | Seri::AğaçHaritası(_)
+                | Seri::GüneşPatlaması(_) => {}
             }
             };
             if pencereli {
@@ -1403,6 +1410,77 @@ pub fn grafiği_boya(
                             }
                         }
                     }
+            }
+            Seri::AğaçHaritası(a) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let önce = çıktı.isabetler.len();
+                let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                ağaç_haritası_çiz(
+                    yüzey,
+                    a,
+                    i,
+                    tüm_alan,
+                    &palet,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
+                // Öğe ipucu.
+                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                        && let Some(b) = çıktı
+                            .isabetler
+                            .iter()
+                            .skip(önce)
+                            .rev()
+                            .find(|b| b.geometri.içeriyor_mu(f))
+                        {
+                            bekleyen_ipucu = Some((
+                                b.ad.clone(),
+                                vec![İpucuSatırı {
+                                    im_rengi: None,
+                                    ad: "Değer".to_string(),
+                                    değer: hücre_değer_metni(b.değer.unwrap_or(0.0)),
+                                }],
+                                f,
+                            ));
+                        }
+            }
+            Seri::GüneşPatlaması(g) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let önce = çıktı.isabetler.len();
+                let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                güneş_patlaması_çiz(
+                    yüzey,
+                    g,
+                    i,
+                    tüm_alan,
+                    &palet,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
+                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                        && let Some(b) = çıktı
+                            .isabetler
+                            .iter()
+                            .skip(önce)
+                            .rev()
+                            .find(|b| b.geometri.içeriyor_mu(f))
+                        {
+                            bekleyen_ipucu = Some((
+                                b.ad.clone(),
+                                vec![İpucuSatırı {
+                                    im_rengi: None,
+                                    ad: "Değer".to_string(),
+                                    değer: hücre_değer_metni(b.değer.unwrap_or(0.0)),
+                                }],
+                                f,
+                            ));
+                        }
             }
             Seri::Özel(s) if !s.kartezyen_gerekli => {
                 if !ad_görünür(seri.ad(), kapalı) {

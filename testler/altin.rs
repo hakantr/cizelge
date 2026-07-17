@@ -522,6 +522,52 @@ fn kutupsal_seriler() {
 }
 
 #[test]
+fn ağaç_haritası() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .başlık(Başlık::yeni().metin("Disk"))
+        .animasyon(false)
+        .seri(AğaçHaritasıSerisi::yeni().ad("Disk").kökler([
+            AğaçDüğümü::dal(
+                "Belgeler",
+                vec![
+                    AğaçDüğümü::yaprak("Raporlar", 32.0),
+                    AğaçDüğümü::yaprak("Sunumlar", 18.0),
+                ],
+            ),
+            AğaçDüğümü::dal(
+                "Medya",
+                vec![
+                    AğaçDüğümü::yaprak("Video", 60.0),
+                    AğaçDüğümü::yaprak("Müzik", 25.0),
+                    AğaçDüğümü::yaprak("Fotoğraf", 15.0),
+                ],
+            ),
+            AğaçDüğümü::yaprak("Sistem", 20.0),
+        ]));
+    altın_karşılaştır("agac_haritasi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
+fn güneş_patlaması() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(GüneşPatlamasıSerisi::yeni().ad("Kaynak").kökler([
+            AğaçDüğümü::dal(
+                "A",
+                vec![AğaçDüğümü::yaprak("A1", 4.0), AğaçDüğümü::yaprak("A2", 6.0)],
+            ),
+            AğaçDüğümü::dal(
+                "B",
+                vec![
+                    AğaçDüğümü::yaprak("B1", 3.0),
+                    AğaçDüğümü::dal("B2", vec![AğaçDüğümü::yaprak("B2a", 2.0)]),
+                ],
+            ),
+        ]));
+    altın_karşılaştır("gunes_patlamasi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
