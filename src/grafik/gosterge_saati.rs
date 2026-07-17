@@ -67,7 +67,7 @@ pub fn gösterge_saati_çiz(
             yarıçap,
             ekran_açısı(orandan_açı(önceki_oran)),
             ekran_açısı(orandan_açı(1.0)),
-            &Dolgu::Düz(tema::NÖTR_15),
+            &Dolgu::Düz(tema::nötr_15()),
             None,
         );
     }
@@ -79,7 +79,7 @@ pub fn gösterge_saati_çiz(
                 return *renk;
             }
         }
-        tema::EKSEN_ÇİZGİSİ
+        tema::eksen_çizgisi()
     };
 
     // 2) Çentikler ve etiketler.
@@ -109,7 +109,7 @@ pub fn gösterge_saati_çiz(
                 YatayHiza::Orta,
                 DikeyHiza::Orta,
                 seri.etiket_boyutu,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 false,
             );
         }
@@ -167,7 +167,7 @@ pub fn gösterge_saati_çiz(
                 YatayHiza::Orta,
                 DikeyHiza::Orta,
                 tema::YAZI_KÜÇÜK,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 false,
             );
         }

@@ -19,6 +19,7 @@ pub mod sacilim;
 pub mod sankey;
 pub mod sutun;
 pub mod takvim_isi;
+pub mod tema_nehri;
 
 use crate::cizim::ÇizimYüzeyi;
 use crate::model::seri::Sembol;

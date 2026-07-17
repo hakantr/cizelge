@@ -182,7 +182,7 @@ pub fn pasta_çiz(
         };
         match seri.etiket.konum {
             EtiketKonumu::Merkez => {
-                let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+                let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
                 çizici.yazı(
                     &metin,
                     dilim.merkez,
@@ -231,7 +231,7 @@ pub fn pasta_çiz(
                     yol.çiz(b2);
                     çizici.yol_çiz(&yol, 1.0, dilim.renk, crate::model::stil::ÇizgiTürü::Düz);
                 }
-                let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+                let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
                 çizici.yazı(
                     &metin,
                     (b2.0 + if sağda { 4.0 } else { -4.0 }, b2.1),

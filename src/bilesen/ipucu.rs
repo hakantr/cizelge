@@ -65,11 +65,11 @@ pub fn ipucu_çiz(
     let kutu = Dikdörtgen::yeni(x, y, kutu_genişliği, kutu_yüksekliği);
 
     // Kutu: gölge + arka plan + kenarlık.
-    çizici.gölge(kutu, 4.0, tema::İPUCU_GÖLGESİ, 10.0);
-    let arkaplan = seçenek.arkaplan.unwrap_or(tema::İPUCU_ARKAPLANI);
-    çizici.dikdörtgen(kutu, &Dolgu::Düz(arkaplan), [4.0; 4], Some((1.0, tema::İPUCU_KENARLIĞI)));
+    çizici.gölge(kutu, 4.0, tema::ipucu_gölgesi(), 10.0);
+    let arkaplan = seçenek.arkaplan.unwrap_or(tema::ipucu_arkaplanı());
+    çizici.dikdörtgen(kutu, &Dolgu::Düz(arkaplan), [4.0; 4], Some((1.0, tema::ipucu_kenarlığı())));
 
-    let metin_rengi = seçenek.yazı.renk.unwrap_or(tema::İPUCU_METNİ);
+    let metin_rengi = seçenek.yazı.renk.unwrap_or(tema::ipucu_metni());
     let mut satır_y = y + İÇ_BOŞLUK + satır_yüksekliği / 2.0;
 
     if let Some(b) = başlık {

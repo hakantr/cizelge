@@ -1663,6 +1663,56 @@ impl TakvimSerisi {
     }
 }
 
+/// Tema nehri serisi (`themeRiver` + tek eksen karşılığı). Veri kayıtları
+/// `(x, değer, katman adı)` üçlüleridir; katmanlar siluet taban çizgisi
+/// etrafında yumuşak bantlar olarak yığılır.
+#[derive(Clone, Debug)]
+pub struct TemaNehriSerisi {
+    pub ad: Option<String>,
+    /// `(x, değer, katman)` kayıtları.
+    pub veri: Vec<(f64, f64, String)>,
+    pub sol: Uzunluk,
+    pub üst: Uzunluk,
+    pub genişlik: Uzunluk,
+    pub yükseklik: Uzunluk,
+}
+
+impl Default for TemaNehriSerisi {
+    fn default() -> Self {
+        TemaNehriSerisi {
+            ad: None,
+            veri: Vec::new(),
+            sol: Uzunluk::Yüzde(8.0),
+            üst: Uzunluk::Piksel(70.0),
+            genişlik: Uzunluk::Yüzde(84.0),
+            yükseklik: Uzunluk::Yüzde(58.0),
+        }
+    }
+}
+
+impl TemaNehriSerisi {
+    pub fn yeni() -> Self {
+        TemaNehriSerisi::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Veri: `(x, değer, katman)` üçlüleri.
+    pub fn veri<S: Into<String>>(
+        mut self,
+        veri: impl IntoIterator<Item = (f64, f64, S)>,
+    ) -> Self {
+        self.veri = veri
+            .into_iter()
+            .map(|(x, değer, katman)| (x, değer, katman.into()))
+            .collect();
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -1685,6 +1735,7 @@ pub enum Seri {
     Kiriş(KirişSerisi),
     Paralel(ParalelSerisi),
     Takvim(TakvimSerisi),
+    TemaNehri(TemaNehriSerisi),
 }
 
 impl Seri {
@@ -1709,6 +1760,7 @@ impl Seri {
             Seri::Kiriş(s) => s.ad.as_deref(),
             Seri::Paralel(s) => s.ad.as_deref(),
             Seri::Takvim(s) => s.ad.as_deref(),
+            Seri::TemaNehri(s) => s.ad.as_deref(),
         }
     }
 
@@ -1759,6 +1811,7 @@ impl Seri {
             | Seri::Kiriş(_) => &[],
             Seri::Paralel(s) => &s.veri,
             Seri::Takvim(s) => &s.veri,
+            Seri::TemaNehri(_) => &[],
         }
     }
 
@@ -1797,7 +1850,8 @@ impl Seri {
             | Seri::Grafo(_)
             | Seri::Kiriş(_)
             | Seri::Paralel(_)
-            | Seri::Takvim(_) => None,
+            | Seri::Takvim(_)
+            | Seri::TemaNehri(_) => None,
         }
     }
 
@@ -1822,7 +1876,8 @@ impl Seri {
             | Seri::Grafo(_)
             | Seri::Kiriş(_)
             | Seri::Paralel(_)
-            | Seri::Takvim(_) => None,
+            | Seri::Takvim(_)
+            | Seri::TemaNehri(_) => None,
         }
     }
 }
@@ -1938,5 +1993,11 @@ impl From<ParalelSerisi> for Seri {
 impl From<TakvimSerisi> for Seri {
     fn from(s: TakvimSerisi) -> Seri {
         Seri::Takvim(s)
+    }
+}
+
+impl From<TemaNehriSerisi> for Seri {
+    fn from(s: TemaNehriSerisi) -> Seri {
+        Seri::TemaNehri(s)
     }
 }

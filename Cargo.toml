@@ -91,6 +91,9 @@ name = "sankey"
 [[example]]
 name = "grafo"
 
+[[example]]
+name = "tema_nehri"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

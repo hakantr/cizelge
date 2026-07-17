@@ -85,7 +85,7 @@ pub fn ısı_haritası_çiz(
             let yazı_rengi = seri.etiket.yazı.renk.unwrap_or(if parlaklık < 0.55 {
                 Renk::BEYAZ
             } else {
-                tema::BİRİNCİL_METİN
+                tema::birincil_metin()
             });
             çizici.yazı(
                 &binlik_ayır(değer),
@@ -133,10 +133,10 @@ pub fn görsel_eşleme_çiz(
                 - KENAR
                 - SATIR * (n.saturating_sub(i)) as f32;
             let açık = eşleme.parça_açık_mı(i);
-            let renk = if açık { parça.renk } else { tema::DEVRE_DIŞI };
+            let renk = if açık { parça.renk } else { tema::devre_dışı() };
             let kutu = Dikdörtgen::yeni(KENAR, y + (SATIR - KUTU) / 2.0, KUTU, KUTU);
             çizici.dikdörtgen(kutu, &Dolgu::Düz(renk), [3.0; 4], None);
-            let yazı_rengi = if açık { tema::İKİNCİL_METİN } else { tema::DEVRE_DIŞI };
+            let yazı_rengi = if açık { tema::ikincil_metin() } else { tema::devre_dışı() };
             let (metin_gen, _) = çizici.yazı(
                 &parça.etiket_metni(),
                 (KENAR + KUTU + 6.0, y + SATIR / 2.0),
@@ -204,7 +204,7 @@ pub fn görsel_eşleme_çiz(
         YatayHiza::Orta,
         DikeyHiza::Alt,
         boyut,
-        tema::İKİNCİL_METİN,
+        tema::ikincil_metin(),
         false,
     );
     çizici.yazı(
@@ -213,7 +213,7 @@ pub fn görsel_eşleme_çiz(
         YatayHiza::Orta,
         DikeyHiza::Üst,
         boyut,
-        tema::İKİNCİL_METİN,
+        tema::ikincil_metin(),
         false,
     );
     Vec::new()

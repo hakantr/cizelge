@@ -109,7 +109,7 @@ pub fn ağaç_çiz(
         let mut yol = Yol::yeni();
         yol.taşı((x0, y0));
         yol.kübik((orta, y0), (orta, y1), (x1, y1));
-        çizici.yol_çiz(&yol, 1.5, tema::NÖTR_30, crate::model::stil::ÇizgiTürü::Düz);
+        çizici.yol_çiz(&yol, 1.5, tema::nötr_30(), crate::model::stil::ÇizgiTürü::Düz);
     }
 
     // 2) Düğümler ve etiketler.
@@ -130,7 +130,7 @@ pub fn ağaç_çiz(
                 YatayHiza::Sol,
                 DikeyHiza::Orta,
                 boyut,
-                tema::BİRİNCİL_METİN,
+                tema::birincil_metin(),
                 false,
             );
         } else {
@@ -140,7 +140,7 @@ pub fn ağaç_çiz(
                 YatayHiza::Orta,
                 DikeyHiza::Alt,
                 boyut,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 false,
             );
         }

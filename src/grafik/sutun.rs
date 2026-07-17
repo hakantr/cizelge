@@ -165,7 +165,7 @@ pub fn sütunları_çiz(
                         None => binlik_ayır(değer),
                     };
                     let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-                    let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+                    let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
                     if yatay {
                         let x = if değer >= 0.0 { d.sağ() + 4.0 } else { d.x - 4.0 };
                         let hiza = if değer >= 0.0 { YatayHiza::Sol } else { YatayHiza::Sağ };

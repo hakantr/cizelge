@@ -50,7 +50,7 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
         .unwrap_or(İÇ_BOŞLUK);
 
     if let Some(metin) = &başlık.metin {
-        let renk = başlık.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+        let renk = başlık.yazı.renk.unwrap_or(tema::birincil_metin());
         let (_, yükseklik) = çizici.yazı(
             metin,
             (çapa_x, y),
@@ -63,7 +63,7 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
         y += yükseklik + SATIR_ARASI;
     }
     if let Some(alt) = &başlık.alt_metin {
-        let renk = başlık.alt_yazı.renk.unwrap_or(tema::ÜÇÜNCÜL_METİN);
+        let renk = başlık.alt_yazı.renk.unwrap_or(tema::üçüncül_metin());
         çizici.yazı(alt, (çapa_x, y), hiza, DikeyHiza::Üst, alt_boyut, renk, false);
     }
 }

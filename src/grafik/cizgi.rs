@@ -338,7 +338,7 @@ pub fn çizgi_serisi_çiz(
         // 4) Değer etiketleri.
         if seri.etiket.göster {
             let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+            let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
             for (i, nokta) in tepeler.iter().enumerate() {
                 let Some((x, y)) = nokta else { continue };
                 let Some(öğe) = seri.veri.get(i) else { continue };

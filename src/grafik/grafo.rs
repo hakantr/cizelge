@@ -132,7 +132,7 @@ pub fn grafo_çiz(
             *a,
             *b,
             1.0,
-            tema::NÖTR_30.opaklık(opaklık),
+            tema::nötr_30().opaklık(opaklık),
             crate::model::stil::ÇizgiTürü::Düz,
         );
     }
@@ -155,7 +155,7 @@ pub fn grafo_çiz(
                 YatayHiza::Orta,
                 DikeyHiza::Üst,
                 tema::YAZI_KÜÇÜK,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 false,
             );
         }

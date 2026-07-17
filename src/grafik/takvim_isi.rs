@@ -124,7 +124,7 @@ pub fn takvim_çiz(
             YatayHiza::Sağ,
             DikeyHiza::Orta,
             10.0,
-            tema::ÜÇÜNCÜL_METİN,
+            tema::üçüncül_metin(),
             false,
         );
     }
@@ -144,7 +144,7 @@ pub fn takvim_çiz(
                 YatayHiza::Sol,
                 DikeyHiza::Alt,
                 10.0,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 false,
             );
         }
@@ -157,13 +157,13 @@ pub fn takvim_çiz(
                         Some(parça) if eşleme.parça_açık_mı(parça) => {
                             eşleme.renk_çöz(d, eşleme_kapsamı)
                         }
-                        _ => tema::NÖTR_05,
+                        _ => tema::nötr_05(),
                     }
                 } else {
                     eşleme.renk_çöz(d, eşleme_kapsamı)
                 }
             }
-            None => tema::NÖTR_05,
+            None => tema::nötr_05(),
         };
         çizici.dikdörtgen(
             hücre,

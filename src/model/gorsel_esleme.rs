@@ -146,7 +146,7 @@ impl GörselEşleme {
                 .parça_bul(değer)
                 .and_then(|i| self.parçalar.get(i))
                 .map(|p| p.renk)
-                .unwrap_or(crate::tema::NÖTR_20);
+                .unwrap_or(crate::tema::nötr_20());
         }
         let (Some(ilk), Some(son)) = (self.renkler.first(), self.renkler.last()) else {
             return Renk::SİYAH;

@@ -28,13 +28,16 @@ pub fn bölme_çizgilerini_çiz(
 ) {
     // 1) Bölme alanları (`splitArea`): ana çentikler arasında dönüşümlü
     //    bantlar; çizgilerin de altında kalır.
+    let tema_bantları = tema::bölme_alanı_renkleri().to_vec();
     for eksen in eksenler {
-        if !eksen.seçenek.bölme_alanı.göster
-            || eksen.seçenek.bölme_alanı.renkler.is_empty()
-        {
+        if !eksen.seçenek.bölme_alanı.göster {
             continue;
         }
-        let renkler = &eksen.seçenek.bölme_alanı.renkler;
+        let renkler = if eksen.seçenek.bölme_alanı.renkler.is_empty() {
+            &tema_bantları
+        } else {
+            &eksen.seçenek.bölme_alanı.renkler
+        };
         let konumlar = eksen.çizgi_çentikleri(false);
         for (i, çift) in konumlar.windows(2).enumerate() {
             let [a, b] = çift else { continue };
@@ -67,7 +70,7 @@ pub fn bölme_çizgilerini_çiz(
             .seçenek
             .ara_bölme_çizgisi
             .renk
-            .unwrap_or(tema::ARA_BÖLME_ÇİZGİSİ);
+            .unwrap_or(tema::ara_bölme_çizgisi());
         let tür = eksen.seçenek.ara_bölme_çizgisi.tür;
         for konum in eksen.ara_çentik_pikselleri(eksen.seçenek.ara_çentik.bölme_sayısı) {
             let konum = keskin(konum);
@@ -84,7 +87,7 @@ pub fn bölme_çizgilerini_çiz(
         if !eksen.seçenek.bölme_görünür_mü() {
             continue;
         }
-        let renk = eksen.seçenek.bölme_çizgisi.renk.unwrap_or(tema::BÖLME_ÇİZGİSİ);
+        let renk = eksen.seçenek.bölme_çizgisi.renk.unwrap_or(tema::bölme_çizgisi());
         let tür = eksen.seçenek.bölme_çizgisi.tür;
         for konum in eksen.çizgi_çentikleri(false) {
             let konum = keskin(konum);
@@ -120,7 +123,7 @@ pub fn eksenleri_çiz(
 
         // 1) Eksen çizgisi.
         if eksen.seçenek.çizgi_görünür_mü() {
-            let renk = eksen.seçenek.çizgi.renk.unwrap_or(tema::EKSEN_ÇİZGİSİ);
+            let renk = eksen.seçenek.çizgi.renk.unwrap_or(tema::eksen_çizgisi());
             let kalınlık = eksen.seçenek.çizgi.kalınlık;
             let konum = if kalınlık <= 1.5 { sabit_keskin } else { sabit };
             if eksen.yatay_mı() {
@@ -160,7 +163,7 @@ pub fn eksenleri_çiz(
 
         // 2) Çentikler.
         if eksen.seçenek.çentik_görünür_mü() {
-            let renk = tema::EKSEN_ÇENTİĞİ;
+            let renk = tema::eksen_çentiği();
             let uzunluk = eksen.seçenek.çentik.uzunluk;
             for (i, konum) in eksen
                 .çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala)
@@ -193,7 +196,7 @@ pub fn eksenleri_çiz(
 
         // 2b) Ara çentikler (`minorTick`).
         if eksen.seçenek.ara_çentik.göster {
-            let renk = tema::EKSEN_ARA_ÇENTİĞİ;
+            let renk = tema::eksen_ara_çentiği();
             let uzunluk = eksen.seçenek.ara_çentik.uzunluk;
             for konum in eksen.ara_çentik_pikselleri(eksen.seçenek.ara_çentik.bölme_sayısı)
             {
@@ -221,7 +224,7 @@ pub fn eksenleri_çiz(
         // 3) Etiketler.
         if eksen.seçenek.etiket.göster {
             let boyut = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            let renk = eksen.seçenek.etiket.yazı.renk.unwrap_or(tema::EKSEN_ETİKETİ);
+            let renk = eksen.seçenek.etiket.yazı.renk.unwrap_or(tema::eksen_etiketi());
             let boşluk = eksen.seçenek.etiket.boşluk;
             let çentikler = eksen.etiket_çentikleri();
 
@@ -266,7 +269,7 @@ pub fn eksenleri_çiz(
                     YatayHiza::Sol,
                     DikeyHiza::Orta,
                     boyut,
-                    tema::EKSEN_ETİKETİ,
+                    tema::eksen_etiketi(),
                     false,
                 );
             } else {
@@ -276,7 +279,7 @@ pub fn eksenleri_çiz(
                     YatayHiza::Orta,
                     DikeyHiza::Alt,
                     boyut,
-                    tema::EKSEN_ETİKETİ,
+                    tema::eksen_etiketi(),
                     false,
                 );
             }

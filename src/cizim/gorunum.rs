@@ -44,6 +44,7 @@ use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımN
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{sütunları_çiz, SütunGirdisi};
 use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_çiz};
+use crate::grafik::tema_nehri::tema_nehri_çiz;
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B, ÇalışmaEkseni};
 use crate::model::bilesen::{GöstergeSimgesi, Tetikleme, İmleçTürü, İpucu};
@@ -671,6 +672,9 @@ pub fn grafiği_boya(
 ) -> BoyamaÇıktısı {
     let mut çıktı = BoyamaÇıktısı::default();
     // Veri kümesi eşlemeleri: seriler tablodan türetilir.
+    // Etkin tema kipi: tüm `tema::*` erişimcileri bu seçime göre çözülür.
+    crate::tema::koyu_ayarla(seçenekler.koyu);
+
     let türetilmiş;
     let seçenekler = if seçenekler.veri_kümesi.is_some() {
         let (yeni, _hatalar) = seçenekler.veri_kümesini_uygula();
@@ -684,8 +688,11 @@ pub fn grafiği_boya(
     let fare = girdi.fare;
     let kapalı = &girdi.kapalı;
 
-    // 1) Arka plan.
-    if let Some(renk) = seçenekler.arkaplan {
+    // 1) Arka plan (koyu temada zemin, açıkça verilmemişse de doldurulur).
+    let zemin = seçenekler
+        .arkaplan
+        .or_else(|| seçenekler.koyu.then(crate::tema::zemin));
+    if let Some(renk) = zemin {
         let tümü = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
         yüzey.dikdörtgen(tümü, &Dolgu::Düz(renk), [0.0; 4], None);
     }
@@ -717,9 +724,9 @@ pub fn grafiği_boya(
             );
             yüzey.dikdörtgen(
                 kutu,
-                &Dolgu::Düz(tema::NÖTR_05),
+                &Dolgu::Düz(tema::nötr_05()),
                 [4.0; 4],
-                Some((1.0, tema::NÖTR_15)),
+                Some((1.0, tema::nötr_15())),
             );
             yüzey.yazı(
                 metin,
@@ -727,7 +734,7 @@ pub fn grafiği_boya(
                 crate::cizim::YatayHiza::Orta,
                 crate::cizim::DikeyHiza::Orta,
                 boyut,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 false,
             );
             çıktı.araç_düğmeleri.push((kutu, AraçTürü::GeriYükle));
@@ -785,7 +792,7 @@ pub fn grafiği_boya(
                         } else {
                             Dikdörtgen::yeni(alan.x, merkez - bant / 2.0, alan.genişlik, bant)
                         };
-                        yüzey.dikdörtgen(d, &Dolgu::Düz(tema::İMLEÇ_GÖLGESİ), [0.0; 4], None);
+                        yüzey.dikdörtgen(d, &Dolgu::Düz(tema::imleç_gölgesi()), [0.0; 4], None);
                     }
                 }
 
@@ -1033,7 +1040,8 @@ pub fn grafiği_boya(
                 | Seri::Grafo(_)
                 | Seri::Kiriş(_)
                 | Seri::Paralel(_)
-                | Seri::Takvim(_) => {}
+                | Seri::Takvim(_)
+                | Seri::TemaNehri(_) => {}
             }
             };
             if pencereli {
@@ -1080,14 +1088,14 @@ pub fn grafiği_boya(
                             (fx, alan.y),
                             (fx, alan.alt()),
                             1.0,
-                            tema::İMLEÇ_ÇİZGİSİ,
+                            tema::imleç_çizgisi(),
                             ÇizgiTürü::Kesikli,
                         );
                         yüzey.çizgi(
                             (alan.x, fy),
                             (alan.sağ(), fy),
                             1.0,
-                            tema::İMLEÇ_ÇİZGİSİ,
+                            tema::imleç_çizgisi(),
                             ÇizgiTürü::Kesikli,
                         );
                         let mut kenar_etiketi =
@@ -1109,7 +1117,7 @@ pub fn grafiği_boya(
                                         y + 4.0,
                                     )
                                 };
-                                yüzey.dikdörtgen(kutu, &Dolgu::Düz(tema::NÖTR_70), [2.0; 4], None);
+                                yüzey.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_70()), [2.0; 4], None);
                                 yüzey.yazı(
                                     metin,
                                     kutu.merkez(),
@@ -1163,9 +1171,9 @@ pub fn grafiği_boya(
                     // Şerit zemini.
                     yüzey.dikdörtgen(
                         şerit,
-                        &Dolgu::Düz(tema::NÖTR_05),
+                        &Dolgu::Düz(tema::nötr_05()),
                         [3.0; 4],
-                        Some((1.0, tema::NÖTR_15)),
+                        Some((1.0, tema::nötr_15())),
                     );
                     // Seçili pencere.
                     let p_x = şerit.x + şerit.genişlik * b;
@@ -1173,7 +1181,7 @@ pub fn grafiği_boya(
                     let pencere = Dikdörtgen::yeni(p_x, şerit.y, p_g, şerit.yükseklik);
                     yüzey.dikdörtgen(
                         pencere,
-                        &Dolgu::Düz(tema::NÖTR_40.opaklık(0.35)),
+                        &Dolgu::Düz(tema::nötr_40().opaklık(0.35)),
                         [2.0; 4],
                         None,
                     );
@@ -1186,9 +1194,9 @@ pub fn grafiği_boya(
                     for t in [sol, sağ] {
                         yüzey.dikdörtgen(
                             t,
-                            &Dolgu::Düz(tema::NÖTR_50),
+                            &Dolgu::Düz(tema::nötr_50()),
                             [3.0; 4],
-                            Some((1.0, tema::NÖTR_00)),
+                            Some((1.0, tema::nötr_00())),
                         );
                     }
                     çıktı.sürgüler.push(SürgüBölgesi {
@@ -1231,7 +1239,7 @@ pub fn grafiği_boya(
                                 (merkez, alan.y),
                                 (merkez, alan.alt()),
                                 1.0,
-                                tema::İMLEÇ_ÇİZGİSİ,
+                                tema::imleç_çizgisi(),
                                 ÇizgiTürü::Düz,
                             );
                         } else {
@@ -1239,7 +1247,7 @@ pub fn grafiği_boya(
                                 (alan.x, merkez),
                                 (alan.sağ(), merkez),
                                 1.0,
-                                tema::İMLEÇ_ÇİZGİSİ,
+                                tema::imleç_çizgisi(),
                                 ÇizgiTürü::Düz,
                             );
                         }
@@ -1449,6 +1457,31 @@ pub fn grafiği_boya(
                     ilerleme,
                     &mut çıktı.isabetler,
                 );
+                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                        && let Some(b) = çıktı
+                            .isabetler
+                            .iter()
+                            .skip(önce)
+                            .rev()
+                            .find(|b| b.geometri.içeriyor_mu(f))
+                        {
+                            let satır = İpucuSatırı {
+                                im_rengi: None,
+                                ad: b.ad.clone().unwrap_or_default(),
+                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                            };
+                            bekleyen_ipucu =
+                                Some((seri.ad().map(str::to_string), vec![satır], f));
+                        }
+            }
+            Seri::TemaNehri(s) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let önce = çıktı.isabetler.len();
+                let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                tema_nehri_çiz(yüzey, s, i, tüm_alan, &palet, ilerleme, &mut çıktı.isabetler);
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
                         && let Some(b) = çıktı
@@ -1703,7 +1736,7 @@ pub fn grafiği_boya(
         if d.genişlik > 1.0 && d.yükseklik > 1.0 {
             yüzey.dikdörtgen(
                 d,
-                &Dolgu::Düz(tema::NÖTR_40.opaklık(0.15)),
+                &Dolgu::Düz(tema::nötr_40().opaklık(0.15)),
                 [0.0; 4],
                 None,
             );
@@ -1713,7 +1746,7 @@ pub fn grafiği_boya(
             çerçeve.çiz((d.sağ(), d.alt()));
             çerçeve.çiz((d.x, d.alt()));
             çerçeve.kapat();
-            yüzey.yol_çiz(&çerçeve, 1.0, tema::NÖTR_50, ÇizgiTürü::Kesikli);
+            yüzey.yol_çiz(&çerçeve, 1.0, tema::nötr_50(), ÇizgiTürü::Kesikli);
         }
     }
 

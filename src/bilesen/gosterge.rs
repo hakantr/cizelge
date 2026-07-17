@@ -104,14 +104,14 @@ pub fn gösterge_çiz(
         let sol_ok = Dikdörtgen::yeni(denetim_x, üst, 18.0, satır_yüksekliği);
         let sağ_ok = Dikdörtgen::yeni(denetim_x + 70.0, üst, 18.0, satır_yüksekliği);
         for (kutu, işaret, yön) in [(sol_ok, "‹", -1i32), (sağ_ok, "›", 1i32)] {
-            çizici.dikdörtgen(kutu, &Dolgu::Düz(tema::NÖTR_10), [3.0; 4], None);
+            çizici.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_10()), [3.0; 4], None);
             çizici.yazı(
                 işaret,
                 kutu.merkez(),
                 YatayHiza::Orta,
                 DikeyHiza::Orta,
                 boyut,
-                tema::İKİNCİL_METİN,
+                tema::ikincil_metin(),
                 true,
             );
             oklar.push((kutu, yön));
@@ -122,7 +122,7 @@ pub fn gösterge_çiz(
             YatayHiza::Orta,
             DikeyHiza::Orta,
             boyut,
-            tema::İKİNCİL_METİN,
+            tema::ikincil_metin(),
             false,
         );
         return GöstergeÇıktısı { kutular, oklar, sayfa_sayısı };
@@ -173,7 +173,7 @@ fn öğe_çiz(
     kutu: Dikdörtgen,
     yazı_boyutu: f32,
 ) {
-    let renk = if öğe.kapalı { tema::DEVRE_DIŞI } else { öğe.renk };
+    let renk = if öğe.kapalı { tema::devre_dışı() } else { öğe.renk };
     let simge = seçenek.simge.unwrap_or(öğe.simge);
     let orta_y = kutu.y + kutu.yükseklik / 2.0;
 
@@ -215,9 +215,9 @@ fn öğe_çiz(
     }
 
     let yazı_rengi = if öğe.kapalı {
-        tema::DEVRE_DIŞI
+        tema::devre_dışı()
     } else {
-        seçenek.yazı.renk.unwrap_or(tema::İKİNCİL_METİN)
+        seçenek.yazı.renk.unwrap_or(tema::ikincil_metin())
     };
     çizici.yazı(
         &öğe.ad,

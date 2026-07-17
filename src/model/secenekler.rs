@@ -47,6 +47,9 @@ pub struct GrafikSeçenekleri {
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
     pub arkaplan: Option<Renk>,
+    /// Koyu tema (`theme: 'dark'` karşılığı): eksen/yazı/ipucu renkleri koyu
+    /// belirteçlerden çözülür; `arkaplan` verilmemişse koyu zemin doldurulur.
+    pub koyu: bool,
     pub animasyon: bool,
     /// Giriş animasyonu süresi, ms (`animationDuration`).
     pub animasyon_süresi: f32,
@@ -78,6 +81,7 @@ impl Default for GrafikSeçenekleri {
             fırça: None,
             palet: tema::PALET.to_vec(),
             arkaplan: None,
+            koyu: false,
             animasyon: true,
             animasyon_süresi: ÖNTANIMLI_SÜRE_MS,
             animasyon_süresi_güncelleme: 300.0,
@@ -281,6 +285,12 @@ impl GrafikSeçenekleri {
         self
     }
 
+    /// Koyu temayı açar/kapatır (`theme: 'dark'`).
+    pub fn koyu(mut self, açık: bool) -> Self {
+        self.koyu = açık;
+        self
+    }
+
     pub fn animasyon(mut self, açık: bool) -> Self {
         self.animasyon = açık;
         self
@@ -430,7 +440,8 @@ impl GrafikSeçenekleri {
                 | Seri::Ağaç(_)
                 | Seri::Sankey(_)
                 | Seri::Grafo(_)
-                | Seri::Kiriş(_) => {}
+                | Seri::Kiriş(_)
+                | Seri::TemaNehri(_) => {}
                 Seri::Paralel(s) => karıştır(&mut s.veri),
                 Seri::Takvim(s) => karıştır(&mut s.veri),
             }

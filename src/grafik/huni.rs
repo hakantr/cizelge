@@ -182,7 +182,7 @@ pub fn huni_çiz(
                         dilim.renk,
                         crate::model::stil::ÇizgiTürü::Düz,
                     );
-                    let renk = seri.etiket.yazı.renk.unwrap_or(tema::BİRİNCİL_METİN);
+                    let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
                     çizici.yazı(
                         &metin,
                         (uç.0 + 4.0, uç.1),

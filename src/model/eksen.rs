@@ -3,7 +3,6 @@
 
 use crate::model::stil::{Biçimleyici, YazıStili, ÇizgiTürü};
 use crate::renk::Renk;
-use crate::tema;
 
 /// Eksen türü (`axis.type`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -92,17 +91,12 @@ impl Default for AraÇentik {
 
 /// Bölme alanı (`splitArea`): ana çentikler arasında dönüşümlü renkli
 /// bantlar.
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug, Default)]
 pub struct BölmeAlanı {
     pub göster: bool,
-    /// Dönüşümlü bant renkleri (`areaStyle.color`).
+    /// Dönüşümlü bant renkleri (`areaStyle.color`); boş bırakılırsa çizim
+    /// anında etkin temadan çözülür (koyu tema sonradan seçilse de doğru).
     pub renkler: Vec<Renk>,
-}
-
-impl Default for BölmeAlanı {
-    fn default() -> Self {
-        BölmeAlanı { göster: false, renkler: tema::BÖLME_ALANI_RENKLERİ.to_vec() }
-    }
 }
 
 /// Bölme çizgileri (`splitLine`).

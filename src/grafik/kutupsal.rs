@@ -136,14 +136,14 @@ pub fn kutupsal_ağ_çiz(çizici: &mut dyn ÇizimYüzeyi, düzen: &KutupsalDüze
             continue;
         }
         let yol = crate::cizim::yuzey::daire_yolu(düzen.merkez, yarıçap);
-        çizici.yol_çiz(&yol, 1.0, tema::BÖLME_ÇİZGİSİ, crate::model::stil::ÇizgiTürü::Düz);
+        çizici.yol_çiz(&yol, 1.0, tema::bölme_çizgisi(), crate::model::stil::ÇizgiTürü::Düz);
         çizici.yazı(
             &düzen.radyal_ölçek.etiket(çentik.değer),
             (düzen.merkez.0 + 4.0, keskin(düzen.merkez.1 - yarıçap)),
             YatayHiza::Sol,
             DikeyHiza::Orta,
             tema::YAZI_KÜÇÜK,
-            tema::EKSEN_ETİKETİ,
+            tema::eksen_etiketi(),
             false,
         );
     }
@@ -167,7 +167,7 @@ pub fn kutupsal_ağ_çiz(çizici: &mut dyn ÇizimYüzeyi, düzen: &KutupsalDüze
             düzen.merkez,
             uç,
             1.0,
-            tema::BÖLME_ÇİZGİSİ,
+            tema::bölme_çizgisi(),
             crate::model::stil::ÇizgiTürü::Düz,
         );
         // Etiket bant ortasında (kategorik) ya da ışında.
@@ -193,7 +193,7 @@ pub fn kutupsal_ağ_çiz(çizici: &mut dyn ÇizimYüzeyi, düzen: &KutupsalDüze
             yatay,
             DikeyHiza::Orta,
             tema::YAZI_KÜÇÜK,
-            tema::EKSEN_ETİKETİ,
+            tema::eksen_etiketi(),
             false,
         );
     }

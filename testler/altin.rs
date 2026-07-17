@@ -747,3 +747,47 @@ fn isabet_bölgeleri_üretilir() {
         panic!("ilk bölge sütun dikdörtgeni olmalıydı");
     }
 }
+
+#[test]
+fn tema_nehri() {
+    let mut veri: Vec<(f64, f64, String)> = Vec::new();
+    for (k, katman) in ["Rüzgar", "Güneş", "Hidro"].iter().enumerate() {
+        for x in 0..8 {
+            let değer = 20.0 + ((x * (k + 3)) % 7) as f64 * 6.0;
+            veri.push((x as f64, değer, (*katman).to_string()));
+        }
+    }
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(TemaNehriSerisi::yeni().ad("Üretim").veri(veri));
+    altın_karşılaştır("tema_nehri", &boya_ve_dök(seçenekler));
+}
+
+#[test]
+fn koyu_tema() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .koyu(true)
+        .x_ekseni(Eksen::kategori().veri(["Pzt", "Sal", "Çar"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(ÇizgiSerisi::yeni().ad("Ziyaret").veri([120.0, 200.0, 150.0]));
+    altın_karşılaştır("koyu_tema", &boya_ve_dök(seçenekler));
+}
+
+#[test]
+fn koyu_tema_açıktan_farklı() {
+    let kur = |koyu: bool| {
+        GrafikSeçenekleri::yeni()
+            .koyu(koyu)
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer())
+            .animasyon(false)
+            .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]))
+    };
+    let açık = boya_ve_dök(kur(false));
+    let koyu = boya_ve_dök(kur(true));
+    assert_ne!(açık, koyu, "koyu tema çıktısı açık temadan farklı olmalı");
+    // Koyu kipin iş parçacığı yerelinde kalıcı iz bırakmadığını da doğrula:
+    // aynı açık seçenekler ikinci kez aynı çıktıyı vermeli.
+    assert_eq!(açık, boya_ve_dök(kur(false)));
+}

@@ -225,7 +225,7 @@ pub fn sankey_çiz(
             hiza,
             DikeyHiza::Orta,
             tema::YAZI_KÜÇÜK,
-            tema::BİRİNCİL_METİN,
+            tema::birincil_metin(),
             false,
         );
         isabetler.push(İsabetBölgesi {

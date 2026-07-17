@@ -227,7 +227,7 @@ pub fn ağaç_haritası_çiz(
                 + 0.587 * hücre.renk.yeşil
                 + 0.114 * hücre.renk.mavi;
             let yazı_rengi =
-                if parlaklık < 0.55 { Renk::BEYAZ } else { tema::BİRİNCİL_METİN };
+                if parlaklık < 0.55 { Renk::BEYAZ } else { tema::birincil_metin() };
             if hücre.yaprak {
                 çizici.yazı(
                     &hücre.ad,

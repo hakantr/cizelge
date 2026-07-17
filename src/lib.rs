@@ -65,7 +65,7 @@ pub use model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
     GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, KirişSerisi, ParalelBoyut, ParalelSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
-    SankeyBağı, SankeySerisi, TakvimSerisi,
+    SankeyBağı, SankeySerisi, TakvimSerisi, TemaNehriSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     Piktogram, SaçılımSerisi, Sembol, Seri, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
     SütunSerisi, ÇizgiSerisi,
@@ -104,7 +104,7 @@ pub mod hazir {
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
     GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, KirişSerisi, ParalelBoyut, ParalelSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
-    SankeyBağı, SankeySerisi, TakvimSerisi,
+    SankeyBağı, SankeySerisi, TakvimSerisi, TemaNehriSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     Piktogram, SaçılımSerisi, Sembol, Seri, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
     SütunSerisi, ÇizgiSerisi,

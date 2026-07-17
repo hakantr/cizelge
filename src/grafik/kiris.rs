@@ -141,7 +141,7 @@ pub fn kiriş_çiz(
             yatay,
             DikeyHiza::Orta,
             tema::YAZI_KÜÇÜK,
-            tema::İKİNCİL_METİN,
+            tema::ikincil_metin(),
             false,
         );
         isabetler.push(İsabetBölgesi {

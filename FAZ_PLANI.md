@@ -339,7 +339,11 @@ gauge ve kutupsal sütun örneklerinin eşdeğerleri.
 - ✅ 4.6 Takvim koordinatı: yıl görünümü (hafta sütunları × haftanın
   günü satırları), ay/gün adı etiketleri, görsel eşlemeyle (sürekli ve
   parçalı) renklenen hücreler, tarih etiketli öğe ipucu.
-- ⏳ Açık: singleAxis/themeRiver (4.5).
+- ✅ 4.5 SingleAxis + themeRiver: `TemaNehriSerisi` — `(x, değer, katman)`
+  kayıtları, siluet taban çizgisi (-toplam/2) etrafında yumuşak Bezier
+  bantları, en geniş noktada katman adı, altta tek değer ekseni
+  (AralıkÖlçeği çentikleriyle), öğe ipucu + isabetler; altın test + örnek.
+- Faz 4 TAMAM.
 
 ---
 
@@ -468,9 +472,18 @@ tek veri kaynağından 3 farklı grafik örneği.
   kırpma `<clipPath>`, çok duraklı doğrusal ve radyal gradyanlar SVG'de
   doğal `<defs>` tanımlarıyla; belirlenimci çıktı altın testli.
   PNG (başsız rasterleştirme) açık.
-- ⏳ Açık: tema sistemi/koyu tema (7.1), i18n (7.2), erişilebilirlik
-  (7.3), eklenti kaydı API'si (7.5 — ÖzelSeri temelini attı), yayın
-  (7.6; gpui yol bağımlılığı çözülmeli).
+- ✅ 7.1 Tema sistemi/koyu tema: `tema` modülü belirteç erişimcilerine
+  dönüştürüldü (`tema::eksen_çizgisi()` gibi); `TemaRenkleri` AÇIK/KOYU
+  tabloları, iş parçacığı yerel kip + `GrafikSeçenekleri.koyu` seçeneği
+  (`theme: 'dark'`), koyu zemin otomatik dolgusu; altın testli (koyu
+  çıktı açıktan farklı, kip sızıntısız).
+- ⏳ Açık: i18n (7.2), erişilebilirlik (7.3), eklenti kaydı API'si
+  (7.5 — ÖzelSeri temelini attı), yayın (7.6; gpui yol bağımlılığı
+  çözülmeli), PNG (7.4 kalanı).
+- 🆕 Kullanıcı ek istekleri (2026-07-17): tüm örnekleri tek pencerede
+  toplayan **galeri** (solda ağaç menü, sağda seçili çizelge, canlı veri
+  ekleme/değiştirme) + **WASM entegrasyonu** (çekirdek gpui'siz derlenip
+  SVG üretir; wasm-bindgen köprüsü).
 
 ---
 

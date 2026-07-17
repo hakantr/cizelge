@@ -68,7 +68,7 @@ pub fn paralel_çiz(
             (x, alan.y),
             (x, alan.alt()),
             1.0,
-            tema::EKSEN_ÇİZGİSİ,
+            tema::eksen_çizgisi(),
             crate::model::stil::ÇizgiTürü::Düz,
         );
         if let Some(ölçek) = ölçekler.get(b) {
@@ -78,7 +78,7 @@ pub fn paralel_çiz(
                     (x, y),
                     (x + 4.0, y),
                     1.0,
-                    tema::EKSEN_ÇENTİĞİ,
+                    tema::eksen_çentiği(),
                     crate::model::stil::ÇizgiTürü::Düz,
                 );
                 çizici.yazı(
@@ -87,7 +87,7 @@ pub fn paralel_çiz(
                     YatayHiza::Sol,
                     DikeyHiza::Orta,
                     10.0,
-                    tema::ÜÇÜNCÜL_METİN,
+                    tema::üçüncül_metin(),
                     false,
                 );
             }
@@ -98,7 +98,7 @@ pub fn paralel_çiz(
             YatayHiza::Orta,
             DikeyHiza::Alt,
             tema::YAZI_KÜÇÜK,
-            tema::İKİNCİL_METİN,
+            tema::ikincil_metin(),
             false,
         );
     }

@@ -78,11 +78,12 @@ pub fn radar_ağı_çiz(
 
     // 1) Dönüşümlü bölme alanları (dıştan içe).
     if koordinat.bölme_alanı_göster {
+        let bölme_renkleri = tema::bölme_alanı_renkleri();
         for s in (1..=bölme).rev() {
-            let renk = tema::BÖLME_ALANI_RENKLERİ
-                .get(s % tema::BÖLME_ALANI_RENKLERİ.len())
+            let renk = bölme_renkleri
+                .get(s % bölme_renkleri.len())
                 .copied()
-                .unwrap_or(tema::NÖTR_05);
+                .unwrap_or(tema::nötr_05());
             çizici.yol_doldur(&halka_yolu(s as f32 / bölme as f32), &Dolgu::Düz(renk));
         }
     }
@@ -92,7 +93,7 @@ pub fn radar_ağı_çiz(
         çizici.yol_çiz(
             &halka_yolu(s as f32 / bölme as f32),
             1.0,
-            tema::BÖLME_ÇİZGİSİ,
+            tema::bölme_çizgisi(),
             crate::model::stil::ÇizgiTürü::Düz,
         );
     }
@@ -107,7 +108,7 @@ pub fn radar_ağı_çiz(
             düzen.merkez,
             uç,
             1.0,
-            tema::BÖLME_ÇİZGİSİ,
+            tema::bölme_çizgisi(),
             crate::model::stil::ÇizgiTürü::Düz,
         );
         let Some(gösterge) = koordinat.göstergeler.get(i) else { continue };
@@ -135,7 +136,7 @@ pub fn radar_ağı_çiz(
             yatay,
             dikey,
             tema::YAZI_KÜÇÜK,
-            tema::İKİNCİL_METİN,
+            tema::ikincil_metin(),
             false,
         );
     }
