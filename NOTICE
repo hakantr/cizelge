@@ -1,6 +1,19 @@
 çizelge
 Copyright 2026 çizelge katkıcıları
 
+--- Kavis grafik kaynak devir arsivi ---
+
+`devir/ui_kutuphanesi_faz8/kaynak/kavis-2862f3b/` altindaki Rust kaynaklari
+Kavis projesinin `2862f3b` revizyonundan byte-esit devredilmistir ve MIT
+License altindadir.
+
+Kavis grafik kaynaklari:
+  Copyright (c) 2026 Kavis contributors
+
+Bu arsiv Cizelge runtime derlemesine dahil degildir. Kaynaklarin kullanimi ve
+dagitimi arsivdeki `LICENSE` metnindeki MIT kosullarina tabidir; telif ve izin
+bildirimi korunmalidir.
+
 Bu ürün, Apache Software Foundation (https://www.apache.org/) tarafından
 geliştirilen ve Apache License 2.0 ile lisanslanan Apache ECharts
 (https://github.com/apache/echarts) projesinden uyarlanmış algoritmalar ve

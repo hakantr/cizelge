@@ -2,7 +2,9 @@
 
 Bu belge eski Kavis uygulamasinin API'sini dondurmaz. Cizelge'nin ECharts 6.1
 uyum modeline ek olarak korunmasi gereken urun kalite sonuclarini tanimlar.
-Uygulama kaynagi `../echarts` ve onun zrender alt moduludur.
+Davranis otoritesi `../echarts` ve onun zrender alt moduludur. Devredilen
+Kavis MIT kaynaklari gecis/regresyon referansidir; tek basina ECharts uyumu
+kaniti degildir.
 
 ## 1. Veri ve gizlilik
 
@@ -52,8 +54,9 @@ kosuludur.
   Cizelge Faz 8 performans paketine eklenir. Ilk/son nokta, belirgin tepe ve
   kararli kaynak kimlikleri korunur.
 - Cizgi/alan icin sampling, scatter/heatmap icin large/progressive davranisi
-  ECharts 6.1 semantigiyle uyumlu olmalidir. Kavis LTTB kodu port kaynagi
-  degildir.
+  ECharts 6.1 semantigiyle uyumlu olmalidir. Kavis LTTB kodu yeniden
+  kullanilirsa MIT lisans bildirimi korunur; ECharts semantik ve gorsel kanit
+  kapilari yine zorunludur.
 - Performans sonucu sure, tepe bellek ve sicak-dongu tahsis sayisini kaydeder;
   butce donanim profiliyle birlikte surumlenir.
 - Buyuk veride erisilebilir tablo ve CSV tembel/akiskan kalir.

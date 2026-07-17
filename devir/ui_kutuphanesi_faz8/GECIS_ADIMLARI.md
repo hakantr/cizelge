@@ -7,11 +7,16 @@ entegrasyonu sayilmaz.
 
 1. `ENVANTER.json` semasini CI'da JSON olarak dogrula.
 2. Kaynak commit ve SHA-256 degerlerini denetim izi olarak koru.
-3. Kavis Rust dosyalarini, patch'lerini veya turevlerini Cizelge'ye ekleme.
-4. Uygulama kararlarinda `ECHARTS_TAM_UYUM_FAZI.md`, `FAZ_PLANI.md`,
+3. `kaynak/kavis-2862f3b/` arsivini byte-esit ve MIT `LICENSE` bildirimiyle
+   koru; Cargo workspace'e veya urun paketine kendiliginden dahil etme.
+4. Arsivden urun koduna alinacak her parca icin MIT kokenini, degisiklikleri
+   ve `NOTICE` kaydini koru. Yalniz Apache-2.0 olarak yazilacak kodu arsivden
+   kopyalama.
+5. Uygulama kararlarinda `ECHARTS_TAM_UYUM_FAZI.md`, `FAZ_PLANI.md`,
    `../echarts` ve zrender kaynaklarini esas al.
 
-Cikis: lisans taramasi temiz ve devir paketi derlenebilir kaynak icermiyor.
+Cikis: sekiz kaynak ve lisans byte-esit; arsiv derleme disi; lisans ve NOTICE
+kaydi eksiksiz.
 
 ## 2. Gereksinimleri Cizelge envanterine bagla
 
@@ -46,8 +51,9 @@ Cikis: Faz 7 platform ve davranis kapilari geciyor.
 
 ## 5. Buyuk veri ve yasam dongusu kanitlarini tasarla
 
-1. `grafik_lttb_1m` profilini Cizelge benchmark aracina ekle; sampling
-   uygulamasini yalniz ECharts 6.1 kaynaklarindan uret.
+1. `grafik_lttb_1m` profilini Cizelge benchmark aracina ekle. Kavis MIT
+   uygulamasi yeniden kullanilirsa kokenini koru; hangi uygulama secilirse
+   secilsin sampling semantigini ECharts 6.1 kaynagiyla dogrula.
 2. Sicak dongu tahsisi, tepe bellek, sure, ilk/son/tepe ve kararli kimlik
    kontrollerini raporla.
 3. Tum kapsam ici seri ailelerini entity/abonelik kur-yik soak senaryosuna ekle.

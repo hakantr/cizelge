@@ -1,18 +1,22 @@
 {
-  "sema_surumu": 1,
+  "sema_surumu": 2,
   "hazirlanma_tarihi": "2026-07-17",
   "kaynak": {
     "depo": "../kavis",
     "commit": "2862f3b",
     "paket": "crates/ui_kutuphanesi/kutuphaneler/grafik_bilesenleri",
-    "lisans": "MIT"
+    "lisans": "MIT",
+    "arsiv_yolu": "devir/ui_kutuphanesi_faz8/kaynak/kavis-2862f3b",
+    "lisans_yolu": "devir/ui_kutuphanesi_faz8/kaynak/kavis-2862f3b/LICENSE",
+    "arsiv_dosya_sayisi": 8,
+    "byte_esit": true
   },
   "hedef": {
     "depo": ".",
     "plan": "ECHARTS_TAM_UYUM_FAZI.md",
     "referans": "Apache ECharts 6.1.0",
     "lisans": "Apache-2.0",
-    "aktarim_bicimi": "temiz-oda gereksinim devri; Kavis kaynak kodu kopyalanmadi"
+    "aktarim_bicimi": "MIT kaynak arsivi + Apache-2.0 devir ve kabul belgeleri; arsiv runtime derlemesine dahil degil"
   },
   "kaldirilan_yuzeyler": [
     "CizgiGrafik",
@@ -37,7 +41,7 @@
       "satir": 1136,
       "sha256": "02bb7a3b294f5bb1040d0c3ea9a9fc11be97f58db3a1fc6e1928ba15102ec635",
       "hedef_fazlar": [3, 4, 5, 7],
-      "karar": "kod alinmayacak; davranis KABUL_SOZLESMESI.md ile yeniden kurulacak"
+      "karar": "MIT arsiv referansi; urun kullanimi MIT bildirimini korur ve davranis ECharts 6.1 ile dogrulanir"
     },
     {
       "yol": "crates/ui_kutuphanesi/kutuphaneler/grafik_bilesenleri/src/donusum.rs",
@@ -51,7 +55,7 @@
       "satir": 105,
       "sha256": "4ab5d9c79ba3d2ba148f067afe93a4b8f246bf8b3582d33b93ebe78c5fa35db2",
       "hedef_fazlar": [2, 3, 4],
-      "karar": "Cizelge eksen/visualMap sozlesmesine temiz-oda uyarlanacak"
+      "karar": "MIT kokeni korunarak degerlendirilecek; Cizelge eksen/visualMap sozlesmesi esas alinacak"
     },
     {
       "yol": "crates/ui_kutuphanesi/kutuphaneler/grafik_bilesenleri/src/hit_test.rs",
@@ -86,7 +90,7 @@
       "satir": 106,
       "sha256": "206ec658cc46bff40ffc7b1d9374dfecb5511e059d44db8a32caa48aadcce139",
       "hedef_fazlar": [7, 9],
-      "karar": "test kodu alinmayacak; ayni platform sonucu yeni Cizelge testiyle kanitlanacak"
+      "karar": "MIT test arsivi devredildi; ayni platform sonucu Cizelge API'siyle yeniden kanitlanacak"
     }
   ],
   "devredilen_senaryolar": [
