@@ -371,7 +371,8 @@ impl GrafikSeçenekleri {
                 Seri::AğaçHaritası(_)
                 | Seri::GüneşPatlaması(_)
                 | Seri::Ağaç(_)
-                | Seri::Sankey(_) => {}
+                | Seri::Sankey(_)
+                | Seri::Grafo(_) => {}
             }
         }
         sonuç

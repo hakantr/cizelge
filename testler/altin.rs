@@ -639,6 +639,25 @@ fn sankey() {
 }
 
 #[test]
+fn grafo() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(
+            GrafoSerisi::yeni()
+                .ad("Ağ")
+                .düğümler([
+                    GrafoDüğümü::yeni("A", 24.0).kategori(0),
+                    GrafoDüğümü::yeni("B", 16.0).kategori(1),
+                    GrafoDüğümü::yeni("C", 16.0).kategori(1),
+                    GrafoDüğümü::yeni("D", 12.0).kategori(2),
+                    GrafoDüğümü::yeni("E", 12.0).kategori(2),
+                ])
+                .bağlar([("A", "B"), ("A", "C"), ("B", "D"), ("C", "E"), ("D", "E")]),
+        );
+    altın_karşılaştır("grafo", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

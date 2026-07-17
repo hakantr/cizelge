@@ -1366,6 +1366,109 @@ impl SankeySerisi {
     }
 }
 
+/// Grafo düğümü (`graph` `data` öğesi).
+#[derive(Clone, PartialEq, Debug)]
+pub struct GrafoDüğümü {
+    pub ad: String,
+    pub değer: Option<f64>,
+    /// Sembol çapı (`symbolSize`).
+    pub boyut: f32,
+    /// Renk grubu (palet sırası); `None` düğüm sırasını kullanır.
+    pub kategori: Option<usize>,
+}
+
+impl GrafoDüğümü {
+    pub fn yeni(ad: impl Into<String>, boyut: f32) -> Self {
+        GrafoDüğümü { ad: ad.into(), değer: None, boyut, kategori: None }
+    }
+
+    pub fn kategori(mut self, kategori: usize) -> Self {
+        self.kategori = Some(kategori);
+        self
+    }
+
+    pub fn değerli(mut self, değer: f64) -> Self {
+        self.değer = Some(değer);
+        self
+    }
+}
+
+/// Grafo yerleşimi (`graph.layout`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum GrafoYerleşimi {
+    /// Kuvvet yönlendirmeli (`'force'`) — belirlenimci.
+    #[default]
+    Kuvvet,
+    /// Çember üzerinde (`'circular'`).
+    Dairesel,
+}
+
+/// Grafo serisi (`series-graph`).
+#[derive(Clone, Debug)]
+pub struct GrafoSerisi {
+    pub ad: Option<String>,
+    pub düğümler: Vec<GrafoDüğümü>,
+    /// Bağlar: `(kaynak ad, hedef ad)`.
+    pub bağlar: Vec<(String, String)>,
+    pub yerleşim: GrafoYerleşimi,
+    pub merkez: (Uzunluk, Uzunluk),
+    pub yarıçap: Uzunluk,
+    /// İtme çarpanı (`force.repulsion` ölçeği).
+    pub itme: f32,
+    /// Bağ uzunluğu çarpanı (`force.edgeLength` ölçeği).
+    pub kenar_uzunluğu: f32,
+    /// Bu çaptan büyük düğümlerde ad etiketi gösterilir.
+    pub etiket_eşiği: f32,
+}
+
+impl Default for GrafoSerisi {
+    fn default() -> Self {
+        GrafoSerisi {
+            ad: None,
+            düğümler: Vec::new(),
+            bağlar: Vec::new(),
+            yerleşim: GrafoYerleşimi::Kuvvet,
+            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
+            yarıçap: Uzunluk::Yüzde(78.0),
+            itme: 1.0,
+            kenar_uzunluğu: 1.0,
+            etiket_eşiği: 12.0,
+        }
+    }
+}
+
+impl GrafoSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn düğümler(mut self, düğümler: impl IntoIterator<Item = GrafoDüğümü>) -> Self {
+        self.düğümler = düğümler.into_iter().collect();
+        self
+    }
+
+    pub fn bağlar<S: Into<String>>(
+        mut self,
+        bağlar: impl IntoIterator<Item = (S, S)>,
+    ) -> Self {
+        self.bağlar = bağlar
+            .into_iter()
+            .map(|(k, h)| (k.into(), h.into()))
+            .collect();
+        self
+    }
+
+    pub fn yerleşim(mut self, yerleşim: GrafoYerleşimi) -> Self {
+        self.yerleşim = yerleşim;
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -1384,6 +1487,7 @@ pub enum Seri {
     GüneşPatlaması(GüneşPatlamasıSerisi),
     Ağaç(AğaçSerisi),
     Sankey(SankeySerisi),
+    Grafo(GrafoSerisi),
 }
 
 impl Seri {
@@ -1404,6 +1508,7 @@ impl Seri {
             Seri::GüneşPatlaması(s) => s.ad.as_deref(),
             Seri::Ağaç(s) => s.ad.as_deref(),
             Seri::Sankey(s) => s.ad.as_deref(),
+            Seri::Grafo(s) => s.ad.as_deref(),
         }
     }
 
@@ -1446,9 +1551,11 @@ impl Seri {
             Seri::GöstergeSaati(s) => &s.veri,
             Seri::Radar(s) => &s.veri,
             Seri::Özel(s) => &s.veri,
-            Seri::AğaçHaritası(_) | Seri::GüneşPatlaması(_) | Seri::Ağaç(_) | Seri::Sankey(_) => {
-                &[]
-            }
+            Seri::AğaçHaritası(_)
+            | Seri::GüneşPatlaması(_)
+            | Seri::Ağaç(_)
+            | Seri::Sankey(_)
+            | Seri::Grafo(_) => &[],
         }
     }
 
@@ -1483,7 +1590,8 @@ impl Seri {
             | Seri::AğaçHaritası(_)
             | Seri::GüneşPatlaması(_)
             | Seri::Ağaç(_)
-            | Seri::Sankey(_) => None,
+            | Seri::Sankey(_)
+            | Seri::Grafo(_) => None,
         }
     }
 
@@ -1504,7 +1612,8 @@ impl Seri {
             | Seri::AğaçHaritası(_)
             | Seri::GüneşPatlaması(_)
             | Seri::Ağaç(_)
-            | Seri::Sankey(_) => None,
+            | Seri::Sankey(_)
+            | Seri::Grafo(_) => None,
         }
     }
 }
@@ -1596,5 +1705,11 @@ impl From<AğaçSerisi> for Seri {
 impl From<SankeySerisi> for Seri {
     fn from(s: SankeySerisi) -> Seri {
         Seri::Sankey(s)
+    }
+}
+
+impl From<GrafoSerisi> for Seri {
+    fn from(s: GrafoSerisi) -> Seri {
+        Seri::Grafo(s)
     }
 }

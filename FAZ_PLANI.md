@@ -377,8 +377,12 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
 - ✅ 5.5 (kısmi) Sankey: kaynaklardan en-uzun-yol katmanlaması (döngü
   bağları atlanır), değerle orantılı düğüm yükseklikleri ve kübik bağ
   şeritleri, düğüm etiketleri + öğe ipucu.
-- ⏳ Açık: graph/force (5.4), chord (5.5 kalanı), paralel koordinat
-  (5.6), treemap breadcrumb/gezinme.
+- ✅ 5.4 (kısmi) Grafo (graph): belirlenimci kuvvet yerleşimi (dairesel
+  başlangıç + sabit yinelemeli itme/çekme/yerçekimi — altın test
+  uyumlu) ve dairesel yerleşim; kategori renkli düğümler, eşik üstü ad
+  etiketleri, öğe ipucu. Roam (sürükle/yakınlaş) açık.
+- ⏳ Açık: chord (5.5 kalanı), paralel koordinat (5.6), treemap
+  breadcrumb/gezinme, grafo roam + sürüklenebilir düğümler.
 
 ---
 

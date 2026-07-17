@@ -5,6 +5,7 @@ pub mod agac_haritasi;
 pub mod cizgi;
 pub mod gunes;
 pub mod gosterge_saati;
+pub mod grafo;
 pub mod huni;
 pub mod imleyici;
 pub mod isi;

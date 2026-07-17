@@ -88,6 +88,9 @@ name = "agac"
 [[example]]
 name = "sankey"
 
+[[example]]
+name = "grafo"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"
