@@ -3,11 +3,6 @@
 //! ECharts zaman ölçeği JS `Date` üzerine kuruludur; burada bağımlılıksız,
 //! Howard Hinnant'ın gün-sayısı algoritmalarıyla eşdeğer dönüşüm yapılır.
 
-/// Ay kısaltmaları (Türkçe).
-pub const AY_KISALTMALARI: [&str; 12] = [
-    "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara",
-];
-
 /// Takvim anı (UTC).
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct TakvimAnı {

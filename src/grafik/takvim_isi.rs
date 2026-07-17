@@ -9,10 +9,10 @@ use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::TakvimSerisi;
 use crate::renk::Dolgu;
 use crate::tema;
-use crate::yardimci::takvim::{andan_takvime, takvimden_ana, TakvimAnı, AY_KISALTMALARI};
+use crate::yardimci::takvim::{andan_takvime, takvimden_ana, TakvimAnı};
+use crate::yerel::{ay_kısaltması, etkin_yerel};
 
 const GÜN_MS: f64 = 86_400_000.0;
-const GÜN_ADLARI: [&str; 7] = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
 /// Unix gününden haftanın gününe (0 = Pazartesi).
 fn haftanın_günü(gün_sayısı: i64) -> usize {
@@ -111,7 +111,7 @@ pub fn takvim_çiz(
     };
 
     // 1) Gün adları (solda, bir satır atlayarak).
-    for (satır, ad) in GÜN_ADLARI.iter().enumerate() {
+    for (satır, ad) in etkin_yerel().gün_kısaltmaları.iter().enumerate() {
         if satır % 2 != 0 {
             continue;
         }
@@ -139,7 +139,7 @@ pub fn takvim_çiz(
         if an.ay != önceki_ay {
             önceki_ay = an.ay;
             çizici.yazı(
-                AY_KISALTMALARI.get((an.ay.saturating_sub(1)) as usize).unwrap_or(&"?"),
+                ay_kısaltması(an.ay),
                 (hücre.x, alan.y + üst_pay - 6.0),
                 YatayHiza::Sol,
                 DikeyHiza::Alt,
@@ -179,7 +179,7 @@ pub fn takvim_çiz(
                 ad: Some(format!(
                     "{} {} {}",
                     an.gün,
-                    AY_KISALTMALARI.get((an.ay.saturating_sub(1)) as usize).unwrap_or(&"?"),
+                    ay_kısaltması(an.ay),
                     an.yıl
                 )),
                 değer: Some(d),

@@ -50,6 +50,8 @@ pub struct GrafikSeçenekleri {
     /// Koyu tema (`theme: 'dark'` karşılığı): eksen/yazı/ipucu renkleri koyu
     /// belirteçlerden çözülür; `arkaplan` verilmemişse koyu zemin doldurulur.
     pub koyu: bool,
+    /// Yerel (`locale`): ay/gün adları ve arayüz metinleri.
+    pub yerel: &'static crate::yerel::Yerel,
     pub animasyon: bool,
     /// Giriş animasyonu süresi, ms (`animationDuration`).
     pub animasyon_süresi: f32,
@@ -82,6 +84,7 @@ impl Default for GrafikSeçenekleri {
             palet: tema::PALET.to_vec(),
             arkaplan: None,
             koyu: false,
+            yerel: &crate::yerel::TÜRKÇE,
             animasyon: true,
             animasyon_süresi: ÖNTANIMLI_SÜRE_MS,
             animasyon_süresi_güncelleme: 300.0,
@@ -288,6 +291,12 @@ impl GrafikSeçenekleri {
     /// Koyu temayı açar/kapatır (`theme: 'dark'`).
     pub fn koyu(mut self, açık: bool) -> Self {
         self.koyu = açık;
+        self
+    }
+
+    /// Yereli seçer (`locale`).
+    pub fn yerel(mut self, yerel: &'static crate::yerel::Yerel) -> Self {
+        self.yerel = yerel;
         self
     }
 

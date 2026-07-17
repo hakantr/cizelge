@@ -33,6 +33,7 @@ pub mod model;
 pub mod olcek;
 pub mod renk;
 pub mod tema;
+pub mod yerel;
 pub mod yardimci;
 pub mod yerlesim;
 
@@ -75,6 +76,8 @@ pub use model::stil::{
 };
 pub use model::Uzunluk;
 pub use renk::{Dolgu, Renk, RenkDurağı};
+pub use yerel::{Yerel, TÜRKÇE, İNGİLİZCE};
+pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
 
 /// Sık kullanılan tiplerin topluca içe aktarımı (ECharts'taki `echarts` ana
 /// girişinin karşılığı).
@@ -113,5 +116,7 @@ pub mod hazir {
         AlanStili, Biçimleyici, Etiket, EtiketKonumu, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili,
     };
     pub use crate::model::Uzunluk;
+    pub use crate::yerel::{Yerel, TÜRKÇE, İNGİLİZCE};
+    pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
     pub use crate::renk::{Dolgu, Renk, RenkDurağı};
 }

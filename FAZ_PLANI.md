@@ -477,7 +477,15 @@ tek veri kaynağından 3 farklı grafik örneği.
   tabloları, iş parçacığı yerel kip + `GrafikSeçenekleri.koyu` seçeneği
   (`theme: 'dark'`), koyu zemin otomatik dolgusu; altın testli (koyu
   çıktı açıktan farklı, kip sızıntısız).
-- ⏳ Açık: i18n (7.2), erişilebilirlik (7.3), eklenti kaydı API'si
+- ✅ 7.2 i18n: `yerel` modülü — `Yerel` (ay/gün adları uzun+kısa,
+  arayüz metinleri), TÜRKÇE öntanımlı + İNGİLİZCE, iş parçacığı yerel
+  etkin yerel + `GrafikSeçenekleri.yerel`; zaman ölçeği etiketleri ve
+  takvim ay/gün adları yerelden. Sayı biçimi ECharts `addCommas` ile
+  birebir (yerelden bağımsız) bırakıldı.
+- ✅ 7.3 Erişilebilirlik: `erişilebilirlik_özeti()` (`aria.enabled`
+  varsayılan etiket üreticisi) — başlık/seri türü/ad/ilk 10 veri; TR+EN
+  kalıpları, `seri_tür_adı()` dışa açık; birim testli.
+- ⏳ Açık: eklenti kaydı API'si
   (7.5 — ÖzelSeri temelini attı), yayın (7.6; gpui yol bağımlılığı
   çözülmeli), PNG (7.4 kalanı).
 - 🆕 Kullanıcı ek istekleri (2026-07-17): tüm örnekleri tek pencerede

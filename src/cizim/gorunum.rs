@@ -672,8 +672,10 @@ pub fn grafiği_boya(
 ) -> BoyamaÇıktısı {
     let mut çıktı = BoyamaÇıktısı::default();
     // Veri kümesi eşlemeleri: seriler tablodan türetilir.
-    // Etkin tema kipi: tüm `tema::*` erişimcileri bu seçime göre çözülür.
+    // Etkin tema kipi ve yerel: tüm `tema::*` / `yerel::*` erişimcileri bu
+    // seçime göre çözülür.
     crate::tema::koyu_ayarla(seçenekler.koyu);
+    crate::yerel::yerel_ayarla(seçenekler.yerel);
 
     let türetilmiş;
     let seçenekler = if seçenekler.veri_kümesi.is_some() {

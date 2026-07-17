@@ -6,7 +6,8 @@
 
 use crate::olcek::Çentik;
 use crate::yardimci::sayi::doğrusal_eşle;
-use crate::yardimci::takvim::{andan_takvime, takvimden_ana, TakvimAnı, AY_KISALTMALARI};
+use crate::yardimci::takvim::{andan_takvime, takvimden_ana, TakvimAnı};
+use crate::yerel::ay_kısaltması;
 
 const SANİYE: f64 = 1000.0;
 const DAKİKA: f64 = 60.0 * SANİYE;
@@ -214,14 +215,6 @@ impl ZamanÖlçeği {
             ),
         }
     }
-}
-
-/// Ay numarasını (1–12) kısaltmaya çevirir; aralık dışı değerde `"?"`.
-fn ay_kısaltması(ay: u32) -> &'static str {
-    AY_KISALTMALARI
-        .get((ay.saturating_sub(1)) as usize)
-        .copied()
-        .unwrap_or("?")
 }
 
 fn güzel_yıl_adımı(ham: f64) -> f64 {
