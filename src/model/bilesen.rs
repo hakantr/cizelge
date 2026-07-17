@@ -274,6 +274,12 @@ pub struct İpucu {
     pub yazı: YazıStili,
     /// Değer biçimleyici (satırlardaki sayılar için).
     pub değer_biçimleyici: Option<Biçimleyici>,
+    /// Satır biçimleyici (`tooltip.formatter`): `{a}` seri adı, `{b}` öğe/
+    /// kategori adı, `{c}` değer. Verilirse satırlar bu şablonla yazılır.
+    pub biçimleyici: Option<Biçimleyici>,
+    /// Eksen imleci bağlantısı (`axisPointer.link: 'all'`): çoklu ızgarada
+    /// imleç çizgisi aynı kategori sırasında tüm ızgaralarda çizilir.
+    pub bağlantılı: bool,
 }
 
 impl Default for İpucu {
@@ -285,6 +291,8 @@ impl Default for İpucu {
             arkaplan: None,
             yazı: YazıStili::default(),
             değer_biçimleyici: None,
+            biçimleyici: None,
+            bağlantılı: false,
         }
     }
 }
@@ -321,6 +329,19 @@ impl İpucu {
 
     pub fn değer_biçimleyici(mut self, b: impl Into<Biçimleyici>) -> Self {
         self.değer_biçimleyici = Some(b.into());
+        self
+    }
+
+    /// Satır biçimleyici (`formatter`): `{a}` seri adı, `{b}` öğe/kategori
+    /// adı, `{c}` değer.
+    pub fn biçimleyici(mut self, b: impl Into<Biçimleyici>) -> Self {
+        self.biçimleyici = Some(b.into());
+        self
+    }
+
+    /// Eksen imlecini tüm ızgaralara bağlar (`axisPointer.link: 'all'`).
+    pub fn bağlantılı(mut self, açık: bool) -> Self {
+        self.bağlantılı = açık;
         self
     }
 }

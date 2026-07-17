@@ -300,7 +300,11 @@ galerisinde; golden testleri yeşil.
   — kare başına tam seçenekler, kendiliğinden oynatma (kare geçişleri
   `ara_değerle` animasyonlu), altta nokta şeridi + oynat/durdur, kare
   tıklama, `ZamanKaresiDeğişti` olayı; altın + davranış testli, örnekli.
-- ⏳ Açık: zengin ipucu içeriği, toolbox PNG kaydetme.
+- ✅ Zengin ipucu: `İpucu.biçimleyici` (`formatter`) — `{a}`/`{b}`/`{c}`
+  şablonu eksen ve öğe tetiklemelerinde doğru eşlemeyle; davranış testli.
+- ✅ axisPointer bağlantısı: `İpucu.bağlantılı` (`axisPointer.link`) —
+  imleç çizgisi aynı kategori sırasında tüm ızgaralarda; altın testli.
+- ⏳ Açık: toolbox PNG kaydetme.
 
 ---
 

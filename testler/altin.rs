@@ -810,3 +810,44 @@ fn zaman_şeridi() {
     ));
     altın_karşılaştır("zaman_seridi", &yüzey.döküm());
 }
+
+#[test]
+fn bağlantılı_imleç() {
+    // İki ızgara; imleç üstteyken bağlantı sayesinde ALTTA da çizgi çizilir.
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen).bağlantılı(true))
+        .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst(30.0).alt("55%"))
+        .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst("60%").alt(40.0))
+        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(0))
+        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(1))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
+        .seri(ÇizgiSerisi::yeni().ad("Üst").veri([10.0, 14.0, 12.0, 18.0]))
+        .seri(SütunSerisi::yeni().ad("Alt").eksenler(1, 1).veri([4.0, 9.0, 6.0, 2.0]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    // Fare üst ızgarada, "B" kategorisi üzerinde.
+    grafiği_boya(&mut yüzey, &seçenekler, &fareli_girdi((300.0, 120.0)));
+    altın_karşılaştır("baglantili_imlec", &yüzey.döküm());
+}
+
+#[test]
+fn ipucu_biçimleyici() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .biçimleyici(Biçimleyici::Şablon("{a} → {b}: {c} kWh".into())),
+        )
+        .x_ekseni(Eksen::kategori().veri(["Pzt", "Sal"]))
+        .y_ekseni(Eksen::değer())
+        .seri(SütunSerisi::yeni().ad("Tüketim").veri([120.0, 80.0]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    grafiği_boya(&mut yüzey, &seçenekler, &fareli_girdi((250.0, 300.0)));
+    let döküm = yüzey.döküm();
+    assert!(
+        döküm.contains("Tüketim → Pzt: 120 kWh"),
+        "biçimleyici satırı bulunamadı:\n{döküm}"
+    );
+}

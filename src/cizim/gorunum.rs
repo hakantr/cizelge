@@ -605,6 +605,39 @@ struct Eksenİpucu {
     satırlar: Vec<İpucuSatırı>,
 }
 
+/// `tooltip.formatter` uygulaması: `{a}` seri adı, `{b}` öğe/kategori adı,
+/// `{c}` değer. Eksen tetiklemesinde satır adı seri, başlık kategoridir;
+/// öğe tetiklemesinde başlık seri, satır adı öğedir.
+fn ipucu_satırlarını_biçimle(
+    ipucu: &İpucu,
+    başlık: Option<&str>,
+    satırlar: Vec<İpucuSatırı>,
+) -> Vec<İpucuSatırı> {
+    let Some(biçimleyici) = &ipucu.biçimleyici else {
+        return satırlar;
+    };
+    satırlar
+        .into_iter()
+        .map(|satır| {
+            let (seri_adı, öğe_adı) = if ipucu.tetikleme == Tetikleme::Eksen {
+                (satır.ad.as_str(), başlık.unwrap_or(""))
+            } else {
+                (başlık.unwrap_or(""), satır.ad.as_str())
+            };
+            let metin = match biçimleyici {
+                crate::model::stil::Biçimleyici::Şablon(ş) => ş
+                    .replace("{a}", seri_adı)
+                    .replace("{b}", öğe_adı)
+                    .replace("{c}", &satır.değer),
+                crate::model::stil::Biçimleyici::İşlev(f) => {
+                    f(f64::NAN, &satır.değer)
+                }
+            };
+            İpucuSatırı { im_rengi: satır.im_rengi, ad: metin, değer: String::new() }
+        })
+        .collect()
+}
+
 fn eksen_ipucu_derle(
     seçenekler: &GrafikSeçenekleri,
     kurulum: &KartezyenKurulum,
@@ -1218,27 +1251,39 @@ pub fn grafiği_boya(
             }
         }
 
-        // Eksen imleci çizgisi + eksen ipucu penceresi.
+        // Eksen imleci çizgisi + eksen ipucu penceresi. `bağlantılı`
+        // (axisPointer.link) açıkken çizgi, aynı kategori sırasında TÜM
+        // ızgaralarda çizilir.
         if let Some(eksen_ip) = eksen_ipucu
             && let Some(ipucu) = &ipucu_seçeneği {
-                let alan = kurulum
-                    .ızgara_alanları
-                    .get(eksen_ip.ızgara)
-                    .copied()
-                    .unwrap_or_default();
                 if ipucu.imleç == İmleçTürü::Çizgi {
-                    let bant_ekseni = if eksen_ip.bant_x {
-                        kurulum.x_eksenler.iter().find(|e| {
-                            e.seçenek.ızgara_sırası == eksen_ip.ızgara
-                                && e.ölçek.kategorik_mi()
-                        })
+                    let hedef_ızgaralar: Vec<usize> = if ipucu.bağlantılı {
+                        (0..kurulum.ızgara_alanları.len()).collect()
                     } else {
-                        kurulum.y_eksenler.iter().find(|e| {
-                            e.seçenek.ızgara_sırası == eksen_ip.ızgara
-                                && e.ölçek.kategorik_mi()
-                        })
+                        vec![eksen_ip.ızgara]
                     };
-                    if let Some(bant_ekseni) = bant_ekseni {
+                    for ızgara in hedef_ızgaralar {
+                        let alan = kurulum
+                            .ızgara_alanları
+                            .get(ızgara)
+                            .copied()
+                            .unwrap_or_default();
+                        let bant_ekseni = if eksen_ip.bant_x {
+                            kurulum.x_eksenler.iter().find(|e| {
+                                e.seçenek.ızgara_sırası == ızgara
+                                    && e.ölçek.kategorik_mi()
+                            })
+                        } else {
+                            kurulum.y_eksenler.iter().find(|e| {
+                                e.seçenek.ızgara_sırası == ızgara
+                                    && e.ölçek.kategorik_mi()
+                            })
+                        };
+                        let Some(bant_ekseni) = bant_ekseni else { continue };
+                        // Yakınlaştırma penceresi dışındaysa çizme.
+                        if !bant_ekseni.pencerede_mi(eksen_ip.kategori_sırası as f64) {
+                            continue;
+                        }
                         let merkez = keskin(
                             bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64),
                         );
@@ -1763,8 +1808,10 @@ pub fn grafiği_boya(
         }
     }
 
-    // 6) İpucu penceresi (her şeyin üstüne).
+    // 6) İpucu penceresi (her şeyin üstüne). `formatter` verilmişse
+    // satırlar şablonla yeniden yazılır.
     if let (Some(ipucu), Some((başlık, satırlar, konum))) = (&ipucu_seçeneği, bekleyen_ipucu) {
+        let satırlar = ipucu_satırlarını_biçimle(ipucu, başlık.as_deref(), satırlar);
         ipucu_çiz(yüzey, ipucu, konum, başlık.as_deref(), &satırlar);
     }
 
