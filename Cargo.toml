@@ -82,6 +82,9 @@ name = "agac_haritasi"
 [[example]]
 name = "gunes"
 
+[[example]]
+name = "agac"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

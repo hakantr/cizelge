@@ -62,7 +62,7 @@ pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
 pub use model::seri::{
-    AğaçHaritasıSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
+    AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
     HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     Piktogram, SaçılımSerisi, Sembol, Seri, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
@@ -99,7 +99,7 @@ pub mod hazir {
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
     pub use crate::model::seri::{
-        AğaçHaritasıSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
+        AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
     HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
     Piktogram, SaçılımSerisi, Sembol, Seri, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,

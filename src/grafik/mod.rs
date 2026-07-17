@@ -1,5 +1,6 @@
 //! Seri çizicileri — `echarts/src/chart` dizininin karşılığı.
 
+pub mod agac;
 pub mod agac_haritasi;
 pub mod cizgi;
 pub mod gunes;

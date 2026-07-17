@@ -600,6 +600,30 @@ fn svg_dışa_aktarım() {
 }
 
 #[test]
+fn ağaç_serisi() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(AğaçSerisi::yeni().ad("Kuruluş").kökler([AğaçDüğümü::dal(
+            "Genel Müdür",
+            vec![
+                AğaçDüğümü::dal(
+                    "Mühendislik",
+                    vec![
+                        AğaçDüğümü::yaprak("Arayüz", 12.0),
+                        AğaçDüğümü::yaprak("Altyapı", 9.0),
+                    ],
+                ),
+                AğaçDüğümü::dal(
+                    "Satış",
+                    vec![AğaçDüğümü::yaprak("Yurt İçi", 7.0)],
+                ),
+                AğaçDüğümü::yaprak("İK", 4.0),
+            ],
+        )]));
+    altın_karşılaştır("agac_serisi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
