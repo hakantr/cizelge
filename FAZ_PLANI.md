@@ -420,6 +420,18 @@ tek veri kaynağından 3 farklı grafik örneği.
 
 **Tahmin:** 4–6 hafta. (Bağımlılık: Faz 1; dataZoom ile birlikte anlamlı.)
 
+**Durum (2026-07-17):**
+- ✅ 6.1 VeriKümesi (dataset): sütunlu tablo, boyut adıyla erişim
+  (sayılar/metinler, Result dönüşlü), kayıtlarla hızlı kurulum.
+- ✅ 6.2 (kısmi) Dönüşümler: süz (filter) + sırala (sort) zincirlenebilir
+  metotlar; bildirimsel transform boru hattı yerine tipli API.
+- ✅ encode: Çizgi/Sütun/Saçılım/Pasta serilerinde `eşle(ad, değer)` —
+  boyama öncesi seriler tablodan türetilir, eşleme hataları güvenle
+  atlanır.
+- ✅ Örnekleme (lttb/ortalama) Faz 2'de teslim edildi.
+- ⏳ Açık: sütunlu DataStore (6.3), aşamalı/progressive işleme (6.4),
+  large kipi (6.5), çok iş parçacıklı yerleşim (6.6).
+
 ---
 
 ## Faz 7 — Tema, erişilebilirlik, çıktı ve yayın

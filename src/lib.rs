@@ -60,6 +60,7 @@ pub use model::agac::AğaçDüğümü;
 pub use model::kutupsal::KutupsalKoordinat;
 pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
+pub use model::veri_kumesi::VeriKümesi;
 pub use model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
@@ -98,6 +99,7 @@ pub mod hazir {
     pub use crate::model::kutupsal::KutupsalKoordinat;
     pub use crate::model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
     pub use crate::model::secenekler::GrafikSeçenekleri;
+    pub use crate::model::veri_kumesi::VeriKümesi;
     pub use crate::model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,

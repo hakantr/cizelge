@@ -12,6 +12,7 @@ pub mod radar;
 pub mod secenekler;
 pub mod seri;
 pub mod stil;
+pub mod veri_kumesi;
 pub mod yakinlastirma;
 
 use crate::yardimci::sayi::yüzde_çöz;

@@ -129,6 +129,8 @@ pub struct ÇizgiSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
+    pub eşleme: Option<(String, String)>,
 }
 
 impl Default for ÇizgiSerisi {
@@ -151,6 +153,7 @@ impl Default for ÇizgiSerisi {
             örnekleme: None,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
+            eşleme: None,
         }
     }
 }
@@ -158,6 +161,12 @@ impl Default for ÇizgiSerisi {
 impl ÇizgiSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
+    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+        self
     }
 
     /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
@@ -292,12 +301,20 @@ pub struct SütunSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
+    pub eşleme: Option<(String, String)>,
 }
 
 
 impl SütunSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
+    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+        self
     }
 
     /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
@@ -416,6 +433,8 @@ pub struct PastaSerisi {
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
     pub etiket_çizgisi: EtiketÇizgisi,
+    /// Veri kümesi eşlemesi: `(ad boyutu, değer boyutu)` (`encode`).
+    pub eşleme: Option<(String, String)>,
 }
 
 impl Default for PastaSerisi {
@@ -431,6 +450,7 @@ impl Default for PastaSerisi {
             öğe_stili: ÖğeStili::default(),
             etiket: Etiket { göster: true, konum: crate::model::stil::EtiketKonumu::Dış, ..Default::default() },
             etiket_çizgisi: EtiketÇizgisi::default(),
+            eşleme: None,
         }
     }
 }
@@ -438,6 +458,12 @@ impl Default for PastaSerisi {
 impl PastaSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
+    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -712,6 +738,8 @@ pub struct SaçılımSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
+    pub eşleme: Option<(String, String)>,
 }
 
 impl Default for SaçılımSerisi {
@@ -729,6 +757,7 @@ impl Default for SaçılımSerisi {
             efekt_süresi_sn: 4.0,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
+            eşleme: None,
         }
     }
 }
@@ -736,6 +765,12 @@ impl Default for SaçılımSerisi {
 impl SaçılımSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
+    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+        self
     }
 
     /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).

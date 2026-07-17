@@ -704,6 +704,30 @@ fn takvim_ısısı() {
 }
 
 #[test]
+fn veri_kümesi_eşleme() {
+    // Tek tablo → sütun + pasta, encode ile.
+    let küme = VeriKümesi::yeni(["ürün", "satış"]).kayıtlar([
+        ("Elma", vec![120.0]),
+        ("Armut", vec![80.0]),
+        ("Kiraz", vec![160.0]),
+    ]);
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .veri_kümesi(küme)
+        .x_ekseni(Eksen::kategori().veri(["Elma", "Armut", "Kiraz"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(SütunSerisi::yeni().ad("Satış").eşle("ürün", "satış"))
+        .seri(
+            PastaSerisi::yeni()
+                .ad("Pay")
+                .eşle("ürün", "satış")
+                .halka("8%", "16%")
+                .merkez("84%", "24%"),
+        );
+    altın_karşılaştır("veri_kumesi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

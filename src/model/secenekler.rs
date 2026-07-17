@@ -6,6 +6,7 @@ use crate::model::eksen::Eksen;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::radar::RadarKoordinatı;
+use crate::model::veri_kumesi::VeriKümesi;
 use crate::model::yakinlastirma::VeriYakınlaştırma;
 use crate::model::seri::Seri;
 use crate::renk::Renk;
@@ -35,6 +36,8 @@ pub struct GrafikSeçenekleri {
     pub radar: Option<RadarKoordinatı>,
     /// Kutupsal koordinat sistemi (`polar` + `angleAxis` + `radiusAxis`).
     pub kutupsal: Option<KutupsalKoordinat>,
+    /// Ortak veri tablosu (`dataset`); seriler `eşle(...)` ile beslenir.
+    pub veri_kümesi: Option<VeriKümesi>,
     /// Veri yakınlaştırmaları (`dataZoom`).
     pub veri_yakınlaştırmaları: Vec<VeriYakınlaştırma>,
     /// Araç kutusu (`toolbox`).
@@ -69,6 +72,7 @@ impl Default for GrafikSeçenekleri {
             görsel_eşleme: None,
             radar: None,
             kutupsal: None,
+            veri_kümesi: None,
             veri_yakınlaştırmaları: Vec::new(),
             araç_kutusu: None,
             fırça: None,
@@ -188,6 +192,59 @@ impl GrafikSeçenekleri {
     pub fn kutupsal(mut self, koordinat: KutupsalKoordinat) -> Self {
         self.kutupsal = Some(koordinat);
         self
+    }
+
+    pub fn veri_kümesi(mut self, küme: VeriKümesi) -> Self {
+        self.veri_kümesi = Some(küme);
+        self
+    }
+
+    /// Veri kümesine bağlı serilerin verilerini tablodan türetir
+    /// (`encode` çözümü). Eşleme çözülemezse seri olduğu gibi kalır ve
+    /// hata listelenir.
+    pub fn veri_kümesini_uygula(&self) -> (Self, Vec<crate::hata::BilesenHatasi>) {
+        let Some(küme) = &self.veri_kümesi else {
+            return (self.clone(), Vec::new());
+        };
+        let mut hatalar = Vec::new();
+        let mut sonuç = self.clone();
+        for seri in &mut sonuç.seriler {
+            let eşleme = match seri {
+                Seri::Çizgi(s) => s.eşleme.clone(),
+                Seri::Sütun(s) => s.eşleme.clone(),
+                Seri::Saçılım(s) => s.eşleme.clone(),
+                Seri::Pasta(s) => s.eşleme.clone(),
+                _ => None,
+            };
+            let Some((ad_boyutu, değer_boyutu)) = eşleme else { continue };
+            let adlar = match küme.metinler(&ad_boyutu) {
+                Ok(a) => a,
+                Err(hata) => {
+                    hatalar.push(hata);
+                    continue;
+                }
+            };
+            let değerler = match küme.sayılar(&değer_boyutu) {
+                Ok(d) => d,
+                Err(hata) => {
+                    hatalar.push(hata);
+                    continue;
+                }
+            };
+            let veri: Vec<crate::model::deger::VeriÖğesi> = adlar
+                .iter()
+                .zip(değerler.iter())
+                .map(|(ad, değer)| crate::model::deger::VeriÖğesi::adlı(ad.clone(), *değer))
+                .collect();
+            match seri {
+                Seri::Çizgi(s) => s.veri = veri,
+                Seri::Sütun(s) => s.veri = veri,
+                Seri::Saçılım(s) => s.veri = veri,
+                Seri::Pasta(s) => s.veri = veri,
+                _ => {}
+            }
+        }
+        (sonuç, hatalar)
     }
 
     /// Veri yakınlaştırma ekler (`dataZoom`).

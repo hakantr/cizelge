@@ -670,6 +670,15 @@ pub fn grafiği_boya(
     girdi: &BoyamaGirdisi,
 ) -> BoyamaÇıktısı {
     let mut çıktı = BoyamaÇıktısı::default();
+    // Veri kümesi eşlemeleri: seriler tablodan türetilir.
+    let türetilmiş;
+    let seçenekler = if seçenekler.veri_kümesi.is_some() {
+        let (yeni, _hatalar) = seçenekler.veri_kümesini_uygula();
+        türetilmiş = yeni;
+        &türetilmiş
+    } else {
+        seçenekler
+    };
     let ilerleme = girdi.ilerleme;
     let zaman_sn = girdi.zaman_sn;
     let fare = girdi.fare;
