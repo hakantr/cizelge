@@ -43,6 +43,9 @@ impl Kök {
                 GrafikOlayı::ZamanKaresiDeğişti { sıra } => {
                     format!("Zaman şeridi → {}. kare", sıra.saturating_add(1)).into()
                 }
+                GrafikOlayı::SvgKaydedildi { yol } => {
+                    format!("SVG kaydedildi → {yol}").into()
+                }
             };
             cx.notify();
         })

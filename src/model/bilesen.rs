@@ -162,17 +162,26 @@ pub struct AraçKutusu {
     /// Yakınlaştırma/gösterge durumunu ilk seçeneklere döndürür
     /// (`feature.restore`).
     pub geri_yükle: bool,
+    /// Grafiği SVG dosyası olarak kaydetme düğmesi
+    /// (`feature.saveAsImage` karşılığı; çıktı biçimi SVG'dir).
+    pub svg_kaydet: bool,
 }
 
 impl Default for AraçKutusu {
     fn default() -> Self {
-        AraçKutusu { göster: true, geri_yükle: true }
+        AraçKutusu { göster: true, geri_yükle: true, svg_kaydet: false }
     }
 }
 
 impl AraçKutusu {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// SVG kaydet düğmesini açar (`saveAsImage`).
+    pub fn svg_kaydet(mut self, açık: bool) -> Self {
+        self.svg_kaydet = açık;
+        self
     }
 }
 

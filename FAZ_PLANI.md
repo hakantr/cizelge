@@ -250,8 +250,9 @@ galerisinde; golden testleri yeşil.
   kenarlarında değer kutuları. `link` (ızgaralar arası eşleme) açık.
 - ✅ 2.5 pictorialBar (Piktogram) ve `custom` seri (ÖzelSeri — eklenti
   noktası); 2.6 çizgi `sampling` (LTTB + ortalama).
-- ⏳ Açık: axisPointer `link`, etiket döndürme (gpui kısıtı) +
-  `alignTicks` + zaman ölçeği tam kademe.
+- ✅ axisPointer `link` (`İpucu.bağlantılı`, 2026-07-17).
+- ⏳ Açık: etiket döndürme (gpui kısıtı) + `alignTicks` + zaman ölçeği
+  tam kademe.
 
 ---
 
@@ -304,7 +305,10 @@ galerisinde; golden testleri yeşil.
   şablonu eksen ve öğe tetiklemelerinde doğru eşlemeyle; davranış testli.
 - ✅ axisPointer bağlantısı: `İpucu.bağlantılı` (`axisPointer.link`) —
   imleç çizgisi aynı kategori sırasında tüm ızgaralarda; altın testli.
-- ⏳ Açık: toolbox PNG kaydetme.
+- ✅ Toolbox kaydetme: `AraçKutusu.svg_kaydet` (`saveAsImage` SVG
+  biçimiyle) — pencere boyutunda SVG dosyaya yazılır, `SvgKaydedildi`
+  olayı yayımlanır; davranış testli. PNG biçimi rasterleştirici
+  gerektirir (7.4 kalanı olarak açık).
 
 ---
 

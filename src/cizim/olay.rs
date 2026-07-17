@@ -137,4 +137,6 @@ pub enum GrafikOlayı {
     GeriYüklendi,
     /// Zaman şeridinde kare değişti (`'timelinechanged'`).
     ZamanKaresiDeğişti { sıra: usize },
+    /// Araç kutusundan grafik SVG olarak kaydedildi (`saveAsImage`).
+    SvgKaydedildi { yol: String },
 }

@@ -851,3 +851,21 @@ fn ipucu_biçimleyici() {
         "biçimleyici satırı bulunamadı:\n{döküm}"
     );
 }
+
+#[test]
+fn araç_kutusu_svg_düğmesi() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .araç_kutusu(AraçKutusu::yeni().svg_kaydet(true))
+        .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+        .y_ekseni(Eksen::değer())
+        .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+    // Sıfırla + SVG kaydet: iki düğme, ikisi de tıklanabilir kutulu.
+    assert_eq!(çıktı.araç_düğmeleri.len(), 2);
+    assert!(çıktı
+        .araç_düğmeleri
+        .iter()
+        .any(|(_, tür)| *tür == cizelge::AraçTürü::SvgKaydet));
+}

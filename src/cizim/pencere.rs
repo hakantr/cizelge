@@ -3,7 +3,7 @@
 //! yayını. Boyama hattının kendisi [`crate::cizim::gorunum::grafiği_boya`]
 //! içindedir ve bu modül olmadan da (ör. WASM/SVG hedeflerinde) çalışır.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -88,6 +88,8 @@ pub struct GrafikGörünümü {
     ölçüm_önbelleği: ÖlçümÖnbelleği,
     /// Zaman şeridi (timeline) durumu.
     film: Option<Film>,
+    /// Son çizimdeki tuval boyutu (SVG kaydetme için).
+    son_boyut: Rc<Cell<(f32, f32)>>,
     /// Pencere-mutlak zaman şeridi düğmeleri.
     film_düğmeleri: FilmDüğmeleri,
 }
@@ -140,6 +142,7 @@ impl GrafikGörünümü {
             ölçüm_önbelleği: Rc::new(RefCell::new(std::collections::HashMap::new())),
             film: None,
             film_düğmeleri: Rc::new(RefCell::new(Vec::new())),
+            son_boyut: Rc::new(Cell::new((800.0, 600.0))),
         }
     }
 
@@ -191,6 +194,29 @@ impl GrafikGörünümü {
         self.ilk_seçenekler = kare;
         cx.emit(GrafikOlayı::ZamanKaresiDeğişti { sıra });
         cx.notify();
+    }
+
+    /// Grafiği çalışma dizinine SVG dosyası olarak kaydeder
+    /// (`saveAsImage`). Başarıda [`GrafikOlayı::SvgKaydedildi`] yayımlanır;
+    /// yazma hatası tanı olayına dönüşür (panik yok).
+    pub fn svg_kaydet(&mut self, cx: &mut Context<Self>) {
+        let (genişlik, yükseklik) = self.son_boyut.get();
+        let svg = crate::cizim::svg_dışa_aktar(&self.seçenekler, genişlik, yükseklik);
+        let damga = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|s| s.as_secs())
+            .unwrap_or_default();
+        let yol = format!("cizelge-{damga}.svg");
+        match std::fs::write(&yol, svg) {
+            Ok(()) => cx.emit(GrafikOlayı::SvgKaydedildi { yol }),
+            Err(hata) => cx.emit(BilesenTanisi::yeni(
+                "svg_kaydet",
+                BilesenHatasi::GeçersizSeçenek {
+                    alan: "araç_kutusu.svg_kaydet",
+                    ayrıntı: format!("`{yol}` yazılamadı: {hata}"),
+                },
+            )),
+        }
     }
 
     /// Oynatmayı açar/kapatır.
@@ -361,6 +387,7 @@ impl Render for GrafikGörünümü {
         let gösterge_okları = self.gösterge_okları.clone();
         let araç_düğmeleri = self.araç_düğmeleri.clone();
         let film_düğmeleri = self.film_düğmeleri.clone();
+        let son_boyut = self.son_boyut.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -373,6 +400,10 @@ impl Render for GrafikGörünümü {
                         let mut çizici =
                             Çizici::yeni(pencere, uygulama, sınırlar, Some(önbellek));
                         let köken = çizici.köken;
+                        son_boyut.set((
+                            f32::from(sınırlar.size.width),
+                            f32::from(sınırlar.size.height),
+                        ));
                         let yerel_fare = fare.map(|(x, y)| (x - köken.0, y - köken.1));
                         let girdi = BoyamaGirdisi {
                             ilerleme,
@@ -683,14 +714,21 @@ impl Render for GrafikGörünümü {
                             .map(|(_, tür)| *tür),
                         Err(_) => None,
                     };
-                    if let Some(AraçTürü::GeriYükle) = araç_vuruşu {
-                        bu.seçenekler = bu.ilk_seçenekler.clone();
-                        bu.kapalı.clear();
-                        bu.gösterge_sayfası = 0;
-                        bu.fırça_seçimi = None;
-                        cx.emit(GrafikOlayı::GeriYüklendi);
-                        cx.notify();
-                        return;
+                    match araç_vuruşu {
+                        Some(AraçTürü::GeriYükle) => {
+                            bu.seçenekler = bu.ilk_seçenekler.clone();
+                            bu.kapalı.clear();
+                            bu.gösterge_sayfası = 0;
+                            bu.fırça_seçimi = None;
+                            cx.emit(GrafikOlayı::GeriYüklendi);
+                            cx.notify();
+                            return;
+                        }
+                        Some(AraçTürü::SvgKaydet) => {
+                            bu.svg_kaydet(cx);
+                            return;
+                        }
+                        None => {}
                     }
                     // 0c) Zaman şeridi düğmeleri.
                     let film_vuruşu = match bu.film_düğmeleri.try_borrow() {

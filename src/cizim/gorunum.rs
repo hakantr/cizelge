@@ -130,6 +130,8 @@ pub struct BoyamaÇıktısı {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AraçTürü {
     GeriYükle,
+    /// Grafiği SVG dosyası olarak kaydet (`saveAsImage`).
+    SvgKaydet,
 }
 
 /// Ad görünür mü (gösterge ile kapatılmamış mı)?
@@ -740,34 +742,43 @@ pub fn grafiği_boya(
         çıktı.gösterge_okları = gösterge_çıktısı.oklar;
     }
 
-    // 3b) Araç kutusu (sağ üst).
+    // 3b) Araç kutusu (sağ üst): sağdan sola dizilen düğmeler.
     if let Some(araçlar) = &seçenekler.araç_kutusu
-        && araçlar.göster && araçlar.geri_yükle {
+        && araçlar.göster {
             let boyut = tema::YAZI_KÜÇÜK;
-            let metin = "↺ Sıfırla";
-            let (gş, _) = yüzey.yazı_ölç(metin, boyut);
-            let kutu = Dikdörtgen::yeni(
-                yüzey.genişlik() - gş - 26.0,
-                6.0,
-                gş + 16.0,
-                22.0,
-            );
-            yüzey.dikdörtgen(
-                kutu,
-                &Dolgu::Düz(tema::nötr_05()),
-                [4.0; 4],
-                Some((1.0, tema::nötr_15())),
-            );
-            yüzey.yazı(
-                metin,
-                kutu.merkez(),
-                crate::cizim::YatayHiza::Orta,
-                crate::cizim::DikeyHiza::Orta,
-                boyut,
-                tema::ikincil_metin(),
-                false,
-            );
-            çıktı.araç_düğmeleri.push((kutu, AraçTürü::GeriYükle));
+            let mut sağ_kenar = yüzey.genişlik() - 10.0;
+            let düğme_çiz = |yüzey: &mut dyn ÇizimYüzeyi,
+                                 metin: &str,
+                                 tür: AraçTürü,
+                                 sağ_kenar: &mut f32| {
+                let (gş, _) = yüzey.yazı_ölç(metin, boyut);
+                let kutu = Dikdörtgen::yeni(*sağ_kenar - gş - 16.0, 6.0, gş + 16.0, 22.0);
+                *sağ_kenar = kutu.x - 6.0;
+                yüzey.dikdörtgen(
+                    kutu,
+                    &Dolgu::Düz(tema::nötr_05()),
+                    [4.0; 4],
+                    Some((1.0, tema::nötr_15())),
+                );
+                yüzey.yazı(
+                    metin,
+                    kutu.merkez(),
+                    crate::cizim::YatayHiza::Orta,
+                    crate::cizim::DikeyHiza::Orta,
+                    boyut,
+                    tema::ikincil_metin(),
+                    false,
+                );
+                (kutu, tür)
+            };
+            if araçlar.geri_yükle {
+                let düğme = düğme_çiz(yüzey, "↺ Sıfırla", AraçTürü::GeriYükle, &mut sağ_kenar);
+                çıktı.araç_düğmeleri.push(düğme);
+            }
+            if araçlar.svg_kaydet {
+                let düğme = düğme_çiz(yüzey, "⤓ SVG", AraçTürü::SvgKaydet, &mut sağ_kenar);
+                çıktı.araç_düğmeleri.push(düğme);
+            }
         }
 
     let ipucu_seçeneği = seçenekler.ipucu.clone().filter(|i| i.göster);
