@@ -137,11 +137,34 @@ pub fn eksenleri_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) 
             }
         }
 
+        // Kategori eksenlerinde seyreltme adımı: sığmayan etiket VE
+        // çentikler `interval` mantığıyla atlanır (ECharts davranışı).
+        let boyut_ön = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+        let adım = if eksen.ölçek.kategorik_mi() {
+            let çentikler = eksen.etiket_çentikleri();
+            let en_geniş = çentikler
+                .iter()
+                .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut_ön).0)
+                .fold(0.0f32, f32::max);
+            let bant = eksen.bant_genişliği().max(1.0);
+            let gerekli = if eksen.yatay_mı() { en_geniş + 8.0 } else { boyut_ön * 1.6 };
+            (gerekli / bant).ceil().max(1.0) as usize
+        } else {
+            1
+        };
+
         // 2) Çentikler.
         if eksen.seçenek.çentik_görünür_mü() {
             let renk = tema::EKSEN_ÇENTİĞİ;
             let uzunluk = eksen.seçenek.çentik.uzunluk;
-            for konum in eksen.çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala) {
+            for (i, konum) in eksen
+                .çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala)
+                .into_iter()
+                .enumerate()
+            {
+                if i % adım != 0 {
+                    continue;
+                }
                 let konum = keskin(konum);
                 if eksen.yatay_mı() {
                     çizici.çizgi(
@@ -196,19 +219,6 @@ pub fn eksenleri_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) 
             let renk = eksen.seçenek.etiket.yazı.renk.unwrap_or(tema::EKSEN_ETİKETİ);
             let boşluk = eksen.seçenek.etiket.boşluk;
             let çentikler = eksen.etiket_çentikleri();
-
-            // Kategori etiketlerinde otomatik seyreltme: sığmayan etiketler
-            // `interval` mantığıyla atlanır.
-            let adım = if eksen.yatay_mı() && eksen.ölçek.kategorik_mi() {
-                let en_geniş = çentikler
-                    .iter()
-                    .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut).0)
-                    .fold(0.0f32, f32::max);
-                let bant = eksen.bant_genişliği().max(1.0);
-                ((en_geniş + 8.0) / bant).ceil().max(1.0) as usize
-            } else {
-                1
-            };
 
             for (i, (konum, çentik)) in çentikler.iter().enumerate() {
                 if i % adım != 0 {

@@ -115,7 +115,38 @@ pub fn sütunları_çiz(
                 .map(|r| (seri.öğe_stili.kenarlık_kalınlığı.max(1.0), r));
             let opaklık = seri.öğe_stili.opaklık.unwrap_or(1.0);
 
-            çizici.dikdörtgen(d, &dolgu.opaklık(opaklık), yarıçap, kenarlık);
+            if let Some(pik) = &seri.piktogram {
+                // Resimli sütun: tabandan tepeye tekrarlanan semboller.
+                let adım = pik.boyut + pik.aralık;
+                let sembol_rengi = dolgu.temsilî().opaklık(opaklık);
+                if yatay {
+                    let sayı = ((d.genişlik / adım).floor() as usize).max(1);
+                    let orta_y = d.y + d.yükseklik / 2.0;
+                    for k in 0..sayı {
+                        crate::grafik::sembol_çiz(
+                            çizici,
+                            pik.sembol,
+                            (d.x + adım * k as f32 + pik.boyut / 2.0, orta_y),
+                            pik.boyut,
+                            sembol_rengi,
+                        );
+                    }
+                } else {
+                    let sayı = ((d.yükseklik / adım).floor() as usize).max(1);
+                    let orta_x = d.x + d.genişlik / 2.0;
+                    for k in 0..sayı {
+                        crate::grafik::sembol_çiz(
+                            çizici,
+                            pik.sembol,
+                            (orta_x, d.alt() - adım * k as f32 - pik.boyut / 2.0),
+                            pik.boyut,
+                            sembol_rengi,
+                        );
+                    }
+                }
+            } else {
+                çizici.dikdörtgen(d, &dolgu.opaklık(opaklık), yarıçap, kenarlık);
+            }
 
             isabetler.push(İsabetBölgesi {
                 seri_sırası: girdi.genel_sıra,

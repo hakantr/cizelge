@@ -336,6 +336,56 @@ fn çapraz_imleç() {
 }
 
 #[test]
+fn resimli_sütun_ve_özel_seri() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Stok")
+                .veri([3.0, 6.0, 4.0])
+                .piktogram(Piktogram::default()),
+        )
+        .seri(
+            ÖzelSeri::yeni()
+                .ad("Özel")
+                .veri([1.0, 2.0])
+                .çizim(|yüzey, bağlam| {
+                    // Kullanıcı çizimi: ızgara köşesine bir işaret.
+                    yüzey.daire(
+                        (bağlam.alan.x + 12.0, bağlam.alan.y + 12.0),
+                        6.0,
+                        Some(&Dolgu::Düz(bağlam.renk)),
+                        None,
+                    );
+                }),
+        );
+    altın_karşılaştır("resimli_sutun_ve_ozel_seri", &boya_ve_dök(seçenekler));
+}
+
+#[test]
+fn örnekleme_altını() {
+    let veri: Vec<f64> = (0..5000).map(|i| ((i as f64) * 0.05).sin() * 50.0 + 60.0).collect();
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori())
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Sinyal")
+                .sembol_göster(false)
+                .örnekleme(Örnekleme::Lttb)
+                .veri(veri),
+        );
+    // Altın karşılaştırması yerine boyut sınırı: 5000 nokta ızgara
+    // genişliğine (≤ ~800 komut) inmiş olmalı.
+    let döküm = boya_ve_dök(seçenekler);
+    let satır_sayısı = döküm.lines().count();
+    assert!(satır_sayısı < 1000, "örnekleme etkisiz: {satır_sayısı} satır");
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

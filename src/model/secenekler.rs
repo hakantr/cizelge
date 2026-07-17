@@ -266,6 +266,7 @@ impl GrafikSeçenekleri {
                 Seri::Huni(s) => karıştır(&mut s.veri),
                 Seri::GöstergeSaati(s) => karıştır(&mut s.veri),
                 Seri::Radar(s) => karıştır(&mut s.veri),
+                Seri::Özel(s) => karıştır(&mut s.veri),
             }
         }
         sonuç

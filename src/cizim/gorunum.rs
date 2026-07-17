@@ -40,7 +40,7 @@ use crate::koordinat::{Dikdörtgen, Kartezyen2B, ÇalışmaEkseni};
 use crate::model::bilesen::{GöstergeSimgesi, Tetikleme, İmleçTürü, İpucu};
 use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::secenekler::GrafikSeçenekleri;
-use crate::model::seri::Seri;
+use crate::model::seri::{Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, LogÖlçeği, ZamanÖlçeği, Ölçek};
 use crate::renk::Dolgu;
@@ -663,6 +663,18 @@ pub fn grafiği_boya(
                         &mut çıktı.isabetler,
                     );
                 }
+                Seri::Özel(s) => {
+                    if let Some(çizim) = &s.çizim {
+                        let bağlam = ÖzelBağlam {
+                            alan: kartezyen.alan,
+                            kartezyen: Some(kartezyen),
+                            veri: &s.veri,
+                            renk: seçenekler.seri_rengi(i),
+                            ilerleme,
+                        };
+                        çizim(yüzey, &bağlam);
+                    }
+                }
                 Seri::Pasta(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) | Seri::Radar(_) => {}
             }
         }
@@ -861,6 +873,21 @@ pub fn grafiği_boya(
                             }
                         }
                     }
+            }
+            Seri::Özel(s) if !s.kartezyen_gerekli => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                if let Some(çizim) = &s.çizim {
+                    let bağlam = ÖzelBağlam {
+                        alan: tüm_alan,
+                        kartezyen: None,
+                        veri: &s.veri,
+                        renk: seçenekler.seri_rengi(i),
+                        ilerleme,
+                    };
+                    çizim(yüzey, &bağlam);
+                }
             }
             _ => {}
         }

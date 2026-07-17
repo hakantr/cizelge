@@ -41,6 +41,23 @@ pub enum Basamak {
     Son,
 }
 
+/// Resimli sütun ayarları (`pictorialBar` karşılığı): sütun, tekrarlanan
+/// sembollerle çizilir.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Piktogram {
+    pub sembol: Sembol,
+    /// Sembol çapı.
+    pub boyut: f32,
+    /// Semboller arası boşluk.
+    pub aralık: f32,
+}
+
+impl Default for Piktogram {
+    fn default() -> Self {
+        Piktogram { sembol: Sembol::Daire, boyut: 14.0, aralık: 4.0 }
+    }
+}
+
 /// Pasta grafiklerinde gül (Nightingale) kipi (`roseType`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum GülTürü {
@@ -244,6 +261,8 @@ pub struct SütunSerisi {
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
     pub imleyiciler: İmleyiciler,
+    /// Sütunu tekrarlanan sembollerle çizer (`pictorialBar`).
+    pub piktogram: Option<Piktogram>,
 }
 
 
@@ -289,6 +308,12 @@ impl SütunSerisi {
 
     pub fn kategori_boşluğu(mut self, boşluk: impl Into<Uzunluk>) -> Self {
         self.kategori_boşluğu = Some(boşluk.into());
+        self
+    }
+
+    /// Sütunu tekrarlanan sembollerle çizer (`pictorialBar` karşılığı).
+    pub fn piktogram(mut self, piktogram: Piktogram) -> Self {
+        self.piktogram = Some(piktogram);
         self
     }
 
@@ -961,6 +986,80 @@ impl RadarSerisi {
     }
 }
 
+/// Özel seri çizim bağlamı: kullanıcının çizim işlevine geçirilir.
+pub struct ÖzelBağlam<'a> {
+    /// Izgara alanı (kartezyen yoksa tuvalin tamamı).
+    pub alan: crate::koordinat::Dikdörtgen,
+    /// Kartezyen koordinat sistemi (eksenler kuruluysa).
+    pub kartezyen: Option<&'a crate::koordinat::Kartezyen2B>,
+    pub veri: &'a [VeriÖğesi],
+    /// Paletten çözülen seri rengi.
+    pub renk: crate::renk::Renk,
+    /// Giriş animasyonu ilerlemesi `0..=1`.
+    pub ilerleme: f32,
+}
+
+/// Özel çizim işlevi (`series-custom` içindeki `renderItem` karşılığı).
+pub type ÖzelÇizim =
+    Arc<dyn Fn(&mut dyn crate::cizim::ÇizimYüzeyi, &ÖzelBağlam) + Send + Sync>;
+
+/// Özel seri (`series-custom`): çizim tümüyle kullanıcı işlevine bırakılır.
+/// Bu aynı zamanda üçüncü taraf seri türleri için eklenti noktasıdır.
+#[derive(Clone)]
+pub struct ÖzelSeri {
+    pub ad: Option<String>,
+    pub veri: Vec<VeriÖğesi>,
+    pub çizim: Option<ÖzelÇizim>,
+    /// Eksen/ızgara kurulumu gerekli mi? `false` ise tuvalin tamamı verilir.
+    pub kartezyen_gerekli: bool,
+}
+
+impl fmt::Debug for ÖzelSeri {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ÖzelSeri")
+            .field("ad", &self.ad)
+            .field("veri", &self.veri.len())
+            .field("kartezyen_gerekli", &self.kartezyen_gerekli)
+            .finish()
+    }
+}
+
+impl Default for ÖzelSeri {
+    fn default() -> Self {
+        ÖzelSeri { ad: None, veri: Vec::new(), çizim: None, kartezyen_gerekli: true }
+    }
+}
+
+impl ÖzelSeri {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+
+    /// Çizim işlevini ayarlar.
+    pub fn çizim(
+        mut self,
+        işlev: impl Fn(&mut dyn crate::cizim::ÇizimYüzeyi, &ÖzelBağlam) + Send + Sync + 'static,
+    ) -> Self {
+        self.çizim = Some(Arc::new(işlev));
+        self
+    }
+
+    pub fn kartezyen_gerekli(mut self, gerekli: bool) -> Self {
+        self.kartezyen_gerekli = gerekli;
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -974,6 +1073,7 @@ pub enum Seri {
     Huni(HuniSerisi),
     GöstergeSaati(GöstergeSaatiSerisi),
     Radar(RadarSerisi),
+    Özel(ÖzelSeri),
 }
 
 impl Seri {
@@ -989,6 +1089,7 @@ impl Seri {
             Seri::Huni(s) => s.ad.as_deref(),
             Seri::GöstergeSaati(s) => s.ad.as_deref(),
             Seri::Radar(s) => s.ad.as_deref(),
+            Seri::Özel(s) => s.ad.as_deref(),
         }
     }
 
@@ -1002,7 +1103,7 @@ impl Seri {
                 | Seri::Mum(_)
                 | Seri::Kutu(_)
                 | Seri::Isı(_)
-        )
+        ) || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
     }
 
     pub fn veri(&self) -> &[VeriÖğesi] {
@@ -1017,6 +1118,7 @@ impl Seri {
             Seri::Huni(s) => &s.veri,
             Seri::GöstergeSaati(s) => &s.veri,
             Seri::Radar(s) => &s.veri,
+            Seri::Özel(s) => &s.veri,
         }
     }
 
@@ -1032,7 +1134,8 @@ impl Seri {
             | Seri::Isı(_)
             | Seri::Huni(_)
             | Seri::GöstergeSaati(_)
-            | Seri::Radar(_) => None,
+            | Seri::Radar(_)
+            | Seri::Özel(_) => None,
         }
     }
 
@@ -1048,7 +1151,8 @@ impl Seri {
             | Seri::Isı(_)
             | Seri::Huni(_)
             | Seri::GöstergeSaati(_)
-            | Seri::Radar(_) => None,
+            | Seri::Radar(_)
+            | Seri::Özel(_) => None,
         }
     }
 }
@@ -1110,5 +1214,11 @@ impl From<GöstergeSaatiSerisi> for Seri {
 impl From<RadarSerisi> for Seri {
     fn from(s: RadarSerisi) -> Seri {
         Seri::Radar(s)
+    }
+}
+
+impl From<ÖzelSeri> for Seri {
+    fn from(s: ÖzelSeri) -> Seri {
+        Seri::Özel(s)
     }
 }
