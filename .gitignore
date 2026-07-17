@@ -22,3 +22,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# WASM köprüsü çıktı dizinleri
+wasm/target/
+wasm/pkg/

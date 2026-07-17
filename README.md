@@ -99,3 +99,10 @@ uyarlanmıştır.
 **Değiştirilemez kural:** Proje hiçbir koşulda Apache-2.0 lisans sınırının
 dışına çıkmaz; GPL/LGPL/AGPL lisanslı kod veya bağımlılık kabul edilmez.
 Ayrıntı: [FAZ_PLANI.md](FAZ_PLANI.md) içindeki lisans kuralı bölümü.
+
+## WASM
+
+Çekirdek (model + ölçekler + boyama + SVG dışa aktarım) gpui olmadan da
+derlenir: `cargo check --no-default-features` ya da
+`--target wasm32-unknown-unknown`. Tarayıcı köprüsü ve canlı demo için
+[`wasm/README.md`](wasm/README.md) dosyasına bakın.

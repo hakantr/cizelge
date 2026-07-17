@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cizelge — WASM demosu</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 24px;
+         background: #f4f7fd; color: #3c3c41; }
+  body.koyu { background: #141418; color: #e8ebf0; }
+  h1 { font-size: 20px; }
+  .denetimler { display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+                margin-bottom: 16px; }
+  label { font-size: 14px; }
+  input, select, button { font: inherit; padding: 6px 10px; border-radius: 8px;
+                          border: 1px solid #cfd2d7; background: inherit; color: inherit; }
+  button { cursor: pointer; }
+  #tuval { background: transparent; border-radius: 12px; overflow: auto; }
+  .not { font-size: 12px; opacity: 0.7; margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>cizelge — WASM demosu (SVG çekirdeği, gpui'siz)</h1>
+<div class="denetimler">
+  <label>Tür
+    <select id="tür">
+      <option value="çizgi">Çizgi</option>
+      <option value="sütun">Sütun</option>
+      <option value="pasta">Pasta</option>
+    </select>
+  </label>
+  <label>Değerler (virgüllü)
+    <input id="değerler" size="40" value="120, 200, 150, 80, 70, 110, 130">
+  </label>
+  <label>Kategoriler
+    <input id="kategoriler" size="28" value="Pzt, Sal, Çar, Per, Cum, Cmt, Paz">
+  </label>
+  <button id="ekle">＋ Değer Ekle</button>
+  <button id="karıştır">🎲 Karıştır</button>
+  <label><input type="checkbox" id="koyu"> Koyu tema</label>
+</div>
+<div id="tuval"></div>
+<p class="not" id="özet"></p>
+<p class="not">
+  Derleme (wasm/ dizininde): <code>cargo build --release --target wasm32-unknown-unknown</code>
+  ardından <code>wasm-bindgen --target web --out-dir pkg
+  target/wasm32-unknown-unknown/release/cizelge_wasm.wasm</code>
+  (ya da <code>wasm-pack build --target web</code>). Sonra bu sayfayı
+  <code>wasm/</code> kökünden statik sunucuyla açın
+  (ör. <code>python3 -m http.server</code> → <code>/www/index.html</code>).
+</p>
+<script type="module">
+import init, { svg_cizgi, svg_sutun, svg_pasta, ozet_cizgi } from "../pkg/cizelge_wasm.js";
+
+const oku = (kimlik) => document.getElementById(kimlik);
+
+function değerleri_al() {
+  return oku("değerler").value
+    .split(",")
+    .map((s) => parseFloat(s.trim()))
+    .filter((v) => Number.isFinite(v));
+}
+
+function çiz() {
+  const değerler = new Float64Array(değerleri_al());
+  const kategoriler = oku("kategoriler").value;
+  const koyu = oku("koyu").checked;
+  document.body.classList.toggle("koyu", koyu);
+  const g = Math.min(window.innerWidth - 60, 960);
+  const y = 520;
+  let svg;
+  switch (oku("tür").value) {
+    case "sütun": svg = svg_sutun("Canlı Veri", kategoriler, değerler, koyu, g, y); break;
+    case "pasta": svg = svg_pasta("Canlı Veri", kategoriler, değerler, koyu, g, y); break;
+    default: svg = svg_cizgi("Canlı Veri", kategoriler, değerler, koyu, g, y);
+  }
+  oku("tuval").innerHTML = svg;
+  oku("özet").textContent = ozet_cizgi("Canlı Veri", kategoriler, değerler);
+}
+
+init().then(() => {
+  for (const kimlik of ["tür", "değerler", "kategoriler", "koyu"]) {
+    oku(kimlik).addEventListener("input", çiz);
+  }
+  oku("ekle").addEventListener("click", () => {
+    const v = değerleri_al();
+    v.push(Math.round(50 + Math.random() * 200));
+    oku("değerler").value = v.join(", ");
+    çiz();
+  });
+  oku("karıştır").addEventListener("click", () => {
+    const v = değerleri_al().map(() => Math.round(50 + Math.random() * 200));
+    oku("değerler").value = v.join(", ");
+    çiz();
+  });
+  çiz();
+});
+</script>
+</body>
+</html>

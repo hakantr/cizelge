@@ -29,3 +29,12 @@ Bilinen MPL-2.0 bağımlılıkları (tümü değiştirilmeden kullanılır):
 - option-ext (geçişli bağımlılık)
 - dwrote (yalnızca Windows hedefinde derlenir)
 - cbindgen (derleme aracı; mevcut derleme grafiğinde etkin değil)
+
+---
+
+WASM köprüsü (wasm/ dizini, cizelge-wasm):
+- wasm-bindgen (MIT VEYA Apache-2.0) — değiştirilmeden bağımlılık olarak
+  kullanılır; geçişli bağımlılıkları (proc-macro2, quote, syn,
+  unicode-ident, bumpalo, log, cfg-if, once_cell, rustversion,
+  wasm-bindgen-shared/backend/macro) MIT/Apache-2.0 (unicode-ident ek
+  olarak Unicode-3.0) lisanslıdır ve onaylı listeye uygundur.

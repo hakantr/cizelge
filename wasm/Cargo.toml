@@ -1,0 +1,31 @@
+# cizelge-wasm — çekirdeğin (gpui'siz) tarayıcı köprüsü.
+#
+# Derleme:
+#   rustup target add wasm32-unknown-unknown
+#   wasm-pack build --target web          # ya da: cargo build --target wasm32-unknown-unknown --release
+#
+# Lisans denetimi: wasm-bindgen MIT/Apache-2.0 ikili lisanslıdır (onaylı liste içinde).
+
+[package]
+name = "cizelge-wasm"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "cizelge çekirdeğinin wasm-bindgen köprüsü: seçeneklerden SVG üretir"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cizelge = { path = "..", default-features = false }
+wasm-bindgen = "=0.2.120"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+indexing_slicing = "deny"

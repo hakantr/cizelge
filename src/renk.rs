@@ -1,6 +1,7 @@
 //! Renk modeli, ECharts renk seçenekleriyle uyumlu metin çözümleme ve gpui
 //! boya tiplerine dönüşüm.
 
+#[cfg(feature = "gpui")]
 use gpui::{Background, Hsla, Rgba, linear_color_stop, linear_gradient};
 
 /// Bileşenleri `0.0..=1.0` aralığında bir KYMA (RGBA) rengi.
@@ -112,10 +113,12 @@ impl Renk {
         }
     }
 
+    #[cfg(feature = "gpui")]
     pub fn gpui_rgba(self) -> Rgba {
         Rgba { r: self.kırmızı, g: self.yeşil, b: self.mavi, a: self.alfa }
     }
 
+    #[cfg(feature = "gpui")]
     pub fn gpui_hsla(self) -> Hsla {
         Hsla::from(self.gpui_rgba())
     }
@@ -133,12 +136,14 @@ impl From<&str> for Renk {
     }
 }
 
+#[cfg(feature = "gpui")]
 impl From<Renk> for Hsla {
     fn from(r: Renk) -> Hsla {
         r.gpui_hsla()
     }
 }
 
+#[cfg(feature = "gpui")]
 impl From<Renk> for Background {
     fn from(r: Renk) -> Background {
         r.gpui_hsla().into()
@@ -239,6 +244,7 @@ impl Dolgu {
     /// doğrusal gradyanların tam karşılığı, gpui yüzeyinde bantlama ile
     /// çizilir — bkz. `cizim::cizici`). Radyal gradyan burada orta renge
     /// düşer; daire/dilim ilkellerinde halkalarla yaklaşıklanır.
+    #[cfg(feature = "gpui")]
     pub fn gpui_arkaplan(&self) -> Background {
         match self {
             Dolgu::Düz(r) => r.gpui_hsla().into(),

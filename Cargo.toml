@@ -19,94 +19,129 @@ unreachable = "deny"
 indexing_slicing = "deny"
 
 [dependencies]
-gpui = { path = "../zed/crates/gpui" }
+gpui = { path = "../zed/crates/gpui", optional = true }
 lyon = "1.0"
+
+[features]
+# Öntanımlı: gpui penceresi (Çizici + GrafikGörünümü). Kapatılırsa
+# çekirdek (model + ölçek + KayıtYüzeyi + SvgYüzeyi) gpui'siz derlenir —
+# WASM hedefi bu kipi kullanır.
+default = ["gpui"]
+gpui = ["dep:gpui"]
 
 [dev-dependencies]
 gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "wayland", "x11"] }
 
 [[example]]
+required-features = ["gpui"]
 name = "cizgi"
 
 [[example]]
+required-features = ["gpui"]
 name = "sutun"
 
 [[example]]
+required-features = ["gpui"]
 name = "pasta"
 
 [[example]]
+required-features = ["gpui"]
 name = "sacilim"
 
 [[example]]
+required-features = ["gpui"]
 name = "pano"
 
 [[example]]
+required-features = ["gpui"]
 name = "olaylar"
 
 [[example]]
+required-features = ["gpui"]
 name = "mum"
 
 [[example]]
+required-features = ["gpui"]
 name = "kutu"
 
 [[example]]
+required-features = ["gpui"]
 name = "isi"
 
 [[example]]
+required-features = ["gpui"]
 name = "huni"
 
 [[example]]
+required-features = ["gpui"]
 name = "gosterge_saati"
 
 [[example]]
+required-features = ["gpui"]
 name = "radar"
 
 [[example]]
+required-features = ["gpui"]
 name = "efektli_sacilim"
 
 [[example]]
+required-features = ["gpui"]
 name = "imleyiciler"
 
 [[example]]
+required-features = ["gpui"]
 name = "coklu_izgara"
 
 [[example]]
+required-features = ["gpui"]
 name = "yakinlastirma"
 
 [[example]]
+required-features = ["gpui"]
 name = "kutupsal"
 
 [[example]]
+required-features = ["gpui"]
 name = "agac_haritasi"
 
 [[example]]
+required-features = ["gpui"]
 name = "gunes"
 
 [[example]]
+required-features = ["gpui"]
 name = "agac"
 
 [[example]]
+required-features = ["gpui"]
 name = "sankey"
 
 [[example]]
+required-features = ["gpui"]
 name = "grafo"
 
 [[example]]
+required-features = ["gpui"]
 name = "tema_nehri"
 
 [[example]]
+required-features = ["gpui"]
 name = "zaman_seridi"
 
 [[example]]
+required-features = ["gpui"]
 name = "galeri"
 
 [[example]]
+required-features = ["gpui"]
 name = "kiris"
 
 [[example]]
+required-features = ["gpui"]
 name = "paralel"
 
 [[example]]
+required-features = ["gpui"]
 name = "takvim"
 
 [[test]]

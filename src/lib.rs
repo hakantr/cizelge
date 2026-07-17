@@ -38,9 +38,11 @@ pub mod yardimci;
 pub mod yerlesim;
 
 pub use cizim::gorunum::{
-    grafiği_boya, AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, GrafikGörünümü, SürgüBölgesi,
+    grafiği_boya, AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, SürgüBölgesi,
     SürgüParçası, İçYakınlaştırmaAlanı,
 };
+#[cfg(feature = "gpui")]
+pub use cizim::pencere::GrafikGörünümü;
 pub use cizim::{
     svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi, İsabetBölgesi,
     İsabetGeometrisi,
@@ -83,7 +85,9 @@ pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
 /// Sık kullanılan tiplerin topluca içe aktarımı (ECharts'taki `echarts` ana
 /// girişinin karşılığı).
 pub mod hazir {
-    pub use crate::cizim::gorunum::{grafiği_boya, BoyamaGirdisi, BoyamaÇıktısı, GrafikGörünümü};
+    pub use crate::cizim::gorunum::{grafiği_boya, BoyamaGirdisi, BoyamaÇıktısı};
+    #[cfg(feature = "gpui")]
+    pub use crate::cizim::pencere::GrafikGörünümü;
     pub use crate::cizim::{svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi};
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
     pub use crate::model::bilesen::{

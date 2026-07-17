@@ -501,8 +501,15 @@ tek veri kaynağından 3 farklı grafik örneği.
   çizelge; üst çubukta canlı veri düzenleme (± nokta, değer karıştırma,
   koyu tema) — her değişiklik geçiş animasyonuyla uygulanır. Eksik olan
   kiriş/paralel/takvim bağımsız örnekleri de eklendi (27 örnek).
-- ⏳ WASM entegrasyonu (kullanıcı isteği 2026-07-17): çekirdek gpui'siz
-  derlenip SVG üretir; wasm-bindgen köprüsü — sıradaki iş.
+- ✅ WASM entegrasyonu (kullanıcı isteği 2026-07-17): `gpui` bağımlılığı
+  özellik kapısına alındı (`default = ["gpui"]`; kapatılınca çekirdek —
+  model + ölçek + boyama + KayıtYüzeyi + SvgYüzeyi — gpui'siz derlenir;
+  `Çizici` ve `GrafikGörünümü` `cizim/pencere.rs`'e ayrıldı). Çekirdek
+  `wasm32-unknown-unknown` hedefinde temiz derlenir. `wasm/` köprü
+  crate'i (`cizelge-wasm`, wasm-bindgen =0.2.120 — MIT/Apache-2.0):
+  `svg_cizgi`/`svg_sutun`/`svg_pasta`/`ozet_cizgi` işlevleri +
+  `wasm/www/index.html` canlı demo (değer ekleme/karıştırma, koyu tema).
+  Paket üretimi doğrulandı (432K .wasm + JS bağları).
 
 ---
 
