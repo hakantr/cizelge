@@ -48,3 +48,24 @@ impl AğaçDüğümü {
         self.çocuklar.is_empty()
     }
 }
+
+/// Ad zincirini (kök yolu) izleyerek etkin kök listesini bulur — ağaç
+/// haritası inme (drill-down) ve güneş patlaması odak gezinmesi için.
+/// Ad bulunamazsa ya da bulunan düğüm yapraksa iniş orada durur.
+/// Dönen ikinci değer: gerçekten inilen adım sayısıdır.
+pub fn yolu_çöz<'a>(
+    kökler: &'a [AğaçDüğümü],
+    yol: &[String],
+) -> (&'a [AğaçDüğümü], usize) {
+    let mut etkin = kökler;
+    let mut derinlik = 0usize;
+    for ad in yol {
+        let Some(düğüm) = etkin.iter().find(|d| &d.ad == ad) else { break };
+        if düğüm.çocuklar.is_empty() {
+            break;
+        }
+        etkin = &düğüm.çocuklar;
+        derinlik = derinlik.saturating_add(1);
+    }
+    (etkin, derinlik)
+}

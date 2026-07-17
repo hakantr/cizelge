@@ -21,6 +21,8 @@ pub fn grafo_çiz(
     tuval: Dikdörtgen,
     palet: &dyn Fn(usize) -> Renk,
     ilerleme: f32,
+    görünüm: (f32, f32, f32),
+    kaymalar: &[(usize, f32, f32)],
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
     if seri.düğümler.is_empty() {
@@ -124,6 +126,23 @@ pub fn grafo_çiz(
         }
     }
 
+    // 2b) Gezinme (roam) dönüşümü: merkez odaklı ölçek + kaydırma; ardından
+    // sürüklenen düğümlerin bireysel kaymaları.
+    let (kayma_x, kayma_y, ölçek) = görünüm;
+    let ölçek = if ölçek.is_finite() && ölçek > 0.01 { ölçek } else { 1.0 };
+    if ölçek != 1.0 || kayma_x != 0.0 || kayma_y != 0.0 {
+        for konum in konumlar.iter_mut() {
+            konum.0 = merkez.0 + (konum.0 - merkez.0) * ölçek + kayma_x;
+            konum.1 = merkez.1 + (konum.1 - merkez.1) * ölçek + kayma_y;
+        }
+    }
+    for (sıra, dx, dy) in kaymalar {
+        if let Some(konum) = konumlar.get_mut(*sıra) {
+            konum.0 += dx;
+            konum.1 += dy;
+        }
+    }
+
     // 3) Bağlar.
     let opaklık = ilerleme.clamp(0.0, 1.0);
     for (i, j) in &bağ_sıraları {
@@ -140,7 +159,7 @@ pub fn grafo_çiz(
     // 4) Düğümler + etiketler.
     for (i, düğüm) in seri.düğümler.iter().enumerate() {
         let Some(&konum) = konumlar.get(i) else { continue };
-        let boyut = düğüm.boyut.max(4.0) * opaklık.max(0.01);
+        let boyut = düğüm.boyut.max(4.0) * opaklık.max(0.01) * ölçek;
         let renk = palet(düğüm.kategori.unwrap_or(i));
         çizici.daire(
             konum,

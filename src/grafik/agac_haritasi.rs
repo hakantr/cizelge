@@ -183,7 +183,10 @@ fn düğümleri_yerleştir(
     }
 }
 
-/// Ağaç haritasını çizer ve isabet bölgelerini toplar.
+/// Ağaç haritasını çizer ve isabet bölgelerini toplar. `kök_yolu`
+/// (drill-down) doluysa yerleşim o dala iner ve üstte tıklanabilir
+/// kırıntı (breadcrumb) şeridi çizilir.
+#[allow(clippy::too_many_arguments)]
 pub fn ağaç_haritası_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     seri: &AğaçHaritasıSerisi,
@@ -191,17 +194,71 @@ pub fn ağaç_haritası_çiz(
     tuval: Dikdörtgen,
     palet: &dyn Fn(usize) -> Renk,
     ilerleme: f32,
+    kök_yolu: &[String],
     isabetler: &mut Vec<İsabetBölgesi>,
+    kırıntılar: &mut Vec<(Dikdörtgen, usize)>,
 ) {
-    let alan = Dikdörtgen::yeni(
+    let mut alan = Dikdörtgen::yeni(
         tuval.x + seri.sol.çöz(tuval.genişlik),
         tuval.y + seri.üst.çöz(tuval.yükseklik),
         seri.genişlik.çöz(tuval.genişlik),
         seri.yükseklik.çöz(tuval.yükseklik),
     );
+    let (etkin_kökler, derinlik) =
+        crate::model::agac::yolu_çöz(&seri.kökler, kök_yolu);
+
+    // Kırıntı şeridi (`breadcrumb`): "Tümü › dal › dal", her parça
+    // tıklanınca yol o uzunluğa kırpılır.
+    if derinlik > 0 {
+        let şerit_yüksekliği = 22.0;
+        let mut x = alan.x;
+        let boyut = tema::YAZI_KÜÇÜK;
+        let mut parçalar: Vec<String> = vec!["Tümü".to_string()];
+        parçalar.extend(kök_yolu.iter().take(derinlik).cloned());
+        for (i, parça) in parçalar.iter().enumerate() {
+            let (gş, _) = çizici.yazı_ölç(parça, boyut);
+            let kutu = Dikdörtgen::yeni(x, alan.y, gş + 14.0, şerit_yüksekliği - 4.0);
+            çizici.dikdörtgen(
+                kutu,
+                &Dolgu::Düz(tema::nötr_05()),
+                [3.0; 4],
+                Some((1.0, tema::nötr_15())),
+            );
+            çizici.yazı(
+                parça,
+                kutu.merkez(),
+                YatayHiza::Orta,
+                DikeyHiza::Orta,
+                boyut,
+                tema::ikincil_metin(),
+                false,
+            );
+            kırıntılar.push((kutu, i));
+            x = kutu.sağ() + 6.0;
+            if i + 1 < parçalar.len() {
+                çizici.yazı(
+                    "›",
+                    (x, kutu.merkez().1),
+                    YatayHiza::Sol,
+                    DikeyHiza::Orta,
+                    boyut,
+                    tema::üçüncül_metin(),
+                    false,
+                );
+                x += 12.0;
+            }
+        }
+        alan = Dikdörtgen::yeni(
+            alan.x,
+            alan.y + şerit_yüksekliği,
+            alan.genişlik,
+            (alan.yükseklik - şerit_yüksekliği).max(10.0),
+        );
+    }
+
     let mut hücreler = Vec::new();
     düğümleri_yerleştir(
-        &seri.kökler,
+        etkin_kökler,
         alan,
         0,
         seri.en_çok_derinlik.max(1),
@@ -250,16 +307,16 @@ pub fn ağaç_haritası_çiz(
                 );
             }
         }
-        if hücre.yaprak {
-            isabetler.push(İsabetBölgesi {
-                seri_sırası: genel_sıra,
-                veri_sırası: isabetler.len(),
-                seri_adı: seri.ad.clone(),
-                ad: Some(hücre.ad.clone()),
-                değer: Some(hücre.değer),
-                geometri: İsabetGeometrisi::Dikdörtgen(hücre.alan),
-            });
-        }
+        // Yapraklar ipucu/tıklama, dallar inme (drill-down) isabetidir;
+        // yapraklar üstte çizildiğinden aramada önce bulunur.
+        isabetler.push(İsabetBölgesi {
+            seri_sırası: genel_sıra,
+            veri_sırası: isabetler.len(),
+            seri_adı: seri.ad.clone(),
+            ad: Some(hücre.ad.clone()),
+            değer: Some(hücre.değer),
+            geometri: İsabetGeometrisi::Dikdörtgen(hücre.alan),
+        });
     }
 }
 

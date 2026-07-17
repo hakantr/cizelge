@@ -41,6 +41,9 @@ type AraçKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, AraçTürü)>>>;
 /// Zaman şeridi düğmelerinin pencere-mutlak kutuları.
 type FilmDüğmeleri = Rc<RefCell<Vec<(Bounds<Pixels>, ZamanŞeridiEylemi)>>>;
 
+/// Hiyerarşi kırıntılarının pencere-mutlak kutuları: `(kutu, yeni yol uzunluğu)`.
+type KırıntıKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
+
 /// Zaman şeridi (timeline) durumu: kare listesi + oynatma.
 struct Film {
     kareler: Vec<Arc<GrafikSeçenekleri>>,
@@ -92,11 +95,23 @@ pub struct GrafikGörünümü {
     son_boyut: Rc<Cell<(f32, f32)>>,
     /// Pencere-mutlak zaman şeridi düğmeleri.
     film_düğmeleri: FilmDüğmeleri,
+    /// Hiyerarşik gezinme yolu (ağaç haritası inme / güneş odak).
+    hiyerarşi_yolu: Vec<String>,
+    /// Pencere-mutlak kırıntı kutuları.
+    kırıntı_kutuları: KırıntıKutuları,
+    /// Grafo gezinmesi: `(kayma_x, kayma_y, ölçek)`.
+    grafo_görünümü: (f32, f32, f32),
+    /// Grafo düğümü sürükleme kaymaları.
+    grafo_kaymaları: std::collections::HashMap<usize, (f32, f32)>,
 }
 
 /// Etkin sürükleme durumu.
 #[derive(Clone, Copy, Debug)]
 enum Sürükleme {
+    /// Grafo düğümünü taşıma.
+    GrafoDüğüm { veri_sırası: usize, son: (f32, f32) },
+    /// Grafo görünümünü kaydırma (roam).
+    GrafoKaydırma { son: (f32, f32) },
     /// Izgara içinde yatay kaydırma (pan).
     Kaydırma {
         yakınlaştırma_sırası: usize,
@@ -143,6 +158,10 @@ impl GrafikGörünümü {
             film: None,
             film_düğmeleri: Rc::new(RefCell::new(Vec::new())),
             son_boyut: Rc::new(Cell::new((800.0, 600.0))),
+            hiyerarşi_yolu: Vec::new(),
+            kırıntı_kutuları: Rc::new(RefCell::new(Vec::new())),
+            grafo_görünümü: (0.0, 0.0, 1.0),
+            grafo_kaymaları: std::collections::HashMap::new(),
         }
     }
 
@@ -307,8 +326,16 @@ impl GrafikGörünümü {
         self.ilk_seçenekler = self.seçenekler.clone();
         self.gösterge_sayfası = 0;
         self.fırça_seçimi = None;
+        self.gezinmeyi_sıfırla();
         cx.notify();
         Ok(())
+    }
+
+    /// Gezinme durumunu (hiyerarşi yolu, grafo görünümü) sıfırlar.
+    fn gezinmeyi_sıfırla(&mut self) {
+        self.hiyerarşi_yolu.clear();
+        self.grafo_görünümü = (0.0, 0.0, 1.0);
+        self.grafo_kaymaları.clear();
     }
 
     pub fn seçenekler(&self) -> &GrafikSeçenekleri {
@@ -387,7 +414,15 @@ impl Render for GrafikGörünümü {
         let gösterge_okları = self.gösterge_okları.clone();
         let araç_düğmeleri = self.araç_düğmeleri.clone();
         let film_düğmeleri = self.film_düğmeleri.clone();
+        let kırıntı_kutuları = self.kırıntı_kutuları.clone();
         let son_boyut = self.son_boyut.clone();
+        let hiyerarşi_yolu = self.hiyerarşi_yolu.clone();
+        let grafo_görünümü = self.grafo_görünümü;
+        let grafo_kaymaları: Vec<(usize, f32, f32)> = self
+            .grafo_kaymaları
+            .iter()
+            .map(|(sıra, (dx, dy))| (*sıra, *dx, *dy))
+            .collect();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -415,6 +450,9 @@ impl Render for GrafikGörünümü {
                                 [x0 - köken.0, y0 - köken.1, x1 - köken.0, y1 - köken.1]
                             }),
                             zaman_şeridi,
+                            hiyerarşi_yolu: hiyerarşi_yolu.clone(),
+                            grafo_görünümü,
+                            grafo_kaymaları: grafo_kaymaları.clone(),
                         };
                         let çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
                         let tanı_bildir = |bileşen: &'static str| {
@@ -518,6 +556,15 @@ impl Render for GrafikGörünümü {
                             }
                             Err(_) => tanı_bildir("zaman_düğmeleri"),
                         }
+                        match kırıntı_kutuları.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for (kutu, uzunluk) in çıktı.kırıntılar {
+                                    kayıt.push((çizici.sınırlar(kutu), uzunluk));
+                                }
+                            }
+                            Err(_) => tanı_bildir("kırıntı_kutuları"),
+                        }
                     },
                 )
                 .size_full(),
@@ -534,6 +581,26 @@ impl Render for GrafikGörünümü {
                 // Etkin sürükleme: kaydırma ya da sürgü.
                 if olay.pressed_button == Some(MouseButton::Left) {
                     match bu.sürükleme {
+                        Some(Sürükleme::GrafoDüğüm { veri_sırası, son }) => {
+                            let fark = (yeni.0 - son.0, yeni.1 - son.1);
+                            let kayıt = bu
+                                .grafo_kaymaları
+                                .entry(veri_sırası)
+                                .or_insert((0.0, 0.0));
+                            kayıt.0 += fark.0;
+                            kayıt.1 += fark.1;
+                            bu.sürükleme =
+                                Some(Sürükleme::GrafoDüğüm { veri_sırası, son: yeni });
+                            cx.notify();
+                            return;
+                        }
+                        Some(Sürükleme::GrafoKaydırma { son }) => {
+                            bu.grafo_görünümü.0 += yeni.0 - son.0;
+                            bu.grafo_görünümü.1 += yeni.1 - son.1;
+                            bu.sürükleme = Some(Sürükleme::GrafoKaydırma { son: yeni });
+                            cx.notify();
+                            return;
+                        }
                         Some(Sürükleme::Kaydırma {
                             yakınlaştırma_sırası,
                             başlangıç_x,
@@ -602,7 +669,30 @@ impl Render for GrafikGörünümü {
                         .cloned(),
                     Err(_) => None,
                 };
-                let Some(kayıt) = alan_kaydı else { return };
+                let Some(kayıt) = alan_kaydı else {
+                    // Grafo gezinmesi (roam): tekerlek görünümü ölçekler.
+                    if bu.seçenekler.seriler.iter().any(|s| matches!(s, Seri::Grafo(_))) {
+                        let yön = match olay.delta {
+                            gpui::ScrollDelta::Pixels(p) => f32::from(p.y),
+                            gpui::ScrollDelta::Lines(l) => l.y * 20.0,
+                        };
+                        if yön.abs() < 0.01 {
+                            return;
+                        }
+                        let çarpan = if yön > 0.0 { 1.0 / 0.85 } else { 0.85 };
+                        let (kayma_x, kayma_y, ölçek) = bu.grafo_görünümü;
+                        let yeni_ölçek = (ölçek * çarpan).clamp(0.2, 8.0);
+                        let gerçek_çarpan = yeni_ölçek / ölçek.max(1e-6);
+                        // Merkez odaklı: kaymalar ölçekle birlikte büyür.
+                        bu.grafo_görünümü = (
+                            kayma_x * gerçek_çarpan,
+                            kayma_y * gerçek_çarpan,
+                            yeni_ölçek,
+                        );
+                        cx.notify();
+                    }
+                    return;
+                };
                 let pencere = bu
                     .seçenekler
                     .veri_yakınlaştırmaları
@@ -720,6 +810,7 @@ impl Render for GrafikGörünümü {
                             bu.kapalı.clear();
                             bu.gösterge_sayfası = 0;
                             bu.fırça_seçimi = None;
+                            bu.gezinmeyi_sıfırla();
                             cx.emit(GrafikOlayı::GeriYüklendi);
                             cx.notify();
                             return;
@@ -748,6 +839,19 @@ impl Render for GrafikGörünümü {
                             return;
                         }
                         None => {}
+                    }
+                    // 0d) Hiyerarşi kırıntıları (breadcrumb / güneş geri).
+                    let kırıntı_vuruşu = match bu.kırıntı_kutuları.try_borrow() {
+                        Ok(kutular) => kutular
+                            .iter()
+                            .find(|(kutu, _)| kutu.contains(&olay.position))
+                            .map(|(_, uzunluk)| *uzunluk),
+                        Err(_) => None,
+                    };
+                    if let Some(uzunluk) = kırıntı_vuruşu {
+                        bu.hiyerarşi_yolu.truncate(uzunluk);
+                        cx.notify();
+                        return;
                     }
                     // 0c) Fırça etkinse seçim başlat.
                     if bu.seçenekler.fırça.map(|f| f.etkin).unwrap_or(false) {
@@ -843,6 +947,23 @@ impl Render for GrafikGörünümü {
                         }
                     };
                     if let Some(b) = bölge {
+                        match bu.seçenekler.seriler.get(b.seri_sırası) {
+                            // Ağaç haritası / güneş patlaması: dala in (odakla).
+                            Some(Seri::AğaçHaritası(_) | Seri::GüneşPatlaması(_)) => {
+                                if let Some(ad) = &b.ad {
+                                    bu.hiyerarşi_yolu.push(ad.clone());
+                                    cx.notify();
+                                }
+                            }
+                            // Grafo düğümü: sürüklemeyi başlat.
+                            Some(Seri::Grafo(_)) => {
+                                bu.sürükleme = Some(Sürükleme::GrafoDüğüm {
+                                    veri_sırası: b.veri_sırası,
+                                    son: nokta,
+                                });
+                            }
+                            _ => {}
+                        }
                         cx.emit(GrafikOlayı::ÖğeTıklandı {
                             seri_sırası: b.seri_sırası,
                             veri_sırası: b.veri_sırası,
@@ -850,6 +971,15 @@ impl Render for GrafikGörünümü {
                             ad: b.ad,
                             değer: b.değer,
                         });
+                    } else if bu
+                        .seçenekler
+                        .seriler
+                        .iter()
+                        .any(|s| matches!(s, Seri::Grafo(_)))
+                        && !bu.seçenekler.seriler.iter().any(Seri::kartezyen_mi)
+                    {
+                        // Grafo boş alanı: görünümü kaydırma (roam).
+                        bu.sürükleme = Some(Sürükleme::GrafoKaydırma { son: nokta });
                     }
                 }),
             )

@@ -869,3 +869,90 @@ fn araç_kutusu_svg_düğmesi() {
         .iter()
         .any(|(_, tür)| *tür == cizelge::AraçTürü::SvgKaydet));
 }
+
+#[test]
+fn ağaç_haritası_inme() {
+    let seri = AğaçHaritasıSerisi::yeni().ad("Disk").kökler([
+        AğaçDüğümü::dal(
+            "Medya",
+            vec![
+                AğaçDüğümü::yaprak("Video", 60.0),
+                AğaçDüğümü::yaprak("Müzik", 25.0),
+            ],
+        ),
+        AğaçDüğümü::yaprak("Sistem", 20.0),
+    ]);
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(seri);
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let girdi = BoyamaGirdisi {
+        hiyerarşi_yolu: vec!["Medya".to_string()],
+        ..Default::default()
+    };
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
+    // Kırıntı şeridi: "Tümü" + "Medya".
+    assert_eq!(çıktı.kırıntılar.len(), 2);
+    let döküm = yüzey.döküm();
+    assert!(döküm.contains("Tümü"), "kırıntı şeridi yok:\n{döküm}");
+    assert!(döküm.contains("Video"), "inilen dal çizilmedi:\n{döküm}");
+    altın_karşılaştır("agac_haritasi_inme", &döküm);
+
+    // Yaprağa inme denemesi son geçerli düzeyde durur (görüntü değişmez).
+    let mut yüzey2 = KayıtYüzeyi::yeni(800.0, 600.0);
+    let girdi2 = BoyamaGirdisi {
+        hiyerarşi_yolu: vec!["Medya".to_string(), "Video".to_string()],
+        ..Default::default()
+    };
+    grafiği_boya(&mut yüzey2, &seçenekler, &girdi2);
+    assert_eq!(döküm, yüzey2.döküm());
+}
+
+#[test]
+fn güneş_patlaması_odak() {
+    let seri = GüneşPatlamasıSerisi::yeni().ad("Trafik").kökler([
+        AğaçDüğümü::dal(
+            "Sosyal",
+            vec![
+                AğaçDüğümü::yaprak("Video", 14.0),
+                AğaçDüğümü::yaprak("Blog", 6.0),
+            ],
+        ),
+        AğaçDüğümü::yaprak("Doğrudan", 22.0),
+    ]);
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(seri);
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let girdi = BoyamaGirdisi {
+        hiyerarşi_yolu: vec!["Sosyal".to_string()],
+        ..Default::default()
+    };
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
+    // Merkezde "geri" düğmesi: tıklanınca yol bir üst düzeye kırpılır.
+    assert_eq!(çıktı.kırıntılar.len(), 1);
+    assert_eq!(çıktı.kırıntılar.first().map(|(_, u)| *u), Some(0));
+    assert!(yüzey.döküm().contains("⌂"));
+}
+
+#[test]
+fn grafo_gezinme_dönüşümü() {
+    let kur = || {
+        GrafikSeçenekleri::yeni().animasyon(false).seri(
+            GrafoSerisi::yeni()
+                .ad("Ağ")
+                .düğümler([
+                    GrafoDüğümü::yeni("A", 20.0),
+                    GrafoDüğümü::yeni("B", 16.0),
+                ])
+                .bağlar([("A", "B")]),
+        )
+    };
+    let mut düz = KayıtYüzeyi::yeni(800.0, 600.0);
+    grafiği_boya(&mut düz, &kur(), &BoyamaGirdisi::default());
+    // Yakınlaştırma + kaydırma + düğüm kayması çıktıyı değiştirir.
+    let mut gezinmeli = KayıtYüzeyi::yeni(800.0, 600.0);
+    let girdi = BoyamaGirdisi {
+        grafo_görünümü: (24.0, -10.0, 1.5),
+        grafo_kaymaları: vec![(1, 30.0, 12.0)],
+        ..Default::default()
+    };
+    grafiği_boya(&mut gezinmeli, &kur(), &girdi);
+    assert_ne!(düz.döküm(), gezinmeli.döküm());
+}

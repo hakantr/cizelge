@@ -1,0 +1,9 @@
+dikdörtgen (40.0,50.0 42.8x18.0) #f4f7fd@1.0 r=[3.0,3.0,3.0,3.0] kenarlık=1.0:#dbdee4@1.0
+yazı "Tümü" (61.4,59.0) orta/orta b=12.0 #54555a@1.0
+yazı "›" (88.8,59.0) sol/orta b=12.0 #6d6e73@1.0
+dikdörtgen (100.8,50.0 50.0x18.0) #f4f7fd@1.0 r=[3.0,3.0,3.0,3.0] kenarlık=1.0:#dbdee4@1.0
+yazı "Medya" (125.8,59.0) orta/orta b=12.0 #54555a@1.0
+dikdörtgen (41.0,73.0 506.2x456.0) #5070dd@1.0 r=[2.0,2.0,2.0,2.0] kenarlık=1.0:#ffffff@1.0
+yazı "Video" (294.1,301.0) orta/orta b=12.0 #ffffff@1.0
+dikdörtgen (549.2,73.0 209.8x456.0) #b6d634@1.0 r=[2.0,2.0,2.0,2.0] kenarlık=1.0:#ffffff@1.0
+yazı "Müzik" (654.1,301.0) orta/orta b=12.0 #3c3c41@1.0

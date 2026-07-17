@@ -406,7 +406,13 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
 - ✅ 5.6 Paralel koordinat: boyut başına aralık ölçeği + çentikli dikey
   eksenler, öğe başına yarı saydam çoklu çizgi, geçiş animasyonuyla
   uyumlu Dizi verisi.
-- ⏳ Açık: treemap breadcrumb/gezinme, grafo roam + sürüklenebilir
+- ✅ Faz 5 etkileşimleri (2026-07-17): ağaç haritası inme (drill-down)
+  + tıklanabilir kırıntı (breadcrumb) şeridi; güneş patlaması odak
+  (dala tıkla → köke al, merkez ⌂ → bir üst); grafo gezinme (tekerlekle
+  imleç ölçekli yakınlaştırma, boş alanda kaydırma) + düğüm sürükleme.
+  Durum `BoyamaGirdisi.hiyerarşi_yolu / grafo_görünümü / grafo_kaymaları`
+  ile saf boyamaya taşınır; altın + davranış testli.
+- ⏳ Eski açık not (kapandı): treemap breadcrumb/gezinme, grafo roam + sürüklenebilir
   düğümler, sunburst tıklamayla odaklanma.
 
 ---

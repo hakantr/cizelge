@@ -2,11 +2,12 @@
 //! hiyerarşi, iç içe halkalarda açısal paylara bölünür.
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::ÇizimYüzeyi;
+use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::agac::AğaçDüğümü;
 use crate::model::seri::GüneşPatlamasıSerisi;
 use crate::renk::{Dolgu, Renk};
+use crate::tema;
 
 /// Ağaç derinliği (kök çocukları = 1).
 fn derinlik(düğümler: &[AğaçDüğümü]) -> usize {
@@ -94,7 +95,9 @@ fn dilimleri_çiz(
     }
 }
 
-/// Güneş patlamasını çizer.
+/// Güneş patlamasını çizer. `kök_yolu` doluysa o dal köke alınır (odak);
+/// ortadaki `⌂` düğmesi bir üst düzeye döndürür.
+#[allow(clippy::too_many_arguments)]
 pub fn güneş_patlaması_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     seri: &GüneşPatlamasıSerisi,
@@ -102,7 +105,9 @@ pub fn güneş_patlaması_çiz(
     tuval: Dikdörtgen,
     palet: &dyn Fn(usize) -> Renk,
     ilerleme: f32,
+    kök_yolu: &[String],
     isabetler: &mut Vec<İsabetBölgesi>,
+    kırıntılar: &mut Vec<(Dikdörtgen, usize)>,
 ) {
     let merkez = (
         tuval.x + seri.merkez.0.çöz(tuval.genişlik),
@@ -111,14 +116,18 @@ pub fn güneş_patlaması_çiz(
     let taban = tuval.genişlik.min(tuval.yükseklik) / 2.0;
     let dış = seri.yarıçap.1.çöz(taban);
     let iç = seri.yarıçap.0.çöz(taban);
-    let seviye_sayısı = derinlik(&seri.kökler).max(1);
+    let (etkin_kökler, inilen) =
+        crate::model::agac::yolu_çöz(&seri.kökler, kök_yolu);
+    let seviye_sayısı = derinlik(etkin_kökler).max(1);
+    // Odaklıyken merkezde geri düğmesine yer aç.
+    let iç = if inilen > 0 { iç.max(22.0) } else { iç };
     let halka = ((dış - iç) / seviye_sayısı as f32).max(2.0);
 
     let açı0 = -std::f32::consts::FRAC_PI_2;
     let açı1 = açı0 + std::f32::consts::TAU * ilerleme.clamp(0.0, 1.0);
     dilimleri_çiz(
         çizici,
-        &seri.kökler,
+        etkin_kökler,
         merkez,
         açı0,
         açı1,
@@ -131,4 +140,33 @@ pub fn güneş_patlaması_çiz(
         &seri.ad,
         isabetler,
     );
+
+    // Geri düğmesi: bir üst düzeye çıkar (ECharts'ta merkez tıklaması).
+    if inilen > 0 {
+        let yarıçap = 16.0;
+        çizici.daire(
+            merkez,
+            yarıçap,
+            Some(&Dolgu::Düz(tema::nötr_05())),
+            Some((1.0, tema::nötr_15())),
+        );
+        çizici.yazı(
+            "⌂",
+            merkez,
+            YatayHiza::Orta,
+            DikeyHiza::Orta,
+            tema::YAZI_KÜÇÜK,
+            tema::ikincil_metin(),
+            false,
+        );
+        kırıntılar.push((
+            Dikdörtgen::yeni(
+                merkez.0 - yarıçap,
+                merkez.1 - yarıçap,
+                yarıçap * 2.0,
+                yarıçap * 2.0,
+            ),
+            inilen.saturating_sub(1),
+        ));
+    }
 }

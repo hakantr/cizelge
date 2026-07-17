@@ -66,6 +66,13 @@ pub struct BoyamaGirdisi {
     pub fırça: Option<[f32; 4]>,
     /// Zaman şeridi durumu: `(geçerli kare, kare sayısı, oynuyor)`.
     pub zaman_şeridi: Option<(usize, usize, bool)>,
+    /// Hiyerarşik gezinme yolu (ağaç haritası inme / güneş patlaması odak):
+    /// kökten itibaren ad zinciri.
+    pub hiyerarşi_yolu: Vec<String>,
+    /// Grafo gezinmesi (roam): `(kayma_x, kayma_y, ölçek)`.
+    pub grafo_görünümü: (f32, f32, f32),
+    /// Grafo düğümü sürükleme kaymaları: `(düğüm sırası, dx, dy)`.
+    pub grafo_kaymaları: Vec<(usize, f32, f32)>,
 }
 
 impl Default for BoyamaGirdisi {
@@ -78,6 +85,9 @@ impl Default for BoyamaGirdisi {
             gösterge_sayfası: 0,
             fırça: None,
             zaman_şeridi: None,
+            hiyerarşi_yolu: Vec::new(),
+            grafo_görünümü: (0.0, 0.0, 1.0),
+            grafo_kaymaları: Vec::new(),
         }
     }
 }
@@ -124,6 +134,8 @@ pub struct BoyamaÇıktısı {
     pub araç_düğmeleri: Vec<(Dikdörtgen, AraçTürü)>,
     /// Zaman şeridi düğmeleri (oynat/durdur + kare noktaları).
     pub zaman_düğmeleri: Vec<(Dikdörtgen, ZamanŞeridiEylemi)>,
+    /// Hiyerarşi kırıntıları (breadcrumb / geri): `(kutu, yeni yol uzunluğu)`.
+    pub kırıntılar: Vec<(Dikdörtgen, usize)>,
 }
 
 /// Araç kutusu düğme türleri.
@@ -1605,6 +1617,8 @@ pub fn grafiği_boya(
                     tüm_alan,
                     &palet,
                     ilerleme,
+                    girdi.grafo_görünümü,
+                    &girdi.grafo_kaymaları,
                     &mut çıktı.isabetler,
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
@@ -1706,7 +1720,9 @@ pub fn grafiği_boya(
                     tüm_alan,
                     &palet,
                     ilerleme,
+                    &girdi.hiyerarşi_yolu,
                     &mut çıktı.isabetler,
+                    &mut çıktı.kırıntılar,
                 );
                 // Öğe ipucu.
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
@@ -1742,7 +1758,9 @@ pub fn grafiği_boya(
                     tüm_alan,
                     &palet,
                     ilerleme,
+                    &girdi.hiyerarşi_yolu,
                     &mut çıktı.isabetler,
+                    &mut çıktı.kırıntılar,
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
