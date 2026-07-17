@@ -22,15 +22,27 @@ pub struct GöstergeÖğesi {
 const ÜST_BOŞLUK: f32 = 5.0;
 const SİMGE_METİN_ARASI: f32 = 5.0;
 
-/// Göstergeyi çizer ve her öğenin `(isabet kutusu, ad)` çiftini döndürür.
-/// Kutular grafik yerel koordinatındadır.
+/// Gösterge çiziminin çıktısı.
+#[derive(Default)]
+pub struct GöstergeÇıktısı {
+    /// Her öğenin `(isabet kutusu, ad)` çifti (grafik yerel).
+    pub kutular: Vec<(Dikdörtgen, String)>,
+    /// Kaydırma okları: `(kutu, yön)` — yön -1 önceki, +1 sonraki sayfa.
+    pub oklar: Vec<(Dikdörtgen, i32)>,
+    /// Toplam sayfa sayısı (kaydırmalı değilse 1).
+    pub sayfa_sayısı: usize,
+}
+
+/// Göstergeyi çizer; kaydırılabilir kipte yalnız geçerli sayfanın
+/// öğelerini ve `‹ n/m ›` denetimlerini boyar.
 pub fn gösterge_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     seçenek: &Gösterge,
     öğeler: &[GöstergeÖğesi],
-) -> Vec<(Dikdörtgen, String)> {
+    sayfa: usize,
+) -> GöstergeÇıktısı {
     if !seçenek.göster || öğeler.is_empty() {
-        return Vec::new();
+        return GöstergeÇıktısı::default();
     }
     let boyut = seçenek.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
     let satır_yüksekliği = seçenek.simge_yüksekliği.max(boyut * 1.4);
@@ -44,6 +56,77 @@ pub fn gösterge_çiz(
         .collect();
 
     let üst = seçenek.üst.map(|u| u.çöz(çizici.yükseklik())).unwrap_or(ÜST_BOŞLUK);
+
+    // Kaydırmalı yatay gösterge: sayfaya böl.
+    if seçenek.kaydırılabilir && seçenek.yön == Yön::Yatay {
+        let denetim_genişliği = 96.0;
+        let kullanılabilir = (çizici.genişlik() - denetim_genişliği - ÜST_BOŞLUK * 2.0).max(60.0);
+        // Sayfaları doldur.
+        let mut sayfalar: Vec<(usize, usize)> = Vec::new(); // (başlangıç, uzunluk)
+        let mut başlangıç = 0usize;
+        while başlangıç < öğeler.len() {
+            let mut genişlik_toplam = 0.0f32;
+            let mut uzunluk = 0usize;
+            for g in genişlikler.iter().skip(başlangıç) {
+                let ek = if uzunluk == 0 { *g } else { seçenek.öğe_boşluğu + *g };
+                if genişlik_toplam + ek > kullanılabilir && uzunluk > 0 {
+                    break;
+                }
+                genişlik_toplam += ek;
+                uzunluk += 1;
+            }
+            uzunluk = uzunluk.max(1);
+            sayfalar.push((başlangıç, uzunluk));
+            başlangıç += uzunluk;
+        }
+        let sayfa_sayısı = sayfalar.len().max(1);
+        let sayfa = sayfa % sayfa_sayısı;
+        let (s_baş, s_uzunluk) = sayfalar.get(sayfa).copied().unwrap_or((0, öğeler.len()));
+
+        let mut kutular = Vec::new();
+        let mut x = ÜST_BOŞLUK;
+        for (öğe, genişlik) in öğeler
+            .iter()
+            .zip(&genişlikler)
+            .skip(s_baş)
+            .take(s_uzunluk)
+        {
+            let kutu = Dikdörtgen::yeni(x, üst, *genişlik, satır_yüksekliği);
+            öğe_çiz(çizici, seçenek, öğe, kutu, boyut);
+            kutular.push((kutu, öğe.ad.clone()));
+            x += genişlik + seçenek.öğe_boşluğu;
+        }
+
+        // Denetimler: ‹ n/m ›
+        let mut oklar = Vec::new();
+        let denetim_x = çizici.genişlik() - denetim_genişliği;
+        let orta_y = üst + satır_yüksekliği / 2.0;
+        let sol_ok = Dikdörtgen::yeni(denetim_x, üst, 18.0, satır_yüksekliği);
+        let sağ_ok = Dikdörtgen::yeni(denetim_x + 70.0, üst, 18.0, satır_yüksekliği);
+        for (kutu, işaret, yön) in [(sol_ok, "‹", -1i32), (sağ_ok, "›", 1i32)] {
+            çizici.dikdörtgen(kutu, &Dolgu::Düz(tema::NÖTR_10), [3.0; 4], None);
+            çizici.yazı(
+                işaret,
+                kutu.merkez(),
+                YatayHiza::Orta,
+                DikeyHiza::Orta,
+                boyut,
+                tema::İKİNCİL_METİN,
+                true,
+            );
+            oklar.push((kutu, yön));
+        }
+        çizici.yazı(
+            &format!("{}/{}", sayfa + 1, sayfa_sayısı),
+            (denetim_x + 44.0, orta_y),
+            YatayHiza::Orta,
+            DikeyHiza::Orta,
+            boyut,
+            tema::İKİNCİL_METİN,
+            false,
+        );
+        return GöstergeÇıktısı { kutular, oklar, sayfa_sayısı };
+    }
 
     let mut kutular = Vec::with_capacity(öğeler.len());
     match seçenek.yön {
@@ -80,7 +163,7 @@ pub fn gösterge_çiz(
             }
         }
     }
-    kutular
+    GöstergeÇıktısı { kutular, oklar: Vec::new(), sayfa_sayısı: 1 }
 }
 
 fn öğe_çiz(

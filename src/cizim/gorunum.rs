@@ -49,6 +49,36 @@ use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
 use crate::yerlesim::yigin::{yığın_aralıkları, YığınAralığı};
 
+/// Boyamanın anlık girdileri (görünüm durumundan türetilir).
+#[derive(Clone, Debug)]
+pub struct BoyamaGirdisi {
+    /// Giriş animasyonunun yumuşatılmış ilerlemesi `0..=1`.
+    pub ilerleme: f32,
+    /// Sürekli animasyonlar için geçen süre (saniye).
+    pub zaman_sn: f32,
+    /// Yüzey yerel fare konumu.
+    pub fare: Option<(f32, f32)>,
+    /// Gösterge ile kapatılmış adlar.
+    pub kapalı: HashSet<String>,
+    /// Kaydırmalı göstergenin geçerli sayfası.
+    pub gösterge_sayfası: usize,
+    /// Etkin fırça seçimi, yüzey yerel `[x0, y0, x1, y1]`.
+    pub fırça: Option<[f32; 4]>,
+}
+
+impl Default for BoyamaGirdisi {
+    fn default() -> Self {
+        BoyamaGirdisi {
+            ilerleme: 1.0,
+            zaman_sn: 0.0,
+            fare: None,
+            kapalı: HashSet::new(),
+            gösterge_sayfası: 0,
+            fırça: None,
+        }
+    }
+}
+
 /// Sürgünün sürüklenebilir parçaları.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum SürgüParçası {
@@ -85,6 +115,16 @@ pub struct BoyamaÇıktısı {
     pub iç_yakınlaştırmalar: Vec<İçYakınlaştırmaAlanı>,
     /// Parçalı görsel eşleme dilimlerinin isabet kutuları.
     pub eşleme_kutuları: Vec<(Dikdörtgen, usize)>,
+    /// Kaydırmalı gösterge okları: `(kutu, yön)`.
+    pub gösterge_okları: Vec<(Dikdörtgen, i32)>,
+    /// Araç kutusu düğmeleri.
+    pub araç_düğmeleri: Vec<(Dikdörtgen, AraçTürü)>,
+}
+
+/// Araç kutusu düğme türleri.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum AraçTürü {
+    GeriYükle,
 }
 
 /// Ad görünür mü (gösterge ile kapatılmamış mı)?
@@ -618,12 +658,13 @@ fn eksen_ipucu_derle(
 pub fn grafiği_boya(
     yüzey: &mut dyn ÇizimYüzeyi,
     seçenekler: &GrafikSeçenekleri,
-    ilerleme: f32,
-    zaman_sn: f32,
-    fare: Option<(f32, f32)>,
-    kapalı: &HashSet<String>,
+    girdi: &BoyamaGirdisi,
 ) -> BoyamaÇıktısı {
     let mut çıktı = BoyamaÇıktısı::default();
+    let ilerleme = girdi.ilerleme;
+    let zaman_sn = girdi.zaman_sn;
+    let fare = girdi.fare;
+    let kapalı = &girdi.kapalı;
 
     // 1) Arka plan.
     if let Some(renk) = seçenekler.arkaplan {
@@ -639,8 +680,40 @@ pub fn grafiği_boya(
     // 3) Gösterge.
     let öğeler = gösterge_öğeleri(seçenekler, kapalı);
     if let Some(g) = &seçenekler.gösterge {
-        çıktı.gösterge_kutuları = gösterge_çiz(yüzey, g, &öğeler);
+        let gösterge_çıktısı = gösterge_çiz(yüzey, g, &öğeler, girdi.gösterge_sayfası);
+        çıktı.gösterge_kutuları = gösterge_çıktısı.kutular;
+        çıktı.gösterge_okları = gösterge_çıktısı.oklar;
     }
+
+    // 3b) Araç kutusu (sağ üst).
+    if let Some(araçlar) = &seçenekler.araç_kutusu
+        && araçlar.göster && araçlar.geri_yükle {
+            let boyut = tema::YAZI_KÜÇÜK;
+            let metin = "↺ Sıfırla";
+            let (gş, _) = yüzey.yazı_ölç(metin, boyut);
+            let kutu = Dikdörtgen::yeni(
+                yüzey.genişlik() - gş - 26.0,
+                6.0,
+                gş + 16.0,
+                22.0,
+            );
+            yüzey.dikdörtgen(
+                kutu,
+                &Dolgu::Düz(tema::NÖTR_05),
+                [4.0; 4],
+                Some((1.0, tema::NÖTR_15)),
+            );
+            yüzey.yazı(
+                metin,
+                kutu.merkez(),
+                crate::cizim::YatayHiza::Orta,
+                crate::cizim::DikeyHiza::Orta,
+                boyut,
+                tema::İKİNCİL_METİN,
+                false,
+            );
+            çıktı.araç_düğmeleri.push((kutu, AraçTürü::GeriYükle));
+        }
 
     let ipucu_seçeneği = seçenekler.ipucu.clone().filter(|i| i.göster);
 
@@ -1314,6 +1387,26 @@ pub fn grafiği_boya(
         }
     }
 
+    // 5c) Fırça seçimi kaplaması.
+    if let Some([x0, y0, x1, y1]) = girdi.fırça {
+        let d = Dikdörtgen::yeni(x0.min(x1), y0.min(y1), (x1 - x0).abs(), (y1 - y0).abs());
+        if d.genişlik > 1.0 && d.yükseklik > 1.0 {
+            yüzey.dikdörtgen(
+                d,
+                &Dolgu::Düz(tema::NÖTR_40.opaklık(0.15)),
+                [0.0; 4],
+                None,
+            );
+            let mut çerçeve = crate::cizim::Yol::yeni();
+            çerçeve.taşı((d.x, d.y));
+            çerçeve.çiz((d.sağ(), d.y));
+            çerçeve.çiz((d.sağ(), d.alt()));
+            çerçeve.çiz((d.x, d.alt()));
+            çerçeve.kapat();
+            yüzey.yol_çiz(&çerçeve, 1.0, tema::NÖTR_50, ÇizgiTürü::Kesikli);
+        }
+    }
+
     // 6) İpucu penceresi (her şeyin üstüne).
     if let (Some(ipucu), Some((başlık, satırlar, konum))) = (&ipucu_seçeneği, bekleyen_ipucu) {
         ipucu_çiz(yüzey, ipucu, konum, başlık.as_deref(), &satırlar);
@@ -1327,6 +1420,12 @@ type GöstergeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, String)>>>;
 
 /// Parçalı eşleme dilimlerinin pencere-mutlak kutuları.
 type EşlemeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
+
+/// Gösterge kaydırma oklarının pencere-mutlak kutuları.
+type OkKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, i32)>>>;
+
+/// Araç kutusu düğmelerinin pencere-mutlak kutuları.
+type AraçKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, AraçTürü)>>>;
 
 /// ECharts grafik örneğinin gpui görünümü.
 pub struct GrafikGörünümü {
@@ -1349,10 +1448,20 @@ pub struct GrafikGörünümü {
     sürgü_bölgeleri: Rc<RefCell<Vec<SürgüBölgesi>>>,
     /// Pencere-mutlak parçalı eşleme dilim kutuları.
     eşleme_kutuları: EşlemeKutuları,
+    /// Pencere-mutlak gösterge kaydırma okları.
+    gösterge_okları: OkKutuları,
+    /// Pencere-mutlak araç kutusu düğmeleri.
+    araç_düğmeleri: AraçKutuları,
     /// Pencere-mutlak iç yakınlaştırma alanları.
     iç_yakınlaştırma_alanları: Rc<RefCell<Vec<İçYakınlaştırmaAlanı>>>,
     /// Etkin sürükleme (kaydırma ya da sürgü).
     sürükleme: Option<Sürükleme>,
+    /// Kaydırmalı göstergenin sayfası.
+    gösterge_sayfası: usize,
+    /// Etkin fırça seçimi: (başlangıç, şimdiki) pencere-mutlak.
+    fırça_seçimi: Option<((f32, f32), (f32, f32))>,
+    /// İlk seçenekler (araç kutusu "geri yükle" için).
+    ilk_seçenekler: Arc<GrafikSeçenekleri>,
     ölçüm_önbelleği: ÖlçümÖnbelleği,
 }
 
@@ -1381,8 +1490,10 @@ impl EventEmitter<BilesenTanisi> for GrafikGörünümü {}
 
 impl GrafikGörünümü {
     pub fn yeni(seçenekler: GrafikSeçenekleri) -> Self {
+        let seçenekler = Arc::new(seçenekler);
         GrafikGörünümü {
-            seçenekler: Arc::new(seçenekler),
+            ilk_seçenekler: seçenekler.clone(),
+            seçenekler,
             başlangıç: Instant::now(),
             eski_seçenekler: None,
             geçiş_başlangıcı: None,
@@ -1393,8 +1504,12 @@ impl GrafikGörünümü {
             bekleyen_tanılar: Rc::new(RefCell::new(Vec::new())),
             sürgü_bölgeleri: Rc::new(RefCell::new(Vec::new())),
             eşleme_kutuları: Rc::new(RefCell::new(Vec::new())),
+            gösterge_okları: Rc::new(RefCell::new(Vec::new())),
+            araç_düğmeleri: Rc::new(RefCell::new(Vec::new())),
             iç_yakınlaştırma_alanları: Rc::new(RefCell::new(Vec::new())),
             sürükleme: None,
+            gösterge_sayfası: 0,
+            fırça_seçimi: None,
             ölçüm_önbelleği: Rc::new(RefCell::new(std::collections::HashMap::new())),
         }
     }
@@ -1447,6 +1562,9 @@ impl GrafikGörünümü {
             self.geçiş_başlangıcı = None;
         }
         self.seçenekler = Arc::new(seçenekler);
+        self.ilk_seçenekler = self.seçenekler.clone();
+        self.gösterge_sayfası = 0;
+        self.fırça_seçimi = None;
         cx.notify();
         Ok(())
     }
@@ -1511,12 +1629,16 @@ impl Render for GrafikGörünümü {
 
         let fare = self.fare;
         let kapalı = self.kapalı.clone();
+        let gösterge_sayfası = self.gösterge_sayfası;
+        let fırça = self.fırça_seçimi.map(|(b, ş)| [b.0, b.1, ş.0, ş.1]);
         let gösterge_kutuları = self.gösterge_kutuları.clone();
         let isabetler = self.isabetler.clone();
         let tanılar = self.bekleyen_tanılar.clone();
         let sürgüler = self.sürgü_bölgeleri.clone();
         let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
         let eşleme_kutuları = self.eşleme_kutuları.clone();
+        let gösterge_okları = self.gösterge_okları.clone();
+        let araç_düğmeleri = self.araç_düğmeleri.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -1530,14 +1652,17 @@ impl Render for GrafikGörünümü {
                             Çizici::yeni(pencere, uygulama, sınırlar, Some(önbellek));
                         let köken = çizici.köken;
                         let yerel_fare = fare.map(|(x, y)| (x - köken.0, y - köken.1));
-                        let çıktı = grafiği_boya(
-                            &mut çizici,
-                            &etkin_seçenekler,
+                        let girdi = BoyamaGirdisi {
                             ilerleme,
                             zaman_sn,
-                            yerel_fare,
-                            &kapalı,
-                        );
+                            fare: yerel_fare,
+                            kapalı: kapalı.clone(),
+                            gösterge_sayfası,
+                            fırça: fırça.map(|[x0, y0, x1, y1]| {
+                                [x0 - köken.0, y0 - köken.1, x1 - köken.0, y1 - köken.1]
+                            }),
+                        };
+                        let çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
                         let tanı_bildir = |bileşen: &'static str| {
                             if let Ok(mut kayıt) = tanılar.try_borrow_mut() {
                                 kayıt.push(BilesenTanisi::yeni(
@@ -1612,12 +1737,37 @@ impl Render for GrafikGörünümü {
                             }
                             Err(_) => tanı_bildir("eşleme_kutuları"),
                         }
+                        match gösterge_okları.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for (kutu, yön) in çıktı.gösterge_okları {
+                                    kayıt.push((çizici.sınırlar(kutu), yön));
+                                }
+                            }
+                            Err(_) => tanı_bildir("gösterge_okları"),
+                        }
+                        match araç_düğmeleri.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for (kutu, tür) in çıktı.araç_düğmeleri {
+                                    kayıt.push((çizici.sınırlar(kutu), tür));
+                                }
+                            }
+                            Err(_) => tanı_bildir("araç_düğmeleri"),
+                        }
                     },
                 )
                 .size_full(),
             )
             .on_mouse_move(cx.listener(|bu, olay: &MouseMoveEvent, _, cx| {
                 let yeni = (f32::from(olay.position.x), f32::from(olay.position.y));
+                // Fırça seçimi sürüyor.
+                if olay.pressed_button == Some(MouseButton::Left)
+                    && let Some((_, şimdiki)) = bu.fırça_seçimi.as_mut() {
+                        *şimdiki = yeni;
+                        cx.notify();
+                        return;
+                    }
                 // Etkin sürükleme: kaydırma ya da sürgü.
                 if olay.pressed_button == Some(MouseButton::Left) {
                     match bu.sürükleme {
@@ -1721,8 +1871,30 @@ impl Render for GrafikGörünümü {
             }))
             .on_mouse_up(
                 MouseButton::Left,
-                cx.listener(|bu, _: &MouseUpEvent, _, _| {
+                cx.listener(|bu, _: &MouseUpEvent, _, cx| {
                     bu.sürükleme = None;
+                    if let Some((başlangıç, şimdiki)) = bu.fırça_seçimi.take() {
+                        let x0 = başlangıç.0.min(şimdiki.0);
+                        let x1 = başlangıç.0.max(şimdiki.0);
+                        let y0 = başlangıç.1.min(şimdiki.1);
+                        let y1 = başlangıç.1.max(şimdiki.1);
+                        if x1 - x0 > 3.0 && y1 - y0 > 3.0 {
+                            let öğeler: Vec<(usize, usize)> =
+                                match bu.isabetler.try_borrow() {
+                                    Ok(bölgeler) => bölgeler
+                                        .iter()
+                                        .filter(|b| {
+                                            let (mx, my) = b.geometri.merkez();
+                                            mx >= x0 && mx <= x1 && my >= y0 && my <= y1
+                                        })
+                                        .map(|b| (b.seri_sırası, b.veri_sırası))
+                                        .collect(),
+                                    Err(_) => Vec::new(),
+                                };
+                            cx.emit(GrafikOlayı::FırçaSeçildi { öğeler });
+                        }
+                        cx.notify();
+                    }
                 }),
             )
             .on_mouse_down(
@@ -1754,6 +1926,46 @@ impl Render for GrafikGörünümü {
                         return;
                     }
                     let konum = (f32::from(olay.position.x), f32::from(olay.position.y));
+                    // 0) Gösterge kaydırma okları.
+                    let ok_vuruşu = match bu.gösterge_okları.try_borrow() {
+                        Ok(oklar) => oklar
+                            .iter()
+                            .find(|(kutu, _)| kutu.contains(&olay.position))
+                            .map(|(_, yön)| *yön),
+                        Err(_) => None,
+                    };
+                    if let Some(yön) = ok_vuruşu {
+                        if yön < 0 {
+                            bu.gösterge_sayfası = bu.gösterge_sayfası.saturating_sub(1);
+                        } else {
+                            bu.gösterge_sayfası = bu.gösterge_sayfası.saturating_add(1);
+                        }
+                        cx.notify();
+                        return;
+                    }
+                    // 0b) Araç kutusu düğmeleri.
+                    let araç_vuruşu = match bu.araç_düğmeleri.try_borrow() {
+                        Ok(düğmeler) => düğmeler
+                            .iter()
+                            .find(|(kutu, _)| kutu.contains(&olay.position))
+                            .map(|(_, tür)| *tür),
+                        Err(_) => None,
+                    };
+                    if let Some(AraçTürü::GeriYükle) = araç_vuruşu {
+                        bu.seçenekler = bu.ilk_seçenekler.clone();
+                        bu.kapalı.clear();
+                        bu.gösterge_sayfası = 0;
+                        bu.fırça_seçimi = None;
+                        cx.emit(GrafikOlayı::GeriYüklendi);
+                        cx.notify();
+                        return;
+                    }
+                    // 0c) Fırça etkinse seçim başlat.
+                    if bu.seçenekler.fırça.map(|f| f.etkin).unwrap_or(false) {
+                        bu.fırça_seçimi = Some((konum, konum));
+                        cx.notify();
+                        return;
+                    }
                     // 1a) Parçalı görsel eşleme dilimi aç/kapat.
                     let eşleme_vuruşu = match bu.eşleme_kutuları.try_borrow() {
                         Ok(kutular) => kutular

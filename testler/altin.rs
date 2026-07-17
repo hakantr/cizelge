@@ -10,7 +10,6 @@
 //! ALTIN_GUNCELLE=1 cargo test --test altin
 //! ```
 
-use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
@@ -49,8 +48,12 @@ fn altın_karşılaştır(ad: &str, içerik: &str) {
 fn boya_ve_dök(seçenekler: GrafikSeçenekleri) -> String {
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
     // Animasyonsuz, faresiz, tüm seriler açık.
-    grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
+    grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     yüzey.döküm()
+}
+
+fn fareli_girdi(fare: (f32, f32)) -> BoyamaGirdisi {
+    BoyamaGirdisi { fare: Some(fare), ..Default::default() }
 }
 
 #[test]
@@ -157,14 +160,7 @@ fn ipucu_ve_imlec() {
         .animasyon(false)
         .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0, 5.0]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    grafiği_boya(
-        &mut yüzey,
-        &seçenekler,
-        1.0,
-        0.0,
-        Some((400.0, 300.0)),
-        &HashSet::new(),
-    );
+    grafiği_boya(&mut yüzey, &seçenekler, &fareli_girdi((400.0, 300.0)));
     altın_karşılaştır("ipucu_ve_imlec", &yüzey.döküm());
 }
 
@@ -324,14 +320,7 @@ fn çapraz_imleç() {
         .animasyon(false)
         .seri(SaçılımSerisi::yeni().ad("N").veri([[1.0, 2.0], [4.0, 6.0]]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    grafiği_boya(
-        &mut yüzey,
-        &seçenekler,
-        1.0,
-        0.0,
-        Some((400.0, 300.0)),
-        &HashSet::new(),
-    );
+    grafiği_boya(&mut yüzey, &seçenekler, &fareli_girdi((400.0, 300.0)));
     altın_karşılaştır("capraz_imlec", &yüzey.döküm());
 }
 
@@ -427,7 +416,7 @@ fn yakınlaştırma_penceresi() {
             1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0,
         ]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     assert_eq!(çıktı.iç_yakınlaştırmalar.len(), 1);
     assert_eq!(çıktı.sürgüler.len(), 1);
     altın_karşılaştır("yakinlastirma", &yüzey.döküm());
@@ -471,9 +460,42 @@ fn parçalı_eşleme() {
             [2.0, 1.0, 15.0],
         ]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     assert_eq!(çıktı.eşleme_kutuları.len(), 3);
     altın_karşılaştır("parcali_esleme", &yüzey.döküm());
+}
+
+#[test]
+fn etkileşim_araçları() {
+    // Kaydırmalı gösterge (2. sayfa), araç kutusu ve fırça kaplaması.
+    let çok_seri: Vec<Seri> = (0..12)
+        .map(|i| {
+            Seri::from(
+                ÇizgiSerisi::yeni()
+                    .ad(format!("Uzun Seri Adı {i}"))
+                    .veri([i as f64, (i + 2) as f64]),
+            )
+        })
+        .collect();
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .gösterge(Gösterge::yeni().kaydırılabilir(true))
+        .araç_kutusu(AraçKutusu::yeni())
+        .fırça(Fırça::yeni())
+        .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seriler(çok_seri);
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let girdi = BoyamaGirdisi {
+        gösterge_sayfası: 1,
+        fırça: Some([200.0, 200.0, 400.0, 380.0]),
+        ..Default::default()
+    };
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
+    assert_eq!(çıktı.gösterge_okları.len(), 2);
+    assert_eq!(çıktı.araç_düğmeleri.len(), 1);
+    assert!(çıktı.gösterge_kutuları.len() < 12, "sayfalama uygulanmalıydı");
+    altın_karşılaştır("etkilesim_araclari", &yüzey.döküm());
 }
 
 #[test]
@@ -485,7 +507,7 @@ fn isabet_bölgeleri_üretilir() {
         .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]))
         .seri(PastaSerisi::yeni().ad("P").yarıçap("30%").veri([("X", 1.0), ("Y", 2.0)]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     // 2 sütun + 2 dilim = 4 tıklanabilir bölge.
     assert_eq!(çıktı.isabetler.len(), 4);
     // Sütun bölgesinin içi gerçekten isabet sayılmalı.

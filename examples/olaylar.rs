@@ -36,6 +36,10 @@ impl Kök {
                     "Yakınlaştırma {sıra} → %{başlangıç:.0}–%{bitiş:.0}"
                 )
                 .into(),
+                GrafikOlayı::FırçaSeçildi { öğeler } => {
+                    format!("Fırça → {} öğe seçildi", öğeler.len()).into()
+                }
+                GrafikOlayı::GeriYüklendi => "Geri yüklendi".into(),
             };
             cx.notify();
         })

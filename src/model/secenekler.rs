@@ -1,7 +1,7 @@
 //! Grafik seçenekleri — ECharts'taki kök `option` nesnesinin karşılığı.
 
 use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
-use crate::model::bilesen::{Başlık, Gösterge, Izgara, İpucu};
+use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
 use crate::model::eksen::Eksen;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::radar::RadarKoordinatı;
@@ -34,6 +34,10 @@ pub struct GrafikSeçenekleri {
     pub radar: Option<RadarKoordinatı>,
     /// Veri yakınlaştırmaları (`dataZoom`).
     pub veri_yakınlaştırmaları: Vec<VeriYakınlaştırma>,
+    /// Araç kutusu (`toolbox`).
+    pub araç_kutusu: Option<AraçKutusu>,
+    /// Fırça (`brush`): dikdörtgen seçim.
+    pub fırça: Option<Fırça>,
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
     pub arkaplan: Option<Renk>,
@@ -62,6 +66,8 @@ impl Default for GrafikSeçenekleri {
             görsel_eşleme: None,
             radar: None,
             veri_yakınlaştırmaları: Vec::new(),
+            araç_kutusu: None,
+            fırça: None,
             palet: tema::PALET.to_vec(),
             arkaplan: None,
             animasyon: true,
@@ -178,6 +184,16 @@ impl GrafikSeçenekleri {
     /// Veri yakınlaştırma ekler (`dataZoom`).
     pub fn veri_yakınlaştırma(mut self, yakınlaştırma: VeriYakınlaştırma) -> Self {
         self.veri_yakınlaştırmaları.push(yakınlaştırma);
+        self
+    }
+
+    pub fn araç_kutusu(mut self, araçlar: AraçKutusu) -> Self {
+        self.araç_kutusu = Some(araçlar);
+        self
+    }
+
+    pub fn fırça(mut self, fırça: Fırça) -> Self {
+        self.fırça = Some(fırça);
         self
     }
 

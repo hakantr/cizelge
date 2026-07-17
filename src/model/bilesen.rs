@@ -86,6 +86,8 @@ pub struct Gösterge {
     pub simge: Option<GöstergeSimgesi>,
     /// Yalnızca bu adlar gösterilsin (`legend.data`); boşsa hepsi.
     pub veri: Vec<String>,
+    /// Sığmayan öğeler için sayfalı kaydırma (`type: 'scroll'`).
+    pub kaydırılabilir: bool,
 }
 
 impl Default for Gösterge {
@@ -101,6 +103,7 @@ impl Default for Gösterge {
             yazı: YazıStili::default(),
             simge: None,
             veri: Vec::new(),
+            kaydırılabilir: false,
         }
     }
 }
@@ -143,6 +146,45 @@ impl Gösterge {
     pub fn veri<S: Into<String>>(mut self, veri: impl IntoIterator<Item = S>) -> Self {
         self.veri = veri.into_iter().map(Into::into).collect();
         self
+    }
+
+    /// Sığmayan öğeleri sayfalı kaydırmayla gösterir (`type: 'scroll'`).
+    pub fn kaydırılabilir(mut self, açık: bool) -> Self {
+        self.kaydırılabilir = açık;
+        self
+    }
+}
+
+/// Araç kutusu (`toolbox`): şimdilik "geri yükle" düğmesi.
+#[derive(Clone, PartialEq, Debug)]
+pub struct AraçKutusu {
+    pub göster: bool,
+    /// Yakınlaştırma/gösterge durumunu ilk seçeneklere döndürür
+    /// (`feature.restore`).
+    pub geri_yükle: bool,
+}
+
+impl Default for AraçKutusu {
+    fn default() -> Self {
+        AraçKutusu { göster: true, geri_yükle: true }
+    }
+}
+
+impl AraçKutusu {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+}
+
+/// Fırça (`brush`): dikdörtgen seçim.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub struct Fırça {
+    pub etkin: bool,
+}
+
+impl Fırça {
+    pub fn yeni() -> Self {
+        Fırça { etkin: true }
     }
 }
 

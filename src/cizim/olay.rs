@@ -47,6 +47,22 @@ impl İsabetGeometrisi {
         }
     }
 
+    /// Geometrinin temsilî merkezi (fırça seçimi için).
+    pub fn merkez(&self) -> (f32, f32) {
+        match self {
+            İsabetGeometrisi::Dikdörtgen(d) => d.merkez(),
+            İsabetGeometrisi::Daire { merkez, .. } => *merkez,
+            İsabetGeometrisi::Halka { merkez, iç_yarıçap, dış_yarıçap, açı0, açı1 } => {
+                let orta_açı = (açı0 + açı1) / 2.0;
+                let orta_yarıçap = (iç_yarıçap + dış_yarıçap) / 2.0;
+                (
+                    merkez.0 + orta_yarıçap * orta_açı.cos(),
+                    merkez.1 + orta_yarıçap * orta_açı.sin(),
+                )
+            }
+        }
+    }
+
     /// Geometriyi verilen kadar öteler (yüzey-yerel → pencere-mutlak dönüşümü).
     pub fn kaydır(&self, dx: f32, dy: f32) -> İsabetGeometrisi {
         match self {
@@ -112,4 +128,11 @@ pub enum GrafikOlayı {
         başlangıç: f32,
         bitiş: f32,
     },
+    /// Fırça seçimi tamamlandı (`'brushselected'`): kapsanan öğeler.
+    FırçaSeçildi {
+        /// `(seri sırası, veri sırası)` çiftleri.
+        öğeler: Vec<(usize, usize)>,
+    },
+    /// Araç kutusundan "geri yükle" tıklandı (`'restore'`).
+    GeriYüklendi,
 }
