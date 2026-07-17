@@ -34,6 +34,8 @@ use crate::grafik::gunes::güneş_patlaması_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
+use crate::grafik::kiris::kiriş_çiz;
+use crate::grafik::paralel::paralel_çiz;
 use crate::grafik::kutupsal::{kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
@@ -1018,7 +1020,9 @@ pub fn grafiği_boya(
                 | Seri::GüneşPatlaması(_)
                 | Seri::Ağaç(_)
                 | Seri::Sankey(_)
-                | Seri::Grafo(_) => {}
+                | Seri::Grafo(_)
+                | Seri::Kiriş(_)
+                | Seri::Paralel(_) => {}
             }
             };
             if pencereli {
@@ -1416,6 +1420,45 @@ pub fn grafiği_boya(
                             }
                         }
                     }
+            }
+            Seri::Kiriş(s) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let önce = çıktı.isabetler.len();
+                let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                kiriş_çiz(yüzey, s, i, tüm_alan, &palet, ilerleme, &mut çıktı.isabetler);
+                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                        && let Some(b) = çıktı
+                            .isabetler
+                            .iter()
+                            .skip(önce)
+                            .rev()
+                            .find(|b| b.geometri.içeriyor_mu(f))
+                        {
+                            let satır = İpucuSatırı {
+                                im_rengi: None,
+                                ad: b.ad.clone().unwrap_or_default(),
+                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                            };
+                            bekleyen_ipucu =
+                                Some((seri.ad().map(str::to_string), vec![satır], f));
+                        }
+            }
+            Seri::Paralel(s) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                paralel_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    tüm_alan,
+                    seçenekler.seri_rengi(i),
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
             }
             Seri::Grafo(g) => {
                 if !ad_görünür(seri.ad(), kapalı) {

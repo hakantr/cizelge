@@ -381,8 +381,14 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
   başlangıç + sabit yinelemeli itme/çekme/yerçekimi — altın test
   uyumlu) ve dairesel yerleşim; kategori renkli düğümler, eşik üstü ad
   etiketleri, öğe ipucu. Roam (sürükle/yakınlaş) açık.
-- ⏳ Açık: chord (5.5 kalanı), paralel koordinat (5.6), treemap
-  breadcrumb/gezinme, grafo roam + sürüklenebilir düğümler.
+- ✅ 5.5 Kiriş (chord): düğümler çemberde toplam değerle orantılı yay
+  dilimleri, akışlar merkez kontrollü kübik şeritler, dış etiketler,
+  yay isabetleriyle öğe ipucu.
+- ✅ 5.6 Paralel koordinat: boyut başına aralık ölçeği + çentikli dikey
+  eksenler, öğe başına yarı saydam çoklu çizgi, geçiş animasyonuyla
+  uyumlu Dizi verisi.
+- ⏳ Açık: treemap breadcrumb/gezinme, grafo roam + sürüklenebilir
+  düğümler, sunburst tıklamayla odaklanma.
 
 ---
 

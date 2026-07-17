@@ -1469,6 +1469,119 @@ impl GrafoSerisi {
     }
 }
 
+/// Kiriş serisi (`series-chord`): çember üzerindeki düğümler arasında
+/// merkezden geçen akış şeritleri.
+#[derive(Clone, Debug)]
+pub struct KirişSerisi {
+    pub ad: Option<String>,
+    /// Akışlar: `(kaynak, hedef, değer)`.
+    pub bağlar: Vec<(String, String, f64)>,
+    pub merkez: (Uzunluk, Uzunluk),
+    pub yarıçap: Uzunluk,
+    pub şerit_kalınlığı: f32,
+}
+
+impl Default for KirişSerisi {
+    fn default() -> Self {
+        KirişSerisi {
+            ad: None,
+            bağlar: Vec::new(),
+            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
+            yarıçap: Uzunluk::Yüzde(72.0),
+            şerit_kalınlığı: 16.0,
+        }
+    }
+}
+
+impl KirişSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn bağlar<S: Into<String>>(
+        mut self,
+        bağlar: impl IntoIterator<Item = (S, S, f64)>,
+    ) -> Self {
+        self.bağlar = bağlar
+            .into_iter()
+            .map(|(k, h, d)| (k.into(), h.into(), d))
+            .collect();
+        self
+    }
+}
+
+/// Paralel koordinat boyutu (`parallelAxis` öğesi).
+#[derive(Clone, PartialEq, Debug)]
+pub struct ParalelBoyut {
+    pub ad: String,
+    pub en_az: Option<f64>,
+    pub en_çok: Option<f64>,
+}
+
+impl ParalelBoyut {
+    pub fn yeni(ad: impl Into<String>) -> Self {
+        ParalelBoyut { ad: ad.into(), en_az: None, en_çok: None }
+    }
+}
+
+/// Paralel koordinat serisi (`series-parallel`).
+#[derive(Clone, Debug)]
+pub struct ParalelSerisi {
+    pub ad: Option<String>,
+    pub boyutlar: Vec<ParalelBoyut>,
+    /// Her öğe, boyut sayısı kadar değerli bir dizidir.
+    pub veri: Vec<VeriÖğesi>,
+    pub sol: Uzunluk,
+    pub üst: Uzunluk,
+    pub genişlik: Uzunluk,
+    pub yükseklik: Uzunluk,
+    pub çizgi_stili: ÇizgiStili,
+}
+
+impl Default for ParalelSerisi {
+    fn default() -> Self {
+        ParalelSerisi {
+            ad: None,
+            boyutlar: Vec::new(),
+            veri: Vec::new(),
+            sol: Uzunluk::Yüzde(8.0),
+            üst: Uzunluk::Piksel(70.0),
+            genişlik: Uzunluk::Yüzde(84.0),
+            yükseklik: Uzunluk::Yüzde(70.0),
+            çizgi_stili: ÇizgiStili { kalınlık: 1.0, ..Default::default() },
+        }
+    }
+}
+
+impl ParalelSerisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn boyutlar<S: Into<String>>(
+        mut self,
+        boyutlar: impl IntoIterator<Item = S>,
+    ) -> Self {
+        self.boyutlar = boyutlar.into_iter().map(ParalelBoyut::yeni).collect();
+        self
+    }
+
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -1488,6 +1601,8 @@ pub enum Seri {
     Ağaç(AğaçSerisi),
     Sankey(SankeySerisi),
     Grafo(GrafoSerisi),
+    Kiriş(KirişSerisi),
+    Paralel(ParalelSerisi),
 }
 
 impl Seri {
@@ -1509,6 +1624,8 @@ impl Seri {
             Seri::Ağaç(s) => s.ad.as_deref(),
             Seri::Sankey(s) => s.ad.as_deref(),
             Seri::Grafo(s) => s.ad.as_deref(),
+            Seri::Kiriş(s) => s.ad.as_deref(),
+            Seri::Paralel(s) => s.ad.as_deref(),
         }
     }
 
@@ -1555,7 +1672,9 @@ impl Seri {
             | Seri::GüneşPatlaması(_)
             | Seri::Ağaç(_)
             | Seri::Sankey(_)
-            | Seri::Grafo(_) => &[],
+            | Seri::Grafo(_)
+            | Seri::Kiriş(_) => &[],
+            Seri::Paralel(s) => &s.veri,
         }
     }
 
@@ -1591,7 +1710,9 @@ impl Seri {
             | Seri::GüneşPatlaması(_)
             | Seri::Ağaç(_)
             | Seri::Sankey(_)
-            | Seri::Grafo(_) => None,
+            | Seri::Grafo(_)
+            | Seri::Kiriş(_)
+            | Seri::Paralel(_) => None,
         }
     }
 
@@ -1613,7 +1734,9 @@ impl Seri {
             | Seri::GüneşPatlaması(_)
             | Seri::Ağaç(_)
             | Seri::Sankey(_)
-            | Seri::Grafo(_) => None,
+            | Seri::Grafo(_)
+            | Seri::Kiriş(_)
+            | Seri::Paralel(_) => None,
         }
     }
 }
@@ -1711,5 +1834,17 @@ impl From<SankeySerisi> for Seri {
 impl From<GrafoSerisi> for Seri {
     fn from(s: GrafoSerisi) -> Seri {
         Seri::Grafo(s)
+    }
+}
+
+impl From<KirişSerisi> for Seri {
+    fn from(s: KirişSerisi) -> Seri {
+        Seri::Kiriş(s)
+    }
+}
+
+impl From<ParalelSerisi> for Seri {
+    fn from(s: ParalelSerisi) -> Seri {
+        Seri::Paralel(s)
     }
 }

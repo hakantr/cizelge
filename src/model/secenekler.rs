@@ -372,7 +372,9 @@ impl GrafikSeçenekleri {
                 | Seri::GüneşPatlaması(_)
                 | Seri::Ağaç(_)
                 | Seri::Sankey(_)
-                | Seri::Grafo(_) => {}
+                | Seri::Grafo(_)
+                | Seri::Kiriş(_) => {}
+                Seri::Paralel(s) => karıştır(&mut s.veri),
             }
         }
         sonuç

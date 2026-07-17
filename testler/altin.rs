@@ -658,6 +658,37 @@ fn grafo() {
 }
 
 #[test]
+fn kiriş() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(KirişSerisi::yeni().ad("Göç").bağlar([
+            ("Kuzey", "Güney", 12.0),
+            ("Güney", "Doğu", 8.0),
+            ("Doğu", "Kuzey", 5.0),
+            ("Kuzey", "Batı", 6.0),
+        ]));
+    altın_karşılaştır("kiris", &boya_ve_dök(seçenekler));
+}
+
+#[test]
+fn paralel_koordinat() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(
+            ParalelSerisi::yeni()
+                .ad("Ölçümler")
+                .boyutlar(["Fiyat", "Ağırlık", "Puan", "Stok"])
+                .veri([
+                    vec![12.0, 3.4, 8.2, 40.0],
+                    vec![9.5, 2.1, 6.4, 65.0],
+                    vec![15.2, 4.8, 9.1, 20.0],
+                    vec![7.8, 1.9, 5.5, 80.0],
+                ]),
+        );
+    altın_karşılaştır("paralel", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
