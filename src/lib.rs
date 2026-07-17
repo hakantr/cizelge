@@ -41,7 +41,8 @@ pub use cizim::gorunum::{
     SürgüParçası, İçYakınlaştırmaAlanı,
 };
 pub use cizim::{
-    GrafikOlayı, KayıtYüzeyi, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
+    svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi, İsabetBölgesi,
+    İsabetGeometrisi,
 };
 pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu};
@@ -77,7 +78,7 @@ pub use renk::{Dolgu, Renk, RenkDurağı};
 /// girişinin karşılığı).
 pub mod hazir {
     pub use crate::cizim::gorunum::{grafiği_boya, BoyamaGirdisi, BoyamaÇıktısı, GrafikGörünümü};
-    pub use crate::cizim::{GrafikOlayı, KayıtYüzeyi, ÇizimYüzeyi};
+    pub use crate::cizim::{svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi};
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
     pub use crate::model::bilesen::{
         AraçKutusu, Başlık, Fırça, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,

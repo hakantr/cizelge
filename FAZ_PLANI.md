@@ -432,6 +432,16 @@ tek veri kaynağından 3 farklı grafik örneği.
 
 **Tahmin:** 3–4 hafta.
 
+**Durum (2026-07-17):**
+- ✅ 7.4 (kısmi) SVG dışa aktarım: `SvgYüzeyi` (ÇizimYüzeyi'nin üçüncü
+  gerçeklemesi) + `svg_dışa_aktar` — yollar/dikdörtgenler/yazılar,
+  kırpma `<clipPath>`, çok duraklı doğrusal ve radyal gradyanlar SVG'de
+  doğal `<defs>` tanımlarıyla; belirlenimci çıktı altın testli.
+  PNG (başsız rasterleştirme) açık.
+- ⏳ Açık: tema sistemi/koyu tema (7.1), i18n (7.2), erişilebilirlik
+  (7.3), eklenti kaydı API'si (7.5 — ÖzelSeri temelini attı), yayın
+  (7.6; gpui yol bağımlılığı çözülmeli).
+
 ---
 
 ## Fazlar arası sürekli işler

@@ -568,6 +568,38 @@ fn güneş_patlaması() {
 }
 
 #[test]
+fn svg_dışa_aktarım() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("S")
+                .veri([3.0, 7.0, 5.0])
+                .alan_stili(AlanStili::yeni().renk(Dolgu::doğrusal(
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    vec![
+                        RenkDurağı::yeni(0.0, Renk::onaltılık(0x5070dd)),
+                        RenkDurağı::yeni(0.5, Renk::onaltılık(0xb6d634)),
+                        RenkDurağı::yeni(1.0, Renk::onaltılık(0x5070dd).alfa_ile(0.0)),
+                    ],
+                ))),
+        );
+    let svg = svg_dışa_aktar(&seçenekler, 800.0, 600.0);
+    assert!(svg.starts_with("<svg"));
+    assert!(svg.ends_with("</svg>"));
+    assert!(svg.contains("<linearGradient"), "çok duraklı gradyan defs'e yazılmalı");
+    assert!(svg.contains("<path"));
+    assert!(svg.contains("<text"));
+    // Altın olarak da sakla (belirlenimci üretim).
+    altın_karşılaştır("svg_disa_aktarim", &svg);
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
