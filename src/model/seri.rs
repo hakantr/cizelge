@@ -23,6 +23,13 @@ pub enum Sembol {
     Yok,
 }
 
+/// Serinin bağlı olduğu eksenler (`xAxisIndex` / `yAxisIndex`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub struct EksenBağı {
+    pub x: usize,
+    pub y: usize,
+}
+
 /// Çizgi örnekleme kipi (`sampling`): büyük veri setlerinde çizimden önce
 /// nokta sayısını görünür piksel sayısına indirger.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -118,6 +125,8 @@ pub struct ÇizgiSerisi {
     pub imleyiciler: İmleyiciler,
     /// Büyük veri örneklemesi (`sampling`).
     pub örnekleme: Option<Örnekleme>,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 impl Default for ÇizgiSerisi {
@@ -138,6 +147,7 @@ impl Default for ÇizgiSerisi {
             etiket: Etiket::default(),
             imleyiciler: İmleyiciler::default(),
             örnekleme: None,
+            eksen_bağı: EksenBağı::default(),
         }
     }
 }
@@ -145,6 +155,12 @@ impl Default for ÇizgiSerisi {
 impl ÇizgiSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -263,12 +279,20 @@ pub struct SütunSerisi {
     pub imleyiciler: İmleyiciler,
     /// Sütunu tekrarlanan sembollerle çizer (`pictorialBar`).
     pub piktogram: Option<Piktogram>,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 
 impl SütunSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -472,6 +496,8 @@ pub struct MumSerisi {
     pub gövde_oranı: f32,
     pub kenarlık_kalınlığı: f32,
     pub imleyiciler: İmleyiciler,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 impl Default for MumSerisi {
@@ -485,6 +511,7 @@ impl Default for MumSerisi {
             gövde_oranı: 0.6,
             kenarlık_kalınlığı: 1.0,
             imleyiciler: İmleyiciler::default(),
+            eksen_bağı: EksenBağı::default(),
         }
     }
 }
@@ -492,6 +519,12 @@ impl Default for MumSerisi {
 impl MumSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -531,6 +564,8 @@ pub struct KutuSerisi {
     /// Gövde genişliğinin bant genişliğine oranı.
     pub gövde_oranı: f32,
     pub imleyiciler: İmleyiciler,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 impl Default for KutuSerisi {
@@ -541,6 +576,7 @@ impl Default for KutuSerisi {
             öğe_stili: ÖğeStili::default(),
             gövde_oranı: 0.5,
             imleyiciler: İmleyiciler::default(),
+            eksen_bağı: EksenBağı::default(),
         }
     }
 }
@@ -548,6 +584,12 @@ impl Default for KutuSerisi {
 impl KutuSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -578,6 +620,8 @@ pub struct IsıHaritasıSerisi {
     /// Hücreler arası boşluk, piksel.
     pub hücre_boşluğu: f32,
     pub etiket: Etiket,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 impl Default for IsıHaritasıSerisi {
@@ -588,6 +632,7 @@ impl Default for IsıHaritasıSerisi {
             öğe_stili: ÖğeStili::default(),
             hücre_boşluğu: 1.0,
             etiket: Etiket::default(),
+            eksen_bağı: EksenBağı::default(),
         }
     }
 }
@@ -595,6 +640,12 @@ impl Default for IsıHaritasıSerisi {
 impl IsıHaritasıSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -640,6 +691,8 @@ pub struct SaçılımSerisi {
     pub efekt_ölçeği: f32,
     /// Bir dalga turunun süresi, saniye (`rippleEffect.period`, öntanımlı 4).
     pub efekt_süresi_sn: f32,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 impl Default for SaçılımSerisi {
@@ -655,6 +708,7 @@ impl Default for SaçılımSerisi {
             efektli: false,
             efekt_ölçeği: 2.5,
             efekt_süresi_sn: 4.0,
+            eksen_bağı: EksenBağı::default(),
         }
     }
 }
@@ -662,6 +716,12 @@ impl Default for SaçılımSerisi {
 impl SaçılımSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -1012,6 +1072,8 @@ pub struct ÖzelSeri {
     pub çizim: Option<ÖzelÇizim>,
     /// Eksen/ızgara kurulumu gerekli mi? `false` ise tuvalin tamamı verilir.
     pub kartezyen_gerekli: bool,
+    /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
+    pub eksen_bağı: EksenBağı,
 }
 
 impl fmt::Debug for ÖzelSeri {
@@ -1026,13 +1088,25 @@ impl fmt::Debug for ÖzelSeri {
 
 impl Default for ÖzelSeri {
     fn default() -> Self {
-        ÖzelSeri { ad: None, veri: Vec::new(), çizim: None, kartezyen_gerekli: true }
+        ÖzelSeri {
+            ad: None,
+            veri: Vec::new(),
+            çizim: None,
+            kartezyen_gerekli: true,
+            eksen_bağı: EksenBağı::default(),
+        }
     }
 }
 
 impl ÖzelSeri {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
+    pub fn eksenler(mut self, x: usize, y: usize) -> Self {
+        self.eksen_bağı = EksenBağı { x, y };
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -1119,6 +1193,20 @@ impl Seri {
             Seri::GöstergeSaati(s) => &s.veri,
             Seri::Radar(s) => &s.veri,
             Seri::Özel(s) => &s.veri,
+        }
+    }
+
+    /// Serinin bağlı olduğu eksen sıraları (kartezyen olmayanlarda öntanımlı).
+    pub fn eksen_bağı(&self) -> EksenBağı {
+        match self {
+            Seri::Çizgi(s) => s.eksen_bağı,
+            Seri::Sütun(s) => s.eksen_bağı,
+            Seri::Saçılım(s) => s.eksen_bağı,
+            Seri::Mum(s) => s.eksen_bağı,
+            Seri::Kutu(s) => s.eksen_bağı,
+            Seri::Isı(s) => s.eksen_bağı,
+            Seri::Özel(s) => s.eksen_bağı,
+            _ => EksenBağı::default(),
         }
     }
 

@@ -386,6 +386,35 @@ fn örnekleme_altını() {
 }
 
 #[test]
+fn çoklu_ızgara_ve_ikincil_eksen() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        // Üst ızgara: çizgi (sol y) + ikincil sağ y ekseninde ikinci çizgi.
+        .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst(30.0).alt("55%"))
+        // Alt ızgara: sütun.
+        .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst("60%").alt(40.0))
+        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(0))
+        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(1))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0))
+        .y_ekseni_ekle(Eksen::değer().ölçekli(true).ızgara_sırası(0))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
+        .seri(ÇizgiSerisi::yeni().ad("Sıcaklık").veri([10.0, 14.0, 12.0, 18.0]))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Nem")
+                .eksenler(0, 1)
+                .veri([55.0, 60.0, 52.0, 66.0]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Yağış")
+                .eksenler(1, 2)
+                .veri([4.0, 9.0, 6.0, 2.0]),
+        );
+    altın_karşılaştır("coklu_izgara", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

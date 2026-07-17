@@ -5,7 +5,7 @@
 //! eksen ve bölme çizgilerinin bulanıklaşması böyle önlenir.
 
 use crate::cizim::{keskin, DikeyHiza, YatayHiza, ÇizimYüzeyi};
-use crate::koordinat::{Kartezyen2B, ÇalışmaEkseni};
+use crate::koordinat::{Dikdörtgen, ÇalışmaEkseni};
 use crate::model::eksen::EksenKonumu;
 use crate::model::stil::ÇizgiTürü;
 use crate::tema;
@@ -21,12 +21,14 @@ fn etiket_metni(eksen: &ÇalışmaEkseni, değer: f64) -> String {
 
 /// Izgaranın bölme alanlarını ve bölme çizgilerini çizer (serilerin altında
 /// kalması için önce çağrılır).
-pub fn bölme_çizgilerini_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) {
-    let alan = kartezyen.alan;
-
+pub fn bölme_çizgilerini_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+) {
     // 1) Bölme alanları (`splitArea`): ana çentikler arasında dönüşümlü
     //    bantlar; çizgilerin de altında kalır.
-    for eksen in [&kartezyen.x, &kartezyen.y] {
+    for eksen in eksenler {
         if !eksen.seçenek.bölme_alanı.göster
             || eksen.seçenek.bölme_alanı.renkler.is_empty()
         {
@@ -57,7 +59,7 @@ pub fn bölme_çizgilerini_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kar
     }
 
     // 2) Ara bölme çizgileri (`minorSplitLine`).
-    for eksen in [&kartezyen.x, &kartezyen.y] {
+    for eksen in eksenler {
         if !eksen.seçenek.ara_bölme_çizgisi.göster.unwrap_or(false) {
             continue;
         }
@@ -78,7 +80,7 @@ pub fn bölme_çizgilerini_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kar
     }
 
     // 3) Ana bölme çizgileri (`splitLine`).
-    for eksen in [&kartezyen.x, &kartezyen.y] {
+    for eksen in eksenler {
         if !eksen.seçenek.bölme_görünür_mü() {
             continue;
         }
@@ -97,9 +99,12 @@ pub fn bölme_çizgilerini_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kar
 }
 
 /// Eksen çizgisi, çentikler ve etiketleri çizer.
-pub fn eksenleri_çiz(çizici: &mut dyn ÇizimYüzeyi, kartezyen: &Kartezyen2B) {
-    let alan = kartezyen.alan;
-    for eksen in [&kartezyen.x, &kartezyen.y] {
+pub fn eksenleri_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+) {
+    for eksen in eksenler {
         // Eksenin sabit (dik) konumu.
         let sabit = match eksen.konum {
             EksenKonumu::Alt => alan.alt(),

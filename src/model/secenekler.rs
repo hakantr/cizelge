@@ -15,8 +15,15 @@ pub struct GrafikSeçenekleri {
     pub başlık: Option<Başlık>,
     pub gösterge: Option<Gösterge>,
     pub ızgara: Izgara,
+    /// Çoklu ızgara listesi (`grid: []`); boşsa `ızgara` tek başına
+    /// kullanılır. Eksenler `ızgara_sırası` ile bağlanır.
+    pub ızgaralar: Vec<Izgara>,
     pub x_ekseni: Option<Eksen>,
     pub y_ekseni: Option<Eksen>,
+    /// Çoklu x eksenleri (`xAxis: []`); boşsa `x_ekseni` kullanılır.
+    pub x_eksenleri: Vec<Eksen>,
+    /// Çoklu y eksenleri (`yAxis: []`); boşsa `y_ekseni` kullanılır.
+    pub y_eksenleri: Vec<Eksen>,
     pub seriler: Vec<Seri>,
     pub ipucu: Option<İpucu>,
     /// Görsel eşleme bileşeni (`visualMap`); ısı haritası hücre renkleri
@@ -42,8 +49,11 @@ impl Default for GrafikSeçenekleri {
             başlık: None,
             gösterge: None,
             ızgara: Izgara::default(),
+            ızgaralar: Vec::new(),
             x_ekseni: None,
             y_ekseni: None,
+            x_eksenleri: Vec::new(),
+            y_eksenleri: Vec::new(),
             seriler: Vec::new(),
             ipucu: None,
             görsel_eşleme: None,
@@ -86,6 +96,54 @@ impl GrafikSeçenekleri {
     pub fn y_ekseni(mut self, eksen: Eksen) -> Self {
         self.y_ekseni = Some(eksen);
         self
+    }
+
+    /// Çoklu ızgara için ızgara ekler; eksenler `ızgara_sırası(i)` ile
+    /// bağlanır.
+    pub fn ızgara_ekle(mut self, ızgara: Izgara) -> Self {
+        self.ızgaralar.push(ızgara);
+        self
+    }
+
+    /// Çoklu eksen için x ekseni ekler (`xAxis: [...]`).
+    pub fn x_ekseni_ekle(mut self, eksen: Eksen) -> Self {
+        self.x_eksenleri.push(eksen);
+        self
+    }
+
+    /// Çoklu eksen için y ekseni ekler (`yAxis: [...]`).
+    pub fn y_ekseni_ekle(mut self, eksen: Eksen) -> Self {
+        self.y_eksenleri.push(eksen);
+        self
+    }
+
+    /// Etkin ızgara listesi: `ızgaralar` boşsa tekil `ızgara`.
+    pub fn etkin_ızgaralar(&self) -> Vec<Izgara> {
+        if self.ızgaralar.is_empty() {
+            vec![self.ızgara.clone()]
+        } else {
+            self.ızgaralar.clone()
+        }
+    }
+
+    /// Etkin x eksenleri: `x_eksenleri` boşsa tekil `x_ekseni` (o da yoksa
+    /// öntanımlı kategori).
+    pub fn etkin_x_eksenleri(&self) -> Vec<Eksen> {
+        if self.x_eksenleri.is_empty() {
+            vec![self.x_ekseni.clone().unwrap_or_else(Eksen::kategori)]
+        } else {
+            self.x_eksenleri.clone()
+        }
+    }
+
+    /// Etkin y eksenleri: `y_eksenleri` boşsa tekil `y_ekseni` (o da yoksa
+    /// öntanımlı değer ekseni).
+    pub fn etkin_y_eksenleri(&self) -> Vec<Eksen> {
+        if self.y_eksenleri.is_empty() {
+            vec![self.y_ekseni.clone().unwrap_or_else(Eksen::değer)]
+        } else {
+            self.y_eksenleri.clone()
+        }
     }
 
     pub fn seri(mut self, seri: impl Into<Seri>) -> Self {

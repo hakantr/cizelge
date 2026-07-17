@@ -67,6 +67,9 @@ name = "efektli_sacilim"
 [[example]]
 name = "imleyiciler"
 
+[[example]]
+name = "coklu_izgara"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

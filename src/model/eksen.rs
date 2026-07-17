@@ -144,6 +144,9 @@ pub struct Eksen {
     pub log_tabanı: f64,
     pub ters: bool,
     pub konum: Option<EksenKonumu>,
+    /// Bağlı olduğu ızgaranın `ızgaralar` listesindeki sırası
+    /// (`gridIndex`).
+    pub ızgara_sırası: usize,
     pub çizgi: EksenÇizgisi,
     pub çentik: EksenÇentiği,
     /// Ara (minör) çentikler (`minorTick`); yalnız değer/log eksenlerinde.
@@ -172,6 +175,7 @@ impl Default for Eksen {
             log_tabanı: 10.0,
             ters: false,
             konum: None,
+            ızgara_sırası: 0,
             çizgi: EksenÇizgisi::default(),
             çentik: EksenÇentiği::default(),
             ara_çentik: AraÇentik::default(),
@@ -262,6 +266,12 @@ impl Eksen {
 
     pub fn konum(mut self, konum: EksenKonumu) -> Self {
         self.konum = Some(konum);
+        self
+    }
+
+    /// Ekseni `ızgaralar` listesindeki bir ızgaraya bağlar (`gridIndex`).
+    pub fn ızgara_sırası(mut self, sıra: usize) -> Self {
+        self.ızgara_sırası = sıra;
         self
     }
 

@@ -241,10 +241,17 @@ galerisinde; golden testleri yeşil.
   VeriDeğeri::Dizi çok değerli öğelerle; efektli saçılım (effectScatter,
   `SaçılımSerisi::efektli(true)` + sürekli dalga animasyonu); kartezyen
   ısı haritası + GörselEşleme (visualMap sürekli kip çekirdeği).
-- ⏳ Açık: çoklu ızgara/çoklu eksen (2.1), axisPointer `cross`/`link`
-  (2.3), etiket döndürme + `alignTicks` + zaman ölçeği tam kademe (2.2
-  kalanı), pictorialBar ve `custom` seri (2.5 kalanı), çizgi `sampling`
-  (2.6).
+- ✅ 2.1 Çoklu ızgara / çoklu eksen: `ızgara_ekle`, `x_ekseni_ekle`,
+  `y_ekseni_ekle`, eksenlerde `ızgara_sırası`, serilerde `eksenler(x, y)`
+  bağı; ızgara başına bölme/eksen çizimi, konum öntanımıları (2. x → Üst,
+  2. y → Sağ), eksen-bağlı kapsam/kategori çözümü, ızgara-altında eksen
+  ipucu ve doğrulamada bağ denetimi.
+- ✅ 2.3 (kısmi) Çapraz imleç: fareden geçen kesikli çizgiler + eksen
+  kenarlarında değer kutuları. `link` (ızgaralar arası eşleme) açık.
+- ✅ 2.5 pictorialBar (Piktogram) ve `custom` seri (ÖzelSeri — eklenti
+  noktası); 2.6 çizgi `sampling` (LTTB + ortalama).
+- ⏳ Açık: axisPointer `link`, etiket döndürme (gpui kısıtı) +
+  `alignTicks` + zaman ölçeği tam kademe.
 
 ---
 
