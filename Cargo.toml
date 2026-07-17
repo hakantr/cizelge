@@ -70,6 +70,9 @@ name = "imleyiciler"
 [[example]]
 name = "coklu_izgara"
 
+[[example]]
+name = "yakinlastirma"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

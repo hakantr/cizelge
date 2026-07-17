@@ -104,4 +104,12 @@ pub enum GrafikOlayı {
     /// Gösterge öğesi tıklanıp bir ad açıldı/kapandı
     /// (`'legendselectchanged'`).
     GöstergeDeğişti { ad: String, görünür: bool },
+    /// Veri yakınlaştırma penceresi değişti (`'datazoom'`).
+    YakınlaştırmaDeğişti {
+        /// `veri_yakınlaştırmaları` içindeki sıra.
+        sıra: usize,
+        /// Yüzde `0..=100`.
+        başlangıç: f32,
+        bitiş: f32,
+    },
 }

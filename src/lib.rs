@@ -36,7 +36,7 @@ pub mod tema;
 pub mod yardimci;
 pub mod yerlesim;
 
-pub use cizim::gorunum::{grafiği_boya, BoyamaÇıktısı, GrafikGörünümü};
+pub use cizim::gorunum::{grafiği_boya, BoyamaÇıktısı, GrafikGörünümü, SürgüBölgesi, SürgüParçası, İçYakınlaştırmaAlanı};
 pub use cizim::{
     GrafikOlayı, KayıtYüzeyi, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
 };
@@ -54,6 +54,7 @@ pub use model::imleyici::{
 pub use model::gorsel_esleme::GörselEşleme;
 pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
+pub use model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
 pub use model::seri::{
     Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
@@ -87,6 +88,7 @@ pub mod hazir {
     pub use crate::model::gorsel_esleme::GörselEşleme;
     pub use crate::model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
     pub use crate::model::secenekler::GrafikSeçenekleri;
+    pub use crate::model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
     pub use crate::model::seri::{
         Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,

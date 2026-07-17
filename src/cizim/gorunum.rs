@@ -14,8 +14,8 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use gpui::{
-    Bounds, Context, EventEmitter, MouseButton, MouseDownEvent, MouseMoveEvent, Pixels,
-    Render, Window, canvas, div, prelude::*,
+    Bounds, Context, EventEmitter, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
+    Pixels, Render, ScrollWheelEvent, Window, canvas, div, prelude::*,
 };
 
 use crate::bilesen::baslik::başlık_çiz;
@@ -42,11 +42,38 @@ use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::{Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
+use crate::model::yakinlastirma::YakınlaştırmaTürü;
 use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, LogÖlçeği, ZamanÖlçeği, Ölçek};
 use crate::renk::Dolgu;
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
 use crate::yerlesim::yigin::{yığın_aralıkları, YığınAralığı};
+
+/// Sürgünün sürüklenebilir parçaları.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum SürgüParçası {
+    SolTutamaç,
+    SağTutamaç,
+    Pencere,
+}
+
+/// Çizilen bir yakınlaştırma sürgüsünün etkileşim bölgeleri.
+#[derive(Clone, Debug)]
+pub struct SürgüBölgesi {
+    /// `veri_yakınlaştırmaları` içindeki sıra.
+    pub yakınlaştırma_sırası: usize,
+    pub şerit: Dikdörtgen,
+    pub pencere: Dikdörtgen,
+    pub sol_tutamaç: Dikdörtgen,
+    pub sağ_tutamaç: Dikdörtgen,
+}
+
+/// İç (tekerlek/sürükleme) yakınlaştırmanın etkin olduğu ızgara alanı.
+#[derive(Clone, Debug)]
+pub struct İçYakınlaştırmaAlanı {
+    pub yakınlaştırma_sırası: usize,
+    pub alan: Dikdörtgen,
+}
 
 /// Boyamanın etkileşim çıktıları: gösterge kutuları ve veri öğesi isabet
 /// bölgeleri (yüzey yerel koordinatlarda).
@@ -54,6 +81,8 @@ use crate::yerlesim::yigin::{yığın_aralıkları, YığınAralığı};
 pub struct BoyamaÇıktısı {
     pub gösterge_kutuları: Vec<(Dikdörtgen, String)>,
     pub isabetler: Vec<İsabetBölgesi>,
+    pub sürgüler: Vec<SürgüBölgesi>,
+    pub iç_yakınlaştırmalar: Vec<İçYakınlaştırmaAlanı>,
 }
 
 /// Ad görünür mü (gösterge ile kapatılmamış mı)?
@@ -418,11 +447,31 @@ fn kartezyen_kur(
         .map(|(xi, seçenek)| {
             let g = seçenek.ızgara_sırası.min(ızgara_sayısı.saturating_sub(1));
             let alan = ızgara_alanları.get(g).copied().unwrap_or_default();
-            let kapsam = x_kapsamlar.get(xi).copied().unwrap_or([0.0, 1.0]);
+            let mut kapsam = x_kapsamlar.get(xi).copied().unwrap_or([0.0, 1.0]);
+            // Veri yakınlaştırma: sayısal eksenlerde kapsam pencereye
+            // daraltılır; kategorik eksenlerde pencere kurulumdan sonra
+            // sıra uzayında uygulanır.
+            let pencere = seçenekler
+                .x_penceresi(xi)
+                .filter(|(b, e)| *b > 0.001 || *e < 0.999);
+            let mut seçenek = seçenek.clone();
+            if let Some((b, e)) = pencere
+                && seçenek.tür != EksenTürü::Kategori {
+                    let açıklık = kapsam[1] - kapsam[0];
+                    if açıklık.is_finite() && açıklık > 0.0 {
+                        let yeni = [
+                            kapsam[0] + açıklık * b as f64,
+                            kapsam[0] + açıklık * e as f64,
+                        ];
+                        seçenek.en_az = Some(yeni[0]);
+                        seçenek.en_çok = Some(yeni[1]);
+                        kapsam = yeni;
+                    }
+                }
             let ölçek = ölçek_kur(
-                seçenek,
+                &seçenek,
                 if seçenek.tür == EksenTürü::Kategori {
-                    kategoriler_derle(seçenek, true, xi)
+                    kategoriler_derle(&seçenek, true, xi)
                 } else {
                     Vec::new()
                 },
@@ -438,7 +487,13 @@ fn kartezyen_kur(
             } else {
                 EksenKonumu::Üst
             });
-            ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.x, alan.sağ()], konum)
+            let mut eksen =
+                ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.x, alan.sağ()], konum);
+            if seçenek.tür == EksenTürü::Kategori
+                && let Some((b, e)) = pencere {
+                    eksen.pencere_uygula(b, e);
+                }
+            eksen
         })
         .collect();
     let mut ızgara_y_sayaç = vec![0usize; ızgara_sayısı];
@@ -728,6 +783,14 @@ pub fn grafiği_boya(
                 continue;
             }
             let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else { continue };
+            // Yakınlaştırma penceresi etkinse seri ızgaraya kırpılır
+            // (ECharts `clip: true`).
+            let pencereli = kartezyen.x.pencere.is_some() || kartezyen.y.pencere.is_some();
+            let mut yerel_isabetler: Vec<İsabetBölgesi> = Vec::new();
+            let mut yerel_ipucu: Option<Bekleyenİpucu> = None;
+            let mut seri_çiz = |yüzey: &mut dyn ÇizimYüzeyi,
+                                isabetler: &mut Vec<İsabetBölgesi>,
+                                bekleyen: &mut Option<Bekleyenİpucu>| {
             match seri {
                 Seri::Çizgi(s) => {
                     let seri_aralıkları = kurulum
@@ -748,7 +811,7 @@ pub fn grafiği_boya(
                     for (j, nokta) in tepeler.iter().enumerate() {
                         let Some(nokta) = nokta else { continue };
                         let Some(öğe) = s.veri.get(j) else { continue };
-                        çıktı.isabetler.push(İsabetBölgesi {
+                        isabetler.push(İsabetBölgesi {
                             seri_sırası: i,
                             veri_sırası: j,
                             seri_adı: s.ad.clone(),
@@ -773,7 +836,7 @@ pub fn grafiği_boya(
                                 girdiler,
                                 &kartezyen,
                                 ilerleme,
-                                &mut çıktı.isabetler,
+                                isabetler,
                             );
                         }
                 }
@@ -790,7 +853,7 @@ pub fn grafiği_boya(
                             *vurgu,
                         );
                         for n in noktalar {
-                            çıktı.isabetler.push(İsabetBölgesi {
+                            isabetler.push(İsabetBölgesi {
                                 seri_sırası: i,
                                 veri_sırası: n.sıra,
                                 seri_adı: s.ad.clone(),
@@ -805,7 +868,7 @@ pub fn grafiği_boya(
                         // Öğe ipucu.
                         if let (Some(sıra), Some(f)) = (vurgu, fare)
                             && let Some(nokta) = noktalar.iter().find(|n| n.sıra == *sıra) {
-                                bekleyen_ipucu = Some((
+                                *bekleyen = Some((
                                     seri.ad().map(str::to_string),
                                     vec![İpucuSatırı {
                                         im_rengi: Some(seçenekler.seri_rengi(i)),
@@ -827,7 +890,7 @@ pub fn grafiği_boya(
                     i,
                     &kartezyen,
                     ilerleme,
-                    &mut çıktı.isabetler,
+                    isabetler,
                 ),
                 Seri::Kutu(s) => kutu_çiz(
                     yüzey,
@@ -835,7 +898,7 @@ pub fn grafiği_boya(
                     i,
                     &kartezyen,
                     seçenekler.seri_rengi(i),
-                    &mut çıktı.isabetler,
+                    isabetler,
                 ),
                 Seri::Isı(s) => {
                     let eşleme = seçenekler
@@ -851,7 +914,7 @@ pub fn grafiği_boya(
                         &eşleme,
                         kapsam,
                         ilerleme,
-                        &mut çıktı.isabetler,
+                        isabetler,
                     );
                 }
                 Seri::Özel(s) => {
@@ -867,6 +930,19 @@ pub fn grafiği_boya(
                     }
                 }
                 Seri::Pasta(_) | Seri::Huni(_) | Seri::GöstergeSaati(_) | Seri::Radar(_) => {}
+            }
+            };
+            if pencereli {
+                let alan_kırp = kartezyen.alan;
+                yüzey.kırpılı(alan_kırp, &mut |y| {
+                    seri_çiz(y, &mut yerel_isabetler, &mut yerel_ipucu);
+                });
+            } else {
+                seri_çiz(yüzey, &mut yerel_isabetler, &mut yerel_ipucu);
+            }
+            çıktı.isabetler.append(&mut yerel_isabetler);
+            if yerel_ipucu.is_some() {
+                bekleyen_ipucu = yerel_ipucu;
             }
         }
 
@@ -951,6 +1027,76 @@ pub fn grafiği_boya(
                         kenar_etiketi(&x_metin, (fx, alan.alt() + 4.0), true);
                         kenar_etiketi(&y_metin, (alan.x - 4.0, fy), false);
                     }
+
+        // Veri yakınlaştırma: iç alan kayıtları + sürgü çizimi.
+        for (z, yakınlaştırma) in seçenekler.veri_yakınlaştırmaları.iter().enumerate() {
+            let Some(x_ekseni) = kurulum.x_eksenler.get(yakınlaştırma.x_eksen_sırası)
+            else {
+                continue;
+            };
+            let Some(alan) = kurulum
+                .ızgara_alanları
+                .get(x_ekseni.seçenek.ızgara_sırası)
+                .copied()
+            else {
+                continue;
+            };
+            match yakınlaştırma.tür {
+                YakınlaştırmaTürü::İç => {
+                    çıktı.iç_yakınlaştırmalar.push(İçYakınlaştırmaAlanı {
+                        yakınlaştırma_sırası: z,
+                        alan,
+                    });
+                }
+                YakınlaştırmaTürü::Sürgü => {
+                    let (b, e) = yakınlaştırma.oranlar();
+                    let şerit = Dikdörtgen::yeni(
+                        alan.x,
+                        yüzey.yükseklik() - 36.0,
+                        alan.genişlik,
+                        22.0,
+                    );
+                    // Şerit zemini.
+                    yüzey.dikdörtgen(
+                        şerit,
+                        &Dolgu::Düz(tema::NÖTR_05),
+                        [3.0; 4],
+                        Some((1.0, tema::NÖTR_15)),
+                    );
+                    // Seçili pencere.
+                    let p_x = şerit.x + şerit.genişlik * b;
+                    let p_g = (şerit.genişlik * (e - b)).max(4.0);
+                    let pencere = Dikdörtgen::yeni(p_x, şerit.y, p_g, şerit.yükseklik);
+                    yüzey.dikdörtgen(
+                        pencere,
+                        &Dolgu::Düz(tema::NÖTR_40.opaklık(0.35)),
+                        [2.0; 4],
+                        None,
+                    );
+                    // Tutamaçlar.
+                    let tutamaç = |x: f32| {
+                        Dikdörtgen::yeni(x - 4.0, şerit.y - 2.0, 8.0, şerit.yükseklik + 4.0)
+                    };
+                    let sol = tutamaç(p_x);
+                    let sağ = tutamaç(p_x + p_g);
+                    for t in [sol, sağ] {
+                        yüzey.dikdörtgen(
+                            t,
+                            &Dolgu::Düz(tema::NÖTR_50),
+                            [3.0; 4],
+                            Some((1.0, tema::NÖTR_00)),
+                        );
+                    }
+                    çıktı.sürgüler.push(SürgüBölgesi {
+                        yakınlaştırma_sırası: z,
+                        şerit,
+                        pencere,
+                        sol_tutamaç: sol,
+                        sağ_tutamaç: sağ,
+                    });
+                }
+            }
+        }
 
         // Eksen imleci çizgisi + eksen ipucu penceresi.
         if let Some(eksen_ip) = eksen_ipucu
@@ -1193,7 +1339,33 @@ pub struct GrafikGörünümü {
     /// Boyama sırasında biriken, bir sonraki karede olay olarak yayımlanacak
     /// tanılar.
     bekleyen_tanılar: Rc<RefCell<Vec<BilesenTanisi>>>,
+    /// Pencere-mutlak sürgü etkileşim bölgeleri.
+    sürgü_bölgeleri: Rc<RefCell<Vec<SürgüBölgesi>>>,
+    /// Pencere-mutlak iç yakınlaştırma alanları.
+    iç_yakınlaştırma_alanları: Rc<RefCell<Vec<İçYakınlaştırmaAlanı>>>,
+    /// Etkin sürükleme (kaydırma ya da sürgü).
+    sürükleme: Option<Sürükleme>,
     ölçüm_önbelleği: ÖlçümÖnbelleği,
+}
+
+/// Etkin sürükleme durumu.
+#[derive(Clone, Copy, Debug)]
+enum Sürükleme {
+    /// Izgara içinde yatay kaydırma (pan).
+    Kaydırma {
+        yakınlaştırma_sırası: usize,
+        başlangıç_x: f32,
+        pencere: (f32, f32),
+        alan_genişliği: f32,
+    },
+    /// Sürgü parçası sürükleme.
+    Sürgü {
+        yakınlaştırma_sırası: usize,
+        parça: SürgüParçası,
+        başlangıç_x: f32,
+        pencere: (f32, f32),
+        şerit_genişliği: f32,
+    },
 }
 
 impl EventEmitter<GrafikOlayı> for GrafikGörünümü {}
@@ -1211,7 +1383,32 @@ impl GrafikGörünümü {
             gösterge_kutuları: Rc::new(RefCell::new(Vec::new())),
             isabetler: Rc::new(RefCell::new(Vec::new())),
             bekleyen_tanılar: Rc::new(RefCell::new(Vec::new())),
+            sürgü_bölgeleri: Rc::new(RefCell::new(Vec::new())),
+            iç_yakınlaştırma_alanları: Rc::new(RefCell::new(Vec::new())),
+            sürükleme: None,
             ölçüm_önbelleği: Rc::new(RefCell::new(std::collections::HashMap::new())),
+        }
+    }
+
+    /// Yakınlaştırma penceresini günceller, olay yayımlar.
+    fn pencereyi_güncelle(
+        &mut self,
+        sıra: usize,
+        başlangıç: f32,
+        bitiş: f32,
+        cx: &mut Context<Self>,
+    ) {
+        let başlangıç = başlangıç.clamp(0.0, 100.0);
+        let bitiş = bitiş.clamp(başlangıç + 1.0, 100.0);
+        let seçenekler = Arc::make_mut(&mut self.seçenekler);
+        if let Some(y) = seçenekler.veri_yakınlaştırmaları.get_mut(sıra) {
+            if (y.başlangıç - başlangıç).abs() < 0.01 && (y.bitiş - bitiş).abs() < 0.01 {
+                return;
+            }
+            y.başlangıç = başlangıç;
+            y.bitiş = bitiş;
+            cx.emit(GrafikOlayı::YakınlaştırmaDeğişti { sıra, başlangıç, bitiş });
+            cx.notify();
         }
     }
 
@@ -1308,6 +1505,8 @@ impl Render for GrafikGörünümü {
         let gösterge_kutuları = self.gösterge_kutuları.clone();
         let isabetler = self.isabetler.clone();
         let tanılar = self.bekleyen_tanılar.clone();
+        let sürgüler = self.sürgü_bölgeleri.clone();
+        let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -1359,17 +1558,154 @@ impl Render for GrafikGörünümü {
                             }
                             Err(_) => tanı_bildir("isabet_bölgeleri"),
                         }
+                        let kaydırılmış = |d: Dikdörtgen| {
+                            Dikdörtgen::yeni(
+                                d.x + köken.0,
+                                d.y + köken.1,
+                                d.genişlik,
+                                d.yükseklik,
+                            )
+                        };
+                        match sürgüler.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for s in çıktı.sürgüler {
+                                    kayıt.push(SürgüBölgesi {
+                                        yakınlaştırma_sırası: s.yakınlaştırma_sırası,
+                                        şerit: kaydırılmış(s.şerit),
+                                        pencere: kaydırılmış(s.pencere),
+                                        sol_tutamaç: kaydırılmış(s.sol_tutamaç),
+                                        sağ_tutamaç: kaydırılmış(s.sağ_tutamaç),
+                                    });
+                                }
+                            }
+                            Err(_) => tanı_bildir("sürgü_bölgeleri"),
+                        }
+                        match iç_alanlar.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for a in çıktı.iç_yakınlaştırmalar {
+                                    kayıt.push(İçYakınlaştırmaAlanı {
+                                        yakınlaştırma_sırası: a.yakınlaştırma_sırası,
+                                        alan: kaydırılmış(a.alan),
+                                    });
+                                }
+                            }
+                            Err(_) => tanı_bildir("iç_yakınlaştırma_alanları"),
+                        }
                     },
                 )
                 .size_full(),
             )
             .on_mouse_move(cx.listener(|bu, olay: &MouseMoveEvent, _, cx| {
                 let yeni = (f32::from(olay.position.x), f32::from(olay.position.y));
+                // Etkin sürükleme: kaydırma ya da sürgü.
+                if olay.pressed_button == Some(MouseButton::Left) {
+                    match bu.sürükleme {
+                        Some(Sürükleme::Kaydırma {
+                            yakınlaştırma_sırası,
+                            başlangıç_x,
+                            pencere,
+                            alan_genişliği,
+                        }) => {
+                            let oran_farkı =
+                                (yeni.0 - başlangıç_x) / alan_genişliği.max(1.0);
+                            let genişlik = pencere.1 - pencere.0;
+                            // İçerik fareyle sürüklenir: pencere ters yönde kayar.
+                            let kayma = -oran_farkı * genişlik * 100.0;
+                            let b = (pencere.0 * 100.0 + kayma)
+                                .clamp(0.0, 100.0 - genişlik * 100.0);
+                            bu.pencereyi_güncelle(
+                                yakınlaştırma_sırası,
+                                b,
+                                b + genişlik * 100.0,
+                                cx,
+                            );
+                            return;
+                        }
+                        Some(Sürükleme::Sürgü {
+                            yakınlaştırma_sırası,
+                            parça,
+                            başlangıç_x,
+                            pencere,
+                            şerit_genişliği,
+                        }) => {
+                            let oran_farkı =
+                                (yeni.0 - başlangıç_x) / şerit_genişliği.max(1.0) * 100.0;
+                            let (b0, e0) = (pencere.0 * 100.0, pencere.1 * 100.0);
+                            let (b, e) = match parça {
+                                SürgüParçası::SolTutamaç => {
+                                    ((b0 + oran_farkı).min(e0 - 1.0), e0)
+                                }
+                                SürgüParçası::SağTutamaç => {
+                                    (b0, (e0 + oran_farkı).max(b0 + 1.0))
+                                }
+                                SürgüParçası::Pencere => {
+                                    let genişlik = e0 - b0;
+                                    let b =
+                                        (b0 + oran_farkı).clamp(0.0, 100.0 - genişlik);
+                                    (b, b + genişlik)
+                                }
+                            };
+                            bu.pencereyi_güncelle(yakınlaştırma_sırası, b, e, cx);
+                            return;
+                        }
+                        None => {}
+                    }
+                } else if bu.sürükleme.is_some() {
+                    bu.sürükleme = None;
+                }
                 if bu.fare != Some(yeni) {
                     bu.fare = Some(yeni);
                     cx.notify();
                 }
             }))
+            .on_scroll_wheel(cx.listener(|bu, olay: &ScrollWheelEvent, _, cx| {
+                // Fare hangi iç yakınlaştırma alanındaysa pencereyi ölçekle.
+                let konum = (f32::from(olay.position.x), f32::from(olay.position.y));
+                let alan_kaydı = match bu.iç_yakınlaştırma_alanları.try_borrow() {
+                    Ok(alanlar) => alanlar
+                        .iter()
+                        .find(|a| a.alan.içeriyor_mu(konum))
+                        .cloned(),
+                    Err(_) => None,
+                };
+                let Some(kayıt) = alan_kaydı else { return };
+                let pencere = bu
+                    .seçenekler
+                    .veri_yakınlaştırmaları
+                    .get(kayıt.yakınlaştırma_sırası)
+                    .map(|y| y.oranlar());
+                let Some((b, e)) = pencere else { return };
+                let yön = match olay.delta {
+                    gpui::ScrollDelta::Pixels(p) => f32::from(p.y),
+                    gpui::ScrollDelta::Lines(l) => l.y * 20.0,
+                };
+                if yön.abs() < 0.01 {
+                    return;
+                }
+                // Yukarı tekerlek = yakınlaş.
+                let çarpan = if yön > 0.0 { 0.85 } else { 1.0 / 0.85 };
+                let imleç_oranı =
+                    ((konum.0 - kayıt.alan.x) / kayıt.alan.genişlik.max(1.0)).clamp(0.0, 1.0);
+                let odak = b + (e - b) * imleç_oranı;
+                let yeni_b = (odak - (odak - b) * çarpan).max(0.0);
+                let yeni_e = (odak + (e - odak) * çarpan).min(1.0);
+                if yeni_e - yeni_b >= 0.01 {
+                    bu.pencereyi_güncelle(
+                        kayıt.yakınlaştırma_sırası,
+                        yeni_b * 100.0,
+                        yeni_e * 100.0,
+                        cx,
+                    );
+                }
+            }))
+            .on_mouse_up(
+                MouseButton::Left,
+                cx.listener(|bu, _: &MouseUpEvent, _, _| {
+                    bu.sürükleme = None;
+                }),
+            )
             .on_mouse_down(
                 MouseButton::Left,
                 cx.listener(|bu, olay: &MouseDownEvent, _, cx| {
@@ -1398,8 +1734,58 @@ impl Render for GrafikGörünümü {
                         cx.notify();
                         return;
                     }
+                    let konum = (f32::from(olay.position.x), f32::from(olay.position.y));
+                    // 1b) Sürgü parçası sürüklemesi.
+                    let sürgü_vuruşu = match bu.sürgü_bölgeleri.try_borrow() {
+                        Ok(bölgeler) => bölgeler.iter().find_map(|s| {
+                            let parça = if s.sol_tutamaç.içeriyor_mu(konum) {
+                                Some(SürgüParçası::SolTutamaç)
+                            } else if s.sağ_tutamaç.içeriyor_mu(konum) {
+                                Some(SürgüParçası::SağTutamaç)
+                            } else if s.pencere.içeriyor_mu(konum) {
+                                Some(SürgüParçası::Pencere)
+                            } else {
+                                None
+                            };
+                            parça.map(|p| (s.yakınlaştırma_sırası, p, s.şerit.genişlik))
+                        }),
+                        Err(_) => None,
+                    };
+                    if let Some((sıra, parça, şerit_genişliği)) = sürgü_vuruşu {
+                        if let Some(y) = bu.seçenekler.veri_yakınlaştırmaları.get(sıra) {
+                            bu.sürükleme = Some(Sürükleme::Sürgü {
+                                yakınlaştırma_sırası: sıra,
+                                parça,
+                                başlangıç_x: konum.0,
+                                pencere: y.oranlar(),
+                                şerit_genişliği,
+                            });
+                        }
+                        return;
+                    }
+                    // 1c) İç yakınlaştırma alanında kaydırma başlat.
+                    let iç_vuruş = match bu.iç_yakınlaştırma_alanları.try_borrow() {
+                        Ok(alanlar) => alanlar
+                            .iter()
+                            .find(|a| a.alan.içeriyor_mu(konum))
+                            .cloned(),
+                        Err(_) => None,
+                    };
+                    if let Some(kayıt) = iç_vuruş
+                        && let Some(y) = bu
+                            .seçenekler
+                            .veri_yakınlaştırmaları
+                            .get(kayıt.yakınlaştırma_sırası)
+                        {
+                            bu.sürükleme = Some(Sürükleme::Kaydırma {
+                                yakınlaştırma_sırası: kayıt.yakınlaştırma_sırası,
+                                başlangıç_x: konum.0,
+                                pencere: y.oranlar(),
+                                alan_genişliği: kayıt.alan.genişlik,
+                            });
+                        }
                     // 2) Veri öğesi tıklaması: en üstte çizilen bölge kazanır.
-                    let nokta = (f32::from(olay.position.x), f32::from(olay.position.y));
+                    let nokta = konum;
                     let bölge = match bu.isabetler.try_borrow() {
                         Ok(bölgeler) => bölgeler
                             .iter()

@@ -32,6 +32,10 @@ impl Kök {
                     if *görünür { "görünür" } else { "gizli" }
                 )
                 .into(),
+                GrafikOlayı::YakınlaştırmaDeğişti { sıra, başlangıç, bitiş } => format!(
+                    "Yakınlaştırma {sıra} → %{başlangıç:.0}–%{bitiş:.0}"
+                )
+                .into(),
             };
             cx.notify();
         })

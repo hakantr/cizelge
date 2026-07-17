@@ -5,6 +5,7 @@ use crate::model::bilesen::{Başlık, Gösterge, Izgara, İpucu};
 use crate::model::eksen::Eksen;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::radar::RadarKoordinatı;
+use crate::model::yakinlastirma::VeriYakınlaştırma;
 use crate::model::seri::Seri;
 use crate::renk::Renk;
 use crate::tema;
@@ -31,6 +32,8 @@ pub struct GrafikSeçenekleri {
     pub görsel_eşleme: Option<GörselEşleme>,
     /// Radar koordinat sistemi (`radar`).
     pub radar: Option<RadarKoordinatı>,
+    /// Veri yakınlaştırmaları (`dataZoom`).
+    pub veri_yakınlaştırmaları: Vec<VeriYakınlaştırma>,
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
     pub arkaplan: Option<Renk>,
@@ -58,6 +61,7 @@ impl Default for GrafikSeçenekleri {
             ipucu: None,
             görsel_eşleme: None,
             radar: None,
+            veri_yakınlaştırmaları: Vec::new(),
             palet: tema::PALET.to_vec(),
             arkaplan: None,
             animasyon: true,
@@ -169,6 +173,20 @@ impl GrafikSeçenekleri {
     pub fn radar(mut self, koordinat: RadarKoordinatı) -> Self {
         self.radar = Some(koordinat);
         self
+    }
+
+    /// Veri yakınlaştırma ekler (`dataZoom`).
+    pub fn veri_yakınlaştırma(mut self, yakınlaştırma: VeriYakınlaştırma) -> Self {
+        self.veri_yakınlaştırmaları.push(yakınlaştırma);
+        self
+    }
+
+    /// Verilen x eksenine bağlı etkin pencere oranları `0..=1`.
+    pub fn x_penceresi(&self, eksen_sırası: usize) -> Option<(f32, f32)> {
+        self.veri_yakınlaştırmaları
+            .iter()
+            .find(|y| y.x_eksen_sırası == eksen_sırası)
+            .map(|y| y.oranlar())
     }
 
     pub fn palet<R: Into<Renk>>(mut self, renkler: impl IntoIterator<Item = R>) -> Self {

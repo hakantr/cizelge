@@ -285,6 +285,16 @@ galerisinde; golden testleri yeşil.
 
 **Tahmin:** 5–6 hafta. (Bağımlılık: Faz 1; heatmap için Faz 2.)
 
+**Durum (2026-07-17):**
+- ✅ 3.1 dataZoom: `VeriYakınlaştırma` (İç + Sürgü), eksen pencereleme
+  (kategorikte sıra-uzayı, sayısalda kapsam daraltma), pencereli seride
+  ızgara kırpması, tekerlekle imleç-odaklı yakınlaştırma, sürükleyerek
+  kaydırma, tutamaçlı/sürüklenebilir alt sürgü, `YakınlaştırmaDeğişti`
+  olayı; örnek: examples/yakinlastirma.rs.
+- ✅ 3.2 (kısmi) GörselEşleme sürekli kip + gradyan çubuğu (Faz 2'de).
+- ⏳ Açık: visualMap parçalı (piecewise) + etkileşimli bileşen, kaydırmalı
+  gösterge, toolbox, brush, timeline, zengin ipucu içeriği.
+
 ---
 
 ## Faz 4 — Yeni koordinat sistemleri

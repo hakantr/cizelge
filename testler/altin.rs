@@ -415,6 +415,43 @@ fn çoklu_ızgara_ve_ikincil_eksen() {
 }
 
 #[test]
+fn yakınlaştırma_penceresi() {
+    // Kategorik eksende %25–%75 penceresi + sürgü şeridi.
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["A", "B", "C", "D", "E", "F", "G", "H"]))
+        .y_ekseni(Eksen::değer())
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(25.0, 75.0))
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().aralık(25.0, 75.0))
+        .animasyon(false)
+        .seri(SütunSerisi::yeni().ad("S").veri([
+            1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0,
+        ]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
+    assert_eq!(çıktı.iç_yakınlaştırmalar.len(), 1);
+    assert_eq!(çıktı.sürgüler.len(), 1);
+    altın_karşılaştır("yakinlastirma", &yüzey.döküm());
+}
+
+#[test]
+fn değer_ekseni_penceresi() {
+    // Sayısal x ekseninde pencere: kapsam daraltılır, çentikler pencereye
+    // göre yeniden hesaplanır.
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::değer().ölçekli(true))
+        .y_ekseni(Eksen::değer().ölçekli(true))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(0.0, 50.0))
+        .animasyon(false)
+        .seri(SaçılımSerisi::yeni().ad("N").veri([
+            [0.0, 1.0],
+            [10.0, 5.0],
+            [20.0, 3.0],
+            [40.0, 8.0],
+        ]));
+    altın_karşılaştır("deger_ekseni_penceresi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
