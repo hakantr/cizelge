@@ -372,8 +372,13 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
 - ✅ 5.3 (kısmi) Güneş patlaması: hiyerarşi iç içe halkalarda açısal
   paylara bölünür, üst renkten türeyen tonlar, öğe ipucu; tıklamayla
   odaklanma açık.
-- ⏳ Açık: tree (5.3 kalanı), graph/force (5.4), sankey + chord (5.5),
-  paralel koordinat (5.6), treemap breadcrumb/gezinme.
+- ✅ 5.3 Ağaç (tree): düzenli yatay yerleşim, kübik bağlantılar, düğüm
+  sembolleri + konuma göre etiketler, öğe ipucu.
+- ✅ 5.5 (kısmi) Sankey: kaynaklardan en-uzun-yol katmanlaması (döngü
+  bağları atlanır), değerle orantılı düğüm yükseklikleri ve kübik bağ
+  şeritleri, düğüm etiketleri + öğe ipucu.
+- ⏳ Açık: graph/force (5.4), chord (5.5 kalanı), paralel koordinat
+  (5.6), treemap breadcrumb/gezinme.
 
 ---
 

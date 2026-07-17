@@ -85,6 +85,9 @@ name = "gunes"
 [[example]]
 name = "agac"
 
+[[example]]
+name = "sankey"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

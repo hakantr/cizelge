@@ -38,6 +38,7 @@ use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
 use crate::grafik::radar::{radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz};
 use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımNoktası};
+use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{sütunları_çiz, SütunGirdisi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B, ÇalışmaEkseni};
@@ -1014,7 +1015,8 @@ pub fn grafiği_boya(
                 | Seri::Radar(_)
                 | Seri::AğaçHaritası(_)
                 | Seri::GüneşPatlaması(_)
-                | Seri::Ağaç(_) => {}
+                | Seri::Ağaç(_)
+                | Seri::Sankey(_) => {}
             }
             };
             if pencereli {
@@ -1412,6 +1414,39 @@ pub fn grafiği_boya(
                             }
                         }
                     }
+            }
+            Seri::Sankey(s) => {
+                if !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let önce = çıktı.isabetler.len();
+                let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                sankey_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    tüm_alan,
+                    &palet,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
+                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                        && let Some(b) = çıktı
+                            .isabetler
+                            .iter()
+                            .skip(önce)
+                            .rev()
+                            .find(|b| b.geometri.içeriyor_mu(f))
+                        {
+                            let satır = İpucuSatırı {
+                                im_rengi: None,
+                                ad: b.ad.clone().unwrap_or_default(),
+                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                            };
+                            bekleyen_ipucu =
+                                Some((seri.ad().map(str::to_string), vec![satır], f));
+                        }
             }
             Seri::Ağaç(a) => {
                 if !ad_görünür(seri.ad(), kapalı) {

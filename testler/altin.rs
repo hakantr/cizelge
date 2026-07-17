@@ -624,6 +624,21 @@ fn ağaç_serisi() {
 }
 
 #[test]
+fn sankey() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .seri(SankeySerisi::yeni().ad("Enerji").bağlar([
+            ("Kömür", "Elektrik", 30.0),
+            ("Gaz", "Elektrik", 20.0),
+            ("Güneş", "Elektrik", 12.0),
+            ("Elektrik", "Konut", 35.0),
+            ("Elektrik", "Sanayi", 27.0),
+            ("Gaz", "Konut", 8.0),
+        ]));
+    altın_karşılaştır("sankey", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

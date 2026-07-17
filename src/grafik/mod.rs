@@ -13,6 +13,7 @@ pub mod mum;
 pub mod pasta;
 pub mod radar;
 pub mod sacilim;
+pub mod sankey;
 pub mod sutun;
 
 use crate::cizim::ÇizimYüzeyi;

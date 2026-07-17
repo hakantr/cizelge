@@ -368,7 +368,10 @@ impl GrafikSeçenekleri {
                 Seri::GöstergeSaati(s) => karıştır(&mut s.veri),
                 Seri::Radar(s) => karıştır(&mut s.veri),
                 Seri::Özel(s) => karıştır(&mut s.veri),
-                Seri::AğaçHaritası(_) | Seri::GüneşPatlaması(_) | Seri::Ağaç(_) => {}
+                Seri::AğaçHaritası(_)
+                | Seri::GüneşPatlaması(_)
+                | Seri::Ağaç(_)
+                | Seri::Sankey(_) => {}
             }
         }
         sonuç
