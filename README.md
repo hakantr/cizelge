@@ -24,6 +24,7 @@ let seçenekler = GrafikSeçenekleri::yeni()
 ## Örnekler
 
 ```bash
+cargo run --example galeri    # TÜM çizelgeler: ağaç menü + canlı veri düzenleme
 cargo run --example cizgi     # yumuşak çizgi + alan + eksen ipucu
 cargo run --example sutun     # gruplu + yığılmış sütun, gölge imleç
 cargo run --example pasta     # halka pasta, dış etiketler, gösterge

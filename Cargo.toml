@@ -97,6 +97,18 @@ name = "tema_nehri"
 [[example]]
 name = "zaman_seridi"
 
+[[example]]
+name = "galeri"
+
+[[example]]
+name = "kiris"
+
+[[example]]
+name = "paralel"
+
+[[example]]
+name = "takvim"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

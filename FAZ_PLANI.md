@@ -496,10 +496,13 @@ tek veri kaynağından 3 farklı grafik örneği.
 - ⏳ Açık: eklenti kaydı API'si
   (7.5 — ÖzelSeri temelini attı), yayın (7.6; gpui yol bağımlılığı
   çözülmeli), PNG (7.4 kalanı).
-- 🆕 Kullanıcı ek istekleri (2026-07-17): tüm örnekleri tek pencerede
-  toplayan **galeri** (solda ağaç menü, sağda seçili çizelge, canlı veri
-  ekleme/değiştirme) + **WASM entegrasyonu** (çekirdek gpui'siz derlenip
-  SVG üretir; wasm-bindgen köprüsü).
+- ✅ Galeri (kullanıcı isteği 2026-07-17): `examples/galeri.rs` — 27
+  çizelge tek pencerede; solda katlanabilir ağaç menü, sağda seçilen
+  çizelge; üst çubukta canlı veri düzenleme (± nokta, değer karıştırma,
+  koyu tema) — her değişiklik geçiş animasyonuyla uygulanır. Eksik olan
+  kiriş/paralel/takvim bağımsız örnekleri de eklendi (27 örnek).
+- ⏳ WASM entegrasyonu (kullanıcı isteği 2026-07-17): çekirdek gpui'siz
+  derlenip SVG üretir; wasm-bindgen köprüsü — sıradaki iş.
 
 ---
 
