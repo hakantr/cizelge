@@ -4,6 +4,7 @@ use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
 use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
 use crate::model::eksen::Eksen;
 use crate::model::gorsel_esleme::GörselEşleme;
+use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::radar::RadarKoordinatı;
 use crate::model::yakinlastirma::VeriYakınlaştırma;
 use crate::model::seri::Seri;
@@ -32,6 +33,8 @@ pub struct GrafikSeçenekleri {
     pub görsel_eşleme: Option<GörselEşleme>,
     /// Radar koordinat sistemi (`radar`).
     pub radar: Option<RadarKoordinatı>,
+    /// Kutupsal koordinat sistemi (`polar` + `angleAxis` + `radiusAxis`).
+    pub kutupsal: Option<KutupsalKoordinat>,
     /// Veri yakınlaştırmaları (`dataZoom`).
     pub veri_yakınlaştırmaları: Vec<VeriYakınlaştırma>,
     /// Araç kutusu (`toolbox`).
@@ -65,6 +68,7 @@ impl Default for GrafikSeçenekleri {
             ipucu: None,
             görsel_eşleme: None,
             radar: None,
+            kutupsal: None,
             veri_yakınlaştırmaları: Vec::new(),
             araç_kutusu: None,
             fırça: None,
@@ -178,6 +182,11 @@ impl GrafikSeçenekleri {
 
     pub fn radar(mut self, koordinat: RadarKoordinatı) -> Self {
         self.radar = Some(koordinat);
+        self
+    }
+
+    pub fn kutupsal(mut self, koordinat: KutupsalKoordinat) -> Self {
+        self.kutupsal = Some(koordinat);
         self
     }
 

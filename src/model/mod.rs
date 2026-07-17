@@ -6,6 +6,7 @@ pub mod deger;
 pub mod eksen;
 pub mod gorsel_esleme;
 pub mod imleyici;
+pub mod kutupsal;
 pub mod radar;
 pub mod secenekler;
 pub mod seri;

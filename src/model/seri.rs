@@ -127,6 +127,8 @@ pub struct ÇizgiSerisi {
     pub örnekleme: Option<Örnekleme>,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
+    /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
+    pub kutupsal: bool,
 }
 
 impl Default for ÇizgiSerisi {
@@ -148,6 +150,7 @@ impl Default for ÇizgiSerisi {
             imleyiciler: İmleyiciler::default(),
             örnekleme: None,
             eksen_bağı: EksenBağı::default(),
+            kutupsal: false,
         }
     }
 }
@@ -155,6 +158,12 @@ impl Default for ÇizgiSerisi {
 impl ÇizgiSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
+    pub fn kutupsal(mut self, açık: bool) -> Self {
+        self.kutupsal = açık;
+        self
     }
 
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
@@ -281,12 +290,20 @@ pub struct SütunSerisi {
     pub piktogram: Option<Piktogram>,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
+    /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
+    pub kutupsal: bool,
 }
 
 
 impl SütunSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
+    pub fn kutupsal(mut self, açık: bool) -> Self {
+        self.kutupsal = açık;
+        self
     }
 
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
@@ -693,6 +710,8 @@ pub struct SaçılımSerisi {
     pub efekt_süresi_sn: f32,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
+    /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
+    pub kutupsal: bool,
 }
 
 impl Default for SaçılımSerisi {
@@ -709,6 +728,7 @@ impl Default for SaçılımSerisi {
             efekt_ölçeği: 2.5,
             efekt_süresi_sn: 4.0,
             eksen_bağı: EksenBağı::default(),
+            kutupsal: false,
         }
     }
 }
@@ -716,6 +736,12 @@ impl Default for SaçılımSerisi {
 impl SaçılımSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
+    pub fn kutupsal(mut self, açık: bool) -> Self {
+        self.kutupsal = açık;
+        self
     }
 
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
@@ -1167,8 +1193,21 @@ impl Seri {
         }
     }
 
+    /// Kutupsal koordinatta mı çizilir?
+    pub fn kutupsal_mı(&self) -> bool {
+        match self {
+            Seri::Çizgi(s) => s.kutupsal,
+            Seri::Sütun(s) => s.kutupsal,
+            Seri::Saçılım(s) => s.kutupsal,
+            _ => false,
+        }
+    }
+
     /// Kartezyen koordinat sisteminde mi çizilir?
     pub fn kartezyen_mi(&self) -> bool {
+        if self.kutupsal_mı() {
+            return false;
+        }
         matches!(
             self,
             Seri::Çizgi(_)

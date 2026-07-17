@@ -73,6 +73,9 @@ name = "coklu_izgara"
 [[example]]
 name = "yakinlastirma"
 
+[[example]]
+name = "kutupsal"
+
 [[test]]
 name = "altin"
 path = "testler/altin.rs"

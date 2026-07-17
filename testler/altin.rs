@@ -499,6 +499,29 @@ fn etkileşim_araçları() {
 }
 
 #[test]
+fn kutupsal_seriler() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .kutupsal(
+            KutupsalKoordinat::yeni()
+                .açısal_eksen(Eksen::kategori().veri(["K", "KD", "D", "GD", "G", "GB", "B", "KB"])),
+        )
+        .animasyon(false)
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Rüzgar")
+                .kutupsal(true)
+                .veri([4.0, 7.0, 3.0, 6.0, 8.0, 5.0, 2.0, 6.5]),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Ortalama")
+                .kutupsal(true)
+                .veri([3.0, 5.0, 4.0, 5.5, 6.0, 4.5, 3.0, 5.0]),
+        );
+    altın_karşılaştır("kutupsal", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

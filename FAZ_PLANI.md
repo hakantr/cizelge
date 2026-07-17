@@ -292,8 +292,11 @@ galerisinde; golden testleri yeşil.
   kaydırma, tutamaçlı/sürüklenebilir alt sürgü, `YakınlaştırmaDeğişti`
   olayı; örnek: examples/yakinlastirma.rs.
 - ✅ 3.2 (kısmi) GörselEşleme sürekli kip + gradyan çubuğu (Faz 2'de).
-- ⏳ Açık: visualMap parçalı (piecewise) + etkileşimli bileşen, kaydırmalı
-  gösterge, toolbox, brush, timeline, zengin ipucu içeriği.
+- ✅ 3.2 visualMap parçalı (piecewise): tıklanabilir dilim listesi,
+  kapalı dilim verisi çizilmez; 3.3 kaydırmalı gösterge (‹ n/m ›);
+  3.4 araç kutusu "geri yükle" (+GeriYüklendi olayı); 3.5 fırça:
+  dikdörtgen seçim kaplaması + FırçaSeçildi olayı.
+- ⏳ Açık: timeline, zengin ipucu içeriği, toolbox PNG kaydetme.
 
 ---
 
@@ -329,8 +332,11 @@ gauge ve kutupsal sütun örneklerinin eşdeğerleri.
   bölme alanları, kollar + gösterge adları) ve RadarSerisi (öğe başına
   çokgen, alan dolgusu, semboller, gösterge/legend ve öğe ipucu
   entegrasyonu, merkezden büyüme animasyonu).
-- ⏳ Açık: kutupsal koordinat (4.1), singleAxis/themeRiver (4.5), takvim
-  koordinatı (4.6).
+- ✅ 4.1 Kutupsal koordinat: `KutupsalKoordinat` (açısal kategori/değer +
+  radyal değer ekseni), halkalar/ışınlar/etiketlerle ağ çizimi; kutupsal
+  sütun (yığın destekli dilimler), çizgi ve saçılım — serilerde
+  `.kutupsal(true)`; öğe ipucu ve isabetler.
+- ⏳ Açık: singleAxis/themeRiver (4.5), takvim koordinatı (4.6).
 
 ---
 

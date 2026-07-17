@@ -55,6 +55,7 @@ pub use model::imleyici::{
     İmÇizgisi, İmÇizgisiTanımı,
 };
 pub use model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
+pub use model::kutupsal::KutupsalKoordinat;
 pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
@@ -89,6 +90,7 @@ pub mod hazir {
         İmÇizgisi, İmÇizgisiTanımı,
     };
     pub use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
+    pub use crate::model::kutupsal::KutupsalKoordinat;
     pub use crate::model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};

@@ -30,6 +30,7 @@ use crate::grafik::gosterge_saati::gösterge_saati_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
+use crate::grafik::kutupsal::{kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
 use crate::grafik::radar::{radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz};
@@ -1234,6 +1235,41 @@ pub fn grafiği_boya(
             .unwrap_or([0.0, 1.0]);
         çıktı.eşleme_kutuları =
             görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
+    }
+
+    // 4c) Kutupsal koordinat ve kutupsal seriler.
+    if let Some(koordinat) = &seçenekler.kutupsal {
+        let görünürler: Vec<bool> = seçenekler
+            .seriler
+            .iter()
+            .map(|s| ad_görünür(s.ad(), kapalı))
+            .collect();
+        let kutupsal_var = seçenekler
+            .seriler
+            .iter()
+            .zip(&görünürler)
+            .any(|(s, g)| s.kutupsal_mı() && *g);
+        if kutupsal_var {
+            let aralıklar = yığın_aralıkları(&seçenekler.seriler, &görünürler);
+            let düzen = kutupsal_kur(
+                koordinat,
+                seçenekler,
+                &aralıklar,
+                &görünürler,
+                Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik()),
+            );
+            kutupsal_ağ_çiz(yüzey, &düzen);
+            kutupsal_serileri_çiz(
+                yüzey,
+                seçenekler,
+                &düzen,
+                &aralıklar,
+                &görünürler,
+                kapalı,
+                ilerleme,
+                &mut çıktı.isabetler,
+            );
+        }
     }
 
     // 5) Pasta serileri.

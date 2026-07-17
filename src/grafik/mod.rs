@@ -5,6 +5,7 @@ pub mod gosterge_saati;
 pub mod huni;
 pub mod imleyici;
 pub mod isi;
+pub mod kutupsal;
 pub mod mum;
 pub mod pasta;
 pub mod radar;
