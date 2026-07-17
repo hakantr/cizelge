@@ -272,8 +272,15 @@ pub fn çizgi_serisi_çiz(
         let mut tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
         let mut tabanlar_parçalı = parçalara_ayır(&tabanlar, seri.boşları_bağla);
         // Büyük veri örneklemesi: hedef, ızgara genişliği kadar noktadır.
-        if let Some(örnekleme) = seri.örnekleme {
-            let hedef = (alan.genişlik.max(2.0) as usize).max(2);
+        // Açıkça seçilmemişse, piksel başına birden çok nokta düşen büyük
+        // serilerde LTTB kendiliğinden devreye girer (ECharts'ın aşamalı/
+        // progressive büyük-veri yolunun tek karelik karşılığı).
+        let hedef = (alan.genişlik.max(2.0) as usize).max(2);
+        let örnekleme = seri.örnekleme.or_else(|| {
+            let en_uzun = tepeler_parçalı.iter().map(Vec::len).max().unwrap_or(0);
+            (en_uzun > hedef.saturating_mul(2)).then_some(Örnekleme::Lttb)
+        });
+        if let Some(örnekleme) = örnekleme {
             let örnekle = |parça: &Vec<(f32, f32)>| match örnekleme {
                 Örnekleme::Lttb => lttb_örnekle(parça, hedef),
                 Örnekleme::Ortalama => ortalama_örnekle(parça, hedef),

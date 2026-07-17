@@ -956,3 +956,48 @@ fn grafo_gezinme_dönüşümü() {
     grafiği_boya(&mut gezinmeli, &kur(), &girdi);
     assert_ne!(düz.döküm(), gezinmeli.döküm());
 }
+
+#[test]
+fn çentik_hizalama() {
+    // İki değer y-ekseni: hizalama açıkken ikisi de aynı sayıda bölmeye
+    // sahip olmalı (bölme çizgileri üst üste düşer).
+    let kur = |hizala: bool| {
+        GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+            .y_ekseni_ekle(Eksen::değer())
+            .y_ekseni_ekle(Eksen::değer().ölçekli(true).çentik_hizala(hizala))
+            .seri(ÇizgiSerisi::yeni().ad("Sıcaklık").veri([10.0, 24.0, 17.0]))
+            .seri(
+                ÇizgiSerisi::yeni()
+                    .ad("Nem")
+                    .eksenler(0, 1)
+                    .veri([53.0, 61.0, 47.0]),
+            )
+    };
+    let hizalı = boya_ve_dök(kur(true));
+    let serbest = boya_ve_dök(kur(false));
+    assert_ne!(hizalı, serbest, "hizalama çıktıyı değiştirmeli");
+    altın_karşılaştır("centik_hizalama", &hizalı);
+}
+
+#[test]
+fn otomatik_örnekleme() {
+    // 6000 nokta, örnekleme SEÇİLMEDEN: piksel başına birden çok nokta
+    // düştüğü için LTTB kendiliğinden devreye girer (progressive karşılığı).
+    let veri: Vec<f64> = (0..6000).map(|i| ((i % 97) as f64) * 0.5).collect();
+    let kategoriler: Vec<String> = (0..6000).map(|i| format!("N{i}")).collect();
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .x_ekseni(Eksen::kategori().veri(kategoriler))
+        .y_ekseni(Eksen::değer())
+        .seri(ÇizgiSerisi::yeni().ad("Büyük").sembol_göster(false).veri(veri));
+    let döküm = boya_ve_dök(seçenekler);
+    // Çizgi yolu, ızgara genişliğini (800px'ten küçük) aşan nokta içermemeli:
+    // tek "çiz" satırındaki nokta sayısı kabaca hedefe inmiş olmalı.
+    let en_uzun_satır = döküm.lines().map(str::len).max().unwrap_or(0);
+    assert!(
+        en_uzun_satır < 40_000,
+        "örnekleme devreye girmedi: en uzun satır {en_uzun_satır} bayt"
+    );
+}

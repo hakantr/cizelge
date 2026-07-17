@@ -589,6 +589,49 @@ fn kartezyen_kur(
         })
         .collect();
 
+    // Çentik hizalama (`alignTicks`): aynı ızgaradaki İLK değer y-ekseni
+    // referanstır; `çentik_hizala` işaretli diğer değer eksenleri onun
+    // bölme sayısına uyacak biçimde yeniden kurulur — bölme çizgileri
+    // üst üste düşer.
+    let mut y_eksenler = y_eksenler;
+    for g in 0..ızgara_sayısı {
+        let referans_bölme = y_eksenler
+            .iter()
+            .find(|e| {
+                e.seçenek.ızgara_sırası.min(ızgara_sayısı.saturating_sub(1)) == g
+                    && matches!(&e.ölçek, Ölçek::Aralık(_))
+            })
+            .and_then(|e| match &e.ölçek {
+                Ölçek::Aralık(ö) => Some(ö.çentikler().len().saturating_sub(1)),
+                _ => None,
+            });
+        let Some(bölme) = referans_bölme.filter(|b| *b >= 1) else { continue };
+        let mut ilk_görüldü = false;
+        for (yi, eksen) in y_eksenler.iter_mut().enumerate() {
+            let eksen_g =
+                eksen.seçenek.ızgara_sırası.min(ızgara_sayısı.saturating_sub(1));
+            if eksen_g != g || !matches!(&eksen.ölçek, Ölçek::Aralık(_)) {
+                continue;
+            }
+            if !ilk_görüldü {
+                // Referansın kendisi olduğu gibi kalır.
+                ilk_görüldü = true;
+                continue;
+            }
+            if !eksen.seçenek.çentik_hizala {
+                continue;
+            }
+            let kapsam = y_kapsamlar.get(yi).copied().unwrap_or([0.0, 1.0]);
+            eksen.ölçek = Ölçek::Aralık(AralıkÖlçeği::hizalı_kur(
+                kapsam,
+                eksen.seçenek.en_az,
+                eksen.seçenek.en_çok,
+                eksen.seçenek.sıfırı_içer,
+                bölme,
+            ));
+        }
+    }
+
     Some(KartezyenKurulum {
         ızgara_alanları,
         x_eksenler,

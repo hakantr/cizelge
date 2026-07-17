@@ -193,7 +193,11 @@ tıklanan dilimi raporlayan yeni örnek; golden test altyapısı CI'da koşuyor.
   Karar: kısa vadede yatay geri düşüş; kalıcı çözüm gpui'ye upstream katkı
   (metin koşusuna dönüşüm matrisi) ya da glif konturlarını yol olarak
   doldurma. Faz 2'deki etiket döndürme kalemi bu karara bağlı.
-- ⏳ CI hattı yok (depo yerel); `cargo deny` yapılandırması `deny.toml`de
+- ✅ CI iskeleti: `.github/workflows/ci.yml` — çekirdek (gpui'siz)
+  clippy -D warnings + tüm test takımı + wasm32 derleme + lisans
+  denetimi; depo GitHub'a taşındığında olduğu gibi çalışır (gpui'li
+  derleme, Zed checkout'u gerektirdiğinden bilinçli kapsam dışı).
+  `cargo deny` yapılandırması `deny.toml`de
   hazır, CI kurulunca bağlanacak.
 
 ---
@@ -251,8 +255,16 @@ galerisinde; golden testleri yeşil.
 - ✅ 2.5 pictorialBar (Piktogram) ve `custom` seri (ÖzelSeri — eklenti
   noktası); 2.6 çizgi `sampling` (LTTB + ortalama).
 - ✅ axisPointer `link` (`İpucu.bağlantılı`, 2026-07-17).
-- ⏳ Açık: etiket döndürme (gpui kısıtı) + `alignTicks` + zaman ölçeği
-  tam kademe.
+- ✅ `alignTicks` (`Eksen.çentik_hizala`, 2026-07-17): aynı ızgaradaki
+  değer eksenleri ilk eksenin bölme sayısına hizalanır
+  (`AralıkÖlçeği::hizalı_kur`); altın testli.
+- ✅ Zaman ölçeği kademesi: yıl→ay→gün→saat→dakika→saniye→milisaniye
+  kademeli biçimleyicinin sade portu uygulanmış durumda (ay başında yıl,
+  gün başında "g Ay" vurgusu). ECharts'ın özel şablon dilbilgisi
+  (`{yyyy}-{MM}` biçim dizgileri) gerektiğinde `Biçimleyici` üzerinden
+  eklenebilir — ayrı kalem olarak izlenmiyor.
+- ⏳ Açık: etiket döndürme (gpui metin sistemi döndürme sunana dek
+  üst-akım engeli).
 
 ---
 
@@ -412,9 +424,6 @@ kuvvet yönlendirmeli graph ve sankey örnekleri akıcı çalışır.
   imleç ölçekli yakınlaştırma, boş alanda kaydırma) + düğüm sürükleme.
   Durum `BoyamaGirdisi.hiyerarşi_yolu / grafo_görünümü / grafo_kaymaları`
   ile saf boyamaya taşınır; altın + davranış testli.
-- ⏳ Eski açık not (kapandı): treemap breadcrumb/gezinme, grafo roam + sürüklenebilir
-  düğümler, sunburst tıklamayla odaklanma.
-
 ---
 
 ## Faz 6 — Veri katmanı ve ölçeklenebilirlik
@@ -451,7 +460,18 @@ tek veri kaynağından 3 farklı grafik örneği.
   boyama öncesi seriler tablodan türetilir, eşleme hataları güvenle
   atlanır.
 - ✅ Örnekleme (lttb/ortalama) Faz 2'de teslim edildi.
-- ⏳ Açık: sütunlu DataStore (6.3), aşamalı/progressive işleme (6.4),
+- ✅ 6.4 karşılığı — otomatik büyük veri yolu: örnekleme seçilmemiş
+  çizgi serilerinde piksel başına >2 nokta düşüyorsa LTTB kendiliğinden
+  devreye girer (ECharts'ın progressive büyük-veri hattının tek karelik
+  eşdeğeri; gpui anlık-kip çizdiğinden kare-üstü parçalı biriktirme
+  mimariye uygun değil). Davranış testli.
+- ⏸ 6.3 sütunlu DataStore: bilinçli ertelendi — mevcut satır tabanlı
+  `VeriKümesi` + otomatik LTTB + yakınlaştırma penceresi kırpması,
+  100k+ nokta senaryosunu karşılıyor; sütunlu depo yalnız bellek
+  yerleşimi eniyilemesidir ve ölçümle gerekçelenmeden API'ye
+  eklenmeyecek (tasarım: boyut başına `Vec<f64>` sütunları +
+  `VeriKümesi`den dönüşüm).
+- ⏸ Ertelendi (6.3 ile aynı gerekçe — ölçüm olmadan eniyileme yok):
   large kipi (6.5), çok iş parçacıklı yerleşim (6.6).
 
 ---
@@ -503,9 +523,17 @@ tek veri kaynağından 3 farklı grafik örneği.
 - ✅ 7.3 Erişilebilirlik: `erişilebilirlik_özeti()` (`aria.enabled`
   varsayılan etiket üreticisi) — başlık/seri türü/ad/ilk 10 veri; TR+EN
   kalıpları, `seri_tür_adı()` dışa açık; birim testli.
-- ⏳ Açık: eklenti kaydı API'si
-  (7.5 — ÖzelSeri temelini attı), yayın (7.6; gpui yol bağımlılığı
-  çözülmeli), PNG (7.4 kalanı).
+- ✅ 7.5 eklenti noktası (kapanış): ECharts'ın çalışma zamanı
+  `use()`/register mekanizmasının Rust karşılığı derleme zamanıdır —
+  `ÖzelSeri`/`ÖzelÇizim` kullanıcı çizimine tam erişim verir (bağlam:
+  alan, kartezyen, veri, renk, ilerleme), tüm çizici/bileşen modülleri
+  herkese açıktır ve `gpui` özellik kapısı bileşen seçiminin örneğidir.
+  Ayrı bir çalışma zamanı kayıt defteri Rust'ta yapay olurdu; kalem
+  kapatıldı.
+- ⏳ Açık: yayın (7.6 — crates.io, gpui yol bağımlılığı üst-akımda
+  yayınlanana dek yapılamaz; dış engel) ve PNG dışa aktarım (7.4 —
+  rasterleştirici gerektirir; onaylı listeden `tiny-skia` [MIT] adayı
+  kullanıcı onayına sunulmuştur, alternatifi kendi rasterleştiricimizdir).
 - ✅ Galeri (kullanıcı isteği 2026-07-17): `examples/galeri.rs` — 27
   çizelge tek pencerede; solda katlanabilir ağaç menü, sağda seçilen
   çizelge; üst çubukta canlı veri düzenleme (± nokta, değer karıştırma,

@@ -132,6 +132,10 @@ pub struct Eksen {
     pub sıfırı_içer: bool,
     /// `splitNumber`, öntanımlı 5.
     pub bölme_sayısı: usize,
+    /// Çentik hizalama (`alignTicks`): aynı ızgaradaki ilk değer ekseninin
+    /// bölme sayısına uyar; bölme çizgileri üst üste düşer (yalnız değer
+    /// eksenlerinde anlamlıdır).
+    pub çentik_hizala: bool,
     pub en_küçük_adım: Option<f64>,
     pub en_büyük_adım: Option<f64>,
     /// Log ekseni tabanı (`logBase`), öntanımlı 10.
@@ -164,6 +168,7 @@ impl Default for Eksen {
             en_çok: None,
             sıfırı_içer: true,
             bölme_sayısı: 5,
+            çentik_hizala: false,
             en_küçük_adım: None,
             en_büyük_adım: None,
             log_tabanı: 10.0,
@@ -235,6 +240,12 @@ impl Eksen {
 
     pub fn bölme_sayısı(mut self, sayı: usize) -> Self {
         self.bölme_sayısı = sayı.max(1);
+        self
+    }
+
+    /// Çentik hizalamayı açar (`alignTicks`).
+    pub fn çentik_hizala(mut self, açık: bool) -> Self {
+        self.çentik_hizala = açık;
         self
     }
 

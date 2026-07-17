@@ -1,0 +1,33 @@
+# Sürekli tümleştirme iskeleti.
+#
+# NOT: `gpui` bağımlılığı Zed çalışma alanına yol (path) ile bağlıdır;
+# öntanımlı özelliklerle derleme, depo yanında `zed` checkout'u ister.
+# Bu hat, gpui'siz çekirdeği (--no-default-features) doğrular — altın
+# testler dahil tüm test takımı gpui olmadan çalışır. Depo GitHub'a
+# taşındığında olduğu gibi kullanılabilir.
+
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cekirdek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+          targets: wasm32-unknown-unknown
+      - name: Clippy (çekirdek, uyarı = hata)
+        run: cargo clippy --no-default-features --lib --tests -- -D warnings
+      - name: Testler (birim + altın)
+        run: cargo test --no-default-features
+      - name: WASM hedefi derlenir
+        run: cargo check --lib --no-default-features --target wasm32-unknown-unknown
+      - name: Lisans denetimi
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check licenses

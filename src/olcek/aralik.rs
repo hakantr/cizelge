@@ -85,6 +85,67 @@ pub struct AralıkÖlçeği {
 }
 
 impl AralıkÖlçeği {
+    /// Verilen bölme sayısına HİZALI ölçek kurar (`alignTicks`): adım,
+    /// kapsamı tam `bölme` aralığa bölen güzel bir değere yükseltilir;
+    /// böylece aynı ızgaradaki değer eksenlerinin bölme çizgileri üst üste
+    /// düşer.
+    pub fn hizalı_kur(
+        veri_kapsamı: [f64; 2],
+        sabit_en_az: Option<f64>,
+        sabit_en_çok: Option<f64>,
+        sıfırı_içer: bool,
+        bölme: usize,
+    ) -> Self {
+        let mut kapsam = veri_kapsamı;
+        if !geçerli_kapsam_sayısı(kapsam[0]) {
+            kapsam[0] = 0.0;
+        }
+        if !geçerli_kapsam_sayısı(kapsam[1]) {
+            kapsam[1] = 1.0;
+        }
+        if sıfırı_içer {
+            kapsam[0] = kapsam[0].min(0.0);
+            kapsam[1] = kapsam[1].max(0.0);
+        }
+        if let Some(ea) = sabit_en_az {
+            kapsam[0] = ea;
+        }
+        if let Some(eç) = sabit_en_çok {
+            kapsam[1] = eç;
+        }
+        let sabit_uçlar = [sabit_en_az.is_some(), sabit_en_çok.is_some()];
+        let kapsam = kapsamı_geçerle(kapsam, sabit_uçlar);
+
+        let bölme_f = bölme.max(1) as f64;
+        let mut adım = güzel_sayı((kapsam[1] - kapsam[0]) / bölme_f, GüzelKip::Tavan);
+        for _ in 0..12 {
+            let alt = if sabit_en_az.is_some() {
+                kapsam[0]
+            } else {
+                (kapsam[0] / adım).floor() * adım
+            };
+            let üst = alt + adım * bölme_f;
+            if üst + adım * 1e-9 >= kapsam[1] || sabit_en_çok.is_some() {
+                let h = adım_hassasiyeti(adım);
+                let alt = yuvarla(alt, h);
+                let üst = if sabit_en_çok.is_some() {
+                    kapsam[1]
+                } else {
+                    yuvarla(üst, h)
+                };
+                return AralıkÖlçeği {
+                    kapsam: [alt, üst],
+                    adım,
+                    adım_hassasiyeti: h,
+                    güzel_kapsam: [alt, üst],
+                };
+            }
+            // Sığmadı: bir üst güzel adıma çık.
+            adım = güzel_sayı(adım * 1.6, GüzelKip::Tavan);
+        }
+        Self::kur(veri_kapsamı, sabit_en_az, sabit_en_çok, sıfırı_içer, bölme, None, None)
+    }
+
     /// Veri kapsamından ölçek kurar.
     ///
     /// * `sabit_en_az` / `sabit_en_çok` — eksen seçeneğindeki `min`/`max`.
