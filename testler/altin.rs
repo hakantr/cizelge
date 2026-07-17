@@ -452,6 +452,31 @@ fn değer_ekseni_penceresi() {
 }
 
 #[test]
+fn parçalı_eşleme() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["a", "b", "c"]))
+        .y_ekseni(Eksen::kategori().veri(["x", "y"]))
+        .görsel_eşleme(GörselEşleme::yeni().parçalar([
+            EşlemeParçası::yeni(None, Some(5.0), 0x67e0e3u32).etiket("Düşük"),
+            EşlemeParçası::yeni(Some(5.0), Some(10.0), 0x37a2dau32).etiket("Orta"),
+            EşlemeParçası::yeni(Some(10.0), None, 0xfd666du32).etiket("Yüksek"),
+        ]))
+        .animasyon(false)
+        .seri(IsıHaritasıSerisi::yeni().ad("V").veri([
+            [0.0, 0.0, 2.0],
+            [1.0, 0.0, 7.0],
+            [2.0, 0.0, 12.0],
+            [0.0, 1.0, 4.0],
+            [1.0, 1.0, 9.0],
+            [2.0, 1.0, 15.0],
+        ]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, 1.0, 0.0, None, &HashSet::new());
+    assert_eq!(çıktı.eşleme_kutuları.len(), 3);
+    altın_karşılaştır("parcali_esleme", &yüzey.döküm());
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

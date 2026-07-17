@@ -56,6 +56,13 @@ pub fn ısı_haritası_çiz(
         if !değer.is_finite() {
             continue;
         }
+        // Parçalı eşlemede kapalı dilime düşen hücre çizilmez.
+        if eşleme.parçalı_mı() {
+            match eşleme.parça_bul(değer) {
+                Some(parça) if eşleme.parça_açık_mı(parça) => {}
+                _ => continue,
+            }
+        }
         let merkez_x = kartezyen.x.veriden_piksele(x_sırası);
         let merkez_y = kartezyen.y.veriden_piksele(y_sırası);
         let d = Dikdörtgen::yeni(
@@ -102,14 +109,52 @@ pub fn ısı_haritası_çiz(
     }
 }
 
-/// Görsel eşleme bileşenini (sürekli gradyan çubuğu) sol alt köşeye çizer.
+/// Görsel eşleme bileşenini sol alt köşeye çizer: sürekli kipte gradyan
+/// çubuğu, parçalı kipte tıklanabilir dilim listesi. Parçalı kipte her
+/// dilimin isabet kutusu döndürülür.
 pub fn görsel_eşleme_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     eşleme: &GörselEşleme,
     kapsam: [f64; 2],
-) {
-    if !eşleme.göster || eşleme.renkler.is_empty() {
-        return;
+) -> Vec<(Dikdörtgen, usize)> {
+    if !eşleme.göster {
+        return Vec::new();
+    }
+    if eşleme.parçalı_mı() {
+        // Dilim listesi (alttan üste).
+        const KUTU: f32 = 14.0;
+        const SATIR: f32 = 20.0;
+        const KENAR: f32 = 10.0;
+        let boyut = tema::YAZI_KÜÇÜK;
+        let mut kutular = Vec::new();
+        let n = eşleme.parçalar.len();
+        for (i, parça) in eşleme.parçalar.iter().enumerate() {
+            let y = çizici.yükseklik()
+                - KENAR
+                - SATIR * (n.saturating_sub(i)) as f32;
+            let açık = eşleme.parça_açık_mı(i);
+            let renk = if açık { parça.renk } else { tema::DEVRE_DIŞI };
+            let kutu = Dikdörtgen::yeni(KENAR, y + (SATIR - KUTU) / 2.0, KUTU, KUTU);
+            çizici.dikdörtgen(kutu, &Dolgu::Düz(renk), [3.0; 4], None);
+            let yazı_rengi = if açık { tema::İKİNCİL_METİN } else { tema::DEVRE_DIŞI };
+            let (metin_gen, _) = çizici.yazı(
+                &parça.etiket_metni(),
+                (KENAR + KUTU + 6.0, y + SATIR / 2.0),
+                YatayHiza::Sol,
+                DikeyHiza::Orta,
+                boyut,
+                yazı_rengi,
+                false,
+            );
+            kutular.push((
+                Dikdörtgen::yeni(KENAR, y, KUTU + 6.0 + metin_gen, SATIR),
+                i,
+            ));
+        }
+        return kutular;
+    }
+    if eşleme.renkler.is_empty() {
+        return Vec::new();
     }
     const GENİŞLİK: f32 = 14.0;
     const YÜKSEKLİK: f32 = 130.0;
@@ -171,4 +216,5 @@ pub fn görsel_eşleme_çiz(
         tema::İKİNCİL_METİN,
         false,
     );
+    Vec::new()
 }

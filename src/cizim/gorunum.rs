@@ -83,6 +83,8 @@ pub struct BoyamaÇıktısı {
     pub isabetler: Vec<İsabetBölgesi>,
     pub sürgüler: Vec<SürgüBölgesi>,
     pub iç_yakınlaştırmalar: Vec<İçYakınlaştırmaAlanı>,
+    /// Parçalı görsel eşleme dilimlerinin isabet kutuları.
+    pub eşleme_kutuları: Vec<(Dikdörtgen, usize)>,
 }
 
 /// Ad görünür mü (gösterge ile kapatılmamış mı)?
@@ -1157,7 +1159,8 @@ pub fn grafiği_boya(
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
-        görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
+        çıktı.eşleme_kutuları =
+            görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
     }
 
     // 5) Pasta serileri.
@@ -1322,6 +1325,9 @@ pub fn grafiği_boya(
 /// Gösterge öğelerinin pencere-mutlak isabet kutuları (tıklama için).
 type GöstergeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, String)>>>;
 
+/// Parçalı eşleme dilimlerinin pencere-mutlak kutuları.
+type EşlemeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
+
 /// ECharts grafik örneğinin gpui görünümü.
 pub struct GrafikGörünümü {
     seçenekler: Arc<GrafikSeçenekleri>,
@@ -1341,6 +1347,8 @@ pub struct GrafikGörünümü {
     bekleyen_tanılar: Rc<RefCell<Vec<BilesenTanisi>>>,
     /// Pencere-mutlak sürgü etkileşim bölgeleri.
     sürgü_bölgeleri: Rc<RefCell<Vec<SürgüBölgesi>>>,
+    /// Pencere-mutlak parçalı eşleme dilim kutuları.
+    eşleme_kutuları: EşlemeKutuları,
     /// Pencere-mutlak iç yakınlaştırma alanları.
     iç_yakınlaştırma_alanları: Rc<RefCell<Vec<İçYakınlaştırmaAlanı>>>,
     /// Etkin sürükleme (kaydırma ya da sürgü).
@@ -1384,6 +1392,7 @@ impl GrafikGörünümü {
             isabetler: Rc::new(RefCell::new(Vec::new())),
             bekleyen_tanılar: Rc::new(RefCell::new(Vec::new())),
             sürgü_bölgeleri: Rc::new(RefCell::new(Vec::new())),
+            eşleme_kutuları: Rc::new(RefCell::new(Vec::new())),
             iç_yakınlaştırma_alanları: Rc::new(RefCell::new(Vec::new())),
             sürükleme: None,
             ölçüm_önbelleği: Rc::new(RefCell::new(std::collections::HashMap::new())),
@@ -1507,6 +1516,7 @@ impl Render for GrafikGörünümü {
         let tanılar = self.bekleyen_tanılar.clone();
         let sürgüler = self.sürgü_bölgeleri.clone();
         let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
+        let eşleme_kutuları = self.eşleme_kutuları.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -1592,6 +1602,15 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             Err(_) => tanı_bildir("iç_yakınlaştırma_alanları"),
+                        }
+                        match eşleme_kutuları.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for (kutu, sıra) in çıktı.eşleme_kutuları {
+                                    kayıt.push((çizici.sınırlar(kutu), sıra));
+                                }
+                            }
+                            Err(_) => tanı_bildir("eşleme_kutuları"),
                         }
                     },
                 )
@@ -1735,6 +1754,28 @@ impl Render for GrafikGörünümü {
                         return;
                     }
                     let konum = (f32::from(olay.position.x), f32::from(olay.position.y));
+                    // 1a) Parçalı görsel eşleme dilimi aç/kapat.
+                    let eşleme_vuruşu = match bu.eşleme_kutuları.try_borrow() {
+                        Ok(kutular) => kutular
+                            .iter()
+                            .find(|(kutu, _)| kutu.contains(&olay.position))
+                            .map(|(_, sıra)| *sıra),
+                        Err(_) => None,
+                    };
+                    if let Some(sıra) = eşleme_vuruşu {
+                        let seçenekler = Arc::make_mut(&mut bu.seçenekler);
+                        if let Some(eşleme) = seçenekler.görsel_eşleme.as_mut() {
+                            if let Some(k) =
+                                eşleme.kapalı_parçalar.iter().position(|k| *k == sıra)
+                            {
+                                eşleme.kapalı_parçalar.remove(k);
+                            } else {
+                                eşleme.kapalı_parçalar.push(sıra);
+                            }
+                            cx.notify();
+                        }
+                        return;
+                    }
                     // 1b) Sürgü parçası sürüklemesi.
                     let sürgü_vuruşu = match bu.sürgü_bölgeleri.try_borrow() {
                         Ok(bölgeler) => bölgeler.iter().find_map(|s| {
