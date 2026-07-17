@@ -316,6 +316,26 @@ fn radar() {
 }
 
 #[test]
+fn çapraz_imleç() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe).imleç(İmleçTürü::Çapraz))
+        .x_ekseni(Eksen::değer().ölçekli(true))
+        .y_ekseni(Eksen::değer().ölçekli(true))
+        .animasyon(false)
+        .seri(SaçılımSerisi::yeni().ad("N").veri([[1.0, 2.0], [4.0, 6.0]]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    grafiği_boya(
+        &mut yüzey,
+        &seçenekler,
+        1.0,
+        0.0,
+        Some((400.0, 300.0)),
+        &HashSet::new(),
+    );
+    altın_karşılaştır("capraz_imlec", &yüzey.döküm());
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

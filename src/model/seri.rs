@@ -23,6 +23,16 @@ pub enum Sembol {
     Yok,
 }
 
+/// Çizgi örnekleme kipi (`sampling`): büyük veri setlerinde çizimden önce
+/// nokta sayısını görünür piksel sayısına indirger.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Örnekleme {
+    /// En Büyük Üçgen Üç Kova (LTTB): görsel biçimi en iyi koruyan seçim.
+    Lttb,
+    /// Kova ortalaması.
+    Ortalama,
+}
+
 /// Basamaklı çizgi kipi (`step`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Basamak {
@@ -89,6 +99,8 @@ pub struct ÇizgiSerisi {
     pub boşları_bağla: bool,
     pub etiket: Etiket,
     pub imleyiciler: İmleyiciler,
+    /// Büyük veri örneklemesi (`sampling`).
+    pub örnekleme: Option<Örnekleme>,
 }
 
 impl Default for ÇizgiSerisi {
@@ -108,6 +120,7 @@ impl Default for ÇizgiSerisi {
             boşları_bağla: false,
             etiket: Etiket::default(),
             imleyiciler: İmleyiciler::default(),
+            örnekleme: None,
         }
     }
 }
@@ -180,6 +193,11 @@ impl ÇizgiSerisi {
 
     pub fn boşları_bağla(mut self, bağla: bool) -> Self {
         self.boşları_bağla = bağla;
+        self
+    }
+
+    pub fn örnekleme(mut self, örnekleme: Örnekleme) -> Self {
+        self.örnekleme = Some(örnekleme);
         self
     }
 

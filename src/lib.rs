@@ -57,7 +57,7 @@ pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
-    SaçılımSerisi, Sembol, Seri,
+    SaçılımSerisi, Sembol, Seri, Örnekleme,
     SütunSerisi, ÇizgiSerisi,
 };
 pub use model::stil::{
@@ -90,7 +90,7 @@ pub mod hazir {
     pub use crate::model::seri::{
         Basamak, GülTürü, GöstergeSaatiSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
-    SaçılımSerisi, Sembol, Seri,
+    SaçılımSerisi, Sembol, Seri, Örnekleme,
     SütunSerisi, ÇizgiSerisi,
     };
     pub use crate::model::stil::{

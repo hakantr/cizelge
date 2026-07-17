@@ -4,7 +4,7 @@
 use crate::cizim::{Yol, ÇizimYüzeyi};
 use crate::grafik::{sembol_çiz, çizgi_stili_çöz};
 use crate::koordinat::Kartezyen2B;
-use crate::model::seri::{Basamak, ÇizgiSerisi};
+use crate::model::seri::{Basamak, ÇizgiSerisi, Örnekleme};
 use crate::model::stil::EtiketKonumu;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
@@ -129,6 +129,83 @@ pub fn yumuşak_parça_ekle(
     }
 }
 
+/// En Büyük Üçgen Üç Kova (LTTB) örneklemesi: `hedef` sayıda nokta seçer.
+/// Uçlar her zaman korunur; her kovadan, komşu kovalarla en büyük üçgen
+/// alanını kuran nokta seçilir.
+pub fn lttb_örnekle(noktalar: &[(f32, f32)], hedef: usize) -> Vec<(f32, f32)> {
+    let n = noktalar.len();
+    if hedef >= n || hedef < 3 {
+        return noktalar.to_vec();
+    }
+    let (Some(&ilk), Some(&son)) = (noktalar.first(), noktalar.last()) else {
+        return noktalar.to_vec();
+    };
+    let mut sonuç = Vec::with_capacity(hedef);
+    sonuç.push(ilk);
+
+    let kova_boyu = (n - 2) as f64 / (hedef - 2) as f64;
+    let mut önceki = ilk;
+    let mut kova_başı = 1usize;
+
+    for k in 0..hedef - 2 {
+        let kova_sonu = ((k as f64 + 1.0) * kova_boyu).floor() as usize + 1;
+        let kova_sonu = kova_sonu.min(n - 1).max(kova_başı + 1);
+
+        // Bir sonraki kovanın ortalaması (üçgenin üçüncü köşesi).
+        let sonraki_başı = kova_sonu;
+        let sonraki_sonu = (((k as f64 + 2.0) * kova_boyu).floor() as usize + 1).min(n - 1);
+        let sonraki = noktalar
+            .get(sonraki_başı..sonraki_sonu.max(sonraki_başı + 1))
+            .unwrap_or(&[]);
+        let (mut ox, mut oy) = (son.0 as f64, son.1 as f64);
+        if !sonraki.is_empty() {
+            ox = sonraki.iter().map(|p| p.0 as f64).sum::<f64>() / sonraki.len() as f64;
+            oy = sonraki.iter().map(|p| p.1 as f64).sum::<f64>() / sonraki.len() as f64;
+        }
+
+        let mut en_iyi = None;
+        let mut en_büyük_alan = -1.0f64;
+        for p in noktalar.get(kova_başı..kova_sonu).unwrap_or(&[]) {
+            let alan = ((önceki.0 as f64 - ox) * (p.1 as f64 - önceki.1 as f64)
+                - (önceki.0 as f64 - p.0 as f64) * (oy - önceki.1 as f64))
+                .abs();
+            if alan > en_büyük_alan {
+                en_büyük_alan = alan;
+                en_iyi = Some(*p);
+            }
+        }
+        if let Some(seçilen) = en_iyi {
+            sonuç.push(seçilen);
+            önceki = seçilen;
+        }
+        kova_başı = kova_sonu;
+    }
+    sonuç.push(son);
+    sonuç
+}
+
+/// Kova ortalaması örneklemesi.
+pub fn ortalama_örnekle(noktalar: &[(f32, f32)], hedef: usize) -> Vec<(f32, f32)> {
+    let n = noktalar.len();
+    if hedef >= n || hedef == 0 {
+        return noktalar.to_vec();
+    }
+    let kova_boyu = n as f64 / hedef as f64;
+    (0..hedef)
+        .filter_map(|k| {
+            let başı = (k as f64 * kova_boyu).floor() as usize;
+            let sonu = (((k + 1) as f64 * kova_boyu).floor() as usize).min(n).max(başı + 1);
+            let kova = noktalar.get(başı..sonu)?;
+            if kova.is_empty() {
+                return None;
+            }
+            let x = kova.iter().map(|p| p.0).sum::<f32>() / kova.len() as f32;
+            let y = kova.iter().map(|p| p.1).sum::<f32>() / kova.len() as f32;
+            Some((x, y))
+        })
+        .collect()
+}
+
 /// Basamaklı çizgi için ara noktaları üretir.
 fn basamaklı_noktalar(noktalar: &[(f32, f32)], basamak: Basamak) -> Vec<(f32, f32)> {
     let mut sonuç = Vec::with_capacity(noktalar.len().saturating_mul(2));
@@ -192,8 +269,18 @@ pub fn çizgi_serisi_çiz(
     let alan = kartezyen.alan;
 
     let mut gövde = |ç: &mut dyn ÇizimYüzeyi| {
-        let tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
-        let tabanlar_parçalı = parçalara_ayır(&tabanlar, seri.boşları_bağla);
+        let mut tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
+        let mut tabanlar_parçalı = parçalara_ayır(&tabanlar, seri.boşları_bağla);
+        // Büyük veri örneklemesi: hedef, ızgara genişliği kadar noktadır.
+        if let Some(örnekleme) = seri.örnekleme {
+            let hedef = (alan.genişlik.max(2.0) as usize).max(2);
+            let örnekle = |parça: &Vec<(f32, f32)>| match örnekleme {
+                Örnekleme::Lttb => lttb_örnekle(parça, hedef),
+                Örnekleme::Ortalama => ortalama_örnekle(parça, hedef),
+            };
+            tepeler_parçalı = tepeler_parçalı.iter().map(örnekle).collect();
+            tabanlar_parçalı = tabanlar_parçalı.iter().map(örnekle).collect();
+        }
 
         // 1) Alan dolgusu (çizginin altına).
         if let Some(alan_stili) = &seri.alan_stili {
@@ -288,5 +375,33 @@ pub fn çizgi_serisi_çiz(
             çizici.yükseklik(),
         );
         çizici.kırpılı(kırpma, &mut gövde);
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+mod testler {
+    use super::*;
+
+    #[test]
+    fn lttb_uçları_korur() {
+        let noktalar: Vec<(f32, f32)> =
+            (0..100).map(|i| (i as f32, ((i * 7) % 13) as f32)).collect();
+        let seçilen = lttb_örnekle(&noktalar, 10);
+        assert_eq!(seçilen.len(), 10);
+        assert_eq!(seçilen[0], noktalar[0]);
+        assert_eq!(*seçilen.last().unwrap(), *noktalar.last().unwrap());
+    }
+
+    #[test]
+    fn lttb_küçük_veriye_dokunmaz() {
+        let noktalar = vec![(0.0, 1.0), (1.0, 2.0)];
+        assert_eq!(lttb_örnekle(&noktalar, 10), noktalar);
+    }
+
+    #[test]
+    fn ortalama_örnekleme_boyutu() {
+        let noktalar: Vec<(f32, f32)> = (0..50).map(|i| (i as f32, i as f32)).collect();
+        assert_eq!(ortalama_örnekle(&noktalar, 5).len(), 5);
     }
 }
