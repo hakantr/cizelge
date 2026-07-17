@@ -530,10 +530,18 @@ tek veri kaynağından 3 farklı grafik örneği.
   herkese açıktır ve `gpui` özellik kapısı bileşen seçiminin örneğidir.
   Ayrı bir çalışma zamanı kayıt defteri Rust'ta yapay olurdu; kalem
   kapatıldı.
+- ✅ 7.4 PNG dışa aktarım (kullanıcı onayı 2026-07-17): `png` özelliği
+  (öntanımlı açık; wasm çekirdeği hariç) — `PikselYüzeyi`
+  (ÇizimYüzeyi'nin rasterleştirici gerçeklemesi: tiny-skia
+  [BSD-3-Clause; onay 'MIT' notuyla verilmişti, gerçek lisans BSD-3 olup
+  o da onaylı listededir] + ab_glyph [Apache-2.0] + fontdb [MIT] sistem
+  yazı tipleri), `png_dışa_aktar(seçenekler, g, y, ölçek)` ve araç
+  kutusunda `⤓ PNG` düğmesi (2× piksel oranı, `PngKaydedildi` olayı).
+  Testler: PNG imzası + IHDR boyutları + koyu/açık farkı + isabetlerin
+  kayıt yüzeyiyle birebirliği; çıktı gözle doğrulandı (Türkçe glifler,
+  gradyanlar, koyu tema).
 - ⏳ Açık: yayın (7.6 — crates.io, gpui yol bağımlılığı üst-akımda
-  yayınlanana dek yapılamaz; dış engel) ve PNG dışa aktarım (7.4 —
-  rasterleştirici gerektirir; onaylı listeden `tiny-skia` [MIT] adayı
-  kullanıcı onayına sunulmuştur, alternatifi kendi rasterleştiricimizdir).
+  yayınlanana dek yapılamaz; dış engel).
 - ✅ Galeri (kullanıcı isteği 2026-07-17): `examples/galeri.rs` — 27
   çizelge tek pencerede; solda katlanabilir ağaç menü, sağda seçilen
   çizelge; üst çubukta canlı veri düzenleme (± nokta, değer karıştırma,

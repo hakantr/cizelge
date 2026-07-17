@@ -38,3 +38,17 @@ WASM köprüsü (wasm/ dizini, cizelge-wasm):
   unicode-ident, bumpalo, log, cfg-if, once_cell, rustversion,
   wasm-bindgen-shared/backend/macro) MIT/Apache-2.0 (unicode-ident ek
   olarak Unicode-3.0) lisanslıdır ve onaylı listeye uygundur.
+
+---
+
+PNG dışa aktarım bağımlılıkları (kullanıcı onayı 2026-07-17, "png"
+özelliği; tümü değiştirilmeden kullanılır):
+- tiny-skia, tiny-skia-path (BSD-3-Clause — Skia türevi)
+- ab_glyph, ab_glyph_rasterizer, owned_ttf_parser (Apache-2.0)
+- fontdb (MIT), ttf-parser (MIT/Apache-2.0), memmap2 (MIT/Apache-2.0)
+- png, flate2, crc32fast, fdeflate, miniz_oxide (MIT/Apache-2.0;
+  miniz_oxide ayrıca Zlib seçenekli), simd-adler32 (MIT),
+  arrayref (BSD-2-Clause), arrayvec (MIT/Apache-2.0),
+  bytemuck (Zlib/Apache-2.0/MIT), slotmap (Zlib), strict-num (MIT)
+Tümü onaylı lisans listesinin (MIT, BSD-2/3, ISC, CC0, Apache-2.0,
+MPL-2.0 + gerekçeli Zlib istisnası) içindedir.

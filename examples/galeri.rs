@@ -68,6 +68,7 @@ fn temel(başlık: &str) -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin(başlık.to_string()))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .araç_kutusu(AraçKutusu::yeni().svg_kaydet(true).png_kaydet(true))
         .ızgara(Izgara::yeni().sol(60.0).sağ(30.0).üst(60.0).alt(45.0))
 }
 

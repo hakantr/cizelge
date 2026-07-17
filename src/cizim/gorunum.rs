@@ -144,6 +144,8 @@ pub enum AraçTürü {
     GeriYükle,
     /// Grafiği SVG dosyası olarak kaydet (`saveAsImage`).
     SvgKaydet,
+    /// Grafiği PNG dosyası olarak kaydet (`saveAsImage`, `type: 'png'`).
+    PngKaydet,
 }
 
 /// Ad görünür mü (gösterge ile kapatılmamış mı)?
@@ -832,6 +834,10 @@ pub fn grafiği_boya(
             }
             if araçlar.svg_kaydet {
                 let düğme = düğme_çiz(yüzey, "⤓ SVG", AraçTürü::SvgKaydet, &mut sağ_kenar);
+                çıktı.araç_düğmeleri.push(düğme);
+            }
+            if araçlar.png_kaydet {
+                let düğme = düğme_çiz(yüzey, "⤓ PNG", AraçTürü::PngKaydet, &mut sağ_kenar);
                 çıktı.araç_düğmeleri.push(düğme);
             }
         }

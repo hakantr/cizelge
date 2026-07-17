@@ -238,6 +238,47 @@ impl GrafikGörünümü {
         }
     }
 
+    /// Grafiği çalışma dizinine PNG dosyası olarak kaydeder
+    /// (`saveAsImage`, `type: 'png'`; 2× piksel oranı). `png` özelliği
+    /// kapalıysa tanı yayımlanır.
+    pub fn png_kaydet(&mut self, cx: &mut Context<Self>) {
+        #[cfg(feature = "png")]
+        {
+            let (genişlik, yükseklik) = self.son_boyut.get();
+            let damga = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|s| s.as_secs())
+                .unwrap_or_default();
+            let yol = format!("cizelge-{damga}.png");
+            let sonuç = crate::cizim::piksel::png_dışa_aktar(
+                &self.seçenekler,
+                genişlik,
+                yükseklik,
+                2.0,
+            )
+            .and_then(|baytlar| {
+                std::fs::write(&yol, baytlar).map_err(|hata| {
+                    BilesenHatasi::GeçersizSeçenek {
+                        alan: "araç_kutusu.png_kaydet",
+                        ayrıntı: format!("`{yol}` yazılamadı: {hata}"),
+                    }
+                })
+            });
+            match sonuç {
+                Ok(()) => cx.emit(GrafikOlayı::PngKaydedildi { yol }),
+                Err(hata) => cx.emit(BilesenTanisi::yeni("png_kaydet", hata)),
+            }
+        }
+        #[cfg(not(feature = "png"))]
+        cx.emit(BilesenTanisi::yeni(
+            "png_kaydet",
+            BilesenHatasi::GeçersizSeçenek {
+                alan: "araç_kutusu.png_kaydet",
+                ayrıntı: "`png` özelliği derlemede kapalı".to_string(),
+            },
+        ));
+    }
+
     /// Oynatmayı açar/kapatır.
     pub fn oynat_durdur(&mut self, cx: &mut Context<Self>) {
         if let Some(film) = &mut self.film {
@@ -817,6 +858,10 @@ impl Render for GrafikGörünümü {
                         }
                         Some(AraçTürü::SvgKaydet) => {
                             bu.svg_kaydet(cx);
+                            return;
+                        }
+                        Some(AraçTürü::PngKaydet) => {
+                            bu.png_kaydet(cx);
                             return;
                         }
                         None => {}

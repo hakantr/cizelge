@@ -20,14 +20,22 @@ indexing_slicing = "deny"
 
 [dependencies]
 gpui = { path = "../zed/crates/gpui", optional = true }
+# PNG dışa aktarım (kullanıcı onayı 2026-07-17): rasterleştirme tiny-skia,
+# yazı biçimlendirme ab_glyph + sistem yazı tipi keşfi fontdb.
+tiny-skia = { version = "0.11", optional = true }
+ab_glyph = { version = "0.2", optional = true }
+fontdb = { version = "0.18", optional = true }
 lyon = "1.0"
 
 [features]
 # Öntanımlı: gpui penceresi (Çizici + GrafikGörünümü). Kapatılırsa
 # çekirdek (model + ölçek + KayıtYüzeyi + SvgYüzeyi) gpui'siz derlenir —
 # WASM hedefi bu kipi kullanır.
-default = ["gpui"]
+default = ["gpui", "png"]
 gpui = ["dep:gpui"]
+# PNG dışa aktarımı (PikselYüzeyi + png_dışa_aktar); wasm çekirdeği bunu
+# dışarıda bırakır (dosya sistemi ister).
+png = ["dep:tiny-skia", "dep:ab_glyph", "dep:fontdb"]
 
 [dev-dependencies]
 gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "wayland", "x11"] }

@@ -43,6 +43,8 @@ pub use cizim::gorunum::{
 };
 #[cfg(feature = "gpui")]
 pub use cizim::pencere::GrafikGörünümü;
+#[cfg(feature = "png")]
+pub use cizim::piksel::{png_dışa_aktar, PikselYüzeyi};
 pub use cizim::{
     svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi, İsabetBölgesi,
     İsabetGeometrisi,
@@ -88,6 +90,8 @@ pub mod hazir {
     pub use crate::cizim::gorunum::{grafiği_boya, BoyamaGirdisi, BoyamaÇıktısı};
     #[cfg(feature = "gpui")]
     pub use crate::cizim::pencere::GrafikGörünümü;
+    #[cfg(feature = "png")]
+    pub use crate::cizim::piksel::{png_dışa_aktar, PikselYüzeyi};
     pub use crate::cizim::{svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi};
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
     pub use crate::model::bilesen::{

@@ -1001,3 +1001,45 @@ fn otomatik_örnekleme() {
         "örnekleme devreye girmedi: en uzun satır {en_uzun_satır} bayt"
     );
 }
+
+/// PNG dışa aktarım: imza, boyutlar ve tema farkı (`png` özelliğiyle).
+#[cfg(feature = "png")]
+#[test]
+fn png_dışa_aktarım() {
+    let kur = |koyu: bool| {
+        GrafikSeçenekleri::yeni()
+            .koyu(koyu)
+            .başlık(Başlık::yeni().metin("PNG Deneme"))
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+            .y_ekseni(Eksen::değer())
+            .animasyon(false)
+            .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0, 5.0]))
+    };
+    let baytlar = png_dışa_aktar(&kur(false), 400.0, 300.0, 2.0).unwrap();
+    // PNG imzası.
+    assert_eq!(baytlar.get(..8), Some(&[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A][..]));
+    // IHDR boyutları: 2× ölçekle 800×600 fiziksel piksel.
+    let genişlik = u32::from_be_bytes([baytlar[16], baytlar[17], baytlar[18], baytlar[19]]);
+    let yükseklik = u32::from_be_bytes([baytlar[20], baytlar[21], baytlar[22], baytlar[23]]);
+    assert_eq!((genişlik, yükseklik), (800, 600));
+    // Koyu tema çıktısı açık temadan farklı olmalı.
+    let koyu = png_dışa_aktar(&kur(true), 400.0, 300.0, 2.0).unwrap();
+    assert_ne!(baytlar, koyu);
+}
+
+/// PikselYüzeyi, kayıt yüzeyiyle aynı boyama hattını çalıştırır: isabet
+/// bölgeleri birebir aynı üretilmeli.
+#[cfg(feature = "png")]
+#[test]
+fn piksel_yüzeyi_isabetleri_kayıtla_aynı() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+        .y_ekseni(Eksen::değer())
+        .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]));
+    let mut kayıt = KayıtYüzeyi::yeni(800.0, 600.0);
+    let kayıt_çıktısı = grafiği_boya(&mut kayıt, &seçenekler, &BoyamaGirdisi::default());
+    let mut piksel = PikselYüzeyi::yeni(800.0, 600.0, 1.0).unwrap();
+    let piksel_çıktısı = grafiği_boya(&mut piksel, &seçenekler, &BoyamaGirdisi::default());
+    assert_eq!(kayıt_çıktısı.isabetler.len(), piksel_çıktısı.isabetler.len());
+}

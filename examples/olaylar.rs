@@ -46,6 +46,9 @@ impl Kök {
                 GrafikOlayı::SvgKaydedildi { yol } => {
                     format!("SVG kaydedildi → {yol}").into()
                 }
+                GrafikOlayı::PngKaydedildi { yol } => {
+                    format!("PNG kaydedildi → {yol}").into()
+                }
             };
             cx.notify();
         })

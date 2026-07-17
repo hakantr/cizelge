@@ -139,4 +139,6 @@ pub enum GrafikOlayı {
     ZamanKaresiDeğişti { sıra: usize },
     /// Araç kutusundan grafik SVG olarak kaydedildi (`saveAsImage`).
     SvgKaydedildi { yol: String },
+    /// Araç kutusundan grafik PNG olarak kaydedildi (`saveAsImage`).
+    PngKaydedildi { yol: String },
 }

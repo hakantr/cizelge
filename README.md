@@ -100,6 +100,13 @@ uyarlanmıştır.
 dışına çıkmaz; GPL/LGPL/AGPL lisanslı kod veya bağımlılık kabul edilmez.
 Ayrıntı: [FAZ_PLANI.md](FAZ_PLANI.md) içindeki lisans kuralı bölümü.
 
+## PNG / SVG dışa aktarım
+
+`svg_dışa_aktar(&seçenekler, g, y)` SVG metni, `png_dışa_aktar(&seçenekler,
+g, y, ölçek)` PNG baytları üretir (`png` özelliği; tiny-skia + ab_glyph +
+fontdb). Araç kutusundaki `⤓ SVG` / `⤓ PNG` düğmeleri aynı hattı kullanır:
+`AraçKutusu::yeni().svg_kaydet(true).png_kaydet(true)`.
+
 ## WASM
 
 Çekirdek (model + ölçekler + boyama + SVG dışa aktarım) gpui olmadan da

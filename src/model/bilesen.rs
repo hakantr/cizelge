@@ -165,11 +165,14 @@ pub struct AraçKutusu {
     /// Grafiği SVG dosyası olarak kaydetme düğmesi
     /// (`feature.saveAsImage` karşılığı; çıktı biçimi SVG'dir).
     pub svg_kaydet: bool,
+    /// Grafiği PNG dosyası olarak kaydetme düğmesi
+    /// (`feature.saveAsImage`, `type: 'png'`; `png` özelliği gerekir).
+    pub png_kaydet: bool,
 }
 
 impl Default for AraçKutusu {
     fn default() -> Self {
-        AraçKutusu { göster: true, geri_yükle: true, svg_kaydet: false }
+        AraçKutusu { göster: true, geri_yükle: true, svg_kaydet: false, png_kaydet: false }
     }
 }
 
@@ -181,6 +184,12 @@ impl AraçKutusu {
     /// SVG kaydet düğmesini açar (`saveAsImage`).
     pub fn svg_kaydet(mut self, açık: bool) -> Self {
         self.svg_kaydet = açık;
+        self
+    }
+
+    /// PNG kaydet düğmesini açar (`saveAsImage`, `type: 'png'`).
+    pub fn png_kaydet(mut self, açık: bool) -> Self {
+        self.png_kaydet = açık;
         self
     }
 }
