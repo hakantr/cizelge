@@ -1582,6 +1582,52 @@ impl ParalelSerisi {
     }
 }
 
+/// Takvim ısı serisi (`coordinateSystem: 'calendar'` + heatmap karşılığı).
+/// Veri öğeleri `[gün (Unix ms), değer]` dizileridir.
+#[derive(Clone, Debug)]
+pub struct TakvimSerisi {
+    pub ad: Option<String>,
+    pub yıl: i32,
+    pub veri: Vec<VeriÖğesi>,
+    pub sol: Uzunluk,
+    pub üst: Uzunluk,
+    pub genişlik: Uzunluk,
+    pub yükseklik: Uzunluk,
+    pub hücre_boşluğu: f32,
+}
+
+impl Default for TakvimSerisi {
+    fn default() -> Self {
+        TakvimSerisi {
+            ad: None,
+            yıl: 2026,
+            veri: Vec::new(),
+            sol: Uzunluk::Yüzde(4.0),
+            üst: Uzunluk::Piksel(60.0),
+            genişlik: Uzunluk::Yüzde(92.0),
+            yükseklik: Uzunluk::Piksel(190.0),
+            hücre_boşluğu: 2.0,
+        }
+    }
+}
+
+impl TakvimSerisi {
+    pub fn yeni(yıl: i32) -> Self {
+        TakvimSerisi { yıl, ..Default::default() }
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    /// Veri: `[gün ms, değer]` dizileri.
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+}
+
 /// Tüm seri türlerini saran toplam tip (`series` dizisinin öğesi).
 #[derive(Clone, Debug)]
 pub enum Seri {
@@ -1603,6 +1649,7 @@ pub enum Seri {
     Grafo(GrafoSerisi),
     Kiriş(KirişSerisi),
     Paralel(ParalelSerisi),
+    Takvim(TakvimSerisi),
 }
 
 impl Seri {
@@ -1626,6 +1673,7 @@ impl Seri {
             Seri::Grafo(s) => s.ad.as_deref(),
             Seri::Kiriş(s) => s.ad.as_deref(),
             Seri::Paralel(s) => s.ad.as_deref(),
+            Seri::Takvim(s) => s.ad.as_deref(),
         }
     }
 
@@ -1675,6 +1723,7 @@ impl Seri {
             | Seri::Grafo(_)
             | Seri::Kiriş(_) => &[],
             Seri::Paralel(s) => &s.veri,
+            Seri::Takvim(s) => &s.veri,
         }
     }
 
@@ -1712,7 +1761,8 @@ impl Seri {
             | Seri::Sankey(_)
             | Seri::Grafo(_)
             | Seri::Kiriş(_)
-            | Seri::Paralel(_) => None,
+            | Seri::Paralel(_)
+            | Seri::Takvim(_) => None,
         }
     }
 
@@ -1736,7 +1786,8 @@ impl Seri {
             | Seri::Sankey(_)
             | Seri::Grafo(_)
             | Seri::Kiriş(_)
-            | Seri::Paralel(_) => None,
+            | Seri::Paralel(_)
+            | Seri::Takvim(_) => None,
         }
     }
 }
@@ -1846,5 +1897,11 @@ impl From<KirişSerisi> for Seri {
 impl From<ParalelSerisi> for Seri {
     fn from(s: ParalelSerisi) -> Seri {
         Seri::Paralel(s)
+    }
+}
+
+impl From<TakvimSerisi> for Seri {
+    fn from(s: TakvimSerisi) -> Seri {
+        Seri::Takvim(s)
     }
 }

@@ -336,7 +336,10 @@ gauge ve kutupsal sütun örneklerinin eşdeğerleri.
   radyal değer ekseni), halkalar/ışınlar/etiketlerle ağ çizimi; kutupsal
   sütun (yığın destekli dilimler), çizgi ve saçılım — serilerde
   `.kutupsal(true)`; öğe ipucu ve isabetler.
-- ⏳ Açık: singleAxis/themeRiver (4.5), takvim koordinatı (4.6).
+- ✅ 4.6 Takvim koordinatı: yıl görünümü (hafta sütunları × haftanın
+  günü satırları), ay/gün adı etiketleri, görsel eşlemeyle (sürekli ve
+  parçalı) renklenen hücreler, tarih etiketli öğe ipucu.
+- ⏳ Açık: singleAxis/themeRiver (4.5).
 
 ---
 

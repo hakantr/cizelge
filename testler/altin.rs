@@ -689,6 +689,21 @@ fn paralel_koordinat() {
 }
 
 #[test]
+fn takvim_ısısı() {
+    // 2026'nın ilk 60 günü, belirlenimci değerlerle.
+    let gün_ms = 86_400_000.0f64;
+    let yıl_başı = 1_767_225_600_000.0f64; // 2026-01-01 UTC
+    let veri: Vec<VeriÖğesi> = (0..60)
+        .map(|g| VeriÖğesi::from(vec![yıl_başı + g as f64 * gün_ms, ((g * 7) % 13) as f64]))
+        .collect();
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .görsel_eşleme(GörselEşleme::yeni())
+        .animasyon(false)
+        .seri(TakvimSerisi::yeni(2026).ad("Katkılar").veri(veri));
+    altın_karşılaştır("takvim_isisi", &boya_ve_dök(seçenekler));
+}
+
+#[test]
 fn isabet_bölgeleri_üretilir() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))

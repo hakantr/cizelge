@@ -375,6 +375,7 @@ impl GrafikSeçenekleri {
                 | Seri::Grafo(_)
                 | Seri::Kiriş(_) => {}
                 Seri::Paralel(s) => karıştır(&mut s.veri),
+                Seri::Takvim(s) => karıştır(&mut s.veri),
             }
         }
         sonuç
