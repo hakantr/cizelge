@@ -78,6 +78,7 @@ pub use model::Uzunluk;
 pub use renk::{Dolgu, Renk, RenkDurağı};
 pub use yerel::{Yerel, TÜRKÇE, İNGİLİZCE};
 pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
+pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
 
 /// Sık kullanılan tiplerin topluca içe aktarımı (ECharts'taki `echarts` ana
 /// girişinin karşılığı).
@@ -118,5 +119,6 @@ pub mod hazir {
     pub use crate::model::Uzunluk;
     pub use crate::yerel::{Yerel, TÜRKÇE, İNGİLİZCE};
     pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
+    pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
     pub use crate::renk::{Dolgu, Renk, RenkDurağı};
 }

@@ -40,6 +40,9 @@ impl Kök {
                     format!("Fırça → {} öğe seçildi", öğeler.len()).into()
                 }
                 GrafikOlayı::GeriYüklendi => "Geri yüklendi".into(),
+                GrafikOlayı::ZamanKaresiDeğişti { sıra } => {
+                    format!("Zaman şeridi → {}. kare", sıra.saturating_add(1)).into()
+                }
             };
             cx.notify();
         })

@@ -296,7 +296,11 @@ galerisinde; golden testleri yeşil.
   kapalı dilim verisi çizilmez; 3.3 kaydırmalı gösterge (‹ n/m ›);
   3.4 araç kutusu "geri yükle" (+GeriYüklendi olayı); 3.5 fırça:
   dikdörtgen seçim kaplaması + FırçaSeçildi olayı.
-- ⏳ Açık: timeline, zengin ipucu içeriği, toolbox PNG kaydetme.
+- ✅ Timeline (zaman şeridi): `GrafikGörünümü::film(kareler, aralık_ms)`
+  — kare başına tam seçenekler, kendiliğinden oynatma (kare geçişleri
+  `ara_değerle` animasyonlu), altta nokta şeridi + oynat/durdur, kare
+  tıklama, `ZamanKaresiDeğişti` olayı; altın + davranış testli, örnekli.
+- ⏳ Açık: zengin ipucu içeriği, toolbox PNG kaydetme.
 
 ---
 

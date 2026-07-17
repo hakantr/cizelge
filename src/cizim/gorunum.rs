@@ -21,6 +21,7 @@ use gpui::{
 use crate::bilesen::baslik::başlık_çiz;
 use crate::bilesen::eksen_cizimi::{bölme_çizgilerini_çiz, eksenleri_çiz};
 use crate::bilesen::gosterge::{gösterge_çiz, GöstergeÖğesi};
+use crate::bilesen::zaman_seridi::{zaman_şeridi_çiz, ZamanŞeridiEylemi};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
@@ -74,6 +75,8 @@ pub struct BoyamaGirdisi {
     pub gösterge_sayfası: usize,
     /// Etkin fırça seçimi, yüzey yerel `[x0, y0, x1, y1]`.
     pub fırça: Option<[f32; 4]>,
+    /// Zaman şeridi durumu: `(geçerli kare, kare sayısı, oynuyor)`.
+    pub zaman_şeridi: Option<(usize, usize, bool)>,
 }
 
 impl Default for BoyamaGirdisi {
@@ -85,6 +88,7 @@ impl Default for BoyamaGirdisi {
             kapalı: HashSet::new(),
             gösterge_sayfası: 0,
             fırça: None,
+            zaman_şeridi: None,
         }
     }
 }
@@ -129,6 +133,8 @@ pub struct BoyamaÇıktısı {
     pub gösterge_okları: Vec<(Dikdörtgen, i32)>,
     /// Araç kutusu düğmeleri.
     pub araç_düğmeleri: Vec<(Dikdörtgen, AraçTürü)>,
+    /// Zaman şeridi düğmeleri (oynat/durdur + kare noktaları).
+    pub zaman_düğmeleri: Vec<(Dikdörtgen, ZamanŞeridiEylemi)>,
 }
 
 /// Araç kutusu düğme türleri.
@@ -1732,7 +1738,12 @@ pub fn grafiği_boya(
         }
     }
 
-    // 5c) Fırça seçimi kaplaması.
+    // 5c) Zaman şeridi (timeline) — kare noktaları + oynat/durdur.
+    if let Some((geçerli, toplam, oynuyor)) = girdi.zaman_şeridi {
+        çıktı.zaman_düğmeleri = zaman_şeridi_çiz(yüzey, geçerli, toplam, oynuyor);
+    }
+
+    // 5d) Fırça seçimi kaplaması.
     if let Some([x0, y0, x1, y1]) = girdi.fırça {
         let d = Dikdörtgen::yeni(x0.min(x1), y0.min(y1), (x1 - x0).abs(), (y1 - y0).abs());
         if d.genişlik > 1.0 && d.yükseklik > 1.0 {
@@ -1772,6 +1783,18 @@ type OkKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, i32)>>>;
 /// Araç kutusu düğmelerinin pencere-mutlak kutuları.
 type AraçKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, AraçTürü)>>>;
 
+/// Zaman şeridi düğmelerinin pencere-mutlak kutuları.
+type FilmDüğmeleri = Rc<RefCell<Vec<(Bounds<Pixels>, ZamanŞeridiEylemi)>>>;
+
+/// Zaman şeridi (timeline) durumu: kare listesi + oynatma.
+struct Film {
+    kareler: Vec<Arc<GrafikSeçenekleri>>,
+    geçerli: usize,
+    oynuyor: bool,
+    aralık_ms: f32,
+    son_geçiş: Instant,
+}
+
 /// ECharts grafik örneğinin gpui görünümü.
 pub struct GrafikGörünümü {
     seçenekler: Arc<GrafikSeçenekleri>,
@@ -1808,6 +1831,10 @@ pub struct GrafikGörünümü {
     /// İlk seçenekler (araç kutusu "geri yükle" için).
     ilk_seçenekler: Arc<GrafikSeçenekleri>,
     ölçüm_önbelleği: ÖlçümÖnbelleği,
+    /// Zaman şeridi (timeline) durumu.
+    film: Option<Film>,
+    /// Pencere-mutlak zaman şeridi düğmeleri.
+    film_düğmeleri: FilmDüğmeleri,
 }
 
 /// Etkin sürükleme durumu.
@@ -1856,7 +1883,96 @@ impl GrafikGörünümü {
             gösterge_sayfası: 0,
             fırça_seçimi: None,
             ölçüm_önbelleği: Rc::new(RefCell::new(std::collections::HashMap::new())),
+            film: None,
+            film_düğmeleri: Rc::new(RefCell::new(Vec::new())),
         }
+    }
+
+    /// Zaman şeridiyle (timeline) kurulum: kare başına tam seçenekler.
+    /// Geçersiz kareler atlanır; kalan kareler `aralık_ms` aralıkla
+    /// kendiliğinden oynatılır. Kare geçişleri veri geçiş animasyonuyla
+    /// yumuşatılır ve [`GrafikOlayı::ZamanKaresiDeğişti`] yayımlanır.
+    pub fn film(kareler: Vec<GrafikSeçenekleri>, aralık_ms: f32) -> Self {
+        let geçerli_kareler: Vec<Arc<GrafikSeçenekleri>> = kareler
+            .into_iter()
+            .filter(|k| k.doğrula().is_ok())
+            .map(Arc::new)
+            .collect();
+        let ilk = geçerli_kareler
+            .first()
+            .map(|k| (**k).clone())
+            .unwrap_or_default();
+        let mut görünüm = Self::yeni(ilk);
+        if !geçerli_kareler.is_empty() {
+            görünüm.film = Some(Film {
+                kareler: geçerli_kareler,
+                geçerli: 0,
+                oynuyor: true,
+                aralık_ms: aralık_ms.max(100.0),
+                son_geçiş: Instant::now(),
+            });
+        }
+        görünüm
+    }
+
+    /// Zaman şeridinde verilen kareye geçer (geçiş animasyonlu).
+    pub fn kare_seç(&mut self, sıra: usize, cx: &mut Context<Self>) {
+        let Some(film) = &mut self.film else { return };
+        if film.kareler.is_empty() {
+            return;
+        }
+        let sıra = sıra % film.kareler.len();
+        if sıra == film.geçerli {
+            return;
+        }
+        film.geçerli = sıra;
+        film.son_geçiş = Instant::now();
+        let Some(kare) = film.kareler.get(sıra).cloned() else { return };
+        if self.seçenekler.animasyon {
+            self.eski_seçenekler = Some(self.seçenekler.clone());
+            self.geçiş_başlangıcı = Some(Instant::now());
+        }
+        self.seçenekler = kare.clone();
+        self.ilk_seçenekler = kare;
+        cx.emit(GrafikOlayı::ZamanKaresiDeğişti { sıra });
+        cx.notify();
+    }
+
+    /// Oynatmayı açar/kapatır.
+    pub fn oynat_durdur(&mut self, cx: &mut Context<Self>) {
+        if let Some(film) = &mut self.film {
+            film.oynuyor = !film.oynuyor;
+            film.son_geçiş = Instant::now();
+            cx.notify();
+        }
+    }
+
+    /// Oynatma sırasında kare ilerletir; şerit durumunu döndürür.
+    fn film_ilerlet(&mut self, cx: &mut Context<Self>) -> Option<(usize, usize, bool)> {
+        let (ilerlet, durum) = match &self.film {
+            Some(film) => {
+                let bekleme_bitti = film.oynuyor
+                    && film.son_geçiş.elapsed().as_secs_f32() * 1000.0 >= film.aralık_ms;
+                (
+                    bekleme_bitti,
+                    Some((film.geçerli, film.kareler.len(), film.oynuyor)),
+                )
+            }
+            None => (false, None),
+        };
+        if ilerlet {
+            let sonraki = durum
+                .map(|(geçerli, toplam, _)| {
+                    if toplam == 0 { 0 } else { (geçerli + 1) % toplam }
+                })
+                .unwrap_or(0);
+            self.kare_seç(sonraki, cx);
+            return self
+                .film
+                .as_ref()
+                .map(|f| (f.geçerli, f.kareler.len(), f.oynuyor));
+        }
+        durum
     }
 
     /// Yakınlaştırma penceresini günceller, olay yayımlar.
@@ -1961,12 +2077,17 @@ impl Render for GrafikGörünümü {
             cx.emit(tanı);
         }
 
+        // Zaman şeridi: oynatma sırasında kare ilerlet (geçiş animasyonunu
+        // tetikler) ve şerit durumunu boyamaya taşı.
+        let zaman_şeridi = self.film_ilerlet(cx);
+
         let (etkin_seçenekler, ilerleme, sürüyor) = self.boyama_durumu();
-        // Dalga efektli seriler sürekli kare ister.
+        // Dalga efektli seriler ve oynayan zaman şeridi sürekli kare ister.
         let sürekli = etkin_seçenekler
             .seriler
             .iter()
-            .any(|s| matches!(s, Seri::Saçılım(sa) if sa.efektli));
+            .any(|s| matches!(s, Seri::Saçılım(sa) if sa.efektli))
+            || zaman_şeridi.map(|(_, _, oynuyor)| oynuyor).unwrap_or(false);
         if sürüyor || sürekli {
             pencere.request_animation_frame();
         }
@@ -1984,6 +2105,7 @@ impl Render for GrafikGörünümü {
         let eşleme_kutuları = self.eşleme_kutuları.clone();
         let gösterge_okları = self.gösterge_okları.clone();
         let araç_düğmeleri = self.araç_düğmeleri.clone();
+        let film_düğmeleri = self.film_düğmeleri.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -2006,6 +2128,7 @@ impl Render for GrafikGörünümü {
                             fırça: fırça.map(|[x0, y0, x1, y1]| {
                                 [x0 - köken.0, y0 - köken.1, x1 - köken.0, y1 - köken.1]
                             }),
+                            zaman_şeridi,
                         };
                         let çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
                         let tanı_bildir = |bileşen: &'static str| {
@@ -2099,6 +2222,15 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             Err(_) => tanı_bildir("araç_düğmeleri"),
+                        }
+                        match film_düğmeleri.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                for (kutu, eylem) in çıktı.zaman_düğmeleri {
+                                    kayıt.push((çizici.sınırlar(kutu), eylem));
+                                }
+                            }
+                            Err(_) => tanı_bildir("zaman_düğmeleri"),
                         }
                     },
                 )
@@ -2304,6 +2436,25 @@ impl Render for GrafikGörünümü {
                         cx.emit(GrafikOlayı::GeriYüklendi);
                         cx.notify();
                         return;
+                    }
+                    // 0c) Zaman şeridi düğmeleri.
+                    let film_vuruşu = match bu.film_düğmeleri.try_borrow() {
+                        Ok(düğmeler) => düğmeler
+                            .iter()
+                            .find(|(kutu, _)| kutu.contains(&olay.position))
+                            .map(|(_, eylem)| *eylem),
+                        Err(_) => None,
+                    };
+                    match film_vuruşu {
+                        Some(ZamanŞeridiEylemi::Kare(sıra)) => {
+                            bu.kare_seç(sıra, cx);
+                            return;
+                        }
+                        Some(ZamanŞeridiEylemi::OynatDurdur) => {
+                            bu.oynat_durdur(cx);
+                            return;
+                        }
+                        None => {}
                     }
                     // 0c) Fırça etkinse seçim başlat.
                     if bu.seçenekler.fırça.map(|f| f.etkin).unwrap_or(false) {

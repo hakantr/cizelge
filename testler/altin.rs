@@ -791,3 +791,22 @@ fn koyu_tema_açıktan_farklı() {
     // aynı açık seçenekler ikinci kez aynı çıktıyı vermeli.
     assert_eq!(açık, boya_ve_dök(kur(false)));
 }
+
+#[test]
+fn zaman_şeridi() {
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+        .y_ekseni(Eksen::değer())
+        .animasyon(false)
+        .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]));
+    let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
+    let girdi = BoyamaGirdisi { zaman_şeridi: Some((1, 5, true)), ..Default::default() };
+    let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
+    // Oynat/durdur + 5 kare noktası tıklanabilir olmalı.
+    assert_eq!(çıktı.zaman_düğmeleri.len(), 6);
+    assert!(matches!(
+        çıktı.zaman_düğmeleri.first(),
+        Some((_, ZamanŞeridiEylemi::OynatDurdur))
+    ));
+    altın_karşılaştır("zaman_seridi", &yüzey.döküm());
+}

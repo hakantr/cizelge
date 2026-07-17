@@ -135,4 +135,6 @@ pub enum GrafikOlayı {
     },
     /// Araç kutusundan "geri yükle" tıklandı (`'restore'`).
     GeriYüklendi,
+    /// Zaman şeridinde kare değişti (`'timelinechanged'`).
+    ZamanKaresiDeğişti { sıra: usize },
 }
