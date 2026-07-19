@@ -4,6 +4,7 @@
 //! yerleşim) hesabını üstlenir.
 
 use crate::model::eksen::{Eksen, EksenKonumu};
+use crate::model::yakinlastirma::YakınlaştırmaSüzmeKipi;
 use crate::olcek::{Çentik, Ölçek};
 use crate::yardimci::sayi::doğrusal_eşle;
 
@@ -22,6 +23,9 @@ pub struct ÇalışmaEkseni {
     /// noktaların kenara sıkıştırılmadan ızgara dışında hesaplanmasını ve
     /// seri kırpmasının devreye girmesini sağlar. `None` = tam kapsam.
     pub pencere: Option<(f64, f64)>,
+    /// Pencerenin seri verisine uygulanma biçimi (`dataZoom.filterMode`).
+    /// Pencere yokken bu değer etkisizdir.
+    pub yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi,
 }
 
 impl ÇalışmaEkseni {
@@ -34,6 +38,7 @@ impl ÇalışmaEkseni {
             bantlı,
             konum,
             pencere: None,
+            yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi::Yok,
         }
     }
 
@@ -120,6 +125,19 @@ impl ÇalışmaEkseni {
                 None => self.ölçek.kategori_sayısı().max(1) as f32,
             };
             uzunluk / n
+        } else if self.ölçek.kategorik_mi() {
+            // `boundaryGap: false` kategorilerde bant merkez değil ardışık
+            // kategori aralığıdır. dataZoom açıkken tam kategori sayısını
+            // kullanmak otomatik label interval'ini binlerce kat büyütür.
+            let aralık = self
+                .pencere
+                .map(|(p0, p1)| p1 - p0)
+                .unwrap_or_else(|| {
+                    let kapsam = self.ölçek.kapsam();
+                    kapsam[1] - kapsam[0]
+                })
+                .max(1.0);
+            uzunluk / aralık as f32
         } else {
             let çentikler = self.ölçek.çentikler();
             if çentikler.len() > 1 {
@@ -144,6 +162,15 @@ impl ÇalışmaEkseni {
             }
             None => true,
         }
+    }
+
+    /// Veri öğesinin bu eksenin dataZoom işlemcisinden sonra çizimde kalıp
+    /// kalmadığı. `none` yalnız koordinat kapsamını daraltıp veriyi korur;
+    /// diğer kiplerde tek boyutlu çizgi öğesi pencere dışında bırakılır.
+    pub fn veri_penceresinde_mi(&self, değer: f64) -> bool {
+        self.pencere.is_none()
+            || self.yakınlaştırma_süzme_kipi == YakınlaştırmaSüzmeKipi::Yok
+            || self.pencerede_mi(değer)
     }
 
     /// Etiket çentikleri: `(piksel konumu, çentik)` çiftleri. Kategori
@@ -201,5 +228,40 @@ impl ÇalışmaEkseni {
     /// Yatay eksen mi?
     pub fn yatay_mı(&self) -> bool {
         matches!(self.konum, EksenKonumu::Alt | EksenKonumu::Üst)
+    }
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+    use crate::model::eksen::Eksen;
+    use crate::olcek::KategorikÖlçek;
+
+    #[test]
+    fn aralıksız_kategori_zoom_birimini_alt_piksel_hesaplar() {
+        let kategoriler = (0..20_000).map(|sıra| sıra.to_string()).collect();
+        let mut eksen = ÇalışmaEkseni::yeni(
+            Eksen::kategori().kenar_boşluğu(false),
+            Ölçek::Kategorik(KategorikÖlçek::yeni(kategoriler)),
+            [105.0, 630.0],
+            EksenKonumu::Alt,
+        );
+        eksen.değer_penceresi_uygula(0.0, 2_000.0);
+        assert!((eksen.bant_genişliği() - 0.2625).abs() < 1e-6);
+    }
+
+    #[test]
+    fn filter_none_pencere_dışındaki_veriyi_korur() {
+        let mut eksen = ÇalışmaEkseni::yeni(
+            Eksen::değer(),
+            Ölçek::Kategorik(KategorikÖlçek::yeni(vec!["a".into(), "b".into()])),
+            [0.0, 100.0],
+            EksenKonumu::Alt,
+        );
+        eksen.değer_penceresi_uygula(0.0, 1.0);
+        eksen.yakınlaştırma_süzme_kipi = YakınlaştırmaSüzmeKipi::Yok;
+        assert!(eksen.veri_penceresinde_mi(2.0));
+        eksen.yakınlaştırma_süzme_kipi = YakınlaştırmaSüzmeKipi::Süz;
+        assert!(!eksen.veri_penceresinde_mi(2.0));
     }
 }

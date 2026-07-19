@@ -30,10 +30,24 @@ pub fn nokta_listeleri(
         match aralıklar.get(i).copied().flatten() {
             Some((taban, tepe)) => {
                 if yatay_değer_serisi {
+                    if !kartezyen.x.veri_penceresinde_mi(tepe)
+                        || !kartezyen.y.veri_penceresinde_mi(i as f64)
+                    {
+                        tepeler.push(None);
+                        tabanlar.push(None);
+                        continue;
+                    }
                     let y = kartezyen.y.veriden_piksele(i as f64);
                     tepeler.push(Some((kartezyen.x.veriden_piksele(tepe), y)));
                     tabanlar.push(Some((kartezyen.x.veriden_piksele(taban), y)));
                 } else {
+                    if !kartezyen.x.veri_penceresinde_mi(x_değeri)
+                        || !kartezyen.y.veri_penceresinde_mi(tepe)
+                    {
+                        tepeler.push(None);
+                        tabanlar.push(None);
+                        continue;
+                    }
                     let x = kartezyen.x.veriden_piksele(x_değeri);
                     tepeler.push(Some((x, kartezyen.y.veriden_piksele(tepe))));
                     tabanlar.push(Some((x, kartezyen.y.veriden_piksele(taban))));

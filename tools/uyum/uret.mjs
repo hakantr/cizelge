@@ -74,6 +74,8 @@ const YEREL_FIXTURE = Object.freeze({
   'line-simple': 'examples/uyum_fixture.rs#line_simple',
   'line-smooth': 'examples/uyum_fixture.rs#line_smooth',
   'area-basic': 'examples/uyum_fixture.rs#area_basic',
+  'area-simple': 'examples/uyum_fixture.rs#area_simple',
+  'area-time-axis': 'examples/uyum_fixture.rs#area_time_axis',
   'line-sections': 'examples/uyum_fixture.rs#line_sections',
   'area-pieces': 'examples/uyum_fixture.rs#area_pieces',
   'line-gradient': 'examples/uyum_fixture.rs#line_gradient',

@@ -392,6 +392,13 @@ impl Eksen {
     pub fn zaman() -> Self {
         Eksen {
             tür: EksenTürü::Zaman,
+            // `timeAxis` öntanımlısı değer ekseninden ayrılır: altı bölme
+            // ister ve ana splitLine'ı kapatır.
+            bölme_sayısı: 6,
+            bölme_çizgisi: BölmeÇizgisi {
+                göster: Some(false),
+                ..Default::default()
+            },
             ..Default::default()
         }
     }
@@ -583,10 +590,23 @@ impl Eksen {
             .unwrap_or(matches!(self.tür, EksenTürü::Kategori | EksenTürü::Zaman))
     }
 
-    /// Bölme çizgisi öntanımlı görünürlüğü: kategori dışındaki eksenlerde.
+    /// Bölme çizgisi öntanımlı görünürlüğü: değer/log eksenlerinde açık,
+    /// kategori/zaman eksenlerinde kapalı.
     pub fn bölme_görünür_mü(&self) -> bool {
         self.bölme_çizgisi
             .göster
-            .unwrap_or(self.tür != EksenTürü::Kategori)
+            .unwrap_or(!matches!(self.tür, EksenTürü::Kategori | EksenTürü::Zaman))
+    }
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+
+    #[test]
+    fn zaman_ekseni_resmi_bolme_varsayilanlarini_kullanir() {
+        let eksen = Eksen::zaman();
+        assert_eq!(eksen.bölme_sayısı, 6);
+        assert!(!eksen.bölme_görünür_mü());
     }
 }

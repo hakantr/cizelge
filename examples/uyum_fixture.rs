@@ -390,6 +390,132 @@ fn area_basic() -> GrafikSeçenekleri {
         )
 }
 
+/// JavaScript `Math.round` davranışı. Rust'ın `round` yöntemi negatif yarım
+/// değerleri sıfırdan uzağa yuvarladığından, ECharts örnek verisinin rastgele
+/// yürüyüşünü birebir korumak için `floor(x + 0.5)` kullanılır.
+fn javascript_yuvarla(değer: f64) -> f64 {
+    (değer + 0.5).floor()
+}
+
+fn area_simple() -> GrafikSeçenekleri {
+    const GÜN_MS: f64 = 86_400_000.0;
+    let mut tohum = 0x5eed_1234;
+    let mut taban =
+        cizelge::yardimci::takvim::takvimden_ana(cizelge::yardimci::takvim::TakvimAnı {
+            yıl: 1968,
+            ay: 10,
+            gün: 3,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+    let mut tarihler = Vec::with_capacity(19_999);
+    let mut değerler = Vec::with_capacity(20_000);
+    değerler.push(kanıt_rastgele(&mut tohum) * 300.0);
+    for sıra in 1..20_000 {
+        taban += GÜN_MS;
+        let tarih = cizelge::yardimci::takvim::andan_takvime(taban);
+        tarihler.push(format!("{}/{}/{}", tarih.yıl, tarih.ay, tarih.gün));
+        let önceki = değerler[sıra - 1];
+        değerler.push(javascript_yuvarla(
+            (kanıt_rastgele(&mut tohum) - 0.5) * 20.0 + önceki,
+        ));
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Large Area Chart")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .veri_yakınlaştırma(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .x_ekseni(Eksen::kategori().kenar_boşluğu(false).veri(tarihler))
+        .y_ekseni(Eksen::değer().sayısal_kenar_boşluğu(0.0, "100%"))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(0.0, 10.0))
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().aralık(0.0, 10.0))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Fake Data")
+                .sembol(Sembol::Yok)
+                .örnekleme(Örnekleme::Lttb)
+                .öğe_stili(ÖğeStili::yeni().renk("rgb(255, 70, 131)"))
+                .alan_stili(AlanStili::yeni().renk(Dolgu::doğrusal(
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    vec![
+                        RenkDurağı::yeni(0.0, "rgb(255, 158, 68)"),
+                        RenkDurağı::yeni(1.0, "rgb(255, 70, 131)"),
+                    ],
+                )))
+                .veri(değerler),
+        )
+}
+
+fn area_time_axis() -> GrafikSeçenekleri {
+    const GÜN_MS: f64 = 86_400_000.0;
+    let mut tohum = 0x5eed_1234;
+    // ECharts örneği yerel 1988-10-03 gece yarısını kullanır. Cizelge zaman
+    // ekseni UTC tabanlı olduğundan aynı takvim gününü UTC'de kurmak, veri ve
+    // çentik geometrisini saat diliminden bağımsız ve belirlenimci tutar.
+    let mut taban =
+        cizelge::yardimci::takvim::takvimden_ana(cizelge::yardimci::takvim::TakvimAnı {
+            yıl: 1988,
+            ay: 10,
+            gün: 3,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+    let mut değer = kanıt_rastgele(&mut tohum) * 300.0;
+    let mut veri = Vec::with_capacity(20_000);
+    veri.push(VeriÖğesi::yeni([taban, değer]));
+    for _ in 1..20_000 {
+        taban += GÜN_MS;
+        değer = javascript_yuvarla((kanıt_rastgele(&mut tohum) - 0.5) * 20.0 + değer);
+        veri.push(VeriÖğesi::yeni([taban, değer]));
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Large Ara Chart")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .veri_yakınlaştırma(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .x_ekseni(Eksen::zaman().sayısal_kenar_boşluğu(0.0, 0.0))
+        .y_ekseni(Eksen::değer().sayısal_kenar_boşluğu(0.0, "100%"))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(0.0, 20.0))
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().aralık(0.0, 20.0))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Fake Data")
+                .yumuşat(true)
+                .sembol(Sembol::Yok)
+                .alan_stili(AlanStili::default())
+                .veri(veri),
+        )
+}
+
 fn line_stack() -> GrafikSeçenekleri {
     let seri = |ad: &str, veri: [i32; 7]| ÇizgiSerisi::yeni().ad(ad).yığın("Total").veri(veri);
     GrafikSeçenekleri::yeni()
@@ -3202,6 +3328,8 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "multiple-y-axis" => Ok(multiple_y_axis()),
         "line-smooth" => Ok(line_smooth()),
         "area-basic" => Ok(area_basic()),
+        "area-simple" => Ok(area_simple()),
+        "area-time-axis" => Ok(area_time_axis()),
         "line-stack" => Ok(line_stack()),
         "line-style" => Ok(line_style()),
         "line-step" => Ok(line_step()),
@@ -3273,12 +3401,27 @@ fn çalıştır() -> Result<(), String> {
         let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
         eprintln!("dataset tanıları: {hatalar:?}");
         for (sıra, seri) in çözülmüş.seriler.iter().enumerate() {
-            if let Seri::Saçılım(saçılım) = seri {
-                eprintln!(
-                    "scatter[{sıra}] eşleme={:?} ilk={:?}",
-                    saçılım.eşleme,
-                    saçılım.veri.first()
-                );
+            match seri {
+                Seri::Saçılım(saçılım) => {
+                    eprintln!(
+                        "scatter[{sıra}] eşleme={:?} ilk={:?}",
+                        saçılım.eşleme,
+                        saçılım.veri.first()
+                    );
+                }
+                Seri::Çizgi(çizgi) => {
+                    let örnekler = [0, 1_999, 2_000, 3_999, 4_000]
+                        .into_iter()
+                        .filter_map(|veri_sırası| {
+                            çizgi
+                                .veri
+                                .get(veri_sırası)
+                                .map(|öğe| (veri_sırası, öğe.değer.x(), öğe.değer.sayı()))
+                        })
+                        .collect::<Vec<_>>();
+                    eprintln!("çizgi[{sıra}] örnekleri={örnekler:?}");
+                }
+                _ => {}
             }
         }
         let mut kayıt = KayıtYüzeyi::yeni(700.0, 525.0);

@@ -147,21 +147,25 @@ pub fn eksenleri_çiz(
     çizici: &mut dyn ÇizimYüzeyi, alan: Dikdörtgen, eksenler: &[&ÇalışmaEkseni]
 ) {
     for eksen in eksenler {
-        // ECharts `axisLine.show: 'auto'`: bir değer/log/zaman ekseni,
-        // dikindeki kategori ekseni çizgiyi zaten temsil ediyorsa gizlenir;
-        // iki sürekli eksenli (scatter gibi) ızgarada ise iki çizgi de
-        // görünür. Kategori ekseni her zaman kendi çizgisini gösterir.
-        let dik_kategori_var = eksenler.iter().any(|diğer| {
-            diğer.yatay_mı() != eksen.yatay_mı() && diğer.seçenek.tür == EksenTürü::Kategori
+        // ECharts `axisLine.show: 'auto'`: eksen çizgisi yalnız dikindeki
+        // eksen interval (değer) ya da log ölçeğiyse otomatik görünür.
+        // Time ölçeği bu kararda kategori ölçeği gibi davranır.
+        let dik_değer_veya_log_var = eksenler.iter().any(|diğer| {
+            diğer.yatay_mı() != eksen.yatay_mı()
+                && matches!(diğer.seçenek.tür, EksenTürü::Değer | EksenTürü::Log)
         });
-        let otomatik_çizgi = eksen.seçenek.tür == EksenTürü::Kategori || !dik_kategori_var;
+        // `createCartesianAxisViewCommonPartBuilder`: axisLine/axisTick
+        // yalnız dik eksen interval veya log ölçeğiyse otomatik görünür.
+        // Time ölçeği kategori gibi davranır; time×value grafiğinde x
+        // çizgisi görünürken y çizgisi gizlenir.
+        let otomatik_çizgi = dik_değer_veya_log_var;
         // `axisTick.show: 'auto'`, dik eksen sürekli değilse kapanır. Ayrıca
         // kategori ekseni bantlıysa (`boundaryGap: true`) tikler kategori
         // merkezlerine değil bant sınırlarına düşeceğinden ECharts tarafından
         // otomatik olarak gizlenir.
         let bantlı_kategori =
             eksen.seçenek.tür == EksenTürü::Kategori && eksen.seçenek.kenar_boşluğu.unwrap_or(true);
-        let otomatik_çentik = !dik_kategori_var && !bantlı_kategori;
+        let otomatik_çentik = dik_değer_veya_log_var && !bantlı_kategori;
         let çizgi_göster = eksen.seçenek.çizgi.göster.unwrap_or(otomatik_çizgi);
         let çentik_göster = eksen.seçenek.çentik.göster.unwrap_or(otomatik_çentik);
 
@@ -229,7 +233,10 @@ pub fn eksenleri_çiz(
                 .step_by(örnek_adımı)
                 .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut_ön).0)
                 .fold(0.0f32, f32::max);
-            let bant = eksen.bant_genişliği().max(1.0);
+            // Büyük ordinal veriZoom pencerelerinde ardışık kategoriler
+            // bir fiziksel pikselden daha yakın olabilir. ECharts
+            // `unitSpan` değerini alt-piksele izin vererek kullanır.
+            let bant = eksen.bant_genişliği().max(f32::EPSILON);
             // `calculateCategoryInterval`: zrender metin sınırına 1.3
             // güvenlik çarpanı uygular, oranı aşağı yuvarlar; dönen `interval`
             // atlanan öğe sayısı olduğundan gerçek çizim adımı +1'dir.

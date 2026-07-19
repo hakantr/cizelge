@@ -53,7 +53,7 @@ use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::{Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
-use crate::model::yakinlastirma::YakınlaştırmaTürü;
+use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
 use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, LogÖlçeği, ZamanÖlçeği, Ölçek};
 use crate::renk::Dolgu;
@@ -713,6 +713,250 @@ fn kartezyen_kur(
         adlar.unwrap_or_default()
     };
 
+    // ECharts `AxisProxy` önce ham veri kapsamından dataZoom penceresini
+    // çözer, ardından `filter`/`weakFilter` ile kalan satırlardan diğer
+    // eksenin kapsamını yeniden kurar. Ham kapsamı ayrı tutmak zorunludur:
+    // aksi halde her render'da yüzde penceresi yeniden küçülür.
+    let ham_x_kapsamlar = x_kapsamlar.clone();
+    let ham_y_kapsamlar = y_kapsamlar.clone();
+    type SüzmePenceresi = ([f64; 2], YakınlaştırmaSüzmeKipi);
+    let x_pencereleri: Vec<Option<SüzmePenceresi>> = x_seçenekler
+        .iter()
+        .enumerate()
+        .map(|(sıra, eksen)| {
+            let yakınlaştırma = seçenekler.x_yakınlaştırması(sıra)?;
+            let kategoriler = if eksen.tür == EksenTürü::Kategori {
+                kategoriler_derle(eksen, true, sıra)
+            } else {
+                Vec::new()
+            };
+            let ham = if eksen.tür == EksenTürü::Kategori {
+                [0.0, kategoriler.len().saturating_sub(1) as f64]
+            } else {
+                let veri = ham_x_kapsamlar.get(sıra).copied().unwrap_or([0.0, 1.0]);
+                [
+                    eksen.en_az.unwrap_or(veri[0]),
+                    eksen.en_çok.unwrap_or(veri[1]),
+                ]
+            };
+            yakınlaştırma
+                .pencere_çöz(&kategoriler, ham)
+                .map(|(mut pencere, _)| {
+                    if eksen.tür == EksenTürü::Kategori {
+                        pencere = [pencere[0].round(), pencere[1].round()];
+                    }
+                    (pencere, yakınlaştırma.süzme_kipi)
+                })
+        })
+        .collect();
+    let y_pencereleri: Vec<Option<SüzmePenceresi>> = y_seçenekler
+        .iter()
+        .enumerate()
+        .map(|(sıra, eksen)| {
+            let yakınlaştırma = seçenekler.y_yakınlaştırması(sıra)?;
+            let kategoriler = if eksen.tür == EksenTürü::Kategori {
+                kategoriler_derle(eksen, false, sıra)
+            } else {
+                Vec::new()
+            };
+            let ham = if eksen.tür == EksenTürü::Kategori {
+                [0.0, kategoriler.len().saturating_sub(1) as f64]
+            } else {
+                let veri = ham_y_kapsamlar.get(sıra).copied().unwrap_or([0.0, 1.0]);
+                [
+                    eksen.en_az.unwrap_or(veri[0]),
+                    eksen.en_çok.unwrap_or(veri[1]),
+                ]
+            };
+            yakınlaştırma
+                .pencere_çöz(&kategoriler, ham)
+                .map(|(mut pencere, _)| {
+                    if eksen.tür == EksenTürü::Kategori {
+                        pencere = [pencere[0].round(), pencere[1].round()];
+                    }
+                    (pencere, yakınlaştırma.süzme_kipi)
+                })
+        })
+        .collect();
+
+    let pencereden_geçer = |pencere: Option<SüzmePenceresi>, değerler: &[f64]| -> bool {
+        let Some(([baş, son], kip)) = pencere else {
+            return true;
+        };
+        match kip {
+            YakınlaştırmaSüzmeKipi::Yok | YakınlaştırmaSüzmeKipi::Boşalt => true,
+            YakınlaştırmaSüzmeKipi::Süz => değerler
+                .iter()
+                .all(|değer| değer.is_finite() && *değer >= baş && *değer <= son),
+            YakınlaştırmaSüzmeKipi::ZayıfSüz => {
+                let mut değer_var = false;
+                let mut solda = false;
+                let mut sağda = false;
+                for değer in değerler.iter().copied().filter(|değer| değer.is_finite()) {
+                    değer_var = true;
+                    if değer >= baş && değer <= son {
+                        return true;
+                    }
+                    solda |= değer < baş;
+                    sağda |= değer > son;
+                }
+                // `weakFilter`, bütün boyutlar aynı tarafta kaldığında
+                // süzer; pencerenin iki yanına yayılan öğeyi korur.
+                değer_var && solda && sağda
+            }
+        }
+    };
+
+    if x_pencereleri.iter().flatten().any(|(_, kip)| {
+        matches!(
+            kip,
+            YakınlaştırmaSüzmeKipi::Süz | YakınlaştırmaSüzmeKipi::ZayıfSüz
+        )
+    }) || y_pencereleri.iter().flatten().any(|(_, kip)| {
+        matches!(
+            kip,
+            YakınlaştırmaSüzmeKipi::Süz | YakınlaştırmaSüzmeKipi::ZayıfSüz
+        )
+    }) {
+        x_kapsamlar.fill([f64::INFINITY, f64::NEG_INFINITY]);
+        y_kapsamlar.fill([f64::INFINITY, f64::NEG_INFINITY]);
+
+        for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+            if !seri.kartezyen_mi() || !görünürler.get(seri_sırası).copied().unwrap_or(false) {
+                continue;
+            }
+            let bağ = seri.eksen_bağı();
+            let (Some(x_seçenek), Some(y_seçenek)) =
+                (x_seçenekler.get(bağ.x), y_seçenekler.get(bağ.y))
+            else {
+                continue;
+            };
+            let x_kategorik = x_seçenek.tür == EksenTürü::Kategori;
+            let y_kategorik = y_seçenek.tür == EksenTürü::Kategori;
+            let (Some(x_kapsam), Some(y_kapsam)) =
+                (x_kapsamlar.get_mut(bağ.x), y_kapsamlar.get_mut(bağ.y))
+            else {
+                continue;
+            };
+            let x_penceresi = x_pencereleri.get(bağ.x).copied().flatten();
+            let y_penceresi = y_pencereleri.get(bağ.y).copied().flatten();
+
+            if matches!(seri, Seri::Isı(_)) {
+                continue;
+            }
+            if let Seri::Hatlar(hatlar) = seri {
+                for nokta in hatlar.veri.iter().flat_map(|veri| &veri.koordinatlar) {
+                    let x = nokta.x.sayı();
+                    let y = nokta.y.sayı();
+                    let x_değerleri = [x.unwrap_or(f64::NAN)];
+                    let y_değerleri = [y.unwrap_or(f64::NAN)];
+                    if !pencereden_geçer(x_penceresi, &x_değerleri)
+                        || !pencereden_geçer(y_penceresi, &y_değerleri)
+                    {
+                        continue;
+                    }
+                    if !x_kategorik && let Some(x) = x {
+                        kapsa(x_kapsam, x);
+                    }
+                    if !y_kategorik && let Some(y) = y {
+                        kapsa(y_kapsam, y);
+                    }
+                }
+                continue;
+            }
+            if let Seri::Saçılım(saçılım) = seri
+                && let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme
+            {
+                for öğe in &saçılım.veri {
+                    let x = öğe.boyut(x_boyutu).and_then(|değer| değer.sayı());
+                    let y = öğe.boyut(y_boyutu).and_then(|değer| değer.sayı());
+                    let x_değerleri = [x.unwrap_or(f64::NAN)];
+                    let y_değerleri = [y.unwrap_or(f64::NAN)];
+                    if !pencereden_geçer(x_penceresi, &x_değerleri)
+                        || !pencereden_geçer(y_penceresi, &y_değerleri)
+                    {
+                        continue;
+                    }
+                    if !x_kategorik && let Some(x) = x {
+                        kapsa(x_kapsam, x);
+                    }
+                    if !y_kategorik && let Some(y) = y {
+                        kapsa(y_kapsam, y);
+                    }
+                }
+                continue;
+            }
+            if matches!(seri, Seri::Mum(_) | Seri::Kutu(_)) {
+                for (veri_sırası, öğe) in seri.veri().iter().enumerate() {
+                    let Some(dizi) = öğe.değer.dizi() else {
+                        continue;
+                    };
+                    let sıra_değeri = [veri_sırası as f64];
+                    let (x_değerleri, y_değerleri): (&[f64], &[f64]) =
+                        if y_kategorik && !x_kategorik {
+                            (dizi, &sıra_değeri)
+                        } else {
+                            (&sıra_değeri, dizi)
+                        };
+                    if !pencereden_geçer(x_penceresi, x_değerleri)
+                        || !pencereden_geçer(y_penceresi, y_değerleri)
+                    {
+                        continue;
+                    }
+                    if y_kategorik && !x_kategorik {
+                        for değer in x_değerleri {
+                            kapsa(x_kapsam, *değer);
+                        }
+                        kapsa(y_kapsam, veri_sırası as f64);
+                    } else {
+                        kapsa(x_kapsam, veri_sırası as f64);
+                        for değer in y_değerleri {
+                            kapsa(y_kapsam, *değer);
+                        }
+                    }
+                }
+                continue;
+            }
+
+            let sütun_mu = matches!(seri, Seri::Sütun(_));
+            let Some(seri_aralıkları) = aralıklar.get(seri_sırası) else {
+                continue;
+            };
+            for (veri_sırası, aralık) in seri_aralıkları.iter().enumerate() {
+                let Some((taban, tepe)) = aralık else {
+                    continue;
+                };
+                let x_değeri = seri
+                    .veri()
+                    .get(veri_sırası)
+                    .and_then(|öğe| öğe.değer.x())
+                    .unwrap_or(veri_sırası as f64);
+                let (x_değerleri, y_değerleri) = if y_kategorik && !x_kategorik {
+                    ([*tepe], [veri_sırası as f64])
+                } else {
+                    ([x_değeri], [*tepe])
+                };
+                if !pencereden_geçer(x_penceresi, &x_değerleri)
+                    || !pencereden_geçer(y_penceresi, &y_değerleri)
+                {
+                    continue;
+                }
+                let değer_kapsamı = if y_kategorik && !x_kategorik {
+                    &mut *x_kapsam
+                } else {
+                    &mut *y_kapsam
+                };
+                kapsa(değer_kapsamı, *tepe);
+                if sütun_mu || taban.abs() > 1e-12 {
+                    kapsa(değer_kapsamı, *taban);
+                }
+                if x_kategorik || !y_kategorik {
+                    kapsa(x_kapsam, x_değeri);
+                }
+            }
+        }
+    }
+
     // Izgara alanları (etiket kapsama, o ızgaranın ilk y/x eksenine göre).
     let mut ızgara_alanları: Vec<Dikdörtgen> = ızgara_seçenekleri
         .iter()
@@ -834,18 +1078,14 @@ fn kartezyen_kur(
             // Veri yakınlaştırma: sayısal eksenlerde kapsam pencereye
             // daraltılır; kategorik eksenlerde pencere kurulumdan sonra
             // sıra uzayında uygulanır.
-            let tam_kapsam = if seçenek.tür == EksenTürü::Kategori {
-                [0.0, kategoriler.len().saturating_sub(1) as f64]
-            } else {
-                [
-                    seçenek.en_az.unwrap_or(kapsam[0]),
-                    seçenek.en_çok.unwrap_or(kapsam[1]),
-                ]
-            };
             let yakınlaştırma = seçenekler.x_yakınlaştırması(xi).filter(|y| y.etkin_mi());
-            let pencere = yakınlaştırma.and_then(|y| y.pencere_çöz(&kategoriler, tam_kapsam));
+            let pencere = x_pencereleri
+                .get(xi)
+                .copied()
+                .flatten()
+                .map(|(pencere, _)| pencere);
             let mut seçenek = seçenek.clone();
-            if let Some(([p0, p1], _)) = pencere
+            if let Some([p0, p1]) = pencere
                 && seçenek.tür != EksenTürü::Kategori
             {
                 if let Some(yakınlaştırma) = yakınlaştırma {
@@ -877,7 +1117,10 @@ fn kartezyen_kur(
             });
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.x, alan.sağ()], konum);
-            if let Some(([p0, p1], _)) = pencere {
+            if let Some([p0, p1]) = pencere {
+                if let Some(yakınlaştırma) = yakınlaştırma {
+                    eksen.yakınlaştırma_süzme_kipi = yakınlaştırma.süzme_kipi;
+                }
                 if seçenek.tür == EksenTürü::Kategori {
                     eksen.değer_penceresi_uygula(p0.round(), p1.round());
                 } else {
@@ -901,18 +1144,14 @@ fn kartezyen_kur(
             } else {
                 Vec::new()
             };
-            let tam_kapsam = if seçenek.tür == EksenTürü::Kategori {
-                [0.0, kategoriler.len().saturating_sub(1) as f64]
-            } else {
-                [
-                    seçenek.en_az.unwrap_or(kapsam[0]),
-                    seçenek.en_çok.unwrap_or(kapsam[1]),
-                ]
-            };
             let yakınlaştırma = seçenekler.y_yakınlaştırması(yi).filter(|y| y.etkin_mi());
-            let pencere = yakınlaştırma.and_then(|y| y.pencere_çöz(&kategoriler, tam_kapsam));
+            let pencere = y_pencereleri
+                .get(yi)
+                .copied()
+                .flatten()
+                .map(|(pencere, _)| pencere);
             let mut seçenek = seçenek.clone();
-            if let Some(([p0, p1], _)) = pencere
+            if let Some([p0, p1]) = pencere
                 && seçenek.tür != EksenTürü::Kategori
             {
                 if let Some(yakınlaştırma) = yakınlaştırma {
@@ -941,7 +1180,10 @@ fn kartezyen_kur(
             // Dikey eksen piksel aralığı alttan yukarı doğrudur.
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.alt(), alan.y], konum);
-            if let Some(([p0, p1], _)) = pencere {
+            if let Some([p0, p1]) = pencere {
+                if let Some(yakınlaştırma) = yakınlaştırma {
+                    eksen.yakınlaştırma_süzme_kipi = yakınlaştırma.süzme_kipi;
+                }
                 if seçenek.tür == EksenTürü::Kategori {
                     eksen.değer_penceresi_uygula(p0.round(), p1.round());
                 } else {
@@ -2130,16 +2372,21 @@ pub fn grafiği_boya(
                             .map(Seri::veri)
                             .find(|veri| !veri.is_empty())
                     {
-                        let en_çok = veri
+                        let kapsam = veri
                             .iter()
                             .filter_map(|öğe| öğe.değer.sayı())
-                            .fold(0.0_f64, f64::max)
-                            .max(1.0);
-                        // SliderZoomView, karşı eksen kapsamını iki yönde
-                        // %30 genişletip [0, sliderHeight] aralığına eşler.
-                        // Bu, sıfır çizgisini zeminden biraz yukarı alır.
-                        let alt_kapsam = -en_çok * 0.3;
-                        let üst_kapsam = en_çok * 1.3;
+                            .filter(|değer| değer.is_finite())
+                            .fold(
+                                [f64::INFINITY, f64::NEG_INFINITY],
+                                |[en_az, en_çok], değer| [en_az.min(değer), en_çok.max(değer)],
+                            );
+                        // SliderZoomView `_renderDataShadow`, ham karşı-eksen
+                        // kapsamını veri açıklığının %30'u kadar iki yönde
+                        // genişletir. Sıfır merkezli varsayım, uzun rastgele
+                        // yürüyüşlerin negatif yarısını kırpıyordu.
+                        let açıklık = (kapsam[1] - kapsam[0]).max(f64::EPSILON);
+                        let alt_kapsam = kapsam[0] - açıklık * 0.3;
+                        let üst_kapsam = kapsam[1] + açıklık * 0.3;
                         let eşle = |değer: f64| {
                             ((değer - alt_kapsam) / (üst_kapsam - alt_kapsam)) as f32
                                 * şerit.yükseklik
@@ -2151,7 +2398,14 @@ pub fn grafiği_boya(
                         let mut çizgi_başladı = false;
                         let mut son_boş = false;
                         let mut son_x = şerit.x;
+                        // ECharts büyük veri gölgesinde yaklaşık bir örnek /
+                        // yatay piksel bırakır (`Math.round(count / width)`).
+                        let adım =
+                            ((veri.len() as f32 / şerit.genişlik.max(1.0)).round() as usize).max(1);
                         for (sıra, öğe) in veri.iter().enumerate() {
+                            if sıra % adım != 0 {
+                                continue;
+                            }
                             let oran = if veri.len() > 1 {
                                 sıra as f32 / (veri.len() - 1) as f32
                             } else {
