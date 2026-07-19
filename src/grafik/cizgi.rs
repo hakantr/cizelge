@@ -470,6 +470,7 @@ pub fn çizgi_serisi_çiz(
     görsel_eşleme: Option<&GörselEşleme>,
     ilerleme: f32,
     katman: ÇizgiKatmanı,
+    uç_etiketi_y: Option<f32>,
 ) {
     let (tepeler, tabanlar) = nokta_listeleri(seri, kartezyen, aralıklar);
     let alan = kartezyen.alan;
@@ -708,7 +709,10 @@ pub fn çizgi_serisi_çiz(
                     .unwrap_or(ham);
                 ç.yazı(
                     &metin,
-                    (nokta.0 + seri.uç_etiketi.uzaklık, nokta.1),
+                    (
+                        nokta.0 + seri.uç_etiketi.uzaklık,
+                        uç_etiketi_y.unwrap_or(nokta.1),
+                    ),
                     crate::cizim::YatayHiza::Sol,
                     crate::cizim::DikeyHiza::Orta,
                     seri.uç_etiketi.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK),

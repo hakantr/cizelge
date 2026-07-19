@@ -51,7 +51,7 @@ use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
 use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
-use crate::model::seri::{Seri, ÖzelBağlam};
+use crate::model::seri::{EksenBağı, Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
@@ -70,6 +70,43 @@ fn araç_noktası(merkez: (f32, f32), sınır: [f32; 4], nokta: (f32, f32)) -> (
         merkez.0 + (nokta.0 - kaynak_merkez.0) * ölçek,
         merkez.1 + (nokta.1 - kaynak_merkez.1) * ölçek,
     )
+}
+
+/// `labelLayout.moveOverlap: 'shiftY'` için zrender'ın tek yönlü dikey
+/// itme adımı. Her tuple `(seri, eksen bağı, merkez y, etiket yüksekliği)`dir.
+fn çizgi_uç_etiketlerini_dikey_kaydır(
+    adaylar: &[(usize, EksenBağı, f32, f32)],
+    seri_sayısı: usize,
+) -> Vec<Option<f32>> {
+    let mut sonuç = vec![None; seri_sayısı];
+    let mut işlenen_bağlar = Vec::new();
+    for (_, bağ, ..) in adaylar {
+        if işlenen_bağlar.contains(bağ) {
+            continue;
+        }
+        işlenen_bağlar.push(*bağ);
+        let mut grup = adaylar
+            .iter()
+            .filter(|(_, aday_bağ, ..)| aday_bağ == bağ)
+            .copied()
+            .collect::<Vec<_>>();
+        grup.sort_by(|a, b| {
+            a.2.partial_cmp(&b.2)
+                .unwrap_or(std::cmp::Ordering::Equal)
+                .then_with(|| a.0.cmp(&b.0))
+        });
+        let mut önceki_alt: Option<f32> = None;
+        for (sıra, _, ham_y, yükseklik) in grup {
+            let y = önceki_alt
+                .map(|alt| ham_y.max(alt + yükseklik / 2.0))
+                .unwrap_or(ham_y);
+            if let Some(yer) = sonuç.get_mut(sıra) {
+                *yer = Some(y);
+            }
+            önceki_alt = Some(y + yükseklik / 2.0);
+        }
+    }
+    sonuç
 }
 
 /// Boyamanın anlık girdileri (görünüm durumundan türetilir).
@@ -1966,6 +2003,7 @@ pub fn grafiği_boya(
                     seçenekler.seri_görsel_eşlemesi(i),
                     ilerleme,
                     ÇizgiKatmanı::Alan,
+                    None,
                 );
             };
             if kartezyen.x.pencere.is_some() || kartezyen.y.pencere.is_some() {
@@ -1974,6 +2012,40 @@ pub fn grafiği_boya(
                 alanı_çiz(yüzey);
             }
         }
+
+        // ECharts `labelLayout.moveOverlap: 'shiftY'`: aynı eksen çiftine
+        // bağlı çizgilerin uç etiketlerini ham y konumuna göre sıralar ve
+        // her sınır kutusunu bir öncekinin hemen altına iter. Etiketler seri
+        // döngüsünde ayrı ayrı boyansa da yerleşim ortak hesaplanmalıdır.
+        let mut uç_etiketi_adayları = Vec::new();
+        for (i, seri) in seçenekler.seriler.iter().enumerate() {
+            let Seri::Çizgi(çizgi) = seri else { continue };
+            if !çizgi.uç_etiketi.göster
+                || !çizgi.etiket_örtüşmesini_dikey_kaydır
+                || !kurulum.görünürler.get(i).copied().unwrap_or(false)
+            {
+                continue;
+            }
+            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                continue;
+            };
+            let aralıklar = kurulum.aralıklar.get(i).map(Vec::as_slice).unwrap_or(&[]);
+            let (tepeler, _) = nokta_listeleri(çizgi, &kartezyen, aralıklar);
+            let son = tepeler.iter().enumerate().rev().find_map(|(sıra, nokta)| {
+                let nokta = (*nokta)?;
+                let öğe = çizgi.veri.get(sıra)?;
+                let x_değeri = öğe.değer.x().unwrap_or(sıra as f64);
+                let y_değeri = öğe.değer.sayı()?;
+                (kartezyen.x.pencerede_mi(x_değeri) && kartezyen.y.pencerede_mi(y_değeri))
+                    .then_some(nokta.1)
+            });
+            if let Some(y) = son {
+                let yükseklik = çizgi.uç_etiketi.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+                uç_etiketi_adayları.push((i, çizgi.eksen_bağı, y, yükseklik));
+            }
+        }
+        let uç_etiketi_yerleşimleri =
+            çizgi_uç_etiketlerini_dikey_kaydır(&uç_etiketi_adayları, seçenekler.seriler.len());
 
         for (i, seri) in seçenekler.seriler.iter().enumerate() {
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
@@ -2006,6 +2078,7 @@ pub fn grafiği_boya(
                                 seçenekler.seri_görsel_eşlemesi(i),
                                 ilerleme,
                                 ÇizgiKatmanı::ÇizgiVeSembol,
+                                uç_etiketi_yerleşimleri.get(i).copied().flatten(),
                             );
                             // Sembol noktaları tıklanabilir bölgelerdir.
                             let (tepeler, _) = nokta_listeleri(s, &kartezyen, seri_aralıkları);
@@ -3391,6 +3464,22 @@ mod yakınlaştırma_yönü_testleri {
         };
         assert_eq!(sürgü.eksen_uzunluğu(), 200.0);
         assert!(sürgü.eksen_konumu((20.0, 40.0)) > sürgü.eksen_konumu((20.0, 80.0)));
+    }
+
+    #[test]
+    fn çizgi_uç_etiketleri_aynı_eksende_örtüşmeden_aşağı_itilir() {
+        let birinci = EksenBağı::default();
+        let ikinci = EksenBağı { x: 1, y: 1 };
+        let sonuç = çizgi_uç_etiketlerini_dikey_kaydır(
+            &[
+                (0, birinci, 10.0, 12.0),
+                (1, birinci, 15.0, 12.0),
+                (2, birinci, 40.0, 12.0),
+                (3, ikinci, 11.0, 12.0),
+            ],
+            4,
+        );
+        assert_eq!(sonuç, vec![Some(10.0), Some(22.0), Some(40.0), Some(11.0)]);
     }
 
     #[test]

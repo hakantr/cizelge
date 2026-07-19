@@ -136,6 +136,9 @@ pub struct ÇizgiSerisi {
     pub etiket: Etiket,
     /// Çizginin son görünür noktasına bağlı etiket (`endLabel`).
     pub uç_etiketi: Etiket,
+    /// `labelLayout.moveOverlap: 'shiftY'`: aynı eksen çiftindeki çizgi
+    /// etiketlerini dikeyde çakışmayacak biçimde kaydırır.
+    pub etiket_örtüşmesini_dikey_kaydır: bool,
     pub imleyiciler: İmleyiciler,
     /// Büyük veri örneklemesi (`sampling`).
     pub örnekleme: Option<Örnekleme>,
@@ -177,6 +180,7 @@ impl Default for ÇizgiSerisi {
                 uzaklık: 8.0,
                 ..Etiket::default()
             },
+            etiket_örtüşmesini_dikey_kaydır: false,
             imleyiciler: İmleyiciler::default(),
             örnekleme: None,
             eksen_bağı: EksenBağı::default(),
@@ -310,6 +314,11 @@ impl ÇizgiSerisi {
 
     pub fn uç_etiketi(mut self, etiket: Etiket) -> Self {
         self.uç_etiketi = etiket;
+        self
+    }
+
+    pub fn etiket_örtüşmesini_dikey_kaydır(mut self, kaydır: bool) -> Self {
+        self.etiket_örtüşmesini_dikey_kaydır = kaydır;
         self
     }
 

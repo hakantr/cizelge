@@ -1168,6 +1168,168 @@ fn line_aqi() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn confidence_band() -> Result<GrafikSeçenekleri, String> {
+    #[derive(Deserialize)]
+    struct GüvenAralığıÖğesi {
+        l: f64,
+        u: f64,
+        date: String,
+        value: f64,
+    }
+
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/confidence-band.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let veri: Vec<GüvenAralığıÖğesi> = serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))?;
+    let taban = -veri
+        .iter()
+        .map(|öğe| öğe.l)
+        .fold(f64::INFINITY, f64::min)
+        .floor();
+    let tarihler = veri.iter().map(|öğe| öğe.date.clone()).collect::<Vec<_>>();
+    let alt = veri.iter().map(|öğe| öğe.l + taban).collect::<Vec<_>>();
+    let aralık = veri.iter().map(|öğe| öğe.u - öğe.l).collect::<Vec<_>>();
+    let orta = veri.iter().map(|öğe| öğe.value + taban).collect::<Vec<_>>();
+
+    let tarih_biçimleyici = Biçimleyici::İşlev(Arc::new(|değer, metin| {
+        if değer.round() == 0.0 {
+            return metin.to_owned();
+        }
+        let parçalar = metin.split('-').collect::<Vec<_>>();
+        match (parçalar.get(1), parçalar.get(2)) {
+            (Some(ay), Some(gün)) => format!(
+                "{}-{}",
+                ay.trim_start_matches('0'),
+                gün.trim_start_matches('0')
+            ),
+            _ => metin.to_owned(),
+        }
+    }));
+    let yüzde_biçimleyici = Biçimleyici::İşlev(Arc::new(move |değer, _| {
+        format!("{:.0}%", (değer - taban) * 100.0)
+    }));
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Confidence Band")
+                .alt_metin("Example in MetricsGraphics.js")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .ızgara(
+            Izgara::yeni()
+                .sol("3%")
+                .sağ("4%")
+                .alt("3%")
+                .etiketi_kapsa(true),
+        )
+        .x_ekseni(
+            Eksen::kategori()
+                .kenar_boşluğu(false)
+                .etiket_biçimleyici(tarih_biçimleyici)
+                .veri(tarihler),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .bölme_sayısı(3)
+                .etiket_biçimleyici(yüzde_biçimleyici),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("L")
+                .çizgi_stili(ÇizgiStili::yeni().opaklık(0.0))
+                .yığın("confidence-band")
+                .sembol(Sembol::Yok)
+                .veri(alt),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("U")
+                .çizgi_stili(ÇizgiStili::yeni().opaklık(0.0))
+                .alan_stili(AlanStili::yeni().renk("#ccc"))
+                .yığın("confidence-band")
+                .sembol(Sembol::Yok)
+                .veri(aralık),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .öğe_stili(ÖğeStili::yeni().renk("#333"))
+                .sembol_göster(false)
+                .veri(orta),
+        ))
+}
+
+fn line_race() -> Result<GrafikSeçenekleri, String> {
+    let ülkeler = [
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Norway",
+        "Poland",
+        "Russia",
+        "United Kingdom",
+    ];
+    let ülke_verisi = |ad: &str| {
+        VeriKümesiTanımı::kaynaktan_süz(
+            0,
+            SüzmeKoşulu::Ve(vec![
+                SüzmeKoşulu::Karşılaştır {
+                    boyut: BoyutSeçici::ad("Year"),
+                    işlem: Karşılaştırmaİşlemi::BüyükEşit,
+                    değer: 1950.into(),
+                },
+                SüzmeKoşulu::Karşılaştır {
+                    boyut: BoyutSeçici::ad("Country"),
+                    işlem: Karşılaştırmaİşlemi::Eşit,
+                    değer: ad.into(),
+                },
+            ]),
+        )
+    };
+    let mut veri_kümeleri = vec![VeriKümesiTanımı::kaynak(yaşam_beklentisi_verisi()?)];
+    veri_kümeleri.extend(ülkeler.iter().map(|ülke| ülke_verisi(ülke)));
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Income of Germany and France since 1950")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .veri_kümeleri(veri_kümeleri)
+        .ızgara(Izgara::yeni().sağ(140))
+        .x_ekseni(Eksen::kategori())
+        .y_ekseni(Eksen::değer().ad("Income"));
+    for (sıra, ülke) in ülkeler.into_iter().enumerate() {
+        let etiket_ülkesi = ülke.to_owned();
+        seçenekler = seçenekler.seri(
+            ÇizgiSerisi::yeni()
+                .ad(ülke)
+                .veri_kümesi_sırası(sıra + 1)
+                .eşle("Year", "Income")
+                .sembol_göster(false)
+                .etiket_örtüşmesini_dikey_kaydır(true)
+                .uç_etiketi(Etiket::yeni().göster(true).uzaklık(8.0).biçimleyici(
+                    Biçimleyici::İşlev(Arc::new(move |değer, _| {
+                        format!("{etiket_ülkesi}: {değer:.0}")
+                    })),
+                )),
+        );
+    }
+    Ok(seçenekler)
+}
+
 fn area_stack() -> GrafikSeçenekleri {
     let seri = |ad: &str, veri: [i32; 7]| {
         ÇizgiSerisi::yeni()
@@ -3410,6 +3572,8 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "area-pieces" => Ok(area_pieces()),
         "line-gradient" => Ok(line_gradient()),
         "line-aqi" => line_aqi(),
+        "confidence-band" => confidence_band(),
+        "line-race" => line_race(),
         "area-stack" => Ok(area_stack()),
         "area-stack-gradient" => Ok(area_stack_gradient()),
         "bar-background" => Ok(bar_background()),
