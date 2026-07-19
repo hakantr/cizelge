@@ -1,0 +1,19 @@
+{
+  "id": "dataset-link",
+  "senaryo": "etkileşim",
+  "kare": "başlangıç",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1148,
+  "değişen_piksel_oranı": 0.004251851851851852,
+  "ssim": 0.9972859669068569,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-link-başlangıç.png",
+    "gerçek": "testler/gorsel/gerçek/default/dataset-link-başlangıç.png",
+    "fark": "testler/gorsel/fark/default/dataset-link-başlangıç.png"
+  }
+}

@@ -16,7 +16,13 @@ fn seçenekler() -> GrafikSeçenekleri {
         )
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
         .gösterge(Gösterge::yeni().üst(28.0))
-        .ızgara(Izgara::yeni().sol("8%").sağ("5%").alt(50.0).etiketi_kapsa(true))
+        .ızgara(
+            Izgara::yeni()
+                .sol("8%")
+                .sağ("5%")
+                .alt(50.0)
+                .etiketi_kapsa(true),
+        )
         .x_ekseni(
             Eksen::kategori()
                 .veri(["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"])

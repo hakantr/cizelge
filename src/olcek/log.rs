@@ -4,8 +4,8 @@
 //! adımlarla üretilir ve `taban^k` olarak geri çevrilir.
 
 use crate::olcek::Çentik;
-use crate::yardimci::bicim::ondalık_kırp;
-use crate::yardimci::sayi::{doğrusal_eşle, güzel_sayı, yuvarla, GüzelKip};
+use crate::yardimci::bicim::binlik_ayır;
+use crate::yardimci::sayi::{GüzelKip, doğrusal_eşle, güzel_sayı, yuvarla};
 
 /// Logaritmik değer ekseni ölçeği (`LogScale`).
 #[derive(Clone, Debug)]
@@ -64,7 +64,11 @@ impl LogÖlçeği {
             log_kapsam[1] += adım;
         }
 
-        LogÖlçeği { taban, log_kapsam, adım }
+        LogÖlçeği {
+            taban,
+            log_kapsam,
+            adım,
+        }
     }
 
     /// Veri uzayındaki kapsam.
@@ -101,7 +105,9 @@ impl LogÖlçeği {
             // `logScalePowTick`: yuvarlama hatasına karşı log-uzayı değerini
             // önce tam sayıya oturt.
             let düz_k = yuvarla(k, 9);
-            sonuç.push(Çentik { değer: self.taban.powf(düz_k) });
+            sonuç.push(Çentik {
+                değer: self.taban.powf(düz_k),
+            });
             k += self.adım;
             sayaç += 1;
         }
@@ -110,12 +116,19 @@ impl LogÖlçeği {
 
     pub fn etiket(&self, değer: f64) -> String {
         // 6'nın `5.999999999999999` görünmesini önle (#4158).
-        ondalık_kırp(yuvarla(değer, 9))
+        // ECharts `LogScale.getLabel` çağrısını `IntervalScale.getLabel`'a
+        // yönlendirir; o da `addCommas` ile binlik ayraçlarını ekler.
+        binlik_ayır(yuvarla(değer, 9))
     }
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
@@ -130,5 +143,12 @@ mod testler {
     fn oranlar() {
         let ö = LogÖlçeği::kur([1.0, 1000.0], 10.0, None, None, 5);
         assert!((ö.oranla(10.0) - 1.0 / 3.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn etiketler_interval_olcegi_gibi_binlik_ayrac_kullanir() {
+        let ö = LogÖlçeği::kur([0.001, 10_000.0], 10.0, None, None, 5);
+        assert_eq!(ö.etiket(0.001), "0.001");
+        assert_eq!(ö.etiket(10_000.0), "10,000");
     }
 }

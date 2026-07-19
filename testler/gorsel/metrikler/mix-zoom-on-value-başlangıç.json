@@ -1,0 +1,19 @@
+{
+  "id": "mix-zoom-on-value",
+  "senaryo": "etkileşim",
+  "kare": "başlangıç",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 887,
+  "değişen_piksel_oranı": 0.0032851851851851853,
+  "ssim": 0.9971995864472851,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/mix-zoom-on-value-başlangıç.png",
+    "gerçek": "testler/gorsel/gerçek/default/mix-zoom-on-value-başlangıç.png",
+    "fark": "testler/gorsel/fark/default/mix-zoom-on-value-başlangıç.png"
+  }
+}

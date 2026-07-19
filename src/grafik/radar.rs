@@ -34,12 +34,15 @@ pub fn radar_düzeni(koordinat: &RadarKoordinatı, tuval: Dikdörtgen) -> RadarD
     let n = koordinat.göstergeler.len().max(1);
     let yönler = (0..n)
         .map(|i| {
-            let açı = -std::f32::consts::FRAC_PI_2
-                + i as f32 * std::f32::consts::TAU / n as f32;
+            let açı = -std::f32::consts::FRAC_PI_2 + i as f32 * std::f32::consts::TAU / n as f32;
             (açı.cos(), açı.sin())
         })
         .collect();
-    RadarDüzeni { merkez, yarıçap, yönler }
+    RadarDüzeni {
+        merkez,
+        yarıçap,
+        yönler,
+    }
 }
 
 /// Ağ (ızgara) çizimi: bölme halkaları, dönüşümlü bölme alanları, kollar ve
@@ -111,7 +114,9 @@ pub fn radar_ağı_çiz(
             tema::bölme_çizgisi(),
             crate::model::stil::ÇizgiTürü::Düz,
         );
-        let Some(gösterge) = koordinat.göstergeler.get(i) else { continue };
+        let Some(gösterge) = koordinat.göstergeler.get(i) else {
+            continue;
+        };
         let etiket_konumu = (
             düzen.merkez.0 + (düzen.yarıçap + 12.0) * kos,
             düzen.merkez.1 + (düzen.yarıçap + 12.0) * sin,
@@ -161,7 +166,9 @@ pub fn radar_serisi_çiz(
         if kapalı.contains(&ad) {
             continue;
         }
-        let Some(değerler) = öğe.değer.dizi() else { continue };
+        let Some(değerler) = öğe.değer.dizi() else {
+            continue;
+        };
 
         let renk = öğe
             .stil
@@ -250,8 +257,12 @@ pub fn radar_ipucu_satırları(
     koordinat: &RadarKoordinatı,
     veri_sırası: usize,
 ) -> Vec<(String, String)> {
-    let Some(öğe) = seri.veri.get(veri_sırası) else { return Vec::new() };
-    let Some(değerler) = öğe.değer.dizi() else { return Vec::new() };
+    let Some(öğe) = seri.veri.get(veri_sırası) else {
+        return Vec::new();
+    };
+    let Some(değerler) = öğe.değer.dizi() else {
+        return Vec::new();
+    };
     koordinat
         .göstergeler
         .iter()

@@ -1,0 +1,18 @@
+# Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
+id = "chord-simple"
+kapsam_durumu = "kısmi"
+sahip_faz = 5
+resmi_kaynak = "public/examples/ts/chord-simple.ts"
+fixture = "examples/kiris.rs"
+viewport_genişlik = 700
+viewport_yükseklik = 525
+shot_delay_ms = 0
+profiller = ["açık", "koyu"]
+
+[kanıt]
+api = "kısmi"
+statik_görsel = "kısmi"
+animasyon = "kısmi"
+etkileşim = "kısmi"
+erişilebilirlik = "kısmi"
+performans = "kısmi"

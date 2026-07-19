@@ -1,0 +1,19 @@
+{
+  "id": "dataset-series-layout-by",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 678,
+  "değişen_piksel_oranı": 0.002511111111111111,
+  "ssim": 0.9976822229976875,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-series-layout-by.png",
+    "gerçek": "testler/gorsel/gerçek/default/dataset-series-layout-by.png",
+    "fark": "testler/gorsel/fark/default/dataset-series-layout-by.png"
+  }
+}

@@ -9,7 +9,7 @@ use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::TakvimSerisi;
 use crate::renk::Dolgu;
 use crate::tema;
-use crate::yardimci::takvim::{andan_takvime, takvimden_ana, TakvimAnı};
+use crate::yardimci::takvim::{TakvimAnı, andan_takvime, takvimden_ana};
 use crate::yerel::{ay_kısaltması, etkin_yerel};
 
 const GÜN_MS: f64 = 86_400_000.0;
@@ -25,12 +25,17 @@ pub fn takvim_değer_kapsamı(seri: &TakvimSerisi) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
     for öğe in &seri.veri {
         if let Some(&değer) = öğe.değer.dizi().and_then(|d| d.get(1))
-            && değer.is_finite() {
-                kapsam[0] = kapsam[0].min(değer);
-                kapsam[1] = kapsam[1].max(değer);
-            }
+            && değer.is_finite()
+        {
+            kapsam[0] = kapsam[0].min(değer);
+            kapsam[1] = kapsam[1].max(değer);
+        }
     }
-    if kapsam[0].is_finite() { kapsam } else { [0.0, 1.0] }
+    if kapsam[0].is_finite() {
+        kapsam
+    } else {
+        [0.0, 1.0]
+    }
 }
 
 /// Takvim ısı haritasını çizer.
@@ -87,16 +92,21 @@ pub fn takvim_çiz(
     // Değer arama tablosu (gün → değer).
     let mut değerler: Vec<Option<f64>> = vec![None; gün_sayısı.max(0) as usize];
     for öğe in &seri.veri {
-        let Some(dizi) = öğe.değer.dizi() else { continue };
-        let (Some(&ms), Some(&değer)) = (dizi.first(), dizi.get(1)) else { continue };
+        let Some(dizi) = öğe.değer.dizi() else {
+            continue;
+        };
+        let (Some(&ms), Some(&değer)) = (dizi.first(), dizi.get(1)) else {
+            continue;
+        };
         if !ms.is_finite() || !değer.is_finite() {
             continue;
         }
         let gün = ((ms / GÜN_MS) as i64).saturating_sub(ilk_gün);
         if gün >= 0
-            && let Some(kayıt) = değerler.get_mut(gün as usize) {
-                *kayıt = Some(değer);
-            }
+            && let Some(kayıt) = değerler.get_mut(gün as usize)
+        {
+            *kayıt = Some(değer);
+        }
     }
 
     let hücre_konumu = |gün: i64| -> Dikdörtgen {
@@ -165,23 +175,13 @@ pub fn takvim_çiz(
             }
             None => tema::nötr_05(),
         };
-        çizici.dikdörtgen(
-            hücre,
-            &Dolgu::Düz(renk.opaklık(opaklık)),
-            [2.0; 4],
-            None,
-        );
+        çizici.dikdörtgen(hücre, &Dolgu::Düz(renk.opaklık(opaklık)), [2.0; 4], None);
         if let Some(d) = değer {
             isabetler.push(İsabetBölgesi {
                 seri_sırası: genel_sıra,
                 veri_sırası: gün as usize,
                 seri_adı: seri.ad.clone(),
-                ad: Some(format!(
-                    "{} {} {}",
-                    an.gün,
-                    ay_kısaltması(an.ay),
-                    an.yıl
-                )),
+                ad: Some(format!("{} {} {}", an.gün, ay_kısaltması(an.ay), an.yıl)),
                 değer: Some(d),
                 geometri: İsabetGeometrisi::Dikdörtgen(hücre),
             });

@@ -1,0 +1,19 @@
+{
+  "name": "cizelge-uyum-araclari",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "uret": "node uret.mjs",
+    "denetle": "node uret.mjs --check",
+    "kanıt": "node kanit.mjs",
+    "referans:yenile": "node kanit.mjs --referans-yenile"
+  },
+  "devDependencies": {
+    "pixelmatch": "7.2.0",
+    "pngjs": "7.0.0",
+    "puppeteer-core": "24.12.1",
+    "sharp": "0.35.3",
+    "ssim.js": "3.5.0",
+    "typescript": "4.4.3"
+  }
+}

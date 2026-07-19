@@ -1,0 +1,18 @@
+# Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
+id = "grid-multiple"
+kapsam_durumu = "kısmi"
+sahip_faz = 3
+resmi_kaynak = "public/examples/ts/grid-multiple.ts"
+fixture = "examples/coklu_izgara.rs"
+viewport_genişlik = 700
+viewport_yükseklik = 525
+shot_delay_ms = 0
+profiller = ["açık", "koyu"]
+
+[kanıt]
+api = "kısmi"
+statik_görsel = "kısmi"
+animasyon = "kısmi"
+etkileşim = "kısmi"
+erişilebilirlik = "kısmi"
+performans = "kısmi"

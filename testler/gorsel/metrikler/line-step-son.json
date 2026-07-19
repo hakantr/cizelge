@@ -1,0 +1,19 @@
+{
+  "id": "line-step",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 489,
+  "değişen_piksel_oranı": 0.0018111111111111112,
+  "ssim": 0.9986186483654493,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-step.png",
+    "gerçek": "testler/gorsel/gerçek/default/line-step.png",
+    "fark": "testler/gorsel/fark/default/line-step.png"
+  }
+}

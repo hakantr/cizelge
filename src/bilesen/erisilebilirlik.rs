@@ -14,26 +14,141 @@ const EN_ÇOK_VERİ: usize = 10;
 pub fn seri_tür_adı(seri: &Seri) -> &'static str {
     let tr = crate::yerel::etkin_yerel().kod == "tr";
     match seri {
-        Seri::Çizgi(_) => if tr { "çizgi" } else { "line" },
-        Seri::Sütun(_) => if tr { "sütun" } else { "bar" },
-        Seri::Pasta(_) => if tr { "pasta" } else { "pie" },
-        Seri::Saçılım(_) => if tr { "saçılım" } else { "scatter" },
-        Seri::Mum(_) => if tr { "şamdan (mum)" } else { "candlestick" },
-        Seri::Kutu(_) => if tr { "kutu" } else { "boxplot" },
-        Seri::Isı(_) => if tr { "ısı haritası" } else { "heatmap" },
-        Seri::Huni(_) => if tr { "huni" } else { "funnel" },
-        Seri::GöstergeSaati(_) => if tr { "gösterge saati" } else { "gauge" },
+        Seri::Çizgi(_) => {
+            if tr {
+                "çizgi"
+            } else {
+                "line"
+            }
+        }
+        Seri::Sütun(_) => {
+            if tr {
+                "sütun"
+            } else {
+                "bar"
+            }
+        }
+        Seri::Pasta(_) => {
+            if tr {
+                "pasta"
+            } else {
+                "pie"
+            }
+        }
+        Seri::Saçılım(_) => {
+            if tr {
+                "saçılım"
+            } else {
+                "scatter"
+            }
+        }
+        Seri::Mum(_) => {
+            if tr {
+                "şamdan (mum)"
+            } else {
+                "candlestick"
+            }
+        }
+        Seri::Kutu(_) => {
+            if tr {
+                "kutu"
+            } else {
+                "boxplot"
+            }
+        }
+        Seri::Isı(_) => {
+            if tr {
+                "ısı haritası"
+            } else {
+                "heatmap"
+            }
+        }
+        Seri::Huni(_) => {
+            if tr {
+                "huni"
+            } else {
+                "funnel"
+            }
+        }
+        Seri::GöstergeSaati(_) => {
+            if tr {
+                "gösterge saati"
+            } else {
+                "gauge"
+            }
+        }
         Seri::Radar(_) => "radar",
-        Seri::Özel(_) => if tr { "özel" } else { "custom" },
-        Seri::AğaçHaritası(_) => if tr { "ağaç haritası" } else { "treemap" },
-        Seri::GüneşPatlaması(_) => if tr { "güneş patlaması" } else { "sunburst" },
-        Seri::Ağaç(_) => if tr { "ağaç" } else { "tree" },
+        Seri::Özel(_) => {
+            if tr {
+                "özel"
+            } else {
+                "custom"
+            }
+        }
+        Seri::AğaçHaritası(_) => {
+            if tr {
+                "ağaç haritası"
+            } else {
+                "treemap"
+            }
+        }
+        Seri::GüneşPatlaması(_) => {
+            if tr {
+                "güneş patlaması"
+            } else {
+                "sunburst"
+            }
+        }
+        Seri::Ağaç(_) => {
+            if tr {
+                "ağaç"
+            } else {
+                "tree"
+            }
+        }
         Seri::Sankey(_) => "sankey",
-        Seri::Grafo(_) => if tr { "ilişki (grafo)" } else { "graph" },
-        Seri::Kiriş(_) => if tr { "kiriş" } else { "chord" },
-        Seri::Paralel(_) => if tr { "paralel koordinat" } else { "parallel" },
-        Seri::Takvim(_) => if tr { "takvim ısı haritası" } else { "calendar heatmap" },
-        Seri::TemaNehri(_) => if tr { "tema nehri" } else { "theme river" },
+        Seri::Grafo(_) => {
+            if tr {
+                "ilişki (grafo)"
+            } else {
+                "graph"
+            }
+        }
+        Seri::Kiriş(_) => {
+            if tr {
+                "kiriş"
+            } else {
+                "chord"
+            }
+        }
+        Seri::Paralel(_) => {
+            if tr {
+                "paralel koordinat"
+            } else {
+                "parallel"
+            }
+        }
+        Seri::Takvim(_) => {
+            if tr {
+                "takvim ısı haritası"
+            } else {
+                "calendar heatmap"
+            }
+        }
+        Seri::TemaNehri(_) => {
+            if tr {
+                "tema nehri"
+            } else {
+                "theme river"
+            }
+        }
+        Seri::Hatlar(_) => {
+            if tr {
+                "bağlantı çizgileri"
+            } else {
+                "lines"
+            }
+        }
     }
 }
 
@@ -46,10 +161,7 @@ fn nokta_adı(seçenekler: &GrafikSeçenekleri, seri: &Seri, sıra: usize) -> St
     if seri.kartezyen_mi() {
         let eksenler = seçenekler.etkin_x_eksenleri();
         let bağ = seri.eksen_bağı();
-        if let Some(etiket) = eksenler
-            .get(bağ.x)
-            .and_then(|e| e.veri.get(sıra))
-        {
+        if let Some(etiket) = eksenler.get(bağ.x).and_then(|e| e.veri.get(sıra)) {
             return etiket.clone();
         }
     }
@@ -67,8 +179,9 @@ pub fn erişilebilirlik_özeti(seçenekler: &GrafikSeçenekleri) -> String {
 
     // 1) Başlık.
     let başlık = seçenekler
-        .başlık
-        .as_ref()
+        .başlıklar
+        .first()
+        .or(seçenekler.başlık.as_ref())
         .and_then(|b| b.metin.as_deref())
         .map(str::trim)
         .filter(|m| !m.is_empty());
@@ -103,7 +216,10 @@ pub fn erişilebilirlik_özeti(seçenekler: &GrafikSeçenekleri) -> String {
         let ad = seri.ad().map(str::trim).filter(|a| !a.is_empty());
         let mut cümle = match (tr, ad) {
             (true, Some(ad)) => {
-                format!("{}. seri, “{ad}” adlı {tür} türünde bir seridir", s.saturating_add(1))
+                format!(
+                    "{}. seri, “{ad}” adlı {tür} türünde bir seridir",
+                    s.saturating_add(1)
+                )
             }
             (true, None) => format!("{}. seri {tür} türündedir", s.saturating_add(1)),
             (false, Some(ad)) => format!(
@@ -115,6 +231,34 @@ pub fn erişilebilirlik_özeti(seçenekler: &GrafikSeçenekleri) -> String {
             }
         };
         let veri = seri.veri();
+        if let Seri::Hatlar(hatlar) = seri {
+            if !hatlar.veri.is_empty() {
+                cümle.push_str(if tr {
+                    " ve şu bağlantıları içerir: "
+                } else {
+                    " with the connections: "
+                });
+                let parçalar: Vec<String> = hatlar
+                    .veri
+                    .iter()
+                    .take(EN_ÇOK_VERİ)
+                    .enumerate()
+                    .map(|(sıra, hat)| {
+                        hat.ad
+                            .clone()
+                            .or_else(|| match (&hat.kaynak_adı, &hat.hedef_adı) {
+                                (Some(kaynak), Some(hedef)) => Some(format!("{kaynak} > {hedef}")),
+                                _ => None,
+                            })
+                            .unwrap_or_else(|| sıra.saturating_add(1).to_string())
+                    })
+                    .collect();
+                cümle.push_str(&parçalar.join(", "));
+            }
+            cümle.push('.');
+            cümleler.push(cümle);
+            continue;
+        }
         if !veri.is_empty() {
             cümle.push_str(if tr {
                 " ve şu verileri içerir: "
@@ -150,7 +294,12 @@ pub fn erişilebilirlik_özeti(seçenekler: &GrafikSeçenekleri) -> String {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
     use crate::model::bilesen::Başlık;
@@ -183,8 +332,7 @@ mod testler {
     #[test]
     fn uzun_veri_kırpılır() {
         let veri: Vec<f64> = (0..25).map(|i| i as f64).collect();
-        let seçenekler =
-            GrafikSeçenekleri::yeni().seri(ÇizgiSerisi::yeni().ad("Uzun").veri(veri));
+        let seçenekler = GrafikSeçenekleri::yeni().seri(ÇizgiSerisi::yeni().ad("Uzun").veri(veri));
         let özet = erişilebilirlik_özeti(&seçenekler);
         assert!(özet.contains("ilk 10 nokta; toplam 25"), "{özet}");
     }

@@ -30,14 +30,20 @@ pub struct Yerel {
 pub const TÜRKÇE: Yerel = Yerel {
     kod: "tr",
     aylar: [
-        "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül",
-        "Ekim", "Kasım", "Aralık",
+        "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim",
+        "Kasım", "Aralık",
     ],
     ay_kısaltmaları: [
         "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara",
     ],
     günler: [
-        "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar",
+        "Pazartesi",
+        "Salı",
+        "Çarşamba",
+        "Perşembe",
+        "Cuma",
+        "Cumartesi",
+        "Pazar",
     ],
     gün_kısaltmaları: ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
     geri_yükle: "Geri yükle",
@@ -49,14 +55,30 @@ pub const TÜRKÇE: Yerel = Yerel {
 pub const İNGİLİZCE: Yerel = Yerel {
     kod: "en",
     aylar: [
-        "January", "February", "March", "April", "May", "June", "July", "August", "September",
-        "October", "November", "December",
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
     ],
     ay_kısaltmaları: [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ],
     günler: [
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
     ],
     gün_kısaltmaları: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     geri_yükle: "Restore",
@@ -96,7 +118,12 @@ pub fn gün_kısaltması(gün: usize) -> &'static str {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 

@@ -77,10 +77,11 @@ pub fn sankey_çiz(
             let hedef_katman = katmanlar.get(k).copied().unwrap_or(0) + 1;
             if katmanlar.get(h).copied().unwrap_or(0) < hedef_katman
                 && hedef_katman <= adlar.len()
-                && let Some(kayıt) = katmanlar.get_mut(h) {
-                    *kayıt = hedef_katman;
-                    değişti = true;
-                }
+                && let Some(kayıt) = katmanlar.get_mut(h)
+            {
+                *kayıt = hedef_katman;
+                değişti = true;
+            }
         }
         if !değişti {
             break;
@@ -93,13 +94,15 @@ pub fn sankey_çiz(
     let mut gelen = vec![0.0f64; adlar.len()];
     for bağ in &geçerli_bağlar {
         if let Some(&k) = sıra_bul.get(bağ.kaynak.as_str())
-            && let Some(kayıt) = giden.get_mut(k) {
-                *kayıt += bağ.değer;
-            }
+            && let Some(kayıt) = giden.get_mut(k)
+        {
+            *kayıt += bağ.değer;
+        }
         if let Some(&h) = sıra_bul.get(bağ.hedef.as_str())
-            && let Some(kayıt) = gelen.get_mut(h) {
-                *kayıt += bağ.değer;
-            }
+            && let Some(kayıt) = gelen.get_mut(h)
+        {
+            *kayıt += bağ.değer;
+        }
     }
 
     // 4) Katman içi yerleşim: yükseklik değerle orantılı.
@@ -198,7 +201,11 @@ pub fn sankey_çiz(
         şerit.taşı((x0, y0));
         şerit.kübik((orta, y0), (orta, y1), (x1, y1));
         şerit.çiz((x1, y1 + kalınlık));
-        şerit.kübik((orta, y1 + kalınlık), (orta, y0 + kalınlık), (x0, y0 + kalınlık));
+        şerit.kübik(
+            (orta, y1 + kalınlık),
+            (orta, y0 + kalınlık),
+            (x0, y0 + kalınlık),
+        );
         şerit.kapat();
         çizici.yol_doldur(&şerit, &Dolgu::Düz(k_renk.opaklık(opaklık)));
 

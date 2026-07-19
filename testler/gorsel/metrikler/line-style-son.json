@@ -1,0 +1,19 @@
+{
+  "id": "line-style",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 279,
+  "değişen_piksel_oranı": 0.0010333333333333334,
+  "ssim": 0.998518062655368,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-style.png",
+    "gerçek": "testler/gorsel/gerçek/default/line-style.png",
+    "fark": "testler/gorsel/fark/default/line-style.png"
+  }
+}

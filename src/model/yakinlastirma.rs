@@ -2,6 +2,70 @@
 //! karşılığı. `İç` tür fare tekerleği/sürüklemeyle, `Sürgü` tür alt
 //! şeritteki tutamaçlarla pencereyi değiştirir.
 
+use crate::model::Uzunluk;
+
+/// `dataZoom.startValue` / `endValue` eksen ucu.
+#[derive(Clone, PartialEq, Debug)]
+pub enum YakınlaştırmaDeğeri {
+    /// Değer ve zaman eksenlerinde sayısal değer; kategori ekseninde sıra.
+    Sayı(f64),
+    /// Kategori adı.
+    Kategori(String),
+}
+
+impl YakınlaştırmaDeğeri {
+    /// Eksenin sayısal koordinat uzayına çözer.
+    pub fn çöz(&self, kategoriler: &[String]) -> Option<f64> {
+        match self {
+            YakınlaştırmaDeğeri::Sayı(değer) => değer.is_finite().then_some(*değer),
+            YakınlaştırmaDeğeri::Kategori(ad) => kategoriler
+                .iter()
+                .position(|aday| aday == ad)
+                .map(|sıra| sıra as f64),
+        }
+    }
+}
+
+macro_rules! sayı_yakınlaştırma_değeri {
+    ($($tür:ty),+ $(,)?) => {
+        $(
+            impl From<$tür> for YakınlaştırmaDeğeri {
+                fn from(değer: $tür) -> Self {
+                    YakınlaştırmaDeğeri::Sayı(değer as f64)
+                }
+            }
+        )+
+    };
+}
+
+sayı_yakınlaştırma_değeri!(f64, f32, i64, i32, usize, u64, u32);
+
+impl From<String> for YakınlaştırmaDeğeri {
+    fn from(değer: String) -> Self {
+        YakınlaştırmaDeğeri::Kategori(değer)
+    }
+}
+
+impl From<&str> for YakınlaştırmaDeğeri {
+    fn from(değer: &str) -> Self {
+        YakınlaştırmaDeğeri::Kategori(değer.to_owned())
+    }
+}
+
+/// `dataZoom.filterMode`.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum YakınlaştırmaSüzmeKipi {
+    /// Pencere dışındaki satırları veri listesinden süzer (`filter`).
+    #[default]
+    Süz,
+    /// Bütün boyutları aynı tarafta kalan satırları süzer (`weakFilter`).
+    ZayıfSüz,
+    /// Pencere dışındaki değerleri boş değer yapar (`empty`).
+    Boşalt,
+    /// Veriyi değiştirmez; yalnız eksen kapsamını daraltır (`none`).
+    Yok,
+}
+
 /// Yakınlaştırma türü (`dataZoom.type`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum YakınlaştırmaTürü {
@@ -13,15 +77,32 @@ pub enum YakınlaştırmaTürü {
 }
 
 /// Veri yakınlaştırma tanımı (`dataZoom` öğesi).
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct VeriYakınlaştırma {
     pub tür: YakınlaştırmaTürü,
     /// Bağlı x ekseninin sırası (`xAxisIndex`).
     pub x_eksen_sırası: usize,
+    /// `Some` ise yakınlaştırma x yerine bu y eksenine bağlıdır
+    /// (`yAxisIndex`) ve sürgü dikey çizilir.
+    pub y_eksen_sırası: Option<usize>,
     /// Pencere başlangıcı, yüzde `0..=100` (`start`).
     pub başlangıç: f32,
     /// Pencere bitişi, yüzde `0..=100` (`end`).
     pub bitiş: f32,
+    /// Değer tabanlı başlangıç; verildiyse yüzde başlangıcın önüne geçer.
+    pub başlangıç_değeri: Option<YakınlaştırmaDeğeri>,
+    /// Değer tabanlı bitiş; verildiyse yüzde bitişin önüne geçer.
+    pub bitiş_değeri: Option<YakınlaştırmaDeğeri>,
+    /// Pencere dışındaki verinin işlenme biçimi (`filterMode`).
+    pub süzme_kipi: YakınlaştırmaSüzmeKipi,
+    /// İsteğe bağlı kutu yerleşimi (`left/top/bottom/width/height`).
+    pub sol: Option<Uzunluk>,
+    pub üst: Option<Uzunluk>,
+    pub alt: Option<Uzunluk>,
+    pub genişlik: Option<Uzunluk>,
+    pub yükseklik: Option<Uzunluk>,
+    /// Veri gölgesi (`showDataShadow`).
+    pub veri_gölgesi: bool,
 }
 
 impl Default for VeriYakınlaştırma {
@@ -29,8 +110,18 @@ impl Default for VeriYakınlaştırma {
         VeriYakınlaştırma {
             tür: YakınlaştırmaTürü::İç,
             x_eksen_sırası: 0,
+            y_eksen_sırası: None,
             başlangıç: 0.0,
             bitiş: 100.0,
+            başlangıç_değeri: None,
+            bitiş_değeri: None,
+            süzme_kipi: YakınlaştırmaSüzmeKipi::Süz,
+            sol: None,
+            üst: None,
+            alt: None,
+            genişlik: None,
+            yükseklik: None,
+            veri_gölgesi: true,
         }
     }
 }
@@ -43,18 +134,94 @@ impl VeriYakınlaştırma {
 
     /// Alt şerit sürgüsü (`'slider'`).
     pub fn sürgü() -> Self {
-        VeriYakınlaştırma { tür: YakınlaştırmaTürü::Sürgü, ..Default::default() }
+        VeriYakınlaştırma {
+            tür: YakınlaştırmaTürü::Sürgü,
+            ..Default::default()
+        }
     }
 
     pub fn x_eksen_sırası(mut self, sıra: usize) -> Self {
         self.x_eksen_sırası = sıra;
+        self.y_eksen_sırası = None;
         self
+    }
+
+    /// Yakınlaştırmayı y eksenine bağlar (`yAxisIndex`); yön dikey olur.
+    pub fn y_eksen_sırası(mut self, sıra: usize) -> Self {
+        self.y_eksen_sırası = Some(sıra);
+        self
+    }
+
+    pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
+        self.sol = Some(sol.into());
+        self
+    }
+
+    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+        self.üst = Some(üst.into());
+        self.alt = None;
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = Some(alt.into());
+        self.üst = None;
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(genişlik.into());
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = Some(yükseklik.into());
+        self
+    }
+
+    pub fn veri_gölgesi(mut self, göster: bool) -> Self {
+        self.veri_gölgesi = göster;
+        self
+    }
+
+    pub fn dikey_mi(&self) -> bool {
+        self.y_eksen_sırası.is_some()
     }
 
     /// Başlangıç penceresi, yüzde.
     pub fn aralık(mut self, başlangıç: f32, bitiş: f32) -> Self {
         self.başlangıç = başlangıç.clamp(0.0, 100.0);
         self.bitiş = bitiş.clamp(self.başlangıç, 100.0);
+        self.başlangıç_değeri = None;
+        self.bitiş_değeri = None;
+        self
+    }
+
+    /// `startValue`.
+    pub fn başlangıç_değeri(mut self, değer: impl Into<YakınlaştırmaDeğeri>) -> Self {
+        self.başlangıç_değeri = Some(değer.into());
+        self
+    }
+
+    /// `endValue`.
+    pub fn bitiş_değeri(mut self, değer: impl Into<YakınlaştırmaDeğeri>) -> Self {
+        self.bitiş_değeri = Some(değer.into());
+        self
+    }
+
+    /// `startValue` / `endValue` çiftini ayarlar.
+    pub fn değer_aralığı(
+        mut self,
+        başlangıç: impl Into<YakınlaştırmaDeğeri>,
+        bitiş: impl Into<YakınlaştırmaDeğeri>,
+    ) -> Self {
+        self.başlangıç_değeri = Some(başlangıç.into());
+        self.bitiş_değeri = Some(bitiş.into());
+        self
+    }
+
+    pub fn süzme_kipi(mut self, kip: YakınlaştırmaSüzmeKipi) -> Self {
+        self.süzme_kipi = kip;
         self
     }
 
@@ -65,6 +232,52 @@ impl VeriYakınlaştırma {
 
     /// Pencere etkin mi (tam açıklıktan farklı mı)?
     pub fn etkin_mi(&self) -> bool {
-        self.başlangıç > 0.001 || self.bitiş < 99.999
+        self.başlangıç_değeri.is_some()
+            || self.bitiş_değeri.is_some()
+            || self.başlangıç > 0.001
+            || self.bitiş < 99.999
+    }
+
+    /// Yüzde ya da değer uçlarını eksenin ham kapsamına çözer. Dönen ilk
+    /// çift değer penceresi, ikinci çift bunun tam kapsamdaki oranlarıdır.
+    pub fn pencere_çöz(
+        &self,
+        kategoriler: &[String],
+        tam_kapsam: [f64; 2],
+    ) -> Option<([f64; 2], (f32, f32))> {
+        if !self.etkin_mi() {
+            return None;
+        }
+        let mut kapsam = tam_kapsam;
+        if !kapsam[0].is_finite() || !kapsam[1].is_finite() || kapsam[1] < kapsam[0] {
+            kapsam = [0.0, 1.0];
+        }
+        let açıklık = (kapsam[1] - kapsam[0]).max(0.0);
+        let yüzde_başı = kapsam[0] + açıklık * f64::from(self.başlangıç) / 100.0;
+        let yüzde_sonu = kapsam[0] + açıklık * f64::from(self.bitiş) / 100.0;
+        let başlangıç = self
+            .başlangıç_değeri
+            .as_ref()
+            .and_then(|değer| değer.çöz(kategoriler))
+            .unwrap_or(yüzde_başı)
+            .clamp(kapsam[0], kapsam[1]);
+        let bitiş = self
+            .bitiş_değeri
+            .as_ref()
+            .and_then(|değer| değer.çöz(kategoriler))
+            .unwrap_or(yüzde_sonu)
+            .clamp(kapsam[0], kapsam[1]);
+        if bitiş < başlangıç {
+            return None;
+        }
+        let oranlar = if açıklık > 0.0 {
+            (
+                ((başlangıç - kapsam[0]) / açıklık) as f32,
+                ((bitiş - kapsam[0]) / açıklık) as f32,
+            )
+        } else {
+            (0.0, 1.0)
+        };
+        Some(([başlangıç, bitiş], oranlar))
     }
 }

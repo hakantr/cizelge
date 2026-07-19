@@ -1,0 +1,19 @@
+{
+  "id": "scatter-effect",
+  "senaryo": "animasyon",
+  "kare": "kare-1",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 238,
+  "değişen_piksel_oranı": 0.0008814814814814815,
+  "ssim": 0.999037986281468,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-effect-kare-1.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-effect-kare-1.png",
+    "fark": "testler/gorsel/fark/default/scatter-effect-kare-1.png"
+  }
+}

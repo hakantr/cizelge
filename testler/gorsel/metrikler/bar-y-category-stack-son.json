@@ -1,0 +1,19 @@
+{
+  "id": "bar-y-category-stack",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1284,
+  "değişen_piksel_oranı": 0.004755555555555555,
+  "ssim": 0.9975223625159136,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-y-category-stack.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-y-category-stack.png",
+    "fark": "testler/gorsel/fark/default/bar-y-category-stack.png"
+  }
+}

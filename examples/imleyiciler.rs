@@ -10,10 +10,14 @@ fn seçenekler() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin("Aylık Üretim"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
-        .ızgara(Izgara::yeni().sol("8%").sağ(90.0).alt(50.0).etiketi_kapsa(true))
-        .x_ekseni(Eksen::kategori().veri([
-            "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu",
-        ]))
+        .ızgara(
+            Izgara::yeni()
+                .sol("8%")
+                .sağ(90.0)
+                .alt(50.0)
+                .etiketi_kapsa(true),
+        )
+        .x_ekseni(Eksen::kategori().veri(["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu"]))
         .y_ekseni(Eksen::değer())
         .seri(
             SütunSerisi::yeni()

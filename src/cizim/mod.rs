@@ -5,21 +5,28 @@
 
 #[cfg(feature = "gpui")]
 pub mod cizici;
+pub mod donusum;
 pub mod gorunum;
+pub mod kayit;
+pub mod olay;
 #[cfg(feature = "gpui")]
 pub mod pencere;
 #[cfg(feature = "png")]
 pub mod piksel;
-pub mod kayit;
-pub mod olay;
+pub mod sahne;
 pub mod svg;
 pub mod yuzey;
 
 #[cfg(feature = "gpui")]
 pub use cizici::Çizici;
-#[cfg(feature = "png")]
-pub use piksel::{png_dışa_aktar, PikselYüzeyi};
+pub use donusum::AfinMatris;
 pub use kayit::KayıtYüzeyi;
-pub use olay::{GrafikOlayı, İsabetBölgesi, İsabetGeometrisi};
-pub use svg::{svg_dışa_aktar, SvgYüzeyi};
-pub use yuzey::{keskin, DikeyHiza, SATIR_ORANI, YatayHiza, Yol, ÇizimYüzeyi};
+pub use olay::{GrafikOlayı, SihirliSeriTürü, İsabetBölgesi, İsabetGeometrisi};
+#[cfg(feature = "png")]
+pub use piksel::{PikselYüzeyi, png_dışa_aktar};
+pub use sahne::{
+    GörselDurum, KırpmaYolu, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
+    SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, YerelDönüşüm, yolu_dönüştür,
+};
+pub use svg::{SvgYüzeyi, svg_dışa_aktar};
+pub use yuzey::{DikeyHiza, SATIR_ORANI, YatayHiza, Yol, keskin, ÇizimYüzeyi};

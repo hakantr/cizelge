@@ -57,7 +57,50 @@ pub fn yüzde_çöz(metin: &str, bütün: f64) -> f64 {
 /// (`+(+x).toFixed(precision)` davranışı).
 pub fn yuvarla(x: f64, hassasiyet: usize) -> f64 {
     let hassasiyet = hassasiyet.min(20);
-    format!("{x:.hassasiyet$}").parse::<f64>().unwrap_or(x)
+    let mut sonuç = format!("{x:.hassasiyet$}").parse::<f64>().unwrap_or(x);
+    if !x.is_finite() || sonuç == x {
+        return sonuç;
+    }
+
+    // Rust biçimleyicisi tam yarıda en yakın çifti seçer; ECMAScript
+    // `Number#toFixed` ise işaretten uzağa yuvarlar. Önce Rust'ın doğru
+    // ikili→ondalık uzaklık kararını koru (2.675 → 2.67), yalnız gerçekten
+    // yarı noktada çift basamağa inmiş sonucu bir birim dışarı taşı.
+    let birim = 10_f64.powi(-(hassasiyet as i32));
+    let tam_yarı = ondalık_yarı_noktası_mı(x, hassasiyet);
+    if tam_yarı && x.is_sign_positive() && sonuç < x {
+        let düzeltilmiş = sonuç + birim;
+        sonuç = format!("{düzeltilmiş:.hassasiyet$}")
+            .parse::<f64>()
+            .unwrap_or(düzeltilmiş);
+    } else if tam_yarı && x.is_sign_negative() && sonuç > x {
+        let düzeltilmiş = sonuç - birim;
+        sonuç = format!("{düzeltilmiş:.hassasiyet$}")
+            .parse::<f64>()
+            .unwrap_or(düzeltilmiş);
+    }
+    sonuç
+}
+
+/// İkili `f64` değerinin `hassasiyet` ondalık basamakta matematiksel olarak
+/// tam yarıya (`n + 0.5`) denk gelip gelmediğini yuvarlamasız sınar.
+fn ondalık_yarı_noktası_mı(x: f64, hassasiyet: usize) -> bool {
+    if !x.is_finite() || x == 0.0 {
+        return false;
+    }
+    let bitler = x.abs().to_bits();
+    let üs_bitleri = ((bitler >> 52) & 0x7ff) as i32;
+    let kesir = bitler & ((1_u64 << 52) - 1);
+    let (mantis, ikili_üs) = if üs_bitleri == 0 {
+        (kesir, -1074)
+    } else {
+        ((1_u64 << 52) | kesir, üs_bitleri - 1023 - 52)
+    };
+    if mantis == 0 {
+        return false;
+    }
+    // x * 2 * 10^p = odd integer ise x*10^p tam olarak n+0.5'tir.
+    ikili_üs + hassasiyet as i32 + 1 + mantis.trailing_zeros() as i32 == 0
 }
 
 /// Değerin anlamlı ondalık basamak sayısı.
@@ -149,7 +192,12 @@ pub fn geçerli_kapsam_sayısı(v: f64) -> bool {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
@@ -172,6 +220,14 @@ mod testler {
     fn hassasiyet_hesabı() {
         assert_eq!(hassasiyet(1.25), 2);
         assert_eq!(hassasiyet(10.0), 0);
+    }
+
+    #[test]
+    fn yuvarlama_javascript_to_fixed_yari_kuralini_izler() {
+        assert_eq!(yuvarla(41.625, 2), 41.63);
+        assert_eq!(yuvarla(-41.625, 2), -41.63);
+        assert_eq!(yuvarla(2.675, 2), 2.67);
+        assert_eq!(yuvarla(48.074999999999996, 2), 48.07);
     }
 
     #[test]

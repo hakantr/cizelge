@@ -1,0 +1,19 @@
+{
+  "id": "data-transform-filter",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1072,
+  "değişen_piksel_oranı": 0.003970370370370371,
+  "ssim": 0.9978395322808227,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/data-transform-filter.png",
+    "gerçek": "testler/gorsel/gerçek/default/data-transform-filter.png",
+    "fark": "testler/gorsel/fark/default/data-transform-filter.png"
+  }
+}

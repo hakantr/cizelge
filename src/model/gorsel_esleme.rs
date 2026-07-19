@@ -2,6 +2,9 @@
 //! değerleri renk şeridine eşler. Sürekli (continuous) kip; parçalı
 //! (piecewise) kip Faz 3'te eklenecektir.
 
+use crate::model::bilesen::Yön;
+use crate::model::veri_kumesi::BoyutSeçici;
+use crate::model::{Uzunluk, YatayKonum};
 use crate::renk::Renk;
 
 /// Parçalı eşlemenin tek dilimi (`visualMap-piecewise` `pieces` öğesi).
@@ -17,7 +20,12 @@ pub struct EşlemeParçası {
 
 impl EşlemeParçası {
     pub fn yeni(en_az: Option<f64>, en_çok: Option<f64>, renk: impl Into<Renk>) -> Self {
-        EşlemeParçası { en_az, en_çok, renk: renk.into(), etiket: None }
+        EşlemeParçası {
+            en_az,
+            en_çok,
+            renk: renk.into(),
+            etiket: None,
+        }
     }
 
     pub fn etiket(mut self, etiket: impl Into<String>) -> Self {
@@ -53,6 +61,18 @@ pub struct GörselEşleme {
     pub en_çok: Option<f64>,
     /// Renk şeridi, düşükten yükseğe (`inRange.color`).
     pub renkler: Vec<Renk>,
+    /// HSL açıklık şeridi (`inRange.colorLightness`). Bu kanal renk
+    /// kanalından farklı olarak öğenin/paletin mevcut rengini değiştirir.
+    pub renk_açıklığı: Option<[f32; 2]>,
+    /// `visualMap.dimension`: seri koordinat değerinden farklı bir dataset
+    /// boyutu da renk kanalını sürebilir.
+    pub boyut: Option<BoyutSeçici>,
+    /// Bileşen yönü (`orient`).
+    pub yön: Yön,
+    pub sol: YatayKonum,
+    pub alt: Uzunluk,
+    /// `(yüksek, düşük)` uç metinleri (`text`). Boşsa sayısal kapsam yazılır.
+    pub metin: Option<(String, String)>,
     /// Bileşen (gradyan çubuğu) çizilsin mi?
     pub göster: bool,
     /// Parçalı kip (`visualMap: piecewise`): boş değilse renkler
@@ -74,6 +94,12 @@ impl Default for GörselEşleme {
                 Renk::onaltılık(0xd88273),
                 Renk::onaltılık(0xbf444c),
             ],
+            renk_açıklığı: None,
+            boyut: None,
+            yön: Yön::Dikey,
+            sol: YatayKonum::Değer(Uzunluk::Piksel(10.0)),
+            alt: Uzunluk::Piksel(10.0),
+            metin: None,
             göster: true,
             parçalar: Vec::new(),
             kapalı_parçalar: Vec::new(),
@@ -98,6 +124,37 @@ impl GörselEşleme {
 
     pub fn renkler<R: Into<Renk>>(mut self, renkler: impl IntoIterator<Item = R>) -> Self {
         self.renkler = renkler.into_iter().map(Into::into).collect();
+        self
+    }
+
+    /// `inRange.colorLightness: [düşük, yüksek]`.
+    pub fn renk_açıklığı(mut self, düşük: f32, yüksek: f32) -> Self {
+        self.renk_açıklığı = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
+        self
+    }
+
+    pub fn boyut(mut self, boyut: impl Into<BoyutSeçici>) -> Self {
+        self.boyut = Some(boyut.into());
+        self
+    }
+
+    pub fn yön(mut self, yön: Yön) -> Self {
+        self.yön = yön;
+        self
+    }
+
+    pub fn sol(mut self, sol: impl Into<YatayKonum>) -> Self {
+        self.sol = sol.into();
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = alt.into();
+        self
+    }
+
+    pub fn metin(mut self, yüksek: impl Into<String>, düşük: impl Into<String>) -> Self {
+        self.metin = Some((yüksek.into(), düşük.into()));
         self
     }
 
@@ -167,10 +224,30 @@ impl GörselEşleme {
             _ => *ilk,
         }
     }
+
+    /// Görsel eşlemeyi mevcut öğe rengine uygular. `colorLightness`,
+    /// ECharts'ta bağımsız bir kısmi renk kanalıdır ve seri `itemStyle.color`
+    /// değerinin ton/doygunluğunu korur.
+    pub fn renk_çöz_tabanla(&self, değer: f64, kapsam: [f64; 2], taban: Renk) -> Renk {
+        let Some([düşük, yüksek]) = self.renk_açıklığı else {
+            return self.renk_çöz(değer, kapsam);
+        };
+        let oran = if kapsam[1] > kapsam[0] {
+            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
+        } else {
+            0.0
+        };
+        taban.açıklık_ile(düşük + (yüksek - düşük) * oran)
+    }
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
@@ -187,5 +264,18 @@ mod testler {
         let e = GörselEşleme::yeni().renkler([0x000000u32, 0xffffffu32]);
         let orta = e.renk_çöz(5.0, [0.0, 10.0]);
         assert!((orta.kırmızı - 0.5).abs() < 1e-4);
+    }
+
+    #[test]
+    fn açıklık_kanalı_taban_rengin_tonunu_korur() {
+        let e = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(10.0)
+            .renk_açıklığı(0.0, 1.0);
+        let taban = Renk::onaltılık(0xc23531);
+        assert_eq!(e.renk_çöz_tabanla(0.0, [0.0, 10.0], taban), Renk::SİYAH);
+        assert_eq!(e.renk_çöz_tabanla(10.0, [0.0, 10.0], taban), Renk::BEYAZ);
+        let orta = e.renk_çöz_tabanla(5.0, [0.0, 10.0], taban);
+        assert!(orta.kırmızı > orta.yeşil && orta.yeşil > orta.mavi);
     }
 }

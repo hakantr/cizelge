@@ -27,17 +27,76 @@ pub enum EksenKonumu {
     Sağ,
 }
 
+/// Eksen adının eksen boyunca yerleşimi (`nameLocation`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum EksenAdKonumu {
+    Başlangıç,
+    Orta,
+    #[default]
+    Bitiş,
+}
+
+/// `axisLine.onZero`: sıfırda kesişme davranışı.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum EksenSıfırKipi {
+    /// ECharts 6.1 öntanımlısı (`'auto'`).
+    #[default]
+    Otomatik,
+    Açık,
+    Kapalı,
+}
+
 /// Eksen çizgisi (`axisLine`).
 #[derive(Clone, PartialEq, Debug)]
 pub struct EksenÇizgisi {
     pub göster: Option<bool>,
+    pub sıfır: EksenSıfırKipi,
+    /// Kesişilecek dik eksen sırası (`axisLine.onZeroAxisIndex`).
+    pub sıfır_eksen_sırası: Option<usize>,
     pub renk: Option<Renk>,
     pub kalınlık: f32,
 }
 
 impl Default for EksenÇizgisi {
     fn default() -> Self {
-        EksenÇizgisi { göster: None, renk: None, kalınlık: 1.0 }
+        EksenÇizgisi {
+            göster: None,
+            sıfır: EksenSıfırKipi::Otomatik,
+            sıfır_eksen_sırası: None,
+            renk: None,
+            kalınlık: 1.0,
+        }
+    }
+}
+
+impl EksenÇizgisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = Some(göster);
+        self
+    }
+
+    pub fn sıfır(mut self, kip: EksenSıfırKipi) -> Self {
+        self.sıfır = kip;
+        self
+    }
+
+    pub fn sıfır_eksen_sırası(mut self, sıra: usize) -> Self {
+        self.sıfır_eksen_sırası = Some(sıra);
+        self
+    }
+
+    pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
+        self.renk = Some(renk.into());
+        self
+    }
+
+    pub fn kalınlık(mut self, kalınlık: f32) -> Self {
+        self.kalınlık = kalınlık.max(0.0);
+        self
     }
 }
 
@@ -53,7 +112,11 @@ pub struct EksenÇentiği {
 
 impl Default for EksenÇentiği {
     fn default() -> Self {
-        EksenÇentiği { göster: None, uzunluk: 5.0, etiketle_hizala: false }
+        EksenÇentiği {
+            göster: None,
+            uzunluk: 5.0,
+            etiketle_hizala: false,
+        }
     }
 }
 
@@ -65,11 +128,65 @@ pub struct EksenEtiketi {
     pub biçimleyici: Option<Biçimleyici>,
     /// Etiket ile eksen arasındaki boşluk (`axisLabel.margin`).
     pub boşluk: f32,
+    /// Derece cinsinden dönüş (`axisLabel.rotate`); pozitif değer ECharts
+    /// Canvas koordinatında saat yönünün tersine döner.
+    pub döndürme: f32,
+    /// Açık kategori aralığı (`axisLabel.interval`): `0` bütün etiketler,
+    /// `1` birer atlayarak. `None`, ECharts'ın otomatik hesabıdır.
+    pub aralık: Option<usize>,
 }
 
 impl Default for EksenEtiketi {
     fn default() -> Self {
-        EksenEtiketi { göster: true, yazı: YazıStili::default(), biçimleyici: None, boşluk: 8.0 }
+        EksenEtiketi {
+            göster: true,
+            yazı: YazıStili::default(),
+            biçimleyici: None,
+            boşluk: 8.0,
+            döndürme: 0.0,
+            aralık: None,
+        }
+    }
+}
+
+impl EksenEtiketi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
+    }
+
+    pub fn yazı(mut self, yazı: YazıStili) -> Self {
+        self.yazı = yazı;
+        self
+    }
+
+    pub fn biçimleyici(mut self, biçimleyici: impl Into<Biçimleyici>) -> Self {
+        self.biçimleyici = Some(biçimleyici.into());
+        self
+    }
+
+    pub fn boşluk(mut self, boşluk: f32) -> Self {
+        self.boşluk = boşluk.max(0.0);
+        self
+    }
+
+    pub fn döndür(mut self, derece: f32) -> Self {
+        self.döndürme = if derece.is_finite() { derece } else { 0.0 };
+        self
+    }
+
+    pub fn aralık(mut self, atlanan: usize) -> Self {
+        self.aralık = Some(atlanan);
+        self
+    }
+
+    pub fn otomatik_aralık(mut self) -> Self {
+        self.aralık = None;
+        self
     }
 }
 
@@ -85,7 +202,11 @@ pub struct AraÇentik {
 
 impl Default for AraÇentik {
     fn default() -> Self {
-        AraÇentik { göster: false, bölme_sayısı: 5, uzunluk: 3.0 }
+        AraÇentik {
+            göster: false,
+            bölme_sayısı: 5,
+            uzunluk: 3.0,
+        }
     }
 }
 
@@ -111,7 +232,11 @@ pub struct BölmeÇizgisi {
 
 impl Default for BölmeÇizgisi {
     fn default() -> Self {
-        BölmeÇizgisi { göster: None, renk: None, tür: ÇizgiTürü::Düz }
+        BölmeÇizgisi {
+            göster: None,
+            renk: None,
+            tür: ÇizgiTürü::Düz,
+        }
     }
 }
 
@@ -120,6 +245,9 @@ impl Default for BölmeÇizgisi {
 pub struct Eksen {
     pub tür: EksenTürü,
     pub ad: Option<String>,
+    pub ad_konumu: EksenAdKonumu,
+    /// Eksen çizgisi ile eksen adı arasındaki boşluk (`nameGap`).
+    pub ad_boşluğu: f32,
     /// Kategori ekseni verisi.
     pub veri: Vec<String>,
     /// Kategori ekseninde uçlarda yarım bant boşluğu bırakılsın mı
@@ -142,6 +270,8 @@ pub struct Eksen {
     pub log_tabanı: f64,
     pub ters: bool,
     pub konum: Option<EksenKonumu>,
+    /// Ekseni seçilen kenardan dışarı taşır (`offset`).
+    pub kaydırma: f32,
     /// Bağlı olduğu ızgaranın `ızgaralar` listesindeki sırası
     /// (`gridIndex`).
     pub ızgara_sırası: usize,
@@ -162,6 +292,8 @@ impl Default for Eksen {
         Eksen {
             tür: EksenTürü::Değer,
             ad: None,
+            ad_konumu: EksenAdKonumu::Bitiş,
+            ad_boşluğu: 15.0,
             veri: Vec::new(),
             kenar_boşluğu: None,
             en_az: None,
@@ -174,13 +306,17 @@ impl Default for Eksen {
             log_tabanı: 10.0,
             ters: false,
             konum: None,
+            kaydırma: 0.0,
             ızgara_sırası: 0,
             çizgi: EksenÇizgisi::default(),
             çentik: EksenÇentiği::default(),
             ara_çentik: AraÇentik::default(),
             etiket: EksenEtiketi::default(),
             bölme_çizgisi: BölmeÇizgisi::default(),
-            ara_bölme_çizgisi: BölmeÇizgisi { göster: Some(false), ..Default::default() },
+            ara_bölme_çizgisi: BölmeÇizgisi {
+                göster: Some(false),
+                ..Default::default()
+            },
             bölme_alanı: BölmeAlanı::default(),
         }
     }
@@ -189,26 +325,49 @@ impl Default for Eksen {
 impl Eksen {
     /// Sayısal değer ekseni.
     pub fn değer() -> Self {
-        Eksen { tür: EksenTürü::Değer, ..Default::default() }
+        Eksen {
+            tür: EksenTürü::Değer,
+            ..Default::default()
+        }
     }
 
     /// Kategori ekseni.
     pub fn kategori() -> Self {
-        Eksen { tür: EksenTürü::Kategori, ..Default::default() }
+        Eksen {
+            tür: EksenTürü::Kategori,
+            ..Default::default()
+        }
     }
 
     /// Zaman ekseni.
     pub fn zaman() -> Self {
-        Eksen { tür: EksenTürü::Zaman, ..Default::default() }
+        Eksen {
+            tür: EksenTürü::Zaman,
+            ..Default::default()
+        }
     }
 
     /// Logaritmik eksen.
     pub fn log() -> Self {
-        Eksen { tür: EksenTürü::Log, sıfırı_içer: false, ..Default::default() }
+        Eksen {
+            tür: EksenTürü::Log,
+            sıfırı_içer: false,
+            ..Default::default()
+        }
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
         self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn ad_konumu(mut self, konum: EksenAdKonumu) -> Self {
+        self.ad_konumu = konum;
+        self
+    }
+
+    pub fn ad_boşluğu(mut self, boşluk: f32) -> Self {
+        self.ad_boşluğu = if boşluk.is_finite() { boşluk } else { 15.0 };
         self
     }
 
@@ -271,6 +430,15 @@ impl Eksen {
 
     pub fn konum(mut self, konum: EksenKonumu) -> Self {
         self.konum = Some(konum);
+        self
+    }
+
+    pub fn kaydırma(mut self, piksel: f32) -> Self {
+        self.kaydırma = if piksel.is_finite() {
+            piksel.max(0.0)
+        } else {
+            0.0
+        };
         self
     }
 
@@ -345,18 +513,16 @@ impl Eksen {
     /// kapalıdır ama kartezyen ızgarada alt eksen çizgisi beklenir; burada
     /// kategori/zamanda açık, değer/logda kapalı bırakılır).
     pub fn çizgi_görünür_mü(&self) -> bool {
-        self.çizgi.göster.unwrap_or(matches!(
-            self.tür,
-            EksenTürü::Kategori | EksenTürü::Zaman
-        ))
+        self.çizgi
+            .göster
+            .unwrap_or(matches!(self.tür, EksenTürü::Kategori | EksenTürü::Zaman))
     }
 
     /// Çentik öntanımlı görünürlüğü: yalnızca kategori/zaman eksenlerinde.
     pub fn çentik_görünür_mü(&self) -> bool {
-        self.çentik.göster.unwrap_or(matches!(
-            self.tür,
-            EksenTürü::Kategori | EksenTürü::Zaman
-        ))
+        self.çentik
+            .göster
+            .unwrap_or(matches!(self.tür, EksenTürü::Kategori | EksenTürü::Zaman))
     }
 
     /// Bölme çizgisi öntanımlı görünürlüğü: kategori dışındaki eksenlerde.

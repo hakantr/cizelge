@@ -13,6 +13,81 @@ on:
   pull_request:
 
 jobs:
+  uyum-envanteri:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cizelge
+        uses: actions/checkout@v4
+        with:
+          path: cizelge
+      - name: Kilitli Apache ECharts
+        uses: actions/checkout@v4
+        with:
+          repository: apache/echarts
+          ref: 74e9e09a0b5687fdd34319121ac73b3022d1483c
+          path: echarts
+      - name: Kilitli Apache ECharts örnekleri
+        uses: actions/checkout@v4
+        with:
+          repository: apache/echarts-examples
+          ref: 1ff3451941535c51af83eacd504035ef4bfd7d0d
+          path: echarts-examples
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cizelge/tools/uyum/package-lock.json
+      - name: Uyum üreticisi bağımlılıkları
+        working-directory: cizelge
+        run: npm --prefix tools/uyum ci
+      - name: Kaynak kilidi, kapsam ve üretilmiş envanter
+        working-directory: cizelge
+        run: npm --prefix tools/uyum run denetle
+
+  gorsel-uyum:
+    # PikselYüzeyi ve kilitli referans profili Arial kullandığı için görsel
+    # kapı, fontun sistemde sabit bulunduğu macOS profilinde çalışır.
+    runs-on: macos-latest
+    steps:
+      - name: Cizelge
+        uses: actions/checkout@v4
+        with:
+          path: cizelge
+      - name: Kilitli Apache ECharts
+        uses: actions/checkout@v4
+        with:
+          repository: apache/echarts
+          ref: 74e9e09a0b5687fdd34319121ac73b3022d1483c
+          path: echarts
+      - name: Kilitli Apache ECharts örnekleri
+        uses: actions/checkout@v4
+        with:
+          repository: apache/echarts-examples
+          ref: 1ff3451941535c51af83eacd504035ef4bfd7d0d
+          path: echarts-examples
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cizelge/tools/uyum/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Görsel araç bağımlılıkları
+        working-directory: cizelge
+        run: npm --prefix tools/uyum ci
+      - name: Kilitli referanslara karşı görsel kapı
+        working-directory: cizelge
+        run: npm --prefix tools/uyum run kanıt -- --enforce
+      - name: Görsel kanıt raporu
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cizelge-gorsel-uyum
+          path: |
+            cizelge/testler/gorsel/gerçek
+            cizelge/testler/gorsel/fark
+            cizelge/testler/gorsel/metrikler
+            cizelge/testler/gorsel/rapor
+
   cekirdek:
     runs-on: ubuntu-latest
     steps:

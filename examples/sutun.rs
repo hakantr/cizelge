@@ -15,7 +15,13 @@ fn seçenekler() -> GrafikSeçenekleri {
                 .imleç(İmleçTürü::Gölge),
         )
         .gösterge(Gösterge::yeni().üst(28.0))
-        .ızgara(Izgara::yeni().sol("6%").sağ("4%").alt(45.0).etiketi_kapsa(true))
+        .ızgara(
+            Izgara::yeni()
+                .sol("6%")
+                .sağ("4%")
+                .alt(45.0)
+                .etiketi_kapsa(true),
+        )
         .x_ekseni(Eksen::kategori().veri([
             "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara",
         ]))
@@ -36,18 +42,12 @@ fn seçenekler() -> GrafikSeçenekleri {
                 ])
                 .öğe_stili(ÖğeStili::yeni().kenarlık_yarıçapı([3.0, 3.0, 0.0, 0.0])),
         )
-        .seri(
-            SütunSerisi::yeni()
-                .ad("Sulama")
-                .yığın("kaynak")
-                .veri([12.0, 14.0, 18.0, 22.0, 26.0, 32.0, 41.0, 44.0, 28.0, 16.0, 9.0, 11.0]),
-        )
-        .seri(
-            SütunSerisi::yeni()
-                .ad("Şebeke")
-                .yığın("kaynak")
-                .veri([8.0, 9.5, 12.0, 15.5, 18.0, 22.5, 29.0, 31.0, 19.5, 11.0, 6.5, 7.5]),
-        )
+        .seri(SütunSerisi::yeni().ad("Sulama").yığın("kaynak").veri([
+            12.0, 14.0, 18.0, 22.0, 26.0, 32.0, 41.0, 44.0, 28.0, 16.0, 9.0, 11.0,
+        ]))
+        .seri(SütunSerisi::yeni().ad("Şebeke").yığın("kaynak").veri([
+            8.0, 9.5, 12.0, 15.5, 18.0, 22.5, 29.0, 31.0, 19.5, 11.0, 6.5, 7.5,
+        ]))
 }
 
 fn main() {

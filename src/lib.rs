@@ -25,7 +25,10 @@
 
 pub mod animasyon;
 pub mod bilesen;
+pub mod calisma_zamani;
 pub mod cizim;
+pub mod eylem;
+pub mod genisletme;
 pub mod grafik;
 pub mod hata;
 pub mod koordinat;
@@ -33,100 +36,186 @@ pub mod model;
 pub mod olcek;
 pub mod renk;
 pub mod tema;
-pub mod yerel;
 pub mod yardimci;
+pub mod yerel;
 pub mod yerlesim;
+pub mod zamanlayici;
 
+pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
+pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
+pub use calisma_zamani::{
+    BileşikSeçenekler, GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu,
+    SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
+    ÖrnekBaşlatmaSeçenekleri,
+};
 pub use cizim::gorunum::{
-    grafiği_boya, AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, SürgüBölgesi,
-    SürgüParçası, İçYakınlaştırmaAlanı,
+    AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, SürgüBölgesi, SürgüParçası, grafiği_boya,
+    İçYakınlaştırmaAlanı,
 };
 #[cfg(feature = "gpui")]
 pub use cizim::pencere::GrafikGörünümü;
 #[cfg(feature = "png")]
-pub use cizim::piksel::{png_dışa_aktar, PikselYüzeyi};
+pub use cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use cizim::{
-    svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi, İsabetBölgesi,
-    İsabetGeometrisi,
+    AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, OdakKapsamı, Sahne, SahneDüğümü,
+    SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti,
+    SahneŞekli, SihirliSeriTürü, SvgYüzeyi, YerelDönüşüm, svg_dışa_aktar, yolu_dönüştür,
+    ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
+};
+pub use eylem::{
+    BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
+    OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, eksen_imleci_eylemini_kaydet,
+    geri_yükleme_eylemini_kaydet, gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet,
+    öntanımlı_eylemleri_kaydet,
+};
+pub use genisletme::{
+    Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
+    KoordinatSistemiÜreticisi, SeçenekÖnİşleyicisi, YüklemeGirdisi, YüklemeKayıtDefteri,
+    YüklemeÇizicisi, ÖnİşlemeKayıtDefteri, ÖzelKoordinatSistemi,
 };
 pub use hata::{BilesenHatasi, BilesenTanisi};
-pub use model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu};
+pub use model::agac::AğaçDüğümü;
+pub use model::bilesen::{
+    AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, Gösterge, GöstergeSeçimKipi,
+    Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
+};
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
-    AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü,
-    EksenÇentiği, EksenÇizgisi,
-};
-pub use model::imleyici::{
-    İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
-    İmÇizgisi, İmÇizgisiTanımı,
+    AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenAdKonumu, EksenEtiketi, EksenKonumu,
+    EksenSıfırKipi, EksenTürü, EksenÇentiği, EksenÇizgisi,
 };
 pub use model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
-pub use model::agac::AğaçDüğümü;
+pub use model::hatlar::{
+    HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
+};
+pub use model::imleyici::{
+    İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler, İmÇizgisi,
+    İmÇizgisiParçası, İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
+};
 pub use model::kutupsal::KutupsalKoordinat;
+pub use model::matris::{
+    MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisGövdeHücresi, MatrisKonumu,
+    MatrisKoordinatı,
+};
 pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
-pub use model::veri_kumesi::VeriKümesi;
-pub use model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
 pub use model::seri::{
-    AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
-    GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, KirişSerisi, ParalelBoyut, ParalelSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
-    SankeyBağı, SankeySerisi, TakvimSerisi, TemaNehriSerisi,
-    IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
-    Piktogram, SaçılımSerisi, Sembol, Seri, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
-    SütunSerisi, ÇizgiSerisi,
+    AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
+    EtiketÇizgisi, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, GöstergeSaatiSerisi, GülTürü,
+    GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
+    MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarSerisi, SankeyBağı,
+    SankeySerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi,
+    ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
 };
 pub use model::stil::{
-    AlanStili, Biçimleyici, Etiket, EtiketKonumu, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili,
+    AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
+    YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü, ÖğeStili,
 };
-pub use model::Uzunluk;
-pub use renk::{Dolgu, Renk, RenkDurağı};
-pub use yerel::{Yerel, TÜRKÇE, İNGİLİZCE};
-pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
-pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
+pub use model::takvim::{TakvimAralığı, TakvimKoordinatı, TakvimYönü};
+pub use model::veri_kumesi::{
+    BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi, KaynakBaşlığı,
+    KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, SeriYerleşimi, SüzmeDönüşümü,
+    SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni, ToplamaBoyutu,
+    ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü, VeriKaynağı,
+    VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
+};
+pub use model::yakinlastirma::{
+    VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,
+};
+pub use model::{DikeyKonum, Uzunluk, YatayKonum};
+pub use renk::{DesenTekrarı, Dolgu, GörüntüDeseni, Renk, RenkDurağı};
+pub use yerel::{TÜRKÇE, Yerel, İNGİLİZCE};
+pub use zamanlayici::{
+    AdımSonucu, ArtımlıGörev, GörevAşaması, GörevBağlamı, Görevİlerlemesi, Zamanlayıcı,
+    ZamanlayıcıDurumu,
+};
 
 /// Sık kullanılan tiplerin topluca içe aktarımı (ECharts'taki `echarts` ana
 /// girişinin karşılığı).
 pub mod hazir {
-    pub use crate::cizim::gorunum::{grafiği_boya, BoyamaGirdisi, BoyamaÇıktısı};
+    pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
+    pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
+    pub use crate::calisma_zamani::{
+        BileşikSeçenekler, GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu,
+        SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
+        ÖrnekBaşlatmaSeçenekleri,
+    };
+    pub use crate::cizim::gorunum::{BoyamaGirdisi, BoyamaÇıktısı, grafiği_boya};
     #[cfg(feature = "gpui")]
     pub use crate::cizim::pencere::GrafikGörünümü;
     #[cfg(feature = "png")]
-    pub use crate::cizim::piksel::{png_dışa_aktar, PikselYüzeyi};
-    pub use crate::cizim::{svg_dışa_aktar, GrafikOlayı, KayıtYüzeyi, SvgYüzeyi, ÇizimYüzeyi};
+    pub use crate::cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
+    pub use crate::cizim::{
+        AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, OdakKapsamı, Sahne,
+        SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
+        Sahneİsabeti, SahneŞekli, SvgYüzeyi, YerelDönüşüm, svg_dışa_aktar, yolu_dönüştür,
+        ÇizimYüzeyi,
+    };
+    pub use crate::eylem::{
+        BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
+        OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
+        eksen_imleci_eylemini_kaydet, geri_yükleme_eylemini_kaydet, gösterge_eylemlerini_kaydet,
+        veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+    };
+    pub use crate::genisletme::{
+        Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
+        KoordinatSistemiÜreticisi, SeçenekÖnİşleyicisi, YüklemeGirdisi, YüklemeKayıtDefteri,
+        YüklemeÇizicisi, ÖnİşlemeKayıtDefteri, ÖzelKoordinatSistemi,
+    };
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
+    pub use crate::model::agac::AğaçDüğümü;
     pub use crate::model::bilesen::{
-        AraçKutusu, Başlık, Fırça, Gösterge, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
+        AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, Gösterge,
+        GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{
-        AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenEtiketi, EksenKonumu, EksenTürü,
-        EksenÇentiği, EksenÇizgisi,
+        AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenAdKonumu, EksenEtiketi, EksenKonumu,
+        EksenSıfırKipi, EksenTürü, EksenÇentiği, EksenÇizgisi,
+    };
+    pub use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
+    pub use crate::model::hatlar::{
+        HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
     };
     pub use crate::model::imleyici::{
         İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
-        İmÇizgisi, İmÇizgisiTanımı,
+        İmÇizgisi, İmÇizgisiParçası, İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
     };
-    pub use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
-    pub use crate::model::agac::AğaçDüğümü;
     pub use crate::model::kutupsal::KutupsalKoordinat;
+    pub use crate::model::matris::{
+        MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisGövdeHücresi, MatrisKonumu,
+        MatrisKoordinatı,
+    };
     pub use crate::model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
     pub use crate::model::secenekler::GrafikSeçenekleri;
-    pub use crate::model::veri_kumesi::VeriKümesi;
-    pub use crate::model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaTürü};
     pub use crate::model::seri::{
-        AğaçHaritasıSerisi, AğaçSerisi, Basamak, GülTürü, GüneşPatlamasıSerisi, GöstergeSaatiSerisi,
-    GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, KirişSerisi, ParalelBoyut, ParalelSerisi, HuniSerisi, HuniSıralaması, RadarSerisi,
-    SankeyBağı, SankeySerisi, TakvimSerisi, TemaNehriSerisi,
-    IsıHaritasıSerisi, KutuSerisi, MumSerisi, PastaSerisi,
-    Piktogram, SaçılımSerisi, Sembol, Seri, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
-    SütunSerisi, ÇizgiSerisi,
+        AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
+        EtiketÇizgisi, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, GöstergeSaatiSerisi, GülTürü,
+        GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması, IsıHaritasıSerisi, KirişSerisi,
+        KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarSerisi,
+        SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, TakvimSerisi,
+        TemaNehriSerisi, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
     };
     pub use crate::model::stil::{
-        AlanStili, Biçimleyici, Etiket, EtiketKonumu, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili,
+        AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,
+        EtiketYaması, YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü, ÖğeStili,
     };
-    pub use crate::model::Uzunluk;
-    pub use crate::yerel::{Yerel, TÜRKÇE, İNGİLİZCE};
-    pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
-    pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
-    pub use crate::renk::{Dolgu, Renk, RenkDurağı};
+    pub use crate::model::takvim::{TakvimAralığı, TakvimKoordinatı, TakvimYönü};
+    pub use crate::model::veri_kumesi::{
+        BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi,
+        KaynakBaşlığı, KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, SeriYerleşimi,
+        SüzmeDönüşümü, SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni,
+        ToplamaBoyutu, ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü,
+        VeriKaynağı, VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
+    };
+    pub use crate::model::yakinlastirma::{
+        VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,
+    };
+    pub use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
+    pub use crate::renk::{DesenTekrarı, Dolgu, GörüntüDeseni, Renk, RenkDurağı};
+    pub use crate::yerel::{TÜRKÇE, Yerel, İNGİLİZCE};
+    pub use crate::zamanlayici::{
+        AdımSonucu, ArtımlıGörev, GörevAşaması, GörevBağlamı, Görevİlerlemesi, Zamanlayıcı,
+        ZamanlayıcıDurumu,
+    };
 }

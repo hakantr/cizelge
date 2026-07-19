@@ -46,8 +46,8 @@ pub fn sütun_yerleşimi(
     let mut kalan_genişlik = bant_genişliği;
     let mut otomatik_sayısı: usize = 0;
     let mut kategori_boşluğu_seçeneği: Option<Uzunluk> = None;
-    // ECharts: ilk serinin `defaultBarGap`i %30'dur.
-    let mut sütun_boşluğu_oranı: f32 = 0.3;
+    // Kilitli ECharts sürümünde BaseBarSeries `defaultBarGap: '10%'`.
+    let mut sütun_boşluğu_oranı: f32 = 0.1;
 
     let mut yığın_sırası: Vec<String> = Vec::new();
     let mut yığınlar: HashMap<String, YığınBilgisi> = HashMap::new();
@@ -61,20 +61,24 @@ pub fn sütun_yerleşimi(
         let yığın = yığınlar.entry(kimlik.clone()).or_default();
 
         if let Some(g) = uzunluk_çöz(&bilgi.genişlik, bant_genişliği)
-            && yığın.genişlik == 0.0 && g > 0.0 {
-                // #6312: genişlik burada kısıtlanmaz.
-                yığın.genişlik = g;
-                let kırpılmış = g.min(kalan_genişlik);
-                kalan_genişlik -= kırpılmış;
-            }
+            && yığın.genişlik == 0.0
+            && g > 0.0
+        {
+            // #6312: genişlik burada kısıtlanmaz.
+            yığın.genişlik = g;
+            let kırpılmış = g.min(kalan_genişlik);
+            kalan_genişlik -= kırpılmış;
+        }
         if let Some(eç) = uzunluk_çöz(&bilgi.en_çok_genişlik, bant_genişliği)
-            && eç > 0.0 {
-                yığın.en_çok = eç;
-            }
+            && eç > 0.0
+        {
+            yığın.en_çok = eç;
+        }
         if let Some(ea) = uzunluk_çöz(&bilgi.en_az_genişlik, bant_genişliği)
-            && ea > 0.0 {
-                yığın.en_az = Some(ea);
-            }
+            && ea > 0.0
+        {
+            yığın.en_az = Some(ea);
+        }
         if let Some(b) = &bilgi.sütun_boşluğu {
             sütun_boşluğu_oranı = b.çöz(1.0);
         }
@@ -99,7 +103,9 @@ pub fn sütun_yerleşimi(
 
     // Otomatik genişliğin en çok / en az sınırlarını aşan sütunları sabitle.
     for kimlik in &yığın_sırası {
-        let Some(yığın) = yığınlar.get_mut(kimlik) else { continue };
+        let Some(yığın) = yığınlar.get_mut(kimlik) else {
+            continue;
+        };
         if yığın.genişlik == 0.0 {
             let mut son_genişlik = otomatik_genişlik;
             if yığın.en_çok > 0.0 && yığın.en_çok < son_genişlik {
@@ -107,9 +113,10 @@ pub fn sütun_yerleşimi(
             }
             // `minWidth` önceliklidir: sütunun görünür kalmasını belirler.
             if let Some(ea) = yığın.en_az
-                && ea > son_genişlik {
-                    son_genişlik = ea;
-                }
+                && ea > son_genişlik
+            {
+                son_genişlik = ea;
+            }
             if son_genişlik != otomatik_genişlik {
                 yığın.genişlik = son_genişlik;
                 kalan_genişlik -= son_genişlik + sütun_boşluğu_oranı * son_genişlik;
@@ -138,7 +145,9 @@ pub fn sütun_yerleşimi(
     let mut genişlik_toplamı = 0.0;
     let mut son_genişlik = 0.0;
     for kimlik in &yığın_sırası {
-        let Some(yığın) = yığınlar.get_mut(kimlik) else { continue };
+        let Some(yığın) = yığınlar.get_mut(kimlik) else {
+            continue;
+        };
         if yığın.genişlik == 0.0 {
             yığın.genişlik = otomatik_genişlik;
         }
@@ -152,10 +161,15 @@ pub fn sütun_yerleşimi(
     let mut sonuç = HashMap::new();
     let mut kaydırma = -genişlik_toplamı / 2.0;
     for kimlik in &yığın_sırası {
-        let Some(yığın) = yığınlar.get(kimlik) else { continue };
+        let Some(yığın) = yığınlar.get(kimlik) else {
+            continue;
+        };
         sonuç.insert(
             kimlik.clone(),
-            SütunKonumu { kaydırma, genişlik: yığın.genişlik },
+            SütunKonumu {
+                kaydırma,
+                genişlik: yığın.genişlik,
+            },
         );
         kaydırma += yığın.genişlik * (1.0 + sütun_boşluğu_oranı);
     }
@@ -163,7 +177,12 @@ pub fn sütun_yerleşimi(
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 

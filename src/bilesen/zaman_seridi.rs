@@ -3,7 +3,7 @@
 //! Kare listesi ve oynatma durumu görünüm katmanında tutulur
 //! (`GrafikGörünümü::film`); burası yalnız çizim ve isabet kutularıdır.
 
-use crate::cizim::{keskin, ÇizimYüzeyi, Yol};
+use crate::cizim::{Yol, keskin, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::renk::Dolgu;
 use crate::tema;
@@ -85,11 +85,20 @@ pub fn zaman_şeridi_çiz(
         0.0
     };
     for sıra in 0..toplam {
-        let x = if toplam > 1 { sol + sıra as f32 * adım } else { (sol + sağ) / 2.0 };
+        let x = if toplam > 1 {
+            sol + sıra as f32 * adım
+        } else {
+            (sol + sağ) / 2.0
+        };
         let seçili = sıra == geçerli;
         if seçili {
             // Geçerli kare: dolu + halka vurgusu.
-            yüzey.daire((x, orta_y), 7.5, Some(&Dolgu::Düz(vurgu.opaklık(0.25))), None);
+            yüzey.daire(
+                (x, orta_y),
+                7.5,
+                Some(&Dolgu::Düz(vurgu.opaklık(0.25))),
+                None,
+            );
             yüzey.daire((x, orta_y), 5.0, Some(&Dolgu::Düz(vurgu)), None);
         } else {
             yüzey.daire(

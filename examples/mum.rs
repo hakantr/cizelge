@@ -10,7 +10,13 @@ fn seçenekler() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin("Hisse Fiyatı"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
-        .ızgara(Izgara::yeni().sol("8%").sağ("6%").alt(50.0).etiketi_kapsa(true))
+        .ızgara(
+            Izgara::yeni()
+                .sol("8%")
+                .sağ("6%")
+                .alt(50.0)
+                .etiketi_kapsa(true),
+        )
         .x_ekseni(Eksen::kategori().veri([
             "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz", "Pzt2", "Sal2", "Çar2",
         ]))

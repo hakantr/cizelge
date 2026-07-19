@@ -2,13 +2,13 @@
 //! `poly.ts` içindeki yumuşak eğri algoritmasının portu.
 
 use crate::cizim::{Yol, ÇizimYüzeyi};
-use crate::grafik::{sembol_çiz, çizgi_stili_çöz};
+use crate::grafik::{sembol_stilli_çiz, çizgi_stili_çöz};
 use crate::koordinat::Kartezyen2B;
 use crate::model::seri::{Basamak, ÇizgiSerisi, Örnekleme};
 use crate::model::stil::EtiketKonumu;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
-use crate::yardimci::bicim::binlik_ayır;
+use crate::yardimci::bicim::ondalık_kırp;
 use crate::yerlesim::yigin::YığınAralığı;
 
 /// Boş değerleri `None` olan piksel noktası listesi.
@@ -20,15 +20,22 @@ pub fn nokta_listeleri(
     kartezyen: &Kartezyen2B,
     aralıklar: &[YığınAralığı],
 ) -> (NoktaListesi, NoktaListesi) {
+    let yatay_değer_serisi = kartezyen.y.ölçek.kategorik_mi() && !kartezyen.x.ölçek.kategorik_mi();
     let mut tepeler = Vec::with_capacity(seri.veri.len());
     let mut tabanlar = Vec::with_capacity(seri.veri.len());
     for (i, öğe) in seri.veri.iter().enumerate() {
         let x_değeri = öğe.değer.x().unwrap_or(i as f64);
         match aralıklar.get(i).copied().flatten() {
             Some((taban, tepe)) => {
-                let x = kartezyen.x.veriden_piksele(x_değeri);
-                tepeler.push(Some((x, kartezyen.y.veriden_piksele(tepe))));
-                tabanlar.push(Some((x, kartezyen.y.veriden_piksele(taban))));
+                if yatay_değer_serisi {
+                    let y = kartezyen.y.veriden_piksele(i as f64);
+                    tepeler.push(Some((kartezyen.x.veriden_piksele(tepe), y)));
+                    tabanlar.push(Some((kartezyen.x.veriden_piksele(taban), y)));
+                } else {
+                    let x = kartezyen.x.veriden_piksele(x_değeri);
+                    tepeler.push(Some((x, kartezyen.y.veriden_piksele(tepe))));
+                    tabanlar.push(Some((x, kartezyen.y.veriden_piksele(taban))));
+                }
             }
             None => {
                 tepeler.push(None);
@@ -68,7 +75,9 @@ pub fn yumuşak_parça_ekle(
     let mut önceki = ilk;
 
     for i in 1..noktalar.len() {
-        let Some(&şimdiki) = noktalar.get(i) else { break };
+        let Some(&şimdiki) = noktalar.get(i) else {
+            break;
+        };
         let (öx, öy) = (önceki.0 as f64, önceki.1 as f64);
         let (x, y) = (şimdiki.0 as f64, şimdiki.1 as f64);
         let sonraki = noktalar.get(i + 1);
@@ -194,7 +203,9 @@ pub fn ortalama_örnekle(noktalar: &[(f32, f32)], hedef: usize) -> Vec<(f32, f32
     (0..hedef)
         .filter_map(|k| {
             let başı = (k as f64 * kova_boyu).floor() as usize;
-            let sonu = (((k + 1) as f64 * kova_boyu).floor() as usize).min(n).max(başı + 1);
+            let sonu = (((k + 1) as f64 * kova_boyu).floor() as usize)
+                .min(n)
+                .max(başı + 1);
             let kova = noktalar.get(başı..sonu)?;
             if kova.is_empty() {
                 return None;
@@ -230,12 +241,15 @@ fn basamaklı_noktalar(noktalar: &[(f32, f32)], basamak: Basamak) -> Vec<(f32, f
 /// `None` boşluklarına göre bitişik parçalara ayırır; `boşları_bağla`
 /// doğruysa boşluklar atlanarak tek parça üretilir.
 fn parçalara_ayır(
-    noktalar: &[Option<(f32, f32)>],
-    boşları_bağla: bool,
+    noktalar: &[Option<(f32, f32)>], boşları_bağla: bool
 ) -> Vec<Vec<(f32, f32)>> {
     if boşları_bağla {
         let dolu: Vec<(f32, f32)> = noktalar.iter().flatten().copied().collect();
-        return if dolu.is_empty() { Vec::new() } else { vec![dolu] };
+        return if dolu.is_empty() {
+            Vec::new()
+        } else {
+            vec![dolu]
+        };
     }
     let mut parçalar = Vec::new();
     let mut geçerli = Vec::new();
@@ -255,6 +269,15 @@ fn parçalara_ayır(
     parçalar
 }
 
+/// ECharts çizgi görünümünün z2 katmanları: alan poligonu `0`, çizgi ve
+/// semboller daha üst katmandadır. Yığınlı alanlarda bütün dolguların bütün
+/// çizgilerden önce boyanması ortak sınırların kapanmaması için zorunludur.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ÇizgiKatmanı {
+    Alan,
+    ÇizgiVeSembol,
+}
+
 /// Çizgi serisini çizer: alan dolgusu, çizgi, semboller ve etiketler.
 #[allow(clippy::too_many_arguments)]
 pub fn çizgi_serisi_çiz(
@@ -264,6 +287,7 @@ pub fn çizgi_serisi_çiz(
     aralıklar: &[YığınAralığı],
     seri_rengi: Renk,
     ilerleme: f32,
+    katman: ÇizgiKatmanı,
 ) {
     let (tepeler, tabanlar) = nokta_listeleri(seri, kartezyen, aralıklar);
     let alan = kartezyen.alan;
@@ -272,14 +296,11 @@ pub fn çizgi_serisi_çiz(
         let mut tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
         let mut tabanlar_parçalı = parçalara_ayır(&tabanlar, seri.boşları_bağla);
         // Büyük veri örneklemesi: hedef, ızgara genişliği kadar noktadır.
-        // Açıkça seçilmemişse, piksel başına birden çok nokta düşen büyük
-        // serilerde LTTB kendiliğinden devreye girer (ECharts'ın aşamalı/
-        // progressive büyük-veri yolunun tek karelik karşılığı).
+        // ECharts `sampling` belirtilmediğinde veriyi kendiliğinden LTTB'ye
+        // indirmez; progressive çizim yalnız işi parçalara ayırır ve bütün
+        // noktaları korur. Bu nedenle örnekleme yalnız açık seçenekle çalışır.
         let hedef = (alan.genişlik.max(2.0) as usize).max(2);
-        let örnekleme = seri.örnekleme.or_else(|| {
-            let en_uzun = tepeler_parçalı.iter().map(Vec::len).max().unwrap_or(0);
-            (en_uzun > hedef.saturating_mul(2)).then_some(Örnekleme::Lttb)
-        });
+        let örnekleme = seri.örnekleme;
         if let Some(örnekleme) = örnekleme {
             let örnekle = |parça: &Vec<(f32, f32)>| match örnekleme {
                 Örnekleme::Lttb => lttb_örnekle(parça, hedef),
@@ -290,7 +311,9 @@ pub fn çizgi_serisi_çiz(
         }
 
         // 1) Alan dolgusu (çizginin altına).
-        if let Some(alan_stili) = &seri.alan_stili {
+        if katman == ÇizgiKatmanı::Alan
+            && let Some(alan_stili) = &seri.alan_stili
+        {
             let dolgu = alan_stili
                 .renk
                 .clone()
@@ -309,7 +332,11 @@ pub fn çizgi_serisi_çiz(
                     Some(b) => basamaklı_noktalar(taban_parça, b),
                     None => taban_parça.clone(),
                 };
-                let yumuşaklık = if seri.basamak.is_some() { 0.0 } else { seri.yumuşaklık };
+                let yumuşaklık = if seri.basamak.is_some() {
+                    0.0
+                } else {
+                    seri.yumuşaklık
+                };
                 yumuşak_parça_ekle(&mut yol, &üst, yumuşaklık, true);
                 let mut alt: Vec<(f32, f32)> = alt_kaynak;
                 alt.reverse();
@@ -317,6 +344,10 @@ pub fn çizgi_serisi_çiz(
                 yol.kapat();
                 ç.yol_doldur(&yol, &dolgu);
             }
+        }
+
+        if katman == ÇizgiKatmanı::Alan {
+            return;
         }
 
         // 2) Çizgi.
@@ -330,33 +361,94 @@ pub fn çizgi_serisi_çiz(
                 None => parça.clone(),
             };
             let mut yol = Yol::yeni();
-            let yumuşaklık = if seri.basamak.is_some() { 0.0 } else { seri.yumuşaklık };
+            let yumuşaklık = if seri.basamak.is_some() {
+                0.0
+            } else {
+                seri.yumuşaklık
+            };
             yumuşak_parça_ekle(&mut yol, &noktalar, yumuşaklık, true);
+            if let Some(gölge_rengi) = seri.çizgi_stili.gölge_rengi
+                && (seri.çizgi_stili.gölge_bulanıklığı > 0.0
+                    || seri.çizgi_stili.gölge_kayması != (0.0, 0.0))
+            {
+                ç.yol_çizgi_gölgesi(
+                    &yol,
+                    kalınlık,
+                    tür,
+                    // tiny-skia'nın vuruş A8 örtüsü Chromium/Skia Canvas
+                    // maskesinden çok az daha yoğundur.
+                    gölge_rengi.opaklık(0.95),
+                    seri.çizgi_stili.gölge_bulanıklığı,
+                    seri.çizgi_stili.gölge_kayması,
+                );
+            }
             ç.yol_çiz(&yol, kalınlık, çizgi_rengi, tür);
         }
 
         // 3) Semboller.
         if seri.sembol_göster && seri.sembol != crate::model::seri::Sembol::Yok {
-            for nokta in tepeler.iter().flatten() {
-                sembol_çiz(ç, seri.sembol, *nokta, seri.sembol_boyutu, seri_rengi);
+            for (i, nokta) in tepeler.iter().enumerate() {
+                let Some(nokta) = nokta else { continue };
+                let veri_stili = seri.veri.get(i).and_then(|öğe| öğe.stil.as_ref());
+                let dolgu = veri_stili
+                    .and_then(|stil| stil.renk.as_ref())
+                    .or(seri.öğe_stili.renk.as_ref());
+                let kenarlık_rengi = veri_stili
+                    .and_then(|stil| stil.kenarlık_rengi)
+                    .or(seri.öğe_stili.kenarlık_rengi);
+                let kenarlık_kalınlığı = veri_stili
+                    .filter(|stil| stil.kenarlık_kalınlığı > 0.0)
+                    .map(|stil| stil.kenarlık_kalınlığı)
+                    .unwrap_or(seri.öğe_stili.kenarlık_kalınlığı);
+                let kenarlık = kenarlık_rengi
+                    .filter(|_| kenarlık_kalınlığı > 0.0)
+                    .map(|renk| (kenarlık_kalınlığı, renk));
+                let opaklık = veri_stili
+                    .and_then(|stil| stil.opaklık)
+                    .or(seri.öğe_stili.opaklık)
+                    .unwrap_or(1.0);
+                sembol_stilli_çiz(
+                    ç,
+                    seri.sembol,
+                    *nokta,
+                    seri.sembol_boyutu,
+                    seri_rengi,
+                    dolgu,
+                    kenarlık,
+                    opaklık,
+                );
             }
         }
 
         // 4) Değer etiketleri.
-        if seri.etiket.göster {
+        // ECharts LineView etiketleri SymbolDraw öğesine bağlar. Seri
+        // `showSymbol: false` ya da `symbol: 'none'` ile sembol grubunu
+        // kaldırdığında açık `label.show` da tek başına etiket üretmez.
+        if seri.etiket.göster
+            && seri.sembol_göster
+            && seri.sembol != crate::model::seri::Sembol::Yok
+        {
             let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
             let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
             for (i, nokta) in tepeler.iter().enumerate() {
                 let Some((x, y)) = nokta else { continue };
-                let Some(öğe) = seri.veri.get(i) else { continue };
-                let Some(değer) = öğe.değer.sayı() else { continue };
-                let metin = match &seri.etiket.biçimleyici {
-                    Some(b) => b.uygula(değer, &binlik_ayır(değer)),
-                    None => binlik_ayır(değer),
+                let Some(öğe) = seri.veri.get(i) else {
+                    continue;
                 };
+                let Some(değer) = öğe.değer.sayı() else {
+                    continue;
+                };
+                let metin = match &seri.etiket.biçimleyici {
+                    Some(b) => b.uygula(değer, &ondalık_kırp(değer)),
+                    None => ondalık_kırp(değer),
+                };
+                // AttachedText konumu sembolün sınır kutusundan başlar ve
+                // `label.distance` kadar daha dışarı gider.
+                let sembol_yarıçapı = seri.sembol_boyutu / 2.0;
+                let uzaklık = seri.etiket.uzaklık + sembol_yarıçapı;
                 let (hiza, kaydırma) = match seri.etiket.konum {
-                    EtiketKonumu::Alt => (crate::cizim::DikeyHiza::Üst, 6.0),
-                    _ => (crate::cizim::DikeyHiza::Alt, -6.0),
+                    EtiketKonumu::Alt => (crate::cizim::DikeyHiza::Üst, uzaklık),
+                    _ => (crate::cizim::DikeyHiza::Alt, -uzaklık),
                 };
                 ç.yazı(
                     &metin,
@@ -365,6 +457,47 @@ pub fn çizgi_serisi_çiz(
                     hiza,
                     boyut,
                     renk,
+                    false,
+                );
+            }
+        }
+
+        // 5) `endLabel`: son görünür veri noktasına bağlı, çizginin akış
+        // yönünün dışında duran etiket. LineView bunu sembol etiketinden
+        // bağımsız bir `Text` öğesi olarak üretir; showSymbol kapalıyken de
+        // görünür kalır.
+        if seri.uç_etiketi.göster {
+            let son = tepeler.iter().enumerate().rev().find_map(|(sıra, nokta)| {
+                let nokta = (*nokta)?;
+                let öğe = seri.veri.get(sıra)?;
+                let x_değeri = öğe.değer.x().unwrap_or(sıra as f64);
+                let değer = öğe.değer.sayı()?;
+                (kartezyen.x.pencerede_mi(x_değeri) && kartezyen.y.pencerede_mi(değer))
+                    .then_some((sıra, nokta, değer))
+            });
+            if let Some((sıra, nokta, değer)) = son {
+                let öğe = seri.veri.get(sıra);
+                let ham = ondalık_kırp(değer);
+                let metin = seri
+                    .uç_etiketi
+                    .biçimleyici
+                    .as_ref()
+                    .map(|biçimleyici| {
+                        biçimleyici.uygula_bağlamla(
+                            değer,
+                            &ham,
+                            seri.ad.as_deref().unwrap_or_default(),
+                            öğe.and_then(|öğe| öğe.ad.as_deref()).unwrap_or_default(),
+                        )
+                    })
+                    .unwrap_or(ham);
+                ç.yazı(
+                    &metin,
+                    (nokta.0 + seri.uç_etiketi.uzaklık, nokta.1),
+                    crate::cizim::YatayHiza::Sol,
+                    crate::cizim::DikeyHiza::Orta,
+                    seri.uç_etiketi.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK),
+                    seri.uç_etiketi.yazı.renk.unwrap_or(tema::birincil_metin()),
                     false,
                 );
             }
@@ -386,14 +519,20 @@ pub fn çizgi_serisi_çiz(
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
     #[test]
     fn lttb_uçları_korur() {
-        let noktalar: Vec<(f32, f32)> =
-            (0..100).map(|i| (i as f32, ((i * 7) % 13) as f32)).collect();
+        let noktalar: Vec<(f32, f32)> = (0..100)
+            .map(|i| (i as f32, ((i * 7) % 13) as f32))
+            .collect();
         let seçilen = lttb_örnekle(&noktalar, 10);
         assert_eq!(seçilen.len(), 10);
         assert_eq!(seçilen[0], noktalar[0]);

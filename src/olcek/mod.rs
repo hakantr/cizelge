@@ -70,35 +70,21 @@ impl Ölçek {
     }
 
     /// Ana çentikler arasındaki ara (minör) çentik değerleri
-    /// (`Scale#getMinorTicks`). Aralık ölçeğinde eşit, log ölçeğinde
-    /// log-uzayında eşit (geometrik) bölme uygulanır; kategori ve zaman
-    /// ölçeklerinde üretilmez.
+    /// (`Scale#getMinorTicks`). ECharts, log ölçeğinde de ardışık ana
+    /// çentiklerin *ham değer* aralığını eşit parçalara böler; bulunan değerler
+    /// daha sonra log koordinatına taşındığı için ekrandaki aralıklar eşit
+    /// görünmez. Kategori ve zaman ölçeklerinde ara çentik üretilmez.
     pub fn ara_çentikler(&self, bölme_sayısı: usize) -> Vec<f64> {
         let bölme = bölme_sayısı.max(2);
         let ana: Vec<f64> = self.çentikler().iter().map(|ç| ç.değer).collect();
         let mut sonuç = Vec::new();
         match self {
-            Ölçek::Aralık(_) => {
+            Ölçek::Aralık(_) | Ölçek::Log(_) => {
                 for çift in ana.windows(2) {
                     if let [a, b] = çift {
                         let adım = (b - a) / bölme as f64;
                         for i in 1..bölme {
                             sonuç.push(a + adım * i as f64);
-                        }
-                    }
-                }
-            }
-            Ölçek::Log(_) => {
-                for çift in ana.windows(2) {
-                    if let [a, b] = çift {
-                        if *a <= 0.0 || *b <= 0.0 {
-                            continue;
-                        }
-                        let oran = (b / a).powf(1.0 / bölme as f64);
-                        let mut değer = *a;
-                        for _ in 1..bölme {
-                            değer *= oran;
-                            sonuç.push(değer);
                         }
                     }
                 }
@@ -128,6 +114,39 @@ impl Ölçek {
         match self {
             Ölçek::Kategorik(ö) => ö.kategoriler.len(),
             _ => 0,
+        }
+    }
+
+    /// Kategori adının sıra değerini döndürür.
+    pub fn kategori_sırası(&self, ad: &str) -> Option<f64> {
+        match self {
+            Ölçek::Kategorik(ölçek) => ölçek
+                .kategoriler
+                .iter()
+                .position(|kategori| kategori == ad)
+                .map(|sıra| sıra as f64),
+            _ => None,
+        }
+    }
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+
+    #[test]
+    fn log_ara_centikleri_ham_deger_araligini_boler() {
+        let ölçek = Ölçek::Log(LogÖlçeği::kur(
+            [0.001, 0.01],
+            10.0,
+            Some(0.001),
+            Some(0.01),
+            5,
+        ));
+        let çentikler = ölçek.ara_çentikler(5);
+        assert_eq!(çentikler.len(), 4);
+        for (gerçek, beklenen) in çentikler.iter().zip([0.0028, 0.0046, 0.0064, 0.0082]) {
+            assert!((*gerçek - beklenen).abs() < 1e-12);
         }
     }
 }

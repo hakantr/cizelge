@@ -11,43 +11,66 @@ use std::collections::HashSet;
 
 use crate::bilesen::baslik::başlık_çiz;
 use crate::bilesen::eksen_cizimi::{bölme_çizgilerini_çiz, eksenleri_çiz};
-use crate::bilesen::gosterge::{gösterge_çiz, GöstergeÖğesi};
-use crate::bilesen::zaman_seridi::{zaman_şeridi_çiz, ZamanŞeridiEylemi};
+use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
+use crate::bilesen::matris_cizimi::matris_çiz;
+use crate::bilesen::takvim_cizimi::takvim_bileşeni_çiz;
+use crate::bilesen::zaman_seridi::{ZamanŞeridiEylemi, zaman_şeridi_çiz};
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
-use crate::grafik::cizgi::{nokta_listeleri, çizgi_serisi_çiz};
 use crate::grafik::agac::ağaç_çiz;
 use crate::grafik::agac_haritasi::{ağaç_haritası_çiz, hücre_değer_metni};
+use crate::grafik::cizgi::{nokta_listeleri, ÇizgiKatmanı, çizgi_serisi_çiz};
 use crate::grafik::gosterge_saati::gösterge_saati_çiz;
 use crate::grafik::grafo::grafo_çiz;
 use crate::grafik::gunes::güneş_patlaması_çiz;
+use crate::grafik::hatlar::hatlar_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
 use crate::grafik::kiris::kiriş_çiz;
-use crate::grafik::paralel::paralel_çiz;
 use crate::grafik::kutupsal::{kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
-use crate::grafik::pasta::{dilim_değer_metni, pasta_yerleşimi, pasta_çiz, Dilim};
-use crate::grafik::radar::{radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz};
-use crate::grafik::sacilim::{saçılım_noktaları, saçılım_çiz, SaçılımNoktası};
+use crate::grafik::paralel::paralel_çiz;
+use crate::grafik::pasta::{
+    Dilim, boş_pasta_çiz, dilim_değer_metni, pasta_yerleşimi, pasta_çiz
+};
+use crate::grafik::radar::{
+    radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
+};
+use crate::grafik::sacilim::{SaçılımNoktası, saçılım_noktaları, saçılım_çiz};
 use crate::grafik::sankey::sankey_çiz;
-use crate::grafik::sutun::{sütunları_çiz, SütunGirdisi};
+use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
 use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_çiz};
 use crate::grafik::tema_nehri::tema_nehri_çiz;
-use crate::koordinat::{Dikdörtgen, Kartezyen2B, ÇalışmaEkseni};
-use crate::model::bilesen::{GöstergeSimgesi, Tetikleme, İmleçTürü, İpucu};
+use crate::koordinat::{Dikdörtgen, Kartezyen2B, TakvimYerleşimi, ÇalışmaEkseni};
+use crate::model::bilesen::{
+    AraçKutusuÖzelliği, GöstergeSimgesi, Tetikleme, Yön, İmleçTürü, İpucu,
+};
 use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
+use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
+use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::{Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::model::yakinlastirma::YakınlaştırmaTürü;
+use crate::model::{DikeyKonum, YatayKonum};
 use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, LogÖlçeği, ZamanÖlçeği, Ölçek};
 use crate::renk::Dolgu;
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
-use crate::yerlesim::yigin::{yığın_aralıkları, YığınAralığı};
+use crate::yerlesim::yigin::{YığınAralığı, yığın_aralıkları};
+
+/// Toolbox'ın 0..60 civarındaki resmi SVG yol koordinatını 15 px simge
+/// kutusuna, en-boy oranını koruyarak ortalar.
+fn araç_noktası(merkez: (f32, f32), sınır: [f32; 4], nokta: (f32, f32)) -> (f32, f32) {
+    let ölçek = 15.0 / (sınır[2] - sınır[0]).max(sınır[3] - sınır[1]).max(1.0);
+    let kaynak_merkez = ((sınır[0] + sınır[2]) / 2.0, (sınır[1] + sınır[3]) / 2.0);
+    (
+        merkez.0 + (nokta.0 - kaynak_merkez.0) * ölçek,
+        merkez.1 + (nokta.1 - kaynak_merkez.1) * ölçek,
+    )
+}
 
 /// Boyamanın anlık girdileri (görünüm durumundan türetilir).
 #[derive(Clone, Debug)]
@@ -109,6 +132,24 @@ pub struct SürgüBölgesi {
     pub pencere: Dikdörtgen,
     pub sol_tutamaç: Dikdörtgen,
     pub sağ_tutamaç: Dikdörtgen,
+    pub dikey: bool,
+}
+
+impl SürgüBölgesi {
+    /// Sürgünün veri yüzdesi artan yönündeki işaretçi koordinatı. Dikey
+    /// sürgüde ECharts aralığı aşağıdan yukarıya arttığı için ekran Y'sinin
+    /// işareti çevrilir.
+    pub fn eksen_konumu(&self, nokta: (f32, f32)) -> f32 {
+        if self.dikey { -nokta.1 } else { nokta.0 }
+    }
+
+    pub fn eksen_uzunluğu(&self) -> f32 {
+        if self.dikey {
+            self.şerit.yükseklik
+        } else {
+            self.şerit.genişlik
+        }
+    }
 }
 
 /// İç (tekerlek/sürükleme) yakınlaştırmanın etkin olduğu ızgara alanı.
@@ -116,6 +157,30 @@ pub struct SürgüBölgesi {
 pub struct İçYakınlaştırmaAlanı {
     pub yakınlaştırma_sırası: usize,
     pub alan: Dikdörtgen,
+    pub dikey: bool,
+}
+
+impl İçYakınlaştırmaAlanı {
+    pub fn eksen_konumu(&self, nokta: (f32, f32)) -> f32 {
+        if self.dikey { -nokta.1 } else { nokta.0 }
+    }
+
+    pub fn eksen_uzunluğu(&self) -> f32 {
+        if self.dikey {
+            self.alan.yükseklik
+        } else {
+            self.alan.genişlik
+        }
+    }
+
+    /// İşaretçinin veri yüzdesi artan yöndeki, `0..=1` odak oranı.
+    pub fn odak_oranı(&self, nokta: (f32, f32)) -> f32 {
+        if self.dikey {
+            ((self.alan.alt() - nokta.1) / self.alan.yükseklik.max(1.0)).clamp(0.0, 1.0)
+        } else {
+            ((nokta.0 - self.alan.x) / self.alan.genişlik.max(1.0)).clamp(0.0, 1.0)
+        }
+    }
 }
 
 /// Boyamanın etkileşim çıktıları: gösterge kutuları ve veri öğesi isabet
@@ -141,6 +206,14 @@ pub struct BoyamaÇıktısı {
 /// Araç kutusu düğme türleri.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AraçTürü {
+    VeriGörünümü,
+    /// `toolbox.feature.dataZoom.zoom`.
+    VeriYakınlaştır,
+    /// `toolbox.feature.dataZoom.back`.
+    VeriYakınlaştırmayıGeriAl,
+    SihirliÇizgi,
+    SihirliSütun,
+    SihirliYığın,
     GeriYükle,
     /// Grafiği SVG dosyası olarak kaydet (`saveAsImage`).
     SvgKaydet,
@@ -178,6 +251,8 @@ fn gösterge_öğeleri(
                         ad,
                         renk: seçenekler.palet_rengi(j),
                         simge: GöstergeSimgesi::Çizgi,
+                        çizgi_kalınlığı: None,
+                        kenarlık: None,
                     });
                 }
             }
@@ -192,6 +267,8 @@ fn gösterge_öğeleri(
                         ad,
                         renk: seçenekler.palet_rengi(j),
                         simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                        çizgi_kalınlığı: None,
+                        kenarlık: None,
                     });
                 }
             }
@@ -211,12 +288,20 @@ fn gösterge_öğeleri(
                         kapalı: kapalı.contains(&ad),
                         ad,
                         renk,
-                        simge: GöstergeSimgesi::Daire,
+                        simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                        çizgi_kalınlığı: None,
+                        kenarlık: p
+                            .öğe_stili
+                            .kenarlık_rengi
+                            .filter(|_| p.öğe_stili.kenarlık_kalınlığı > 0.0)
+                            .map(|renk| (p.öğe_stili.kenarlık_kalınlığı, renk)),
                     });
                 }
             }
             _ => {
-                let Some(ad) = seri.ad().map(str::to_string) else { continue };
+                let Some(ad) = seri.ad().map(str::to_string) else {
+                    continue;
+                };
                 if !süzgeç.is_empty() && !süzgeç.contains(&ad) {
                     continue;
                 }
@@ -225,16 +310,49 @@ fn gösterge_öğeleri(
                     Seri::Saçılım(_) => GöstergeSimgesi::Daire,
                     _ => GöstergeSimgesi::YuvarlakKöşeliKare,
                 };
+                let çizgi_kalınlığı = match seri {
+                    Seri::Çizgi(çizgi) => Some(çizgi.çizgi_stili.kalınlık),
+                    _ => None,
+                };
                 öğeler.push(GöstergeÖğesi {
                     kapalı: kapalı.contains(&ad),
                     ad,
                     renk: seçenekler.seri_rengi(i),
                     simge,
+                    çizgi_kalınlığı,
+                    kenarlık: None,
                 });
             }
         }
     }
+    // `legend.data` yalnız bir süzgeç değildir; açıkça verilen sıra resmi
+    // gösterge sırasıdır. Seri ekleme sırası farklı olsa da bu düzen korunur.
+    if !süzgeç.is_empty() {
+        öğeler.sort_by_key(|öğe| {
+            süzgeç
+                .iter()
+                .position(|ad| ad == &öğe.ad)
+                .unwrap_or(usize::MAX)
+        });
+    }
+    // Legend veri sağlayıcıları aynı adı birden çok seri üzerinden sunsa da
+    // ECharts `LegendModel` tek bir öğe üretir. Özellikle aynı ürünleri
+    // gösteren çoklu pasta serilerinde ilk sağlayıcının simge/stili korunur.
+    let mut görülen = HashSet::new();
+    öğeler.retain(|öğe| görülen.insert(öğe.ad.clone()));
     öğeler
+}
+
+/// Etkileşim katmanının `selectedMode: single` uygulayabilmesi için legend
+/// veri sağlayıcılarından türetilmiş, kararlı ve yinelenmeyen ad listesi.
+#[cfg(feature = "gpui")]
+pub(crate) fn gösterge_adları(seçenekler: &GrafikSeçenekleri) -> Vec<String> {
+    let mut görülen = HashSet::new();
+    gösterge_öğeleri(seçenekler, &HashSet::new())
+        .into_iter()
+        .map(|öğe| öğe.ad)
+        .filter(|ad| görülen.insert(ad.clone()))
+        .collect()
 }
 
 /// Eksen seçeneğinden ölçek kurar.
@@ -285,11 +403,12 @@ impl KartezyenKurulum {
         let bağ = seri.eksen_bağı();
         let x = self.x_eksenler.get(bağ.x)?;
         let y = self.y_eksenler.get(bağ.y)?;
-        let alan = self
-            .ızgara_alanları
-            .get(x.seçenek.ızgara_sırası)
-            .copied()?;
-        Some(Kartezyen2B { x: x.clone(), y: y.clone(), alan })
+        let alan = self.ızgara_alanları.get(x.seçenek.ızgara_sırası).copied()?;
+        Some(Kartezyen2B {
+            x: x.clone(),
+            y: y.clone(),
+            alan,
+        })
     }
 
     /// Izgaranın birincil (ilk) x/y eksen çifti.
@@ -303,7 +422,11 @@ impl KartezyenKurulum {
             .iter()
             .find(|e| e.seçenek.ızgara_sırası == ızgara)?;
         let alan = self.ızgara_alanları.get(ızgara).copied()?;
-        Some(Kartezyen2B { x: x.clone(), y: y.clone(), alan })
+        Some(Kartezyen2B {
+            x: x.clone(),
+            y: y.clone(),
+            alan,
+        })
     }
 
     /// Farenin üzerinde olduğu ızgara.
@@ -311,6 +434,36 @@ impl KartezyenKurulum {
         self.ızgara_alanları
             .iter()
             .position(|alan| alan.içeriyor_mu(fare))
+    }
+}
+
+fn hat_eksen_değeri(değer: &HatKoordinatı, eksen: &ÇalışmaEkseni) -> Option<f64> {
+    if eksen.ölçek.kategorik_mi() {
+        değer
+            .metin()
+            .and_then(|ad| eksen.ölçek.kategori_sırası(ad))
+            .or_else(|| değer.sayı())
+    } else {
+        değer.sayı()
+    }
+}
+
+fn kartezyen_hat_noktası(nokta: &HatNoktası, kartezyen: &Kartezyen2B) -> Option<(f32, f32)> {
+    let x = hat_eksen_değeri(&nokta.x, &kartezyen.x)?;
+    let y = hat_eksen_değeri(&nokta.y, &kartezyen.y)?;
+    Some(kartezyen.nokta(x, y))
+}
+
+fn matris_hat_aralığı(değer: &HatKoordinatı) -> Option<MatrisAralığı> {
+    match değer {
+        HatKoordinatı::Metin(ad) => Some(MatrisAralığı::Tek(MatrisKonumu::Değer(ad.clone()))),
+        HatKoordinatı::Sayı(sıra) if sıra.is_finite() && sıra.fract() == 0.0 => {
+            Some(MatrisAralığı::Tek(MatrisKonumu::Sıra(*sıra as isize)))
+        }
+        HatKoordinatı::Zaman(sıra) => {
+            Some(MatrisAralığı::Tek(MatrisKonumu::Sıra(*sıra as isize)))
+        }
+        HatKoordinatı::Sayı(_) => None,
     }
 }
 
@@ -364,8 +517,7 @@ fn kartezyen_kur(
             continue;
         }
         let bağ = seri.eksen_bağı();
-        let (Some(x_seçenek), Some(y_seçenek)) =
-            (x_seçenekler.get(bağ.x), y_seçenekler.get(bağ.y))
+        let (Some(x_seçenek), Some(y_seçenek)) = (x_seçenekler.get(bağ.x), y_seçenekler.get(bağ.y))
         else {
             continue;
         };
@@ -381,24 +533,69 @@ fn kartezyen_kur(
         if matches!(seri, Seri::Isı(_)) {
             continue;
         }
+        if let Seri::Hatlar(hatlar) = seri {
+            for nokta in hatlar.veri.iter().flat_map(|veri| &veri.koordinatlar) {
+                if !x_kategorik && let Some(değer) = nokta.x.sayı() {
+                    kapsa(x_kapsam, değer);
+                }
+                if !y_kategorik && let Some(değer) = nokta.y.sayı() {
+                    kapsa(y_kapsam, değer);
+                }
+            }
+            continue;
+        }
+        // Scatter `encode.x/y`, veri öğesinin birincil (y) değerinden
+        // bağımsız iki dataset boyutudur. Kapsamı ham sıra uzayından değil
+        // bu iki boyuttan kurmak, çoklu grid/değer eksenlerini doğru ölçekler.
+        if let Seri::Saçılım(saçılım) = seri
+            && let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme
+        {
+            for öğe in &saçılım.veri {
+                if !x_kategorik
+                    && let Some(değer) = öğe.boyut(x_boyutu).and_then(|değer| değer.sayı())
+                {
+                    kapsa(x_kapsam, değer);
+                }
+                if !y_kategorik
+                    && let Some(değer) = öğe.boyut(y_boyutu).and_then(|değer| değer.sayı())
+                {
+                    kapsa(y_kapsam, değer);
+                }
+            }
+            continue;
+        }
         // Çok değerli seriler (mum/kutu): dizinin tüm bileşenleri değer
         // eksenine, sıra bant eksenine.
         if matches!(seri, Seri::Mum(_) | Seri::Kutu(_)) {
             for (j, öğe) in seri.veri().iter().enumerate() {
                 if let Some(dizi) = öğe.değer.dizi() {
-                    for v in dizi {
-                        kapsa(y_kapsam, *v);
+                    if y_kategorik && !x_kategorik {
+                        for v in dizi {
+                            kapsa(x_kapsam, *v);
+                        }
+                    } else {
+                        for v in dizi {
+                            kapsa(y_kapsam, *v);
+                        }
                     }
                 }
-                kapsa(x_kapsam, j as f64);
+                if y_kategorik && !x_kategorik {
+                    kapsa(y_kapsam, j as f64);
+                } else {
+                    kapsa(x_kapsam, j as f64);
+                }
             }
             continue;
         }
 
         let sütun_mu = matches!(seri, Seri::Sütun(_));
-        let Some(seri_aralıkları) = aralıklar.get(i) else { continue };
+        let Some(seri_aralıkları) = aralıklar.get(i) else {
+            continue;
+        };
         for (j, aralık) in seri_aralıkları.iter().enumerate() {
-            let Some((taban, tepe)) = aralık else { continue };
+            let Some((taban, tepe)) = aralık else {
+                continue;
+            };
             // Yatay yerleşim (y kategorik, x değer): değerler x'e akar.
             let değer_kapsamı: &mut [f64; 2] = if y_kategorik && !x_kategorik {
                 x_kapsam
@@ -437,6 +634,57 @@ fn kartezyen_kur(
                 continue;
             }
             let veri = seri.veri();
+            if let Seri::Hatlar(hatlar) = seri {
+                let mut kategoriler = Vec::new();
+                for koordinat in hatlar.veri.iter().flat_map(|veri| &veri.koordinatlar) {
+                    let değer = if x_mi { &koordinat.x } else { &koordinat.y };
+                    let ad = değer
+                        .metin()
+                        .map(str::to_owned)
+                        .or_else(|| değer.sayı().map(|sayı| sayı.to_string()));
+                    if let Some(ad) = ad
+                        && !kategoriler.contains(&ad)
+                    {
+                        kategoriler.push(ad);
+                    }
+                }
+                if kategoriler.len() > en_uzun {
+                    en_uzun = kategoriler.len();
+                    adlar = Some(kategoriler);
+                }
+                continue;
+            }
+            if let Seri::Saçılım(saçılım) = seri
+                && let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme
+            {
+                let boyut = if x_mi { x_boyutu } else { y_boyutu };
+                let mut kategoriler = Vec::new();
+                for öğe in &saçılım.veri {
+                    let ad = match öğe.boyut(boyut) {
+                        Some(crate::model::deger::VeriDeğeri::Metin(ad)) => Some(ad.clone()),
+                        Some(crate::model::deger::VeriDeğeri::Sayı(değer)) => {
+                            Some(crate::yardimci::bicim::ondalık_kırp(*değer))
+                        }
+                        Some(crate::model::deger::VeriDeğeri::Zaman(değer)) => {
+                            Some(değer.to_string())
+                        }
+                        Some(crate::model::deger::VeriDeğeri::Mantıksal(değer)) => {
+                            Some(değer.to_string())
+                        }
+                        _ => None,
+                    };
+                    if let Some(ad) = ad
+                        && !kategoriler.contains(&ad)
+                    {
+                        kategoriler.push(ad);
+                    }
+                }
+                if kategoriler.len() > en_uzun {
+                    en_uzun = kategoriler.len();
+                    adlar = Some(kategoriler);
+                }
+                continue;
+            }
             if veri.len() > en_uzun {
                 en_uzun = veri.len();
                 adlar = Some(
@@ -451,7 +699,7 @@ fn kartezyen_kur(
     };
 
     // Izgara alanları (etiket kapsama, o ızgaranın ilk y/x eksenine göre).
-    let ızgara_alanları: Vec<Dikdörtgen> = ızgara_seçenekleri
+    let mut ızgara_alanları: Vec<Dikdörtgen> = ızgara_seçenekleri
         .iter()
         .enumerate()
         .map(|(g, ızgara)| {
@@ -478,17 +726,28 @@ fn kartezyen_kur(
                     );
                     let mut en_geniş = 0.0f32;
                     for çentik in ölçek.çentikler() {
-                        en_geniş =
-                            en_geniş.max(yüzey.yazı_ölç(&ölçek.etiket(çentik.değer), y_boyut).0);
+                        let ham = ölçek.etiket(çentik.değer);
+                        let metin = y_seçenek
+                            .etiket
+                            .biçimleyici
+                            .as_ref()
+                            .map(|biçimleyici| biçimleyici.uygula(çentik.değer, &ham))
+                            .unwrap_or(ham);
+                        en_geniş = en_geniş.max(yüzey.yazı_ölç(&metin, y_boyut).0);
                     }
-                    sol += en_geniş + y_seçenek.etiket.boşluk;
+                    // Sabit Arial dosyasında ab_glyph ile Chromium Canvas
+                    // ölçümü arasındaki kalan ortalama fark yaklaşık 0,04
+                    // pikseldir. Eski 3/8 px dengesi boşluk çevresi kerning'i
+                    // düzeltilmeden önce gerekliydi ve yatay çizgileri 0,34
+                    // px genişletiyordu.
+                    sol += en_geniş + y_seçenek.etiket.boşluk - 0.04;
                 }
-                if let Some(x_seçenek) =
-                    x_seçenekler.iter().find(|e| e.ızgara_sırası == g)
-                {
+                if let Some(x_seçenek) = x_seçenekler.iter().find(|e| e.ızgara_sırası == g) {
                     let x_boyut = x_seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-                    alt_boşluk +=
-                        x_boyut * crate::cizim::yuzey::SATIR_ORANI + x_seçenek.etiket.boşluk;
+                    // Tek satırlı eksen etiketi için zrender sınır kutusu
+                    // font boyudur; genel rich-text satır oranı burada
+                    // fazladan dikey boşluk üretmemelidir.
+                    alt_boşluk += x_boyut + x_seçenek.etiket.boşluk;
                 }
                 sağ_boşluk = sağ_boşluk.max(20.0);
             }
@@ -501,6 +760,47 @@ fn kartezyen_kur(
         })
         .collect();
 
+    // ECharts 6 `grid.outerBoundsMode: auto`, uçta duran eksen adlarının
+    // tuval dışına taşması halinde yalnız taşan kenarı daraltır. Bu ikinci
+    // yerleşim turu özellikle sağ-alt çoklu gridlerdeki uzun x ekseni
+    // adlarının kırpılmasını önler. Hesap AxisBuilder'ın varsayılan
+    // `nameGap: 15` sınır kutusunu kullanır; gerçek boya alt-piksel metin
+    // sınırı nedeniyle daha yakın görünen çapa kullanmaya devam eder.
+    for (g, alan) in ızgara_alanları.iter_mut().enumerate() {
+        let sağ_taşma = x_seçenekler
+            .iter()
+            .filter(|eksen| eksen.ızgara_sırası == g)
+            .filter(|eksen| eksen.ad_konumu == crate::model::eksen::EksenAdKonumu::Bitiş)
+            .filter_map(|eksen| eksen.ad.as_deref())
+            .map(|ad| {
+                let ad_genişliği = yüzey.yazı_ölç(ad, tema::YAZI_KÜÇÜK).0;
+                (alan.sağ()
+                    + x_seçenekler
+                        .iter()
+                        .find(|eksen| eksen.ızgara_sırası == g && eksen.ad.as_deref() == Some(ad))
+                        .map(|eksen| eksen.ad_boşluğu)
+                        .unwrap_or(15.0)
+                    // `createOrUpdateAxesView` uzun (tuvalin yarısından
+                    // yüksek) gridlerde eksen adı için ikinci margin
+                    // seviyesini seçer. Sağ fiziksel piksel payı bu durumda
+                    // 3, küçük çoklu gridlerde 1 pikseldir.
+                    + if alan.yükseklik > yüzey.yükseklik() * 0.5 {
+                        3.0
+                    } else {
+                        1.0
+                    }
+                    + ad_genişliği
+                    - yüzey.genişlik())
+                .max(0.0)
+            })
+            .fold(0.0_f32, f32::max);
+        if sağ_taşma > 0.0 {
+            // GridModel.outerBoundsClampWidth öntanımlı `%25`: ilk alanın
+            // en az dörtte biri korunur.
+            alan.genişlik = (alan.genişlik - sağ_taşma).max(alan.genişlik * 0.25);
+        }
+    }
+
     // Çalışma eksenleri: piksel aralıkları kendi ızgarasından; konum, aynı
     // ızgaradaki sırasına göre (x: Alt→Üst, y: Sol→Sağ).
     let mut ızgara_x_sayaç = vec![0usize; ızgara_sayısı];
@@ -511,35 +811,45 @@ fn kartezyen_kur(
             let g = seçenek.ızgara_sırası.min(ızgara_sayısı.saturating_sub(1));
             let alan = ızgara_alanları.get(g).copied().unwrap_or_default();
             let mut kapsam = x_kapsamlar.get(xi).copied().unwrap_or([0.0, 1.0]);
+            let kategoriler = if seçenek.tür == EksenTürü::Kategori {
+                kategoriler_derle(seçenek, true, xi)
+            } else {
+                Vec::new()
+            };
             // Veri yakınlaştırma: sayısal eksenlerde kapsam pencereye
             // daraltılır; kategorik eksenlerde pencere kurulumdan sonra
             // sıra uzayında uygulanır.
-            let pencere = seçenekler
-                .x_penceresi(xi)
-                .filter(|(b, e)| *b > 0.001 || *e < 0.999);
+            let tam_kapsam = if seçenek.tür == EksenTürü::Kategori {
+                [0.0, kategoriler.len().saturating_sub(1) as f64]
+            } else {
+                [
+                    seçenek.en_az.unwrap_or(kapsam[0]),
+                    seçenek.en_çok.unwrap_or(kapsam[1]),
+                ]
+            };
+            let yakınlaştırma = seçenekler.x_yakınlaştırması(xi).filter(|y| y.etkin_mi());
+            let pencere = yakınlaştırma.and_then(|y| y.pencere_çöz(&kategoriler, tam_kapsam));
             let mut seçenek = seçenek.clone();
-            if let Some((b, e)) = pencere
-                && seçenek.tür != EksenTürü::Kategori {
-                    let açıklık = kapsam[1] - kapsam[0];
-                    if açıklık.is_finite() && açıklık > 0.0 {
-                        let yeni = [
-                            kapsam[0] + açıklık * b as f64,
-                            kapsam[0] + açıklık * e as f64,
-                        ];
-                        seçenek.en_az = Some(yeni[0]);
-                        seçenek.en_çok = Some(yeni[1]);
-                        kapsam = yeni;
+            if let Some(([p0, p1], _)) = pencere
+                && seçenek.tür != EksenTürü::Kategori
+            {
+                if let Some(yakınlaştırma) = yakınlaştırma {
+                    // AxisProxy yalnız gerçekten daraltılan ucu sabitler.
+                    // %0/%100 sınırı, ölçeğin o ucu güzel bir çentiğe
+                    // genişletmesine izin verir; startValue/endValue ise
+                    // yüzdeden bağımsız olarak sabittir.
+                    if yakınlaştırma.başlangıç_değeri.is_some() || yakınlaştırma.başlangıç > 0.001
+                    {
+                        seçenek.en_az = Some(p0);
+                    }
+                    if yakınlaştırma.bitiş_değeri.is_some() || yakınlaştırma.bitiş < 99.999
+                    {
+                        seçenek.en_çok = Some(p1);
                     }
                 }
-            let ölçek = ölçek_kur(
-                &seçenek,
-                if seçenek.tür == EksenTürü::Kategori {
-                    kategoriler_derle(&seçenek, true, xi)
-                } else {
-                    Vec::new()
-                },
-                kapsam,
-            );
+                kapsam = [p0, p1];
+            }
+            let ölçek = ölçek_kur(&seçenek, kategoriler, kapsam);
             let sıra_no = ızgara_x_sayaç.get_mut(g).map(|s| {
                 let şimdiki = *s;
                 *s += 1;
@@ -552,10 +862,14 @@ fn kartezyen_kur(
             });
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.x, alan.sağ()], konum);
-            if seçenek.tür == EksenTürü::Kategori
-                && let Some((b, e)) = pencere {
-                    eksen.pencere_uygula(b, e);
+            if let Some(([p0, p1], _)) = pencere {
+                if seçenek.tür == EksenTürü::Kategori {
+                    eksen.değer_penceresi_uygula(p0.round(), p1.round());
+                } else {
+                    let ölçek_kapsamı = eksen.ölçek.kapsam();
+                    eksen.değer_penceresi_uygula(ölçek_kapsamı[0], ölçek_kapsamı[1]);
                 }
+            }
             eksen
         })
         .collect();
@@ -566,16 +880,39 @@ fn kartezyen_kur(
         .map(|(yi, seçenek)| {
             let g = seçenek.ızgara_sırası.min(ızgara_sayısı.saturating_sub(1));
             let alan = ızgara_alanları.get(g).copied().unwrap_or_default();
-            let kapsam = y_kapsamlar.get(yi).copied().unwrap_or([0.0, 1.0]);
-            let ölçek = ölçek_kur(
-                seçenek,
-                if seçenek.tür == EksenTürü::Kategori {
-                    kategoriler_derle(seçenek, false, yi)
-                } else {
-                    Vec::new()
-                },
-                kapsam,
-            );
+            let mut kapsam = y_kapsamlar.get(yi).copied().unwrap_or([0.0, 1.0]);
+            let kategoriler = if seçenek.tür == EksenTürü::Kategori {
+                kategoriler_derle(seçenek, false, yi)
+            } else {
+                Vec::new()
+            };
+            let tam_kapsam = if seçenek.tür == EksenTürü::Kategori {
+                [0.0, kategoriler.len().saturating_sub(1) as f64]
+            } else {
+                [
+                    seçenek.en_az.unwrap_or(kapsam[0]),
+                    seçenek.en_çok.unwrap_or(kapsam[1]),
+                ]
+            };
+            let yakınlaştırma = seçenekler.y_yakınlaştırması(yi).filter(|y| y.etkin_mi());
+            let pencere = yakınlaştırma.and_then(|y| y.pencere_çöz(&kategoriler, tam_kapsam));
+            let mut seçenek = seçenek.clone();
+            if let Some(([p0, p1], _)) = pencere
+                && seçenek.tür != EksenTürü::Kategori
+            {
+                if let Some(yakınlaştırma) = yakınlaştırma {
+                    if yakınlaştırma.başlangıç_değeri.is_some() || yakınlaştırma.başlangıç > 0.001
+                    {
+                        seçenek.en_az = Some(p0);
+                    }
+                    if yakınlaştırma.bitiş_değeri.is_some() || yakınlaştırma.bitiş < 99.999
+                    {
+                        seçenek.en_çok = Some(p1);
+                    }
+                }
+                kapsam = [p0, p1];
+            }
+            let ölçek = ölçek_kur(&seçenek, kategoriler, kapsam);
             let sıra_no = ızgara_y_sayaç.get_mut(g).map(|s| {
                 let şimdiki = *s;
                 *s += 1;
@@ -587,7 +924,17 @@ fn kartezyen_kur(
                 EksenKonumu::Sağ
             });
             // Dikey eksen piksel aralığı alttan yukarı doğrudur.
-            ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.alt(), alan.y], konum)
+            let mut eksen =
+                ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.alt(), alan.y], konum);
+            if let Some(([p0, p1], _)) = pencere {
+                if seçenek.tür == EksenTürü::Kategori {
+                    eksen.değer_penceresi_uygula(p0.round(), p1.round());
+                } else {
+                    let ölçek_kapsamı = eksen.ölçek.kapsam();
+                    eksen.değer_penceresi_uygula(ölçek_kapsamı[0], ölçek_kapsamı[1]);
+                }
+            }
+            eksen
         })
         .collect();
 
@@ -607,11 +954,15 @@ fn kartezyen_kur(
                 Ölçek::Aralık(ö) => Some(ö.çentikler().len().saturating_sub(1)),
                 _ => None,
             });
-        let Some(bölme) = referans_bölme.filter(|b| *b >= 1) else { continue };
+        let Some(bölme) = referans_bölme.filter(|b| *b >= 1) else {
+            continue;
+        };
         let mut ilk_görüldü = false;
         for (yi, eksen) in y_eksenler.iter_mut().enumerate() {
-            let eksen_g =
-                eksen.seçenek.ızgara_sırası.min(ızgara_sayısı.saturating_sub(1));
+            let eksen_g = eksen
+                .seçenek
+                .ızgara_sırası
+                .min(ızgara_sayısı.saturating_sub(1));
             if eksen_g != g || !matches!(&eksen.ölçek, Ölçek::Aralık(_)) {
                 continue;
             }
@@ -677,11 +1028,13 @@ fn ipucu_satırlarını_biçimle(
                     .replace("{a}", seri_adı)
                     .replace("{b}", öğe_adı)
                     .replace("{c}", &satır.değer),
-                crate::model::stil::Biçimleyici::İşlev(f) => {
-                    f(f64::NAN, &satır.değer)
-                }
+                crate::model::stil::Biçimleyici::İşlev(f) => f(f64::NAN, &satır.değer),
             };
-            İpucuSatırı { im_rengi: satır.im_rengi, ad: metin, değer: String::new() }
+            İpucuSatırı {
+                im_rengi: satır.im_rengi,
+                ad: metin,
+                değer: String::new(),
+            }
         })
         .collect()
 }
@@ -722,7 +1075,9 @@ fn eksen_ipucu_derle(
         if (bant_x && bağ.x != eksen_sırası) || (!bant_x && bağ.y != eksen_sırası) {
             continue;
         }
-        let Some(öğe) = seri.veri().get(sıra) else { continue };
+        let Some(öğe) = seri.veri().get(sıra) else {
+            continue;
+        };
         let metin = if let Some(dizi) = öğe.değer.dizi() {
             // Mum: A/K/D/Y — Kutu: beş sayının özeti.
             dizi.iter()
@@ -730,7 +1085,9 @@ fn eksen_ipucu_derle(
                 .collect::<Vec<_>>()
                 .join(" / ")
         } else {
-            let Some(değer) = öğe.değer.sayı() else { continue };
+            let Some(değer) = öğe.değer.sayı() else {
+                continue;
+            };
             match &ipucu.değer_biçimleyici {
                 Some(b) => b.uygula(değer, &binlik_ayır(değer)),
                 None => binlik_ayır(değer),
@@ -745,7 +1102,13 @@ fn eksen_ipucu_derle(
     if satırlar.is_empty() {
         return None;
     }
-    Some(Eksenİpucu { ızgara, kategori_sırası: sıra, bant_x, başlık, satırlar })
+    Some(Eksenİpucu {
+        ızgara,
+        kategori_sırası: sıra,
+        bant_x,
+        başlık,
+        satırlar,
+    })
 }
 
 /// Tüm grafiği verilen yüzeye boyar; etkileşim bölgelerini döndürür.
@@ -765,7 +1128,8 @@ pub fn grafiği_boya(
     crate::yerel::yerel_ayarla(seçenekler.yerel);
 
     let türetilmiş;
-    let seçenekler = if seçenekler.veri_kümesi.is_some() {
+    let seçenekler = if seçenekler.veri_kümesi.is_some() || !seçenekler.veri_kümeleri.is_empty()
+    {
         let (yeni, _hatalar) = seçenekler.veri_kümesini_uygula();
         türetilmiş = yeni;
         &türetilmiş
@@ -775,72 +1139,390 @@ pub fn grafiği_boya(
     let ilerleme = girdi.ilerleme;
     let zaman_sn = girdi.zaman_sn;
     let fare = girdi.fare;
-    let kapalı = &girdi.kapalı;
+    // Başsız/Piksel/SVG koşucuları da `legend.selected` başlangıç durumunu
+    // görmelidir; gpui'nin etkileşim kümesi bunun üzerine eklenir.
+    let mut etkili_kapalı = girdi.kapalı.clone();
+    if let Some(gösterge) = &seçenekler.gösterge {
+        etkili_kapalı.extend(
+            gösterge
+                .seçili
+                .iter()
+                .filter_map(|(ad, seçili)| (!*seçili).then_some(ad.clone())),
+        );
+    }
+    let kapalı = &etkili_kapalı;
 
     // 1) Arka plan (koyu temada zemin, açıkça verilmemişse de doldurulur).
     let zemin = seçenekler
         .arkaplan
-        .or_else(|| seçenekler.koyu.then(crate::tema::zemin));
-    if let Some(renk) = zemin {
+        .clone()
+        .or_else(|| seçenekler.koyu.then(|| Dolgu::Düz(crate::tema::zemin())));
+    if let Some(dolgu) = zemin {
         let tümü = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
-        yüzey.dikdörtgen(tümü, &Dolgu::Düz(renk), [0.0; 4], None);
+        yüzey.dikdörtgen(tümü, &dolgu, [0.0; 4], None);
+    }
+
+    // Matrix koordinatı seri katmanlarının altında ortak bir bileşendir.
+    // Veri sayısı bilinmiyorsa dimension.length/data kendi gövdesini belirler.
+    let matris_yerleşimi = seçenekler.matris.as_ref().and_then(|matris| {
+        crate::koordinat::MatrisYerleşimi::kur(
+            matris,
+            (yüzey.genişlik(), yüzey.yükseklik()),
+            (0, 0),
+        )
+        .ok()
+    });
+    if let (Some(matris), Some(yerleşim)) = (&seçenekler.matris, &matris_yerleşimi) {
+        matris_çiz(yüzey, matris, yerleşim);
+    }
+    let takvim_yerleşimleri: Vec<Option<TakvimYerleşimi>> = seçenekler
+        .takvimler
+        .iter()
+        .map(|takvim| TakvimYerleşimi::kur(takvim, (yüzey.genişlik(), yüzey.yükseklik())).ok())
+        .collect();
+    for (takvim, yerleşim) in seçenekler.takvimler.iter().zip(&takvim_yerleşimleri) {
+        if let Some(yerleşim) = yerleşim {
+            takvim_bileşeni_çiz(yüzey, takvim, yerleşim);
+        }
     }
 
     // 2) Başlık.
-    if let Some(başlık) = &seçenekler.başlık {
-        başlık_çiz(yüzey, başlık);
+    if seçenekler.başlıklar.is_empty() {
+        if let Some(başlık) = &seçenekler.başlık {
+            başlık_çiz(yüzey, başlık);
+        }
+    } else {
+        for başlık in &seçenekler.başlıklar {
+            başlık_çiz(yüzey, başlık);
+        }
     }
 
-    // 3) Gösterge.
-    let öğeler = gösterge_öğeleri(seçenekler, kapalı);
-    if let Some(g) = &seçenekler.gösterge {
-        let gösterge_çıktısı = gösterge_çiz(yüzey, g, &öğeler, girdi.gösterge_sayfası);
-        çıktı.gösterge_kutuları = gösterge_çıktısı.kutular;
-        çıktı.gösterge_okları = gösterge_çıktısı.oklar;
-    }
+    // 3) Gösterge verisi burada çözülür; legend z=4 olduğundan asıl çizim
+    // seri/dataZoom katmanlarından sonra yapılır.
+    let gösterge_öğeleri = gösterge_öğeleri(seçenekler, kapalı);
 
-    // 3b) Araç kutusu (sağ üst): sağdan sola dizilen düğmeler.
+    // 3b) Araç kutusu: ECharts'ın 15 px, çıplak vektör ikonları.
     if let Some(araçlar) = &seçenekler.araç_kutusu
-        && araçlar.göster {
-            let boyut = tema::YAZI_KÜÇÜK;
-            let mut sağ_kenar = yüzey.genişlik() - 10.0;
-            let düğme_çiz = |yüzey: &mut dyn ÇizimYüzeyi,
-                                 metin: &str,
-                                 tür: AraçTürü,
-                                 sağ_kenar: &mut f32| {
-                let (gş, _) = yüzey.yazı_ölç(metin, boyut);
-                let kutu = Dikdörtgen::yeni(*sağ_kenar - gş - 16.0, 6.0, gş + 16.0, 22.0);
-                *sağ_kenar = kutu.x - 6.0;
-                yüzey.dikdörtgen(
-                    kutu,
-                    &Dolgu::Düz(tema::nötr_05()),
-                    [4.0; 4],
-                    Some((1.0, tema::nötr_15())),
-                );
-                yüzey.yazı(
-                    metin,
-                    kutu.merkez(),
-                    crate::cizim::YatayHiza::Orta,
-                    crate::cizim::DikeyHiza::Orta,
-                    boyut,
-                    tema::ikincil_metin(),
-                    false,
-                );
-                (kutu, tür)
-            };
-            if araçlar.geri_yükle {
-                let düğme = düğme_çiz(yüzey, "↺ Sıfırla", AraçTürü::GeriYükle, &mut sağ_kenar);
-                çıktı.araç_düğmeleri.push(düğme);
-            }
-            if araçlar.svg_kaydet {
-                let düğme = düğme_çiz(yüzey, "⤓ SVG", AraçTürü::SvgKaydet, &mut sağ_kenar);
-                çıktı.araç_düğmeleri.push(düğme);
-            }
-            if araçlar.png_kaydet {
-                let düğme = düğme_çiz(yüzey, "⤓ PNG", AraçTürü::PngKaydet, &mut sağ_kenar);
-                çıktı.araç_düğmeleri.push(düğme);
+        && araçlar.göster
+    {
+        let mut özellikler = araçlar.özellik_sırası.clone();
+        let varsayılan_sıra = [
+            AraçKutusuÖzelliği::VeriGörünümü,
+            AraçKutusuÖzelliği::VeriYakınlaştırma,
+            AraçKutusuÖzelliği::SihirliÇizgi,
+            AraçKutusuÖzelliği::SihirliSütun,
+            AraçKutusuÖzelliği::SihirliYığın,
+            AraçKutusuÖzelliği::GeriYükle,
+            AraçKutusuÖzelliği::SvgKaydet,
+            AraçKutusuÖzelliği::PngKaydet,
+        ];
+        for özellik in varsayılan_sıra {
+            if !özellikler.contains(&özellik) {
+                özellikler.push(özellik);
             }
         }
+        let mut türler = Vec::new();
+        for özellik in özellikler {
+            match özellik {
+                AraçKutusuÖzelliği::VeriGörünümü if araçlar.veri_görünümü => {
+                    türler.push(AraçTürü::VeriGörünümü);
+                }
+                AraçKutusuÖzelliği::VeriYakınlaştırma if araçlar.veri_yakınlaştırma => {
+                    türler.push(AraçTürü::VeriYakınlaştır);
+                    türler.push(AraçTürü::VeriYakınlaştırmayıGeriAl);
+                }
+                AraçKutusuÖzelliği::SihirliÇizgi if araçlar.sihirli_çizgi => {
+                    türler.push(AraçTürü::SihirliÇizgi);
+                }
+                AraçKutusuÖzelliği::SihirliSütun if araçlar.sihirli_sütun => {
+                    türler.push(AraçTürü::SihirliSütun);
+                }
+                AraçKutusuÖzelliği::SihirliYığın if araçlar.sihirli_yığın => {
+                    türler.push(AraçTürü::SihirliYığın);
+                }
+                AraçKutusuÖzelliği::GeriYükle if araçlar.geri_yükle => {
+                    türler.push(AraçTürü::GeriYükle);
+                }
+                AraçKutusuÖzelliği::SvgKaydet if araçlar.svg_kaydet => {
+                    türler.push(AraçTürü::SvgKaydet);
+                }
+                AraçKutusuÖzelliği::PngKaydet if araçlar.png_kaydet => {
+                    türler.push(AraçTürü::PngKaydet);
+                }
+                _ => {}
+            }
+        }
+        // zrender kutu yerleşimi simgelerin (5 px hit eşiğiyle genişlemiş)
+        // sınır kutularını ve 10 px itemGap'i kullanır.
+        let hit_genişliği = |tür: AraçTürü| match tür {
+            AraçTürü::VeriGörünümü => 15.580_358,
+            AraçTürü::VeriYakınlaştır => 20.0,
+            AraçTürü::VeriYakınlaştırmayıGeriAl => 16.904_762,
+            AraçTürü::SihirliÇizgi => 20.0,
+            AraçTürü::SihirliSütun => 19.383_928,
+            AraçTürü::SihirliYığın => 20.0,
+            AraçTürü::GeriYükle => 19.915_937,
+            AraçTürü::SvgKaydet | AraçTürü::PngKaydet => 17.956_896,
+        };
+        let hit_yüksekliği = |tür: AraçTürü| match tür {
+            AraçTürü::VeriGörünümü => 20.0,
+            AraçTürü::VeriYakınlaştır | AraçTürü::VeriYakınlaştırmayıGeriAl => 20.0,
+            AraçTürü::SihirliÇizgi => 19.912_452,
+            AraçTürü::SihirliSütun => 20.0,
+            AraçTürü::SihirliYığın => 18.853_82,
+            AraçTürü::GeriYükle => 20.0,
+            AraçTürü::SvgKaydet | AraçTürü::PngKaydet => 20.0,
+        };
+        let mut yerel_merkezler = Vec::with_capacity(türler.len());
+        let mut yerel = 0.0;
+        for (sıra, tür) in türler.iter().copied().enumerate() {
+            if sıra > 0 {
+                let önceki = türler.get(sıra - 1).copied().unwrap_or(tür);
+                let önceki_boyut = if araçlar.yön == Yön::Yatay {
+                    hit_genişliği(önceki)
+                } else {
+                    hit_yüksekliği(önceki)
+                };
+                let boyut = if araçlar.yön == Yön::Yatay {
+                    hit_genişliği(tür)
+                } else {
+                    hit_yüksekliği(tür)
+                };
+                yerel += önceki_boyut / 2.0 + 10.0 + boyut / 2.0;
+            }
+            yerel_merkezler.push(yerel);
+        }
+        let ilk_tür = türler.first().copied();
+        let son_tür = türler.last().copied();
+        let ilk_merkez = yerel_merkezler.first().copied().unwrap_or(0.0);
+        let son_merkez = yerel_merkezler.last().copied().unwrap_or(0.0);
+        let yatay_en_az = if araçlar.yön == Yön::Yatay {
+            ilk_tür
+                .map(|tür| ilk_merkez - hit_genişliği(tür) / 2.0)
+                .unwrap_or(0.0)
+        } else {
+            türler
+                .iter()
+                .copied()
+                .map(|tür| -hit_genişliği(tür) / 2.0)
+                .fold(0.0f32, f32::min)
+        };
+        let yatay_en_çok = if araçlar.yön == Yön::Yatay {
+            son_tür
+                .map(|tür| son_merkez + hit_genişliği(tür) / 2.0)
+                .unwrap_or(0.0)
+        } else {
+            türler
+                .iter()
+                .copied()
+                .map(|tür| hit_genişliği(tür) / 2.0)
+                .fold(0.0f32, f32::max)
+        };
+        let dikey_en_az = if araçlar.yön == Yön::Dikey {
+            ilk_tür
+                .map(|tür| ilk_merkez - hit_yüksekliği(tür) / 2.0)
+                .unwrap_or(0.0)
+        } else {
+            -10.0
+        };
+        let dikey_en_çok = if araçlar.yön == Yön::Dikey {
+            son_tür
+                .map(|tür| son_merkez + hit_yüksekliği(tür) / 2.0)
+                .unwrap_or(0.0)
+        } else {
+            10.0
+        };
+        let grup_x = match araçlar.sol {
+            YatayKonum::Sol => 15.0 - yatay_en_az,
+            YatayKonum::Orta => yüzey.genişlik() / 2.0 - (yatay_en_az + yatay_en_çok) / 2.0,
+            YatayKonum::Sağ => yüzey.genişlik() - 15.0 - yatay_en_çok,
+            YatayKonum::Değer(uzunluk) => uzunluk.çöz(yüzey.genişlik()) - yatay_en_az,
+        };
+        let grup_y = match araçlar.üst {
+            DikeyKonum::Üst => 15.0 - dikey_en_az,
+            DikeyKonum::Orta => yüzey.yükseklik() / 2.0 - (dikey_en_az + dikey_en_çok) / 2.0,
+            DikeyKonum::Alt => yüzey.yükseklik() - 15.0 - dikey_en_çok,
+            DikeyKonum::Değer(uzunluk) => uzunluk.çöz(yüzey.yükseklik()) - dikey_en_az,
+        };
+        let renk = crate::renk::Renk::onaltılık(0x6578ba);
+        for (sıra, tür) in türler.into_iter().enumerate() {
+            let yerel = yerel_merkezler.get(sıra).copied().unwrap_or(0.0);
+            let merkez = if araçlar.yön == Yön::Yatay {
+                (grup_x + yerel, grup_y)
+            } else {
+                (grup_x, grup_y + yerel)
+            };
+            let hit = hit_genişliği(tür);
+            let hit_y = hit_yüksekliği(tür);
+            let kutu = Dikdörtgen::yeni(merkez.0 - hit / 2.0, merkez.1 - hit_y / 2.0, hit, hit_y);
+            let mut yol = crate::cizim::Yol::yeni();
+            match tür {
+                AraçTürü::VeriGörünümü => {
+                    let n = |x, y| araç_noktası(merkez, [11.5, 2.0, 51.0, 58.0], (x, y));
+                    yol.taşı(n(17.5, 17.3));
+                    yol.çiz(n(33.0, 17.3));
+                    yol.taşı(n(17.5, 17.3));
+                    yol.çiz(n(33.0, 17.3));
+                    yol.taşı(n(45.4, 29.5));
+                    yol.çiz(n(17.4, 29.5));
+                    yol.taşı(n(11.5, 2.0));
+                    yol.çiz(n(11.5, 58.0));
+                    yol.çiz(n(51.0, 58.0));
+                    yol.çiz(n(51.0, 14.8));
+                    yol.çiz(n(38.4, 2.0));
+                    yol.kapat();
+                    yol.taşı(n(38.4, 2.2));
+                    yol.çiz(n(38.4, 14.9));
+                    yol.çiz(n(51.0, 14.9));
+                    yol.taşı(n(45.4, 41.7));
+                    yol.çiz(n(17.4, 41.7));
+                }
+                AraçTürü::VeriYakınlaştır => {
+                    // ECharts DataZoomFeature.defaultOption.icon.zoom.
+                    let n = |x, y| araç_noktası(merkez, [0.0, 0.0, 58.0, 58.0], (x, y));
+                    yol.taşı(n(0.0, 13.5));
+                    yol.çiz(n(26.9, 13.5));
+                    yol.taşı(n(13.5, 26.9));
+                    yol.çiz(n(13.5, 0.0));
+                    yol.taşı(n(32.1, 13.5));
+                    yol.çiz(n(58.0, 13.5));
+                    yol.çiz(n(58.0, 58.0));
+                    yol.çiz(n(13.5, 58.0));
+                    yol.çiz(n(13.5, 32.1));
+                }
+                AraçTürü::VeriYakınlaştırmayıGeriAl => {
+                    // ECharts DataZoomFeature.defaultOption.icon.back.
+                    let n = |x, y| araç_noktası(merkez, [9.9, 1.4, 54.9, 58.1], (x, y));
+                    yol.taşı(n(22.0, 1.4));
+                    yol.çiz(n(9.9, 13.5));
+                    yol.çiz(n(22.2, 25.8));
+                    yol.taşı(n(10.3, 13.5));
+                    yol.çiz(n(54.9, 13.5));
+                    yol.çiz(n(54.9, 58.1));
+                    yol.çiz(n(10.3, 58.1));
+                    yol.çiz(n(10.3, 32.1));
+                }
+                AraçTürü::SihirliÇizgi => {
+                    let n = |x, y| araç_noktası(merkez, [4.1, 6.9, 55.5, 58.0], (x, y));
+                    yol.taşı(n(4.1, 28.9));
+                    yol.çiz(n(11.2, 28.9));
+                    yol.çiz(n(20.5, 6.9));
+                    yol.çiz(n(27.9, 44.9));
+                    yol.çiz(n(37.6, 25.2));
+                    yol.çiz(n(40.6, 38.0));
+                    yol.çiz(n(55.5, 38.0));
+                    yol.taşı(n(4.1, 58.0));
+                    yol.çiz(n(55.5, 58.0));
+                }
+                AraçTürü::SihirliSütun => {
+                    let n = |x, y| araç_noktası(merkez, [3.1, 2.0, 56.8, 58.0], (x, y));
+                    for (x0, y0, x1, y1) in [
+                        (6.7, 22.9, 16.7, 48.0),
+                        (24.9, 13.0, 34.9, 48.0),
+                        (43.2, 2.0, 53.2, 48.0),
+                    ] {
+                        yol.taşı(n(x0, y0));
+                        yol.çiz(n(x1, y0));
+                        yol.çiz(n(x1, y1));
+                        yol.çiz(n(x0, y1));
+                        yol.kapat();
+                    }
+                    yol.taşı(n(3.1, 58.0));
+                    yol.çiz(n(56.8, 58.0));
+                }
+                AraçTürü::SihirliYığın => {
+                    let n = |x, y| araç_noktası(merkez, [-0.2, 2.2, 60.0, 57.8], (x, y));
+                    for noktalar in [
+                        vec![
+                            (8.2, 38.4),
+                            (-0.2, 42.5),
+                            (30.4, 57.8),
+                            (60.0, 42.5),
+                            (51.9, 38.4),
+                            (30.4, 49.4),
+                        ],
+                        vec![
+                            (51.9, 30.0),
+                            (43.8, 34.2),
+                            (30.4, 41.1),
+                            (16.5, 34.2),
+                            (8.2, 30.0),
+                            (-0.2, 34.2),
+                            (8.2, 38.4),
+                            (30.4, 49.4),
+                            (51.9, 38.4),
+                            (60.0, 34.2),
+                        ],
+                        vec![
+                            (51.9, 21.7),
+                            (43.8, 25.9),
+                            (35.7, 30.0),
+                            (30.4, 32.8),
+                            (24.9, 30.0),
+                            (16.5, 25.9),
+                            (8.2, 21.7),
+                            (-0.2, 25.9),
+                            (8.2, 30.0),
+                            (16.5, 34.2),
+                            (30.4, 41.1),
+                            (43.8, 34.2),
+                            (51.9, 30.0),
+                            (60.0, 25.9),
+                        ],
+                        vec![
+                            (30.4, 2.2),
+                            (-0.2, 17.5),
+                            (8.2, 21.6),
+                            (16.5, 25.8),
+                            (24.9, 30.0),
+                            (30.4, 32.7),
+                            (35.7, 30.0),
+                            (43.8, 25.8),
+                            (51.9, 21.6),
+                            (60.0, 17.5),
+                        ],
+                    ] {
+                        if let Some(ilk) = noktalar.first().copied() {
+                            yol.taşı(n(ilk.0, ilk.1));
+                            for nokta in noktalar.iter().skip(1).copied() {
+                                yol.çiz(n(nokta.0, nokta.1));
+                            }
+                            yol.kapat();
+                        }
+                    }
+                }
+                AraçTürü::GeriYükle => {
+                    let n = |x, y| araç_noktası(merkez, [1.6, 0.6, 57.9, 58.0], (x, y));
+                    yol.taşı(n(47.0, 18.9));
+                    yol.çiz(n(56.8, 18.9));
+                    yol.çiz(n(56.8, 8.7));
+                    yol.taşı(n(56.3, 20.1));
+                    yol.kübik(n(52.1, 9.0), n(40.5, 0.6), n(26.8, 2.1));
+                    yol.kübik(n(12.6, 3.7), n(1.6, 16.2), n(2.1, 30.6));
+                    yol.taşı(n(13.0, 41.1));
+                    yol.çiz(n(3.1, 41.1));
+                    yol.çiz(n(3.1, 51.3));
+                    yol.taşı(n(3.7, 39.9));
+                    yol.kübik(n(7.9, 51.0), n(19.5, 59.4), n(33.2, 57.9));
+                    yol.kübik(n(47.4, 56.3), n(58.4, 43.8), n(57.9, 29.4));
+                }
+                AraçTürü::SvgKaydet | AraçTürü::PngKaydet => {
+                    let n = |x, y| araç_noktası(merkez, [4.6, 0.0, 54.7, 58.0], (x, y));
+                    yol.taşı(n(4.7, 22.9));
+                    yol.çiz(n(29.3, 45.5));
+                    yol.çiz(n(54.7, 23.4));
+                    yol.taşı(n(4.6, 43.6));
+                    yol.çiz(n(4.6, 58.0));
+                    yol.çiz(n(53.8, 58.0));
+                    yol.çiz(n(53.8, 43.6));
+                    yol.taşı(n(29.2, 45.1));
+                    yol.çiz(n(29.2, 0.0));
+                }
+            }
+            yüzey.yol_çiz(&yol, 1.0, renk, ÇizgiTürü::Düz);
+            çıktı.araç_düğmeleri.push((kutu, tür));
+        }
+    }
 
     let ipucu_seçeneği = seçenekler.ipucu.clone().filter(|i| i.göster);
 
@@ -873,30 +1555,31 @@ pub fn grafiği_boya(
             bölme_çizgilerini_çiz(yüzey, *alan, &ızgara_eksenleri);
 
             if let (Some(ipucu), Some(eksen_ip)) = (&ipucu_seçeneği, &eksen_ipucu)
-                && ipucu.imleç == İmleçTürü::Gölge && eksen_ip.ızgara == g {
-                    let bant_ekseni = if eksen_ip.bant_x {
-                        kurulum
-                            .x_eksenler
-                            .iter()
-                            .find(|e| e.seçenek.ızgara_sırası == g && e.ölçek.kategorik_mi())
+                && ipucu.imleç == İmleçTürü::Gölge
+                && eksen_ip.ızgara == g
+            {
+                let bant_ekseni = if eksen_ip.bant_x {
+                    kurulum
+                        .x_eksenler
+                        .iter()
+                        .find(|e| e.seçenek.ızgara_sırası == g && e.ölçek.kategorik_mi())
+                } else {
+                    kurulum
+                        .y_eksenler
+                        .iter()
+                        .find(|e| e.seçenek.ızgara_sırası == g && e.ölçek.kategorik_mi())
+                };
+                if let Some(bant_ekseni) = bant_ekseni {
+                    let merkez = bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64);
+                    let bant = bant_ekseni.bant_genişliği();
+                    let d = if eksen_ip.bant_x {
+                        Dikdörtgen::yeni(merkez - bant / 2.0, alan.y, bant, alan.yükseklik)
                     } else {
-                        kurulum
-                            .y_eksenler
-                            .iter()
-                            .find(|e| e.seçenek.ızgara_sırası == g && e.ölçek.kategorik_mi())
+                        Dikdörtgen::yeni(alan.x, merkez - bant / 2.0, alan.genişlik, bant)
                     };
-                    if let Some(bant_ekseni) = bant_ekseni {
-                        let merkez =
-                            bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64);
-                        let bant = bant_ekseni.bant_genişliği();
-                        let d = if eksen_ip.bant_x {
-                            Dikdörtgen::yeni(merkez - bant / 2.0, alan.y, bant, alan.yükseklik)
-                        } else {
-                            Dikdörtgen::yeni(alan.x, merkez - bant / 2.0, alan.genişlik, bant)
-                        };
-                        yüzey.dikdörtgen(d, &Dolgu::Düz(tema::imleç_gölgesi()), [0.0; 4], None);
-                    }
+                    yüzey.dikdörtgen(d, &Dolgu::Düz(tema::imleç_gölgesi()), [0.0; 4], None);
                 }
+            }
 
             eksenleri_çiz(yüzey, *alan, &ızgara_eksenleri);
         }
@@ -906,47 +1589,62 @@ pub fn grafiği_boya(
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                 continue;
             }
-            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else { continue };
+            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                continue;
+            };
             if let Some(imleyiciler) = seri.imleyiciler()
-                && imleyiciler.alan.is_some() {
-                    im_alanlarını_çiz(
-                        yüzey,
-                        imleyiciler,
-                        seri,
-                        &kartezyen,
-                        seçenekler.seri_rengi(i),
-                    );
-                }
+                && imleyiciler.alan.is_some()
+            {
+                im_alanlarını_çiz(
+                    yüzey,
+                    imleyiciler,
+                    seri,
+                    &kartezyen,
+                    seçenekler.seri_rengi(i),
+                );
+            }
         }
 
-        // Sütunlar eksen çifti başına gruplanır (yerleşim paylaşımı).
-        let mut sütun_grupları: Vec<((usize, usize), Vec<SütunGirdisi>)> = Vec::new();
+        // Sütunlar değer eksenine göre değil ortak kategori (taban) eksenine
+        // göre gruplanır. ECharts böylece iki ayrı yAxis'e bağlı sütunları da
+        // aynı kategoride yan yana yerleştirir.
+        let sütun_grup_anahtarı = |seri: &Seri| {
+            let bağ = seri.eksen_bağı();
+            let y_kategorik = kurulum
+                .y_eksenler
+                .get(bağ.y)
+                .map(|eksen| eksen.ölçek.kategorik_mi())
+                .unwrap_or(false);
+            if y_kategorik {
+                (false, bağ.y)
+            } else {
+                (true, bağ.x)
+            }
+        };
+        let mut sütun_grupları: Vec<((bool, usize), Vec<SütunGirdisi>)> = Vec::new();
         for (i, s) in seçenekler.seriler.iter().enumerate() {
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                 continue;
             }
             if let Seri::Sütun(sütun) = s {
-                let bağ = s.eksen_bağı();
+                let Some(seri_kartezyeni) = kurulum.seri_kartezyeni(s) else {
+                    continue;
+                };
+                let anahtar = sütun_grup_anahtarı(s);
                 let girdi = SütunGirdisi {
                     seri: sütun,
+                    kartezyen: seri_kartezyeni,
                     genel_sıra: i,
-                    aralıklar: kurulum
-                        .aralıklar
-                        .get(i)
-                        .map(Vec::as_slice)
-                        .unwrap_or(&[]),
+                    aralıklar: kurulum.aralıklar.get(i).map(Vec::as_slice).unwrap_or(&[]),
                     renk: seçenekler.seri_rengi(i),
                 };
-                match sütun_grupları
-                    .iter_mut()
-                    .find(|(anahtar, _)| *anahtar == (bağ.x, bağ.y))
-                {
+                match sütun_grupları.iter_mut().find(|(aday, _)| *aday == anahtar) {
                     Some((_, grup)) => grup.push(girdi),
-                    None => sütun_grupları.push(((bağ.x, bağ.y), vec![girdi])),
+                    None => sütun_grupları.push((anahtar, vec![girdi])),
                 }
             }
         }
-        let mut çizilen_sütun_grupları: HashSet<(usize, usize)> = HashSet::new();
+        let mut çizilen_sütun_grupları: HashSet<(bool, usize)> = HashSet::new();
 
         // Saçılım vurgusu (öğe ipucu) için önden isabet araması.
         // `(seri sırası, vurgulu veri sırası, noktalar)`.
@@ -957,7 +1655,9 @@ pub fn grafiği_boya(
                 if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                     continue;
                 }
-                let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else { continue };
+                let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                    continue;
+                };
                 let noktalar = saçılım_noktaları(s, &kartezyen);
                 let vurgu = match (&ipucu_seçeneği, fare) {
                     (Some(ipucu), Some(f)) if ipucu.tetikleme == Tetikleme::Öğe => noktalar
@@ -980,172 +1680,229 @@ pub fn grafiği_boya(
             }
         }
 
+        // LineView alan poligonlarını z2=0, polylineleri z2=10 ile boyar.
+        // Bütün alanları önce geçirmek, sonraki yığın dolgularının daha önce
+        // çizilmiş sınır çizgilerini örtmesini engeller.
+        for (i, seri) in seçenekler.seriler.iter().enumerate() {
+            let Seri::Çizgi(çizgi) = seri else { continue };
+            if çizgi.alan_stili.is_none() || !kurulum.görünürler.get(i).copied().unwrap_or(false)
+            {
+                continue;
+            }
+            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                continue;
+            };
+            let aralıklar = kurulum.aralıklar.get(i).map(Vec::as_slice).unwrap_or(&[]);
+            let mut alanı_çiz = |yüzey: &mut dyn ÇizimYüzeyi| {
+                çizgi_serisi_çiz(
+                    yüzey,
+                    çizgi,
+                    &kartezyen,
+                    aralıklar,
+                    seçenekler.seri_rengi(i),
+                    ilerleme,
+                    ÇizgiKatmanı::Alan,
+                );
+            };
+            if kartezyen.x.pencere.is_some() || kartezyen.y.pencere.is_some() {
+                yüzey.kırpılı(kartezyen.alan, &mut alanı_çiz);
+            } else {
+                alanı_çiz(yüzey);
+            }
+        }
+
         for (i, seri) in seçenekler.seriler.iter().enumerate() {
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                 continue;
             }
-            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else { continue };
+            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                continue;
+            };
             // Yakınlaştırma penceresi etkinse seri ızgaraya kırpılır
             // (ECharts `clip: true`).
-            let pencereli = kartezyen.x.pencere.is_some() || kartezyen.y.pencere.is_some();
+            let pencereli = kartezyen.x.pencere.is_some()
+                || kartezyen.y.pencere.is_some()
+                || matches!(seri, Seri::Hatlar(hatlar) if hatlar.kırp);
             let mut yerel_isabetler: Vec<İsabetBölgesi> = Vec::new();
             let mut yerel_ipucu: Option<Bekleyenİpucu> = None;
-            let mut seri_çiz = |yüzey: &mut dyn ÇizimYüzeyi,
-                                isabetler: &mut Vec<İsabetBölgesi>,
-                                bekleyen: &mut Option<Bekleyenİpucu>| {
-            match seri {
-                Seri::Çizgi(s) => {
-                    let seri_aralıkları = kurulum
-                        .aralıklar
-                        .get(i)
-                        .map(Vec::as_slice)
-                        .unwrap_or(&[]);
-                    çizgi_serisi_çiz(
-                        yüzey,
-                        s,
-                        &kartezyen,
-                        seri_aralıkları,
-                        seçenekler.seri_rengi(i),
-                        ilerleme,
-                    );
-                    // Sembol noktaları tıklanabilir bölgelerdir.
-                    let (tepeler, _) = nokta_listeleri(s, &kartezyen, seri_aralıkları);
-                    for (j, nokta) in tepeler.iter().enumerate() {
-                        let Some(nokta) = nokta else { continue };
-                        let Some(öğe) = s.veri.get(j) else { continue };
-                        isabetler.push(İsabetBölgesi {
-                            seri_sırası: i,
-                            veri_sırası: j,
-                            seri_adı: s.ad.clone(),
-                            ad: öğe.ad.clone(),
-                            değer: öğe.değer.sayı(),
-                            geometri: İsabetGeometrisi::Daire {
-                                merkez: *nokta,
-                                yarıçap: (s.sembol_boyutu / 2.0 + 3.0).max(8.0),
-                            },
-                        });
-                    }
-                }
-                Seri::Sütun(_) => {
-                    let bağ = seri.eksen_bağı();
-                    if çizilen_sütun_grupları.insert((bağ.x, bağ.y))
-                        && let Some((_, girdiler)) = sütun_grupları
-                            .iter()
-                            .find(|(anahtar, _)| *anahtar == (bağ.x, bağ.y))
-                        {
-                            sütunları_çiz(
+            let mut seri_çiz =
+                |yüzey: &mut dyn ÇizimYüzeyi,
+                 isabetler: &mut Vec<İsabetBölgesi>,
+                 bekleyen: &mut Option<Bekleyenİpucu>| {
+                    match seri {
+                        Seri::Çizgi(s) => {
+                            let seri_aralıkları =
+                                kurulum.aralıklar.get(i).map(Vec::as_slice).unwrap_or(&[]);
+                            çizgi_serisi_çiz(
                                 yüzey,
-                                girdiler,
+                                s,
                                 &kartezyen,
+                                seri_aralıkları,
+                                seçenekler.seri_rengi(i),
                                 ilerleme,
+                                ÇizgiKatmanı::ÇizgiVeSembol,
+                            );
+                            // Sembol noktaları tıklanabilir bölgelerdir.
+                            let (tepeler, _) = nokta_listeleri(s, &kartezyen, seri_aralıkları);
+                            for (j, nokta) in tepeler.iter().enumerate() {
+                                let Some(nokta) = nokta else { continue };
+                                let Some(öğe) = s.veri.get(j) else { continue };
+                                isabetler.push(İsabetBölgesi {
+                                    seri_sırası: i,
+                                    veri_sırası: j,
+                                    seri_adı: s.ad.clone(),
+                                    ad: öğe.ad.clone(),
+                                    değer: öğe.değer.sayı(),
+                                    geometri: İsabetGeometrisi::Daire {
+                                        merkez: *nokta,
+                                        yarıçap: (s.sembol_boyutu / 2.0 + 3.0).max(8.0),
+                                    },
+                                });
+                            }
+                        }
+                        Seri::Sütun(_) => {
+                            let anahtar = sütun_grup_anahtarı(seri);
+                            if çizilen_sütun_grupları.insert(anahtar)
+                                && let Some((_, girdiler)) =
+                                    sütun_grupları.iter().find(|(aday, _)| *aday == anahtar)
+                            {
+                                sütunları_çiz(yüzey, girdiler, ilerleme, isabetler);
+                            }
+                        }
+                        Seri::Saçılım(s) => {
+                            let kayıt = saçılım_vurguları.iter().find(|(sıra, ..)| *sıra == i);
+                            if let Some((_, vurgu, noktalar)) = kayıt {
+                                saçılım_çiz(
+                                    yüzey,
+                                    s,
+                                    noktalar,
+                                    seçenekler.seri_rengi(i),
+                                    ilerleme,
+                                    zaman_sn,
+                                    *vurgu,
+                                );
+                                for n in noktalar {
+                                    isabetler.push(İsabetBölgesi {
+                                        seri_sırası: i,
+                                        veri_sırası: n.sıra,
+                                        seri_adı: s.ad.clone(),
+                                        ad: s.veri.get(n.sıra).and_then(|ö| ö.ad.clone()),
+                                        değer: Some(n.y_değeri),
+                                        geometri: İsabetGeometrisi::Daire {
+                                            merkez: n.konum,
+                                            yarıçap: (n.boyut / 2.0 + 3.0).max(8.0),
+                                        },
+                                    });
+                                }
+                                // Öğe ipucu.
+                                if let (Some(sıra), Some(f)) = (vurgu, fare)
+                                    && let Some(nokta) = noktalar.iter().find(|n| n.sıra == *sıra)
+                                {
+                                    *bekleyen = Some((
+                                        seri.ad().map(str::to_string),
+                                        vec![İpucuSatırı {
+                                            im_rengi: Some(seçenekler.seri_rengi(i)),
+                                            ad: format!(
+                                                "({}, {})",
+                                                binlik_ayır(nokta.x_değeri),
+                                                binlik_ayır(nokta.y_değeri)
+                                            ),
+                                            değer: String::new(),
+                                        }],
+                                        f,
+                                    ));
+                                }
+                            }
+                        }
+                        Seri::Mum(s) => mum_çiz(yüzey, s, i, &kartezyen, ilerleme, isabetler),
+                        Seri::Kutu(s) => {
+                            // ECharts kutu serilerini aynı kategorik taban
+                            // ekseni üzerinde yan yana yerleştirir. Değer
+                            // ekseni farklı olsa bile ortak taban ekseni aynı
+                            // yerleşim istatistiğini paylaşır.
+                            let yatay = kartezyen.y.ölçek.kategorik_mi()
+                                && !kartezyen.x.ölçek.kategorik_mi();
+                            let bağ = seri.eksen_bağı();
+                            let grup: Vec<usize> = seçenekler
+                                .seriler
+                                .iter()
+                                .enumerate()
+                                .filter_map(|(sıra, aday)| {
+                                    if !kurulum.görünürler.get(sıra).copied().unwrap_or(false)
+                                        || !matches!(aday, Seri::Kutu(_))
+                                    {
+                                        return None;
+                                    }
+                                    let aday_kartezyen = kurulum.seri_kartezyeni(aday)?;
+                                    let aday_yatay = aday_kartezyen.y.ölçek.kategorik_mi()
+                                        && !aday_kartezyen.x.ölçek.kategorik_mi();
+                                    let aday_bağ = aday.eksen_bağı();
+                                    let aynı_taban = if yatay {
+                                        aday_yatay && aday_bağ.y == bağ.y
+                                    } else {
+                                        !aday_yatay && aday_bağ.x == bağ.x
+                                    };
+                                    aynı_taban.then_some(sıra)
+                                })
+                                .collect();
+                            let grup_sırası = grup.iter().position(|&sıra| sıra == i).unwrap_or(0);
+                            kutu_çiz(
+                                yüzey,
+                                s,
+                                i,
+                                &kartezyen,
+                                grup_sırası,
+                                grup.len(),
+                                seçenekler.seri_rengi(i),
+                                isabetler,
+                            )
+                        }
+                        Seri::Isı(s) => {
+                            let eşleme = seçenekler.görsel_eşleme.clone().unwrap_or_default();
+                            let kapsam = eşleme.kapsam_çöz(ısı_değer_kapsamı(s));
+                            ısı_haritası_çiz(
+                                yüzey, s, i, &kartezyen, &eşleme, kapsam, ilerleme, isabetler,
+                            );
+                        }
+                        Seri::Özel(s) => {
+                            if let Some(çizim) = &s.çizim {
+                                let bağlam = ÖzelBağlam {
+                                    alan: kartezyen.alan,
+                                    kartezyen: Some(&kartezyen),
+                                    veri: &s.veri,
+                                    renk: seçenekler.seri_rengi(i),
+                                    ilerleme,
+                                };
+                                çizim(yüzey, &bağlam);
+                            }
+                        }
+                        Seri::Hatlar(s) => {
+                            hatlar_çiz(
+                                yüzey,
+                                s,
+                                i,
+                                &|nokta| kartezyen_hat_noktası(nokta, &kartezyen),
+                                seçenekler.seri_rengi(i),
+                                ilerleme,
+                                zaman_sn,
                                 isabetler,
                             );
                         }
-                }
-                Seri::Saçılım(s) => {
-                    let kayıt = saçılım_vurguları.iter().find(|(sıra, ..)| *sıra == i);
-                    if let Some((_, vurgu, noktalar)) = kayıt {
-                        saçılım_çiz(
-                            yüzey,
-                            s,
-                            noktalar,
-                            seçenekler.seri_rengi(i),
-                            ilerleme,
-                            zaman_sn,
-                            *vurgu,
-                        );
-                        for n in noktalar {
-                            isabetler.push(İsabetBölgesi {
-                                seri_sırası: i,
-                                veri_sırası: n.sıra,
-                                seri_adı: s.ad.clone(),
-                                ad: s.veri.get(n.sıra).and_then(|ö| ö.ad.clone()),
-                                değer: Some(n.y_değeri),
-                                geometri: İsabetGeometrisi::Daire {
-                                    merkez: n.konum,
-                                    yarıçap: (n.boyut / 2.0 + 3.0).max(8.0),
-                                },
-                            });
-                        }
-                        // Öğe ipucu.
-                        if let (Some(sıra), Some(f)) = (vurgu, fare)
-                            && let Some(nokta) = noktalar.iter().find(|n| n.sıra == *sıra) {
-                                *bekleyen = Some((
-                                    seri.ad().map(str::to_string),
-                                    vec![İpucuSatırı {
-                                        im_rengi: Some(seçenekler.seri_rengi(i)),
-                                        ad: format!(
-                                            "({}, {})",
-                                            binlik_ayır(nokta.x_değeri),
-                                            binlik_ayır(nokta.y_değeri)
-                                        ),
-                                        değer: String::new(),
-                                    }],
-                                    f,
-                                ));
-                            }
+                        Seri::Pasta(_)
+                        | Seri::Huni(_)
+                        | Seri::GöstergeSaati(_)
+                        | Seri::Radar(_)
+                        | Seri::AğaçHaritası(_)
+                        | Seri::GüneşPatlaması(_)
+                        | Seri::Ağaç(_)
+                        | Seri::Sankey(_)
+                        | Seri::Grafo(_)
+                        | Seri::Kiriş(_)
+                        | Seri::Paralel(_)
+                        | Seri::Takvim(_)
+                        | Seri::TemaNehri(_) => {}
                     }
-                }
-                Seri::Mum(s) => mum_çiz(
-                    yüzey,
-                    s,
-                    i,
-                    &kartezyen,
-                    ilerleme,
-                    isabetler,
-                ),
-                Seri::Kutu(s) => kutu_çiz(
-                    yüzey,
-                    s,
-                    i,
-                    &kartezyen,
-                    seçenekler.seri_rengi(i),
-                    isabetler,
-                ),
-                Seri::Isı(s) => {
-                    let eşleme = seçenekler
-                        .görsel_eşleme
-                        .clone()
-                        .unwrap_or_default();
-                    let kapsam = eşleme.kapsam_çöz(ısı_değer_kapsamı(s));
-                    ısı_haritası_çiz(
-                        yüzey,
-                        s,
-                        i,
-                        &kartezyen,
-                        &eşleme,
-                        kapsam,
-                        ilerleme,
-                        isabetler,
-                    );
-                }
-                Seri::Özel(s) => {
-                    if let Some(çizim) = &s.çizim {
-                        let bağlam = ÖzelBağlam {
-                            alan: kartezyen.alan,
-                            kartezyen: Some(&kartezyen),
-                            veri: &s.veri,
-                            renk: seçenekler.seri_rengi(i),
-                            ilerleme,
-                        };
-                        çizim(yüzey, &bağlam);
-                    }
-                }
-                Seri::Pasta(_)
-                | Seri::Huni(_)
-                | Seri::GöstergeSaati(_)
-                | Seri::Radar(_)
-                | Seri::AğaçHaritası(_)
-                | Seri::GüneşPatlaması(_)
-                | Seri::Ağaç(_)
-                | Seri::Sankey(_)
-                | Seri::Grafo(_)
-                | Seri::Kiriş(_)
-                | Seri::Paralel(_)
-                | Seri::Takvim(_)
-                | Seri::TemaNehri(_) => {}
-            }
-            };
+                };
             if pencereli {
                 let alan_kırp = kartezyen.alan;
                 yüzey.kırpılı(alan_kırp, &mut |y| {
@@ -1165,94 +1922,116 @@ pub fn grafiği_boya(
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
                 continue;
             }
-            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else { continue };
+            let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                continue;
+            };
             if let Some(imleyiciler) = seri.imleyiciler()
-                && (imleyiciler.çizgi.is_some() || imleyiciler.nokta.is_some()) {
-                    im_çizgi_ve_noktalarını_çiz(
-                        yüzey,
-                        imleyiciler,
-                        seri,
-                        &kartezyen,
-                        seçenekler.seri_rengi(i),
-                    );
-                }
+                && (imleyiciler.çizgi.is_some() || imleyiciler.nokta.is_some())
+            {
+                let kategori_kaydırması = if matches!(seri, Seri::Sütun(_)) {
+                    let anahtar = sütun_grup_anahtarı(seri);
+                    sütun_grupları
+                        .iter()
+                        .find(|(aday, _)| *aday == anahtar)
+                        .and_then(|(_, girdiler)| {
+                            let bant_genişliği = if kartezyen.x.ölçek.kategorik_mi() {
+                                kartezyen.x.bant_genişliği()
+                            } else {
+                                kartezyen.y.bant_genişliği()
+                            };
+                            let konumlar = yerleşim_hesapla(girdiler, bant_genişliği);
+                            girdiler
+                                .iter()
+                                .zip(konumlar)
+                                .find(|(girdi, _)| girdi.genel_sıra == i)
+                                .map(|(_, konum)| konum.kaydırma + konum.genişlik / 2.0)
+                        })
+                        .unwrap_or(0.0)
+                } else {
+                    0.0
+                };
+                im_çizgi_ve_noktalarını_çiz(
+                    yüzey,
+                    imleyiciler,
+                    seri,
+                    &kartezyen,
+                    seçenekler.seri_rengi(i),
+                    kategori_kaydırması,
+                );
+            }
         }
 
         // Çapraz imleç: fareden geçen kesikli yatay+dikey çizgiler ve
         // eksen kenarlarında değer etiketleri (`axisPointer: cross`).
         if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
             && ipucu.imleç == İmleçTürü::Çapraz
-                && let Some(g) = kurulum.faredeki_ızgara(f)
-                    && let Some(kartezyen) = kurulum.birincil_kartezyen(g) {
-                        let alan = kartezyen.alan;
-                        let (fx, fy) = (keskin(f.0), keskin(f.1));
-                        yüzey.çizgi(
-                            (fx, alan.y),
-                            (fx, alan.alt()),
-                            1.0,
-                            tema::imleç_çizgisi(),
-                            ÇizgiTürü::Kesikli,
-                        );
-                        yüzey.çizgi(
-                            (alan.x, fy),
-                            (alan.sağ(), fy),
-                            1.0,
-                            tema::imleç_çizgisi(),
-                            ÇizgiTürü::Kesikli,
-                        );
-                        let mut kenar_etiketi =
-                            |metin: &str, konum: (f32, f32), yatay_orta: bool| {
-                                let boyut = tema::YAZI_KÜÇÜK;
-                                let (gş, y) = yüzey.yazı_ölç(metin, boyut);
-                                let kutu = if yatay_orta {
-                                    Dikdörtgen::yeni(
-                                        konum.0 - gş / 2.0 - 5.0,
-                                        konum.1,
-                                        gş + 10.0,
-                                        y + 4.0,
-                                    )
-                                } else {
-                                    Dikdörtgen::yeni(
-                                        konum.0 - gş - 10.0,
-                                        konum.1 - y / 2.0 - 2.0,
-                                        gş + 10.0,
-                                        y + 4.0,
-                                    )
-                                };
-                                yüzey.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_70()), [2.0; 4], None);
-                                yüzey.yazı(
-                                    metin,
-                                    kutu.merkez(),
-                                    crate::cizim::YatayHiza::Orta,
-                                    crate::cizim::DikeyHiza::Orta,
-                                    boyut,
-                                    crate::renk::Renk::BEYAZ,
-                                    false,
-                                );
-                            };
-                        let x_metin = kartezyen
-                            .x
-                            .ölçek
-                            .etiket(kartezyen.x.pikselden_veriye(f.0));
-                        let y_metin = kartezyen
-                            .y
-                            .ölçek
-                            .etiket(kartezyen.y.pikselden_veriye(f.1));
-                        kenar_etiketi(&x_metin, (fx, alan.alt() + 4.0), true);
-                        kenar_etiketi(&y_metin, (alan.x - 4.0, fy), false);
-                    }
+            && let Some(g) = kurulum.faredeki_ızgara(f)
+            && let Some(kartezyen) = kurulum.birincil_kartezyen(g)
+        {
+            let alan = kartezyen.alan;
+            let (fx, fy) = (keskin(f.0), keskin(f.1));
+            yüzey.çizgi(
+                (fx, alan.y),
+                (fx, alan.alt()),
+                1.0,
+                tema::imleç_çizgisi(),
+                ÇizgiTürü::Kesikli,
+            );
+            yüzey.çizgi(
+                (alan.x, fy),
+                (alan.sağ(), fy),
+                1.0,
+                tema::imleç_çizgisi(),
+                ÇizgiTürü::Kesikli,
+            );
+            let mut kenar_etiketi = |metin: &str, konum: (f32, f32), yatay_orta: bool| {
+                let boyut = tema::YAZI_KÜÇÜK;
+                let (gş, y) = yüzey.yazı_ölç(metin, boyut);
+                let kutu = if yatay_orta {
+                    Dikdörtgen::yeni(konum.0 - gş / 2.0 - 5.0, konum.1, gş + 10.0, y + 4.0)
+                } else {
+                    Dikdörtgen::yeni(
+                        konum.0 - gş - 10.0,
+                        konum.1 - y / 2.0 - 2.0,
+                        gş + 10.0,
+                        y + 4.0,
+                    )
+                };
+                yüzey.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_70()), [2.0; 4], None);
+                yüzey.yazı(
+                    metin,
+                    kutu.merkez(),
+                    crate::cizim::YatayHiza::Orta,
+                    crate::cizim::DikeyHiza::Orta,
+                    boyut,
+                    crate::renk::Renk::BEYAZ,
+                    false,
+                );
+            };
+            let x_metin = kartezyen.x.ölçek.etiket(kartezyen.x.pikselden_veriye(f.0));
+            let y_metin = kartezyen.y.ölçek.etiket(kartezyen.y.pikselden_veriye(f.1));
+            kenar_etiketi(&x_metin, (fx, alan.alt() + 4.0), true);
+            kenar_etiketi(&y_metin, (alan.x - 4.0, fy), false);
+        }
 
         // Veri yakınlaştırma: iç alan kayıtları + sürgü çizimi.
         for (z, yakınlaştırma) in seçenekler.veri_yakınlaştırmaları.iter().enumerate() {
-            let Some(x_ekseni) = kurulum.x_eksenler.get(yakınlaştırma.x_eksen_sırası)
-            else {
+            let dikey = yakınlaştırma.dikey_mi();
+            let hedef_ızgara = if let Some(y_sırası) = yakınlaştırma.y_eksen_sırası {
+                kurulum
+                    .y_eksenler
+                    .get(y_sırası)
+                    .map(|eksen| eksen.seçenek.ızgara_sırası)
+            } else {
+                kurulum
+                    .x_eksenler
+                    .get(yakınlaştırma.x_eksen_sırası)
+                    .map(|eksen| eksen.seçenek.ızgara_sırası)
+            };
+            let Some(hedef_ızgara) = hedef_ızgara else {
                 continue;
             };
-            let Some(alan) = kurulum
-                .ızgara_alanları
-                .get(x_ekseni.seçenek.ızgara_sırası)
-                .copied()
-            else {
+            let Some(alan) = kurulum.ızgara_alanları.get(hedef_ızgara).copied() else {
                 continue;
             };
             match yakınlaştırma.tür {
@@ -1260,46 +2039,329 @@ pub fn grafiği_boya(
                     çıktı.iç_yakınlaştırmalar.push(İçYakınlaştırmaAlanı {
                         yakınlaştırma_sırası: z,
                         alan,
+                        dikey,
                     });
                 }
                 YakınlaştırmaTürü::Sürgü => {
                     let (b, e) = yakınlaştırma.oranlar();
-                    let şerit = Dikdörtgen::yeni(
-                        alan.x,
-                        yüzey.yükseklik() - 36.0,
-                        alan.genişlik,
-                        22.0,
-                    );
+                    let şerit = if dikey {
+                        let genişlik = yakınlaştırma
+                            .genişlik
+                            .map(|u| u.çöz(yüzey.genişlik()))
+                            .unwrap_or(30.0);
+                        let yükseklik = yakınlaştırma
+                            .yükseklik
+                            .map(|u| u.çöz(yüzey.yükseklik()))
+                            .unwrap_or(alan.yükseklik);
+                        let x = yakınlaştırma
+                            .sol
+                            .map(|u| u.çöz(yüzey.genişlik()))
+                            .unwrap_or(yüzey.genişlik() - genişlik - 15.0)
+                            + 0.5;
+                        let y = yakınlaştırma
+                            .üst
+                            .map(|u| u.çöz(yüzey.yükseklik()))
+                            .or_else(|| {
+                                yakınlaştırma.alt.map(|u| {
+                                    yüzey.yükseklik() - u.çöz(yüzey.yükseklik()) - yükseklik
+                                })
+                            })
+                            .unwrap_or((yüzey.yükseklik() - yükseklik) / 2.0 + 10.0);
+                        Dikdörtgen::yeni(x, y, genişlik, yükseklik)
+                    } else {
+                        let genişlik = yakınlaştırma
+                            .genişlik
+                            .map(|u| u.çöz(yüzey.genişlik()))
+                            .unwrap_or(alan.genişlik);
+                        let yükseklik = yakınlaştırma
+                            .yükseklik
+                            .map(|u| u.çöz(yüzey.yükseklik()))
+                            .unwrap_or(30.0);
+                        let x = yakınlaştırma
+                            .sol
+                            .map(|u| u.çöz(yüzey.genişlik()))
+                            .unwrap_or(alan.x)
+                            + 2.8;
+                        let y = yakınlaştırma
+                            .üst
+                            .map(|u| u.çöz(yüzey.yükseklik()) + 6.5)
+                            .or_else(|| {
+                                yakınlaştırma.alt.map(|u| {
+                                    yüzey.yükseklik() - u.çöz(yüzey.yükseklik()) - yükseklik + 6.5
+                                })
+                            })
+                            .unwrap_or(yüzey.yükseklik() - 45.5);
+                        Dikdörtgen::yeni(x, y, genişlik, yükseklik)
+                    };
+                    let kenarlık = crate::renk::Renk::onaltılık(0xe0e4f2);
+                    let vurgu = crate::renk::Renk::onaltılık(0x8292cc);
                     // Şerit zemini.
                     yüzey.dikdörtgen(
                         şerit,
-                        &Dolgu::Düz(tema::nötr_05()),
-                        [3.0; 4],
-                        Some((1.0, tema::nötr_15())),
-                    );
-                    // Seçili pencere.
-                    let p_x = şerit.x + şerit.genişlik * b;
-                    let p_g = (şerit.genişlik * (e - b)).max(4.0);
-                    let pencere = Dikdörtgen::yeni(p_x, şerit.y, p_g, şerit.yükseklik);
-                    yüzey.dikdörtgen(
-                        pencere,
-                        &Dolgu::Düz(tema::nötr_40().opaklık(0.35)),
-                        [2.0; 4],
+                        &Dolgu::Düz(crate::renk::Renk::SAYDAM),
+                        [0.0; 4],
                         None,
                     );
-                    // Tutamaçlar.
-                    let tutamaç = |x: f32| {
-                        Dikdörtgen::yeni(x - 4.0, şerit.y - 2.0, 8.0, şerit.yükseklik + 4.0)
+                    // ECharts `showDataShadow: auto`: ilk uygun serinin tüm
+                    // verisini sürgünün arkasında düşük opaklıklı alan olarak
+                    // gösterir.
+                    if yakınlaştırma.veri_gölgesi
+                        && !dikey
+                        && let Some(veri) = seçenekler
+                            .seriler
+                            .iter()
+                            .map(Seri::veri)
+                            .find(|veri| !veri.is_empty())
+                    {
+                        let en_çok = veri
+                            .iter()
+                            .filter_map(|öğe| öğe.değer.sayı())
+                            .fold(0.0_f64, f64::max)
+                            .max(1.0);
+                        // SliderZoomView, karşı eksen kapsamını iki yönde
+                        // %30 genişletip [0, sliderHeight] aralığına eşler.
+                        // Bu, sıfır çizgisini zeminden biraz yukarı alır.
+                        let alt_kapsam = -en_çok * 0.3;
+                        let üst_kapsam = en_çok * 1.3;
+                        let eşle = |değer: f64| {
+                            ((değer - alt_kapsam) / (üst_kapsam - alt_kapsam)) as f32
+                                * şerit.yükseklik
+                        };
+                        let mut alan_yolu = crate::cizim::Yol::yeni();
+                        alan_yolu.taşı((şerit.sağ(), şerit.alt()));
+                        alan_yolu.çiz((şerit.x, şerit.alt()));
+                        let mut çizgi_yolu = crate::cizim::Yol::yeni();
+                        let mut çizgi_başladı = false;
+                        let mut son_boş = false;
+                        let mut son_x = şerit.x;
+                        for (sıra, öğe) in veri.iter().enumerate() {
+                            let oran = if veri.len() > 1 {
+                                sıra as f32 / (veri.len() - 1) as f32
+                            } else {
+                                0.5
+                            };
+                            let x = şerit.x + şerit.genişlik * oran;
+                            let değer = öğe.değer.sayı().filter(|değer| değer.is_finite());
+                            if değer.is_none() && !son_boş && sıra > 0 {
+                                alan_yolu.çiz((son_x, şerit.alt()));
+                                if çizgi_başladı {
+                                    çizgi_yolu.çiz((son_x, şerit.alt()));
+                                }
+                            } else if değer.is_some() && son_boş {
+                                alan_yolu.çiz((x, şerit.alt()));
+                                if çizgi_başladı {
+                                    çizgi_yolu.çiz((x, şerit.alt()));
+                                }
+                            }
+                            if let Some(değer) = değer {
+                                let nokta = (x, şerit.alt() - eşle(değer));
+                                alan_yolu.çiz(nokta);
+                                if çizgi_başladı {
+                                    çizgi_yolu.çiz(nokta);
+                                } else {
+                                    çizgi_yolu.taşı(nokta);
+                                    çizgi_başladı = true;
+                                }
+                            }
+                            son_boş = değer.is_none();
+                            son_x = x;
+                        }
+                        alan_yolu.kapat();
+                        let seçili_sol = şerit.x + şerit.genişlik * b;
+                        let seçili_sağ = şerit.x + şerit.genişlik * e;
+                        let parçalar = [
+                            (şerit.x, seçili_sol, false),
+                            (seçili_sol, seçili_sağ, true),
+                            (seçili_sağ, şerit.sağ(), false),
+                        ];
+                        for (parça_sol, parça_sağ, seçili) in parçalar {
+                            if parça_sağ <= parça_sol {
+                                continue;
+                            }
+                            let kırpma = Dikdörtgen::yeni(
+                                parça_sol,
+                                şerit.y,
+                                parça_sağ - parça_sol,
+                                şerit.yükseklik,
+                            );
+                            let alan_rengi = crate::renk::Renk::onaltılık(0xc0c9e6)
+                                // Canvas kaynak-üstte birleşimi en yakın
+                                // kanala yuvarlar; tiny-skia yolu aşağı
+                                // kırptığı için aynı son rengi bu opaklıklar
+                                // verir.
+                                .opaklık(if seçili { 0.29 } else { 0.19 });
+                            let çizgi_rengi = crate::renk::Renk::onaltılık(if seçili {
+                                0x8292cc
+                            } else {
+                                0xa1aed9
+                            });
+                            yüzey.kırpılı(kırpma, &mut |çizici| {
+                                çizici.yol_doldur(&alan_yolu, &Dolgu::Düz(alan_rengi));
+                                çizici.yol_çiz(&çizgi_yolu, 0.5, çizgi_rengi, ÇizgiTürü::Düz);
+                            });
+                        }
+                    }
+                    // Seçili pencere.
+                    let pencere = if dikey {
+                        let p_y = şerit.y + şerit.yükseklik * (1.0 - e);
+                        let p_yükseklik = (şerit.yükseklik * (e - b)).max(4.0);
+                        Dikdörtgen::yeni(şerit.x, p_y, şerit.genişlik, p_yükseklik)
+                    } else {
+                        let p_x = şerit.x + şerit.genişlik * b;
+                        let p_g = (şerit.genişlik * (e - b)).max(4.0);
+                        Dikdörtgen::yeni(p_x, şerit.y, p_g, şerit.yükseklik)
                     };
-                    let sol = tutamaç(p_x);
-                    let sağ = tutamaç(p_x + p_g);
+                    yüzey.dikdörtgen(
+                        pencere,
+                        &Dolgu::Düz(crate::renk::Renk::kyma(
+                            135.0 / 255.0,
+                            175.0 / 255.0,
+                            1.0,
+                            0.2,
+                        )),
+                        [0.0; 4],
+                        None,
+                    );
+                    // Çerçeve gölge ve filler katmanlarının üstündedir.
+                    if dikey {
+                        yüzey.dikdörtgen(
+                            şerit,
+                            &Dolgu::Düz(crate::renk::Renk::SAYDAM),
+                            [0.0; 4],
+                            Some((1.0, kenarlık)),
+                        );
+                    } else {
+                        // SubPixelOptimize edilmiş Canvas çerçevesi yarım
+                        // örtüyü iki komşu piksele dağıtır.
+                        let üst = şerit.y + 0.5;
+                        let alt = şerit.alt() - 0.5;
+                        yüzey.çizgi(
+                            (şerit.x, üst),
+                            (şerit.sağ(), üst),
+                            1.0,
+                            kenarlık,
+                            ÇizgiTürü::Düz,
+                        );
+                        yüzey.çizgi(
+                            (şerit.x, alt),
+                            (şerit.sağ(), alt),
+                            1.0,
+                            kenarlık,
+                            ÇizgiTürü::Düz,
+                        );
+                        yüzey.çizgi(
+                            (şerit.x + 0.5, şerit.y),
+                            (şerit.x + 0.5, şerit.alt()),
+                            1.0,
+                            kenarlık,
+                            ÇizgiTürü::Düz,
+                        );
+                        yüzey.çizgi(
+                            (şerit.sağ() - 0.5, şerit.y),
+                            (şerit.sağ() - 0.5, şerit.alt()),
+                            1.0,
+                            kenarlık,
+                            ÇizgiTürü::Düz,
+                        );
+                    }
+                    // Tutamaçlar.
+                    let (sol, sağ) = if dikey {
+                        // ECharts'ın öntanımlı handleIcon yolu 40 birimlik
+                        // eksende 7.5 / 25.06 / 7.44 oranında sap–gövde–sap
+                        // parçalarından oluşur. 30 px handleSize karşılıkları:
+                        // 5.625 / 18.795 / 5.58 px.
+                        (
+                            Dikdörtgen::yeni(şerit.x + 5.625, pencere.alt() - 4.0, 18.795, 6.0),
+                            Dikdörtgen::yeni(şerit.x + 5.625, pencere.y - 2.0, 18.795, 6.0),
+                        )
+                    } else {
+                        // Varsayılan handle yolunda uçları pencereye doğru
+                        // birer piksel kaydıran ECharts hizalama hilesi.
+                        (
+                            Dikdörtgen::yeni(pencere.x - 2.0, şerit.y + 5.625, 6.0, 18.795),
+                            Dikdörtgen::yeni(pencere.sağ() - 4.0, şerit.y + 5.625, 6.0, 18.795),
+                        )
+                    };
                     for t in [sol, sağ] {
                         yüzey.dikdörtgen(
                             t,
-                            &Dolgu::Düz(tema::nötr_50()),
-                            [3.0; 4],
-                            Some((1.0, tema::nötr_00())),
+                            &Dolgu::Düz(crate::renk::Renk::BEYAZ),
+                            [1.5; 4],
+                            Some((1.0, crate::renk::Renk::onaltılık(0xc0c9e6))),
                         );
+                    }
+                    if dikey {
+                        for merkez_y in [sol.merkez().1, sağ.merkez().1] {
+                            yüzey.çizgi(
+                                (şerit.x, merkez_y),
+                                (şerit.x + 5.625, merkez_y),
+                                1.0,
+                                crate::renk::Renk::onaltılık(0xc0c9e6),
+                                ÇizgiTürü::Düz,
+                            );
+                            yüzey.çizgi(
+                                (şerit.x + 24.42, merkez_y),
+                                (şerit.sağ(), merkez_y),
+                                1.0,
+                                crate::renk::Renk::onaltılık(0xc0c9e6),
+                                ÇizgiTürü::Düz,
+                            );
+                        }
+                    } else {
+                        for merkez_x in [sol.merkez().0, sağ.merkez().0] {
+                            yüzey.çizgi(
+                                (merkez_x, şerit.y),
+                                (merkez_x, şerit.y + 5.625),
+                                1.0,
+                                crate::renk::Renk::onaltılık(0xc0c9e6),
+                                ÇizgiTürü::Düz,
+                            );
+                            yüzey.çizgi(
+                                (merkez_x, şerit.y + 24.42),
+                                (merkez_x, şerit.alt()),
+                                1.0,
+                                crate::renk::Renk::onaltılık(0xc0c9e6),
+                                ÇizgiTürü::Düz,
+                            );
+                        }
+                    }
+                    // Alt/sağ taşıma tutamacı (`brushSelect`).
+                    let taşıma = if dikey {
+                        Dikdörtgen::yeni(şerit.sağ(), pencere.y, 7.0, pencere.yükseklik)
+                    } else {
+                        Dikdörtgen::yeni(pencere.x, şerit.y - 6.5, pencere.genişlik, 7.0)
+                    };
+                    let taşıma_yarıçapı = if dikey {
+                        [0.0, 2.0, 2.0, 0.0]
+                    } else {
+                        [2.0, 2.0, 0.0, 0.0]
+                    };
+                    yüzey.dikdörtgen(
+                        taşıma,
+                        &Dolgu::Düz(vurgu.opaklık(0.5)),
+                        taşıma_yarıçapı,
+                        None,
+                    );
+                    if !dikey {
+                        let orta = taşıma.merkez();
+                        for dx in [-2.0, 0.0, 2.0] {
+                            yüzey.dikdörtgen(
+                                Dikdörtgen::yeni(orta.0 + dx - 0.5, orta.1 - 1.5, 1.0, 3.0),
+                                &Dolgu::Düz(crate::renk::Renk::BEYAZ),
+                                [0.5; 4],
+                                None,
+                            );
+                        }
+                    } else {
+                        let orta = taşıma.merkez();
+                        for dy in [-2.0, 0.0, 2.0] {
+                            yüzey.dikdörtgen(
+                                Dikdörtgen::yeni(orta.0 - 1.5, orta.1 + dy - 0.5, 3.0, 1.0),
+                                &Dolgu::Düz(crate::renk::Renk::BEYAZ),
+                                [0.5; 4],
+                                None,
+                            );
+                        }
                     }
                     çıktı.sürgüler.push(SürgüBölgesi {
                         yakınlaştırma_sırası: z,
@@ -1307,6 +2369,7 @@ pub fn grafiği_boya(
                         pencere,
                         sol_tutamaç: sol,
                         sağ_tutamaç: sağ,
+                        dikey,
                     });
                 }
             }
@@ -1316,61 +2379,64 @@ pub fn grafiği_boya(
         // (axisPointer.link) açıkken çizgi, aynı kategori sırasında TÜM
         // ızgaralarda çizilir.
         if let Some(eksen_ip) = eksen_ipucu
-            && let Some(ipucu) = &ipucu_seçeneği {
-                if ipucu.imleç == İmleçTürü::Çizgi {
-                    let hedef_ızgaralar: Vec<usize> = if ipucu.bağlantılı {
-                        (0..kurulum.ızgara_alanları.len()).collect()
-                    } else {
-                        vec![eksen_ip.ızgara]
-                    };
-                    for ızgara in hedef_ızgaralar {
-                        let alan = kurulum
-                            .ızgara_alanları
-                            .get(ızgara)
-                            .copied()
-                            .unwrap_or_default();
-                        let bant_ekseni = if eksen_ip.bant_x {
+            && let Some(ipucu) = &ipucu_seçeneği
+        {
+            if ipucu.imleç == İmleçTürü::Çizgi {
+                let hedef_ızgaralar: Vec<usize> = if ipucu.bağlantılı {
+                    (0..kurulum.ızgara_alanları.len()).collect()
+                } else {
+                    vec![eksen_ip.ızgara]
+                };
+                for ızgara in hedef_ızgaralar {
+                    let alan = kurulum
+                        .ızgara_alanları
+                        .get(ızgara)
+                        .copied()
+                        .unwrap_or_default();
+                    let bant_ekseni =
+                        if eksen_ip.bant_x {
                             kurulum.x_eksenler.iter().find(|e| {
-                                e.seçenek.ızgara_sırası == ızgara
-                                    && e.ölçek.kategorik_mi()
+                                e.seçenek.ızgara_sırası == ızgara && e.ölçek.kategorik_mi()
                             })
                         } else {
                             kurulum.y_eksenler.iter().find(|e| {
-                                e.seçenek.ızgara_sırası == ızgara
-                                    && e.ölçek.kategorik_mi()
+                                e.seçenek.ızgara_sırası == ızgara && e.ölçek.kategorik_mi()
                             })
                         };
-                        let Some(bant_ekseni) = bant_ekseni else { continue };
-                        // Yakınlaştırma penceresi dışındaysa çizme.
-                        if !bant_ekseni.pencerede_mi(eksen_ip.kategori_sırası as f64) {
-                            continue;
-                        }
-                        let merkez = keskin(
-                            bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64),
+                    let Some(bant_ekseni) = bant_ekseni else {
+                        continue;
+                    };
+                    // Yakınlaştırma penceresi dışındaysa çizme.
+                    if !bant_ekseni.pencerede_mi(eksen_ip.kategori_sırası as f64) {
+                        continue;
+                    }
+                    let merkez =
+                        keskin(bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64));
+                    if eksen_ip.bant_x {
+                        yüzey.çizgi(
+                            (merkez, alan.alt()),
+                            (merkez, alan.y),
+                            1.0,
+                            tema::nötr_30(),
+                            ÇizgiTürü::Kesikli,
                         );
-                        if eksen_ip.bant_x {
-                            yüzey.çizgi(
-                                (merkez, alan.y),
-                                (merkez, alan.alt()),
-                                1.0,
-                                tema::imleç_çizgisi(),
-                                ÇizgiTürü::Düz,
-                            );
-                        } else {
-                            yüzey.çizgi(
-                                (alan.x, merkez),
-                                (alan.sağ(), merkez),
-                                1.0,
-                                tema::imleç_çizgisi(),
-                                ÇizgiTürü::Düz,
-                            );
-                        }
+                    } else {
+                        yüzey.çizgi(
+                            (alan.x, merkez),
+                            (alan.sağ(), merkez),
+                            1.0,
+                            tema::nötr_30(),
+                            ÇizgiTürü::Kesikli,
+                        );
                     }
                 }
-                if let Some(f) = fare {
-                    bekleyen_ipucu = Some((Some(eksen_ip.başlık), eksen_ip.satırlar, f));
-                }
             }
+            if ipucu.içerik_göster
+                && let Some(f) = fare
+            {
+                bekleyen_ipucu = Some((Some(eksen_ip.başlık), eksen_ip.satırlar, f));
+            }
+        }
     }
 
     // 4b) Görsel eşleme bileşeni (gradyan çubuğu).
@@ -1417,19 +2483,97 @@ pub fn grafiği_boya(
                 &görünürler,
                 kapalı,
                 ilerleme,
+                zaman_sn,
                 &mut çıktı.isabetler,
             );
         }
     }
 
+    // 4d) Calendar ve matrix üzerindeki çekirdek (GL olmayan) lines.
+    for (i, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Hatlar(hatlar) = seri else {
+            continue;
+        };
+        if !ad_görünür(seri.ad(), kapalı) {
+            continue;
+        }
+        let mut yerel_isabetler = Vec::new();
+        match hatlar.koordinat_sistemi {
+            HatKoordinatSistemi::Takvim => {
+                let Some(Some(yerleşim)) = takvim_yerleşimleri.get(hatlar.takvim_sırası) else {
+                    continue;
+                };
+                let çiz = |yüzey: &mut dyn ÇizimYüzeyi, isabetler: &mut Vec<İsabetBölgesi>| {
+                    hatlar_çiz(
+                        yüzey,
+                        hatlar,
+                        i,
+                        &|nokta| yerleşim.veriden_noktaya(nokta.x.sayı()?),
+                        seçenekler.seri_rengi(i),
+                        ilerleme,
+                        zaman_sn,
+                        isabetler,
+                    );
+                };
+                if hatlar.kırp {
+                    yüzey.kırpılı(yerleşim.gövde_kutusu, &mut |kırpılı| {
+                        çiz(kırpılı, &mut yerel_isabetler);
+                    });
+                } else {
+                    çiz(yüzey, &mut yerel_isabetler);
+                }
+            }
+            HatKoordinatSistemi::Matris => {
+                // Şimdiki kök model tek matrix taşır; sıfır dışındaki açık
+                // indeks sessizce başka matrix'e düşürülmez.
+                if hatlar.matris_sırası != 0 {
+                    continue;
+                }
+                let Some(yerleşim) = &matris_yerleşimi else {
+                    continue;
+                };
+                let çiz = |yüzey: &mut dyn ÇizimYüzeyi, isabetler: &mut Vec<İsabetBölgesi>| {
+                    hatlar_çiz(
+                        yüzey,
+                        hatlar,
+                        i,
+                        &|nokta| {
+                            yerleşim.veriden_noktaya(
+                                matris_hat_aralığı(&nokta.x)?,
+                                matris_hat_aralığı(&nokta.y)?,
+                            )
+                        },
+                        seçenekler.seri_rengi(i),
+                        ilerleme,
+                        zaman_sn,
+                        isabetler,
+                    );
+                };
+                if hatlar.kırp {
+                    yüzey.kırpılı(yerleşim.dış_kutu, &mut |kırpılı| {
+                        çiz(kırpılı, &mut yerel_isabetler);
+                    });
+                } else {
+                    çiz(yüzey, &mut yerel_isabetler);
+                }
+            }
+            HatKoordinatSistemi::Kartezyen2B | HatKoordinatSistemi::Kutupsal => continue,
+        }
+        çıktı.isabetler.append(&mut yerel_isabetler);
+    }
+
     // 5) Pasta serileri.
     let tüm_alan = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
+    let mut pasta_etiket_kutuları = Vec::new();
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         let Seri::Pasta(p) = seri else { continue };
         if !ad_görünür(seri.ad(), kapalı) {
             continue;
         }
         let dilimler: Vec<Dilim> = pasta_yerleşimi(p, seçenekler, tüm_alan, kapalı, ilerleme);
+        if dilimler.is_empty() {
+            boş_pasta_çiz(yüzey, p, tüm_alan);
+        }
 
         // Öğe ipucu: fare hangi dilimde?
         let vurgu = match (&ipucu_seçeneği, fare) {
@@ -1439,7 +2583,7 @@ pub fn grafiği_boya(
             _ => None,
         };
 
-        pasta_çiz(yüzey, p, &dilimler, vurgu);
+        pasta_çiz(yüzey, p, &dilimler, vurgu, &mut pasta_etiket_kutuları);
 
         for dilim in &dilimler {
             çıktı.isabetler.push(İsabetBölgesi {
@@ -1480,15 +2624,13 @@ pub fn grafiği_boya(
                 }
                 let dilimler = huni_yerleşimi(h, seçenekler, tüm_alan, kapalı, ilerleme);
                 let vurgu = match (&ipucu_seçeneği, fare) {
-                    (Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => {
-                        dilimler.iter().position(|d| d.sınır_kutusu().içeriyor_mu(f))
-                    }
+                    (Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => dilimler
+                        .iter()
+                        .position(|d| d.sınır_kutusu().içeriyor_mu(f)),
                     _ => None,
                 };
                 huni_çiz(yüzey, h, i, &dilimler, vurgu, &mut çıktı.isabetler);
-                if let (Some(dilim), Some(f)) =
-                    (vurgu.and_then(|v| dilimler.get(v)), fare)
-                {
+                if let (Some(dilim), Some(f)) = (vurgu.and_then(|v| dilimler.get(v)), fare) {
                     bekleyen_ipucu = Some((
                         seri.ad().map(str::to_string),
                         vec![İpucuSatırı {
@@ -1510,7 +2652,9 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
-                let Some(koordinat) = &seçenekler.radar else { continue };
+                let Some(koordinat) = &seçenekler.radar else {
+                    continue;
+                };
                 if koordinat.göstergeler.len() < 3 {
                     continue;
                 }
@@ -1529,30 +2673,29 @@ pub fn grafiği_boya(
                 );
                 // Öğe ipucu: köşe sembolü isabeti.
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
-                    && ipucu.tetikleme != Tetikleme::Kapalı {
-                        let vurgu = çıktı
-                            .isabetler
-                            .iter()
-                            .rev()
-                            .find(|b| {
-                                b.seri_sırası == i && b.geometri.içeriyor_mu(f)
-                            })
-                            .map(|b| (b.veri_sırası, b.ad.clone()));
-                        if let Some((veri_sırası, ad)) = vurgu {
-                            let satırlar: Vec<İpucuSatırı> =
-                                radar_ipucu_satırları(r, koordinat, veri_sırası)
-                                    .into_iter()
-                                    .map(|(gösterge_adı, değer)| İpucuSatırı {
-                                        im_rengi: None,
-                                        ad: gösterge_adı,
-                                        değer,
-                                    })
-                                    .collect();
-                            if !satırlar.is_empty() {
-                                bekleyen_ipucu = Some((ad, satırlar, f));
-                            }
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                {
+                    let vurgu = çıktı
+                        .isabetler
+                        .iter()
+                        .rev()
+                        .find(|b| b.seri_sırası == i && b.geometri.içeriyor_mu(f))
+                        .map(|b| (b.veri_sırası, b.ad.clone()));
+                    if let Some((veri_sırası, ad)) = vurgu {
+                        let satırlar: Vec<İpucuSatırı> =
+                            radar_ipucu_satırları(r, koordinat, veri_sırası)
+                                .into_iter()
+                                .map(|(gösterge_adı, değer)| İpucuSatırı {
+                                    im_rengi: None,
+                                    ad: gösterge_adı,
+                                    değer,
+                                })
+                                .collect();
+                        if !satırlar.is_empty() {
+                            bekleyen_ipucu = Some((ad, satırlar, f));
                         }
                     }
+                }
             }
             Seri::Takvim(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1573,21 +2716,20 @@ pub fn grafiği_boya(
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            let satır = İpucuSatırı {
-                                im_rengi: None,
-                                ad: b.ad.clone().unwrap_or_default(),
-                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
-                            };
-                            bekleyen_ipucu =
-                                Some((seri.ad().map(str::to_string), vec![satır], f));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    let satır = İpucuSatırı {
+                        im_rengi: None,
+                        ad: b.ad.clone().unwrap_or_default(),
+                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                    };
+                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                }
             }
             Seri::TemaNehri(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1595,24 +2737,31 @@ pub fn grafiği_boya(
                 }
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
-                tema_nehri_çiz(yüzey, s, i, tüm_alan, &palet, ilerleme, &mut çıktı.isabetler);
+                tema_nehri_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    tüm_alan,
+                    &palet,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            let satır = İpucuSatırı {
-                                im_rengi: None,
-                                ad: b.ad.clone().unwrap_or_default(),
-                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
-                            };
-                            bekleyen_ipucu =
-                                Some((seri.ad().map(str::to_string), vec![satır], f));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    let satır = İpucuSatırı {
+                        im_rengi: None,
+                        ad: b.ad.clone().unwrap_or_default(),
+                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                    };
+                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                }
             }
             Seri::Kiriş(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1620,24 +2769,31 @@ pub fn grafiği_boya(
                 }
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
-                kiriş_çiz(yüzey, s, i, tüm_alan, &palet, ilerleme, &mut çıktı.isabetler);
+                kiriş_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    tüm_alan,
+                    &palet,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            let satır = İpucuSatırı {
-                                im_rengi: None,
-                                ad: b.ad.clone().unwrap_or_default(),
-                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
-                            };
-                            bekleyen_ipucu =
-                                Some((seri.ad().map(str::to_string), vec![satır], f));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    let satır = İpucuSatırı {
+                        im_rengi: None,
+                        ad: b.ad.clone().unwrap_or_default(),
+                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                    };
+                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                }
             }
             Seri::Paralel(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1672,21 +2828,20 @@ pub fn grafiği_boya(
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            let satır = İpucuSatırı {
-                                im_rengi: None,
-                                ad: b.ad.clone().unwrap_or_default(),
-                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
-                            };
-                            bekleyen_ipucu =
-                                Some((seri.ad().map(str::to_string), vec![satır], f));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    let satır = İpucuSatırı {
+                        im_rengi: None,
+                        ad: b.ad.clone().unwrap_or_default(),
+                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                    };
+                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                }
             }
             Seri::Sankey(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1705,21 +2860,20 @@ pub fn grafiği_boya(
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            let satır = İpucuSatırı {
-                                im_rengi: None,
-                                ad: b.ad.clone().unwrap_or_default(),
-                                değer: b.değer.map(binlik_ayır).unwrap_or_default(),
-                            };
-                            bekleyen_ipucu =
-                                Some((seri.ad().map(str::to_string), vec![satır], f));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    let satır = İpucuSatırı {
+                        im_rengi: None,
+                        ad: b.ad.clone().unwrap_or_default(),
+                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                    };
+                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                }
             }
             Seri::Ağaç(a) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1737,24 +2891,20 @@ pub fn grafiği_boya(
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            let satır = İpucuSatırı {
-                                im_rengi: Some(seçenekler.seri_rengi(i)),
-                                ad: b.ad.clone().unwrap_or_default(),
-                                değer: b
-                                    .değer
-                                    .map(binlik_ayır)
-                                    .unwrap_or_default(),
-                            };
-                            bekleyen_ipucu =
-                                Some((seri.ad().map(str::to_string), vec![satır], f));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    let satır = İpucuSatırı {
+                        im_rengi: Some(seçenekler.seri_rengi(i)),
+                        ad: b.ad.clone().unwrap_or_default(),
+                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+                    };
+                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                }
             }
             Seri::AğaçHaritası(a) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1776,23 +2926,23 @@ pub fn grafiği_boya(
                 // Öğe ipucu.
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            bekleyen_ipucu = Some((
-                                b.ad.clone(),
-                                vec![İpucuSatırı {
-                                    im_rengi: None,
-                                    ad: "Değer".to_string(),
-                                    değer: hücre_değer_metni(b.değer.unwrap_or(0.0)),
-                                }],
-                                f,
-                            ));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    bekleyen_ipucu = Some((
+                        b.ad.clone(),
+                        vec![İpucuSatırı {
+                            im_rengi: None,
+                            ad: "Değer".to_string(),
+                            değer: hücre_değer_metni(b.değer.unwrap_or(0.0)),
+                        }],
+                        f,
+                    ));
+                }
             }
             Seri::GüneşPatlaması(g) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1813,23 +2963,23 @@ pub fn grafiği_boya(
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
-                        && let Some(b) = çıktı
-                            .isabetler
-                            .iter()
-                            .skip(önce)
-                            .rev()
-                            .find(|b| b.geometri.içeriyor_mu(f))
-                        {
-                            bekleyen_ipucu = Some((
-                                b.ad.clone(),
-                                vec![İpucuSatırı {
-                                    im_rengi: None,
-                                    ad: "Değer".to_string(),
-                                    değer: hücre_değer_metni(b.değer.unwrap_or(0.0)),
-                                }],
-                                f,
-                            ));
-                        }
+                    && let Some(b) = çıktı
+                        .isabetler
+                        .iter()
+                        .skip(önce)
+                        .rev()
+                        .find(|b| b.geometri.içeriyor_mu(f))
+                {
+                    bekleyen_ipucu = Some((
+                        b.ad.clone(),
+                        vec![İpucuSatırı {
+                            im_rengi: None,
+                            ad: "Değer".to_string(),
+                            değer: hücre_değer_metni(b.değer.unwrap_or(0.0)),
+                        }],
+                        f,
+                    ));
+                }
             }
             Seri::Özel(s) if !s.kartezyen_gerekli => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -1848,6 +2998,13 @@ pub fn grafiği_boya(
             }
             _ => {}
         }
+    }
+
+    // 5b) Legend (z=4): dataZoom şeridi üstünde kalmalıdır.
+    if let Some(g) = &seçenekler.gösterge {
+        let gösterge_çıktısı = gösterge_çiz(yüzey, g, &gösterge_öğeleri, girdi.gösterge_sayfası);
+        çıktı.gösterge_kutuları = gösterge_çıktısı.kutular;
+        çıktı.gösterge_okları = gösterge_çıktısı.oklar;
     }
 
     // 5c) Zaman şeridi (timeline) — kare noktaları + oynat/durdur.
@@ -1885,6 +3042,107 @@ pub fn grafiği_boya(
     çıktı
 }
 
-
 #[cfg(feature = "gpui")]
 pub use crate::cizim::pencere::GrafikGörünümü;
+
+#[cfg(test)]
+mod yakınlaştırma_yönü_testleri {
+    use super::*;
+
+    #[test]
+    fn iç_yakınlaştırma_odağı_yatay_ve_dikey_veri_yönünü_izler() {
+        let alan = Dikdörtgen::yeni(10.0, 20.0, 100.0, 200.0);
+        let yatay = İçYakınlaştırmaAlanı {
+            yakınlaştırma_sırası: 0,
+            alan,
+            dikey: false,
+        };
+        assert!((yatay.odak_oranı((35.0, 70.0)) - 0.25).abs() < 1e-6);
+        assert_eq!(yatay.eksen_uzunluğu(), 100.0);
+
+        let dikey = İçYakınlaştırmaAlanı {
+            yakınlaştırma_sırası: 1,
+            alan,
+            dikey: true,
+        };
+        assert!((dikey.odak_oranı((35.0, 70.0)) - 0.75).abs() < 1e-6);
+        assert_eq!(dikey.eksen_uzunluğu(), 200.0);
+        assert!(dikey.eksen_konumu((0.0, 60.0)) > dikey.eksen_konumu((0.0, 70.0)));
+    }
+
+    #[test]
+    fn dikey_sürgü_ekseni_ekranda_yukarı_doğru_artar() {
+        let şerit = Dikdörtgen::yeni(10.0, 20.0, 30.0, 200.0);
+        let sürgü = SürgüBölgesi {
+            yakınlaştırma_sırası: 0,
+            şerit,
+            pencere: şerit,
+            sol_tutamaç: şerit,
+            sağ_tutamaç: şerit,
+            dikey: true,
+        };
+        assert_eq!(sürgü.eksen_uzunluğu(), 200.0);
+        assert!(sürgü.eksen_konumu((20.0, 40.0)) > sürgü.eksen_konumu((20.0, 80.0)));
+    }
+
+    #[test]
+    fn dikey_araç_kutusu_resmi_sınır_kutusu_aralıklarıyla_ortalanır() {
+        let seçenekler = GrafikSeçenekleri::yeni().araç_kutusu(
+            crate::model::bilesen::AraçKutusu::yeni()
+                .yön(Yön::Dikey)
+                .sol("right")
+                .üst("center")
+                .veri_görünümü(true)
+                .sihirli_tür(true, true)
+                .sihirli_yığın(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+        let türler: Vec<AraçTürü> = çıktı.araç_düğmeleri.iter().map(|(_, tür)| *tür).collect();
+        assert_eq!(
+            türler,
+            vec![
+                AraçTürü::VeriGörünümü,
+                AraçTürü::SihirliÇizgi,
+                AraçTürü::SihirliSütun,
+                AraçTürü::SihirliYığın,
+                AraçTürü::GeriYükle,
+                AraçTürü::PngKaydet,
+            ]
+        );
+        let merkezler: Vec<(f32, f32)> = çıktı
+            .araç_düğmeleri
+            .iter()
+            .map(|(kutu, _)| (kutu.x + kutu.genişlik / 2.0, kutu.y + kutu.yükseklik / 2.0))
+            .collect();
+        let beklenen_y = [
+            188.116_87, 218.073_09, 248.029_31, 277.456_2, 306.883_15, 336.883_15,
+        ];
+        for ((x, y), beklenen_y) in merkezler.iter().zip(beklenen_y) {
+            assert!((*x - 675.0).abs() < 1e-3);
+            assert!((*y - beklenen_y).abs() < 1e-3);
+        }
+    }
+
+    #[test]
+    fn çoklu_pasta_göstergesi_yinelenen_dilim_adlarını_tekilleştirir() {
+        let pasta = || {
+            crate::model::seri::PastaSerisi::yeni().veri([
+                crate::model::deger::VeriÖğesi::adlı("Kek", 10),
+                crate::model::deger::VeriÖğesi::adlı("Tahıl", 20),
+            ])
+        };
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .gösterge(crate::model::bilesen::Gösterge::yeni())
+            .seri(pasta())
+            .seri(pasta());
+
+        let öğeler = gösterge_öğeleri(&seçenekler, &HashSet::new());
+        assert_eq!(
+            öğeler.iter().map(|öğe| öğe.ad.as_str()).collect::<Vec<_>>(),
+            ["Kek", "Tahıl"]
+        );
+    }
+}

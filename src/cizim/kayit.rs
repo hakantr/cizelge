@@ -2,6 +2,7 @@
 //! satırları olarak biriktiren gerçeklemesi. Altın (golden) görsel regresyon
 //! testlerinin temelidir: gpui olmadan, tümüyle belirlenimci çalışır.
 
+use crate::cizim::donusum::AfinMatris;
 use crate::cizim::yuzey::{DikeyHiza, SATIR_ORANI, YatayHiza, Yol, YolKomutu, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::stil::ÇizgiTürü;
@@ -11,7 +12,11 @@ use crate::renk::{Dolgu, Renk};
 fn s(v: f32) -> String {
     let yuvarlanmış = (v * 10.0).round() / 10.0;
     // -0.0 → 0.0 normalizasyonu.
-    let yuvarlanmış = if yuvarlanmış == 0.0 { 0.0 } else { yuvarlanmış };
+    let yuvarlanmış = if yuvarlanmış == 0.0 {
+        0.0
+    } else {
+        yuvarlanmış
+    };
     format!("{yuvarlanmış:.1}")
 }
 
@@ -28,7 +33,20 @@ fn renk_yaz(r: Renk) -> String {
 fn dolgu_yaz(d: &Dolgu) -> String {
     match d {
         Dolgu::Düz(r) => renk_yaz(*r),
-        Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar } => {
+        Dolgu::Desen(desen) => format!(
+            "desen({}x{},tekrar={:?},opaklık={})",
+            desen.genişlik,
+            desen.yükseklik,
+            desen.tekrar,
+            s(desen.opaklık)
+        ),
+        Dolgu::DoğrusalGradyan {
+            x,
+            y,
+            x2,
+            y2,
+            duraklar,
+        } => {
             let duraklar: Vec<String> = duraklar
                 .iter()
                 .map(|d| format!("{}:{}", s(d.konum), renk_yaz(d.renk)))
@@ -42,12 +60,23 @@ fn dolgu_yaz(d: &Dolgu) -> String {
                 duraklar.join(" ")
             )
         }
-        Dolgu::RadyalGradyan { x, y, yarıçap, duraklar } => {
+        Dolgu::RadyalGradyan {
+            x,
+            y,
+            yarıçap,
+            duraklar,
+        } => {
             let duraklar: Vec<String> = duraklar
                 .iter()
                 .map(|d| format!("{}:{}", s(d.konum), renk_yaz(d.renk)))
                 .collect();
-            format!("radyal({},{},{})[{}]", s(*x), s(*y), s(*yarıçap), duraklar.join(" "))
+            format!(
+                "radyal({},{},{})[{}]",
+                s(*x),
+                s(*y),
+                s(*yarıçap),
+                duraklar.join(" ")
+            )
         }
     }
 }
@@ -68,7 +97,12 @@ fn yol_yaz(yol: &Yol) -> String {
                 s(uç.0),
                 s(uç.1)
             ),
-            YolKomutu::Yay { yarıçap, büyük_yay, süpürme, uç } => format!(
+            YolKomutu::Yay {
+                yarıçap,
+                büyük_yay,
+                süpürme,
+                uç,
+            } => format!(
                 "Y({} {}{} {},{})",
                 s(yarıçap),
                 if büyük_yay { "B" } else { "b" },
@@ -102,7 +136,12 @@ pub struct KayıtYüzeyi {
 
 impl KayıtYüzeyi {
     pub fn yeni(genişlik: f32, yükseklik: f32) -> Self {
-        KayıtYüzeyi { genişlik, yükseklik, girinti: 0, komutlar: Vec::new() }
+        KayıtYüzeyi {
+            genişlik,
+            yükseklik,
+            girinti: 0,
+            komutlar: Vec::new(),
+        }
     }
 
     fn kaydet(&mut self, satır: String) {
@@ -145,6 +184,44 @@ impl ÇizimYüzeyi for KayıtYüzeyi {
             yol_yaz(yol)
         );
         self.kaydet(satır);
+    }
+
+    fn yol_gölgesi(&mut self, yol: &Yol, renk: Renk, bulanıklık: f32, kayma: (f32, f32)) {
+        if yol.boş_mu() || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
+            return;
+        }
+        self.kaydet(format!(
+            "yol-gölgesi {} b={} k=({},{}) | {}",
+            renk_yaz(renk),
+            s(bulanıklık),
+            s(kayma.0),
+            s(kayma.1),
+            yol_yaz(yol)
+        ));
+    }
+
+    fn yol_çizgi_gölgesi(
+        &mut self,
+        yol: &Yol,
+        kalınlık: f32,
+        tür: ÇizgiTürü,
+        renk: Renk,
+        bulanıklık: f32,
+        kayma: (f32, f32),
+    ) {
+        if yol.boş_mu() || kalınlık <= 0.0 || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
+            return;
+        }
+        self.kaydet(format!(
+            "çizgi-gölgesi {} k={} {} b={} kayma=({},{}) | {}",
+            renk_yaz(renk),
+            s(kalınlık),
+            tür_yaz(tür),
+            s(bulanıklık),
+            s(kayma.0),
+            s(kayma.1),
+            yol_yaz(yol)
+        ));
     }
 
     fn dikdörtgen(
@@ -203,6 +280,14 @@ impl ÇizimYüzeyi for KayıtYüzeyi {
         self.kaydet("}".to_string());
     }
 
+    fn yol_kırpılı(&mut self, yol: &Yol, işlev: &mut dyn FnMut(&mut dyn ÇizimYüzeyi)) {
+        self.kaydet(format!("yol-kırp {} {{", yol_yaz(yol)));
+        self.girinti += 1;
+        işlev(self);
+        self.girinti = self.girinti.saturating_sub(1);
+        self.kaydet("}".to_string());
+    }
+
     fn yazı(
         &mut self,
         metin: &str,
@@ -244,6 +329,37 @@ impl ÇizimYüzeyi for KayıtYüzeyi {
             metin.chars().count() as f32 * boyut * 0.6,
             boyut * SATIR_ORANI,
         )
+    }
+
+    fn dönüşümlü_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        let (genişlik, yükseklik) = self.yazı_ölç(metin, boyut);
+        self.kaydet(format!(
+            "dönüşümlü-yazı \"{metin}\" ({},{}) b={} m=[{} {} {} {} {} {}] {:?}/{:?} {}{}",
+            s(konum.0),
+            s(konum.1),
+            s(boyut),
+            s(dönüşüm.a),
+            s(dönüşüm.b),
+            s(dönüşüm.c),
+            s(dönüşüm.d),
+            s(dönüşüm.e),
+            s(dönüşüm.f),
+            yatay,
+            dikey,
+            renk_yaz(renk),
+            if kalın { " kalın" } else { "" }
+        ));
+        (genişlik, yükseklik)
     }
 
     fn olarak(&mut self) -> &mut dyn ÇizimYüzeyi {

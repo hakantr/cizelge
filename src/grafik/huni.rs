@@ -5,7 +5,7 @@ use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::secenekler::GrafikSeçenekleri;
-use crate::model::seri::{HuniSıralaması, HuniSerisi};
+use crate::model::seri::{HuniSerisi, HuniSıralaması};
 use crate::model::stil::EtiketKonumu;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
@@ -55,8 +55,7 @@ pub fn huni_yerleşimi(
         .filter_map(|(i, ö)| {
             let ad = ö.ad.clone().unwrap_or_else(|| format!("{i}"));
             let değer = ö.değer.sayı()?;
-            (!kapalı.contains(&ad) && değer.is_finite() && değer >= 0.0)
-                .then_some((i, ad, değer))
+            (!kapalı.contains(&ad) && değer.is_finite() && değer >= 0.0).then_some((i, ad, değer))
         })
         .collect();
     match seri.sıralama {
@@ -78,8 +77,7 @@ pub fn huni_yerleşimi(
         .fold(f64::NEG_INFINITY, f64::max)
         .max(1e-12);
     let n = görünürler.len() as f32;
-    let dilim_yüksekliği =
-        ((alan.yükseklik - seri.dilim_boşluğu * (n - 1.0)) / n).max(1.0);
+    let dilim_yüksekliği = ((alan.yükseklik - seri.dilim_boşluğu * (n - 1.0)) / n).max(1.0);
     let ilerleme = ilerleme.clamp(0.0, 1.0);
 
     let genişlik_çöz = |değer: f64| -> f32 {
@@ -139,7 +137,11 @@ pub fn huni_çiz(
         yol.çiz(dilim.köşeler[2]);
         yol.çiz(dilim.köşeler[3]);
         yol.kapat();
-        let opaklık = if vurgulu == Some(i) { 1.0 } else { seri.öğe_stili.opaklık.unwrap_or(1.0) };
+        let opaklık = if vurgulu == Some(i) {
+            1.0
+        } else {
+            seri.öğe_stili.opaklık.unwrap_or(1.0)
+        };
         çizici.yol_doldur(&yol, &Dolgu::Düz(dilim.renk.opaklık(opaklık)));
         if let Some(kenar_rengi) = seri.öğe_stili.kenarlık_rengi {
             çizici.yol_çiz(

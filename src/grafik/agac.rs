@@ -51,7 +51,11 @@ fn yerleştir(
             ilk_y = ilk_y.min(y);
             son_y = son_y.max(y);
         }
-        let y = if ilk_y.is_finite() { (ilk_y + son_y) / 2.0 } else { 0.0 };
+        let y = if ilk_y.is_finite() {
+            (ilk_y + son_y) / 2.0
+        } else {
+            0.0
+        };
         if let Some(kayıt) = sonuç.get_mut(kendi_sıra) {
             kayıt.konum.1 = y;
         }
@@ -101,15 +105,24 @@ pub fn ağaç_çiz(
 
     // 1) Bağlantılar (yatay kübik eğriler).
     for düğüm in &düğümler {
-        let Some(üst_sıra) = düğüm.üst else { continue };
-        let Some(üst) = düğümler.get(üst_sıra) else { continue };
+        let Some(üst_sıra) = düğüm.üst else {
+            continue;
+        };
+        let Some(üst) = düğümler.get(üst_sıra) else {
+            continue;
+        };
         let (x0, y0) = ölçekle(üst.konum);
         let (x1, y1) = ölçekle(düğüm.konum);
         let orta = (x0 + x1) / 2.0;
         let mut yol = Yol::yeni();
         yol.taşı((x0, y0));
         yol.kübik((orta, y0), (orta, y1), (x1, y1));
-        çizici.yol_çiz(&yol, 1.5, tema::nötr_30(), crate::model::stil::ÇizgiTürü::Düz);
+        çizici.yol_çiz(
+            &yol,
+            1.5,
+            tema::nötr_30(),
+            crate::model::stil::ÇizgiTürü::Düz,
+        );
     }
 
     // 2) Düğümler ve etiketler.

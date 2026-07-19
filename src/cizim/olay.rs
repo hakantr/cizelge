@@ -21,6 +21,11 @@ pub enum İsabetGeometrisi {
         açı0: f32,
         açı1: f32,
     },
+    /// Çizgi/polyline etrafındaki isabet bandı (`series.lines`, graph edge).
+    ÇokluÇizgi {
+        noktalar: Vec<(f32, f32)>,
+        tolerans: f32,
+    },
 }
 
 impl İsabetGeometrisi {
@@ -32,7 +37,13 @@ impl İsabetGeometrisi {
                 let dy = n.1 - merkez.1;
                 dx * dx + dy * dy <= yarıçap * yarıçap
             }
-            İsabetGeometrisi::Halka { merkez, iç_yarıçap, dış_yarıçap, açı0, açı1 } => {
+            İsabetGeometrisi::Halka {
+                merkez,
+                iç_yarıçap,
+                dış_yarıçap,
+                açı0,
+                açı1,
+            } => {
                 let dx = n.0 - merkez.0;
                 let dy = n.1 - merkez.1;
                 let uzaklık = (dx * dx + dy * dy).sqrt();
@@ -40,9 +51,19 @@ impl İsabetGeometrisi {
                     return false;
                 }
                 let tau = std::f32::consts::TAU;
-                let (a0, a1) = if açı1 >= açı0 { (*açı0, *açı1) } else { (*açı1, *açı0) };
+                let (a0, a1) = if açı1 >= açı0 {
+                    (*açı0, *açı1)
+                } else {
+                    (*açı1, *açı0)
+                };
                 let göreli = (dy.atan2(dx) - a0).rem_euclid(tau);
                 göreli <= a1 - a0
+            }
+            İsabetGeometrisi::ÇokluÇizgi { noktalar, tolerans } => {
+                noktalar.windows(2).any(|uçlar| match uçlar {
+                    [a, b] => noktadan_parçaya_uzaklık(n, *a, *b) <= *tolerans,
+                    _ => false,
+                })
             }
         }
     }
@@ -52,7 +73,13 @@ impl İsabetGeometrisi {
         match self {
             İsabetGeometrisi::Dikdörtgen(d) => d.merkez(),
             İsabetGeometrisi::Daire { merkez, .. } => *merkez,
-            İsabetGeometrisi::Halka { merkez, iç_yarıçap, dış_yarıçap, açı0, açı1 } => {
+            İsabetGeometrisi::Halka {
+                merkez,
+                iç_yarıçap,
+                dış_yarıçap,
+                açı0,
+                açı1,
+            } => {
                 let orta_açı = (açı0 + açı1) / 2.0;
                 let orta_yarıçap = (iç_yarıçap + dış_yarıçap) / 2.0;
                 (
@@ -60,30 +87,70 @@ impl İsabetGeometrisi {
                     merkez.1 + orta_yarıçap * orta_açı.sin(),
                 )
             }
+            İsabetGeometrisi::ÇokluÇizgi { noktalar, .. } => {
+                let Some(ilk) = noktalar.first().copied() else {
+                    return (0.0, 0.0);
+                };
+                let Some(son) = noktalar.last().copied() else {
+                    return ilk;
+                };
+                ((ilk.0 + son.0) / 2.0, (ilk.1 + son.1) / 2.0)
+            }
         }
     }
 
     /// Geometriyi verilen kadar öteler (yüzey-yerel → pencere-mutlak dönüşümü).
     pub fn kaydır(&self, dx: f32, dy: f32) -> İsabetGeometrisi {
         match self {
-            İsabetGeometrisi::Dikdörtgen(d) => İsabetGeometrisi::Dikdörtgen(
-                Dikdörtgen::yeni(d.x + dx, d.y + dy, d.genişlik, d.yükseklik),
-            ),
+            İsabetGeometrisi::Dikdörtgen(d) => İsabetGeometrisi::Dikdörtgen(Dikdörtgen::yeni(
+                d.x + dx,
+                d.y + dy,
+                d.genişlik,
+                d.yükseklik,
+            )),
             İsabetGeometrisi::Daire { merkez, yarıçap } => İsabetGeometrisi::Daire {
                 merkez: (merkez.0 + dx, merkez.1 + dy),
                 yarıçap: *yarıçap,
             },
-            İsabetGeometrisi::Halka { merkez, iç_yarıçap, dış_yarıçap, açı0, açı1 } => {
-                İsabetGeometrisi::Halka {
-                    merkez: (merkez.0 + dx, merkez.1 + dy),
-                    iç_yarıçap: *iç_yarıçap,
-                    dış_yarıçap: *dış_yarıçap,
-                    açı0: *açı0,
-                    açı1: *açı1,
+            İsabetGeometrisi::Halka {
+                merkez,
+                iç_yarıçap,
+                dış_yarıçap,
+                açı0,
+                açı1,
+            } => İsabetGeometrisi::Halka {
+                merkez: (merkez.0 + dx, merkez.1 + dy),
+                iç_yarıçap: *iç_yarıçap,
+                dış_yarıçap: *dış_yarıçap,
+                açı0: *açı0,
+                açı1: *açı1,
+            },
+            İsabetGeometrisi::ÇokluÇizgi { noktalar, tolerans } => {
+                İsabetGeometrisi::ÇokluÇizgi {
+                    noktalar: noktalar
+                        .iter()
+                        .map(|nokta| (nokta.0 + dx, nokta.1 + dy))
+                        .collect(),
+                    tolerans: *tolerans,
                 }
             }
         }
     }
+}
+
+fn noktadan_parçaya_uzaklık(
+    nokta: (f32, f32), başlangıç: (f32, f32), bitiş: (f32, f32)
+) -> f32 {
+    let dx = bitiş.0 - başlangıç.0;
+    let dy = bitiş.1 - başlangıç.1;
+    let uzunluk_kare = dx * dx + dy * dy;
+    if uzunluk_kare <= f32::EPSILON {
+        return ((nokta.0 - başlangıç.0).powi(2) + (nokta.1 - başlangıç.1).powi(2)).sqrt();
+    }
+    let t = (((nokta.0 - başlangıç.0) * dx + (nokta.1 - başlangıç.1) * dy) / uzunluk_kare)
+        .clamp(0.0, 1.0);
+    let en_yakın = (başlangıç.0 + dx * t, başlangıç.1 + dy * t);
+    ((nokta.0 - en_yakın.0).powi(2) + (nokta.1 - en_yakın.1).powi(2)).sqrt()
 }
 
 /// Boyama sırasında toplanan, tıklanabilir bir veri öğesi bölgesi.
@@ -135,10 +202,23 @@ pub enum GrafikOlayı {
     },
     /// Araç kutusundan "geri yükle" tıklandı (`'restore'`).
     GeriYüklendi,
+    /// Toolbox `dataView`; güvenli yerel görünümü açması için ev sahibine
+    /// yapılandırılmış istek gönderir.
+    VeriGörünümüİstendi,
+    /// Toolbox `magicType`; ev sahibi/çalışma zamanı seri dönüşümünü uygular.
+    SihirliTürİstendi { tür: SihirliSeriTürü },
     /// Zaman şeridinde kare değişti (`'timelinechanged'`).
     ZamanKaresiDeğişti { sıra: usize },
     /// Araç kutusundan grafik SVG olarak kaydedildi (`saveAsImage`).
     SvgKaydedildi { yol: String },
     /// Araç kutusundan grafik PNG olarak kaydedildi (`saveAsImage`).
     PngKaydedildi { yol: String },
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum SihirliSeriTürü {
+    Çizgi,
+    Sütun,
+    /// Uyumlu sütun/çizgi serilerini ortak bir yığına al (`magicType: stack`).
+    Yığın,
 }

@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use gpui::{
     App, BorderStyle, Bounds, BoxShadow, Corners, Edges, FontWeight, PathBuilder, PathStyle,
-    Pixels, Point, SharedString, ShapedLine, StrokeOptions, TextAlign, TextRun, Window,
+    Pixels, Point, ShapedLine, SharedString, StrokeOptions, TextAlign, TextRun, Window,
     linear_color_stop, linear_gradient, point, px, quad, size,
 };
 use lyon::tessellation::{LineCap, LineJoin};
@@ -52,10 +52,7 @@ impl<'a, 'b> Çizici<'a, 'b> {
         Çizici {
             pencere,
             uygulama,
-            köken: (
-                f32::from(sınırlar.origin.x),
-                f32::from(sınırlar.origin.y),
-            ),
+            köken: (f32::from(sınırlar.origin.x), f32::from(sınırlar.origin.y)),
             genişlik: f32::from(sınırlar.size.width),
             yükseklik: f32::from(sınırlar.size.height),
             ölçüm_önbelleği,
@@ -83,7 +80,12 @@ impl<'a, 'b> Çizici<'a, 'b> {
                 YolKomutu::Kübik { k1, k2, uç } => {
                     kurucu.cubic_bezier_to(self.mutlak(uç), self.mutlak(k1), self.mutlak(k2))
                 }
-                YolKomutu::Yay { yarıçap, büyük_yay, süpürme, uç } => kurucu.arc_to(
+                YolKomutu::Yay {
+                    yarıçap,
+                    büyük_yay,
+                    süpürme,
+                    uç,
+                } => kurucu.arc_to(
                     point(px(yarıçap), px(yarıçap)),
                     px(0.0),
                     büyük_yay,
@@ -115,7 +117,9 @@ impl<'a, 'b> Çizici<'a, 'b> {
         y2: f32,
         duraklar: &[RenkDurağı],
     ) {
-        let Some(kutu) = yol.sınır_kutusu() else { return };
+        let Some(kutu) = yol.sınır_kutusu() else {
+            return;
+        };
 
         // Gradyanı ileri yöne çevir (x2 ≥ x, y2 ≥ y).
         let dikey = (x - x2).abs() < 1e-6;
@@ -125,7 +129,10 @@ impl<'a, 'b> Çizici<'a, 'b> {
             duraklar = duraklar
                 .into_iter()
                 .rev()
-                .map(|d| RenkDurağı { konum: 1.0 - d.konum, renk: d.renk })
+                .map(|d| RenkDurağı {
+                    konum: 1.0 - d.konum,
+                    renk: d.renk,
+                })
                 .collect();
             (son, baş)
         } else {
@@ -206,7 +213,11 @@ impl<'a, 'b> Çizici<'a, 'b> {
         let temiz: String = metin.replace(['\n', '\r'], " ");
         let paylaşımlı: SharedString = SharedString::from(temiz);
         let mut yazı_tipi = self.pencere.text_style().font();
-        yazı_tipi.weight = if kalın { FontWeight::BOLD } else { FontWeight::NORMAL };
+        yazı_tipi.weight = if kalın {
+            FontWeight::BOLD
+        } else {
+            FontWeight::NORMAL
+        };
         let koşu = TextRun {
             len: paylaşımlı.len(),
             font: yazı_tipi,
@@ -234,7 +245,14 @@ impl ÇizimYüzeyi for Çizici<'_, '_> {
         if yol.boş_mu() {
             return;
         }
-        if let Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar } = dolgu {
+        if let Dolgu::DoğrusalGradyan {
+            x,
+            y,
+            x2,
+            y2,
+            duraklar,
+        } = dolgu
+        {
             let eksene_hizalı = (x - x2).abs() < 1e-6 || (y - y2).abs() < 1e-6;
             if duraklar.len() > 2 && eksene_hizalı {
                 self.bantlı_gradyan_doldur(yol, *x, *y, *x2, *y2, duraklar);
@@ -250,11 +268,11 @@ impl ÇizimYüzeyi for Çizici<'_, '_> {
         }
         let seçenekler = StrokeOptions::default()
             .with_line_width(kalınlık)
-            .with_line_join(LineJoin::Round)
-            .with_start_cap(LineCap::Round)
-            .with_end_cap(LineCap::Round);
-        let mut kurucu = PathBuilder::stroke(px(kalınlık))
-            .with_style(PathStyle::Stroke(seçenekler));
+            .with_line_join(LineJoin::Bevel)
+            .with_start_cap(LineCap::Butt)
+            .with_end_cap(LineCap::Butt);
+        let mut kurucu =
+            PathBuilder::stroke(px(kalınlık)).with_style(PathStyle::Stroke(seçenekler));
         if let Some(desen) = kesik_deseni(tür, kalınlık) {
             kurucu = kurucu.dash_array(&desen);
         }
@@ -372,9 +390,10 @@ impl ÇizimYüzeyi for Çizici<'_, '_> {
         if let Some(önbellek) = &self.ölçüm_önbelleği {
             let anahtar = (metin.to_string(), boyut.to_bits());
             if let Ok(kayıt) = önbellek.try_borrow()
-                && let Some(genişlik) = kayıt.get(&anahtar) {
-                    return (*genişlik, yükseklik);
-                }
+                && let Some(genişlik) = kayıt.get(&anahtar)
+            {
+                return (*genişlik, yükseklik);
+            }
             let satır = self.şekillendir(metin, boyut, false, Renk::SİYAH);
             let genişlik = f32::from(satır.width());
             // Önbellek kilitliyse ölçüm yine de geçerlidir; kayıt atlanır.

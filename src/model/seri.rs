@@ -4,10 +4,15 @@
 use std::fmt;
 use std::sync::Arc;
 
-use crate::model::deger::{veri_listesi, VeriÖğesi};
-use crate::model::imleyici::{İmleyiciler, İmAlanı, İmNoktası, İmÇizgisi};
-use crate::model::stil::{AlanStili, Etiket, ÇizgiStili, ÖğeStili};
+use crate::koordinat::Dikdörtgen;
 use crate::model::Uzunluk;
+use crate::model::deger::{VeriÖğesi, veri_listesi};
+pub use crate::model::hatlar::{
+    HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
+};
+use crate::model::imleyici::{İmAlanı, İmNoktası, İmleyiciler, İmÇizgisi};
+use crate::model::stil::{AlanStili, Etiket, ÇizgiStili, ÖğeStili};
+use crate::model::veri_kumesi::SeriYerleşimi;
 use crate::renk::Dolgu;
 
 /// Sembol biçimi (`symbol`).
@@ -61,7 +66,11 @@ pub struct Piktogram {
 
 impl Default for Piktogram {
     fn default() -> Self {
-        Piktogram { sembol: Sembol::Daire, boyut: 14.0, aralık: 4.0 }
+        Piktogram {
+            sembol: Sembol::Daire,
+            boyut: 14.0,
+            aralık: 4.0,
+        }
     }
 }
 
@@ -70,7 +79,7 @@ impl Default for Piktogram {
 pub enum GülTürü {
     /// Yarıçap değerle orantılı (`'radius'`).
     Yarıçap,
-    /// Alan değerle orantılı (`'area'`).
+    /// Dilim açıları eşit, yarıçap değerle orantılı (`'area'`).
     Alan,
 }
 
@@ -122,6 +131,8 @@ pub struct ÇizgiSerisi {
     pub yığın: Option<String>,
     pub boşları_bağla: bool,
     pub etiket: Etiket,
+    /// Çizginin son görünür noktasına bağlı etiket (`endLabel`).
+    pub uç_etiketi: Etiket,
     pub imleyiciler: İmleyiciler,
     /// Büyük veri örneklemesi (`sampling`).
     pub örnekleme: Option<Örnekleme>,
@@ -131,6 +142,10 @@ pub struct ÇizgiSerisi {
     pub kutupsal: bool,
     /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
     pub eşleme: Option<(String, String)>,
+    /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
+    pub veri_kümesi_sırası: usize,
+    /// `seriesLayoutBy`: ortak kaynağı sütun ya da satır serileri olarak oku.
+    pub seri_yerleşimi: SeriYerleşimi,
 }
 
 impl Default for ÇizgiSerisi {
@@ -141,19 +156,30 @@ impl Default for ÇizgiSerisi {
             yumuşaklık: 0.0,
             basamak: None,
             sembol: Sembol::İçiBoşDaire,
-            sembol_boyutu: 4.0,
+            // ECharts 6.1 `LineSeries.defaultOption.symbolSize`.
+            sembol_boyutu: 6.0,
             sembol_göster: true,
             çizgi_stili: ÇizgiStili::default(),
             öğe_stili: ÖğeStili::default(),
             alan_stili: None,
             yığın: None,
             boşları_bağla: false,
-            etiket: Etiket::default(),
+            etiket: Etiket {
+                // ECharts LineSeries.defaultOption.label.position = 'top'.
+                konum: crate::model::stil::EtiketKonumu::Üst,
+                ..Etiket::default()
+            },
+            uç_etiketi: Etiket {
+                uzaklık: 8.0,
+                ..Etiket::default()
+            },
             imleyiciler: İmleyiciler::default(),
             örnekleme: None,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
             eşleme: None,
+            veri_kümesi_sırası: 0,
+            seri_yerleşimi: SeriYerleşimi::Sütun,
         }
     }
 }
@@ -166,6 +192,16 @@ impl ÇizgiSerisi {
     /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
     pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
         self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+        self
+    }
+
+    pub fn veri_kümesi_sırası(mut self, sıra: usize) -> Self {
+        self.veri_kümesi_sırası = sıra;
+        self
+    }
+
+    pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
+        self.seri_yerleşimi = yerleşim;
         self
     }
 
@@ -257,6 +293,11 @@ impl ÇizgiSerisi {
         self
     }
 
+    pub fn uç_etiketi(mut self, etiket: Etiket) -> Self {
+        self.uç_etiketi = etiket;
+        self
+    }
+
     pub fn im_çizgisi(mut self, im: İmÇizgisi) -> Self {
         self.imleyiciler.çizgi = Some(im);
         self
@@ -275,7 +316,6 @@ impl ÇizgiSerisi {
 
 /// Sütun serisi (`series-bar`).
 #[derive(Clone, Debug)]
-#[derive(Default)]
 pub struct SütunSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
@@ -293,6 +333,10 @@ pub struct SütunSerisi {
     /// (`barCategoryGap`).
     pub kategori_boşluğu: Option<Uzunluk>,
     pub öğe_stili: ÖğeStili,
+    /// `showBackground`: her veri sütununun değer ekseni boyunca arka planı.
+    pub arka_plan_göster: bool,
+    /// `backgroundStyle`; `None`, ECharts'ın yarı saydam gri varsayılanıdır.
+    pub arka_plan_stili: Option<ÖğeStili>,
     pub etiket: Etiket,
     pub imleyiciler: İmleyiciler,
     /// Sütunu tekrarlanan sembollerle çizer (`pictorialBar`).
@@ -301,19 +345,67 @@ pub struct SütunSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
-    /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
+    /// Veri kümesi eşlemesi: `(x boyutu, y boyutu)` (`encode.x/y`).
     pub eşleme: Option<(String, String)>,
+    /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
+    pub veri_kümesi_sırası: usize,
+    /// `seriesLayoutBy`.
+    pub seri_yerleşimi: SeriYerleşimi,
 }
 
+impl Default for SütunSerisi {
+    fn default() -> Self {
+        SütunSerisi {
+            ad: None,
+            veri: Vec::new(),
+            yığın: None,
+            genişlik: None,
+            en_çok_genişlik: None,
+            en_az_genişlik: None,
+            sütun_boşluğu: None,
+            kategori_boşluğu: None,
+            öğe_stili: ÖğeStili::default(),
+            arka_plan_göster: false,
+            arka_plan_stili: None,
+            // zrender'in bağlı metin öntanımlısı `inside`dır. Line serisi
+            // kendi `top` öntanımlısını taşırken BarSeries taşımaz.
+            etiket: Etiket {
+                konum: crate::model::stil::EtiketKonumu::İç,
+                ..Etiket::default()
+            },
+            imleyiciler: İmleyiciler::default(),
+            piktogram: None,
+            eksen_bağı: EksenBağı::default(),
+            kutupsal: false,
+            eşleme: None,
+            veri_kümesi_sırası: 0,
+            seri_yerleşimi: SeriYerleşimi::Sütun,
+        }
+    }
+}
 
 impl SütunSerisi {
     pub fn yeni() -> Self {
         Self::default()
     }
 
-    /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
-    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
-        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+    /// Seriyi veri kümesine bağlar: `(x boyutu, y boyutu)` (`encode.x/y`).
+    ///
+    /// X boyutu sayısal bir eksene sayı, kategori eksenine sırasal değer
+    /// olarak akar. Dataset'in diğer boyutları tooltip/visualMap için veri
+    /// öğesinde korunur.
+    pub fn eşle(mut self, x_boyutu: impl Into<String>, y_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((x_boyutu.into(), y_boyutu.into()));
+        self
+    }
+
+    pub fn veri_kümesi_sırası(mut self, sıra: usize) -> Self {
+        self.veri_kümesi_sırası = sıra;
+        self
+    }
+
+    pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
+        self.seri_yerleşimi = yerleşim;
         self
     }
 
@@ -380,6 +472,16 @@ impl SütunSerisi {
         self
     }
 
+    pub fn arka_plan_göster(mut self, göster: bool) -> Self {
+        self.arka_plan_göster = göster;
+        self
+    }
+
+    pub fn arka_plan_stili(mut self, stil: ÖğeStili) -> Self {
+        self.arka_plan_stili = Some(stil);
+        self
+    }
+
     pub fn etiket(mut self, etiket: Etiket) -> Self {
         self.etiket = etiket;
         self
@@ -409,11 +511,113 @@ pub struct EtiketÇizgisi {
     pub uzunluk1: f32,
     /// Yatay ikinci parça (`length2`).
     pub uzunluk2: f32,
+    /// `false`/`true`/sayısal `smooth`; 0 düz, 0.3 ECharts `true` karşılığı.
+    pub yumuşaklık: f32,
+    pub en_küçük_dönüş_açısı: f32,
+    pub en_büyük_yüzey_açısı: f32,
+    pub stil: ÇizgiStili,
 }
 
 impl Default for EtiketÇizgisi {
     fn default() -> Self {
-        EtiketÇizgisi { göster: true, uzunluk1: 15.0, uzunluk2: 15.0 }
+        EtiketÇizgisi {
+            göster: true,
+            uzunluk1: 15.0,
+            // ECharts `PieSeries.defaultOption.labelLine.length2`.
+            uzunluk2: 30.0,
+            yumuşaklık: 0.0,
+            en_küçük_dönüş_açısı: 90.0,
+            en_büyük_yüzey_açısı: 90.0,
+            stil: ÇizgiStili {
+                kalınlık: 1.0,
+                ..Default::default()
+            },
+        }
+    }
+}
+
+impl EtiketÇizgisi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
+    }
+
+    pub fn uzunluk1(mut self, uzunluk: f32) -> Self {
+        self.uzunluk1 = uzunluk.max(0.0);
+        self
+    }
+
+    pub fn uzunluk2(mut self, uzunluk: f32) -> Self {
+        self.uzunluk2 = uzunluk.max(0.0);
+        self
+    }
+
+    pub fn yumuşaklık(mut self, yumuşaklık: f32) -> Self {
+        self.yumuşaklık = yumuşaklık.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn en_küçük_dönüş_açısı(mut self, derece: f32) -> Self {
+        self.en_küçük_dönüş_açısı = derece.clamp(0.0, 180.0);
+        self
+    }
+
+    pub fn en_büyük_yüzey_açısı(mut self, derece: f32) -> Self {
+        self.en_büyük_yüzey_açısı = derece.clamp(0.0, 180.0);
+        self
+    }
+
+    pub fn stil(mut self, stil: ÇizgiStili) -> Self {
+        self.stil = stil;
+        self
+    }
+}
+
+/// `series.labelLayout` geri çağrısına verilen, çizimden bağımsız yerleşim
+/// bilgisi. Koordinatlar grafik yüzeyinin mantıksal piksel uzayındadır.
+#[derive(Clone, Debug, PartialEq)]
+pub struct EtiketYerleşimParametreleri {
+    pub veri_sırası: usize,
+    pub veri_adı: String,
+    pub değer: f64,
+    pub etiket_kutusu: Dikdörtgen,
+    pub etiket_çizgisi_noktaları: Option<[(f32, f32); 3]>,
+}
+
+/// `series.labelLayout` geri çağrısının değiştirebildiği değerler.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct EtiketYerleşimSonucu {
+    pub x: Option<f32>,
+    pub y: Option<f32>,
+    pub etiket_çizgisi_noktaları: Option<[(f32, f32); 3]>,
+}
+
+type EtiketYerleşimGeriÇağrısı =
+    Arc<dyn Fn(&EtiketYerleşimParametreleri) -> EtiketYerleşimSonucu + Send + Sync>;
+
+/// Klonlanabilir `labelLayout` işlevi sarmalayıcısı.
+#[derive(Clone)]
+pub struct EtiketYerleşimİşlevi(EtiketYerleşimGeriÇağrısı);
+
+impl EtiketYerleşimİşlevi {
+    pub fn yeni(
+        işlev: impl Fn(&EtiketYerleşimParametreleri) -> EtiketYerleşimSonucu + Send + Sync + 'static,
+    ) -> Self {
+        Self(Arc::new(işlev))
+    }
+
+    pub fn uygula(&self, parametreler: &EtiketYerleşimParametreleri) -> EtiketYerleşimSonucu {
+        (self.0)(parametreler)
+    }
+}
+
+impl fmt::Debug for EtiketYerleşimİşlevi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("EtiketYerleşimİşlevi(..)")
     }
 }
 
@@ -422,19 +626,51 @@ impl Default for EtiketÇizgisi {
 pub struct PastaSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
-    /// `(iç, dış)` yarıçap; ECharts öntanımlısı `[0, '75%']`.
+    /// Seri görünüm kutusu (`left/right/top/bottom/width/height`). Yüzdeler
+    /// ana çizim alanına göre çözülür.
+    pub sol: Uzunluk,
+    pub sağ: Uzunluk,
+    pub üst: Uzunluk,
+    pub alt: Uzunluk,
+    pub genişlik: Option<Uzunluk>,
+    pub yükseklik: Option<Uzunluk>,
+    /// `(iç, dış)` yarıçap; ECharts öntanımlısı `[0, '50%']`.
     pub yarıçap: (Uzunluk, Uzunluk),
     /// Merkez `(x, y)`; öntanımlı `('50%', '50%')`.
     pub merkez: (Uzunluk, Uzunluk),
     /// Derece cinsinden başlangıç açısı (`startAngle`, öntanımlı 90).
     pub başlangıç_açısı: f32,
+    /// Derece cinsinden bitiş açısı; `None`, ECharts `'auto'` karşılığıdır.
+    pub bitiş_açısı: Option<f32>,
     pub saat_yönünde: bool,
+    /// Dilimler arasındaki açı boşluğu (`padAngle`, derece).
+    pub dolgu_açısı: f32,
+    /// En küçük dilim açısı (`minAngle`, derece).
+    pub en_küçük_açı: f32,
+    /// Bundan dar dilimlerin etiketi gösterilmez (`minShowLabelAngle`).
+    pub en_küçük_etiket_açısı: f32,
+    /// Seçili dilimin radyal kayması (`selectedOffset`).
+    pub seçili_uzaklığı: f32,
     pub gül_türü: Option<GülTürü>,
+    /// Tüm değerler sıfırken eşit dilimler gösterilsin.
+    pub sıfır_toplamı_göster: bool,
+    /// Geçerli veri kalmadığında boş halka gösterilsin.
+    pub boş_daire_göster: bool,
+    pub boş_daire_stili: ÖğeStili,
+    /// Dış etiket çakışmalarını taşı/gizle (`avoidLabelOverlap`).
+    pub etiket_çakışmasını_önle: bool,
+    /// Tooltip/etiket yüzde hassasiyeti (`percentPrecision`).
+    pub yüzde_hassasiyeti: u8,
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
     pub etiket_çizgisi: EtiketÇizgisi,
+    pub etiket_yerleşimi: Option<EtiketYerleşimİşlevi>,
     /// Veri kümesi eşlemesi: `(ad boyutu, değer boyutu)` (`encode`).
     pub eşleme: Option<(String, String)>,
+    /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
+    pub veri_kümesi_sırası: usize,
+    /// `seriesLayoutBy`.
+    pub seri_yerleşimi: SeriYerleşimi,
 }
 
 impl Default for PastaSerisi {
@@ -442,15 +678,38 @@ impl Default for PastaSerisi {
         PastaSerisi {
             ad: None,
             veri: Vec::new(),
-            yarıçap: (Uzunluk::Yüzde(0.0), Uzunluk::Yüzde(75.0)),
+            sol: Uzunluk::Piksel(0.0),
+            sağ: Uzunluk::Piksel(0.0),
+            üst: Uzunluk::Piksel(0.0),
+            alt: Uzunluk::Piksel(0.0),
+            genişlik: None,
+            yükseklik: None,
+            yarıçap: (Uzunluk::Yüzde(0.0), Uzunluk::Yüzde(50.0)),
             merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(50.0)),
             başlangıç_açısı: 90.0,
+            bitiş_açısı: None,
             saat_yönünde: true,
+            dolgu_açısı: 0.0,
+            en_küçük_açı: 0.0,
+            en_küçük_etiket_açısı: 0.0,
+            seçili_uzaklığı: 10.0,
             gül_türü: None,
+            sıfır_toplamı_göster: true,
+            boş_daire_göster: true,
+            boş_daire_stili: ÖğeStili::yeni().renk(0xd3d3d3),
+            etiket_çakışmasını_önle: true,
+            yüzde_hassasiyeti: 2,
             öğe_stili: ÖğeStili::default(),
-            etiket: Etiket { göster: true, konum: crate::model::stil::EtiketKonumu::Dış, ..Default::default() },
+            etiket: Etiket {
+                göster: true,
+                konum: crate::model::stil::EtiketKonumu::Dış,
+                ..Default::default()
+            },
             etiket_çizgisi: EtiketÇizgisi::default(),
+            etiket_yerleşimi: None,
             eşleme: None,
+            veri_kümesi_sırası: 0,
+            seri_yerleşimi: SeriYerleşimi::Sütun,
         }
     }
 }
@@ -466,6 +725,16 @@ impl PastaSerisi {
         self
     }
 
+    pub fn veri_kümesi_sırası(mut self, sıra: usize) -> Self {
+        self.veri_kümesi_sırası = sıra;
+        self
+    }
+
+    pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
+        self.seri_yerleşimi = yerleşim;
+        self
+    }
+
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
         self.ad = Some(ad.into());
         self
@@ -473,6 +742,50 @@ impl PastaSerisi {
 
     pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
         self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn sol(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.sol = değer.into();
+        self
+    }
+
+    pub fn sağ(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.sağ = değer.into();
+        self
+    }
+
+    pub fn üst(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.üst = değer.into();
+        self
+    }
+
+    pub fn alt(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.alt = değer.into();
+        self
+    }
+
+    pub fn genişlik(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(değer.into());
+        self
+    }
+
+    pub fn yükseklik(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = Some(değer.into());
+        self
+    }
+
+    pub fn görünüm_kutusu(
+        mut self,
+        sol: impl Into<Uzunluk>,
+        sağ: impl Into<Uzunluk>,
+        üst: impl Into<Uzunluk>,
+        alt: impl Into<Uzunluk>,
+    ) -> Self {
+        self.sol = sol.into();
+        self.sağ = sağ.into();
+        self.üst = üst.into();
+        self.alt = alt.into();
         self
     }
 
@@ -498,13 +811,68 @@ impl PastaSerisi {
         self
     }
 
+    pub fn bitiş_açısı(mut self, derece: f32) -> Self {
+        self.bitiş_açısı = Some(derece);
+        self
+    }
+
+    pub fn otomatik_bitiş_açısı(mut self) -> Self {
+        self.bitiş_açısı = None;
+        self
+    }
+
     pub fn saat_yönünde(mut self, saat_yönünde: bool) -> Self {
         self.saat_yönünde = saat_yönünde;
         self
     }
 
+    pub fn dolgu_açısı(mut self, derece: f32) -> Self {
+        self.dolgu_açısı = derece.max(0.0);
+        self
+    }
+
+    pub fn en_küçük_açı(mut self, derece: f32) -> Self {
+        self.en_küçük_açı = derece.max(0.0);
+        self
+    }
+
+    pub fn en_küçük_etiket_açısı(mut self, derece: f32) -> Self {
+        self.en_küçük_etiket_açısı = derece.max(0.0);
+        self
+    }
+
+    pub fn seçili_uzaklığı(mut self, uzaklık: f32) -> Self {
+        self.seçili_uzaklığı = uzaklık.max(0.0);
+        self
+    }
+
     pub fn gül_türü(mut self, tür: GülTürü) -> Self {
         self.gül_türü = Some(tür);
+        self
+    }
+
+    pub fn sıfır_toplamı_göster(mut self, göster: bool) -> Self {
+        self.sıfır_toplamı_göster = göster;
+        self
+    }
+
+    pub fn boş_daire_göster(mut self, göster: bool) -> Self {
+        self.boş_daire_göster = göster;
+        self
+    }
+
+    pub fn boş_daire_stili(mut self, stil: ÖğeStili) -> Self {
+        self.boş_daire_stili = stil;
+        self
+    }
+
+    pub fn etiket_çakışmasını_önle(mut self, önle: bool) -> Self {
+        self.etiket_çakışmasını_önle = önle;
+        self
+    }
+
+    pub fn yüzde_hassasiyeti(mut self, basamak: u8) -> Self {
+        self.yüzde_hassasiyeti = basamak.min(20);
         self
     }
 
@@ -522,8 +890,15 @@ impl PastaSerisi {
         self.etiket_çizgisi = çizgi;
         self
     }
-}
 
+    pub fn etiket_yerleşimi(
+        mut self,
+        işlev: impl Fn(&EtiketYerleşimParametreleri) -> EtiketYerleşimSonucu + Send + Sync + 'static,
+    ) -> Self {
+        self.etiket_yerleşimi = Some(EtiketYerleşimİşlevi::yeni(işlev));
+        self
+    }
+}
 
 /// Mum serisi (`series-candlestick`). Veri öğeleri
 /// `[açılış, kapanış, en düşük, en yüksek]` dizileridir.
@@ -535,7 +910,8 @@ pub struct MumSerisi {
     pub yükselen_renk: crate::renk::Renk,
     /// Düşen mum rengi (`itemStyle.color0`).
     pub düşen_renk: crate::renk::Renk,
-    /// Gövde genişliğinin bant genişliğine oranı.
+    /// Gövde genişliğinin bant genişliğine oranı. ECharts, açık bir
+    /// `barWidth` verilmediğinde bant genişliğinin yarısını kullanır.
     pub gövde_oranı: f32,
     pub kenarlık_kalınlığı: f32,
     pub imleyiciler: İmleyiciler,
@@ -551,7 +927,7 @@ impl Default for MumSerisi {
             // ECharts v5 öntanımlıları: color '#eb5454', color0 '#47b262'.
             yükselen_renk: crate::renk::Renk::onaltılık(0xeb5454),
             düşen_renk: crate::renk::Renk::onaltılık(0x47b262),
-            gövde_oranı: 0.6,
+            gövde_oranı: 0.5,
             kenarlık_kalınlığı: 1.0,
             imleyiciler: İmleyiciler::default(),
             eksen_bağı: EksenBağı::default(),
@@ -606,6 +982,8 @@ pub struct KutuSerisi {
     pub öğe_stili: ÖğeStili,
     /// Gövde genişliğinin bant genişliğine oranı.
     pub gövde_oranı: f32,
+    /// Açık oran yokken ECharts'ın bant tabanlı `boxWidth` hesabını kullan.
+    pub otomatik_gövde_genişliği: bool,
     pub imleyiciler: İmleyiciler,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
@@ -618,6 +996,7 @@ impl Default for KutuSerisi {
             veri: Vec::new(),
             öğe_stili: ÖğeStili::default(),
             gövde_oranı: 0.5,
+            otomatik_gövde_genişliği: true,
             imleyiciler: İmleyiciler::default(),
             eksen_bağı: EksenBağı::default(),
         }
@@ -648,6 +1027,17 @@ impl KutuSerisi {
 
     pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
         self.öğe_stili = stil;
+        self
+    }
+
+    pub fn gövde_oranı(mut self, oran: f32) -> Self {
+        self.gövde_oranı = oran.clamp(0.05, 1.0);
+        self.otomatik_gövde_genişliği = false;
+        self
+    }
+
+    pub fn otomatik_gövde_genişliği(mut self) -> Self {
+        self.otomatik_gövde_genişliği = true;
         self
     }
 }
@@ -727,6 +1117,8 @@ pub struct SaçılımSerisi {
     pub sembol_boyutu: SembolBoyutu,
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
+    /// Dataset `encode.label` için kullanılan boyut adı.
+    pub etiket_boyutu: Option<String>,
     pub imleyiciler: İmleyiciler,
     /// Dalga efekti (`effectScatter` karşılığı): `efektli(true)` ile açılır.
     pub efektli: bool,
@@ -738,8 +1130,12 @@ pub struct SaçılımSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
-    /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
+    /// Veri kümesi eşlemesi: `(x boyutu, y boyutu)` (`encode.x/y`).
     pub eşleme: Option<(String, String)>,
+    /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
+    pub veri_kümesi_sırası: usize,
+    /// `seriesLayoutBy`.
+    pub seri_yerleşimi: SeriYerleşimi,
 }
 
 impl Default for SaçılımSerisi {
@@ -751,6 +1147,7 @@ impl Default for SaçılımSerisi {
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
             öğe_stili: ÖğeStili::default(),
             etiket: Etiket::default(),
+            etiket_boyutu: None,
             imleyiciler: İmleyiciler::default(),
             efektli: false,
             efekt_ölçeği: 2.5,
@@ -758,6 +1155,8 @@ impl Default for SaçılımSerisi {
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
             eşleme: None,
+            veri_kümesi_sırası: 0,
+            seri_yerleşimi: SeriYerleşimi::Sütun,
         }
     }
 }
@@ -767,9 +1166,23 @@ impl SaçılımSerisi {
         Self::default()
     }
 
-    /// Seriyi veri kümesine bağlar: `(ad/kategori boyutu, değer boyutu)`.
-    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
-        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+    /// Seriyi veri kümesine bağlar: `(x boyutu, y boyutu)` (`encode.x/y`).
+    ///
+    /// X boyutu sayısal bir eksene sayı, kategori eksenine sırasal değer
+    /// olarak akar. Dataset'in diğer boyutları tooltip/visualMap için veri
+    /// öğesinde korunur.
+    pub fn eşle(mut self, x_boyutu: impl Into<String>, y_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((x_boyutu.into(), y_boyutu.into()));
+        self
+    }
+
+    pub fn veri_kümesi_sırası(mut self, sıra: usize) -> Self {
+        self.veri_kümesi_sırası = sıra;
+        self
+    }
+
+    pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
+        self.seri_yerleşimi = yerleşim;
         self
     }
 
@@ -840,6 +1253,12 @@ impl SaçılımSerisi {
         self
     }
 
+    /// Dataset etiket metnini bir boyuta bağlar (`encode.label`).
+    pub fn etiket_boyutunu_eşle(mut self, boyut: impl Into<String>) -> Self {
+        self.etiket_boyutu = Some(boyut.into());
+        self
+    }
+
     pub fn im_çizgisi(mut self, im: İmÇizgisi) -> Self {
         self.imleyiciler.çizgi = Some(im);
         self
@@ -855,7 +1274,6 @@ impl SaçılımSerisi {
         self
     }
 }
-
 
 /// Huni sıralaması (`funnel.sort`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -1037,15 +1455,11 @@ impl GöstergeSaatiSerisi {
         self
     }
 
-    pub fn değer_biçimleyici(
-        mut self,
-        b: impl Into<crate::model::stil::Biçimleyici>,
-    ) -> Self {
+    pub fn değer_biçimleyici(mut self, b: impl Into<crate::model::stil::Biçimleyici>) -> Self {
         self.değer_biçimleyici = Some(b.into());
         self
     }
 }
-
 
 /// Radar serisi (`series-radar`). Her veri öğesi, koordinattaki gösterge
 /// sayısı kadar değerli bir dizidir; öğe adı göstergede (legend) listelenir.
@@ -1085,10 +1499,7 @@ impl RadarSerisi {
     }
 
     /// Veri öğeleri: `(ad, değerler)` çiftleri.
-    pub fn veri<S: Into<String>>(
-        mut self,
-        veri: impl IntoIterator<Item = (S, Vec<f64>)>,
-    ) -> Self {
+    pub fn veri<S: Into<String>>(mut self, veri: impl IntoIterator<Item = (S, Vec<f64>)>) -> Self {
         self.veri = veri
             .into_iter()
             .map(|(ad, değerler)| VeriÖğesi::adlı(ad, değerler))
@@ -1121,8 +1532,7 @@ pub struct ÖzelBağlam<'a> {
 }
 
 /// Özel çizim işlevi (`series-custom` içindeki `renderItem` karşılığı).
-pub type ÖzelÇizim =
-    Arc<dyn Fn(&mut dyn crate::cizim::ÇizimYüzeyi, &ÖzelBağlam) + Send + Sync>;
+pub type ÖzelÇizim = Arc<dyn Fn(&mut dyn crate::cizim::ÇizimYüzeyi, &ÖzelBağlam) + Send + Sync>;
 
 /// Özel seri (`series-custom`): çizim tümüyle kullanıcı işlevine bırakılır.
 /// Bu aynı zamanda üçüncü taraf seri türleri için eklenti noktasıdır.
@@ -1395,7 +1805,11 @@ impl SankeySerisi {
     ) -> Self {
         self.bağlar = bağlar
             .into_iter()
-            .map(|(k, h, d)| SankeyBağı { kaynak: k.into(), hedef: h.into(), değer: d })
+            .map(|(k, h, d)| SankeyBağı {
+                kaynak: k.into(),
+                hedef: h.into(),
+                değer: d,
+            })
             .collect();
         self
     }
@@ -1414,7 +1828,12 @@ pub struct GrafoDüğümü {
 
 impl GrafoDüğümü {
     pub fn yeni(ad: impl Into<String>, boyut: f32) -> Self {
-        GrafoDüğümü { ad: ad.into(), değer: None, boyut, kategori: None }
+        GrafoDüğümü {
+            ad: ad.into(),
+            değer: None,
+            boyut,
+            kategori: None,
+        }
     }
 
     pub fn kategori(mut self, kategori: usize) -> Self {
@@ -1487,10 +1906,7 @@ impl GrafoSerisi {
         self
     }
 
-    pub fn bağlar<S: Into<String>>(
-        mut self,
-        bağlar: impl IntoIterator<Item = (S, S)>,
-    ) -> Self {
+    pub fn bağlar<S: Into<String>>(mut self, bağlar: impl IntoIterator<Item = (S, S)>) -> Self {
         self.bağlar = bağlar
             .into_iter()
             .map(|(k, h)| (k.into(), h.into()))
@@ -1560,7 +1976,11 @@ pub struct ParalelBoyut {
 
 impl ParalelBoyut {
     pub fn yeni(ad: impl Into<String>) -> Self {
-        ParalelBoyut { ad: ad.into(), en_az: None, en_çok: None }
+        ParalelBoyut {
+            ad: ad.into(),
+            en_az: None,
+            en_çok: None,
+        }
     }
 }
 
@@ -1588,7 +2008,10 @@ impl Default for ParalelSerisi {
             üst: Uzunluk::Piksel(70.0),
             genişlik: Uzunluk::Yüzde(84.0),
             yükseklik: Uzunluk::Yüzde(70.0),
-            çizgi_stili: ÇizgiStili { kalınlık: 1.0, ..Default::default() },
+            çizgi_stili: ÇizgiStili {
+                kalınlık: 1.0,
+                ..Default::default()
+            },
         }
     }
 }
@@ -1603,10 +2026,7 @@ impl ParalelSerisi {
         self
     }
 
-    pub fn boyutlar<S: Into<String>>(
-        mut self,
-        boyutlar: impl IntoIterator<Item = S>,
-    ) -> Self {
+    pub fn boyutlar<S: Into<String>>(mut self, boyutlar: impl IntoIterator<Item = S>) -> Self {
         self.boyutlar = boyutlar.into_iter().map(ParalelBoyut::yeni).collect();
         self
     }
@@ -1648,7 +2068,10 @@ impl Default for TakvimSerisi {
 
 impl TakvimSerisi {
     pub fn yeni(yıl: i32) -> Self {
-        TakvimSerisi { yıl, ..Default::default() }
+        TakvimSerisi {
+            yıl,
+            ..Default::default()
+        }
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -1701,10 +2124,7 @@ impl TemaNehriSerisi {
     }
 
     /// Veri: `(x, değer, katman)` üçlüleri.
-    pub fn veri<S: Into<String>>(
-        mut self,
-        veri: impl IntoIterator<Item = (f64, f64, S)>,
-    ) -> Self {
+    pub fn veri<S: Into<String>>(mut self, veri: impl IntoIterator<Item = (f64, f64, S)>) -> Self {
         self.veri = veri
             .into_iter()
             .map(|(x, değer, katman)| (x, değer, katman.into()))
@@ -1736,6 +2156,7 @@ pub enum Seri {
     Paralel(ParalelSerisi),
     Takvim(TakvimSerisi),
     TemaNehri(TemaNehriSerisi),
+    Hatlar(HatlarSerisi),
 }
 
 impl Seri {
@@ -1761,6 +2182,7 @@ impl Seri {
             Seri::Paralel(s) => s.ad.as_deref(),
             Seri::Takvim(s) => s.ad.as_deref(),
             Seri::TemaNehri(s) => s.ad.as_deref(),
+            Seri::Hatlar(s) => s.ad.as_deref(),
         }
     }
 
@@ -1770,6 +2192,7 @@ impl Seri {
             Seri::Çizgi(s) => s.kutupsal,
             Seri::Sütun(s) => s.kutupsal,
             Seri::Saçılım(s) => s.kutupsal,
+            Seri::Hatlar(s) => s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal,
             _ => false,
         }
     }
@@ -1787,6 +2210,10 @@ impl Seri {
                 | Seri::Mum(_)
                 | Seri::Kutu(_)
                 | Seri::Isı(_)
+                | Seri::Hatlar(HatlarSerisi {
+                    koordinat_sistemi: HatKoordinatSistemi::Kartezyen2B,
+                    ..
+                })
         ) || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
     }
 
@@ -1812,6 +2239,36 @@ impl Seri {
             Seri::Paralel(s) => &s.veri,
             Seri::Takvim(s) => &s.veri,
             Seri::TemaNehri(_) => &[],
+            Seri::Hatlar(_) => &[],
+        }
+    }
+
+    /// Artımlı veri eklemeyi destekleyen serinin değiştirilebilir veri
+    /// deposu. Hiyerarşik/bağ tabanlı seriler farklı veri modelleri
+    /// kullandığından onlar için `None` döner.
+    pub fn veri_mut(&mut self) -> Option<&mut Vec<VeriÖğesi>> {
+        match self {
+            Seri::Çizgi(s) => Some(&mut s.veri),
+            Seri::Sütun(s) => Some(&mut s.veri),
+            Seri::Pasta(s) => Some(&mut s.veri),
+            Seri::Saçılım(s) => Some(&mut s.veri),
+            Seri::Mum(s) => Some(&mut s.veri),
+            Seri::Kutu(s) => Some(&mut s.veri),
+            Seri::Isı(s) => Some(&mut s.veri),
+            Seri::Huni(s) => Some(&mut s.veri),
+            Seri::GöstergeSaati(s) => Some(&mut s.veri),
+            Seri::Radar(s) => Some(&mut s.veri),
+            Seri::Özel(s) => Some(&mut s.veri),
+            Seri::Paralel(s) => Some(&mut s.veri),
+            Seri::Takvim(s) => Some(&mut s.veri),
+            Seri::AğaçHaritası(_)
+            | Seri::GüneşPatlaması(_)
+            | Seri::Ağaç(_)
+            | Seri::Sankey(_)
+            | Seri::Grafo(_)
+            | Seri::Kiriş(_)
+            | Seri::TemaNehri(_) => None,
+            Seri::Hatlar(_) => None,
         }
     }
 
@@ -1825,6 +2282,7 @@ impl Seri {
             Seri::Kutu(s) => s.eksen_bağı,
             Seri::Isı(s) => s.eksen_bağı,
             Seri::Özel(s) => s.eksen_bağı,
+            Seri::Hatlar(s) => s.eksen_bağı,
             _ => EksenBağı::default(),
         }
     }
@@ -1852,6 +2310,7 @@ impl Seri {
             | Seri::Paralel(_)
             | Seri::Takvim(_)
             | Seri::TemaNehri(_) => None,
+            Seri::Hatlar(_) => None,
         }
     }
 
@@ -1878,6 +2337,7 @@ impl Seri {
             | Seri::Paralel(_)
             | Seri::Takvim(_)
             | Seri::TemaNehri(_) => None,
+            Seri::Hatlar(_) => None,
         }
     }
 }
@@ -1999,5 +2459,11 @@ impl From<TakvimSerisi> for Seri {
 impl From<TemaNehriSerisi> for Seri {
     fn from(s: TemaNehriSerisi) -> Seri {
         Seri::TemaNehri(s)
+    }
+}
+
+impl From<HatlarSerisi> for Seri {
+    fn from(s: HatlarSerisi) -> Seri {
+        Seri::Hatlar(s)
     }
 }

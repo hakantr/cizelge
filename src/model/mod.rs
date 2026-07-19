@@ -6,12 +6,15 @@ pub mod bilesen;
 pub mod deger;
 pub mod eksen;
 pub mod gorsel_esleme;
+pub mod hatlar;
 pub mod imleyici;
 pub mod kutupsal;
+pub mod matris;
 pub mod radar;
 pub mod secenekler;
 pub mod seri;
 pub mod stil;
+pub mod takvim;
 pub mod veri_kumesi;
 pub mod yakinlastirma;
 
@@ -88,6 +91,39 @@ impl From<&str> for YatayKonum {
             "orta" | "center" | "middle" => YatayKonum::Orta,
             "sağ" | "right" => YatayKonum::Sağ,
             diğer => YatayKonum::Değer(Uzunluk::from(diğer)),
+        }
+    }
+}
+
+/// Dikey hizalama / konum belirtimi (`top: 'center'` vb.).
+#[derive(Clone, Copy, PartialEq, Debug, Default)]
+pub enum DikeyKonum {
+    #[default]
+    Üst,
+    Orta,
+    Alt,
+    Değer(Uzunluk),
+}
+
+impl From<Uzunluk> for DikeyKonum {
+    fn from(u: Uzunluk) -> Self {
+        DikeyKonum::Değer(u)
+    }
+}
+
+impl From<f32> for DikeyKonum {
+    fn from(p: f32) -> Self {
+        DikeyKonum::Değer(Uzunluk::Piksel(p))
+    }
+}
+
+impl From<&str> for DikeyKonum {
+    fn from(s: &str) -> Self {
+        match s.trim() {
+            "üst" | "top" => DikeyKonum::Üst,
+            "orta" | "center" | "middle" => DikeyKonum::Orta,
+            "alt" | "bottom" => DikeyKonum::Alt,
+            diğer => DikeyKonum::Değer(Uzunluk::from(diğer)),
         }
     }
 }

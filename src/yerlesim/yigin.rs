@@ -30,7 +30,9 @@ pub fn yığın_kimliği(seri: &Seri, sıra: usize) -> String {
 ///
 /// Yalnızca çizgi ve sütun serileri yığınlanır; aynı yığında pozitif ve
 /// negatif değerler ayrı birikir.
-pub fn yığın_aralıkları(seriler: &[Seri], görünür: &[bool]) -> Vec<Vec<YığınAralığı>> {
+pub fn yığın_aralıkları(
+    seriler: &[Seri], görünür: &[bool]
+) -> Vec<Vec<YığınAralığı>> {
     // yığın adı -> (pozitif birikimler, negatif birikimler)
     let mut birikimler: HashMap<String, (Vec<f64>, Vec<f64>)> = HashMap::new();
     let mut sonuç: Vec<Vec<YığınAralığı>> = Vec::with_capacity(seriler.len());
@@ -88,7 +90,12 @@ pub fn yığın_aralıkları(seriler: &[Seri], görünür: &[bool]) -> Vec<Vec<Y
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
     use crate::model::seri::{Seri, ÇizgiSerisi};

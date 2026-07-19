@@ -3,7 +3,7 @@
 //! bir çoklu çizgidir.
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::{keskin, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
+use crate::cizim::{DikeyHiza, YatayHiza, Yol, keskin, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::seri::ParalelSerisi;
 use crate::olcek::AralıkÖlçeği;
@@ -41,10 +41,11 @@ pub fn paralel_çiz(
             let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
             for öğe in &seri.veri {
                 if let Some(değer) = öğe.değer.dizi().and_then(|d| d.get(b))
-                    && değer.is_finite() {
-                        kapsam[0] = kapsam[0].min(*değer);
-                        kapsam[1] = kapsam[1].max(*değer);
-                    }
+                    && değer.is_finite()
+                {
+                    kapsam[0] = kapsam[0].min(*değer);
+                    kapsam[1] = kapsam[1].max(*değer);
+                }
             }
             if !kapsam[0].is_finite() {
                 kapsam = [0.0, 1.0];
@@ -53,9 +54,8 @@ pub fn paralel_çiz(
         })
         .collect();
 
-    let eksen_x = |b: usize| -> f32 {
-        alan.x + (b as f32 / (boyut_sayısı - 1) as f32) * alan.genişlik
-    };
+    let eksen_x =
+        |b: usize| -> f32 { alan.x + (b as f32 / (boyut_sayısı - 1) as f32) * alan.genişlik };
     let değer_y = |b: usize, değer: f64| -> f32 {
         let oran = ölçekler.get(b).map(|ö| ö.oranla(değer)).unwrap_or(0.0) as f32;
         alan.alt() - oran * alan.yükseklik
@@ -107,7 +107,9 @@ pub fn paralel_çiz(
     let opaklık = seri.çizgi_stili.opaklık * 0.6 * ilerleme.clamp(0.0, 1.0);
     let renk = seri.çizgi_stili.renk.unwrap_or(seri_rengi);
     for (j, öğe) in seri.veri.iter().enumerate() {
-        let Some(dizi) = öğe.değer.dizi() else { continue };
+        let Some(dizi) = öğe.değer.dizi() else {
+            continue;
+        };
         let noktalar: Vec<(f32, f32)> = dizi
             .iter()
             .take(boyut_sayısı)
@@ -138,7 +140,10 @@ pub fn paralel_çiz(
                 seri_adı: seri.ad.clone(),
                 ad: öğe.ad.clone(),
                 değer: dizi.first().copied(),
-                geometri: İsabetGeometrisi::Daire { merkez: ilk, yarıçap: 8.0 },
+                geometri: İsabetGeometrisi::Daire {
+                    merkez: ilk,
+                    yarıçap: 8.0,
+                },
             });
         }
     }

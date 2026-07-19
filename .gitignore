@@ -1,5 +1,6 @@
 # Derleme çıktıları
 /target/
+/tools/uyum/node_modules/
 
 # Kitaplık projelerinde kilit dosyası sürüme eklenmez
 Cargo.lock

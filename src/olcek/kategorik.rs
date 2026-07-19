@@ -46,6 +46,9 @@ impl KategorikÖlçek {
         if i < 0 {
             return String::new();
         }
-        self.kategoriler.get(i as usize).cloned().unwrap_or_default()
+        self.kategoriler
+            .get(i as usize)
+            .cloned()
+            .unwrap_or_default()
     }
 }

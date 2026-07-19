@@ -1,0 +1,19 @@
+{
+  "id": "pie-legend",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2358,
+  "değişen_piksel_oranı": 0.008733333333333333,
+  "ssim": 0.997088844315423,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/pie-legend.png",
+    "gerçek": "testler/gorsel/gerçek/default/pie-legend.png",
+    "fark": "testler/gorsel/fark/default/pie-legend.png"
+  }
+}

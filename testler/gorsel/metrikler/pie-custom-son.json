@@ -1,0 +1,19 @@
+{
+  "id": "pie-custom",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 343,
+  "değişen_piksel_oranı": 0.0012703703703703703,
+  "ssim": 0.9977832996797074,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/pie-custom.png",
+    "gerçek": "testler/gorsel/gerçek/default/pie-custom.png",
+    "fark": "testler/gorsel/fark/default/pie-custom.png"
+  }
+}

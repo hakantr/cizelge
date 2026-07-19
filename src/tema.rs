@@ -105,8 +105,13 @@ pub const AÇIK: TemaRenkleri = TemaRenkleri {
     bölme_çizgisi: Renk::onaltılık(0xdbdee4),
     ara_bölme_çizgisi: Renk::onaltılık(0xf4f7fd),
     bölme_alanı: [
-        Renk::kyma(250.0 / 255.0, 250.0 / 255.0, 250.0 / 255.0, 0.2),
-        Renk::kyma(210.0 / 255.0, 219.0 / 255.0, 238.0 / 255.0, 0.2),
+        // ECharts 6.1 `tokens.color.backgroundTint`, ardından tam saydam
+        // `backgroundTransparent`. Sıra önemlidir: ilk kategori bandı
+        // renkli başlar.
+        // tiny-skia kaynak-üstü harmanlaması yarım değeri yukarı yuvarlar;
+        // 233 girdisi Canvas çıktısı olan birleşik 244'e karşılık gelir.
+        Renk::kyma(233.0 / 255.0, 237.0 / 255.0, 245.0 / 255.0, 0.5),
+        Renk::kyma(1.0, 1.0, 1.0, 0.0),
     ],
     vurgu: Renk::kyma(1.0, 231.0 / 255.0, 130.0 / 255.0, 0.8),
     imleç_gölgesi: Renk::kyma(150.0 / 255.0, 150.0 / 255.0, 150.0 / 255.0, 0.2),
@@ -306,7 +311,12 @@ pub fn yazı_orta() -> f32 {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 

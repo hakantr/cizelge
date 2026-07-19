@@ -1,6 +1,8 @@
 //! Renk modeli, ECharts renk seçenekleriyle uyumlu metin çözümleme ve gpui
 //! boya tiplerine dönüşüm.
 
+use std::sync::Arc;
+
 #[cfg(feature = "gpui")]
 use gpui::{Background, Hsla, Rgba, linear_color_stop, linear_gradient};
 
@@ -14,12 +16,32 @@ pub struct Renk {
 }
 
 impl Renk {
-    pub const SAYDAM: Renk = Renk { kırmızı: 0.0, yeşil: 0.0, mavi: 0.0, alfa: 0.0 };
-    pub const BEYAZ: Renk = Renk { kırmızı: 1.0, yeşil: 1.0, mavi: 1.0, alfa: 1.0 };
-    pub const SİYAH: Renk = Renk { kırmızı: 0.0, yeşil: 0.0, mavi: 0.0, alfa: 1.0 };
+    pub const SAYDAM: Renk = Renk {
+        kırmızı: 0.0,
+        yeşil: 0.0,
+        mavi: 0.0,
+        alfa: 0.0,
+    };
+    pub const BEYAZ: Renk = Renk {
+        kırmızı: 1.0,
+        yeşil: 1.0,
+        mavi: 1.0,
+        alfa: 1.0,
+    };
+    pub const SİYAH: Renk = Renk {
+        kırmızı: 0.0,
+        yeşil: 0.0,
+        mavi: 0.0,
+        alfa: 1.0,
+    };
 
     pub const fn kyma(kırmızı: f32, yeşil: f32, mavi: f32, alfa: f32) -> Self {
-        Renk { kırmızı, yeşil, mavi, alfa }
+        Renk {
+            kırmızı,
+            yeşil,
+            mavi,
+            alfa,
+        }
     }
 
     /// `0xRRGGBB` onaltılık değerinden.
@@ -113,9 +135,51 @@ impl Renk {
         }
     }
 
+    /// Rengin HSL açıklığını (`colorLightness`) değiştirir. Ton, doygunluk
+    /// ve alfa korunur; açıklık ECharts/zrender gibi `0..=1` aralığına
+    /// sıkıştırılır.
+    pub fn açıklık_ile(self, açıklık: f32) -> Renk {
+        let en_büyük = self.kırmızı.max(self.yeşil).max(self.mavi);
+        let en_küçük = self.kırmızı.min(self.yeşil).min(self.mavi);
+        let fark = en_büyük - en_küçük;
+        let eski_açıklık = (en_büyük + en_küçük) / 2.0;
+        let doygunluk = if fark <= f32::EPSILON {
+            0.0
+        } else {
+            fark / (1.0 - (2.0 * eski_açıklık - 1.0).abs()).max(f32::EPSILON)
+        };
+        let ton = if fark <= f32::EPSILON {
+            0.0
+        } else if (en_büyük - self.kırmızı).abs() <= f32::EPSILON {
+            ((self.yeşil - self.mavi) / fark).rem_euclid(6.0)
+        } else if (en_büyük - self.yeşil).abs() <= f32::EPSILON {
+            (self.mavi - self.kırmızı) / fark + 2.0
+        } else {
+            (self.kırmızı - self.yeşil) / fark + 4.0
+        };
+        let açıklık = açıklık.clamp(0.0, 1.0);
+        let kroma = (1.0 - (2.0 * açıklık - 1.0).abs()) * doygunluk;
+        let x = kroma * (1.0 - (ton.rem_euclid(2.0) - 1.0).abs());
+        let (kırmızı, yeşil, mavi) = match ton {
+            t if t < 1.0 => (kroma, x, 0.0),
+            t if t < 2.0 => (x, kroma, 0.0),
+            t if t < 3.0 => (0.0, kroma, x),
+            t if t < 4.0 => (0.0, x, kroma),
+            t if t < 5.0 => (x, 0.0, kroma),
+            _ => (kroma, 0.0, x),
+        };
+        let eşik = açıklık - kroma / 2.0;
+        Renk::kyma(kırmızı + eşik, yeşil + eşik, mavi + eşik, self.alfa)
+    }
+
     #[cfg(feature = "gpui")]
     pub fn gpui_rgba(self) -> Rgba {
-        Rgba { r: self.kırmızı, g: self.yeşil, b: self.mavi, a: self.alfa }
+        Rgba {
+            r: self.kırmızı,
+            g: self.yeşil,
+            b: self.mavi,
+            a: self.alfa,
+        }
     }
 
     #[cfg(feature = "gpui")]
@@ -157,9 +221,91 @@ pub struct RenkDurağı {
     pub renk: Renk,
 }
 
+/// Canvas `CanvasPattern.repeat` seçenekleri.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum DesenTekrarı {
+    #[default]
+    Tekrar,
+    Yatay,
+    Dikey,
+    Tek,
+}
+
+/// Renderer'lardan bağımsız, önden çarpılmış RGBA8 görüntü deseni.
+///
+/// Piksel verisi kurucuda doğrulanır ve premultiplied biçime çevrilir. Bu
+/// sayede raster yüzey aynı baytları doğrudan görüntü gölgelendiricisine
+/// verebilir; SVG yüzeyi de kayıpsız olarak gömebilir.
+#[derive(Clone, PartialEq, Debug)]
+pub struct GörüntüDeseni {
+    pub genişlik: u32,
+    pub yükseklik: u32,
+    pub pikseller: Arc<[u8]>,
+    pub tekrar: DesenTekrarı,
+    pub opaklık: f32,
+}
+
+impl GörüntüDeseni {
+    /// Düz (premultiplied olmayan) RGBA8 baytlarından desen kurar. Boyutla
+    /// uyuşmayan veri `None` döndürür; çalışma zamanı panik üretmez.
+    pub fn rgba(
+        genişlik: u32,
+        yükseklik: u32,
+        mut pikseller: Vec<u8>,
+        tekrar: DesenTekrarı,
+    ) -> Option<Self> {
+        let beklenen = usize::try_from(genişlik)
+            .ok()?
+            .checked_mul(usize::try_from(yükseklik).ok()?)?
+            .checked_mul(4)?;
+        if genişlik == 0 || yükseklik == 0 || pikseller.len() != beklenen {
+            return None;
+        }
+        for piksel in pikseller.chunks_exact_mut(4) {
+            if let [kırmızı, yeşil, mavi, alfa] = piksel {
+                let alfa_değeri = u16::from(*alfa);
+                for kanal in [kırmızı, yeşil, mavi] {
+                    *kanal = ((u16::from(*kanal) * alfa_değeri + 127) / 255) as u8;
+                }
+            }
+        }
+        Some(Self {
+            genişlik,
+            yükseklik,
+            pikseller: pikseller.into(),
+            tekrar,
+            opaklık: 1.0,
+        })
+    }
+
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        self.opaklık = opaklık.clamp(0.0, 1.0);
+        self
+    }
+
+    fn temsilî(&self) -> Renk {
+        let Some([kırmızı, yeşil, mavi, alfa]) = self.pikseller.get(0..4) else {
+            return Renk::SAYDAM;
+        };
+        let alfa = f32::from(*alfa) / 255.0;
+        if alfa <= f32::EPSILON {
+            return Renk::SAYDAM;
+        }
+        Renk::kyma(
+            (f32::from(*kırmızı) / 255.0 / alfa).clamp(0.0, 1.0),
+            (f32::from(*yeşil) / 255.0 / alfa).clamp(0.0, 1.0),
+            (f32::from(*mavi) / 255.0 / alfa).clamp(0.0, 1.0),
+            alfa * self.opaklık,
+        )
+    }
+}
+
 impl RenkDurağı {
     pub fn yeni(konum: f32, renk: impl Into<Renk>) -> Self {
-        RenkDurağı { konum, renk: renk.into() }
+        RenkDurağı {
+            konum,
+            renk: renk.into(),
+        }
     }
 }
 
@@ -169,6 +315,8 @@ impl RenkDurağı {
 #[derive(Clone, PartialEq, Debug)]
 pub enum Dolgu {
     Düz(Renk),
+    /// Canvas `createPattern(image, repeat)` karşılığı.
+    Desen(GörüntüDeseni),
     /// Doğrusal gradyan. `(x, y)` → `(x2, y2)` uçları, tıpkı
     /// `echarts.graphic.LinearGradient` gibi öğenin birim sınır kutusundadır.
     DoğrusalGradyan {
@@ -192,11 +340,22 @@ pub enum Dolgu {
 
 impl Dolgu {
     pub fn doğrusal(x: f32, y: f32, x2: f32, y2: f32, duraklar: Vec<RenkDurağı>) -> Self {
-        Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar }
+        Dolgu::DoğrusalGradyan {
+            x,
+            y,
+            x2,
+            y2,
+            duraklar,
+        }
     }
 
     pub fn radyal(x: f32, y: f32, yarıçap: f32, duraklar: Vec<RenkDurağı>) -> Self {
-        Dolgu::RadyalGradyan { x, y, yarıçap, duraklar }
+        Dolgu::RadyalGradyan {
+            x,
+            y,
+            yarıçap,
+            duraklar,
+        }
     }
 
     /// Temsilî düz renk (gradyanlarda ilk durak) — gösterge imleri ve ipucu
@@ -204,8 +363,8 @@ impl Dolgu {
     pub fn temsilî(&self) -> Renk {
         match self {
             Dolgu::Düz(r) => *r,
-            Dolgu::DoğrusalGradyan { duraklar, .. }
-            | Dolgu::RadyalGradyan { duraklar, .. } => {
+            Dolgu::Desen(desen) => desen.temsilî(),
+            Dolgu::DoğrusalGradyan { duraklar, .. } | Dolgu::RadyalGradyan { duraklar, .. } => {
                 duraklar.first().map(|d| d.renk).unwrap_or(Renk::SİYAH)
             }
         }
@@ -214,21 +373,36 @@ impl Dolgu {
     fn durakları_soldur(duraklar: &[RenkDurağı], çarpan: f32) -> Vec<RenkDurağı> {
         duraklar
             .iter()
-            .map(|d| RenkDurağı { konum: d.konum, renk: d.renk.opaklık(çarpan) })
+            .map(|d| RenkDurağı {
+                konum: d.konum,
+                renk: d.renk.opaklık(çarpan),
+            })
             .collect()
     }
 
     pub fn opaklık(&self, çarpan: f32) -> Dolgu {
         match self {
             Dolgu::Düz(r) => Dolgu::Düz(r.opaklık(çarpan)),
-            Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar } => Dolgu::DoğrusalGradyan {
+            Dolgu::Desen(desen) => Dolgu::Desen(desen.clone().opaklık(desen.opaklık * çarpan)),
+            Dolgu::DoğrusalGradyan {
+                x,
+                y,
+                x2,
+                y2,
+                duraklar,
+            } => Dolgu::DoğrusalGradyan {
                 x: *x,
                 y: *y,
                 x2: *x2,
                 y2: *y2,
                 duraklar: Self::durakları_soldur(duraklar, çarpan),
             },
-            Dolgu::RadyalGradyan { x, y, yarıçap, duraklar } => Dolgu::RadyalGradyan {
+            Dolgu::RadyalGradyan {
+                x,
+                y,
+                yarıçap,
+                duraklar,
+            } => Dolgu::RadyalGradyan {
                 x: *x,
                 y: *y,
                 yarıçap: *yarıçap,
@@ -248,6 +422,10 @@ impl Dolgu {
     pub fn gpui_arkaplan(&self) -> Background {
         match self {
             Dolgu::Düz(r) => r.gpui_hsla().into(),
+            // gpui'nin `Background` tipi görüntü shader'ı taşımıyor. Yol
+            // yüzeyi deseni ayrıca boyar; yalnız doğrudan Background isteyen
+            // çağrılar için temsilî renk kullanılır.
+            Dolgu::Desen(desen) => desen.temsilî().gpui_hsla().into(),
             Dolgu::RadyalGradyan { duraklar, .. } => {
                 let orta = duraklar
                     .get(duraklar.len() / 2)
@@ -255,7 +433,13 @@ impl Dolgu {
                     .unwrap_or(Renk::SAYDAM);
                 orta.gpui_hsla().into()
             }
-            Dolgu::DoğrusalGradyan { x, y, x2, y2, duraklar } => {
+            Dolgu::DoğrusalGradyan {
+                x,
+                y,
+                x2,
+                y2,
+                duraklar,
+            } => {
                 let (Some(ilk), Some(son)) = (duraklar.first(), duraklar.last()) else {
                     return Renk::SAYDAM.gpui_hsla().into();
                 };
@@ -295,7 +479,12 @@ impl From<&str> for Dolgu {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
@@ -311,5 +500,24 @@ mod testler {
             Renk::çöz("rgba(255, 0, 0, 0.5)"),
             Some(Renk::kyma(1.0, 0.0, 0.0, 0.5))
         );
+    }
+
+    #[test]
+    fn görüntü_deseni_rgba_boyutunu_doğrular_ve_önden_çarpar() {
+        assert!(GörüntüDeseni::rgba(1, 1, vec![1, 2, 3], DesenTekrarı::Tekrar).is_none());
+        let desen =
+            GörüntüDeseni::rgba(1, 1, vec![200, 100, 50, 128], DesenTekrarı::Tekrar).unwrap();
+        assert_eq!(&*desen.pikseller, &[100, 50, 25, 128]);
+    }
+
+    #[test]
+    fn desen_opaklığı_birikimli_çarpılır() {
+        let desen = GörüntüDeseni::rgba(1, 1, vec![255, 255, 255, 255], DesenTekrarı::Tekrar)
+            .unwrap()
+            .opaklık(0.8);
+        let Dolgu::Desen(sönük) = Dolgu::Desen(desen).opaklık(0.5) else {
+            panic!("desen dolgusu türünü korumalı");
+        };
+        assert!((sönük.opaklık - 0.4).abs() < 1e-6);
     }
 }

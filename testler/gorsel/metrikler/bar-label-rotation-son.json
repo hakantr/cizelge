@@ -1,0 +1,19 @@
+{
+  "id": "bar-label-rotation",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2632,
+  "değişen_piksel_oranı": 0.009748148148148148,
+  "ssim": 0.9967057219094229,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-label-rotation.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-label-rotation.png",
+    "fark": "testler/gorsel/fark/default/bar-label-rotation.png"
+  }
+}

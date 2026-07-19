@@ -1,4 +1,9 @@
-#![allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#![allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 
 //! Altın (golden) görsel regresyon testleri.
 //!
@@ -25,7 +30,10 @@ fn altın_karşılaştır(ad: &str, içerik: &str) {
         return;
     }
     let beklenen = fs::read_to_string(&yol).unwrap_or_else(|_| {
-        panic!("altın dosyası yok: {} — ALTIN_GUNCELLE=1 ile üretin", yol.display())
+        panic!(
+            "altın dosyası yok: {} — ALTIN_GUNCELLE=1 ile üretin",
+            yol.display()
+        )
     });
     if beklenen != içerik {
         // Farkı okunur biçimde göster.
@@ -53,7 +61,10 @@ fn boya_ve_dök(seçenekler: GrafikSeçenekleri) -> String {
 }
 
 fn fareli_girdi(fare: (f32, f32)) -> BoyamaGirdisi {
-    BoyamaGirdisi { fare: Some(fare), ..Default::default() }
+    BoyamaGirdisi {
+        fare: Some(fare),
+        ..Default::default()
+    }
 }
 
 #[test]
@@ -61,7 +72,11 @@ fn cizgi_serisi() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin("Çizgi"))
         .gösterge(Gösterge::yeni().üst(28.0))
-        .x_ekseni(Eksen::kategori().veri(["A", "B", "C", "D"]).kenar_boşluğu(false))
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(["A", "B", "C", "D"])
+                .kenar_boşluğu(false),
+        )
         .y_ekseni(Eksen::değer())
         .animasyon(false)
         .seri(
@@ -86,8 +101,18 @@ fn sutun_yigin() {
         .x_ekseni(Eksen::kategori().veri(["Ç1", "Ç2", "Ç3"]))
         .y_ekseni(Eksen::değer())
         .animasyon(false)
-        .seri(SütunSerisi::yeni().ad("A").yığın("t").veri([10.0, 20.0, 30.0]))
-        .seri(SütunSerisi::yeni().ad("B").yığın("t").veri([5.0, 10.0, -15.0]))
+        .seri(
+            SütunSerisi::yeni()
+                .ad("A")
+                .yığın("t")
+                .veri([10.0, 20.0, 30.0]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("B")
+                .yığın("t")
+                .veri([5.0, 10.0, -15.0]),
+        )
         .seri(
             SütunSerisi::yeni()
                 .ad("C")
@@ -99,14 +124,13 @@ fn sutun_yigin() {
 
 #[test]
 fn pasta_halka() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(
-            PastaSerisi::yeni()
-                .ad("Pay")
-                .halka("40%", "70%")
-                .veri([("Bir", 60.0), ("İki", 30.0), ("Üç", 10.0)]),
-        );
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+        PastaSerisi::yeni().ad("Pay").halka("40%", "70%").veri([
+            ("Bir", 60.0),
+            ("İki", 30.0),
+            ("Üç", 10.0),
+        ]),
+    );
     altın_karşılaştır("pasta_halka", &boya_ve_dök(seçenekler));
 }
 
@@ -154,7 +178,11 @@ fn gradyan_ve_log() {
 fn ipucu_ve_imlec() {
     // Fare ızgara içinde: eksen imleci + ipucu penceresi de kayda girer.
     let seçenekler = GrafikSeçenekleri::yeni()
-        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen).imleç(İmleçTürü::Gölge))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Gölge),
+        )
         .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
         .y_ekseni(Eksen::değer())
         .animasyon(false)
@@ -281,14 +309,12 @@ fn huni() {
 
 #[test]
 fn gösterge_saati() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(
-            GöstergeSaatiSerisi::yeni()
-                .ad("Basınç")
-                .değer(72.5, "Yük")
-                .değer_biçimleyici("{value} %"),
-        );
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GöstergeSaatiSerisi::yeni()
+            .ad("Basınç")
+            .değer(72.5, "Yük")
+            .değer_biçimleyici("{value} %"),
+    );
     altın_karşılaştır("gosterge_saati", &boya_ve_dök(seçenekler));
 }
 
@@ -304,17 +330,26 @@ fn radar() {
             ("Yönetim", 100.0),
         ]))
         .animasyon(false)
-        .seri(RadarSerisi::yeni().ad("Bütçe").alan_stili(AlanStili::yeni().opaklık(0.3)).veri([
-            ("Plan", vec![80.0, 60.0, 90.0, 40.0, 70.0]),
-            ("Gerçekleşen", vec![70.0, 75.0, 60.0, 55.0, 50.0]),
-        ]));
+        .seri(
+            RadarSerisi::yeni()
+                .ad("Bütçe")
+                .alan_stili(AlanStili::yeni().opaklık(0.3))
+                .veri([
+                    ("Plan", vec![80.0, 60.0, 90.0, 40.0, 70.0]),
+                    ("Gerçekleşen", vec![70.0, 75.0, 60.0, 55.0, 50.0]),
+                ]),
+        );
     altın_karşılaştır("radar", &boya_ve_dök(seçenekler));
 }
 
 #[test]
 fn çapraz_imleç() {
     let seçenekler = GrafikSeçenekleri::yeni()
-        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe).imleç(İmleçTürü::Çapraz))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .imleç(İmleçTürü::Çapraz),
+        )
         .x_ekseni(Eksen::değer().ölçekli(true))
         .y_ekseni(Eksen::değer().ölçekli(true))
         .animasyon(false)
@@ -355,7 +390,9 @@ fn resimli_sütun_ve_özel_seri() {
 
 #[test]
 fn örnekleme_altını() {
-    let veri: Vec<f64> = (0..5000).map(|i| ((i as f64) * 0.05).sin() * 50.0 + 60.0).collect();
+    let veri: Vec<f64> = (0..5000)
+        .map(|i| ((i as f64) * 0.05).sin() * 50.0 + 60.0)
+        .collect();
     let seçenekler = GrafikSeçenekleri::yeni()
         .x_ekseni(Eksen::kategori())
         .y_ekseni(Eksen::değer())
@@ -371,7 +408,10 @@ fn örnekleme_altını() {
     // genişliğine (≤ ~800 komut) inmiş olmalı.
     let döküm = boya_ve_dök(seçenekler);
     let satır_sayısı = döküm.lines().count();
-    assert!(satır_sayısı < 1000, "örnekleme etkisiz: {satır_sayısı} satır");
+    assert!(
+        satır_sayısı < 1000,
+        "örnekleme etkisiz: {satır_sayısı} satır"
+    );
 }
 
 #[test]
@@ -382,12 +422,24 @@ fn çoklu_ızgara_ve_ikincil_eksen() {
         .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst(30.0).alt("55%"))
         // Alt ızgara: sütun.
         .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst("60%").alt(40.0))
-        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(0))
-        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(1))
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(["A", "B", "C", "D"])
+                .ızgara_sırası(0),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(["A", "B", "C", "D"])
+                .ızgara_sırası(1),
+        )
         .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0))
         .y_ekseni_ekle(Eksen::değer().ölçekli(true).ızgara_sırası(0))
         .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
-        .seri(ÇizgiSerisi::yeni().ad("Sıcaklık").veri([10.0, 14.0, 12.0, 18.0]))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Sıcaklık")
+                .veri([10.0, 14.0, 12.0, 18.0]),
+        )
         .seri(
             ÇizgiSerisi::yeni()
                 .ad("Nem")
@@ -412,9 +464,11 @@ fn yakınlaştırma_penceresi() {
         .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(25.0, 75.0))
         .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().aralık(25.0, 75.0))
         .animasyon(false)
-        .seri(SütunSerisi::yeni().ad("S").veri([
-            1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0,
-        ]));
+        .seri(
+            SütunSerisi::yeni()
+                .ad("S")
+                .veri([1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0, 15.0]),
+        );
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     assert_eq!(çıktı.iç_yakınlaştırmalar.len(), 1);
@@ -479,7 +533,7 @@ fn etkileşim_araçları() {
         .collect();
     let seçenekler = GrafikSeçenekleri::yeni()
         .gösterge(Gösterge::yeni().kaydırılabilir(true))
-        .araç_kutusu(AraçKutusu::yeni())
+        .araç_kutusu(AraçKutusu::yeni().geri_yükle(true))
         .fırça(Fırça::yeni())
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
         .y_ekseni(Eksen::değer())
@@ -494,30 +548,33 @@ fn etkileşim_araçları() {
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
     assert_eq!(çıktı.gösterge_okları.len(), 2);
     assert_eq!(çıktı.araç_düğmeleri.len(), 1);
-    assert!(çıktı.gösterge_kutuları.len() < 12, "sayfalama uygulanmalıydı");
+    assert!(
+        çıktı.gösterge_kutuları.len() < 12,
+        "sayfalama uygulanmalıydı"
+    );
     altın_karşılaştır("etkilesim_araclari", &yüzey.döküm());
 }
 
 #[test]
 fn kutupsal_seriler() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .kutupsal(
-            KutupsalKoordinat::yeni()
-                .açısal_eksen(Eksen::kategori().veri(["K", "KD", "D", "GD", "G", "GB", "B", "KB"])),
-        )
-        .animasyon(false)
-        .seri(
-            SütunSerisi::yeni()
-                .ad("Rüzgar")
-                .kutupsal(true)
-                .veri([4.0, 7.0, 3.0, 6.0, 8.0, 5.0, 2.0, 6.5]),
-        )
-        .seri(
-            ÇizgiSerisi::yeni()
-                .ad("Ortalama")
-                .kutupsal(true)
-                .veri([3.0, 5.0, 4.0, 5.5, 6.0, 4.5, 3.0, 5.0]),
-        );
+    let seçenekler =
+        GrafikSeçenekleri::yeni()
+            .kutupsal(KutupsalKoordinat::yeni().açısal_eksen(
+                Eksen::kategori().veri(["K", "KD", "D", "GD", "G", "GB", "B", "KB"]),
+            ))
+            .animasyon(false)
+            .seri(
+                SütunSerisi::yeni()
+                    .ad("Rüzgar")
+                    .kutupsal(true)
+                    .veri([4.0, 7.0, 3.0, 6.0, 8.0, 5.0, 2.0, 6.5]),
+            )
+            .seri(
+                ÇizgiSerisi::yeni()
+                    .ad("Ortalama")
+                    .kutupsal(true)
+                    .veri([3.0, 5.0, 4.0, 5.5, 6.0, 4.5, 3.0, 5.0]),
+            );
     altın_karşılaştır("kutupsal", &boya_ve_dök(seçenekler));
 }
 
@@ -549,9 +606,8 @@ fn ağaç_haritası() {
 
 #[test]
 fn güneş_patlaması() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(GüneşPatlamasıSerisi::yeni().ad("Kaynak").kökler([
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GüneşPatlamasıSerisi::yeni().ad("Kaynak").kökler([
             AğaçDüğümü::dal(
                 "A",
                 vec![AğaçDüğümü::yaprak("A1", 4.0), AğaçDüğümü::yaprak("A2", 6.0)],
@@ -563,7 +619,8 @@ fn güneş_patlaması() {
                     AğaçDüğümü::dal("B2", vec![AğaçDüğümü::yaprak("B2a", 2.0)]),
                 ],
             ),
-        ]));
+        ]),
+    );
     altın_karşılaştır("gunes_patlamasi", &boya_ve_dök(seçenekler));
 }
 
@@ -592,7 +649,10 @@ fn svg_dışa_aktarım() {
     let svg = svg_dışa_aktar(&seçenekler, 800.0, 600.0);
     assert!(svg.starts_with("<svg"));
     assert!(svg.ends_with("</svg>"));
-    assert!(svg.contains("<linearGradient"), "çok duraklı gradyan defs'e yazılmalı");
+    assert!(
+        svg.contains("<linearGradient"),
+        "çok duraklı gradyan defs'e yazılmalı"
+    );
     assert!(svg.contains("<path"));
     assert!(svg.contains("<text"));
     // Altın olarak da sakla (belirlenimci üretim).
@@ -601,90 +661,86 @@ fn svg_dışa_aktarım() {
 
 #[test]
 fn ağaç_serisi() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(AğaçSerisi::yeni().ad("Kuruluş").kökler([AğaçDüğümü::dal(
-            "Genel Müdür",
-            vec![
-                AğaçDüğümü::dal(
-                    "Mühendislik",
-                    vec![
-                        AğaçDüğümü::yaprak("Arayüz", 12.0),
-                        AğaçDüğümü::yaprak("Altyapı", 9.0),
-                    ],
-                ),
-                AğaçDüğümü::dal(
-                    "Satış",
-                    vec![AğaçDüğümü::yaprak("Yurt İçi", 7.0)],
-                ),
-                AğaçDüğümü::yaprak("İK", 4.0),
-            ],
-        )]));
+    let seçenekler =
+        GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .seri(AğaçSerisi::yeni().ad("Kuruluş").kökler([AğaçDüğümü::dal(
+                "Genel Müdür",
+                vec![
+                    AğaçDüğümü::dal(
+                        "Mühendislik",
+                        vec![
+                            AğaçDüğümü::yaprak("Arayüz", 12.0),
+                            AğaçDüğümü::yaprak("Altyapı", 9.0),
+                        ],
+                    ),
+                    AğaçDüğümü::dal("Satış", vec![AğaçDüğümü::yaprak("Yurt İçi", 7.0)]),
+                    AğaçDüğümü::yaprak("İK", 4.0),
+                ],
+            )]));
     altın_karşılaştır("agac_serisi", &boya_ve_dök(seçenekler));
 }
 
 #[test]
 fn sankey() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(SankeySerisi::yeni().ad("Enerji").bağlar([
-            ("Kömür", "Elektrik", 30.0),
-            ("Gaz", "Elektrik", 20.0),
-            ("Güneş", "Elektrik", 12.0),
-            ("Elektrik", "Konut", 35.0),
-            ("Elektrik", "Sanayi", 27.0),
-            ("Gaz", "Konut", 8.0),
-        ]));
+    let seçenekler =
+        GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .seri(SankeySerisi::yeni().ad("Enerji").bağlar([
+                ("Kömür", "Elektrik", 30.0),
+                ("Gaz", "Elektrik", 20.0),
+                ("Güneş", "Elektrik", 12.0),
+                ("Elektrik", "Konut", 35.0),
+                ("Elektrik", "Sanayi", 27.0),
+                ("Gaz", "Konut", 8.0),
+            ]));
     altın_karşılaştır("sankey", &boya_ve_dök(seçenekler));
 }
 
 #[test]
 fn grafo() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(
-            GrafoSerisi::yeni()
-                .ad("Ağ")
-                .düğümler([
-                    GrafoDüğümü::yeni("A", 24.0).kategori(0),
-                    GrafoDüğümü::yeni("B", 16.0).kategori(1),
-                    GrafoDüğümü::yeni("C", 16.0).kategori(1),
-                    GrafoDüğümü::yeni("D", 12.0).kategori(2),
-                    GrafoDüğümü::yeni("E", 12.0).kategori(2),
-                ])
-                .bağlar([("A", "B"), ("A", "C"), ("B", "D"), ("C", "E"), ("D", "E")]),
-        );
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GrafoSerisi::yeni()
+            .ad("Ağ")
+            .düğümler([
+                GrafoDüğümü::yeni("A", 24.0).kategori(0),
+                GrafoDüğümü::yeni("B", 16.0).kategori(1),
+                GrafoDüğümü::yeni("C", 16.0).kategori(1),
+                GrafoDüğümü::yeni("D", 12.0).kategori(2),
+                GrafoDüğümü::yeni("E", 12.0).kategori(2),
+            ])
+            .bağlar([("A", "B"), ("A", "C"), ("B", "D"), ("C", "E"), ("D", "E")]),
+    );
     altın_karşılaştır("grafo", &boya_ve_dök(seçenekler));
 }
 
 #[test]
 fn kiriş() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(KirişSerisi::yeni().ad("Göç").bağlar([
-            ("Kuzey", "Güney", 12.0),
-            ("Güney", "Doğu", 8.0),
-            ("Doğu", "Kuzey", 5.0),
-            ("Kuzey", "Batı", 6.0),
-        ]));
+    let seçenekler =
+        GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .seri(KirişSerisi::yeni().ad("Göç").bağlar([
+                ("Kuzey", "Güney", 12.0),
+                ("Güney", "Doğu", 8.0),
+                ("Doğu", "Kuzey", 5.0),
+                ("Kuzey", "Batı", 6.0),
+            ]));
     altın_karşılaştır("kiris", &boya_ve_dök(seçenekler));
 }
 
 #[test]
 fn paralel_koordinat() {
-    let seçenekler = GrafikSeçenekleri::yeni()
-        .animasyon(false)
-        .seri(
-            ParalelSerisi::yeni()
-                .ad("Ölçümler")
-                .boyutlar(["Fiyat", "Ağırlık", "Puan", "Stok"])
-                .veri([
-                    vec![12.0, 3.4, 8.2, 40.0],
-                    vec![9.5, 2.1, 6.4, 65.0],
-                    vec![15.2, 4.8, 9.1, 20.0],
-                    vec![7.8, 1.9, 5.5, 80.0],
-                ]),
-        );
+    let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+        ParalelSerisi::yeni()
+            .ad("Ölçümler")
+            .boyutlar(["Fiyat", "Ağırlık", "Puan", "Stok"])
+            .veri([
+                vec![12.0, 3.4, 8.2, 40.0],
+                vec![9.5, 2.1, 6.4, 65.0],
+                vec![15.2, 4.8, 9.1, 20.0],
+                vec![7.8, 1.9, 5.5, 80.0],
+            ]),
+    );
     altın_karşılaştır("paralel", &boya_ve_dök(seçenekler));
 }
 
@@ -734,7 +790,12 @@ fn isabet_bölgeleri_üretilir() {
         .y_ekseni(Eksen::değer())
         .animasyon(false)
         .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]))
-        .seri(PastaSerisi::yeni().ad("P").yarıçap("30%").veri([("X", 1.0), ("Y", 2.0)]));
+        .seri(
+            PastaSerisi::yeni()
+                .ad("P")
+                .yarıçap("30%")
+                .veri([("X", 1.0), ("Y", 2.0)]),
+        );
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     // 2 sütun + 2 dilim = 4 tıklanabilir bölge.
@@ -770,7 +831,11 @@ fn koyu_tema() {
         .x_ekseni(Eksen::kategori().veri(["Pzt", "Sal", "Çar"]))
         .y_ekseni(Eksen::değer())
         .animasyon(false)
-        .seri(ÇizgiSerisi::yeni().ad("Ziyaret").veri([120.0, 200.0, 150.0]));
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Ziyaret")
+                .veri([120.0, 200.0, 150.0]),
+        );
     altın_karşılaştır("koyu_tema", &boya_ve_dök(seçenekler));
 }
 
@@ -800,7 +865,10 @@ fn zaman_şeridi() {
         .animasyon(false)
         .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]));
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
-    let girdi = BoyamaGirdisi { zaman_şeridi: Some((1, 5, true)), ..Default::default() };
+    let girdi = BoyamaGirdisi {
+        zaman_şeridi: Some((1, 5, true)),
+        ..Default::default()
+    };
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
     // Oynat/durdur + 5 kare noktası tıklanabilir olmalı.
     assert_eq!(çıktı.zaman_düğmeleri.len(), 6);
@@ -819,12 +887,25 @@ fn bağlantılı_imleç() {
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen).bağlantılı(true))
         .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst(30.0).alt("55%"))
         .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(60.0).üst("60%").alt(40.0))
-        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(0))
-        .x_ekseni_ekle(Eksen::kategori().veri(["A", "B", "C", "D"]).ızgara_sırası(1))
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(["A", "B", "C", "D"])
+                .ızgara_sırası(0),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(["A", "B", "C", "D"])
+                .ızgara_sırası(1),
+        )
         .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0))
         .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
         .seri(ÇizgiSerisi::yeni().ad("Üst").veri([10.0, 14.0, 12.0, 18.0]))
-        .seri(SütunSerisi::yeni().ad("Alt").eksenler(1, 1).veri([4.0, 9.0, 6.0, 2.0]));
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Alt")
+                .eksenler(1, 1)
+                .veri([4.0, 9.0, 6.0, 2.0]),
+        );
     let mut yüzey = KayıtYüzeyi::yeni(800.0, 600.0);
     // Fare üst ızgarada, "B" kategorisi üzerinde.
     grafiği_boya(&mut yüzey, &seçenekler, &fareli_girdi((300.0, 120.0)));
@@ -856,7 +937,7 @@ fn ipucu_biçimleyici() {
 fn araç_kutusu_svg_düğmesi() {
     let seçenekler = GrafikSeçenekleri::yeni()
         .animasyon(false)
-        .araç_kutusu(AraçKutusu::yeni().svg_kaydet(true))
+        .araç_kutusu(AraçKutusu::yeni().geri_yükle(true).svg_kaydet(true))
         .x_ekseni(Eksen::kategori().veri(["A", "B"]))
         .y_ekseni(Eksen::değer())
         .seri(SütunSerisi::yeni().ad("S").veri([3.0, 7.0]));
@@ -864,10 +945,12 @@ fn araç_kutusu_svg_düğmesi() {
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
     // Sıfırla + SVG kaydet: iki düğme, ikisi de tıklanabilir kutulu.
     assert_eq!(çıktı.araç_düğmeleri.len(), 2);
-    assert!(çıktı
-        .araç_düğmeleri
-        .iter()
-        .any(|(_, tür)| *tür == cizelge::AraçTürü::SvgKaydet));
+    assert!(
+        çıktı
+            .araç_düğmeleri
+            .iter()
+            .any(|(_, tür)| *tür == cizelge::AraçTürü::SvgKaydet)
+    );
 }
 
 #[test]
@@ -937,10 +1020,7 @@ fn grafo_gezinme_dönüşümü() {
         GrafikSeçenekleri::yeni().animasyon(false).seri(
             GrafoSerisi::yeni()
                 .ad("Ağ")
-                .düğümler([
-                    GrafoDüğümü::yeni("A", 20.0),
-                    GrafoDüğümü::yeni("B", 16.0),
-                ])
+                .düğümler([GrafoDüğümü::yeni("A", 20.0), GrafoDüğümü::yeni("B", 16.0)])
                 .bağlar([("A", "B")]),
         )
     };
@@ -991,7 +1071,12 @@ fn otomatik_örnekleme() {
         .animasyon(false)
         .x_ekseni(Eksen::kategori().veri(kategoriler))
         .y_ekseni(Eksen::değer())
-        .seri(ÇizgiSerisi::yeni().ad("Büyük").sembol_göster(false).veri(veri));
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Büyük")
+                .sembol_göster(false)
+                .veri(veri),
+        );
     let döküm = boya_ve_dök(seçenekler);
     // Çizgi yolu, ızgara genişliğini (800px'ten küçük) aşan nokta içermemeli:
     // tek "çiz" satırındaki nokta sayısı kabaca hedefe inmiş olmalı.
@@ -1017,7 +1102,10 @@ fn png_dışa_aktarım() {
     };
     let baytlar = png_dışa_aktar(&kur(false), 400.0, 300.0, 2.0).unwrap();
     // PNG imzası.
-    assert_eq!(baytlar.get(..8), Some(&[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A][..]));
+    assert_eq!(
+        baytlar.get(..8),
+        Some(&[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A][..])
+    );
     // IHDR boyutları: 2× ölçekle 800×600 fiziksel piksel.
     let genişlik = u32::from_be_bytes([baytlar[16], baytlar[17], baytlar[18], baytlar[19]]);
     let yükseklik = u32::from_be_bytes([baytlar[20], baytlar[21], baytlar[22], baytlar[23]]);
@@ -1041,5 +1129,8 @@ fn piksel_yüzeyi_isabetleri_kayıtla_aynı() {
     let kayıt_çıktısı = grafiği_boya(&mut kayıt, &seçenekler, &BoyamaGirdisi::default());
     let mut piksel = PikselYüzeyi::yeni(800.0, 600.0, 1.0).unwrap();
     let piksel_çıktısı = grafiği_boya(&mut piksel, &seçenekler, &BoyamaGirdisi::default());
-    assert_eq!(kayıt_çıktısı.isabetler.len(), piksel_çıktısı.isabetler.len());
+    assert_eq!(
+        kayıt_çıktısı.isabetler.len(),
+        piksel_çıktısı.isabetler.len()
+    );
 }

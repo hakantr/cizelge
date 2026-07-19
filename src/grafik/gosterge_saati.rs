@@ -39,8 +39,7 @@ pub fn gösterge_saati_çiz(
 
     let değer_oranı = |değer: f64| doğrusal_eşle(değer, kapsam, [0.0, 1.0], true);
     let orandan_açı = |oran: f64| {
-        seri.başlangıç_açısı as f64
-            + (seri.bitiş_açısı as f64 - seri.başlangıç_açısı as f64) * oran
+        seri.başlangıç_açısı as f64 + (seri.bitiş_açısı as f64 - seri.başlangıç_açısı as f64) * oran
     };
 
     // 1) Renk bantlı yay (axisLine).
@@ -116,8 +115,12 @@ pub fn gösterge_saati_çiz(
     }
 
     // 3) Değer, ibre ve ayrıntı yazısı.
-    let Some(öğe) = seri.veri.first() else { return };
-    let Some(değer) = öğe.değer.sayı() else { return };
+    let Some(öğe) = seri.veri.first() else {
+        return;
+    };
+    let Some(değer) = öğe.değer.sayı() else {
+        return;
+    };
     let animasyonlu = kapsam[0] + (değer - kapsam[0]) * ilerleme.clamp(0.0, 1.0) as f64;
     let oran = değer_oranı(animasyonlu);
     let açı = ekran_açısı(orandan_açı(oran));
@@ -163,7 +166,10 @@ pub fn gösterge_saati_çiz(
         if let Some(ad) = &öğe.ad {
             çizici.yazı(
                 ad,
-                (merkez.0, merkez.1 + yarıçap * 0.45 + seri.değer_boyutu * 1.1),
+                (
+                    merkez.0,
+                    merkez.1 + yarıçap * 0.45 + seri.değer_boyutu * 1.1,
+                ),
                 YatayHiza::Orta,
                 DikeyHiza::Orta,
                 tema::YAZI_KÜÇÜK,

@@ -1,0 +1,19 @@
+{
+  "id": "multiple-x-axis",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 754,
+  "değişen_piksel_oranı": 0.0027925925925925926,
+  "ssim": 0.9983761546514669,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/multiple-x-axis.png",
+    "gerçek": "testler/gorsel/gerçek/default/multiple-x-axis.png",
+    "fark": "testler/gorsel/fark/default/multiple-x-axis.png"
+  }
+}

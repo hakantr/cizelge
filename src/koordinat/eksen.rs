@@ -18,14 +18,23 @@ pub struct ÇalışmaEkseni {
     pub bantlı: bool,
     pub konum: EksenKonumu,
     /// Veri yakınlaştırma penceresi: görünür değer aralığı (kategorik
-    /// eksenlerde sıra uzayında). `None` = tam kapsam.
+    /// eksenlerde sıra uzayında). Sayısal eksende bu alan, pencere dışı
+    /// noktaların kenara sıkıştırılmadan ızgara dışında hesaplanmasını ve
+    /// seri kırpmasının devreye girmesini sağlar. `None` = tam kapsam.
     pub pencere: Option<(f64, f64)>,
 }
 
 impl ÇalışmaEkseni {
     pub fn yeni(seçenek: Eksen, ölçek: Ölçek, piksel: [f32; 2], konum: EksenKonumu) -> Self {
         let bantlı = seçenek.bantlı_mı() && ölçek.kategorik_mi();
-        ÇalışmaEkseni { seçenek, ölçek, piksel, bantlı, konum, pencere: None }
+        ÇalışmaEkseni {
+            seçenek,
+            ölçek,
+            piksel,
+            bantlı,
+            konum,
+            pencere: None,
+        }
     }
 
     /// Yakınlaştırma penceresini oranlarla (0..=1) uygular; yalnız kategorik
@@ -36,10 +45,21 @@ impl ÇalışmaEkseni {
         if açıklık <= 0.0 {
             return;
         }
-        let p0 = kapsam[0] + açıklık * başlangıç.clamp(0.0, 1.0) as f64;
-        let p1 = kapsam[0] + açıklık * bitiş.clamp(0.0, 1.0) as f64;
-        if p1 > p0 {
-            self.pencere = Some((p0, p1));
+        let mut p0 = kapsam[0] + açıklık * başlangıç.clamp(0.0, 1.0) as f64;
+        let mut p1 = kapsam[0] + açıklık * bitiş.clamp(0.0, 1.0) as f64;
+        // Ordinal ölçek pencere uçlarını en yakın tam kategori indisine
+        // oturtur; yüzdelik uçların kesir izi bant aralığına taşınmaz.
+        if self.bantlı {
+            p0 = p0.round();
+            p1 = p1.round();
+        }
+        self.değer_penceresi_uygula(p0, p1);
+    }
+
+    /// Çözülmüş veri değerleriyle yakınlaştırma penceresi uygular.
+    pub fn değer_penceresi_uygula(&mut self, başlangıç: f64, bitiş: f64) {
+        if başlangıç.is_finite() && bitiş.is_finite() && bitiş > başlangıç {
+            self.pencere = Some((başlangıç, bitiş));
         }
     }
 
@@ -64,7 +84,12 @@ impl ÇalışmaEkseni {
             (None, false) => self.ölçek.oranla(değer),
         };
         // Pencere dışı değerler ızgara dışına taşar; çizim kırpılır.
-        doğrusal_eşle(oran, [0.0, 1.0], self.etkin_piksel(), self.pencere.is_none()) as f32
+        doğrusal_eşle(
+            oran,
+            [0.0, 1.0],
+            self.etkin_piksel(),
+            self.pencere.is_none(),
+        ) as f32
     }
 
     /// Pikseli veri değerine eşler (`Axis#coordToData`).

@@ -3,7 +3,7 @@
 //! yığılmış yumuşak bantlar olarak akar; altta tek değer ekseni çizilir.
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::{keskin, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
+use crate::cizim::{DikeyHiza, YatayHiza, Yol, keskin, ÇizimYüzeyi};
 use crate::grafik::cizgi::yumuşak_parça_ekle;
 use crate::koordinat::Dikdörtgen;
 use crate::model::seri::TemaNehriSerisi;

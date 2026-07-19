@@ -47,9 +47,10 @@ pub fn kiriş_çiz(
         }
         for ad in [k, h] {
             if let Some(&i) = sıra_bul.get(ad.as_str())
-                && let Some(kayıt) = toplamlar.get_mut(i) {
-                    *kayıt += değer;
-                }
+                && let Some(kayıt) = toplamlar.get_mut(i)
+            {
+                *kayıt += değer;
+            }
         }
     }
     let genel_toplam: f64 = toplamlar.iter().sum();
@@ -67,8 +68,8 @@ pub fn kiriş_çiz(
 
     // Yay dilimleri: aralarda boşluk payı.
     let boşluk = 0.02f64 * std::f64::consts::TAU;
-    let kullanılabilir = std::f64::consts::TAU * ilerleme.clamp(0.0, 1.0) as f64
-        - boşluk * adlar.len() as f64;
+    let kullanılabilir =
+        std::f64::consts::TAU * ilerleme.clamp(0.0, 1.0) as f64 - boşluk * adlar.len() as f64;
     if kullanılabilir <= 0.0 {
         return;
     }
@@ -88,8 +89,7 @@ pub fn kiriş_çiz(
         if !değer.is_finite() || *değer <= 0.0 {
             continue;
         }
-        let (Some(&ki), Some(&hi)) = (sıra_bul.get(k.as_str()), sıra_bul.get(h.as_str()))
-        else {
+        let (Some(&ki), Some(&hi)) = (sıra_bul.get(k.as_str()), sıra_bul.get(h.as_str())) else {
             continue;
         };
         let pay = (kullanılabilir * (değer / genel_toplam)) as f32;
@@ -102,9 +102,10 @@ pub fn kiriş_çiz(
             *kayıt = k1;
         }
         if ki != hi
-            && let Some(kayıt) = istif.get_mut(hi) {
-                *kayıt = h1;
-            }
+            && let Some(kayıt) = istif.get_mut(hi)
+        {
+            *kayıt = h1;
+        }
 
         let uç = |açı: f32| (merkez.0 + iç * açı.cos(), merkez.1 + iç * açı.sin());
         let renk = palet(ki).opaklık(0.4 * ilerleme.clamp(0.0, 1.0));
@@ -120,7 +121,9 @@ pub fn kiriş_çiz(
 
     // 2) Yay dilimleri + etiketler.
     for (i, ad) in adlar.iter().enumerate() {
-        let Some(&(a0, a1)) = açılar.get(i) else { continue };
+        let Some(&(a0, a1)) = açılar.get(i) else {
+            continue;
+        };
         let renk = palet(i);
         çizici.dilim(merkez, iç, dış, a0, a1, &Dolgu::Düz(renk), None);
         let orta = (a0 + a1) / 2.0;

@@ -13,7 +13,12 @@ pub struct Dikdörtgen {
 
 impl Dikdörtgen {
     pub fn yeni(x: f32, y: f32, genişlik: f32, yükseklik: f32) -> Self {
-        Dikdörtgen { x, y, genişlik, yükseklik }
+        Dikdörtgen {
+            x,
+            y,
+            genişlik,
+            yükseklik,
+        }
     }
 
     pub fn sağ(&self) -> f32 {
@@ -29,10 +34,7 @@ impl Dikdörtgen {
     }
 
     pub fn içeriyor_mu(&self, nokta: (f32, f32)) -> bool {
-        nokta.0 >= self.x
-            && nokta.0 <= self.sağ()
-            && nokta.1 >= self.y
-            && nokta.1 <= self.alt()
+        nokta.0 >= self.x && nokta.0 <= self.sağ() && nokta.1 >= self.y && nokta.1 <= self.alt()
     }
 }
 

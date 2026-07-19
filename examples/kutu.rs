@@ -10,7 +10,13 @@ fn seçenekler() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin("Deney Dağılımları"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
-        .ızgara(Izgara::yeni().sol("8%").sağ("6%").alt(50.0).etiketi_kapsa(true))
+        .ızgara(
+            Izgara::yeni()
+                .sol("8%")
+                .sağ("6%")
+                .alt(50.0)
+                .etiketi_kapsa(true),
+        )
         .x_ekseni(Eksen::kategori().veri(["D1", "D2", "D3", "D4", "D5"]))
         .y_ekseni(Eksen::değer().ölçekli(true))
         .seri(KutuSerisi::yeni().ad("Ölçüm").veri([

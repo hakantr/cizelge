@@ -48,7 +48,13 @@ fn seçenekler() -> GrafikSeçenekleri {
         .başlık(Başlık::yeni().metin("Saçılım Örneği"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
         .gösterge(Gösterge::yeni().üst(28.0))
-        .ızgara(Izgara::yeni().sol("7%").sağ("5%").alt(50.0).etiketi_kapsa(true))
+        .ızgara(
+            Izgara::yeni()
+                .sol("7%")
+                .sağ("5%")
+                .alt(50.0)
+                .etiketi_kapsa(true),
+        )
         .x_ekseni(Eksen::değer().ölçekli(true))
         .y_ekseni(Eksen::değer().ölçekli(true))
         .seri(

@@ -15,13 +15,24 @@ pub enum BilesenHatasi {
     /// işlem güvenle atlandı.
     KilitliDurum { bileşen: &'static str },
     /// Beklenen veri yok ya da sınır dışı.
-    EksikVeri { bileşen: &'static str, sıra: usize },
+    EksikVeri {
+        bileşen: &'static str, sıra: usize
+    },
     /// Seçenek doğrulaması başarısız; işlem geri alındı.
-    GeçersizSeçenek { alan: &'static str, ayrıntı: String },
+    GeçersizSeçenek {
+        alan: &'static str, ayrıntı: String
+    },
     /// Metin çözümlemesi başarısız (renk, uzunluk, yüzde…).
     ÇözümlemeHatası { girdi: String, hedef: &'static str },
     /// Sayısal işlem güvenli aralık dışında.
     SayısalTaşma { bileşen: &'static str },
+    /// Yaşam döngüsü sona ermiş bir grafik örneğine işlem gönderildi.
+    KapatılmışÖrnek { işlem: &'static str },
+    /// Bilerek desteklenmeyen bir kapsam dalı istendi (ör. Geo/Map veya GL).
+    Desteklenmeyen {
+        özellik: &'static str,
+        ayrıntı: String,
+    },
 }
 
 impl fmt::Display for BilesenHatasi {
@@ -41,6 +52,14 @@ impl fmt::Display for BilesenHatasi {
             }
             BilesenHatasi::SayısalTaşma { bileşen } => {
                 write!(f, "{bileşen}: sayısal değer güvenli aralık dışında")
+            }
+            BilesenHatasi::KapatılmışÖrnek { işlem } => {
+                write!(f, "kapatılmış grafik örneğinde `{işlem}` çalıştırılamaz")
+            }
+            BilesenHatasi::Desteklenmeyen {
+                özellik, ayrıntı
+            } => {
+                write!(f, "desteklenmeyen `{özellik}`: {ayrıntı}")
             }
         }
     }

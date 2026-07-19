@@ -1,0 +1,19 @@
+{
+  "id": "bar-stack-borderRadius",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 460,
+  "değişen_piksel_oranı": 0.0017037037037037038,
+  "ssim": 0.9977014329535869,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-stack-borderRadius.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-stack-borderRadius.png",
+    "fark": "testler/gorsel/fark/default/bar-stack-borderRadius.png"
+  }
+}

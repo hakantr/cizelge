@@ -1,0 +1,19 @@
+{
+  "id": "dataset-encode0",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 995,
+  "değişen_piksel_oranı": 0.003685185185185185,
+  "ssim": 0.9976539273061091,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-encode0.png",
+    "gerçek": "testler/gorsel/gerçek/default/dataset-encode0.png",
+    "fark": "testler/gorsel/fark/default/dataset-encode0.png"
+  }
+}

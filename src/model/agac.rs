@@ -18,12 +18,20 @@ pub struct AğaçDüğümü {
 impl AğaçDüğümü {
     /// Yaprak düğüm.
     pub fn yaprak(ad: impl Into<String>, değer: f64) -> Self {
-        AğaçDüğümü { ad: ad.into(), değer: Some(değer), ..Default::default() }
+        AğaçDüğümü {
+            ad: ad.into(),
+            değer: Some(değer),
+            ..Default::default()
+        }
     }
 
     /// Dal düğümü (değeri çocuk toplamından türeyen).
     pub fn dal(ad: impl Into<String>, çocuklar: Vec<AğaçDüğümü>) -> Self {
-        AğaçDüğümü { ad: ad.into(), çocuklar, ..Default::default() }
+        AğaçDüğümü {
+            ad: ad.into(),
+            çocuklar,
+            ..Default::default()
+        }
     }
 
     pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
@@ -54,13 +62,14 @@ impl AğaçDüğümü {
 /// Ad bulunamazsa ya da bulunan düğüm yapraksa iniş orada durur.
 /// Dönen ikinci değer: gerçekten inilen adım sayısıdır.
 pub fn yolu_çöz<'a>(
-    kökler: &'a [AğaçDüğümü],
-    yol: &[String],
+    kökler: &'a [AğaçDüğümü], yol: &[String]
 ) -> (&'a [AğaçDüğümü], usize) {
     let mut etkin = kökler;
     let mut derinlik = 0usize;
     for ad in yol {
-        let Some(düğüm) = etkin.iter().find(|d| &d.ad == ad) else { break };
+        let Some(düğüm) = etkin.iter().find(|d| &d.ad == ad) else {
+            break;
+        };
         if düğüm.çocuklar.is_empty() {
             break;
         }

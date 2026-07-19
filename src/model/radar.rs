@@ -20,7 +20,11 @@ pub struct RadarGöstergesi {
 
 impl RadarGöstergesi {
     pub fn yeni(ad: impl Into<String>, en_çok: f64) -> Self {
-        RadarGöstergesi { ad: ad.into(), en_az: 0.0, en_çok }
+        RadarGöstergesi {
+            ad: ad.into(),
+            en_az: 0.0,
+            en_çok,
+        }
     }
 }
 

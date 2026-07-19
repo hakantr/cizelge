@@ -4,7 +4,7 @@
 use crate::olcek::Çentik;
 use crate::yardimci::bicim::çentik_değeri_biçimle;
 use crate::yardimci::sayi::{
-    doğrusal_eşle, geçerli_kapsam_sayısı, güzel_sayı, hassasiyet, yuvarla, GüzelKip,
+    GüzelKip, doğrusal_eşle, geçerli_kapsam_sayısı, güzel_sayı, hassasiyet, yuvarla,
 };
 
 /// "Güzel" çentik hesabının sonucu (`intervalScaleNiceTicksResult`).
@@ -31,20 +31,26 @@ pub fn güzel_çentikler(
     let açıklık = kapsam[1] - kapsam[0];
     let mut adım = güzel_sayı(açıklık / bölme_sayısı.max(1) as f64, GüzelKip::Yuvarlak);
     if let Some(ek) = en_küçük_adım
-        && adım < ek {
-            adım = ek;
-        }
+        && adım < ek
+    {
+        adım = ek;
+    }
     if let Some(eb) = en_büyük_adım
-        && adım > eb {
-            adım = eb;
-        }
+        && adım > eb
+    {
+        adım = eb;
+    }
     let h = adım_hassasiyeti(adım);
     // Özgün kapsamın içinde kalan "güzelleştirilmiş" kapsam.
     let güzel_kapsam = [
         yuvarla((kapsam[0] / adım).ceil() * adım, h),
         yuvarla((kapsam[1] / adım).floor() * adım, h),
     ];
-    GüzelÇentikSonucu { adım, adım_hassasiyeti: h, güzel_kapsam }
+    GüzelÇentikSonucu {
+        adım,
+        adım_hassasiyeti: h,
+        güzel_kapsam,
+    }
 }
 
 /// Kapsamı geçerli hale getirir: uçlar eşitse genişletir, geçersizse
@@ -143,7 +149,15 @@ impl AralıkÖlçeği {
             // Sığmadı: bir üst güzel adıma çık.
             adım = güzel_sayı(adım * 1.6, GüzelKip::Tavan);
         }
-        Self::kur(veri_kapsamı, sabit_en_az, sabit_en_çok, sıfırı_içer, bölme, None, None)
+        Self::kur(
+            veri_kapsamı,
+            sabit_en_az,
+            sabit_en_çok,
+            sıfırı_içer,
+            bölme,
+            None,
+            None,
+        )
     }
 
     /// Veri kapsamından ölçek kurar.
@@ -200,8 +214,14 @@ impl AralıkÖlçeği {
 
         // Kapsam değiştiği için güzel kapsamı yeniden kırp.
         let güzel_kapsam = [
-            yuvarla((kapsam[0] / sonuç.adım).ceil() * sonuç.adım, sonuç.adım_hassasiyeti),
-            yuvarla((kapsam[1] / sonuç.adım).floor() * sonuç.adım, sonuç.adım_hassasiyeti),
+            yuvarla(
+                (kapsam[0] / sonuç.adım).ceil() * sonuç.adım,
+                sonuç.adım_hassasiyeti,
+            ),
+            yuvarla(
+                (kapsam[1] / sonuç.adım).floor() * sonuç.adım,
+                sonuç.adım_hassasiyeti,
+            ),
         ];
 
         AralıkÖlçeği {
@@ -232,21 +252,28 @@ impl AralıkÖlçeği {
         let [gk0, gk1] = self.güzel_kapsam;
 
         if self.kapsam[0] < gk0 {
-            sonuç.push(Çentik { değer: self.kapsam[0] });
+            sonuç.push(Çentik {
+                değer: self.kapsam[0],
+            });
         }
         let mut değer = gk0;
         // Kayan nokta birikimini önlemek için yuvarlayarak ilerle.
         let güvenlik_sınırı = 10_000;
         let mut sayaç = 0;
         while değer <= gk1 + adım * 1e-6 && sayaç < güvenlik_sınırı {
-            sonuç.push(Çentik { değer: yuvarla(değer, self.adım_hassasiyeti) });
+            sonuç.push(Çentik {
+                değer: yuvarla(değer, self.adım_hassasiyeti),
+            });
             değer += adım;
             sayaç += 1;
         }
         if let Some(son) = sonuç.last()
-            && self.kapsam[1] > son.değer {
-                sonuç.push(Çentik { değer: self.kapsam[1] });
-            }
+            && self.kapsam[1] > son.değer
+        {
+            sonuç.push(Çentik {
+                değer: self.kapsam[1],
+            });
+        }
         sonuç
     }
 
@@ -256,7 +283,12 @@ impl AralıkÖlçeği {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 

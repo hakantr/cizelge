@@ -1,0 +1,18 @@
+# Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
+id = "bar-tick-align"
+kapsam_durumu = "uygulandı_kanıt_bekliyor"
+sahip_faz = 3
+resmi_kaynak = "public/examples/ts/bar-tick-align.ts"
+fixture = "examples/uyum_fixture.rs#bar_tick_align"
+viewport_genişlik = 700
+viewport_yükseklik = 525
+shot_delay_ms = 0
+profiller = ["açık", "koyu"]
+
+[kanıt]
+api = "kısmi"
+statik_görsel = "tam_kanıtlı"
+animasyon = "kısmi"
+etkileşim = "kısmi"
+erişilebilirlik = "kısmi"
+performans = "kısmi"

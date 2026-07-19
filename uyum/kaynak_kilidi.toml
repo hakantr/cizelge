@@ -1,0 +1,27 @@
+# Bu dosya tools/uyum/uret.mjs tarafından üretilir.
+snapshot_tarihi = "2026-07-17"
+manifest_sürümü = 1
+
+[echarts]
+sürüm = "6.1.0"
+commit = "74e9e09a0b5687fdd34319121ac73b3022d1483c"
+yol = "../echarts"
+lisans = "Apache-2.0"
+
+[zrender]
+sürüm = "6.1.0"
+kaynak = "echarts/package.json"
+lisans = "BSD-3-Clause"
+
+[echarts_examples]
+dal = "gh-pages"
+commit = "1ff3451941535c51af83eacd504035ef4bfd7d0d"
+yol = "../echarts-examples"
+lisans = "Apache-2.0"
+
+[render_profili]
+varsayılan_viewport = [700, 525]
+varsayılan_çıktı = [600, 450]
+device_pixel_ratio = 1
+locale = "en"
+saat_dilimi = "UTC"

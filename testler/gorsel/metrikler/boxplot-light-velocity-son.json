@@ -1,0 +1,19 @@
+{
+  "id": "boxplot-light-velocity",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1193,
+  "değişen_piksel_oranı": 0.004418518518518519,
+  "ssim": 0.9966863813244944,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/boxplot-light-velocity.png",
+    "gerçek": "testler/gorsel/gerçek/default/boxplot-light-velocity.png",
+    "fark": "testler/gorsel/fark/default/boxplot-light-velocity.png"
+  }
+}

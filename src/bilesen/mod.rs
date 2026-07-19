@@ -5,4 +5,6 @@ pub mod eksen_cizimi;
 pub mod erisilebilirlik;
 pub mod gosterge;
 pub mod ipucu;
+pub mod matris_cizimi;
+pub mod takvim_cizimi;
 pub mod zaman_seridi;

@@ -204,8 +204,7 @@ pub fn ağaç_haritası_çiz(
         seri.genişlik.çöz(tuval.genişlik),
         seri.yükseklik.çöz(tuval.yükseklik),
     );
-    let (etkin_kökler, derinlik) =
-        crate::model::agac::yolu_çöz(&seri.kökler, kök_yolu);
+    let (etkin_kökler, derinlik) = crate::model::agac::yolu_çöz(&seri.kökler, kök_yolu);
 
     // Kırıntı şeridi (`breadcrumb`): "Tümü › dal › dal", her parça
     // tıklanınca yol o uzunluğa kırpılır.
@@ -277,14 +276,20 @@ pub fn ağaç_haritası_çiz(
             Some((1.0, Renk::BEYAZ)),
         );
         // Etiket: hücreye sığıyorsa.
-        let boyut = if hücre.derinlik == 0 { tema::YAZI_KÜÇÜK } else { 11.0 };
+        let boyut = if hücre.derinlik == 0 {
+            tema::YAZI_KÜÇÜK
+        } else {
+            11.0
+        };
         let (metin_g, metin_y) = çizici.yazı_ölç(&hücre.ad, boyut);
         if metin_g + 6.0 < hücre.alan.genişlik && metin_y < hücre.alan.yükseklik {
-            let parlaklık = 0.299 * hücre.renk.kırmızı
-                + 0.587 * hücre.renk.yeşil
-                + 0.114 * hücre.renk.mavi;
-            let yazı_rengi =
-                if parlaklık < 0.55 { Renk::BEYAZ } else { tema::birincil_metin() };
+            let parlaklık =
+                0.299 * hücre.renk.kırmızı + 0.587 * hücre.renk.yeşil + 0.114 * hücre.renk.mavi;
+            let yazı_rengi = if parlaklık < 0.55 {
+                Renk::BEYAZ
+            } else {
+                tema::birincil_metin()
+            };
             if hücre.yaprak {
                 çizici.yazı(
                     &hücre.ad,

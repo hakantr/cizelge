@@ -1,0 +1,19 @@
+{
+  "id": "line-in-cartesian-coordinate-system",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 152,
+  "değişen_piksel_oranı": 0.0005629629629629629,
+  "ssim": 0.999327984500956,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-in-cartesian-coordinate-system.png",
+    "gerçek": "testler/gorsel/gerçek/default/line-in-cartesian-coordinate-system.png",
+    "fark": "testler/gorsel/fark/default/line-in-cartesian-coordinate-system.png"
+  }
+}

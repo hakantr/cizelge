@@ -20,12 +20,12 @@ fn seçenekler() -> GrafikSeçenekleri {
                 .efektli(true)
                 .veri([[2.0, 8.0], [5.0, 3.0], [8.0, 6.5], [11.0, 4.2]]),
         )
-        .seri(
-            SaçılımSerisi::yeni()
-                .ad("Normal")
-                .sembol_boyutu(9.0)
-                .veri([[3.0, 5.0], [6.5, 7.2], [9.0, 2.4], [12.0, 7.8]]),
-        )
+        .seri(SaçılımSerisi::yeni().ad("Normal").sembol_boyutu(9.0).veri([
+            [3.0, 5.0],
+            [6.5, 7.2],
+            [9.0, 2.4],
+            [12.0, 7.8],
+        ]))
 }
 
 fn main() {

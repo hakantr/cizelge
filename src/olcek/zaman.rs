@@ -6,7 +6,7 @@
 
 use crate::olcek::Çentik;
 use crate::yardimci::sayi::doğrusal_eşle;
-use crate::yardimci::takvim::{andan_takvime, takvimden_ana, TakvimAnı};
+use crate::yardimci::takvim::{TakvimAnı, andan_takvime, takvimden_ana};
 use crate::yerel::ay_kısaltması;
 
 const SANİYE: f64 = 1000.0;
@@ -94,7 +94,11 @@ impl ZamanÖlçeği {
             }
         }
 
-        ZamanÖlçeği { kapsam, birim, birim_adımı }
+        ZamanÖlçeği {
+            kapsam,
+            birim,
+            birim_adımı,
+        }
     }
 
     pub fn oranla(&self, değer: f64) -> f64 {
@@ -218,7 +222,9 @@ impl ZamanÖlçeği {
 }
 
 fn güzel_yıl_adımı(ham: f64) -> f64 {
-    let adaylar = [1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 50.0, 100.0, 200.0, 500.0, 1000.0];
+    let adaylar = [
+        1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 50.0, 100.0, 200.0, 500.0, 1000.0,
+    ];
     for a in adaylar {
         if a >= ham {
             return a;
@@ -228,7 +234,12 @@ fn güzel_yıl_adımı(ham: f64) -> f64 {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
@@ -236,7 +247,13 @@ mod testler {
     fn günlük_çentikler() {
         // 2026-01-01 .. 2026-01-08 (UTC)
         let başlangıç = takvimden_ana(TakvimAnı {
-            yıl: 2026, ay: 1, gün: 1, saat: 0, dakika: 0, saniye: 0, milisaniye: 0,
+            yıl: 2026,
+            ay: 1,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
         });
         let bitiş = başlangıç + 7.0 * GÜN;
         let ö = ZamanÖlçeği::kur([başlangıç, bitiş], 7);

@@ -1,6 +1,6 @@
 //! İpucu (tooltip) penceresi — `echarts/src/component/tooltip` karşılığı.
 
-use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi, SATIR_ORANI};
+use crate::cizim::{DikeyHiza, SATIR_ORANI, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::bilesen::İpucu;
 use crate::renk::{Dolgu, Renk};
@@ -38,7 +38,11 @@ pub fn ipucu_çiz(
     let başlık_genişliği = başlık.map(|b| çizici.yazı_ölç(b, boyut).0).unwrap_or(0.0);
     let mut içerik_genişliği = başlık_genişliği;
     for satır in satırlar {
-        let im = if satır.im_rengi.is_some() { İM_ÇAPI + 6.0 } else { 0.0 };
+        let im = if satır.im_rengi.is_some() {
+            İM_ÇAPI + 6.0
+        } else {
+            0.0
+        };
         let genişlik = im
             + çizici.yazı_ölç(&satır.ad, boyut).0
             + SÜTUN_ARASI
@@ -46,7 +50,11 @@ pub fn ipucu_çiz(
         içerik_genişliği = içerik_genişliği.max(genişlik);
     }
     let kutu_genişliği = içerik_genişliği + İÇ_BOŞLUK * 2.0;
-    let başlık_yüksekliği = if başlık.is_some() { satır_yüksekliği } else { 0.0 };
+    let başlık_yüksekliği = if başlık.is_some() {
+        satır_yüksekliği
+    } else {
+        0.0
+    };
     let kutu_yüksekliği =
         başlık_yüksekliği + satırlar.len() as f32 * satır_yüksekliği + İÇ_BOŞLUK * 2.0;
 
@@ -67,7 +75,12 @@ pub fn ipucu_çiz(
     // Kutu: gölge + arka plan + kenarlık.
     çizici.gölge(kutu, 4.0, tema::ipucu_gölgesi(), 10.0);
     let arkaplan = seçenek.arkaplan.unwrap_or(tema::ipucu_arkaplanı());
-    çizici.dikdörtgen(kutu, &Dolgu::Düz(arkaplan), [4.0; 4], Some((1.0, tema::ipucu_kenarlığı())));
+    çizici.dikdörtgen(
+        kutu,
+        &Dolgu::Düz(arkaplan),
+        [4.0; 4],
+        Some((1.0, tema::ipucu_kenarlığı())),
+    );
 
     let metin_rengi = seçenek.yazı.renk.unwrap_or(tema::ipucu_metni());
     let mut satır_y = y + İÇ_BOŞLUK + satır_yüksekliği / 2.0;

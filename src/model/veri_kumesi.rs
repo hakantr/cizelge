@@ -2,8 +2,447 @@
 //! bileşenlerinin karşılığı: seriler, ortak bir tablodan boyut adlarıyla
 //! beslenir; süzme/sıralama dönüşümleri tablo üzerinde zincirlenir.
 
+use std::cmp::Ordering;
+use std::collections::BTreeMap;
+use std::sync::Arc;
+
 use crate::hata::BilesenHatasi;
 use crate::model::deger::VeriDeğeri;
+
+/// `dataset.seriesLayoutBy`.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Default)]
+pub enum SeriYerleşimi {
+    #[default]
+    Sütun,
+    Satır,
+}
+
+/// `dataset.sourceHeader`; sayısal değer birden çok başlık satırı/sütunu
+/// bulunan kaynakları da kapsar.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum KaynakBaşlığı {
+    #[default]
+    Otomatik,
+    Sayı(usize),
+}
+
+/// ECharts `DimensionType` karşılığı.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum BoyutTürü {
+    Sayı,
+    Sıralı,
+    Zaman,
+    Mantıksal,
+    #[default]
+    Bilinmeyen,
+}
+
+/// Açık veya kaynaktan çıkarılmış boyut tanımı.
+#[derive(Clone, PartialEq, Eq, Debug, Default)]
+pub struct BoyutTanımı {
+    pub ad: String,
+    pub görünen_ad: Option<String>,
+    pub tür: BoyutTürü,
+}
+
+impl BoyutTanımı {
+    pub fn yeni(ad: impl Into<String>) -> Self {
+        Self {
+            ad: ad.into(),
+            görünen_ad: None,
+            tür: BoyutTürü::Bilinmeyen,
+        }
+    }
+
+    pub fn tür(mut self, tür: BoyutTürü) -> Self {
+        self.tür = tür;
+        self
+    }
+
+    pub fn görünen_ad(mut self, ad: impl Into<String>) -> Self {
+        self.görünen_ad = Some(ad.into());
+        self
+    }
+}
+
+impl<S: Into<String>> From<S> for BoyutTanımı {
+    fn from(ad: S) -> Self {
+        Self::yeni(ad)
+    }
+}
+
+/// JavaScript TypedArray ailelerinin sahiplikli Rust karşılığı.
+#[derive(Clone, PartialEq, Debug)]
+pub enum TürlüSayıDizisi {
+    F32(Vec<f32>),
+    F64(Vec<f64>),
+    I32(Vec<i32>),
+    I64(Vec<i64>),
+    U32(Vec<u32>),
+    U64(Vec<u64>),
+}
+
+impl TürlüSayıDizisi {
+    pub fn len(&self) -> usize {
+        match self {
+            Self::F32(d) => d.len(),
+            Self::F64(d) => d.len(),
+            Self::I32(d) => d.len(),
+            Self::I64(d) => d.len(),
+            Self::U32(d) => d.len(),
+            Self::U64(d) => d.len(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    fn değer(&self, sıra: usize) -> Option<VeriDeğeri> {
+        match self {
+            Self::F32(d) => d.get(sıra).copied().map(VeriDeğeri::from),
+            Self::F64(d) => d.get(sıra).copied().map(VeriDeğeri::from),
+            Self::I32(d) => d.get(sıra).copied().map(VeriDeğeri::from),
+            Self::I64(d) => d.get(sıra).copied().map(VeriDeğeri::from),
+            Self::U32(d) => d.get(sıra).copied().map(VeriDeğeri::from),
+            Self::U64(d) => d
+                .get(sıra)
+                .copied()
+                .map(|değer| VeriDeğeri::Sayı(değer as f64)),
+        }
+    }
+}
+
+/// Desteklenen bütün `dataset.source` biçimleri. Nesne satırları ve anahtarlı
+/// sütunlarda `Vec<(anahtar, değer)>` kullanılması JavaScript özellik sırasını
+/// belirlenimci biçimde korur.
+#[derive(Clone, PartialEq, Debug)]
+pub enum VeriKaynağı {
+    DiziSatırlar(Vec<Vec<VeriDeğeri>>),
+    NesneSatırlar(Vec<Vec<(String, VeriDeğeri)>>),
+    AnahtarlıSütunlar(Vec<(String, Vec<VeriDeğeri>)>),
+    TürlüDizi {
+        değerler: TürlüSayıDizisi,
+        boyut_sayısı: usize,
+    },
+}
+
+/// Kaynağı normalleştirmek için ECharts `SourceMetaRawOption` karşılığı.
+#[derive(Clone, PartialEq, Debug)]
+pub struct KaynakSeçenekleri {
+    pub yerleşim: SeriYerleşimi,
+    pub başlık: KaynakBaşlığı,
+    pub boyutlar: Vec<BoyutTanımı>,
+}
+
+impl Default for KaynakSeçenekleri {
+    fn default() -> Self {
+        Self {
+            yerleşim: SeriYerleşimi::Sütun,
+            başlık: KaynakBaşlığı::Otomatik,
+            boyutlar: Vec::new(),
+        }
+    }
+}
+
+/// Sütunlu, seçili ham indeksleri koruyan veri deposu. Süzme yalnız indeks
+/// görünümünü kopyalar; ham hücreler `Arc` ile paylaşılır.
+#[derive(Clone, PartialEq, Debug)]
+pub struct VeriDeposu {
+    pub boyutlar: Vec<BoyutTanımı>,
+    sütunlar: Arc<Vec<Vec<VeriDeğeri>>>,
+    indeksler: Option<Vec<usize>>,
+}
+
+impl VeriDeposu {
+    pub fn kaynaktan(
+        kaynak: VeriKaynağı,
+        seçenekler: KaynakSeçenekleri,
+    ) -> Result<Self, BilesenHatasi> {
+        let (mut boyutlar, satırlar) = kaynağı_normalleştir(kaynak, &seçenekler)?;
+        if boyutlar.is_empty() {
+            let sütun_sayısı = satırlar.iter().map(Vec::len).max().unwrap_or(0);
+            boyutlar = (0..sütun_sayısı)
+                .map(|sıra| BoyutTanımı::yeni(format!("boyut{sıra}")))
+                .collect();
+        }
+        boyutları_doğrula(&boyutlar)?;
+        let sütun_sayısı = boyutlar.len();
+        let mut sütunlar = vec![Vec::with_capacity(satırlar.len()); sütun_sayısı];
+        for satır in satırlar {
+            for sütun in 0..sütun_sayısı {
+                let değer = satır.get(sütun).cloned().unwrap_or(VeriDeğeri::Boş);
+                if let Some(hedef) = sütunlar.get_mut(sütun) {
+                    hedef.push(değer);
+                }
+            }
+        }
+        for (sıra, boyut) in boyutlar.iter_mut().enumerate() {
+            if boyut.tür == BoyutTürü::Bilinmeyen {
+                boyut.tür = sütunlar
+                    .get(sıra)
+                    .map(|sütun| boyut_türünü_bul(sütun))
+                    .unwrap_or(BoyutTürü::Bilinmeyen);
+            }
+        }
+        Ok(Self {
+            boyutlar,
+            sütunlar: Arc::new(sütunlar),
+            indeksler: None,
+        })
+    }
+
+    pub fn satırlardan(
+        boyutlar: impl IntoIterator<Item = BoyutTanımı>,
+        satırlar: Vec<Vec<VeriDeğeri>>,
+    ) -> Result<Self, BilesenHatasi> {
+        Self::kaynaktan(
+            VeriKaynağı::DiziSatırlar(satırlar),
+            KaynakSeçenekleri {
+                yerleşim: SeriYerleşimi::Sütun,
+                başlık: KaynakBaşlığı::Sayı(0),
+                boyutlar: boyutlar.into_iter().collect(),
+            },
+        )
+    }
+
+    pub fn sayım(&self) -> usize {
+        self.indeksler
+            .as_ref()
+            .map(Vec::len)
+            .unwrap_or_else(|| self.ham_sayım())
+    }
+
+    pub fn ham_sayım(&self) -> usize {
+        self.sütunlar.first().map(Vec::len).unwrap_or(0)
+    }
+
+    pub fn boyut_sırası(&self, seçici: &BoyutSeçici) -> Option<usize> {
+        match seçici {
+            BoyutSeçici::Sıra(sıra) => (*sıra < self.boyutlar.len()).then_some(*sıra),
+            BoyutSeçici::Ad(ad) => self.boyutlar.iter().position(|boyut| boyut.ad == *ad),
+        }
+    }
+
+    pub fn değer(&self, satır: usize, boyut: &BoyutSeçici) -> Option<&VeriDeğeri> {
+        let sütun = self.boyut_sırası(boyut)?;
+        let ham = self.ham_indeks(satır)?;
+        self.sütunlar.get(sütun)?.get(ham)
+    }
+
+    pub fn satır(&self, sıra: usize) -> Option<Vec<&VeriDeğeri>> {
+        let ham = self.ham_indeks(sıra)?;
+        Some(
+            self.sütunlar
+                .iter()
+                .filter_map(|sütun| sütun.get(ham))
+                .collect(),
+        )
+    }
+
+    pub fn satırları_kopyala(&self) -> Vec<Vec<VeriDeğeri>> {
+        (0..self.sayım())
+            .filter_map(|sıra| self.satır(sıra))
+            .map(|satır| satır.into_iter().cloned().collect())
+            .collect()
+    }
+
+    pub fn kapsam(&self, boyut: &BoyutSeçici) -> Result<[f64; 2], BilesenHatasi> {
+        let sütun = self
+            .boyut_sırası(boyut)
+            .ok_or_else(|| boyut_hatası(boyut))?;
+        let mut en_az = f64::INFINITY;
+        let mut en_çok = f64::NEG_INFINITY;
+        for sıra in 0..self.sayım() {
+            let Some(ham) = self.ham_indeks(sıra) else {
+                continue;
+            };
+            let Some(değer) = self
+                .sütunlar
+                .get(sütun)
+                .and_then(|değerler| değerler.get(ham))
+                .and_then(VeriDeğeri::sayı)
+                .filter(|değer| değer.is_finite())
+            else {
+                continue;
+            };
+            en_az = en_az.min(değer);
+            en_çok = en_çok.max(değer);
+        }
+        Ok([en_az, en_çok])
+    }
+
+    pub fn süz(&self, mut koşul: impl FnMut(usize, &[&VeriDeğeri]) -> bool) -> VeriDeposu {
+        let mut indeksler = Vec::new();
+        for sıra in 0..self.sayım() {
+            let Some(ham) = self.ham_indeks(sıra) else {
+                continue;
+            };
+            let satır: Vec<&VeriDeğeri> = self
+                .sütunlar
+                .iter()
+                .filter_map(|sütun| sütun.get(ham))
+                .collect();
+            if koşul(sıra, &satır) {
+                indeksler.push(ham);
+            }
+        }
+        VeriDeposu {
+            boyutlar: self.boyutlar.clone(),
+            sütunlar: self.sütunlar.clone(),
+            indeksler: Some(indeksler),
+        }
+    }
+
+    pub fn aralık_seç(
+        &self,
+        boyut: &BoyutSeçici,
+        en_az: f64,
+        en_çok: f64,
+    ) -> Result<VeriDeposu, BilesenHatasi> {
+        let sütun = self
+            .boyut_sırası(boyut)
+            .ok_or_else(|| boyut_hatası(boyut))?;
+        Ok(self.süz(|_, satır| {
+            satır
+                .get(sütun)
+                .and_then(|değer| değer.sayı())
+                .map(|değer| değer >= en_az && değer <= en_çok)
+                // ECharts `selectRange` çizgi boşluklarını korumak için NaN'i
+                // dışarı atmaz.
+                .unwrap_or(true)
+        }))
+    }
+
+    pub fn sırala(&self, anahtarlar: &[SıralamaAnahtarı]) -> Result<VeriDeposu, BilesenHatasi> {
+        let çözülmüş: Result<Vec<_>, _> = anahtarlar
+            .iter()
+            .map(|anahtar| {
+                self.boyut_sırası(&anahtar.boyut)
+                    .map(|sıra| (sıra, anahtar.düzen))
+                    .ok_or_else(|| boyut_hatası(&anahtar.boyut))
+            })
+            .collect();
+        let çözülmüş = çözülmüş?;
+        let mut indeksler: Vec<usize> = (0..self.sayım())
+            .filter_map(|sıra| self.ham_indeks(sıra))
+            .collect();
+        indeksler.sort_by(|a, b| {
+            for (sütun, düzen) in &çözülmüş {
+                let av = self.sütunlar.get(*sütun).and_then(|d| d.get(*a));
+                let bv = self.sütunlar.get(*sütun).and_then(|d| d.get(*b));
+                let sıra = değerleri_karşılaştır(av, bv);
+                if sıra != Ordering::Equal {
+                    return if *düzen == SıralamaDüzeni::Artan {
+                        sıra
+                    } else {
+                        sıra.reverse()
+                    };
+                }
+            }
+            a.cmp(b)
+        });
+        Ok(VeriDeposu {
+            boyutlar: self.boyutlar.clone(),
+            sütunlar: self.sütunlar.clone(),
+            indeksler: Some(indeksler),
+        })
+    }
+
+    /// Yalnız ham (süzülmemiş) depoya satır eklenebilir.
+    pub fn ekle(&mut self, satırlar: Vec<Vec<VeriDeğeri>>) -> Result<[usize; 2], BilesenHatasi> {
+        if self.indeksler.is_some() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "veri_deposu.ekle",
+                ayrıntı: "süzülmüş görünüme appendData uygulanamaz".to_owned(),
+            });
+        }
+        let başlangıç = self.ham_sayım();
+        let sütunlar = Arc::make_mut(&mut self.sütunlar);
+        for satır in satırlar {
+            for sütun in 0..self.boyutlar.len() {
+                let değer = satır.get(sütun).cloned().unwrap_or(VeriDeğeri::Boş);
+                if let Some(hedef) = sütunlar.get_mut(sütun) {
+                    hedef.push(değer);
+                }
+            }
+        }
+        Ok([başlangıç, self.ham_sayım()])
+    }
+
+    fn ham_indeks(&self, sıra: usize) -> Option<usize> {
+        match &self.indeksler {
+            Some(indeksler) => indeksler.get(sıra).copied(),
+            None => (sıra < self.ham_sayım()).then_some(sıra),
+        }
+    }
+}
+
+/// Encode ve dönüşüm seçeneklerinde boyuta adla veya sırayla erişim.
+#[derive(Clone, PartialEq, Eq, Debug, Hash)]
+pub enum BoyutSeçici {
+    Ad(String),
+    Sıra(usize),
+}
+
+impl BoyutSeçici {
+    pub fn ad(ad: impl Into<String>) -> Self {
+        Self::Ad(ad.into())
+    }
+}
+
+impl From<usize> for BoyutSeçici {
+    fn from(sıra: usize) -> Self {
+        Self::Sıra(sıra)
+    }
+}
+
+impl From<&str> for BoyutSeçici {
+    fn from(ad: &str) -> Self {
+        Self::Ad(ad.to_owned())
+    }
+}
+
+/// Seri türünden bağımsız `encode` yolları.
+#[derive(Clone, PartialEq, Eq, Debug, Default)]
+pub struct Kodlama {
+    pub x: Vec<BoyutSeçici>,
+    pub y: Vec<BoyutSeçici>,
+    pub yarıçap: Vec<BoyutSeçici>,
+    pub açı: Vec<BoyutSeçici>,
+    pub öğe_adı: Vec<BoyutSeçici>,
+    pub seri_adı: Vec<BoyutSeçici>,
+    pub ipucu: Vec<BoyutSeçici>,
+    pub etiket: Vec<BoyutSeçici>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum SıralamaDüzeni {
+    Artan,
+    Azalan,
+}
+
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct SıralamaAnahtarı {
+    pub boyut: BoyutSeçici,
+    pub düzen: SıralamaDüzeni,
+}
+
+impl SıralamaAnahtarı {
+    pub fn artan(boyut: impl Into<BoyutSeçici>) -> Self {
+        Self {
+            boyut: boyut.into(),
+            düzen: SıralamaDüzeni::Artan,
+        }
+    }
+
+    pub fn azalan(boyut: impl Into<BoyutSeçici>) -> Self {
+        Self {
+            boyut: boyut.into(),
+            düzen: SıralamaDüzeni::Azalan,
+        }
+    }
+}
 
 /// Sütunlu veri tablosu (`dataset.source`).
 #[derive(Clone, PartialEq, Debug, Default)]
@@ -19,6 +458,77 @@ impl VeriKümesi {
         VeriKümesi {
             boyutlar: boyutlar.into_iter().map(Into::into).collect(),
             satırlar: Vec::new(),
+        }
+    }
+
+    /// Bütün desteklenen `dataset.source` biçimlerinden eski tablo
+    /// cephesini üretir.
+    pub fn kaynaktan(
+        kaynak: VeriKaynağı,
+        seçenekler: KaynakSeçenekleri,
+    ) -> Result<Self, BilesenHatasi> {
+        let depo = VeriDeposu::kaynaktan(kaynak, seçenekler)?;
+        Ok(Self {
+            boyutlar: depo.boyutlar.iter().map(|boyut| boyut.ad.clone()).collect(),
+            satırlar: depo.satırları_kopyala(),
+        })
+    }
+
+    /// Sütunlu `DataStore` görünümü.
+    pub fn depoya(&self) -> Result<VeriDeposu, BilesenHatasi> {
+        VeriDeposu::satırlardan(
+            self.boyutlar.iter().cloned().map(BoyutTanımı::yeni),
+            self.satırlar.clone(),
+        )
+    }
+
+    /// Bir sütunlu depoyu, görünür satır sırasını koruyarak kök option'da
+    /// taşınabilen veri kümesine dönüştürür.
+    pub fn depodan(depo: &VeriDeposu) -> Self {
+        Self {
+            boyutlar: depo.boyutlar.iter().map(|boyut| boyut.ad.clone()).collect(),
+            satırlar: depo.satırları_kopyala(),
+        }
+    }
+
+    /// Aynı `dataset.source` tablosunun `seriesLayoutBy: 'row'` görünümü.
+    /// Normal sütun görünümündeki ilk boyut/ilk hücreler yeni başlıkları,
+    /// kalan boyutlar da yeni satırları oluşturur.
+    pub fn seri_yerleşimiyle(&self, yerleşim: SeriYerleşimi) -> Self {
+        if yerleşim == SeriYerleşimi::Sütun || self.boyutlar.is_empty() {
+            return self.clone();
+        }
+        let mut boyutlar = Vec::with_capacity(self.satırlar.len() + 1);
+        boyutlar.push(
+            self.boyutlar
+                .first()
+                .cloned()
+                .unwrap_or_else(|| "boyut0".to_owned()),
+        );
+        boyutlar.extend(
+            self.satırlar
+                .iter()
+                .map(|satır| satır.first().and_then(değer_metin).unwrap_or_default()),
+        );
+
+        let satırlar = self
+            .boyutlar
+            .iter()
+            .enumerate()
+            .skip(1)
+            .map(|(sütun, boyut_adı)| {
+                let mut satır = Vec::with_capacity(self.satırlar.len() + 1);
+                satır.push(VeriDeğeri::Metin(boyut_adı.clone()));
+                satır.extend(
+                    self.satırlar
+                        .iter()
+                        .map(|kaynak| kaynak.get(sütun).cloned().unwrap_or(VeriDeğeri::Boş)),
+                );
+                satır
+            })
+            .collect();
+        Self {
+            boyutlar, satırlar
         }
     }
 
@@ -67,12 +577,7 @@ impl VeriKümesi {
         Ok(self
             .satırlar
             .iter()
-            .map(|satır| {
-                satır
-                    .get(sütun)
-                    .and_then(|h| h.sayı())
-                    .unwrap_or(f64::NAN)
-            })
+            .map(|satır| satır.get(sütun).and_then(|h| h.sayı()).unwrap_or(f64::NAN))
             .collect())
     }
 
@@ -129,12 +634,952 @@ impl VeriKümesi {
             let sıra = av.partial_cmp(&bv).unwrap_or(std::cmp::Ordering::Equal);
             if artan { sıra } else { sıra.reverse() }
         });
-        Ok(VeriKümesi { boyutlar: self.boyutlar.clone(), satırlar })
+        Ok(VeriKümesi {
+            boyutlar: self.boyutlar.clone(),
+            satırlar,
+        })
+    }
+}
+
+/// Kök `dataset: []` dizisindeki kaynak veya built-in dönüşüm girdisi.
+/// `kaynak: None`, ECharts gibi `datasetIndex: 0`ı upstream kabul eder.
+#[derive(Clone, PartialEq, Debug)]
+pub enum VeriKümesiTanımı {
+    Kaynak(VeriKümesi),
+    Sırala {
+        kaynak: Option<usize>,
+        anahtarlar: Vec<SıralamaAnahtarı>,
+    },
+    Süz {
+        kaynak: Option<usize>,
+        koşul: SüzmeKoşulu,
+    },
+}
+
+impl VeriKümesiTanımı {
+    pub fn kaynak(küme: VeriKümesi) -> Self {
+        Self::Kaynak(küme)
+    }
+
+    pub fn sırala(anahtarlar: impl IntoIterator<Item = SıralamaAnahtarı>) -> Self {
+        Self::Sırala {
+            kaynak: None,
+            anahtarlar: anahtarlar.into_iter().collect(),
+        }
+    }
+
+    pub fn kaynaktan_sırala(
+        kaynak: usize,
+        anahtarlar: impl IntoIterator<Item = SıralamaAnahtarı>,
+    ) -> Self {
+        Self::Sırala {
+            kaynak: Some(kaynak),
+            anahtarlar: anahtarlar.into_iter().collect(),
+        }
+    }
+
+    pub fn süz(koşul: SüzmeKoşulu) -> Self {
+        Self::Süz {
+            kaynak: None,
+            koşul,
+        }
+    }
+
+    pub fn kaynaktan_süz(kaynak: usize, koşul: SüzmeKoşulu) -> Self {
+        Self::Süz {
+            kaynak: Some(kaynak),
+            koşul,
+        }
+    }
+}
+
+impl From<VeriKümesi> for VeriKümesiTanımı {
+    fn from(küme: VeriKümesi) -> Self {
+        Self::Kaynak(küme)
+    }
+}
+
+/// `dataset: []` kaynak/dönüşüm dizisini sırayla yürütür. Dönüşüm girdisi
+/// açık upstream vermiyorsa ECharts `queryReferringComponents` davranışıyla
+/// ilk dataset'i (`fromDatasetIndex: 0`) kullanır.
+pub fn veri_kümelerini_çöz(
+    tanımlar: &[VeriKümesiTanımı],
+) -> Result<Vec<VeriKümesi>, BilesenHatasi> {
+    let mut sonuçlar: Vec<VeriKümesi> = Vec::with_capacity(tanımlar.len());
+    for tanım in tanımlar {
+        let sonuç = match tanım {
+            VeriKümesiTanımı::Kaynak(küme) => küme.clone(),
+            VeriKümesiTanımı::Sırala { kaynak, anahtarlar } => {
+                let kaynak_sırası = kaynak.unwrap_or(0);
+                let upstream = sonuçlar
+                    .get(kaynak_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "dataset.fromDatasetIndex",
+                        sıra: kaynak_sırası,
+                    })?;
+                let depo = upstream.depoya()?;
+                VeriKümesi::depodan(&depo.sırala(anahtarlar)?)
+            }
+            VeriKümesiTanımı::Süz { kaynak, koşul } => {
+                let kaynak_sırası = kaynak.unwrap_or(0);
+                let upstream = sonuçlar
+                    .get(kaynak_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "dataset.fromDatasetIndex",
+                        sıra: kaynak_sırası,
+                    })?;
+                let depo = upstream.depoya()?;
+                koşul.doğrula(&depo)?;
+                VeriKümesi::depodan(&depo.süz(|satır, _| koşul.değerlendir(&depo, satır)))
+            }
+        };
+        sonuçlar.push(sonuç);
+    }
+    Ok(sonuçlar)
+}
+
+/// Kayıtlı ya da kullanıcı tanımlı dataset dönüşümü. Bir dönüşüm birden çok
+/// upstream alabilir ve birden çok sonuç üretebilir.
+pub trait VeriDönüşümü: Send + Sync {
+    fn tür_adı(&self) -> &str;
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi>;
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Karşılaştırmaİşlemi {
+    Eşit,
+    EşitDeğil,
+    Küçük,
+    KüçükEşit,
+    Büyük,
+    BüyükEşit,
+    İçerir,
+}
+
+/// Built-in filter dönüşümünün iç içe mantıksal koşulları.
+#[derive(Clone, PartialEq, Debug)]
+pub enum SüzmeKoşulu {
+    Karşılaştır {
+        boyut: BoyutSeçici,
+        işlem: Karşılaştırmaİşlemi,
+        değer: VeriDeğeri,
+    },
+    Arasında {
+        boyut: BoyutSeçici,
+        en_az: f64,
+        en_çok: f64,
+    },
+    Ve(Vec<SüzmeKoşulu>),
+    Veya(Vec<SüzmeKoşulu>),
+    Değil(Box<SüzmeKoşulu>),
+}
+
+impl SüzmeKoşulu {
+    fn doğrula(&self, depo: &VeriDeposu) -> Result<(), BilesenHatasi> {
+        match self {
+            Self::Karşılaştır { boyut, .. } | Self::Arasında { boyut, .. } => {
+                if depo.boyut_sırası(boyut).is_none() {
+                    return Err(boyut_hatası(boyut));
+                }
+            }
+            Self::Ve(koşullar) | Self::Veya(koşullar) => {
+                for koşul in koşullar {
+                    koşul.doğrula(depo)?;
+                }
+            }
+            Self::Değil(koşul) => koşul.doğrula(depo)?,
+        }
+        Ok(())
+    }
+
+    fn değerlendir(&self, depo: &VeriDeposu, sıra: usize) -> bool {
+        match self {
+            Self::Karşılaştır {
+                boyut,
+                işlem,
+                değer,
+            } => depo
+                .değer(sıra, boyut)
+                .map(|aday| karşılaştır(aday, değer, *işlem))
+                .unwrap_or(false),
+            Self::Arasında {
+                boyut,
+                en_az,
+                en_çok,
+            } => depo
+                .değer(sıra, boyut)
+                .and_then(VeriDeğeri::sayı)
+                .map(|değer| değer >= *en_az && değer <= *en_çok)
+                .unwrap_or(false),
+            Self::Ve(koşullar) => koşullar.iter().all(|koşul| koşul.değerlendir(depo, sıra)),
+            Self::Veya(koşullar) => koşullar.iter().any(|koşul| koşul.değerlendir(depo, sıra)),
+            Self::Değil(koşul) => !koşul.değerlendir(depo, sıra),
+        }
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct SüzmeDönüşümü {
+    pub koşul: SüzmeKoşulu,
+}
+
+impl VeriDönüşümü for SüzmeDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "filter"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, "filter")?;
+        self.koşul.doğrula(kaynak)?;
+        Ok(vec![
+            kaynak.süz(|sıra, _| self.koşul.değerlendir(kaynak, sıra)),
+        ])
+    }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct SıralamaDönüşümü {
+    pub anahtarlar: Vec<SıralamaAnahtarı>,
+}
+
+impl VeriDönüşümü for SıralamaDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "sort"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, "sort")?;
+        Ok(vec![kaynak.sırala(&self.anahtarlar)?])
+    }
+}
+
+/// Built-in `boxplot` dönüşümünün bıyık sınırı (`boundIQR`).
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum KutuSınırı {
+    /// `Q1/Q3 ± katsayı * IQR`; ECharts öntanımlısı `1.5`.
+    ÇeyreklerArası(f64),
+    /// `boundIQR: 'none' | 0`: gözlenen en küçük/en büyük değer.
+    UçDeğerler,
+}
+
+impl Default for KutuSınırı {
+    fn default() -> Self {
+        Self::ÇeyreklerArası(1.5)
+    }
+}
+
+/// ECharts built-in `boxplot` dataset dönüşümü. İlk sonuç kutu özetlerini,
+/// ikinci sonuç aykırı değerleri üretir.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct KutuDönüşümü {
+    pub sınır: KutuSınırı,
+    pub öğe_adı_biçimi: Option<String>,
+}
+
+impl KutuDönüşümü {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn çeyrekler_arası_sınır(mut self, katsayı: f64) -> Self {
+        self.sınır = if katsayı.is_finite() && katsayı > 0.0 {
+            KutuSınırı::ÇeyreklerArası(katsayı)
+        } else {
+            KutuSınırı::UçDeğerler
+        };
+        self
+    }
+
+    pub fn uç_değerleri_kullan(mut self) -> Self {
+        self.sınır = KutuSınırı::UçDeğerler;
+        self
+    }
+
+    pub fn öğe_adı_biçimi(mut self, biçim: impl Into<String>) -> Self {
+        self.öğe_adı_biçimi = Some(biçim.into());
+        self
+    }
+}
+
+impl VeriDönüşümü for KutuDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "boxplot"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, self.tür_adı())?;
+        let mut kutular = Vec::with_capacity(kaynak.sayım());
+        let mut aykırılar = Vec::new();
+
+        for sıra in 0..kaynak.sayım() {
+            let mut değerler: Vec<f64> = kaynak
+                .satır(sıra)
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(VeriDeğeri::sayı)
+                .filter(|değer| değer.is_finite())
+                .collect();
+            değerler.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+            let ad = self
+                .öğe_adı_biçimi
+                .as_deref()
+                .map(|biçim| biçim.replace("{value}", &sıra.to_string()))
+                .unwrap_or_else(|| sıra.to_string());
+            let (Some(en_az), Some(ç1), Some(ortanca), Some(ç3), Some(en_çok)) = (
+                değerler.first().copied(),
+                quantile_type7(değerler.clone(), 0.25),
+                quantile_type7(değerler.clone(), 0.5),
+                quantile_type7(değerler.clone(), 0.75),
+                değerler.last().copied(),
+            ) else {
+                kutular.push(vec![
+                    ad.into(),
+                    VeriDeğeri::Boş,
+                    VeriDeğeri::Boş,
+                    VeriDeğeri::Boş,
+                    VeriDeğeri::Boş,
+                    VeriDeğeri::Boş,
+                ]);
+                continue;
+            };
+            let (düşük, yüksek) = match self.sınır {
+                KutuSınırı::UçDeğerler => (en_az, en_çok),
+                KutuSınırı::ÇeyreklerArası(katsayı) => {
+                    let sınır = katsayı * (ç3 - ç1);
+                    (en_az.max(ç1 - sınır), en_çok.min(ç3 + sınır))
+                }
+            };
+            kutular.push(vec![
+                ad.clone().into(),
+                düşük.into(),
+                ç1.into(),
+                ortanca.into(),
+                ç3.into(),
+                yüksek.into(),
+            ]);
+            aykırılar.extend(
+                değerler
+                    .into_iter()
+                    .filter(|değer| *değer < düşük || *değer > yüksek)
+                    .map(|değer| vec![ad.clone().into(), değer.into()]),
+            );
+        }
+
+        Ok(vec![
+            VeriDeposu::satırlardan(
+                ["ItemName", "Low", "Q1", "Q2", "Q3", "High"]
+                    .into_iter()
+                    .map(BoyutTanımı::yeni),
+                kutular,
+            )?,
+            VeriDeposu::satırlardan(
+                ["ItemName", "Outlier"].into_iter().map(BoyutTanımı::yeni),
+                aykırılar,
+            )?,
+        ])
+    }
+}
+
+/// Gruplu toplama sonucunda bir boyutun nasıl üretileceği. Çeyrekler,
+/// `echarts-simple-transform` gibi doğrusal enterpolasyonlu Type-7
+/// quantile tanımını kullanır.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ToplamaYöntemi {
+    EnAz,
+    Çeyrek1,
+    Ortanca,
+    Çeyrek3,
+    EnÇok,
+    /// Grubun ilk satırındaki ham değer (genellikle grup anahtarı).
+    İlk,
+}
+
+/// `ecSimpleTransform:aggregate.config.resultDimensions` öğesi.
+#[derive(Clone, PartialEq, Debug)]
+pub struct ToplamaBoyutu {
+    pub ad: String,
+    pub kaynak: BoyutSeçici,
+    pub yöntem: ToplamaYöntemi,
+}
+
+impl ToplamaBoyutu {
+    pub fn yeni(
+        ad: impl Into<String>,
+        kaynak: impl Into<BoyutSeçici>,
+        yöntem: ToplamaYöntemi,
+    ) -> Self {
+        Self {
+            ad: ad.into(),
+            kaynak: kaynak.into(),
+            yöntem,
+        }
+    }
+
+    pub fn en_az(ad: impl Into<String>, kaynak: impl Into<BoyutSeçici>) -> Self {
+        Self::yeni(ad, kaynak, ToplamaYöntemi::EnAz)
+    }
+
+    pub fn çeyrek1(ad: impl Into<String>, kaynak: impl Into<BoyutSeçici>) -> Self {
+        Self::yeni(ad, kaynak, ToplamaYöntemi::Çeyrek1)
+    }
+
+    pub fn ortanca(ad: impl Into<String>, kaynak: impl Into<BoyutSeçici>) -> Self {
+        Self::yeni(ad, kaynak, ToplamaYöntemi::Ortanca)
+    }
+
+    pub fn çeyrek3(ad: impl Into<String>, kaynak: impl Into<BoyutSeçici>) -> Self {
+        Self::yeni(ad, kaynak, ToplamaYöntemi::Çeyrek3)
+    }
+
+    pub fn en_çok(ad: impl Into<String>, kaynak: impl Into<BoyutSeçici>) -> Self {
+        Self::yeni(ad, kaynak, ToplamaYöntemi::EnÇok)
+    }
+
+    pub fn ilk(ad: impl Into<String>, kaynak: impl Into<BoyutSeçici>) -> Self {
+        Self::yeni(ad, kaynak, ToplamaYöntemi::İlk)
+    }
+}
+
+/// `echarts-simple-transform` paketinin gruplu aggregate dönüşümünün yerli
+/// karşılığı. Kayıt defterine `ecSimpleTransform:aggregate` adıyla
+/// kaydedilebilir.
+#[derive(Clone, PartialEq, Debug)]
+pub struct ToplamaDönüşümü {
+    pub grupla: BoyutSeçici,
+    pub sonuç_boyutları: Vec<ToplamaBoyutu>,
+}
+
+impl ToplamaDönüşümü {
+    pub fn yeni(
+        grupla: impl Into<BoyutSeçici>,
+        sonuç_boyutları: impl IntoIterator<Item = ToplamaBoyutu>,
+    ) -> Self {
+        Self {
+            grupla: grupla.into(),
+            sonuç_boyutları: sonuç_boyutları.into_iter().collect(),
+        }
+    }
+}
+
+fn quantile_type7(mut değerler: Vec<f64>, oran: f64) -> Option<f64> {
+    değerler.retain(|değer| değer.is_finite());
+    değerler.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+    let ilk = *değerler.first()?;
+    if değerler.len() == 1 {
+        return Some(ilk);
+    }
+    let konum = (değerler.len() - 1) as f64 * oran.clamp(0.0, 1.0);
+    let alt = konum.floor() as usize;
+    let üst = konum.ceil() as usize;
+    let a = *değerler.get(alt)?;
+    let b = *değerler.get(üst)?;
+    Some(a + (b - a) * (konum - alt as f64))
+}
+
+impl VeriDönüşümü for ToplamaDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "ecSimpleTransform:aggregate"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, self.tür_adı())?;
+        let grup_sırası = kaynak
+            .boyut_sırası(&self.grupla)
+            .ok_or_else(|| boyut_hatası(&self.grupla))?;
+        if self.sonuç_boyutları.is_empty() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.resultDimensions",
+                ayrıntı: "aggregate en az bir sonuç boyutu gerektirir".to_owned(),
+            });
+        }
+        let çözülmüş: Result<Vec<_>, _> = self
+            .sonuç_boyutları
+            .iter()
+            .map(|boyut| {
+                kaynak
+                    .boyut_sırası(&boyut.kaynak)
+                    .map(|sıra| (boyut, sıra))
+                    .ok_or_else(|| boyut_hatası(&boyut.kaynak))
+            })
+            .collect();
+        let çözülmüş = çözülmüş?;
+
+        // JavaScript Map ekleme sırasını korur; grup çıktısı da kaynakta ilk
+        // görülme sırasındadır.
+        let mut gruplar: Vec<(VeriDeğeri, Vec<usize>)> = Vec::new();
+        for sıra in 0..kaynak.sayım() {
+            let anahtar = kaynak
+                .değer(sıra, &BoyutSeçici::Sıra(grup_sırası))
+                .cloned()
+                .unwrap_or(VeriDeğeri::Boş);
+            if let Some((_, sıralar)) = gruplar.iter_mut().find(|(aday, _)| aday == &anahtar) {
+                sıralar.push(sıra);
+            } else {
+                gruplar.push((anahtar, vec![sıra]));
+            }
+        }
+
+        let mut satırlar = Vec::with_capacity(gruplar.len());
+        for (_, grup_satırları) in gruplar {
+            let mut satır = Vec::with_capacity(çözülmüş.len());
+            for (boyut, kaynak_sırası) in &çözülmüş {
+                let ilk_değer = grup_satırları
+                    .first()
+                    .and_then(|sıra| kaynak.değer(*sıra, &BoyutSeçici::Sıra(*kaynak_sırası)))
+                    .cloned()
+                    .unwrap_or(VeriDeğeri::Boş);
+                let değer = match boyut.yöntem {
+                    ToplamaYöntemi::İlk => ilk_değer,
+                    yöntem => {
+                        let sayılar: Vec<f64> = grup_satırları
+                            .iter()
+                            .filter_map(|sıra| {
+                                kaynak.değer(*sıra, &BoyutSeçici::Sıra(*kaynak_sırası))
+                            })
+                            .filter_map(VeriDeğeri::sayı)
+                            .collect();
+                        let sonuç = match yöntem {
+                            ToplamaYöntemi::EnAz => sayılar.iter().copied().reduce(f64::min),
+                            ToplamaYöntemi::Çeyrek1 => quantile_type7(sayılar, 0.25),
+                            ToplamaYöntemi::Ortanca => quantile_type7(sayılar, 0.5),
+                            ToplamaYöntemi::Çeyrek3 => quantile_type7(sayılar, 0.75),
+                            ToplamaYöntemi::EnÇok => sayılar.iter().copied().reduce(f64::max),
+                            ToplamaYöntemi::İlk => None,
+                        };
+                        sonuç.map(VeriDeğeri::Sayı).unwrap_or(VeriDeğeri::Boş)
+                    }
+                };
+                satır.push(değer);
+            }
+            satırlar.push(satır);
+        }
+
+        let boyutlar = self
+            .sonuç_boyutları
+            .iter()
+            .map(|boyut| BoyutTanımı::yeni(boyut.ad.clone()));
+        Ok(vec![VeriDeposu::satırlardan(boyutlar, satırlar)?])
+    }
+}
+
+/// Kullanıcı dönüşümlerinin adla kaydı. Kayıt bir örneğe değil kitaplığa
+/// aittir; trait nesnesi `Send + Sync` olduğundan başsız/progressive
+/// koşucularda da güvenle paylaşılır.
+#[derive(Default)]
+pub struct DönüşümKayıtDefteri {
+    dönüşümler: BTreeMap<String, Arc<dyn VeriDönüşümü>>,
+}
+
+impl DönüşümKayıtDefteri {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn kaydet(
+        &mut self, dönüşüm: impl VeriDönüşümü + 'static
+    ) -> Result<(), BilesenHatasi> {
+        let ad = dönüşüm.tür_adı().trim().to_owned();
+        if ad.is_empty() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.type",
+                ayrıntı: "dönüşüm türü boş olamaz".to_owned(),
+            });
+        }
+        if self.dönüşümler.contains_key(&ad) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.type",
+                ayrıntı: format!("`{ad}` dönüşümü zaten kayıtlı"),
+            });
+        }
+        self.dönüşümler.insert(ad, Arc::new(dönüşüm));
+        Ok(())
+    }
+
+    pub fn çalıştır(
+        &self,
+        tür: &str,
+        upstream: &[VeriDeposu],
+    ) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let dönüşüm = self
+            .dönüşümler
+            .get(tür)
+            .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.type",
+                ayrıntı: format!("`{tür}` dönüşümü kayıtlı değil"),
+            })?;
+        dönüşüm.uygula(upstream)
+    }
+}
+
+/// `dataset.fromDatasetId` ve çok sonuçlu transform zincirlerinin
+/// belirlenimci, yürütülmüş görünümü.
+#[derive(Clone, Default)]
+pub struct VeriKümesiZinciri {
+    sonuçlar: BTreeMap<String, Vec<VeriDeposu>>,
+}
+
+impl VeriKümesiZinciri {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn kaynak_ekle(
+        &mut self,
+        kimlik: impl Into<String>,
+        kaynak: VeriKaynağı,
+        seçenekler: KaynakSeçenekleri,
+    ) -> Result<(), BilesenHatasi> {
+        let kimlik = kimlik.into();
+        self.kimliği_doğrula(&kimlik)?;
+        self.sonuçlar
+            .insert(kimlik, vec![VeriDeposu::kaynaktan(kaynak, seçenekler)?]);
+        Ok(())
+    }
+
+    pub fn dönüştür(
+        &mut self,
+        kimlik: impl Into<String>,
+        upstream: impl IntoIterator<Item = (String, usize)>,
+        dönüşüm: &dyn VeriDönüşümü,
+    ) -> Result<(), BilesenHatasi> {
+        let kimlik = kimlik.into();
+        self.kimliği_doğrula(&kimlik)?;
+        let girdiler: Result<Vec<_>, _> = upstream
+            .into_iter()
+            .map(|(kaynak, sonuç_sırası)| {
+                self.al(&kaynak, sonuç_sırası).cloned().ok_or_else(|| {
+                    BilesenHatasi::GeçersizSeçenek {
+                        alan: "dataset.fromDatasetId",
+                        ayrıntı: format!("`{kaynak}` kümesinin {sonuç_sırası}. sonucu yok"),
+                    }
+                })
+            })
+            .collect();
+        let sonuç = dönüşüm.uygula(&girdiler?)?;
+        if sonuç.is_empty() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.result",
+                ayrıntı: "dönüşüm en az bir veri sonucu üretmeli".to_owned(),
+            });
+        }
+        self.sonuçlar.insert(kimlik, sonuç);
+        Ok(())
+    }
+
+    pub fn al(&self, kimlik: &str, sonuç_sırası: usize) -> Option<&VeriDeposu> {
+        self.sonuçlar.get(kimlik)?.get(sonuç_sırası)
+    }
+
+    fn kimliği_doğrula(&self, kimlik: &str) -> Result<(), BilesenHatasi> {
+        if kimlik.is_empty() || self.sonuçlar.contains_key(kimlik) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "dataset.id",
+                ayrıntı: if kimlik.is_empty() {
+                    "dataset kimliği boş olamaz".to_owned()
+                } else {
+                    format!("`{kimlik}` dataset kimliği yinelendi")
+                },
+            });
+        }
+        Ok(())
+    }
+}
+
+fn kaynağı_normalleştir(
+    kaynak: VeriKaynağı,
+    seçenekler: &KaynakSeçenekleri,
+) -> Result<(Vec<BoyutTanımı>, Vec<Vec<VeriDeğeri>>), BilesenHatasi> {
+    match kaynak {
+        VeriKaynağı::DiziSatırlar(dizi) => {
+            let başlık = match seçenekler.başlık {
+                KaynakBaşlığı::Otomatik => {
+                    otomatik_başlık_sayısı(&dizi, seçenekler.yerleşim)
+                }
+                KaynakBaşlığı::Sayı(sayı) => sayı,
+            };
+            let mut boyutlar = seçenekler.boyutlar.clone();
+            let satırlar = match seçenekler.yerleşim {
+                SeriYerleşimi::Sütun => {
+                    if boyutlar.is_empty() && başlık == 1 {
+                        boyutlar = dizi
+                            .first()
+                            .map(|satır| satır.iter().map(boyut_adı).collect())
+                            .unwrap_or_default();
+                    }
+                    dizi.into_iter().skip(başlık).collect()
+                }
+                SeriYerleşimi::Satır => {
+                    if boyutlar.is_empty() && başlık == 1 {
+                        boyutlar = dizi
+                            .iter()
+                            .map(|satır| {
+                                satır
+                                    .first()
+                                    .map(boyut_adı)
+                                    .unwrap_or_else(|| BoyutTanımı::yeni(""))
+                            })
+                            .collect();
+                    }
+                    let sütun_sayısı = dizi.iter().map(Vec::len).max().unwrap_or(0);
+                    (başlık..sütun_sayısı)
+                        .map(|sütun| {
+                            dizi.iter()
+                                .map(|satır| satır.get(sütun).cloned().unwrap_or(VeriDeğeri::Boş))
+                                .collect()
+                        })
+                        .collect()
+                }
+            };
+            Ok((boyutlar, satırlar))
+        }
+        VeriKaynağı::NesneSatırlar(nesneler) => {
+            let mut boyutlar = seçenekler.boyutlar.clone();
+            if boyutlar.is_empty() {
+                boyutlar = nesneler
+                    .iter()
+                    .find(|satır| !satır.is_empty())
+                    .map(|satır| {
+                        satır
+                            .iter()
+                            .map(|(ad, _)| BoyutTanımı::yeni(ad.clone()))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+            }
+            let satırlar = nesneler
+                .into_iter()
+                .map(|nesne| {
+                    boyutlar
+                        .iter()
+                        .map(|boyut| {
+                            nesne
+                                .iter()
+                                .find(|(ad, _)| ad == &boyut.ad)
+                                .map(|(_, değer)| değer.clone())
+                                .unwrap_or(VeriDeğeri::Boş)
+                        })
+                        .collect()
+                })
+                .collect();
+            Ok((boyutlar, satırlar))
+        }
+        VeriKaynağı::AnahtarlıSütunlar(sütunlar) => {
+            let boyutlar = if seçenekler.boyutlar.is_empty() {
+                sütunlar
+                    .iter()
+                    .map(|(ad, _)| BoyutTanımı::yeni(ad.clone()))
+                    .collect()
+            } else {
+                seçenekler.boyutlar.clone()
+            };
+            let satır_sayısı = sütunlar.iter().map(|(_, d)| d.len()).max().unwrap_or(0);
+            let satırlar = (0..satır_sayısı)
+                .map(|satır| {
+                    boyutlar
+                        .iter()
+                        .map(|boyut| {
+                            sütunlar
+                                .iter()
+                                .find(|(ad, _)| ad == &boyut.ad)
+                                .and_then(|(_, değerler)| değerler.get(satır))
+                                .cloned()
+                                .unwrap_or(VeriDeğeri::Boş)
+                        })
+                        .collect()
+                })
+                .collect();
+            Ok((boyutlar, satırlar))
+        }
+        VeriKaynağı::TürlüDizi {
+            değerler,
+            boyut_sayısı,
+        } => {
+            if boyut_sayısı == 0
+                || seçenekler.boyutlar.len() != boyut_sayısı
+                || değerler.len() % boyut_sayısı != 0
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "dataset.typedArray",
+                    ayrıntı: format!(
+                        "typed array için {boyut_sayısı} açık boyut ve tam satırlar gerekli ({} değer, {} tanım)",
+                        değerler.len(),
+                        seçenekler.boyutlar.len()
+                    ),
+                });
+            }
+            let satır_sayısı = değerler.len() / boyut_sayısı;
+            let satırlar = (0..satır_sayısı)
+                .map(|satır| {
+                    (0..boyut_sayısı)
+                        .map(|sütun| {
+                            değerler
+                                .değer(satır * boyut_sayısı + sütun)
+                                .unwrap_or(VeriDeğeri::Boş)
+                        })
+                        .collect()
+                })
+                .collect();
+            Ok((seçenekler.boyutlar.clone(), satırlar))
+        }
+    }
+}
+
+fn otomatik_başlık_sayısı(dizi: &[Vec<VeriDeğeri>], yerleşim: SeriYerleşimi) -> usize {
+    let değerler: Vec<_> = match yerleşim {
+        SeriYerleşimi::Sütun => dizi
+            .first()
+            .map(|satır| satır.iter().take(10).collect())
+            .unwrap_or_default(),
+        SeriYerleşimi::Satır => dizi
+            .iter()
+            .take(10)
+            .filter_map(|satır| satır.first())
+            .collect(),
+    };
+    let mut sonuç = None;
+    for değer in değerler {
+        match değer {
+            VeriDeğeri::Boş => {}
+            VeriDeğeri::Metin(metin) if metin == "-" => {}
+            VeriDeğeri::Metin(_) if sonuç.is_none() => sonuç = Some(1),
+            VeriDeğeri::Metin(_) => {}
+            _ => sonuç = Some(0),
+        }
+    }
+    sonuç.unwrap_or(0)
+}
+
+fn boyut_adı(değer: &VeriDeğeri) -> BoyutTanımı {
+    BoyutTanımı::yeni(değer_metin(değer).unwrap_or_default())
+}
+
+fn boyutları_doğrula(boyutlar: &[BoyutTanımı]) -> Result<(), BilesenHatasi> {
+    let mut adlar = std::collections::HashSet::new();
+    for boyut in boyutlar {
+        if !boyut.ad.is_empty() && !adlar.insert(&boyut.ad) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "dataset.dimensions",
+                ayrıntı: format!("`{}` boyut adı yinelendi", boyut.ad),
+            });
+        }
+    }
+    Ok(())
+}
+
+fn boyut_türünü_bul(sütun: &[VeriDeğeri]) -> BoyutTürü {
+    let mut tür = BoyutTürü::Bilinmeyen;
+    for değer in sütun.iter().filter(|değer| !değer.boş_mu()) {
+        let aday = match değer {
+            VeriDeğeri::Sayı(_) | VeriDeğeri::Çift(_) | VeriDeğeri::Dizi(_) => {
+                BoyutTürü::Sayı
+            }
+            VeriDeğeri::Metin(_) => BoyutTürü::Sıralı,
+            VeriDeğeri::Mantıksal(_) => BoyutTürü::Mantıksal,
+            VeriDeğeri::Zaman(_) => BoyutTürü::Zaman,
+            VeriDeğeri::Boş => continue,
+        };
+        if tür == BoyutTürü::Bilinmeyen {
+            tür = aday;
+        } else if tür != aday {
+            return if aday == BoyutTürü::Sıralı || tür == BoyutTürü::Sıralı {
+                BoyutTürü::Sıralı
+            } else {
+                BoyutTürü::Bilinmeyen
+            };
+        }
+    }
+    tür
+}
+
+fn boyut_hatası(boyut: &BoyutSeçici) -> BilesenHatasi {
+    BilesenHatasi::GeçersizSeçenek {
+        alan: "dataset.dimension",
+        ayrıntı: format!("{boyut:?} boyutu yok"),
+    }
+}
+
+fn tek_upstream<'a>(
+    upstream: &'a [VeriDeposu],
+    tür: &str,
+) -> Result<&'a VeriDeposu, BilesenHatasi> {
+    if upstream.len() != 1 {
+        return Err(BilesenHatasi::GeçersizSeçenek {
+            alan: "transform.upstream",
+            ayrıntı: format!(
+                "`{tür}` tam bir upstream bekler, {} verildi",
+                upstream.len()
+            ),
+        });
+    }
+    upstream.first().ok_or(BilesenHatasi::EksikVeri {
+        bileşen: "transform.upstream",
+        sıra: 0,
+    })
+}
+
+fn karşılaştır(
+    sol: &VeriDeğeri, sağ: &VeriDeğeri, işlem: Karşılaştırmaİşlemi
+) -> bool {
+    if işlem == Karşılaştırmaİşlemi::İçerir {
+        return değer_metin(sol)
+            .zip(değer_metin(sağ))
+            .map(|(sol, sağ)| sol.contains(&sağ))
+            .unwrap_or(false);
+    }
+    let sıra = değerleri_karşılaştır(Some(sol), Some(sağ));
+    match işlem {
+        Karşılaştırmaİşlemi::Eşit => sıra == Ordering::Equal,
+        Karşılaştırmaİşlemi::EşitDeğil => sıra != Ordering::Equal,
+        Karşılaştırmaİşlemi::Küçük => sıra == Ordering::Less,
+        Karşılaştırmaİşlemi::KüçükEşit => sıra != Ordering::Greater,
+        Karşılaştırmaİşlemi::Büyük => sıra == Ordering::Greater,
+        Karşılaştırmaİşlemi::BüyükEşit => sıra != Ordering::Less,
+        Karşılaştırmaİşlemi::İçerir => false,
+    }
+}
+
+fn değerleri_karşılaştır(sol: Option<&VeriDeğeri>, sağ: Option<&VeriDeğeri>) -> Ordering {
+    match (sol, sağ) {
+        (None, None) => Ordering::Equal,
+        (None, Some(_)) => Ordering::Greater,
+        (Some(_), None) => Ordering::Less,
+        (Some(sol), Some(sağ)) if sol.boş_mu() && sağ.boş_mu() => Ordering::Equal,
+        (Some(sol), Some(_)) if sol.boş_mu() => Ordering::Greater,
+        (Some(_), Some(sağ)) if sağ.boş_mu() => Ordering::Less,
+        (Some(sol), Some(sağ)) => match (sol.sayı(), sağ.sayı()) {
+            (Some(sol), Some(sağ)) if sol.is_finite() && sağ.is_finite() => sol.total_cmp(&sağ),
+            _ => değer_metin(sol)
+                .unwrap_or_default()
+                .cmp(&değer_metin(sağ).unwrap_or_default()),
+        },
+    }
+}
+
+fn değer_metin(değer: &VeriDeğeri) -> Option<String> {
+    match değer {
+        VeriDeğeri::Boş => None,
+        VeriDeğeri::Sayı(sayı) => Some(crate::yardimci::bicim::ondalık_kırp(*sayı)),
+        VeriDeğeri::Çift([x, y]) => Some(format!("{x},{y}")),
+        VeriDeğeri::Dizi(dizi) => Some(
+            dizi.iter()
+                .map(|sayı| crate::yardimci::bicim::ondalık_kırp(*sayı))
+                .collect::<Vec<_>>()
+                .join(","),
+        ),
+        VeriDeğeri::Metin(metin) => Some(metin.clone()),
+        VeriDeğeri::Mantıksal(değer) => Some(değer.to_string()),
+        VeriDeğeri::Zaman(ms) => Some(ms.to_string()),
     }
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
 
@@ -161,10 +1606,309 @@ mod testler {
     fn dönüşümler() {
         let küme = örnek();
         let sıralı = küme.sırala("satış", false).unwrap();
-        assert_eq!(sıralı.metinler("ürün").unwrap(), vec!["Kiraz", "Elma", "Armut"]);
-        let süzülü = küme.süz(|satır| {
-            satır.get(1).and_then(|h| h.sayı()).unwrap_or(0.0) > 100.0
-        });
+        assert_eq!(
+            sıralı.metinler("ürün").unwrap(),
+            vec!["Kiraz", "Elma", "Armut"]
+        );
+        let süzülü = küme.süz(|satır| satır.get(1).and_then(|h| h.sayı()).unwrap_or(0.0) > 100.0);
         assert_eq!(süzülü.satırlar.len(), 2);
+    }
+
+    #[test]
+    fn çoklu_dataset_varsayılan_sıfırıncı_ve_açık_upstreami_çözer() {
+        let kaynak = örnek();
+        let zincir = vec![
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::sırala([SıralamaAnahtarı::azalan("satış")]),
+            VeriKümesiTanımı::kaynaktan_süz(
+                0,
+                SüzmeKoşulu::Arasında {
+                    boyut: BoyutSeçici::ad("satış"),
+                    en_az: 100.0,
+                    en_çok: 130.0,
+                },
+            ),
+        ];
+        let sonuçlar = veri_kümelerini_çöz(&zincir).unwrap();
+        assert_eq!(
+            sonuçlar[1].metinler("ürün").unwrap(),
+            vec!["Kiraz", "Elma", "Armut"]
+        );
+        assert_eq!(sonuçlar[2].metinler("ürün").unwrap(), vec!["Elma"]);
+    }
+
+    #[test]
+    fn kardeş_süzmelerin_ikisi_de_varsayılan_olarak_sıfırıncı_dataseti_kullanır() {
+        let kaynak = VeriKümesi::yeni(["ürün", "satış", "yıl"])
+            .satır(["Kek".into(), 123.into(), 2011.into()])
+            .satır(["Tahıl".into(), 231.into(), 2011.into()])
+            .satır(["Kek".into(), 143.into(), 2012.into()]);
+        let yıla_göre = |yıl: i32| {
+            VeriKümesiTanımı::süz(SüzmeKoşulu::Karşılaştır {
+                boyut: BoyutSeçici::ad("yıl"),
+                işlem: Karşılaştırmaİşlemi::Eşit,
+                değer: yıl.into(),
+            })
+        };
+
+        let sonuçlar = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            yıla_göre(2011),
+            yıla_göre(2012),
+        ])
+        .unwrap();
+
+        assert_eq!(sonuçlar[1].metinler("ürün").unwrap(), vec!["Kek", "Tahıl"]);
+        assert_eq!(sonuçlar[2].metinler("ürün").unwrap(), vec!["Kek"]);
+    }
+
+    #[test]
+    fn array_rows_otomatik_baslik_ve_boyut_turu() {
+        let kaynak = VeriKaynağı::DiziSatırlar(vec![
+            vec!["ürün".into(), "satış".into(), "stokta".into()],
+            vec!["Elma".into(), 12.into(), true.into()],
+            vec!["Armut".into(), 7.into(), false.into()],
+        ]);
+        let depo = VeriDeposu::kaynaktan(kaynak, KaynakSeçenekleri::default()).unwrap();
+        assert_eq!(depo.sayım(), 2);
+        assert_eq!(depo.boyutlar[0].ad, "ürün");
+        assert_eq!(depo.boyutlar[0].tür, BoyutTürü::Sıralı);
+        assert_eq!(depo.boyutlar[1].tür, BoyutTürü::Sayı);
+        assert_eq!(depo.boyutlar[2].tür, BoyutTürü::Mantıksal);
+        assert_eq!(depo.değer(1, &BoyutSeçici::ad("satış")), Some(&7.into()));
+    }
+
+    #[test]
+    fn row_layout_ilk_sutunu_boyut_adi_sayar() {
+        let kaynak = VeriKaynağı::DiziSatırlar(vec![
+            vec!["ürün".into(), "Elma".into(), "Armut".into()],
+            vec!["satış".into(), 12.into(), 7.into()],
+        ]);
+        let depo = VeriDeposu::kaynaktan(
+            kaynak,
+            KaynakSeçenekleri {
+                yerleşim: SeriYerleşimi::Satır,
+                ..KaynakSeçenekleri::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(depo.sayım(), 2);
+        assert_eq!(depo.boyutlar[0].ad, "ürün");
+        assert_eq!(depo.boyutlar[1].ad, "satış");
+        assert_eq!(
+            depo.değer(0, &BoyutSeçici::ad("ürün")),
+            Some(&VeriDeğeri::Metin("Elma".to_owned()))
+        );
+    }
+
+    #[test]
+    fn object_keyed_columns_ve_typed_array_normalize_edilir() {
+        let nesneler = VeriKaynağı::NesneSatırlar(vec![
+            vec![("x".to_owned(), 1.into()), ("y".to_owned(), 2.into())],
+            vec![("x".to_owned(), 3.into())],
+        ]);
+        let nesne_deposu = VeriDeposu::kaynaktan(nesneler, KaynakSeçenekleri::default()).unwrap();
+        assert_eq!(nesne_deposu.sayım(), 2);
+        assert!(matches!(
+            nesne_deposu.değer(1, &BoyutSeçici::ad("y")),
+            Some(VeriDeğeri::Boş)
+        ));
+
+        let sütunlar = VeriKaynağı::AnahtarlıSütunlar(vec![
+            ("x".to_owned(), vec![1.into(), 2.into()]),
+            ("y".to_owned(), vec![3.into()]),
+        ]);
+        let sütun_deposu = VeriDeposu::kaynaktan(sütunlar, KaynakSeçenekleri::default()).unwrap();
+        assert_eq!(sütun_deposu.sayım(), 2);
+
+        let türlü = VeriKaynağı::TürlüDizi {
+            değerler: TürlüSayıDizisi::F32(vec![1.0, 2.0, 3.0, 4.0]),
+            boyut_sayısı: 2,
+        };
+        let türlü_depo = VeriDeposu::kaynaktan(
+            türlü,
+            KaynakSeçenekleri {
+                boyutlar: vec![BoyutTanımı::yeni("x"), BoyutTanımı::yeni("y")],
+                ..KaynakSeçenekleri::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(türlü_depo.sayım(), 2);
+        assert_eq!(
+            türlü_depo.değer(1, &BoyutSeçici::ad("y")),
+            Some(&VeriDeğeri::Sayı(4.0))
+        );
+    }
+
+    #[test]
+    fn datastore_indeks_gorunumu_sort_filter_range_append() {
+        let mut depo = örnek().depoya().unwrap();
+        assert_eq!(
+            depo.kapsam(&BoyutSeçici::ad("satış")).unwrap(),
+            [80.0, 160.0]
+        );
+        let süzülü = depo
+            .aralık_seç(&BoyutSeçici::ad("satış"), 100.0, 130.0)
+            .unwrap();
+        assert_eq!(süzülü.sayım(), 1);
+        let sıralı = depo.sırala(&[SıralamaAnahtarı::azalan("satış")]).unwrap();
+        assert_eq!(
+            sıralı.değer(0, &BoyutSeçici::ad("ürün")),
+            Some(&VeriDeğeri::Metin("Kiraz".to_owned()))
+        );
+        assert_eq!(
+            depo.ekle(vec![vec!["Muz".into(), 90.into(), 20.into()]])
+                .unwrap(),
+            [3, 4]
+        );
+        assert_eq!(depo.sayım(), 4);
+        assert!(süzülü.clone().ekle(vec![vec![]]).is_err());
+    }
+
+    #[test]
+    fn builtin_transform_ve_dataset_zinciri() {
+        let kaynak = örnek().depoya().unwrap();
+        let süz = SüzmeDönüşümü {
+            koşul: SüzmeKoşulu::Ve(vec![
+                SüzmeKoşulu::Karşılaştır {
+                    boyut: BoyutSeçici::ad("satış"),
+                    işlem: Karşılaştırmaİşlemi::BüyükEşit,
+                    değer: 100.into(),
+                },
+                SüzmeKoşulu::Karşılaştır {
+                    boyut: BoyutSeçici::ad("ürün"),
+                    işlem: Karşılaştırmaİşlemi::İçerir,
+                    değer: "a".into(),
+                },
+            ]),
+        };
+        let süzülü = süz.uygula(std::slice::from_ref(&kaynak)).unwrap();
+        assert_eq!(süzülü[0].sayım(), 2);
+
+        let sırala = SıralamaDönüşümü {
+            anahtarlar: vec![SıralamaAnahtarı::azalan("satış")],
+        };
+        let mut zincir = VeriKümesiZinciri::yeni();
+        zincir
+            .kaynak_ekle(
+                "ham",
+                VeriKaynağı::DiziSatırlar(vec![
+                    vec!["ürün".into(), "satış".into()],
+                    vec!["A".into(), 1.into()],
+                    vec!["B".into(), 3.into()],
+                ]),
+                KaynakSeçenekleri::default(),
+            )
+            .unwrap();
+        zincir
+            .dönüştür("sıralı", [("ham".to_owned(), 0)], &sırala)
+            .unwrap();
+        assert_eq!(
+            zincir
+                .al("sıralı", 0)
+                .unwrap()
+                .değer(0, &BoyutSeçici::ad("ürün")),
+            Some(&VeriDeğeri::Metin("B".to_owned()))
+        );
+    }
+
+    #[test]
+    fn kullanici_transformu_cok_sonuc_uretebilir() {
+        struct Böl;
+        impl VeriDönüşümü for Böl {
+            fn tür_adı(&self) -> &str {
+                "örnek:böl"
+            }
+
+            fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+                let kaynak = tek_upstream(upstream, self.tür_adı())?;
+                Ok(vec![
+                    kaynak.süz(|sıra, _| sıra % 2 == 0),
+                    kaynak.süz(|sıra, _| sıra % 2 == 1),
+                ])
+            }
+        }
+
+        let kaynak = örnek().depoya().unwrap();
+        let mut kayıt = DönüşümKayıtDefteri::yeni();
+        kayıt.kaydet(Böl).unwrap();
+        let sonuçlar = kayıt.çalıştır("örnek:böl", &[kaynak]).unwrap();
+        assert_eq!(sonuçlar.len(), 2);
+        assert_eq!(sonuçlar[0].sayım(), 2);
+        assert_eq!(sonuçlar[1].sayım(), 1);
+        assert!(kayıt.kaydet(Böl).is_err());
+    }
+
+    #[test]
+    fn aggregate_grupları_ve_type7_çeyrekleri_hesaplar() {
+        let kaynak = VeriKümesi::yeni(["Country", "Income"])
+            .satır(["A".into(), 1.into()])
+            .satır(["A".into(), 2.into()])
+            .satır(["B".into(), 10.into()])
+            .satır(["A".into(), 3.into()])
+            .satır(["B".into(), 20.into()])
+            .satır(["A".into(), 4.into()])
+            .depoya()
+            .unwrap();
+        let dönüşüm = ToplamaDönüşümü::yeni(
+            "Country",
+            [
+                ToplamaBoyutu::en_az("min", "Income"),
+                ToplamaBoyutu::çeyrek1("Q1", "Income"),
+                ToplamaBoyutu::ortanca("median", "Income"),
+                ToplamaBoyutu::çeyrek3("Q3", "Income"),
+                ToplamaBoyutu::en_çok("max", "Income"),
+                ToplamaBoyutu::ilk("Country", "Country"),
+            ],
+        );
+
+        let sonuçlar = dönüşüm.uygula(&[kaynak]).unwrap();
+        let sonuç = &sonuçlar[0];
+        assert_eq!(sonuç.sayım(), 2);
+        assert_eq!(
+            sonuç.satırları_kopyala()[0],
+            vec![
+                1.0.into(),
+                1.75.into(),
+                2.5.into(),
+                3.25.into(),
+                4.0.into(),
+                "A".into(),
+            ]
+        );
+        // Gruplar JavaScript Map gibi kaynakta ilk görülme sırasını korur.
+        assert_eq!(
+            sonuç.değer(1, &BoyutSeçici::ad("Country")),
+            Some(&VeriDeğeri::Metin("B".to_owned()))
+        );
+    }
+
+    #[test]
+    fn boxplot_transform_özet_ve_aykırı_sonuçlarını_üretir() {
+        let kaynak = VeriKümesi::yeni(["a", "b", "c", "d", "e"])
+            .satır([1.into(), 2.into(), 3.into(), 4.into(), 100.into()])
+            .depoya()
+            .unwrap();
+        let sonuçlar = KutuDönüşümü::yeni()
+            .öğe_adı_biçimi("expr {value}")
+            .uygula(&[kaynak])
+            .unwrap();
+
+        assert_eq!(sonuçlar.len(), 2);
+        assert_eq!(
+            sonuçlar[0].satırları_kopyala()[0],
+            vec![
+                "expr 0".into(),
+                1.0.into(),
+                2.0.into(),
+                3.0.into(),
+                4.0.into(),
+                7.0.into(),
+            ]
+        );
+        assert_eq!(
+            sonuçlar[1].satırları_kopyala(),
+            vec![vec!["expr 0".into(), 100.0.into()]]
+        );
     }
 }

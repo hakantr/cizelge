@@ -1,21 +1,30 @@
 //! Grafik seçenekleri — ECharts'taki kök `option` nesnesinin karşılığı.
 
+use std::collections::BTreeMap;
+
 use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
 use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
 use crate::model::eksen::Eksen;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::kutupsal::KutupsalKoordinat;
+use crate::model::matris::MatrisKoordinatı;
 use crate::model::radar::RadarKoordinatı;
-use crate::model::veri_kumesi::VeriKümesi;
-use crate::model::yakinlastirma::VeriYakınlaştırma;
 use crate::model::seri::Seri;
-use crate::renk::Renk;
+use crate::model::takvim::TakvimKoordinatı;
+use crate::model::veri_kumesi::{
+    BoyutSeçici, SeriYerleşimi, VeriKümesi, VeriKümesiTanımı, veri_kümelerini_çöz,
+};
+use crate::model::yakinlastirma::VeriYakınlaştırma;
+use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
 /// Kök grafik seçenekleri (`EChartsOption`).
 #[derive(Clone, Debug)]
 pub struct GrafikSeçenekleri {
     pub başlık: Option<Başlık>,
+    /// Çoklu başlık listesi (`title: []`). Boşsa geriye uyumlu tekil
+    /// `başlık` alanı kullanılır.
+    pub başlıklar: Vec<Başlık>,
     pub gösterge: Option<Gösterge>,
     pub ızgara: Izgara,
     /// Çoklu ızgara listesi (`grid: []`); boşsa `ızgara` tek başına
@@ -28,6 +37,13 @@ pub struct GrafikSeçenekleri {
     /// Çoklu y eksenleri (`yAxis: []`); boşsa `y_ekseni` kullanılır.
     pub y_eksenleri: Vec<Eksen>,
     pub seriler: Vec<Seri>,
+    /// `series[i].id` karşılığı. Kimlikler seri verisinden ayrı tutulur;
+    /// böylece mevcut seri kurucularının kaynak uyumluluğu bozulmadan
+    /// ECharts'ın `id`/`name`/indeks birleştirme sırası uygulanabilir.
+    ///
+    /// Dışarıdan `seriler` doğrudan değiştirilebildiği için bu vektör kısa
+    /// olabilir; eksik girişler kimliksiz kabul edilir.
+    pub seri_kimlikleri: Vec<Option<String>>,
     pub ipucu: Option<İpucu>,
     /// Görsel eşleme bileşeni (`visualMap`); ısı haritası hücre renkleri
     /// buradan çözülür.
@@ -36,8 +52,15 @@ pub struct GrafikSeçenekleri {
     pub radar: Option<RadarKoordinatı>,
     /// Kutupsal koordinat sistemi (`polar` + `angleAxis` + `radiusAxis`).
     pub kutupsal: Option<KutupsalKoordinat>,
+    /// ECharts 6.1 `matrix` koordinat sistemi.
+    pub matris: Option<MatrisKoordinatı>,
+    /// Birden çok ECharts `calendar` koordinat bileşeni.
+    pub takvimler: Vec<TakvimKoordinatı>,
     /// Ortak veri tablosu (`dataset`); seriler `eşle(...)` ile beslenir.
     pub veri_kümesi: Option<VeriKümesi>,
+    /// Çoklu kaynak ve built-in dönüşüm zinciri (`dataset: []`). Boşsa
+    /// geriye uyumlu tekil `veri_kümesi` kullanılır.
+    pub veri_kümeleri: Vec<VeriKümesiTanımı>,
     /// Veri yakınlaştırmaları (`dataZoom`).
     pub veri_yakınlaştırmaları: Vec<VeriYakınlaştırma>,
     /// Araç kutusu (`toolbox`).
@@ -46,7 +69,7 @@ pub struct GrafikSeçenekleri {
     pub fırça: Option<Fırça>,
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
-    pub arkaplan: Option<Renk>,
+    pub arkaplan: Option<Dolgu>,
     /// Koyu tema (`theme: 'dark'` karşılığı): eksen/yazı/ipucu renkleri koyu
     /// belirteçlerden çözülür; `arkaplan` verilmemişse koyu zemin doldurulur.
     pub koyu: bool,
@@ -65,6 +88,7 @@ impl Default for GrafikSeçenekleri {
     fn default() -> Self {
         GrafikSeçenekleri {
             başlık: None,
+            başlıklar: Vec::new(),
             gösterge: None,
             ızgara: Izgara::default(),
             ızgaralar: Vec::new(),
@@ -73,11 +97,15 @@ impl Default for GrafikSeçenekleri {
             x_eksenleri: Vec::new(),
             y_eksenleri: Vec::new(),
             seriler: Vec::new(),
+            seri_kimlikleri: Vec::new(),
             ipucu: None,
             görsel_eşleme: None,
             radar: None,
             kutupsal: None,
+            matris: None,
+            takvimler: Vec::new(),
             veri_kümesi: None,
+            veri_kümeleri: Vec::new(),
             veri_yakınlaştırmaları: Vec::new(),
             araç_kutusu: None,
             fırça: None,
@@ -100,6 +128,19 @@ impl GrafikSeçenekleri {
 
     pub fn başlık(mut self, başlık: Başlık) -> Self {
         self.başlık = Some(başlık);
+        self.başlıklar.clear();
+        self
+    }
+
+    /// Bir başlık bileşeni ekler (`title: [...]`). Daha önce tekil başlık
+    /// kurulmuşsa onu ilk öğe olarak koruyup çoklu biçime geçirir.
+    pub fn başlık_ekle(mut self, başlık: Başlık) -> Self {
+        if self.başlıklar.is_empty()
+            && let Some(tekil) = self.başlık.take()
+        {
+            self.başlıklar.push(tekil);
+        }
+        self.başlıklar.push(başlık);
         self
     }
 
@@ -173,12 +214,32 @@ impl GrafikSeçenekleri {
 
     pub fn seri(mut self, seri: impl Into<Seri>) -> Self {
         self.seriler.push(seri.into());
+        self.seri_kimlikleri.push(None);
+        self
+    }
+
+    /// Açık `series.id` ile seri ekler. `id`, normal option birleştirmesinde
+    /// `name` ve dizi sırasından önce kullanılır.
+    pub fn kimlikli_seri(mut self, kimlik: impl Into<String>, seri: impl Into<Seri>) -> Self {
+        self.seriler.push(seri.into());
+        self.seri_kimlikleri.push(Some(kimlik.into()));
         self
     }
 
     pub fn seriler<S: Into<Seri>>(mut self, seriler: impl IntoIterator<Item = S>) -> Self {
-        self.seriler.extend(seriler.into_iter().map(Into::into));
+        for seri in seriler {
+            self.seriler.push(seri.into());
+            self.seri_kimlikleri.push(None);
+        }
         self
+    }
+
+    /// Bir serinin açık kimliğini döndürür. Boş dize kimlik sayılmaz.
+    pub fn seri_kimliği(&self, sıra: usize) -> Option<&str> {
+        self.seri_kimlikleri
+            .get(sıra)
+            .and_then(Option::as_deref)
+            .filter(|kimlik| !kimlik.is_empty())
     }
 
     pub fn ipucu(mut self, ipucu: İpucu) -> Self {
@@ -201,8 +262,36 @@ impl GrafikSeçenekleri {
         self
     }
 
+    pub fn matris(mut self, koordinat: MatrisKoordinatı) -> Self {
+        self.matris = Some(koordinat);
+        self
+    }
+
+    pub fn takvim(mut self, koordinat: TakvimKoordinatı) -> Self {
+        self.takvimler.push(koordinat);
+        self
+    }
+
     pub fn veri_kümesi(mut self, küme: VeriKümesi) -> Self {
         self.veri_kümesi = Some(küme);
+        self.veri_kümeleri.clear();
+        self
+    }
+
+    /// `dataset: []` dizisine kaynak veya dönüşüm girdisi ekler.
+    pub fn veri_kümesi_ekle(mut self, tanım: impl Into<VeriKümesiTanımı>) -> Self {
+        if self.veri_kümeleri.is_empty() {
+            self.veri_kümesi = None;
+        }
+        self.veri_kümeleri.push(tanım.into());
+        self
+    }
+
+    pub fn veri_kümeleri(
+        mut self, tanımlar: impl IntoIterator<Item = VeriKümesiTanımı>
+    ) -> Self {
+        self.veri_kümesi = None;
+        self.veri_kümeleri = tanımlar.into_iter().collect();
         self
     }
 
@@ -210,20 +299,87 @@ impl GrafikSeçenekleri {
     /// (`encode` çözümü). Eşleme çözülemezse seri olduğu gibi kalır ve
     /// hata listelenir.
     pub fn veri_kümesini_uygula(&self) -> (Self, Vec<crate::hata::BilesenHatasi>) {
-        let Some(küme) = &self.veri_kümesi else {
-            return (self.clone(), Vec::new());
+        let (kümeler, mut hatalar) = if self.veri_kümeleri.is_empty() {
+            match &self.veri_kümesi {
+                Some(küme) => (vec![küme.clone()], Vec::new()),
+                None => return (self.clone(), Vec::new()),
+            }
+        } else {
+            match veri_kümelerini_çöz(&self.veri_kümeleri) {
+                Ok(kümeler) => (kümeler, Vec::new()),
+                Err(hata) => return (self.clone(), vec![hata]),
+            }
         };
-        let mut hatalar = Vec::new();
         let mut sonuç = self.clone();
+        // Açık `encode` yoksa ECharts aynı dataset/layout grubundaki boş
+        // serilere kategori boyutundan sonraki değer boyutlarını sırayla
+        // tahsis eder. Satır ve sütun görünümleri birbirinden bağımsızdır.
+        let mut otomatik_sıralar: BTreeMap<(usize, SeriYerleşimi), usize> = BTreeMap::new();
         for seri in &mut sonuç.seriler {
-            let eşleme = match seri {
-                Seri::Çizgi(s) => s.eşleme.clone(),
-                Seri::Sütun(s) => s.eşleme.clone(),
-                Seri::Saçılım(s) => s.eşleme.clone(),
-                Seri::Pasta(s) => s.eşleme.clone(),
-                _ => None,
+            let (açık_eşleme, küme_sırası, yerleşim, veri_boş) = match &*seri {
+                Seri::Çizgi(s) => (
+                    s.eşleme.clone(),
+                    s.veri_kümesi_sırası,
+                    s.seri_yerleşimi,
+                    s.veri.is_empty(),
+                ),
+                Seri::Sütun(s) => (
+                    s.eşleme.clone(),
+                    s.veri_kümesi_sırası,
+                    s.seri_yerleşimi,
+                    s.veri.is_empty(),
+                ),
+                Seri::Saçılım(s) => (
+                    s.eşleme.clone(),
+                    s.veri_kümesi_sırası,
+                    s.seri_yerleşimi,
+                    s.veri.is_empty(),
+                ),
+                Seri::Pasta(s) => (
+                    s.eşleme.clone(),
+                    s.veri_kümesi_sırası,
+                    s.seri_yerleşimi,
+                    s.veri.is_empty(),
+                ),
+                _ => continue,
             };
-            let Some((ad_boyutu, değer_boyutu)) = eşleme else { continue };
+            // series.data, dataset'ten daha yüksek önceliklidir.
+            if !veri_boş {
+                continue;
+            }
+            let Some(taban_küme) = kümeler.get(küme_sırası) else {
+                hatalar.push(crate::hata::BilesenHatasi::EksikVeri {
+                    bileşen: "dataset",
+                    sıra: küme_sırası,
+                });
+                continue;
+            };
+            let küme = taban_küme.seri_yerleşimiyle(yerleşim);
+            // ECharts yalnız otomatik encode ürettiğinde `seriesName`
+            // boyutunu da otomatik doldurur. Kullanıcı açık `encode.x/y`
+            // verdiğinde seri adı boş kalır (legend öğesi oluşmaz).
+            let otomatik_eşleme = açık_eşleme.is_none();
+            let (ad_boyutu, değer_boyutu) = match açık_eşleme {
+                Some(eşleme) => eşleme,
+                None => {
+                    let değer_sırası = otomatik_sıralar
+                        .entry((küme_sırası, yerleşim))
+                        .and_modify(|sıra| *sıra += 1)
+                        .or_insert(0);
+                    let ad_boyutu = küme.boyutlar.first().cloned();
+                    let değer_boyutu = küme.boyutlar.get(*değer_sırası + 1).cloned();
+                    let (Some(ad_boyutu), Some(değer_boyutu)) = (ad_boyutu, değer_boyutu) else {
+                        hatalar.push(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                            alan: "dataset.encode",
+                            ayrıntı: format!(
+                                "dataset[{küme_sırası}] içinde otomatik seri için yeterli boyut yok"
+                            ),
+                        });
+                        continue;
+                    };
+                    (ad_boyutu, değer_boyutu)
+                }
+            };
             let adlar = match küme.metinler(&ad_boyutu) {
                 Ok(a) => a,
                 Err(hata) => {
@@ -238,16 +394,96 @@ impl GrafikSeçenekleri {
                     continue;
                 }
             };
+            let görsel_boyut_sırası = self
+                .görsel_eşleme
+                .as_ref()
+                .and_then(|eşleme| eşleme.boyut.as_ref())
+                .and_then(|boyut| match boyut {
+                    BoyutSeçici::Sıra(sıra) => (*sıra < küme.boyutlar.len()).then_some(*sıra),
+                    BoyutSeçici::Ad(ad) => küme.boyut_sırası(ad),
+                });
+            let görsel_kapsam = self.görsel_eşleme.as_ref().and_then(|eşleme| {
+                görsel_boyut_sırası.map(|boyut_sırası| {
+                    let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+                    for değer in küme
+                        .satırlar
+                        .iter()
+                        .filter_map(|satır| satır.get(boyut_sırası))
+                        .filter_map(crate::model::deger::VeriDeğeri::sayı)
+                        .filter(|değer| değer.is_finite())
+                    {
+                        kapsam[0] = kapsam[0].min(değer);
+                        kapsam[1] = kapsam[1].max(değer);
+                    }
+                    if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
+                        kapsam = [0.0, 1.0];
+                    }
+                    eşleme.kapsam_çöz(kapsam)
+                })
+            });
             let veri: Vec<crate::model::deger::VeriÖğesi> = adlar
                 .iter()
                 .zip(değerler.iter())
-                .map(|(ad, değer)| crate::model::deger::VeriÖğesi::adlı(ad.clone(), *değer))
+                .enumerate()
+                .map(|(satır_sırası, (ad, değer))| {
+                    let kaynak_satır = küme.satırlar.get(satır_sırası);
+                    let boyutlar: Vec<_> = küme
+                        .boyutlar
+                        .iter()
+                        .enumerate()
+                        .map(|(boyut_sırası, boyut_adı)| {
+                            (
+                                boyut_adı.clone(),
+                                kaynak_satır
+                                    .and_then(|satır| satır.get(boyut_sırası))
+                                    .cloned()
+                                    .unwrap_or(crate::model::deger::VeriDeğeri::Boş),
+                            )
+                        })
+                        .collect();
+                    let mut öğe =
+                        crate::model::deger::VeriÖğesi::adlı(ad.clone(), *değer).boyutlar(boyutlar);
+                    if let (Some(eşleme), Some(boyut_sırası), Some(kapsam)) = (
+                        self.görsel_eşleme.as_ref(),
+                        görsel_boyut_sırası,
+                        görsel_kapsam,
+                    ) && let Some(görsel_değer) = kaynak_satır
+                        .and_then(|satır| satır.get(boyut_sırası))
+                        .and_then(crate::model::deger::VeriDeğeri::sayı)
+                    {
+                        öğe.stil = Some(
+                            crate::model::stil::ÖğeStili::yeni()
+                                .renk(eşleme.renk_çöz(görsel_değer, kapsam)),
+                        );
+                    }
+                    öğe
+                })
                 .collect();
             match seri {
-                Seri::Çizgi(s) => s.veri = veri,
-                Seri::Sütun(s) => s.veri = veri,
-                Seri::Saçılım(s) => s.veri = veri,
-                Seri::Pasta(s) => s.veri = veri,
+                Seri::Çizgi(s) => {
+                    s.veri = veri;
+                    if otomatik_eşleme && s.ad.is_none() {
+                        s.ad = Some(değer_boyutu.clone());
+                    }
+                }
+                Seri::Sütun(s) => {
+                    s.veri = veri;
+                    if otomatik_eşleme && s.ad.is_none() {
+                        s.ad = Some(değer_boyutu.clone());
+                    }
+                }
+                Seri::Saçılım(s) => {
+                    s.veri = veri;
+                    if otomatik_eşleme && s.ad.is_none() {
+                        s.ad = Some(değer_boyutu.clone());
+                    }
+                }
+                Seri::Pasta(s) => {
+                    s.veri = veri;
+                    if otomatik_eşleme && s.ad.is_none() {
+                        s.ad = Some(değer_boyutu.clone());
+                    }
+                }
                 _ => {}
             }
         }
@@ -272,10 +508,26 @@ impl GrafikSeçenekleri {
 
     /// Verilen x eksenine bağlı etkin pencere oranları `0..=1`.
     pub fn x_penceresi(&self, eksen_sırası: usize) -> Option<(f32, f32)> {
+        self.x_yakınlaştırması(eksen_sırası).map(|y| y.oranlar())
+    }
+
+    /// Verilen y eksenine bağlı etkin pencere oranları `0..=1`.
+    pub fn y_penceresi(&self, eksen_sırası: usize) -> Option<(f32, f32)> {
+        self.y_yakınlaştırması(eksen_sırası).map(|y| y.oranlar())
+    }
+
+    /// Verilen x eksenini yöneten ilk dataZoom bileşeni.
+    pub fn x_yakınlaştırması(&self, eksen_sırası: usize) -> Option<&VeriYakınlaştırma> {
         self.veri_yakınlaştırmaları
             .iter()
-            .find(|y| y.x_eksen_sırası == eksen_sırası)
-            .map(|y| y.oranlar())
+            .find(|y| y.y_eksen_sırası.is_none() && y.x_eksen_sırası == eksen_sırası)
+    }
+
+    /// Verilen y eksenini yöneten ilk dataZoom bileşeni.
+    pub fn y_yakınlaştırması(&self, eksen_sırası: usize) -> Option<&VeriYakınlaştırma> {
+        self.veri_yakınlaştırmaları
+            .iter()
+            .find(|y| y.y_eksen_sırası == Some(eksen_sırası))
     }
 
     pub fn palet<R: Into<Renk>>(mut self, renkler: impl IntoIterator<Item = R>) -> Self {
@@ -283,8 +535,8 @@ impl GrafikSeçenekleri {
         self
     }
 
-    pub fn arkaplan(mut self, renk: impl Into<Renk>) -> Self {
-        self.arkaplan = Some(renk.into());
+    pub fn arkaplan(mut self, dolgu: impl Into<Dolgu>) -> Self {
+        self.arkaplan = Some(dolgu.into());
         self
     }
 
@@ -322,11 +574,21 @@ impl GrafikSeçenekleri {
 
     /// Serinin paletten çözülen rengi (`itemStyle.color` öncelikli).
     pub fn seri_rengi(&self, sıra: usize) -> Renk {
-        self.seriler
-            .get(sıra)
-            .and_then(|s| s.açık_renk())
-            .map(|d| d.temsilî())
-            .unwrap_or_else(|| self.palet_rengi(sıra))
+        if let Some(renk) = self.seriler.get(sıra).and_then(|seri| seri.açık_renk()) {
+            return renk.temsilî();
+        }
+        // PaletteTask, açık bir `itemStyle.color` taşıyan seriyi paletten
+        // boyamaz ve bu seri palette bir sıra da tüketmez. Waterfall'daki
+        // saydam placeholder'dan sonraki görünür seri bu nedenle ilk rengi
+        // alır.
+        let palet_sırası = self
+            .seriler
+            .iter()
+            .take(sıra.saturating_add(1))
+            .filter(|seri| seri.açık_renk().is_none())
+            .count()
+            .saturating_sub(1);
+        self.palet_rengi(palet_sırası)
     }
 
     /// Paletten sıra numarasıyla renk (pasta dilimleri gibi öğe-bazlı
@@ -353,8 +615,7 @@ impl GrafikSeçenekleri {
                 ayrıntı: format!("{} geçerli bir süre değil", self.animasyon_süresi),
             });
         }
-        if !self.animasyon_süresi_güncelleme.is_finite()
-            || self.animasyon_süresi_güncelleme < 0.0
+        if !self.animasyon_süresi_güncelleme.is_finite() || self.animasyon_süresi_güncelleme < 0.0
         {
             return Err(BilesenHatasi::GeçersizSeçenek {
                 alan: "animasyon_süresi_güncelleme",
@@ -364,14 +625,56 @@ impl GrafikSeçenekleri {
                 ),
             });
         }
-        for eksen in [&self.x_ekseni, &self.y_ekseni].into_iter().flatten() {
-            if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
-                && en_az >= en_çok {
+        let x_eksen_adedi = self.etkin_x_eksenleri().len();
+        let y_eksen_adedi = self.etkin_y_eksenleri().len();
+        for (sıra, yakınlaştırma) in self.veri_yakınlaştırmaları.iter().enumerate() {
+            if !yakınlaştırma.başlangıç.is_finite()
+                || !yakınlaştırma.bitiş.is_finite()
+                || !(0.0..=100.0).contains(&yakınlaştırma.başlangıç)
+                || !(0.0..=100.0).contains(&yakınlaştırma.bitiş)
+                || yakınlaştırma.başlangıç > yakınlaştırma.bitiş
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "dataZoom.start/end",
+                    ayrıntı: format!(
+                        "{sıra}. bileşenin aralığı 0..=100 içinde ve start <= end olmalı ({}..{})",
+                        yakınlaştırma.başlangıç, yakınlaştırma.bitiş
+                    ),
+                });
+            }
+            for (alan, değer) in [
+                ("dataZoom.startValue", &yakınlaştırma.başlangıç_değeri),
+                ("dataZoom.endValue", &yakınlaştırma.bitiş_değeri),
+            ] {
+                if let Some(crate::model::yakinlastirma::YakınlaştırmaDeğeri::Sayı(değer)) = değer
+                    && !değer.is_finite()
+                {
                     return Err(BilesenHatasi::GeçersizSeçenek {
-                        alan: "eksen.en_az/en_çok",
-                        ayrıntı: format!("en_az ({en_az}) < en_çok ({en_çok}) olmalı"),
+                        alan,
+                        ayrıntı: format!("{sıra}. bileşenin değer ucu sonlu olmalı ({değer})"),
                     });
                 }
+            }
+            let (bileşen, eksen_sırası, eksen_adedi) = yakınlaştırma
+                .y_eksen_sırası
+                .map(|eksen_sırası| ("yAxis", eksen_sırası, y_eksen_adedi))
+                .unwrap_or(("xAxis", yakınlaştırma.x_eksen_sırası, x_eksen_adedi));
+            if eksen_sırası >= eksen_adedi {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen,
+                    sıra: eksen_sırası,
+                });
+            }
+        }
+        for eksen in [&self.x_ekseni, &self.y_ekseni].into_iter().flatten() {
+            if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
+                && en_az >= en_çok
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "eksen.en_az/en_çok",
+                    ayrıntı: format!("en_az ({en_az}) < en_çok ({en_çok}) olmalı"),
+                });
+            }
             if eksen.tür == crate::model::eksen::EksenTürü::Log && eksen.log_tabanı <= 1.0 {
                 return Err(BilesenHatasi::GeçersizSeçenek {
                     alan: "eksen.log_tabanı",
@@ -380,13 +683,78 @@ impl GrafikSeçenekleri {
             }
         }
         for seri in &self.seriler {
-            if let Seri::Pasta(p) = seri
-                && p.başlangıç_açısı.is_nan() {
+            if let Seri::Pasta(p) = seri {
+                let açılar = [
+                    ("series.pie.startAngle", Some(p.başlangıç_açısı)),
+                    ("series.pie.endAngle", p.bitiş_açısı),
+                    ("series.pie.padAngle", Some(p.dolgu_açısı)),
+                    ("series.pie.minAngle", Some(p.en_küçük_açı)),
+                    (
+                        "series.pie.minShowLabelAngle",
+                        Some(p.en_küçük_etiket_açısı),
+                    ),
+                    ("series.pie.selectedOffset", Some(p.seçili_uzaklığı)),
+                ];
+                for (alan, değer) in açılar {
+                    if let Some(değer) = değer
+                        && (!değer.is_finite()
+                            || (alan != "series.pie.startAngle"
+                                && alan != "series.pie.endAngle"
+                                && değer < 0.0))
+                    {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan,
+                            ayrıntı: format!("{değer} geçerli bir açı/uzaklık değil"),
+                        });
+                    }
+                }
+                if p.yüzde_hassasiyeti > 20 {
                     return Err(BilesenHatasi::GeçersizSeçenek {
-                        alan: "pasta.başlangıç_açısı",
-                        ayrıntı: "başlangıç açısı sayı olmalı".to_string(),
+                        alan: "series.pie.percentPrecision",
+                        ayrıntı: "yüzde hassasiyeti 0..=20 aralığında olmalı".to_owned(),
                     });
                 }
+            }
+            if let Seri::Hatlar(hatlar) = seri {
+                match hatlar.koordinat_sistemi {
+                    crate::model::hatlar::HatKoordinatSistemi::Kutupsal
+                        if self.kutupsal.is_none() =>
+                    {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "polar",
+                            sıra: 0,
+                        });
+                    }
+                    crate::model::hatlar::HatKoordinatSistemi::Takvim
+                        if self.takvimler.get(hatlar.takvim_sırası).is_none() =>
+                    {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "calendar",
+                            sıra: hatlar.takvim_sırası,
+                        });
+                    }
+                    crate::model::hatlar::HatKoordinatSistemi::Matris
+                        if hatlar.matris_sırası != 0 || self.matris.is_none() =>
+                    {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "matrix",
+                            sıra: hatlar.matris_sırası,
+                        });
+                    }
+                    crate::model::hatlar::HatKoordinatSistemi::Kartezyen2B
+                    | crate::model::hatlar::HatKoordinatSistemi::Kutupsal
+                    | crate::model::hatlar::HatKoordinatSistemi::Takvim
+                    | crate::model::hatlar::HatKoordinatSistemi::Matris => {}
+                }
+                for (sıra, veri) in hatlar.veri.iter().enumerate() {
+                    if veri.koordinatlar.len() < 2 {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.lines.data.coords",
+                            ayrıntı: format!("{sıra}. hat en az iki koordinat taşımalıdır"),
+                        });
+                    }
+                }
+            }
         }
         Ok(())
     }
@@ -418,11 +786,41 @@ impl GrafikSeçenekleri {
                 }
                 _ => y.değer.clone(),
             };
-            VeriÖğesi { değer, ..y.clone() }
+            VeriÖğesi {
+                değer, ..y.clone()
+            }
         };
 
         for (sıra, seri) in sonuç.seriler.iter_mut().enumerate() {
-            let Some(eski_seri) = eski.seriler.get(sıra) else { continue };
+            let Some(eski_seri) = eski.seriler.get(sıra) else {
+                continue;
+            };
+            if let (Seri::Hatlar(yeni_hatlar), Seri::Hatlar(eski_hatlar)) = (&mut *seri, eski_seri)
+            {
+                if yeni_hatlar.veri.len() == eski_hatlar.veri.len() {
+                    for (eski_hat, yeni_hat) in eski_hatlar.veri.iter().zip(&mut yeni_hatlar.veri) {
+                        if eski_hat.koordinatlar.len() != yeni_hat.koordinatlar.len() {
+                            continue;
+                        }
+                        for (eski_nokta, yeni_nokta) in
+                            eski_hat.koordinatlar.iter().zip(&mut yeni_hat.koordinatlar)
+                        {
+                            if let (Some(ex), Some(ey), Some(yx), Some(yy)) = (
+                                eski_nokta.x.sayı(),
+                                eski_nokta.y.sayı(),
+                                yeni_nokta.x.sayı(),
+                                yeni_nokta.y.sayı(),
+                            ) {
+                                yeni_nokta.x =
+                                    crate::model::hatlar::HatKoordinatı::Sayı(ex + (yx - ex) * t);
+                                yeni_nokta.y =
+                                    crate::model::hatlar::HatKoordinatı::Sayı(ey + (yy - ey) * t);
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
             let eski_veri = eski_seri.veri();
             let karıştır = |yeni_veri: &mut Vec<VeriÖğesi>| {
                 if eski_veri.len() != yeni_veri.len() {
@@ -453,6 +851,7 @@ impl GrafikSeçenekleri {
                 | Seri::TemaNehri(_) => {}
                 Seri::Paralel(s) => karıştır(&mut s.veri),
                 Seri::Takvim(s) => karıştır(&mut s.veri),
+                Seri::Hatlar(_) => {}
             }
         }
         sonuç
@@ -460,10 +859,18 @@ impl GrafikSeçenekleri {
 }
 
 #[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+#[allow(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic
+)]
 mod testler {
     use super::*;
-    use crate::model::seri::ÇizgiSerisi;
+    use crate::model::deger::VeriDeğeri;
+    use crate::model::seri::{SütunSerisi, ÇizgiSerisi};
+    use crate::model::stil::ÖğeStili;
+    use crate::renk::{Dolgu, Renk};
 
     #[test]
     fn ara_değerleme() {
@@ -489,5 +896,126 @@ mod testler {
             .filter_map(|ö| ö.değer.sayı())
             .collect();
         assert_eq!(değerler, vec![4.0, 8.0]);
+    }
+
+    #[test]
+    fn açık_renkli_seri_palet_sırası_tüketmez() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .seri(
+                SütunSerisi::yeni()
+                    .öğe_stili(ÖğeStili::yeni().renk(Renk::SAYDAM))
+                    .veri([1]),
+            )
+            .seri(SütunSerisi::yeni().veri([2]));
+        assert_eq!(seçenekler.seri_rengi(0), Renk::SAYDAM);
+        assert_eq!(seçenekler.seri_rengi(1), seçenekler.palet_rengi(0));
+    }
+
+    #[test]
+    fn seri_dataset_index_ile_dönüşüm_sonucunu_kullanır() {
+        use crate::model::veri_kumesi::{SıralamaAnahtarı, VeriKümesi, VeriKümesiTanımı};
+
+        let kaynak = VeriKümesi::yeni(["ad", "değer"]).kayıtlar([
+            ("A", vec![2.0]),
+            ("B", vec![5.0]),
+            ("C", vec![1.0]),
+        ]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi_ekle(VeriKümesiTanımı::kaynak(kaynak))
+            .veri_kümesi_ekle(VeriKümesiTanımı::sırala([SıralamaAnahtarı::azalan(
+                "değer",
+            )]))
+            .seri(
+                SütunSerisi::yeni()
+                    .veri_kümesi_sırası(1)
+                    .eşle("ad", "değer"),
+            );
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+        assert!(hatalar.is_empty());
+        let adlar: Vec<_> = çözülmüş.seriler[0]
+            .veri()
+            .iter()
+            .filter_map(|öğe| öğe.ad.as_deref())
+            .collect();
+        assert_eq!(adlar, vec!["B", "A", "C"]);
+    }
+
+    #[test]
+    fn dataset_boş_serilere_boyutları_ve_adları_otomatik_dağıtır() {
+        let küme = VeriKümesi::yeni(["product", "2015", "2016", "2017"]).kayıtlar([
+            ("Matcha Latte", vec![43.3, 85.8, 93.7]),
+            ("Milk Tea", vec![83.1, 73.4, 55.1]),
+        ]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .seri(SütunSerisi::yeni())
+            .seri(SütunSerisi::yeni())
+            .seri(SütunSerisi::yeni());
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+        assert!(hatalar.is_empty());
+        assert_eq!(çözülmüş.seriler[0].ad(), Some("2015"));
+        assert_eq!(çözülmüş.seriler[1].ad(), Some("2016"));
+        assert_eq!(çözülmüş.seriler[2].ad(), Some("2017"));
+        assert_eq!(
+            çözülmüş.seriler[0].veri()[0].ad.as_deref(),
+            Some("Matcha Latte")
+        );
+        assert_eq!(çözülmüş.seriler[1].veri()[1].değer.sayı(), Some(73.4));
+    }
+
+    #[test]
+    fn satır_ve_sütun_series_layout_by_sayaçları_bağımsızdır() {
+        use crate::model::veri_kumesi::SeriYerleşimi;
+
+        let küme = VeriKümesi::yeni(["product", "2012", "2013"]).kayıtlar([
+            ("Matcha Latte", vec![41.1, 30.4]),
+            ("Milk Tea", vec![86.5, 92.1]),
+        ]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .seri(SütunSerisi::yeni().seri_yerleşimi(SeriYerleşimi::Satır))
+            .seri(SütunSerisi::yeni().seri_yerleşimi(SeriYerleşimi::Satır))
+            .seri(SütunSerisi::yeni())
+            .seri(SütunSerisi::yeni());
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+        assert!(hatalar.is_empty());
+        assert_eq!(çözülmüş.seriler[0].ad(), Some("Matcha Latte"));
+        assert_eq!(çözülmüş.seriler[1].ad(), Some("Milk Tea"));
+        assert_eq!(çözülmüş.seriler[2].ad(), Some("2012"));
+        assert_eq!(çözülmüş.seriler[3].ad(), Some("2013"));
+        assert_eq!(çözülmüş.seriler[0].veri()[1].değer.sayı(), Some(30.4));
+        assert_eq!(çözülmüş.seriler[2].veri()[1].değer.sayı(), Some(86.5));
+    }
+
+    #[test]
+    fn visual_map_koordinat_dışındaki_dataset_boyutunu_kullanır() {
+        let küme = VeriKümesi::yeni(["score", "amount", "product"])
+            .satır([89.3.into(), 58_212.into(), "Matcha Latte".into()])
+            .satır([10.0.into(), 12_000.into(), "Milk Tea".into()]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .görsel_eşleme(
+                GörselEşleme::yeni()
+                    .boyut("score")
+                    .en_az(10.0)
+                    .en_çok(90.0)
+                    .renkler([0x000000u32, 0xffffffu32]),
+            )
+            .seri(SütunSerisi::yeni().eşle("product", "amount"));
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+        assert!(hatalar.is_empty());
+        let ilk = &çözülmüş.seriler[0].veri()[0];
+        assert_eq!(ilk.boyut("score").and_then(VeriDeğeri::sayı), Some(89.3));
+        assert_eq!(
+            ilk.stil
+                .as_ref()
+                .and_then(|stil| stil.renk.as_ref())
+                .map(Dolgu::temsilî),
+            Some(
+                GörselEşleme::yeni()
+                    .renkler([0x000000u32, 0xffffffu32])
+                    .renk_çöz(89.3, [10.0, 90.0])
+            )
+        );
     }
 }

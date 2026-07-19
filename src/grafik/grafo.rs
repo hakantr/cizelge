@@ -55,8 +55,7 @@ pub fn grafo_çiz(
     let n = seri.düğümler.len();
     let mut konumlar: Vec<(f32, f32)> = (0..n)
         .map(|i| {
-            let açı = -std::f32::consts::FRAC_PI_2
-                + i as f32 * std::f32::consts::TAU / n as f32;
+            let açı = -std::f32::consts::FRAC_PI_2 + i as f32 * std::f32::consts::TAU / n as f32;
             (
                 merkez.0 + yarıçap * 0.7 * açı.cos(),
                 merkez.1 + yarıçap * 0.7 * açı.sin(),
@@ -66,7 +65,9 @@ pub fn grafo_çiz(
 
     // 2) Kuvvet yerleşimi (Fruchterman–Reingold benzeri, sabit yineleme).
     if seri.yerleşim == GrafoYerleşimi::Kuvvet && n > 1 {
-        let k = (yarıçap * yarıçap * std::f32::consts::PI / n as f32).sqrt().max(8.0);
+        let k = (yarıçap * yarıçap * std::f32::consts::PI / n as f32)
+            .sqrt()
+            .max(8.0);
         let yineleme = 120usize;
         for adım in 0..yineleme {
             let sıcaklık = yarıçap * 0.12 * (1.0 - adım as f32 / yineleme as f32) + 0.5;
@@ -129,7 +130,11 @@ pub fn grafo_çiz(
     // 2b) Gezinme (roam) dönüşümü: merkez odaklı ölçek + kaydırma; ardından
     // sürüklenen düğümlerin bireysel kaymaları.
     let (kayma_x, kayma_y, ölçek) = görünüm;
-    let ölçek = if ölçek.is_finite() && ölçek > 0.01 { ölçek } else { 1.0 };
+    let ölçek = if ölçek.is_finite() && ölçek > 0.01 {
+        ölçek
+    } else {
+        1.0
+    };
     if ölçek != 1.0 || kayma_x != 0.0 || kayma_y != 0.0 {
         for konum in konumlar.iter_mut() {
             konum.0 = merkez.0 + (konum.0 - merkez.0) * ölçek + kayma_x;
@@ -146,7 +151,9 @@ pub fn grafo_çiz(
     // 3) Bağlar.
     let opaklık = ilerleme.clamp(0.0, 1.0);
     for (i, j) in &bağ_sıraları {
-        let (Some(a), Some(b)) = (konumlar.get(*i), konumlar.get(*j)) else { continue };
+        let (Some(a), Some(b)) = (konumlar.get(*i), konumlar.get(*j)) else {
+            continue;
+        };
         çizici.çizgi(
             *a,
             *b,
@@ -158,7 +165,9 @@ pub fn grafo_çiz(
 
     // 4) Düğümler + etiketler.
     for (i, düğüm) in seri.düğümler.iter().enumerate() {
-        let Some(&konum) = konumlar.get(i) else { continue };
+        let Some(&konum) = konumlar.get(i) else {
+            continue;
+        };
         let boyut = düğüm.boyut.max(4.0) * opaklık.max(0.01) * ölçek;
         let renk = palet(düğüm.kategori.unwrap_or(i));
         çizici.daire(

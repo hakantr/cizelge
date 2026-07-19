@@ -13,7 +13,8 @@ fn seçenekler() -> GrafikSeçenekleri {
     for (g, _) in günler.iter().enumerate() {
         for (s, _) in saatler.iter().enumerate() {
             // Kurgusal ama belirlenimci yoğunluk deseni.
-            let değer = ((g * 7 + s * 3) % 13) as f64 + if (2..=4).contains(&s) { 6.0 } else { 0.0 };
+            let değer =
+                ((g * 7 + s * 3) % 13) as f64 + if (2..=4).contains(&s) { 6.0 } else { 0.0 };
             veri.push(VeriÖğesi::from([s as f64, g as f64, değer]));
         }
     }

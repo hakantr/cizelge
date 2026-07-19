@@ -6,14 +6,13 @@
 //!
 //! Çalıştırma: `cargo run --example galeri`
 
-use std::collections::HashSet;
-
 use cizelge::hazir::*;
 use gpui::{
     App, Bounds, Context, Entity, IntoElement, MouseButton, MouseDownEvent, Render, SharedString,
     Window, WindowBounds, WindowOptions, div, prelude::*, px, size,
 };
 use gpui_platform::application;
+use serde::Deserialize;
 
 // ---------------------------------------------------------------------
 // Canlı düzenlenen galeri durumu ve belirlenimci veri üretimi
@@ -76,7 +75,11 @@ fn çizgi(d: &Durum) -> GrafikSeçenekleri {
     temel("Çizgi")
         .x_ekseni(Eksen::kategori().veri(kategoriler(d.nokta)))
         .y_ekseni(Eksen::değer())
-        .seri(ÇizgiSerisi::yeni().ad("Ziyaret").veri(sayılar(d, 0, 400.0, 900.0)))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Ziyaret")
+                .veri(sayılar(d, 0, 400.0, 900.0)),
+        )
         .seri(
             ÇizgiSerisi::yeni()
                 .ad("Kayıt")
@@ -87,7 +90,11 @@ fn çizgi(d: &Durum) -> GrafikSeçenekleri {
 
 fn alan(d: &Durum) -> GrafikSeçenekleri {
     temel("Alan (yumuşak)")
-        .x_ekseni(Eksen::kategori().veri(kategoriler(d.nokta)).kenar_boşluğu(false))
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(kategoriler(d.nokta))
+                .kenar_boşluğu(false),
+        )
         .y_ekseni(Eksen::değer())
         .seri(
             ÇizgiSerisi::yeni()
@@ -132,12 +139,12 @@ fn yığın_sütun(d: &Durum) -> GrafikSeçenekleri {
         .y_ekseni(Eksen::değer())
         .gösterge(Gösterge::yeni().üst(30.0));
     for (k, ad) in ["Doğrudan", "Reklam", "Arama"].iter().enumerate() {
-        s = s.seri(
-            SütunSerisi::yeni()
-                .ad(*ad)
-                .yığın("kaynak")
-                .veri(sayılar(d, 5 + k, 80.0, 300.0)),
-        );
+        s = s.seri(SütunSerisi::yeni().ad(*ad).yığın("kaynak").veri(sayılar(
+            d,
+            5 + k,
+            80.0,
+            300.0,
+        )));
     }
     s
 }
@@ -187,19 +194,20 @@ fn saçılım(d: &Durum) -> GrafikSeçenekleri {
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
         .x_ekseni(Eksen::değer().ölçekli(true))
         .y_ekseni(Eksen::değer().ölçekli(true))
-        .seri(SaçılımSerisi::yeni().ad("Kişiler").sembol_boyutu(12.0).veri(veri))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("Kişiler")
+                .sembol_boyutu(12.0)
+                .veri(veri),
+        )
 }
 
 fn efektli_saçılım(d: &Durum) -> GrafikSeçenekleri {
     let uyarı: Vec<VeriÖğesi> = (0..4)
-        .map(|i| {
-            VeriÖğesi::from([değer(d, 50 + i, 2.0, 10.0), değer(d, 55 + i, 2.0, 7.0)])
-        })
+        .map(|i| VeriÖğesi::from([değer(d, 50 + i, 2.0, 10.0), değer(d, 55 + i, 2.0, 7.0)]))
         .collect();
     let normal: Vec<VeriÖğesi> = (0..d.nokta)
-        .map(|i| {
-            VeriÖğesi::from([değer(d, 60 + i, 1.0, 12.0), değer(d, 80 + i, 1.0, 8.0)])
-        })
+        .map(|i| VeriÖğesi::from([değer(d, 60 + i, 1.0, 12.0), değer(d, 80 + i, 1.0, 8.0)]))
         .collect();
     temel("Efektli Saçılım")
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
@@ -212,7 +220,12 @@ fn efektli_saçılım(d: &Durum) -> GrafikSeçenekleri {
                 .efektli(true)
                 .veri(uyarı),
         )
-        .seri(SaçılımSerisi::yeni().ad("Normal").sembol_boyutu(9.0).veri(normal))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("Normal")
+                .sembol_boyutu(9.0)
+                .veri(normal),
+        )
 }
 
 fn mum(d: &Durum) -> GrafikSeçenekleri {
@@ -300,11 +313,23 @@ fn çoklu_ızgara(d: &Durum) -> GrafikSeçenekleri {
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen).bağlantılı(true))
         .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(30.0).üst(55.0).alt("52%"))
         .ızgara_ekle(Izgara::yeni().sol(60.0).sağ(30.0).üst("58%").alt(40.0))
-        .x_ekseni_ekle(Eksen::kategori().veri(kategoriler(d.nokta)).ızgara_sırası(0))
-        .x_ekseni_ekle(Eksen::kategori().veri(kategoriler(d.nokta)).ızgara_sırası(1))
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(kategoriler(d.nokta))
+                .ızgara_sırası(0),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(kategoriler(d.nokta))
+                .ızgara_sırası(1),
+        )
         .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0))
         .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
-        .seri(ÇizgiSerisi::yeni().ad("Sıcaklık").veri(sayılar(d, 10, 8.0, 20.0)))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Sıcaklık")
+                .veri(sayılar(d, 10, 8.0, 20.0)),
+        )
         .seri(
             SütunSerisi::yeni()
                 .ad("Yağış")
@@ -318,9 +343,7 @@ fn yakınlaştırma(d: &Durum) -> GrafikSeçenekleri {
     let veri: Vec<f64> = (0..n)
         .map(|i| {
             let t = i as f64;
-            60.0 + (t * 0.12).sin() * 25.0
-                + (t * 0.4).cos() * 8.0
-                + karma(d.tohum, 400 + i) * 10.0
+            60.0 + (t * 0.12).sin() * 25.0 + (t * 0.4).cos() * 8.0 + karma(d.tohum, 400 + i) * 10.0
         })
         .collect();
     GrafikSeçenekleri::yeni()
@@ -345,21 +368,28 @@ fn kutupsal(d: &Durum) -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin("Kutupsal"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
-        .kutupsal(KutupsalKoordinat::yeni().açısal_eksen(
-            Eksen::kategori().veri(["K", "KD", "D", "GD", "G", "GB", "B", "KB"]),
-        ))
+        .kutupsal(
+            KutupsalKoordinat::yeni().açısal_eksen(
+                Eksen::kategori().veri(["K", "KD", "D", "GD", "G", "GB", "B", "KB"]),
+            ),
+        )
         .seri(
-            SütunSerisi::yeni()
-                .ad("Hız")
-                .kutupsal(true)
-                .veri((0..8).map(|i| değer(d, 500 + i, 2.0, 7.0)).collect::<Vec<_>>()),
+            SütunSerisi::yeni().ad("Hız").kutupsal(true).veri(
+                (0..8)
+                    .map(|i| değer(d, 500 + i, 2.0, 7.0))
+                    .collect::<Vec<_>>(),
+            ),
         )
         .seri(
             ÇizgiSerisi::yeni()
                 .ad("Ortalama")
                 .kutupsal(true)
                 .sembol_boyutu(6.0)
-                .veri((0..8).map(|i| değer(d, 510 + i, 3.0, 4.0)).collect::<Vec<_>>()),
+                .veri(
+                    (0..8)
+                        .map(|i| değer(d, 510 + i, 3.0, 4.0))
+                        .collect::<Vec<_>>(),
+                ),
         )
 }
 
@@ -383,11 +413,15 @@ fn radar(d: &Durum) -> GrafikSeçenekleri {
                 .veri([
                     (
                         "Ayrılan",
-                        (0..6).map(|i| değer(d, 520 + i, 40.0, 55.0)).collect::<Vec<_>>(),
+                        (0..6)
+                            .map(|i| değer(d, 520 + i, 40.0, 55.0))
+                            .collect::<Vec<_>>(),
                     ),
                     (
                         "Harcanan",
-                        (0..6).map(|i| değer(d, 530 + i, 30.0, 60.0)).collect::<Vec<_>>(),
+                        (0..6)
+                            .map(|i| değer(d, 530 + i, 30.0, 60.0))
+                            .collect::<Vec<_>>(),
                     ),
                 ]),
         )
@@ -613,63 +647,108 @@ fn huni(d: &Durum) -> GrafikSeçenekleri {
         ]))
 }
 
-/// Ağaç menü: kategoriler ve çizelgeler.
-const KATEGORİLER: &[(&str, &[(&str, Üretici)])] = &[
-    (
-        "Temel",
-        &[
-            ("Çizgi", çizgi as Üretici),
-            ("Alan", alan as Üretici),
-            ("Sütun", sütun as Üretici),
-            ("Yığın Sütun", yığın_sütun as Üretici),
-            ("Pasta", pasta as Üretici),
-            ("Halka", halka as Üretici),
-            ("Saçılım", saçılım as Üretici),
-            ("Efektli Saçılım", efektli_saçılım as Üretici),
-        ],
-    ),
-    (
-        "Kartezyen",
-        &[
-            ("Şamdan (Mum)", mum as Üretici),
-            ("Kutu", kutu as Üretici),
-            ("Isı Haritası", ısı as Üretici),
-            ("İmleyiciler", imleyiciler as Üretici),
-            ("Çoklu Izgara", çoklu_ızgara as Üretici),
-            ("Yakınlaştırma", yakınlaştırma as Üretici),
-        ],
-    ),
-    (
-        "Koordinatlar",
-        &[
-            ("Kutupsal", kutupsal as Üretici),
-            ("Radar", radar as Üretici),
-            ("Takvim Isısı", takvim as Üretici),
-            ("Tema Nehri", tema_nehri as Üretici),
-        ],
-    ),
-    (
-        "Hiyerarşik",
-        &[
-            ("Ağaç Haritası", ağaç_haritası as Üretici),
-            ("Güneş Patlaması", güneş as Üretici),
-            ("Ağaç", ağaç as Üretici),
-        ],
-    ),
-    (
-        "İlişkisel",
-        &[
-            ("Sankey", sankey as Üretici),
-            ("Grafo", grafo as Üretici),
-            ("Kiriş", kiriş as Üretici),
-            ("Paralel", paralel as Üretici),
-        ],
-    ),
-    (
-        "Göstergeler",
-        &[("Gösterge Saati", gösterge_saati as Üretici), ("Huni", huni as Üretici)],
-    ),
-];
+#[derive(Clone, Deserialize)]
+struct ManifestBaşlığı {
+    en: String,
+}
+
+#[derive(Clone, Deserialize)]
+struct ManifestKanıtı {
+    api: String,
+    #[serde(rename = "statik_görsel")]
+    statik_görsel: String,
+    etkileşim: String,
+}
+
+#[derive(Clone, Deserialize)]
+struct ManifestKaydı {
+    id: String,
+    #[serde(rename = "başlık")]
+    başlık: ManifestBaşlığı,
+    #[serde(rename = "kategoriler")]
+    kategoriler: Vec<String>,
+    difficulty: u32,
+    since: Option<String>,
+    #[serde(rename = "resmi_sayfada_görünür")]
+    resmi_sayfada_görünür: bool,
+    cizelge_fixture: Option<String>,
+    kapsam_durumu: String,
+    #[serde(rename = "sahip_faz")]
+    sahip_faz: Option<u32>,
+    #[serde(rename = "kanıt")]
+    kanıt: ManifestKanıtı,
+}
+
+#[derive(Deserialize)]
+struct UyumÖzeti {
+    #[serde(rename = "görünür_kapsam_içi")]
+    görünür_kapsam_içi: usize,
+    #[serde(rename = "tam_kanıtlı")]
+    tam_kanıtlı: usize,
+    #[serde(rename = "kategori_sırası")]
+    kategori_sırası: Vec<String>,
+}
+
+fn manifesti_oku() -> (Vec<ManifestKaydı>, UyumÖzeti) {
+    let manifest =
+        serde_json::from_str::<Vec<ManifestKaydı>>(include_str!("../uyum/galeri_manifest.json"));
+    let özet = serde_json::from_str::<UyumÖzeti>(include_str!("../uyum/ozet.json"));
+    match (manifest, özet) {
+        (Ok(manifest), Ok(özet)) => (manifest, özet),
+        (manifest, özet) => {
+            if let Err(hata) = manifest {
+                eprintln!("Galeri manifesti okunamadı: {hata}");
+            }
+            if let Err(hata) = özet {
+                eprintln!("Uyum özeti okunamadı: {hata}");
+            }
+            (
+                Vec::new(),
+                UyumÖzeti {
+                    görünür_kapsam_içi: 0,
+                    tam_kanıtlı: 0,
+                    kategori_sırası: Vec::new(),
+                },
+            )
+        }
+    }
+}
+
+/// Manifestteki resmi kimliği mevcut yerel fixture üreticisine bağlar.
+/// Bu tablo yalnız render üreticilerini tutar; liste/kategori/kanıt durumu
+/// bütünüyle üretilmiş manifestten gelir.
+fn fixture_üreticisi(id: &str) -> Option<Üretici> {
+    match id {
+        "line-simple" => Some(çizgi),
+        "area-basic" => Some(alan),
+        "bar-simple" => Some(sütun),
+        "bar-stack" => Some(yığın_sütun),
+        "pie-simple" => Some(pasta),
+        "pie-doughnut" => Some(halka),
+        "scatter-simple" => Some(saçılım),
+        "scatter-effect" => Some(efektli_saçılım),
+        "candlestick-simple" => Some(mum),
+        "boxplot-light-velocity" => Some(kutu),
+        "heatmap-cartesian" => Some(ısı),
+        "line-marker" => Some(imleyiciler),
+        "grid-multiple" => Some(çoklu_ızgara),
+        "mix-zoom-on-value" => Some(yakınlaştırma),
+        "bar-polar-real-estate" => Some(kutupsal),
+        "radar" => Some(radar),
+        "calendar-simple" => Some(takvim),
+        "themeRiver-basic" => Some(tema_nehri),
+        "treemap-simple" => Some(ağaç_haritası),
+        "sunburst-simple" => Some(güneş),
+        "tree-basic" => Some(ağaç),
+        "sankey-simple" => Some(sankey),
+        "graph-simple" => Some(grafo),
+        "chord-simple" => Some(kiriş),
+        "parallel-simple" => Some(paralel),
+        "gauge-simple" => Some(gösterge_saati),
+        "funnel" => Some(huni),
+        _ => None,
+    }
+}
 
 // ---------------------------------------------------------------------
 // Galeri görünümü
@@ -678,31 +757,69 @@ const KATEGORİLER: &[(&str, &[(&str, Üretici)])] = &[
 struct Galeri {
     grafik: Entity<GrafikGörünümü>,
     durum: Durum,
-    /// Seçili çizelge: (kategori, öğe).
-    seçili: (usize, usize),
-    /// Katlanmış kategoriler.
-    kapalı: HashSet<usize>,
+    manifest: Vec<ManifestKaydı>,
+    kategoriler: Vec<String>,
+    görünür_hedef: usize,
+    tam_kanıtlı: usize,
+    kategori: Option<String>,
+    seçili: usize,
+    detay: bool,
 }
 
 impl Galeri {
     fn yeni(cx: &mut Context<Self>) -> Self {
-        let durum = Durum { nokta: 7, tohum: 1, koyu: false };
-        let grafik = cx.new(|_| GrafikGörünümü::yeni(Self::üret((0, 0), &durum)));
-        Galeri { grafik, durum, seçili: (0, 0), kapalı: HashSet::new() }
+        let durum = Durum {
+            nokta: 7,
+            tohum: 1,
+            koyu: false,
+        };
+        let (tüm_manifest, özet) = manifesti_oku();
+        let manifest: Vec<_> = tüm_manifest
+            .into_iter()
+            .filter(|kayıt| {
+                kayıt.resmi_sayfada_görünür && !kayıt.kapsam_durumu.starts_with("kapsam_dışı_")
+            })
+            .collect();
+        let seçili = manifest
+            .iter()
+            .position(|kayıt| kayıt.id == "line-simple")
+            .unwrap_or(0);
+        let ilk_id = manifest
+            .get(seçili)
+            .map(|kayıt| kayıt.id.as_str())
+            .unwrap_or("");
+        let grafik = cx.new(|_| GrafikGörünümü::yeni(Self::üret(ilk_id, &durum)));
+        Galeri {
+            grafik,
+            durum,
+            manifest,
+            kategoriler: özet.kategori_sırası,
+            görünür_hedef: özet.görünür_kapsam_içi,
+            tam_kanıtlı: özet.tam_kanıtlı,
+            kategori: None,
+            seçili,
+            detay: false,
+        }
     }
 
-    /// Seçili üreticiden durumu uygulanmış seçenekler.
-    fn üret(seçili: (usize, usize), durum: &Durum) -> GrafikSeçenekleri {
-        KATEGORİLER
-            .get(seçili.0)
-            .and_then(|(_, öğeler)| öğeler.get(seçili.1))
-            .map(|(_, üretici)| üretici(durum).koyu(durum.koyu))
-            .unwrap_or_default()
+    fn üret(id: &str, durum: &Durum) -> GrafikSeçenekleri {
+        fixture_üreticisi(id)
+            .map(|üretici| üretici(durum).koyu(durum.koyu))
+            .unwrap_or_else(|| {
+                GrafikSeçenekleri::yeni()
+                    .koyu(durum.koyu)
+                    .başlık(Başlık::yeni().metin(format!("Kanıt bekliyor · {id}")))
+            })
     }
 
     /// Grafiği güncel durumla yeniden kurar (geçiş animasyonlu).
     fn uygula(&mut self, cx: &mut Context<Self>) {
-        let seçenekler = Self::üret(self.seçili, &self.durum);
+        let id = self
+            .manifest
+            .get(self.seçili)
+            .map(|kayıt| kayıt.id.as_str())
+            .unwrap_or("");
+        let seçenekler = Self::üret(id, &self.durum);
         self.grafik.update(cx, |grafik, cx| {
             if let Err(hata) = grafik.seçenekleri_değiştir(seçenekler, cx) {
                 eprintln!("Seçenekler uygulanamadı: {hata}");
@@ -710,24 +827,55 @@ impl Galeri {
         });
         cx.notify();
     }
+
+    fn kategori_sayısı(&self, kategori: &str) -> usize {
+        self.manifest
+            .iter()
+            .filter(|kayıt| kayıt.kategoriler.iter().any(|aday| aday == kategori))
+            .count()
+    }
 }
 
 impl Render for Galeri {
     fn render(&mut self, _pencere: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let koyu = self.durum.koyu;
         // Kabuk renkleri (çizelge kendi temasını kendisi çözer).
-        let zemin = if koyu { gpui::rgb(0x141418) } else { gpui::rgb(0xf4f7fd) };
-        let panel = if koyu { gpui::rgb(0x1b1b20) } else { gpui::rgb(0xffffff) };
-        let metin = if koyu { gpui::rgb(0xe8ebf0) } else { gpui::rgb(0x3c3c41) };
-        let soluk = if koyu { gpui::rgb(0x9ea0a5) } else { gpui::rgb(0x86878c) };
+        let zemin = if koyu {
+            gpui::rgb(0x141418)
+        } else {
+            gpui::rgb(0xf4f7fd)
+        };
+        let panel = if koyu {
+            gpui::rgb(0x1b1b20)
+        } else {
+            gpui::rgb(0xffffff)
+        };
+        let metin = if koyu {
+            gpui::rgb(0xe8ebf0)
+        } else {
+            gpui::rgb(0x3c3c41)
+        };
+        let soluk = if koyu {
+            gpui::rgb(0x9ea0a5)
+        } else {
+            gpui::rgb(0x86878c)
+        };
         let vurgu = gpui::rgb(0x5070dd);
-        let vurgu_zemini = if koyu { gpui::rgb(0x28304d) } else { gpui::rgb(0xe8edfb) };
-        let çizgi_rengi = if koyu { gpui::rgb(0x303034) } else { gpui::rgb(0xe8ebf0) };
+        let vurgu_zemini = if koyu {
+            gpui::rgb(0x28304d)
+        } else {
+            gpui::rgb(0xe8edfb)
+        };
+        let çizgi_rengi = if koyu {
+            gpui::rgb(0x303034)
+        } else {
+            gpui::rgb(0xe8ebf0)
+        };
 
-        // --- Sol ağaç menü ---
+        // --- Resmi Explore.vue sırasından üretilen kategori menüsü ---
         let mut menü = div()
             .id("galeri-menü")
-            .w(px(240.0))
+            .w(px(220.0))
             .h_full()
             .flex()
             .flex_col()
@@ -743,44 +891,40 @@ impl Render for Galeri {
                     .text_lg()
                     .font_weight(gpui::FontWeight::BOLD)
                     .text_color(metin)
-                    .child("çizelge galerisi"),
+                    .child("Cizelge Examples"),
             );
-        for (k, (kategori_adı, öğeler)) in KATEGORİLER.iter().enumerate() {
-            let katlanmış = self.kapalı.contains(&k);
-            let ok = if katlanmış { "▸" } else { "▾" };
-            menü = menü.child(
-                div()
-                    .flex()
-                    .flex_row()
-                    .gap_1()
-                    .px_2()
-                    .py_1()
-                    .mt_1()
-                    .rounded_md()
-                    .cursor_pointer()
-                    .text_color(soluk)
-                    .font_weight(gpui::FontWeight::SEMIBOLD)
-                    .hover(|s| s.bg(vurgu_zemini))
-                    .on_mouse_down(
-                        MouseButton::Left,
-                        cx.listener(move |bu, _: &MouseDownEvent, _, cx| {
-                            if !bu.kapalı.remove(&k) {
-                                bu.kapalı.insert(k);
-                            }
-                            cx.notify();
-                        }),
-                    )
-                    .child(SharedString::from(format!("{ok} {kategori_adı}"))),
-            );
-            if katlanmış {
+        let tüm_seçili = self.kategori.is_none();
+        menü = menü.child(
+            div()
+                .px_2()
+                .py_1()
+                .rounded_md()
+                .cursor_pointer()
+                .text_color(if tüm_seçili { vurgu } else { metin })
+                .when(tüm_seçili, |s| {
+                    s.bg(vurgu_zemini).font_weight(gpui::FontWeight::SEMIBOLD)
+                })
+                .on_mouse_down(
+                    MouseButton::Left,
+                    cx.listener(|bu, _: &MouseDownEvent, _, cx| {
+                        bu.kategori = None;
+                        bu.detay = false;
+                        cx.notify();
+                    }),
+                )
+                .child(SharedString::from(format!("All ({})", self.manifest.len()))),
+        );
+        for kategori_adı in self.kategoriler.clone() {
+            let sayı = self.kategori_sayısı(&kategori_adı);
+            if sayı == 0 {
                 continue;
             }
-            for (i, (ad, _)) in öğeler.iter().enumerate() {
-                let seçili = self.seçili == (k, i);
-                let satır = div()
+            let seçili = self.kategori.as_deref() == Some(kategori_adı.as_str());
+            let tıklanan = kategori_adı.clone();
+            menü = menü.child(
+                div()
                     .px_2()
                     .py_1()
-                    .ml_4()
                     .rounded_md()
                     .cursor_pointer()
                     .text_color(if seçili { vurgu } else { metin })
@@ -791,13 +935,13 @@ impl Render for Galeri {
                     .on_mouse_down(
                         MouseButton::Left,
                         cx.listener(move |bu, _: &MouseDownEvent, _, cx| {
-                            bu.seçili = (k, i);
-                            bu.uygula(cx);
+                            bu.kategori = Some(tıklanan.clone());
+                            bu.detay = false;
+                            cx.notify();
                         }),
                     )
-                    .child(SharedString::from((*ad).to_string()));
-                menü = menü.child(satır);
-            }
+                    .child(SharedString::from(format!("{kategori_adı} ({sayı})"))),
+            );
         }
 
         // --- Üst düğme çubuğu ---
@@ -816,8 +960,15 @@ impl Render for Galeri {
                 .child(SharedString::from(etiket.to_string()))
         };
         let durum_yazısı = SharedString::from(format!(
-            "{} nokta · tohum {}",
-            self.durum.nokta, self.durum.tohum
+            "{} / {} tam kanıtlı · {} yerel fixture · {} nokta · tohum {}",
+            self.tam_kanıtlı,
+            self.görünür_hedef,
+            self.manifest
+                .iter()
+                .filter(|kayıt| kayıt.cizelge_fixture.is_some())
+                .count(),
+            self.durum.nokta,
+            self.durum.tohum
         ));
         let araç_çubuğu = div()
             .flex()
@@ -828,7 +979,13 @@ impl Render for Galeri {
             .border_b_1()
             .border_color(çizgi_rengi)
             .bg(panel)
-            .child(div().text_color(soluk).text_sm().flex_1().child(durum_yazısı))
+            .child(
+                div()
+                    .text_color(soluk)
+                    .text_sm()
+                    .flex_1()
+                    .child(durum_yazısı),
+            )
             .child(düğme("− Nokta").on_mouse_down(
                 MouseButton::Left,
                 cx.listener(|bu, _: &MouseDownEvent, _, cx| {
@@ -850,13 +1007,223 @@ impl Render for Galeri {
                     bu.uygula(cx);
                 }),
             ))
-            .child(düğme(if koyu { "☀ Açık Tema" } else { "🌙 Koyu Tema" }).on_mouse_down(
-                MouseButton::Left,
-                cx.listener(|bu, _: &MouseDownEvent, _, cx| {
-                    bu.durum.koyu = !bu.durum.koyu;
-                    bu.uygula(cx);
-                }),
-            ));
+            .child(
+                düğme(if koyu {
+                    "☀ Açık Tema"
+                } else {
+                    "🌙 Koyu Tema"
+                })
+                .on_mouse_down(
+                    MouseButton::Left,
+                    cx.listener(|bu, _: &MouseDownEvent, _, cx| {
+                        bu.durum.koyu = !bu.durum.koyu;
+                        bu.uygula(cx);
+                    }),
+                ),
+            );
+
+        let içerik =
+            if self.detay {
+                let kayıt = self.manifest.get(self.seçili).cloned();
+                let geri = div()
+                    .px_3()
+                    .py_1()
+                    .rounded_md()
+                    .border_1()
+                    .border_color(çizgi_rengi)
+                    .cursor_pointer()
+                    .child("← Galeriye dön")
+                    .on_mouse_down(
+                        MouseButton::Left,
+                        cx.listener(|bu, _: &MouseDownEvent, _, cx| {
+                            bu.detay = false;
+                            cx.notify();
+                        }),
+                    );
+                let mut ayrıntı = div()
+                    .id("galeri-detay")
+                    .flex_1()
+                    .h_full()
+                    .flex()
+                    .flex_col()
+                    .p_3()
+                    .gap_3()
+                    .child(geri);
+                if let Some(kayıt) = kayıt {
+                    let fixture_durumu = if kayıt.cizelge_fixture.is_some() {
+                        "Yerel fixture bağlı · kanıt kapıları bekliyor"
+                    } else {
+                        "Yerel fixture bekliyor"
+                    };
+                    ayrıntı =
+                        ayrıntı.child(
+                            div()
+                                .flex()
+                                .flex_row()
+                                .gap_3()
+                                .child(
+                                    div()
+                                        .flex_1()
+                                        .min_w(px(500.0))
+                                        .h_full()
+                                        .rounded_lg()
+                                        .bg(panel)
+                                        .child(self.grafik.clone()),
+                                )
+                                .child(
+                                    div()
+                                        .w(px(310.0))
+                                        .flex_none()
+                                        .p_3()
+                                        .rounded_lg()
+                                        .border_1()
+                                        .border_color(çizgi_rengi)
+                                        .bg(panel)
+                                        .text_color(metin)
+                                        .child(
+                                            div()
+                                                .text_lg()
+                                                .font_weight(gpui::FontWeight::BOLD)
+                                                .child(SharedString::from(kayıt.başlık.en.clone())),
+                                        )
+                                        .child(
+                                            div()
+                                                .text_sm()
+                                                .text_color(soluk)
+                                                .child(SharedString::from(kayıt.id.clone())),
+                                        )
+                                        .child(div().mt_2().child(SharedString::from(
+                                            kayıt.kategoriler.join(" · "),
+                                        )))
+                                        .child(
+                                            div()
+                                                .mt_2()
+                                                .text_color(gpui::rgb(0xc2410c))
+                                                .child(fixture_durumu),
+                                        )
+                                        .child(div().mt_3().child(SharedString::from(format!(
+                                            "API: {}",
+                                            kayıt.kanıt.api
+                                        ))))
+                                        .child(div().child(SharedString::from(format!(
+                                            "Görsel: {}",
+                                            kayıt.kanıt.statik_görsel
+                                        ))))
+                                        .child(div().child(SharedString::from(format!(
+                                            "Etkileşim: {}",
+                                            kayıt.kanıt.etkileşim
+                                        ))))
+                                        .child(div().mt_3().text_sm().text_color(soluk).child(
+                                            SharedString::from(format!(
+                                                "Faz {} · zorluk {} · since {}",
+                                                kayıt.sahip_faz.unwrap_or(0),
+                                                kayıt.difficulty,
+                                                kayıt.since.unwrap_or_else(|| "—".to_string())
+                                            )),
+                                        )),
+                                ),
+                        );
+                }
+                ayrıntı
+            } else {
+                let indeksler: Vec<usize> = self
+                    .manifest
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, kayıt)| {
+                        self.kategori.as_ref().is_none_or(|kategori| {
+                            kayıt.kategoriler.iter().any(|aday| aday == kategori)
+                        })
+                    })
+                    .map(|(sıra, _)| sıra)
+                    .collect();
+                let mut kartlar = div()
+                    .id("galeri-kartlar")
+                    .flex_1()
+                    .h_full()
+                    .overflow_y_scroll()
+                    .p_3()
+                    .flex()
+                    .flex_row()
+                    .flex_wrap()
+                    .items_start()
+                    .gap_3();
+                for sıra in indeksler {
+                    let Some(kayıt) = self.manifest.get(sıra) else {
+                        continue;
+                    };
+                    let bağlı = kayıt.cizelge_fixture.is_some();
+                    let üst_renk = if bağlı {
+                        gpui::rgb(0xd97706)
+                    } else {
+                        gpui::rgb(0xdc2626)
+                    };
+                    kartlar = kartlar.child(
+                        div()
+                            .id(("galeri-kartı", sıra))
+                            .w(px(260.0))
+                            .h(px(190.0))
+                            .flex_none()
+                            .p_3()
+                            .rounded_lg()
+                            .border_1()
+                            .border_color(çizgi_rengi)
+                            .border_t_4()
+                            .border_color(üst_renk)
+                            .bg(panel)
+                            .cursor_pointer()
+                            .hover(move |s| s.bg(vurgu_zemini))
+                            .on_mouse_down(
+                                MouseButton::Left,
+                                cx.listener(move |bu, _: &MouseDownEvent, _, cx| {
+                                    bu.seçili = sıra;
+                                    bu.detay = true;
+                                    bu.uygula(cx);
+                                }),
+                            )
+                            .child(
+                                div()
+                                    .h(px(92.0))
+                                    .rounded_md()
+                                    .bg(if koyu {
+                                        gpui::rgb(0x111318)
+                                    } else {
+                                        gpui::rgb(0xf1f3f8)
+                                    })
+                                    .flex()
+                                    .items_center()
+                                    .justify_center()
+                                    .text_color(soluk)
+                                    .text_sm()
+                                    .child(if bağlı {
+                                        "Fixture bağlı"
+                                    } else {
+                                        "Kanıt bekliyor"
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .mt_2()
+                                    .font_weight(gpui::FontWeight::SEMIBOLD)
+                                    .text_color(metin)
+                                    .child(SharedString::from(kayıt.başlık.en.clone())),
+                            )
+                            .child(
+                                div()
+                                    .text_xs()
+                                    .text_color(soluk)
+                                    .child(SharedString::from(kayıt.id.clone())),
+                            )
+                            .child(div().mt_1().text_xs().text_color(üst_renk).child(
+                                SharedString::from(format!(
+                                    "API {} · görsel {}",
+                                    kayıt.kanıt.api, kayıt.kanıt.statik_görsel
+                                )),
+                            )),
+                    );
+                }
+                kartlar
+            };
 
         div()
             .size_full()
@@ -872,7 +1239,7 @@ impl Render for Galeri {
                     .flex()
                     .flex_col()
                     .child(araç_çubuğu)
-                    .child(div().flex_1().m_2().rounded_lg().bg(panel).child(self.grafik.clone())),
+                    .child(içerik),
             )
     }
 }

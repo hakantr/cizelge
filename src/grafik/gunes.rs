@@ -116,8 +116,7 @@ pub fn güneş_patlaması_çiz(
     let taban = tuval.genişlik.min(tuval.yükseklik) / 2.0;
     let dış = seri.yarıçap.1.çöz(taban);
     let iç = seri.yarıçap.0.çöz(taban);
-    let (etkin_kökler, inilen) =
-        crate::model::agac::yolu_çöz(&seri.kökler, kök_yolu);
+    let (etkin_kökler, inilen) = crate::model::agac::yolu_çöz(&seri.kökler, kök_yolu);
     let seviye_sayısı = derinlik(etkin_kökler).max(1);
     // Odaklıyken merkezde geri düğmesine yer aç.
     let iç = if inilen > 0 { iç.max(22.0) } else { iç };

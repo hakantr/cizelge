@@ -1,0 +1,18 @@
+# Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
+id = "parallel-nutrients"
+kapsam_durumu = "yok"
+sahip_faz = 4
+resmi_kaynak = "public/examples/ts/parallel-nutrients.ts"
+fixture = ""
+viewport_genişlik = 700
+viewport_yükseklik = 525
+shot_delay_ms = 0
+profiller = ["açık", "koyu"]
+
+[kanıt]
+api = "yok"
+statik_görsel = "yok"
+animasyon = "yok"
+etkileşim = "yok"
+erişilebilirlik = "yok"
+performans = "yok"
