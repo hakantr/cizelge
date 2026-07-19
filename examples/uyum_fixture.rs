@@ -69,6 +69,79 @@ fn line_simple() -> GrafikSeçenekleri {
         .seri(ÇizgiSerisi::yeni().veri([150.0, 230.0, 224.0, 218.0, 135.0, 147.0, 260.0]))
 }
 
+fn line_markline() -> GrafikSeçenekleri {
+    use İmÇizgisiEtiketKonumu as Konum;
+
+    let konumlar = [
+        ("start", Konum::Başlangıç),
+        ("middle", Konum::Orta),
+        ("end", Konum::Bitiş),
+        ("insideStart", Konum::İçBaşlangıç),
+        ("insideStartTop", Konum::İçBaşlangıçÜst),
+        ("insideStartBottom", Konum::İçBaşlangıçAlt),
+        ("insideMiddle", Konum::İçOrta),
+        ("insideMiddleTop", Konum::İçOrtaÜst),
+        ("insideMiddleBottom", Konum::İçOrtaAlt),
+        ("insideEnd", Konum::İçBitiş),
+        ("insideEndTop", Konum::İçBitişÜst),
+        ("insideEndBottom", Konum::İçBitişAlt),
+    ];
+    let mut im_çizgisi = İmÇizgisi::yeni()
+        .etiket(
+            Etiket::yeni()
+                .göster(true)
+                .yazı(YazıStili::yeni().boyut(14.0).renk("#333")),
+        )
+        .etiket_uzaklığı(20.0, 8.0);
+    for (sıra, (ad, konum)) in konumlar.into_iter().enumerate() {
+        im_çizgisi = im_çizgisi.tanım(
+            İmÇizgisiTanımı::yeni(
+                İmYönü::Yatay,
+                İmDeğeri::Değer(1.8 - 0.2 * (sıra / 3) as f64),
+            )
+            .ad(ad)
+            .etiket(
+                İmÇizgisiEtiketYaması::yeni()
+                    .biçimleyici("{b}")
+                    .konum(konum),
+            ),
+        );
+        if ad != "middle" {
+            let metin = if ad == "insideMiddle" {
+                "insideMiddle / middle"
+            } else {
+                ad
+            };
+            im_çizgisi = im_çizgisi.parça(
+                İmÇizgisiParçası::koordinatlar((0.0, 0.3), (3.0, 1.0))
+                    .ad(format!("start: {ad}"))
+                    .etiket(
+                        İmÇizgisiEtiketYaması::yeni()
+                            .biçimleyici(metin)
+                            .konum(konum),
+                    ),
+            );
+        }
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ızgara(Izgara::yeni().üst(30).sol(60).sağ(60).alt(40))
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(["A", "B", "C", "D", "E"])
+                .bölme_alanı_göster(true),
+        )
+        .y_ekseni(Eksen::değer().en_çok(2.0))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("line")
+                .sembol_boyutu(6.0)
+                .im_çizgisi(im_çizgisi)
+                .veri([0.3, 1.4, 1.2, 1.0, 0.6]),
+        )
+}
+
 fn line_marker() -> GrafikSeçenekleri {
     let mut en_düşük_çizgileri = İmÇizgisi::yeni().yatay(İmDeğeri::Ortalama);
     // Resmî örnekteki ikinci markLine, serinin en büyük noktasından
@@ -79,6 +152,7 @@ fn line_marker() -> GrafikSeçenekleri {
         bitiş: İmÇizgisiUcu::Koordinat(6.0, 5.0),
         başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
         bitiş_simgesi: İmÇizgisiUçSimgesi::Yok,
+        etiket: None,
     });
 
     GrafikSeçenekleri::yeni()
@@ -3858,6 +3932,7 @@ fn mix_zoom_on_value(son: bool) -> Result<GrafikSeçenekleri, String> {
 fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
     match id {
         "line-simple" => Ok(line_simple()),
+        "line-markline" => Ok(line_markline()),
         "line-marker" => Ok(line_marker()),
         "bar-simple" => Ok(bar_simple()),
         "bar1" => Ok(bar1()),
@@ -3995,6 +4070,10 @@ fn çalıştır() -> Result<(), String> {
                 "Search",
                 "Engine",
                 "2000-06-05",
+                "middle",
+                "insideStart",
+                "insideStartTop",
+                "insideMiddle / middle",
             ]
             .map(|metin| (metin, yüzey.yazı_ölç(metin, 12.0).0))
         );

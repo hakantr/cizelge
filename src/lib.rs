@@ -92,7 +92,8 @@ pub use model::hatlar::{
 };
 pub use model::imleyici::{
     İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler, İmÇizgisi,
-    İmÇizgisiParçası, İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
+    İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası, İmÇizgisiTanımı, İmÇizgisiUcu,
+    İmÇizgisiUçSimgesi,
 };
 pub use model::kutupsal::KutupsalKoordinat;
 pub use model::matris::{
@@ -183,7 +184,8 @@ pub mod hazir {
     };
     pub use crate::model::imleyici::{
         İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
-        İmÇizgisi, İmÇizgisiParçası, İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
+        İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası, İmÇizgisiTanımı,
+        İmÇizgisiUcu, İmÇizgisiUçSimgesi,
     };
     pub use crate::model::kutupsal::KutupsalKoordinat;
     pub use crate::model::matris::{

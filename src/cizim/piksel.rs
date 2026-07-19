@@ -36,6 +36,10 @@ const YAZI_KAPSAMA_KUVVETİ: f32 = 0.8;
 // İkinci örtü geçişi, geometriyi büyütmeden aynı kenar yoğunluğunu üretir.
 const DÖNÜŞÜMLÜ_YAZI_EK_OPAKLIĞI: f32 = 0.4;
 const AÇIK_DÖNÜŞÜMLÜ_YAZI_EK_OPAKLIĞI: f32 = 1.0;
+// Zrender'ın `strokeFirst` metni, salt dolgu metninden biraz farklı bir
+// piksel merkezine oturur. Konturlu glif yolunu yerel eksende aynı merkeze
+// taşımak için gereken sabit alt-piksel taban eki.
+const KONTURLU_YAZI_TABAN_EKİ: f32 = 0.12;
 
 /// Sistem yazı tipleri (normal + kalın).
 #[derive(Clone)]
@@ -1582,6 +1586,160 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             }
         }
         ölçü
+    }
+
+    fn dönüşümlü_konturlu_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        kontur_rengi: Renk,
+        kontur_kalınlığı: f32,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        let ölçü = self.yazı_ölç_ağırlıklı(metin, boyut, kalın);
+        let yol = if metin.is_empty() || !dönüşüm.sonlu_mu() || kontur_kalınlığı <= 0.0 {
+            None
+        } else {
+            self.yazılar.as_ref().and_then(|yazılar| {
+                let yazı_tipi = if kalın {
+                    yazılar.kalın.clone()
+                } else {
+                    yazılar.normal.clone()
+                };
+                let ölçekli =
+                    yazı_tipi.as_scaled(ab_glyph::PxScale::from(boyut * YAZI_RASTER_ORANI));
+                let x0 = match yatay {
+                    YatayHiza::Sol => konum.0,
+                    YatayHiza::Orta => konum.0 - ölçü.0 / 2.0,
+                    YatayHiza::Sağ => konum.0 - ölçü.0,
+                };
+                let üst = match dikey {
+                    DikeyHiza::Üst => konum.1,
+                    DikeyHiza::Orta => konum.1 - ölçü.1 / 2.0,
+                    DikeyHiza::Alt => konum.1 - ölçü.1,
+                };
+                let satır = ölçekli.ascent() - ölçekli.descent();
+                let taban_y = üst
+                    + (ölçü.1 - satır) / 2.0
+                    + ölçekli.ascent()
+                    + YAZI_TABAN_DÜZELTMESİ
+                    + KONTURLU_YAZI_TABAN_EKİ;
+                let ölçek_çarpanı = ölçekli.scale_factor();
+                let mut kalem = x0;
+                let mut önceki: Option<(ab_glyph::GlyphId, bool)> = None;
+                let mut kurucu = ts::PathBuilder::new();
+                let mut son: Option<(f32, f32)> = None;
+                let mut dış_hat_var = false;
+                for karakter in metin.chars() {
+                    let kimlik = ölçekli.glyph_id(karakter);
+                    if let Some((önceki_kimlik, önceki_boşluk)) = önceki
+                        && !önceki_boşluk
+                        && !karakter.is_whitespace()
+                    {
+                        kalem += ölçekli.kern(önceki_kimlik, kimlik);
+                    }
+                    if let Some(dış_hat) = yazı_tipi.outline(kimlik) {
+                        let dönüştür = |nokta: ab_glyph::Point| {
+                            dönüşüm.noktayı_dönüştür((
+                                kalem + nokta.x * ölçek_çarpanı.horizontal,
+                                taban_y - nokta.y * ölçek_çarpanı.vertical,
+                            ))
+                        };
+                        for eğri in dış_hat.curves {
+                            let başlangıç = match &eğri {
+                                OutlineCurve::Line(p0, _)
+                                | OutlineCurve::Quad(p0, _, _)
+                                | OutlineCurve::Cubic(p0, _, _, _) => dönüştür(*p0),
+                            };
+                            if son.is_none_or(|son| {
+                                (son.0 - başlangıç.0).abs() > 1e-4
+                                    || (son.1 - başlangıç.1).abs() > 1e-4
+                            }) {
+                                kurucu.move_to(başlangıç.0, başlangıç.1);
+                            }
+                            son = Some(match eğri {
+                                OutlineCurve::Line(_, p1) => {
+                                    let p1 = dönüştür(p1);
+                                    kurucu.line_to(p1.0, p1.1);
+                                    p1
+                                }
+                                OutlineCurve::Quad(_, p1, p2) => {
+                                    let p1 = dönüştür(p1);
+                                    let p2 = dönüştür(p2);
+                                    kurucu.quad_to(p1.0, p1.1, p2.0, p2.1);
+                                    p2
+                                }
+                                OutlineCurve::Cubic(_, p1, p2, p3) => {
+                                    let p1 = dönüştür(p1);
+                                    let p2 = dönüştür(p2);
+                                    let p3 = dönüştür(p3);
+                                    kurucu.cubic_to(p1.0, p1.1, p2.0, p2.1, p3.0, p3.1);
+                                    p3
+                                }
+                            });
+                            dış_hat_var = true;
+                        }
+                    }
+                    kalem += ölçekli.h_advance(kimlik);
+                    önceki = Some((kimlik, karakter.is_whitespace()));
+                }
+                dış_hat_var.then(|| kurucu.finish()).flatten()
+            })
+        };
+
+        let yazı_dönüşümü = dönüşüm.çarp(AfinMatris::ötele(0.0, KONTURLU_YAZI_TABAN_EKİ));
+        if let Some(yol) = yol {
+            let mut boya = ts::Paint {
+                anti_alias: true,
+                ..ts::Paint::default()
+            };
+            boya.set_color(renk_çevir(kontur_rengi));
+            let vuruş = ts::Stroke {
+                width: kontur_kalınlığı,
+                ..ts::Stroke::default()
+            };
+            self.harita
+                .stroke_path(&yol, &boya, &vuruş, self.dönüşüm(), self.kırpma.as_ref());
+        } else if kontur_kalınlığı > 0.0 {
+            let yarıçap = kontur_kalınlığı / 2.0;
+            let köşegen = yarıçap * std::f32::consts::FRAC_1_SQRT_2;
+            for (x, y) in [
+                (-yarıçap, 0.0),
+                (yarıçap, 0.0),
+                (0.0, -yarıçap),
+                (0.0, yarıçap),
+                (-köşegen, -köşegen),
+                (köşegen, -köşegen),
+                (-köşegen, köşegen),
+                (köşegen, köşegen),
+            ] {
+                self.dönüşümlü_yazı(
+                    metin,
+                    konum,
+                    yatay,
+                    dikey,
+                    boyut,
+                    kontur_rengi,
+                    kalın,
+                    AfinMatris::ötele(x, y).çarp(yazı_dönüşümü),
+                );
+            }
+        }
+        self.dönüşümlü_yazı(
+            metin,
+            konum,
+            yatay,
+            dikey,
+            boyut,
+            renk,
+            kalın,
+            yazı_dönüşümü,
+        )
     }
 
     fn olarak(&mut self) -> &mut dyn ÇizimYüzeyi {

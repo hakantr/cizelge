@@ -554,10 +554,12 @@ async function çalıştır() {
               tür: öğe.type,
               metin: öğe.style?.text,
               font: öğe.style?.font,
+              dolgu: öğe.style?.fill,
               x: öğe.x,
               y: öğe.y,
               hiza: öğe.style?.align,
               dikeyHiza: öğe.style?.verticalAlign,
+              dönüşüm: öğe.getComputedTransform?.(),
               sınır: kutu ? { x: kutu.x, y: kutu.y, width: kutu.width, height: kutu.height } : null,
               dünyaSınırı: dünya ? { x: dünya.x, y: dünya.y, width: dünya.width, height: dünya.height } : null
             };

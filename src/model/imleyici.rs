@@ -1,7 +1,10 @@
 //! İmleyici seçenekleri — ECharts'taki `markLine`, `markPoint`, `markArea`
 //! bileşenlerinin karşılığı (`echarts/src/component/marker`).
 
-use crate::model::stil::{Etiket, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili};
+use crate::model::stil::{
+    Biçimleyici, Etiket, YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü,
+    ÖğeStili,
+};
 
 /// İm değeri: sabit sayı ya da seri verisinden türetilen istatistik
 /// (`markLine.data[i].type: 'average' | 'min' | 'max'`).
@@ -22,12 +25,110 @@ pub enum İmYönü {
     Dikey,
 }
 
+/// `markLine.label.position`: etiketin çizginin başlangıç, orta veya bitiş
+/// noktasına göre yerleşimi. `İç*Üst` / `İç*Alt` seçenekleri metni çizgi
+/// doğrultusuna döndürür ve çizginin normalinde konumlandırır.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum İmÇizgisiEtiketKonumu {
+    Başlangıç,
+    Orta,
+    #[default]
+    Bitiş,
+    İçBaşlangıç,
+    İçBaşlangıçÜst,
+    İçBaşlangıçAlt,
+    İçOrta,
+    İçOrtaÜst,
+    İçOrtaAlt,
+    İçBitiş,
+    İçBitişÜst,
+    İçBitişAlt,
+}
+
+/// Bir `markLine.data` öğesindeki `label` yaması. ECharts'ta öğe etiketi
+/// genel `markLine.label` modelinden miras alır; bu nedenle alanlar isteğe
+/// bağlıdır ve yalnız açıkça verilen değerler genel etiketi ezer.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct İmÇizgisiEtiketYaması {
+    pub göster: Option<bool>,
+    pub konum: Option<İmÇizgisiEtiketKonumu>,
+    pub biçimleyici: Option<Biçimleyici>,
+    pub yazı: Option<YazıStili>,
+    /// ECharts `distance: [x, y]`: çizgi doğrultusu ve normalindeki uzaklık.
+    pub uzaklık: Option<[f32; 2]>,
+    pub yatay_hiza: Option<YazıYatayHizası>,
+    pub dikey_hiza: Option<YazıDikeyHizası>,
+}
+
+impl İmÇizgisiEtiketYaması {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = Some(göster);
+        self
+    }
+
+    pub fn konum(mut self, konum: İmÇizgisiEtiketKonumu) -> Self {
+        self.konum = Some(konum);
+        self
+    }
+
+    pub fn biçimleyici(mut self, biçimleyici: impl Into<Biçimleyici>) -> Self {
+        self.biçimleyici = Some(biçimleyici.into());
+        self
+    }
+
+    pub fn yazı(mut self, yazı: YazıStili) -> Self {
+        self.yazı = Some(yazı);
+        self
+    }
+
+    pub fn uzaklık(mut self, doğrultu: f32, normal: f32) -> Self {
+        self.uzaklık = Some([doğrultu, normal]);
+        self
+    }
+
+    pub fn yatay_hiza(mut self, hiza: YazıYatayHizası) -> Self {
+        self.yatay_hiza = Some(hiza);
+        self
+    }
+
+    pub fn dikey_hiza(mut self, hiza: YazıDikeyHizası) -> Self {
+        self.dikey_hiza = Some(hiza);
+        self
+    }
+}
+
 /// Tek bir im çizgisi tanımı (`markLine.data` öğesi).
 #[derive(Clone, PartialEq, Debug)]
 pub struct İmÇizgisiTanımı {
     pub ad: Option<String>,
     pub yön: İmYönü,
     pub değer: İmDeğeri,
+    pub etiket: Option<İmÇizgisiEtiketYaması>,
+}
+
+impl İmÇizgisiTanımı {
+    pub fn yeni(yön: İmYönü, değer: İmDeğeri) -> Self {
+        Self {
+            ad: None,
+            yön,
+            değer,
+            etiket: None,
+        }
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn etiket(mut self, etiket: İmÇizgisiEtiketYaması) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
 }
 
 /// Eksenler üzerinde bir markLine ucunun konumu. İstatistik türü, değerin
@@ -54,6 +155,47 @@ pub struct İmÇizgisiParçası {
     pub bitiş: İmÇizgisiUcu,
     pub başlangıç_simgesi: İmÇizgisiUçSimgesi,
     pub bitiş_simgesi: İmÇizgisiUçSimgesi,
+    pub etiket: Option<İmÇizgisiEtiketYaması>,
+}
+
+impl İmÇizgisiParçası {
+    pub fn yeni(başlangıç: İmÇizgisiUcu, bitiş: İmÇizgisiUcu) -> Self {
+        Self {
+            ad: None,
+            başlangıç,
+            bitiş,
+            başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
+            bitiş_simgesi: İmÇizgisiUçSimgesi::Ok,
+            etiket: None,
+        }
+    }
+
+    pub fn koordinatlar(başlangıç: (f64, f64), bitiş: (f64, f64)) -> Self {
+        Self::yeni(
+            İmÇizgisiUcu::Koordinat(başlangıç.0, başlangıç.1),
+            İmÇizgisiUcu::Koordinat(bitiş.0, bitiş.1),
+        )
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn uç_simgeleri(
+        mut self,
+        başlangıç: İmÇizgisiUçSimgesi,
+        bitiş: İmÇizgisiUçSimgesi,
+    ) -> Self {
+        self.başlangıç_simgesi = başlangıç;
+        self.bitiş_simgesi = bitiş;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: İmÇizgisiEtiketYaması) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
 }
 
 /// İm çizgisi (`markLine`): seriye bağlı yatay/dikey başvuru çizgileri.
@@ -67,6 +209,10 @@ pub struct İmÇizgisi {
     /// Öntanımlı: seri renginde kesikli.
     pub stil: ÇizgiStili,
     pub etiket: Etiket,
+    /// `markLine.label.position`; ECharts öntanımlısı `end`.
+    pub etiket_konumu: İmÇizgisiEtiketKonumu,
+    /// `markLine.label.distance`; sayı biçimi iki eksende aynı değere açılır.
+    pub etiket_uzaklığı: [f32; 2],
 }
 
 impl Default for İmÇizgisi {
@@ -85,6 +231,8 @@ impl Default for İmÇizgisi {
                 göster: true,
                 ..Default::default()
             },
+            etiket_konumu: İmÇizgisiEtiketKonumu::Bitiş,
+            etiket_uzaklığı: [5.0, 5.0],
         }
     }
 }
@@ -96,21 +244,13 @@ impl İmÇizgisi {
 
     /// Yatay çizgi ekler (`{ yAxis: değer }` / `{ type: 'average' }`).
     pub fn yatay(mut self, değer: İmDeğeri) -> Self {
-        self.veri.push(İmÇizgisiTanımı {
-            ad: None,
-            yön: İmYönü::Yatay,
-            değer,
-        });
+        self.veri.push(İmÇizgisiTanımı::yeni(İmYönü::Yatay, değer));
         self
     }
 
     /// Dikey çizgi ekler (`{ xAxis: değer }`).
     pub fn dikey(mut self, değer: İmDeğeri) -> Self {
-        self.veri.push(İmÇizgisiTanımı {
-            ad: None,
-            yön: İmYönü::Dikey,
-            değer,
-        });
+        self.veri.push(İmÇizgisiTanımı::yeni(İmYönü::Dikey, değer));
         self
     }
 
@@ -120,28 +260,26 @@ impl İmÇizgisi {
         self
     }
 
+    /// İki uçlu açık bir `markLine.data` öğesi ekler.
+    pub fn parça(mut self, parça: İmÇizgisiParçası) -> Self {
+        self.parçalar.push(parça);
+        self
+    }
+
     /// Serideki iki istatistik noktasını birleştirir; örneğin resmi
     /// `[{type:'min'}, {type:'max'}]` markLine biçimi.
     pub fn istatistik_parçası(mut self, başlangıç: İmDeğeri, bitiş: İmDeğeri) -> Self {
-        self.parçalar.push(İmÇizgisiParçası {
-            ad: None,
-            başlangıç: İmÇizgisiUcu::İstatistik(başlangıç),
-            bitiş: İmÇizgisiUcu::İstatistik(bitiş),
-            başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
-            bitiş_simgesi: İmÇizgisiUçSimgesi::Ok,
-        });
+        self.parçalar.push(İmÇizgisiParçası::yeni(
+            İmÇizgisiUcu::İstatistik(başlangıç),
+            İmÇizgisiUcu::İstatistik(bitiş),
+        ));
         self
     }
 
     /// Açık iki veri koordinatı arasında markLine çizer.
     pub fn koordinat_parçası(mut self, başlangıç: (f64, f64), bitiş: (f64, f64)) -> Self {
-        self.parçalar.push(İmÇizgisiParçası {
-            ad: None,
-            başlangıç: İmÇizgisiUcu::Koordinat(başlangıç.0, başlangıç.1),
-            bitiş: İmÇizgisiUcu::Koordinat(bitiş.0, bitiş.1),
-            başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
-            bitiş_simgesi: İmÇizgisiUçSimgesi::Ok,
-        });
+        self.parçalar
+            .push(İmÇizgisiParçası::koordinatlar(başlangıç, bitiş));
         self
     }
 
@@ -174,7 +312,18 @@ impl İmÇizgisi {
     }
 
     pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket_uzaklığı = [etiket.uzaklık; 2];
         self.etiket = etiket;
+        self
+    }
+
+    pub fn etiket_konumu(mut self, konum: İmÇizgisiEtiketKonumu) -> Self {
+        self.etiket_konumu = konum;
+        self
+    }
+
+    pub fn etiket_uzaklığı(mut self, doğrultu: f32, normal: f32) -> Self {
+        self.etiket_uzaklığı = [doğrultu, normal];
         self
     }
 }

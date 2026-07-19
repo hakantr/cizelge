@@ -2,12 +2,14 @@
 //! karşılığı: im alanları serilerin altına, im çizgileri ve raptiyeler
 //! serilerin üstüne boyanır.
 
-use crate::cizim::{DikeyHiza, YatayHiza, Yol, keskin, ÇizimYüzeyi};
+use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, keskin, ÇizimYüzeyi};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
 use crate::model::imleyici::{
-    İmDeğeri, İmYönü, İmleyiciler, İmÇizgisiUcu, İmÇizgisiUçSimgesi
+    İmDeğeri, İmYönü, İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması,
+    İmÇizgisiUcu, İmÇizgisiUçSimgesi,
 };
 use crate::model::seri::Seri;
+use crate::model::stil::{Etiket, YazıDikeyHizası, YazıYatayHizası};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::{binlik_ayır, ondalık_kırp};
@@ -124,7 +126,10 @@ fn im_okunu_çiz(
     let ny = ux;
     let mut ok = Yol::yeni();
     ok.taşı(bitiş);
-    let yarı_taban = 16.0 * 2.0 / 3.0;
+    // MarkLine öntanımlı `symbolSize: [8, 16]`, arrow şeklinin 8 px
+    // genişlik ve 16 px yükseklik kutusudur. Çizgi doğrultusuna çevrilince
+    // 16 px uzunluk, `Arrow.buildPath` gereği 2×(8×2/3) px taban verir.
+    let yarı_taban = 8.0 * 2.0 / 3.0;
     let taban_orta = (bitiş.0 - ux * 16.0, bitiş.1 - uy * 16.0);
     ok.çiz((
         taban_orta.0 + nx * yarı_taban,
@@ -155,6 +160,271 @@ fn im_uç_simgesini_çiz(
         }
         İmÇizgisiUçSimgesi::Ok => im_okunu_çiz(yüzey, karşı_uç, uç, renk),
     }
+}
+
+#[derive(Clone, Debug)]
+struct ÇözülmüşİmÇizgisiEtiketi {
+    etiket: Etiket,
+    konum: İmÇizgisiEtiketKonumu,
+    uzaklık: [f32; 2],
+}
+
+fn im_çizgisi_etiketini_çöz(
+    im: &İmÇizgisi,
+    yama: Option<&İmÇizgisiEtiketYaması>,
+) -> ÇözülmüşİmÇizgisiEtiketi {
+    let mut etiket = im.etiket.clone();
+    let mut konum = im.etiket_konumu;
+    let mut uzaklık = im.etiket_uzaklığı;
+    if let Some(yama) = yama {
+        if let Some(göster) = yama.göster {
+            etiket.göster = göster;
+        }
+        if let Some(yama_konumu) = yama.konum {
+            konum = yama_konumu;
+        }
+        if let Some(biçimleyici) = &yama.biçimleyici {
+            etiket.biçimleyici = Some(biçimleyici.clone());
+        }
+        if let Some(yazı) = &yama.yazı {
+            etiket.yazı = yazı.clone();
+        }
+        if let Some(yama_uzaklığı) = yama.uzaklık {
+            uzaklık = yama_uzaklığı;
+        }
+        if let Some(hiza) = yama.yatay_hiza {
+            etiket.yatay_hiza = Some(hiza);
+        }
+        if let Some(hiza) = yama.dikey_hiza {
+            etiket.dikey_hiza = Some(hiza);
+        }
+    }
+    ÇözülmüşİmÇizgisiEtiketi {
+        etiket,
+        konum,
+        uzaklık,
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct İmÇizgisiEtiketYerleşimi {
+    çapa: (f32, f32),
+    yatay: YatayHiza,
+    dikey: DikeyHiza,
+    /// Canvas koordinatında görünen dönüş; `None`, `start` / `end` gibi
+    /// eksene paralel kalması gereken etiketleri belirtir.
+    dönüş: Option<f32>,
+}
+
+/// `echarts/src/chart/helper/Line.ts#beforeUpdate` içindeki markLine etiket
+/// geometrisinin düz çizgi karşılığı. İç konumlarda uzaklık önce metnin yerel
+/// eksenlerinde uygulanır, ardından metin ve uzaklık birlikte çizgiye döner.
+fn im_çizgisi_etiket_yerleşimi(
+    başlangıç: (f32, f32),
+    bitiş: (f32, f32),
+    konum: İmÇizgisiEtiketKonumu,
+    uzaklık: [f32; 2],
+) -> Option<İmÇizgisiEtiketYerleşimi> {
+    let dx = bitiş.0 - başlangıç.0;
+    let dy = bitiş.1 - başlangıç.1;
+    let uzunluk = dx.hypot(dy);
+    if !uzunluk.is_finite() || uzunluk <= f32::EPSILON {
+        return None;
+    }
+    let teğet = (dx / uzunluk, dy / uzunluk);
+
+    let yerleşim = match konum {
+        İmÇizgisiEtiketKonumu::Bitiş => İmÇizgisiEtiketYerleşimi {
+            çapa: (
+                bitiş.0 + teğet.0 * uzaklık[0],
+                bitiş.1 + teğet.1 * uzaklık[1],
+            ),
+            yatay: if teğet.0 > 0.8 {
+                YatayHiza::Sol
+            } else if teğet.0 < -0.8 {
+                YatayHiza::Sağ
+            } else {
+                YatayHiza::Orta
+            },
+            dikey: if teğet.1 > 0.8 {
+                DikeyHiza::Üst
+            } else if teğet.1 < -0.8 {
+                DikeyHiza::Alt
+            } else {
+                DikeyHiza::Orta
+            },
+            dönüş: None,
+        },
+        İmÇizgisiEtiketKonumu::Başlangıç => İmÇizgisiEtiketYerleşimi {
+            çapa: (
+                başlangıç.0 - teğet.0 * uzaklık[0],
+                başlangıç.1 - teğet.1 * uzaklık[1],
+            ),
+            yatay: if teğet.0 > 0.8 {
+                YatayHiza::Sağ
+            } else if teğet.0 < -0.8 {
+                YatayHiza::Sol
+            } else {
+                YatayHiza::Orta
+            },
+            dikey: if teğet.1 > 0.8 {
+                DikeyHiza::Alt
+            } else if teğet.1 < -0.8 {
+                DikeyHiza::Üst
+            } else {
+                DikeyHiza::Orta
+            },
+            dönüş: None,
+        },
+        _ => {
+            let mut dönüş = teğet.1.atan2(teğet.0);
+            if bitiş.0 < başlangıç.0 {
+                dönüş += std::f32::consts::PI;
+            }
+            let yön = if teğet.0 < 0.0 { -1.0 } else { 1.0 };
+            let (normal_uzaklığı, dikey) = match konum {
+                İmÇizgisiEtiketKonumu::Orta
+                | İmÇizgisiEtiketKonumu::İçBaşlangıçÜst
+                | İmÇizgisiEtiketKonumu::İçOrtaÜst
+                | İmÇizgisiEtiketKonumu::İçBitişÜst => (-uzaklık[1], DikeyHiza::Alt),
+                İmÇizgisiEtiketKonumu::İçBaşlangıçAlt
+                | İmÇizgisiEtiketKonumu::İçOrtaAlt
+                | İmÇizgisiEtiketKonumu::İçBitişAlt => (uzaklık[1], DikeyHiza::Üst),
+                _ => (0.0, DikeyHiza::Orta),
+            };
+            let (taban, doğrultu_uzaklığı, yatay) = match konum {
+                İmÇizgisiEtiketKonumu::İçBaşlangıç
+                | İmÇizgisiEtiketKonumu::İçBaşlangıçÜst
+                | İmÇizgisiEtiketKonumu::İçBaşlangıçAlt => (
+                    başlangıç,
+                    uzaklık[0] * yön,
+                    if teğet.0 < 0.0 {
+                        YatayHiza::Sağ
+                    } else {
+                        YatayHiza::Sol
+                    },
+                ),
+                İmÇizgisiEtiketKonumu::Orta
+                | İmÇizgisiEtiketKonumu::İçOrta
+                | İmÇizgisiEtiketKonumu::İçOrtaÜst
+                | İmÇizgisiEtiketKonumu::İçOrtaAlt => (
+                    ((başlangıç.0 + bitiş.0) / 2.0, (başlangıç.1 + bitiş.1) / 2.0),
+                    0.0,
+                    YatayHiza::Orta,
+                ),
+                İmÇizgisiEtiketKonumu::İçBitiş
+                | İmÇizgisiEtiketKonumu::İçBitişÜst
+                | İmÇizgisiEtiketKonumu::İçBitişAlt => (
+                    bitiş,
+                    -uzaklık[0] * yön,
+                    if teğet.0 >= 0.0 {
+                        YatayHiza::Sağ
+                    } else {
+                        YatayHiza::Sol
+                    },
+                ),
+                İmÇizgisiEtiketKonumu::Başlangıç | İmÇizgisiEtiketKonumu::Bitiş => {
+                    return None;
+                }
+            };
+            let (sinüs, kosinüs) = dönüş.sin_cos();
+            let yerel = (doğrultu_uzaklığı, normal_uzaklığı);
+            İmÇizgisiEtiketYerleşimi {
+                çapa: (
+                    taban.0 + kosinüs * yerel.0 - sinüs * yerel.1,
+                    taban.1 + sinüs * yerel.0 + kosinüs * yerel.1,
+                ),
+                yatay,
+                dikey,
+                dönüş: Some(dönüş),
+            }
+        }
+    };
+    Some(yerleşim)
+}
+
+fn yazı_yatay_hizasını_çöz(hiza: YazıYatayHizası) -> YatayHiza {
+    match hiza {
+        YazıYatayHizası::Sol => YatayHiza::Sol,
+        YazıYatayHizası::Orta => YatayHiza::Orta,
+        YazıYatayHizası::Sağ => YatayHiza::Sağ,
+    }
+}
+
+fn yazı_dikey_hizasını_çöz(hiza: YazıDikeyHizası) -> DikeyHiza {
+    match hiza {
+        YazıDikeyHizası::Üst => DikeyHiza::Üst,
+        YazıDikeyHizası::Orta => DikeyHiza::Orta,
+        YazıDikeyHizası::Alt => DikeyHiza::Alt,
+    }
+}
+
+fn im_çizgisi_etiketini_çiz(
+    yüzey: &mut dyn ÇizimYüzeyi,
+    başlangıç: (f32, f32),
+    bitiş: (f32, f32),
+    metin: &str,
+    seçenek: &ÇözülmüşİmÇizgisiEtiketi,
+) {
+    if !seçenek.etiket.göster {
+        return;
+    }
+    let Some(yerleşim) =
+        im_çizgisi_etiket_yerleşimi(başlangıç, bitiş, seçenek.konum, seçenek.uzaklık)
+    else {
+        return;
+    };
+    let yatay = seçenek
+        .etiket
+        .yatay_hiza
+        .map(yazı_yatay_hizasını_çöz)
+        .unwrap_or(yerleşim.yatay);
+    let dikey = seçenek
+        .etiket
+        .dikey_hiza
+        .map(yazı_dikey_hizasını_çöz)
+        .unwrap_or(yerleşim.dikey);
+    let boyut = seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+    let renk = seçenek
+        .etiket
+        .yazı
+        .renk
+        .unwrap_or_else(tema::birincil_metin);
+    // MarkerView, markLine etiketlerine açık zeminde 2 px beyaz
+    // `textBorder` uygular. Dönüş sıfır olsa da aynı glif-vuruş yolu
+    // kullanılmalı; sekiz bitmap kopyası Skia'nın `strokeFirst` sonucunu
+    // özellikle küçük yazıda gereğinden fazla köşelendirir.
+    let kontur_rengi = Renk::onaltılık(0xffffff);
+    let matris = AfinMatris::ötele(yerleşim.çapa.0, yerleşim.çapa.1)
+        .çarp(AfinMatris::döndür(yerleşim.dönüş.unwrap_or(0.0)));
+    yüzey.dönüşümlü_konturlu_yazı(
+        metin,
+        (0.0, 0.0),
+        yatay,
+        dikey,
+        boyut,
+        renk,
+        seçenek.etiket.yazı.kalın,
+        kontur_rengi,
+        2.0,
+        matris,
+    );
+}
+
+fn im_çizgisi_etiket_metni(
+    seçenek: &ÇözülmüşİmÇizgisiEtiketi,
+    değer: f64,
+    ham: &str,
+    varsayılan: &str,
+    seri_adı: &str,
+    veri_adı: &str,
+) -> String {
+    seçenek
+        .etiket
+        .biçimleyici
+        .as_ref()
+        .map(|biçimleyici| biçimleyici.uygula_bağlamla(değer, ham, seri_adı, veri_adı))
+        .unwrap_or_else(|| varsayılan.to_owned())
 }
 
 /// İm alanlarını çizer (serilerin altına).
@@ -253,25 +523,18 @@ pub fn im_çizgi_ve_noktalarını_çiz(
             );
             im_uç_simgesini_çiz(yüzey, parça.başlangıç_simgesi, başlangıç, bitiş, renk);
             im_uç_simgesini_çiz(yüzey, parça.bitiş_simgesi, bitiş, başlangıç, renk);
-            if çizgi_imi.etiket.göster {
-                let boyut = çizgi_imi.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-                let metin = parça
-                    .ad
-                    .clone()
-                    .unwrap_or_else(|| ondalık_kırp(başlangıç_değeri));
-                let dx = bitiş.0 - başlangıç.0;
-                let dy = bitiş.1 - başlangıç.1;
-                let uzunluk = dx.hypot(dy).max(f32::EPSILON);
-                yüzey.yazı(
-                    &metin,
-                    (bitiş.0 + dx / uzunluk * 5.0, bitiş.1 + dy / uzunluk * 5.0),
-                    YatayHiza::Sol,
-                    DikeyHiza::Orta,
-                    boyut,
-                    çizgi_imi.etiket.yazı.renk.unwrap_or(tema::birincil_metin()),
-                    çizgi_imi.etiket.yazı.kalın,
-                );
-            }
+            let etiket = im_çizgisi_etiketini_çöz(çizgi_imi, parça.etiket.as_ref());
+            let ham = ondalık_kırp(başlangıç_değeri);
+            let varsayılan = parça.ad.as_deref().unwrap_or(&ham);
+            let metin = im_çizgisi_etiket_metni(
+                &etiket,
+                başlangıç_değeri,
+                &ham,
+                varsayılan,
+                seri.ad().unwrap_or_default(),
+                parça.ad.as_deref().unwrap_or_default(),
+            );
+            im_çizgisi_etiketini_çiz(yüzey, başlangıç, bitiş, &metin, &etiket);
         }
         for tanım in &çizgi_imi.veri {
             let Some(değer) = değer_çöz(tanım.değer, seri) else {
@@ -282,12 +545,24 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                 .ad
                 .clone()
                 .map(|ad| format!("{ad}: {biçimli_değer}"))
-                .unwrap_or(biçimli_değer);
+                .unwrap_or_else(|| biçimli_değer.clone());
+            let etiket = im_çizgisi_etiketini_çöz(çizgi_imi, tanım.etiket.as_ref());
+            let etiket_metni = im_çizgisi_etiket_metni(
+                &etiket,
+                değer,
+                &biçimli_değer,
+                &etiket_metni,
+                seri.ad().unwrap_or_default(),
+                tanım.ad.as_deref().unwrap_or_default(),
+            );
             match tanım.yön {
                 İmYönü::Yatay => {
-                    let y = keskin(kartezyen.y.veriden_piksele(değer));
-                    let başlangıç = (alan.x, y);
-                    let bitiş = (alan.sağ(), y);
+                    let y = kartezyen.y.veriden_piksele(değer);
+                    let çizgi_y = keskin(y);
+                    let başlangıç = (alan.x, çizgi_y);
+                    let bitiş = (alan.sağ(), çizgi_y);
+                    let im_başlangıcı = (alan.x, y);
+                    let im_bitişi = (alan.sağ(), y);
                     yüzey.çizgi(
                         başlangıç,
                         bitiş,
@@ -299,38 +574,32 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.başlangıç_simgesi,
-                        başlangıç,
-                        bitiş,
+                        im_başlangıcı,
+                        im_bitişi,
                         uç_rengi,
                     );
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.bitiş_simgesi,
-                        bitiş,
-                        başlangıç,
+                        im_bitişi,
+                        im_başlangıcı,
                         uç_rengi,
                     );
-                    if çizgi_imi.etiket.göster {
-                        let boyut = çizgi_imi.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-                        yüzey.yazı(
-                            &etiket_metni,
-                            (alan.sağ() + 5.0, y),
-                            YatayHiza::Sol,
-                            DikeyHiza::Orta,
-                            boyut,
-                            çizgi_imi
-                                .etiket
-                                .yazı
-                                .renk
-                                .unwrap_or_else(tema::birincil_metin),
-                            false,
-                        );
-                    }
+                    im_çizgisi_etiketini_çiz(
+                        yüzey,
+                        im_başlangıcı,
+                        im_bitişi,
+                        &etiket_metni,
+                        &etiket,
+                    );
                 }
                 İmYönü::Dikey => {
-                    let x = keskin(kartezyen.x.veriden_piksele(değer));
-                    let başlangıç = (x, alan.alt());
-                    let bitiş = (x, alan.y);
+                    let x = kartezyen.x.veriden_piksele(değer);
+                    let çizgi_x = keskin(x);
+                    let başlangıç = (çizgi_x, alan.alt());
+                    let bitiş = (çizgi_x, alan.y);
+                    let im_başlangıcı = (x, alan.alt());
+                    let im_bitişi = (x, alan.y);
                     yüzey.çizgi(
                         başlangıç,
                         bitiş,
@@ -342,33 +611,24 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.başlangıç_simgesi,
-                        başlangıç,
-                        bitiş,
+                        im_başlangıcı,
+                        im_bitişi,
                         uç_rengi,
                     );
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.bitiş_simgesi,
-                        bitiş,
-                        başlangıç,
+                        im_bitişi,
+                        im_başlangıcı,
                         uç_rengi,
                     );
-                    if çizgi_imi.etiket.göster {
-                        let boyut = çizgi_imi.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-                        yüzey.yazı(
-                            &etiket_metni,
-                            (x, alan.y - 4.0),
-                            YatayHiza::Orta,
-                            DikeyHiza::Alt,
-                            boyut,
-                            çizgi_imi
-                                .etiket
-                                .yazı
-                                .renk
-                                .unwrap_or_else(tema::birincil_metin),
-                            false,
-                        );
-                    }
+                    im_çizgisi_etiketini_çiz(
+                        yüzey,
+                        im_başlangıcı,
+                        im_bitişi,
+                        &etiket_metni,
+                        &etiket,
+                    );
                 }
             }
         }
@@ -483,6 +743,129 @@ fn raptiye_çiz(
             boyut_yazı,
             yazı_rengi,
             nokta_imi.etiket.yazı.kalın,
+        );
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
+mod testler {
+    use super::*;
+    use crate::model::stil::YazıStili;
+
+    fn yakın(sol: f32, sağ: f32) {
+        assert!((sol - sağ).abs() < 1e-3, "{sol} != {sağ}");
+    }
+
+    #[test]
+    fn markline_yatay_etiket_konumları_line_ts_geometrisini_izler() {
+        let başlangıç = (0.0, 100.0);
+        let bitiş = (100.0, 100.0);
+        let uzaklık = [20.0, 8.0];
+
+        let baş = im_çizgisi_etiket_yerleşimi(
+            başlangıç,
+            bitiş,
+            İmÇizgisiEtiketKonumu::Başlangıç,
+            uzaklık,
+        )
+        .expect("başlangıç etiketi");
+        assert_eq!(baş.çapa, (-20.0, 100.0));
+        assert_eq!(
+            (baş.yatay, baş.dikey, baş.dönüş),
+            (YatayHiza::Sağ, DikeyHiza::Orta, None)
+        );
+
+        let orta =
+            im_çizgisi_etiket_yerleşimi(başlangıç, bitiş, İmÇizgisiEtiketKonumu::Orta, uzaklık)
+                .expect("orta etiketi");
+        assert_eq!(orta.çapa, (50.0, 92.0));
+        assert_eq!((orta.yatay, orta.dikey), (YatayHiza::Orta, DikeyHiza::Alt));
+
+        let iç_baş_üst = im_çizgisi_etiket_yerleşimi(
+            başlangıç,
+            bitiş,
+            İmÇizgisiEtiketKonumu::İçBaşlangıçÜst,
+            uzaklık,
+        )
+        .expect("iç başlangıç üst etiketi");
+        assert_eq!(iç_baş_üst.çapa, (20.0, 92.0));
+        assert_eq!(
+            (iç_baş_üst.yatay, iç_baş_üst.dikey),
+            (YatayHiza::Sol, DikeyHiza::Alt)
+        );
+
+        let iç_bitiş_alt = im_çizgisi_etiket_yerleşimi(
+            başlangıç,
+            bitiş,
+            İmÇizgisiEtiketKonumu::İçBitişAlt,
+            uzaklık,
+        )
+        .expect("iç bitiş alt etiketi");
+        assert_eq!(iç_bitiş_alt.çapa, (80.0, 108.0));
+        assert_eq!(
+            (iç_bitiş_alt.yatay, iç_bitiş_alt.dikey),
+            (YatayHiza::Sağ, DikeyHiza::Üst)
+        );
+    }
+
+    #[test]
+    fn markline_eğik_etiket_matrisi_resmi_ornekle_ayni() {
+        let başlangıç = (118.0, 416.75);
+        let bitiş = (466.0, 257.5);
+        let yerleşim = im_çizgisi_etiket_yerleşimi(
+            başlangıç,
+            bitiş,
+            İmÇizgisiEtiketKonumu::İçBaşlangıçÜst,
+            [20.0, 8.0],
+        )
+        .expect("eğik etiket");
+        yakın(yerleşim.çapa.0, 132.85732);
+        yakın(yerleşim.çapa.1, 401.1532);
+        let dönüş = yerleşim.dönüş.expect("eğik etiket dönüşü");
+        yakın(dönüş.cos(), 0.9093121);
+        yakın(dönüş.sin(), -0.4161148);
+
+        let bitiş_etiketi = im_çizgisi_etiket_yerleşimi(
+            başlangıç,
+            bitiş,
+            İmÇizgisiEtiketKonumu::Bitiş,
+            [20.0, 8.0],
+        )
+        .expect("bitiş etiketi");
+        yakın(bitiş_etiketi.çapa.0, 484.18625);
+        yakın(bitiş_etiketi.çapa.1, 254.17108);
+    }
+
+    #[test]
+    fn markline_oge_etiketi_genel_etiketten_miras_alir() {
+        let im = İmÇizgisi::yeni()
+            .etiket(
+                Etiket::yeni()
+                    .göster(true)
+                    .biçimleyici("{b}")
+                    .yazı(YazıStili::yeni().boyut(14.0)),
+            )
+            .etiket_uzaklığı(20.0, 8.0);
+        let yama = İmÇizgisiEtiketYaması::yeni()
+            .konum(İmÇizgisiEtiketKonumu::İçOrtaAlt)
+            .biçimleyici("öğe");
+        let çözülmüş = im_çizgisi_etiketini_çöz(&im, Some(&yama));
+
+        assert!(çözülmüş.etiket.göster);
+        assert_eq!(çözülmüş.etiket.yazı.boyut, Some(14.0));
+        assert_eq!(çözülmüş.konum, İmÇizgisiEtiketKonumu::İçOrtaAlt);
+        assert_eq!(çözülmüş.uzaklık, [20.0, 8.0]);
+        assert_eq!(
+            im_çizgisi_etiket_metni(&çözülmüş, 1.0, "1", "1", "line", "ad"),
+            "öğe"
+        );
+
+        let negatif = İmÇizgisi::yeni().etiket_uzaklığı(-4.0, -2.0);
+        assert_eq!(negatif.etiket_uzaklığı, [-4.0, -2.0]);
+        assert_eq!(
+            İmÇizgisiEtiketYaması::yeni().uzaklık(-3.0, -1.0).uzaklık,
+            Some([-3.0, -1.0])
         );
     }
 }

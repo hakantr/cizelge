@@ -238,6 +238,49 @@ pub trait ÇizimYüzeyi {
         self.yazı(metin, konum, yatay, dikey, boyut * ölçek, renk, kalın)
     }
 
+    /// Yerel metni önce kontur, ardından dolgu ile affine dönüşüm altında
+    /// boyar (`textBorderWidth` + `strokeFirst`). Yüzey özel glif vuruşu
+    /// sunmuyorsa konturu sekiz yönlü bir piksel örneklemesiyle yaklaştırır.
+    #[allow(clippy::too_many_arguments)]
+    fn dönüşümlü_konturlu_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        kontur_rengi: Renk,
+        kontur_kalınlığı: f32,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        let yarıçap = (kontur_kalınlığı / 2.0).max(0.0);
+        let köşegen = yarıçap * std::f32::consts::FRAC_1_SQRT_2;
+        for (x, y) in [
+            (-yarıçap, 0.0),
+            (yarıçap, 0.0),
+            (0.0, -yarıçap),
+            (0.0, yarıçap),
+            (-köşegen, -köşegen),
+            (köşegen, -köşegen),
+            (-köşegen, köşegen),
+            (köşegen, köşegen),
+        ] {
+            self.dönüşümlü_yazı(
+                metin,
+                konum,
+                yatay,
+                dikey,
+                boyut,
+                kontur_rengi,
+                kalın,
+                AfinMatris::ötele(x, y).çarp(dönüşüm),
+            );
+        }
+        self.dönüşümlü_yazı(metin, konum, yatay, dikey, boyut, renk, kalın, dönüşüm)
+    }
+
     /// Yazının kaplayacağı `(genişlik, yükseklik)` boyutunu ölçer.
     fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32);
 
