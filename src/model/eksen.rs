@@ -18,6 +18,52 @@ pub enum EksenTürü {
     Log,
 }
 
+/// Değer/zaman eksenlerinde `boundaryGap` uçlarından biri. ECharts sayı
+/// değerini doğrudan kapsam oranı, yüzde metnini de yüzde olarak yorumlar.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum SayısalKenarBoşluğu {
+    Oran(f64),
+    Yüzde(f64),
+}
+
+impl SayısalKenarBoşluğu {
+    pub fn çöz(self, açıklık: f64) -> f64 {
+        match self {
+            Self::Oran(oran) => açıklık.max(0.0) * oran.max(0.0),
+            Self::Yüzde(yüzde) => açıklık.max(0.0) * (yüzde / 100.0).max(0.0),
+        }
+    }
+}
+
+impl From<f64> for SayısalKenarBoşluğu {
+    fn from(değer: f64) -> Self {
+        Self::Oran(değer)
+    }
+}
+
+impl From<f32> for SayısalKenarBoşluğu {
+    fn from(değer: f32) -> Self {
+        Self::Oran(değer as f64)
+    }
+}
+
+impl From<&str> for SayısalKenarBoşluğu {
+    fn from(değer: &str) -> Self {
+        değer
+            .trim()
+            .strip_suffix('%')
+            .and_then(|yüzde| yüzde.parse().ok())
+            .map(Self::Yüzde)
+            .unwrap_or_else(|| Self::Oran(değer.parse().unwrap_or(0.0)))
+    }
+}
+
+impl From<String> for SayısalKenarBoşluğu {
+    fn from(değer: String) -> Self {
+        Self::from(değer.as_str())
+    }
+}
+
 /// Eksenin çizildiği kenar (`axis.position`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum EksenKonumu {
@@ -253,6 +299,8 @@ pub struct Eksen {
     /// Kategori ekseninde uçlarda yarım bant boşluğu bırakılsın mı
     /// (`boundaryGap`)? Kategoride öntanımlı `true`.
     pub kenar_boşluğu: Option<bool>,
+    /// Değer/zaman ekseni `boundaryGap: [alt, üst]` uçları.
+    pub sayısal_kenar_boşluğu: Option<[SayısalKenarBoşluğu; 2]>,
     pub en_az: Option<f64>,
     pub en_çok: Option<f64>,
     /// `false` ise kapsam sıfırı içerecek şekilde genişletilir; ECharts'taki
@@ -296,6 +344,7 @@ impl Default for Eksen {
             ad_boşluğu: 15.0,
             veri: Vec::new(),
             kenar_boşluğu: None,
+            sayısal_kenar_boşluğu: None,
             en_az: None,
             en_çok: None,
             sıfırı_içer: true,
@@ -378,6 +427,15 @@ impl Eksen {
 
     pub fn kenar_boşluğu(mut self, açık: bool) -> Self {
         self.kenar_boşluğu = Some(açık);
+        self
+    }
+
+    pub fn sayısal_kenar_boşluğu(
+        mut self,
+        alt: impl Into<SayısalKenarBoşluğu>,
+        üst: impl Into<SayısalKenarBoşluğu>,
+    ) -> Self {
+        self.sayısal_kenar_boşluğu = Some([alt.into(), üst.into()]);
         self
     }
 

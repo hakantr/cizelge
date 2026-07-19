@@ -105,6 +105,25 @@ impl<'a, 'b> Çizici<'a, 'b> {
         }
     }
 
+    fn yolu_vur(
+        &mut self, yol: &Yol, kalınlık: f32, tür: ÇizgiTürü, arkaplan: gpui::Background
+    ) {
+        let seçenekler = StrokeOptions::default()
+            .with_line_width(kalınlık)
+            .with_line_join(LineJoin::Bevel)
+            .with_start_cap(LineCap::Butt)
+            .with_end_cap(LineCap::Butt);
+        let mut kurucu =
+            PathBuilder::stroke(px(kalınlık)).with_style(PathStyle::Stroke(seçenekler));
+        if let Some(desen) = kesik_deseni(tür, kalınlık) {
+            kurucu = kurucu.dash_array(&desen);
+        }
+        self.yol_kur(yol, &mut kurucu);
+        if let Ok(gpui_yolu) = kurucu.build() {
+            self.pencere.paint_path(gpui_yolu, arkaplan);
+        }
+    }
+
     /// Eksene hizalı, ikiden çok duraklı doğrusal gradyanı, her ardışık
     /// durak çifti için yolun o banda kırpılmış kopyasını iki duraklı gpui
     /// gradyanıyla boyayarak birebir çizer.
@@ -209,6 +228,106 @@ impl<'a, 'b> Çizici<'a, 'b> {
         }
     }
 
+    /// Çok duraklı eksen hizalı gradyan vuruşu. GPUI iki renk durağı
+    /// taşıdığı için yol, durak çiftlerinin dikdörtgen bantlarına kırpılarak
+    /// yeniden vurulur; geometri ve kesik deseni değişmez.
+    #[allow(clippy::too_many_arguments)]
+    fn bantlı_gradyan_çiz(
+        &mut self,
+        yol: &Yol,
+        kalınlık: f32,
+        tür: ÇizgiTürü,
+        x: f32,
+        y: f32,
+        x2: f32,
+        y2: f32,
+        duraklar: &[RenkDurağı],
+    ) {
+        let Some(kutu) = yol.sınır_kutusu() else {
+            return;
+        };
+        let dikey = (x - x2).abs() < 1e-6;
+        let (baş, son) = if dikey { (y, y2) } else { (x, x2) };
+        let mut duraklar = duraklar.to_vec();
+        let (baş, son) = if son < baş {
+            duraklar = duraklar
+                .into_iter()
+                .rev()
+                .map(|durak| RenkDurağı {
+                    konum: 1.0 - durak.konum,
+                    renk: durak.renk,
+                })
+                .collect();
+            (son, baş)
+        } else {
+            (baş, son)
+        };
+        duraklar.sort_by(|a, b| {
+            a.konum
+                .partial_cmp(&b.konum)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        let eksen_oranı = |konum: f32| (baş + konum * (son - baş)).clamp(0.0, 1.0);
+        let (Some(ilk), Some(sonuncu)) = (duraklar.first(), duraklar.last()) else {
+            return;
+        };
+        let mut çiftler: Vec<(f32, f32, Renk, Renk)> = Vec::new();
+        if eksen_oranı(ilk.konum) > 0.0 {
+            çiftler.push((0.0, eksen_oranı(ilk.konum), ilk.renk, ilk.renk));
+        }
+        for pencere in duraklar.windows(2) {
+            if let [a, b] = pencere {
+                çiftler.push((eksen_oranı(a.konum), eksen_oranı(b.konum), a.renk, b.renk));
+            }
+        }
+        if eksen_oranı(sonuncu.konum) < 1.0 {
+            çiftler.push((eksen_oranı(sonuncu.konum), 1.0, sonuncu.renk, sonuncu.renk));
+        }
+
+        let açı = if dikey { 180.0 } else { 90.0 };
+        for (k0, k1, renk0, renk1) in çiftler {
+            let bant = if dikey {
+                Dikdörtgen::yeni(
+                    kutu.x,
+                    kutu.y + k0 * kutu.yükseklik,
+                    kutu.genişlik,
+                    (k1 - k0) * kutu.yükseklik,
+                )
+            } else {
+                Dikdörtgen::yeni(
+                    kutu.x + k0 * kutu.genişlik,
+                    kutu.y,
+                    (k1 - k0) * kutu.genişlik,
+                    kutu.yükseklik,
+                )
+            };
+            if bant.genişlik <= 0.0 || bant.yükseklik <= 0.0 {
+                continue;
+            }
+            let arkaplan = linear_gradient(
+                açı,
+                linear_color_stop(renk0.gpui_hsla(), k0),
+                linear_color_stop(renk1.gpui_hsla(), k1),
+            );
+            let sınır = self.sınırlar(bant);
+            let köken = self.köken;
+            let (genişlik, yükseklik) = (self.genişlik, self.yükseklik);
+            let uygulama: &mut App = self.uygulama;
+            let önbellek = self.ölçüm_önbelleği.clone();
+            self.pencere.paint_layer(sınır, |pencere| {
+                let mut iç = Çizici {
+                    pencere,
+                    uygulama,
+                    köken,
+                    genişlik,
+                    yükseklik,
+                    ölçüm_önbelleği: önbellek,
+                };
+                iç.yolu_vur(yol, kalınlık, tür, arkaplan);
+            });
+        }
+    }
+
     fn şekillendir(&self, metin: &str, boyut: f32, kalın: bool, renk: Renk) -> ShapedLine {
         let temiz: String = metin.replace(['\n', '\r'], " ");
         let paylaşımlı: SharedString = SharedString::from(temiz);
@@ -266,20 +385,28 @@ impl ÇizimYüzeyi for Çizici<'_, '_> {
         if yol.boş_mu() || kalınlık <= 0.0 || renk.alfa <= 0.0 {
             return;
         }
-        let seçenekler = StrokeOptions::default()
-            .with_line_width(kalınlık)
-            .with_line_join(LineJoin::Bevel)
-            .with_start_cap(LineCap::Butt)
-            .with_end_cap(LineCap::Butt);
-        let mut kurucu =
-            PathBuilder::stroke(px(kalınlık)).with_style(PathStyle::Stroke(seçenekler));
-        if let Some(desen) = kesik_deseni(tür, kalınlık) {
-            kurucu = kurucu.dash_array(&desen);
+        self.yolu_vur(yol, kalınlık, tür, renk.gpui_hsla().into());
+    }
+
+    fn yol_dolgulu_çiz(&mut self, yol: &Yol, kalınlık: f32, dolgu: &Dolgu, tür: ÇizgiTürü) {
+        if yol.boş_mu() || kalınlık <= 0.0 {
+            return;
         }
-        self.yol_kur(yol, &mut kurucu);
-        if let Ok(gpui_yolu) = kurucu.build() {
-            self.pencere.paint_path(gpui_yolu, renk.gpui_hsla());
+        if let Dolgu::DoğrusalGradyan {
+            x,
+            y,
+            x2,
+            y2,
+            duraklar,
+        } = dolgu
+        {
+            let eksene_hizalı = (x - x2).abs() < 1e-6 || (y - y2).abs() < 1e-6;
+            if duraklar.len() > 2 && eksene_hizalı {
+                self.bantlı_gradyan_çiz(yol, kalınlık, tür, *x, *y, *x2, *y2, duraklar);
+                return;
+            }
         }
+        self.yolu_vur(yol, kalınlık, tür, dolgu.gpui_arkaplan());
     }
 
     fn dikdörtgen(

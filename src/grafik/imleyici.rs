@@ -196,12 +196,16 @@ pub fn im_alanlarını_çiz(
             && (alan_imi.etiket.göster || !ad.is_empty())
         {
             let boyut = alan_imi.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            let renk = alan_imi.etiket.yazı.renk.unwrap_or(seri_rengi);
+            let renk = alan_imi
+                .etiket
+                .yazı
+                .renk
+                .unwrap_or_else(tema::birincil_metin);
             yüzey.yazı(
                 ad,
-                (d.x + d.genişlik / 2.0, d.y + 4.0),
+                (d.x + d.genişlik / 2.0, d.y - 4.0),
                 YatayHiza::Orta,
-                DikeyHiza::Üst,
+                DikeyHiza::Alt,
                 boyut,
                 renk,
                 false,
@@ -290,14 +294,14 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     let uç_rengi = renk.opaklık(çizgi_imi.stil.opaklık);
                     im_uç_simgesini_çiz(
                         yüzey,
-                        İmÇizgisiUçSimgesi::Daire,
+                        çizgi_imi.başlangıç_simgesi,
                         başlangıç,
                         bitiş,
                         uç_rengi,
                     );
                     im_uç_simgesini_çiz(
                         yüzey,
-                        İmÇizgisiUçSimgesi::Ok,
+                        çizgi_imi.bitiş_simgesi,
                         bitiş,
                         başlangıç,
                         uç_rengi,
@@ -333,14 +337,14 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     let uç_rengi = renk.opaklık(çizgi_imi.stil.opaklık);
                     im_uç_simgesini_çiz(
                         yüzey,
-                        İmÇizgisiUçSimgesi::Daire,
+                        çizgi_imi.başlangıç_simgesi,
                         başlangıç,
                         bitiş,
                         uç_rengi,
                     );
                     im_uç_simgesini_çiz(
                         yüzey,
-                        İmÇizgisiUçSimgesi::Ok,
+                        çizgi_imi.bitiş_simgesi,
                         bitiş,
                         başlangıç,
                         uç_rengi,

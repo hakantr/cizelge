@@ -775,6 +775,207 @@ fn bump_chart() -> GrafikSeçenekleri {
     seçenekler
 }
 
+fn line_sections() -> GrafikSeçenekleri {
+    let görsel = GörselEşleme::yeni().göster(false).boyut(0usize).parçalar([
+        EşlemeParçası::aralık(None, true, Some(6.0), true, "green"),
+        EşlemeParçası::aralık(Some(6.0), false, Some(8.0), true, "red"),
+        EşlemeParçası::aralık(Some(8.0), false, Some(14.0), true, "green"),
+        EşlemeParçası::aralık(Some(14.0), false, Some(17.0), true, "red"),
+        EşlemeParçası::aralık(Some(17.0), false, None, true, "green"),
+    ]);
+    let alanlar = İmAlanı::yeni()
+        .x_aralığı("Morning Peak", 6.0, 8.0)
+        .x_aralığı("Evening Peak", 14.0, 17.0)
+        .stil(ÖğeStili::yeni().renk("rgba(255, 173, 177, 0.4)"));
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Distribution of Electricity")
+                .alt_metin("Fake Data")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .araç_kutusu(AraçKutusu::yeni().png_kaydet(true))
+        .x_ekseni(Eksen::kategori().kenar_boşluğu(false).veri([
+            "00:00", "01:15", "02:30", "03:45", "05:00", "06:15", "07:30", "08:45", "10:00",
+            "11:15", "12:30", "13:45", "15:00", "16:15", "17:30", "18:45", "20:00", "21:15",
+            "22:30", "23:45",
+        ]))
+        .y_ekseni(Eksen::değer().etiket_biçimleyici("{value} W"))
+        .görsel_eşleme(görsel)
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Electricity")
+                .yumuşat(true)
+                .im_alanı(alanlar)
+                .veri([
+                    300, 280, 250, 260, 270, 300, 550, 500, 400, 390, 380, 390, 400, 500, 600, 750,
+                    800, 700, 600, 400,
+                ]),
+        )
+}
+
+fn area_pieces() -> GrafikSeçenekleri {
+    let im_çizgileri = İmÇizgisi::yeni()
+        .dikey(İmDeğeri::Değer(1.0))
+        .dikey(İmDeğeri::Değer(3.0))
+        .dikey(İmDeğeri::Değer(5.0))
+        .dikey(İmDeğeri::Değer(7.0))
+        .uç_simgeleri(İmÇizgisiUçSimgesi::Yok, İmÇizgisiUçSimgesi::Yok)
+        .etiket(Etiket::yeni().göster(false));
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .x_ekseni(Eksen::kategori().kenar_boşluğu(false).veri([
+            "2019-10-10",
+            "2019-10-11",
+            "2019-10-12",
+            "2019-10-13",
+            "2019-10-14",
+            "2019-10-15",
+            "2019-10-16",
+            "2019-10-17",
+            "2019-10-18",
+        ]))
+        .y_ekseni(Eksen::değer().sayısal_kenar_boşluğu(0.0, "30%"))
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .boyut(0usize)
+                .seri_sırası(0)
+                .parçalar([
+                    EşlemeParçası::aralık(
+                        Some(1.0),
+                        false,
+                        Some(3.0),
+                        false,
+                        "rgba(0, 0, 180, 0.4)",
+                    ),
+                    EşlemeParçası::aralık(
+                        Some(5.0),
+                        false,
+                        Some(7.0),
+                        false,
+                        "rgba(0, 0, 180, 0.4)",
+                    ),
+                ]),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .yumuşaklık(0.6)
+                .sembol(Sembol::Yok)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#5470C6").kalınlık(5.0))
+                .alan_stili(AlanStili::default())
+                .im_çizgisi(im_çizgileri)
+                .veri([200, 560, 750, 580, 250, 300, 450, 300, 100]),
+        )
+}
+
+fn line_gradient() -> GrafikSeçenekleri {
+    let tarihler = [
+        "2000-06-05",
+        "2000-06-06",
+        "2000-06-07",
+        "2000-06-08",
+        "2000-06-09",
+        "2000-06-10",
+        "2000-06-11",
+        "2000-06-12",
+        "2000-06-13",
+        "2000-06-14",
+        "2000-06-15",
+        "2000-06-16",
+        "2000-06-17",
+        "2000-06-18",
+        "2000-06-19",
+        "2000-06-20",
+        "2000-06-21",
+        "2000-06-22",
+        "2000-06-23",
+        "2000-06-24",
+        "2000-06-25",
+        "2000-06-26",
+        "2000-06-27",
+        "2000-06-28",
+        "2000-06-29",
+        "2000-06-30",
+        "2000-07-01",
+        "2000-07-02",
+        "2000-07-03",
+        "2000-07-04",
+        "2000-07-05",
+        "2000-07-06",
+        "2000-07-07",
+        "2000-07-08",
+        "2000-07-09",
+        "2000-07-10",
+        "2000-07-11",
+        "2000-07-12",
+        "2000-07-13",
+        "2000-07-14",
+        "2000-07-15",
+        "2000-07-16",
+        "2000-07-17",
+        "2000-07-18",
+        "2000-07-19",
+        "2000-07-20",
+        "2000-07-21",
+        "2000-07-22",
+        "2000-07-23",
+        "2000-07-24",
+    ];
+    let değerler = [
+        116, 129, 135, 86, 73, 85, 73, 68, 92, 130, 245, 139, 115, 111, 309, 206, 137, 128, 85, 94,
+        71, 106, 84, 93, 85, 73, 83, 125, 107, 82, 44, 72, 106, 107, 66, 91, 92, 113, 107, 131,
+        111, 64, 69, 88, 77, 83, 111, 57, 55, 60,
+    ];
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .görsel_eşlemeler([
+            GörselEşleme::yeni()
+                .göster(false)
+                .seri_sırası(0)
+                .en_az(0.0)
+                .en_çok(400.0),
+            GörselEşleme::yeni()
+                .göster(false)
+                .seri_sırası(1)
+                .boyut(0usize)
+                .en_az(0.0)
+                .en_çok((tarihler.len() - 1) as f64),
+        ])
+        .başlık(
+            Başlık::yeni()
+                .metin("Gradient along the y axis")
+                .iç_boşluk(15.0),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Gradient along the x axis")
+                .üst("55%")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .ızgara_ekle(Izgara::yeni().alt("60%"))
+        .ızgara_ekle(Izgara::yeni().üst("60%"))
+        .x_ekseni_ekle(Eksen::kategori().veri(tarihler))
+        .x_ekseni_ekle(Eksen::kategori().ızgara_sırası(1).veri(tarihler))
+        .y_ekseni_ekle(Eksen::değer())
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
+        .seri(ÇizgiSerisi::yeni().sembol_göster(false).veri(değerler))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .eksenler(1, 1)
+                .sembol_göster(false)
+                .veri(değerler),
+        )
+}
+
 fn area_stack() -> GrafikSeçenekleri {
     let seri = |ad: &str, veri: [i32; 7]| {
         ÇizgiSerisi::yeni()
@@ -3011,6 +3212,9 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-polar2" => Ok(line_polar2()),
         "line-function" => Ok(line_function()),
         "bump-chart" => Ok(bump_chart()),
+        "line-sections" => Ok(line_sections()),
+        "area-pieces" => Ok(area_pieces()),
+        "line-gradient" => Ok(line_gradient()),
         "area-stack" => Ok(area_stack()),
         "area-stack-gradient" => Ok(area_stack_gradient()),
         "bar-background" => Ok(bar_background()),
@@ -3103,6 +3307,7 @@ fn çalıştır() -> Result<(), String> {
                 "Video",
                 "Search",
                 "Engine",
+                "2000-06-05",
             ]
             .map(|metin| (metin, yüzey.yazı_ölç(metin, 12.0).0))
         );

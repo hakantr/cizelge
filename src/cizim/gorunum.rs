@@ -357,6 +357,21 @@ pub(crate) fn gösterge_adları(seçenekler: &GrafikSeçenekleri) -> Vec<String>
 
 /// Eksen seçeneğinden ölçek kurar.
 fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> Ölçek {
+    let mut kapsam = kapsam;
+    if seçenek.tür != EksenTürü::Kategori
+        && let Some([alt, üst]) = seçenek.sayısal_kenar_boşluğu
+        && kapsam[0].is_finite()
+        && kapsam[1].is_finite()
+    {
+        let fark = (kapsam[1] - kapsam[0]).abs();
+        let açıklık = if fark > 0.0 { fark } else { kapsam[0].abs() };
+        if seçenek.en_az.is_none() {
+            kapsam[0] -= alt.çöz(açıklık);
+        }
+        if seçenek.en_çok.is_none() {
+            kapsam[1] += üst.çöz(açıklık);
+        }
+    }
     match seçenek.tür {
         EksenTürü::Kategori => Ölçek::Kategorik(KategorikÖlçek::yeni(kategoriler)),
         EksenTürü::Değer => Ölçek::Aralık(AralıkÖlçeği::kur(
@@ -1700,6 +1715,7 @@ pub fn grafiği_boya(
                     &kartezyen,
                     aralıklar,
                     seçenekler.seri_rengi(i),
+                    seçenekler.seri_görsel_eşlemesi(i),
                     ilerleme,
                     ÇizgiKatmanı::Alan,
                 );
@@ -1739,6 +1755,7 @@ pub fn grafiği_boya(
                                 &kartezyen,
                                 seri_aralıkları,
                                 seçenekler.seri_rengi(i),
+                                seçenekler.seri_görsel_eşlemesi(i),
                                 ilerleme,
                                 ÇizgiKatmanı::ÇizgiVeSembol,
                             );
@@ -3048,6 +3065,25 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn sayısal_boundary_gap_veri_açıklığını_yüzdeyle_genişletir() {
+        let ölçek = ölçek_kur(
+            &Eksen::değer().sayısal_kenar_boşluğu(0.0, "30%"),
+            Vec::new(),
+            [200.0, 750.0],
+        );
+        assert_eq!(ölçek.kapsam(), [0.0, 1000.0]);
+
+        let sabit_üst = ölçek_kur(
+            &Eksen::değer()
+                .sayısal_kenar_boşluğu(0.0, "30%")
+                .en_çok(800.0),
+            Vec::new(),
+            [200.0, 750.0],
+        );
+        assert_eq!(sabit_üst.kapsam(), [0.0, 800.0]);
+    }
 
     #[test]
     fn iç_yakınlaştırma_odağı_yatay_ve_dikey_veri_yönünü_izler() {

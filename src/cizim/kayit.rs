@@ -186,6 +186,19 @@ impl ÇizimYüzeyi for KayıtYüzeyi {
         self.kaydet(satır);
     }
 
+    fn yol_dolgulu_çiz(&mut self, yol: &Yol, kalınlık: f32, dolgu: &Dolgu, tür: ÇizgiTürü) {
+        if yol.boş_mu() || kalınlık <= 0.0 {
+            return;
+        }
+        self.kaydet(format!(
+            "çiz {} k={} {} | {}",
+            dolgu_yaz(dolgu),
+            s(kalınlık),
+            tür_yaz(tür),
+            yol_yaz(yol)
+        ));
+    }
+
     fn yol_gölgesi(&mut self, yol: &Yol, renk: Renk, bulanıklık: f32, kayma: (f32, f32)) {
         if yol.boş_mu() || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
             return;

@@ -48,6 +48,9 @@ pub struct GrafikSeçenekleri {
     /// Görsel eşleme bileşeni (`visualMap`); ısı haritası hücre renkleri
     /// buradan çözülür.
     pub görsel_eşleme: Option<GörselEşleme>,
+    /// Çoklu görsel eşleme (`visualMap: []`). Tekil alan kaynak uyumluluğu
+    /// için korunur; etkin sıra tekil öğe, ardından bu listedir.
+    pub görsel_eşlemeler: Vec<GörselEşleme>,
     /// Radar koordinat sistemi (`radar`).
     pub radar: Option<RadarKoordinatı>,
     /// Kutupsal koordinat sistemi (`polar` + `angleAxis` + `radiusAxis`).
@@ -100,6 +103,7 @@ impl Default for GrafikSeçenekleri {
             seri_kimlikleri: Vec::new(),
             ipucu: None,
             görsel_eşleme: None,
+            görsel_eşlemeler: Vec::new(),
             radar: None,
             kutupsal: None,
             matris: None,
@@ -249,7 +253,39 @@ impl GrafikSeçenekleri {
 
     pub fn görsel_eşleme(mut self, eşleme: GörselEşleme) -> Self {
         self.görsel_eşleme = Some(eşleme);
+        self.görsel_eşlemeler.clear();
         self
+    }
+
+    /// `visualMap: []` listesini doğrudan ayarlar. Tekil geriye uyumluluk
+    /// alanı temizlenir; böylece seçenek tam olarak verilen diziyi temsil eder.
+    pub fn görsel_eşlemeler(
+        mut self, eşlemeler: impl IntoIterator<Item = GörselEşleme>
+    ) -> Self {
+        self.görsel_eşleme = None;
+        self.görsel_eşlemeler = eşlemeler.into_iter().collect();
+        self
+    }
+
+    /// Var olan görsel eşleme sırasının sonuna bir bileşen ekler.
+    pub fn görsel_eşleme_ekle(mut self, eşleme: GörselEşleme) -> Self {
+        self.görsel_eşlemeler.push(eşleme);
+        self
+    }
+
+    /// Tekil ve çoğul alanları ECharts bileşen sırasıyla dolaşır.
+    pub fn tüm_görsel_eşlemeler(&self) -> impl DoubleEndedIterator<Item = &GörselEşleme> {
+        self.görsel_eşleme
+            .iter()
+            .chain(self.görsel_eşlemeler.iter())
+    }
+
+    /// Seriyi hedefleyen son görsel eşleme. Birden çok renk eşlemesinde
+    /// ECharts'ın son görsel meta girdisini tercih etme davranışını izler.
+    pub fn seri_görsel_eşlemesi(&self, seri_sırası: usize) -> Option<&GörselEşleme> {
+        self.tüm_görsel_eşlemeler()
+            .rev()
+            .find(|eşleme| eşleme.seriye_uygulanır_mı(seri_sırası))
     }
 
     pub fn radar(mut self, koordinat: RadarKoordinatı) -> Self {
@@ -315,7 +351,7 @@ impl GrafikSeçenekleri {
         // serilere kategori boyutundan sonraki değer boyutlarını sırayla
         // tahsis eder. Satır ve sütun görünümleri birbirinden bağımsızdır.
         let mut otomatik_sıralar: BTreeMap<(usize, SeriYerleşimi), usize> = BTreeMap::new();
-        for seri in &mut sonuç.seriler {
+        for (seri_sırası, seri) in sonuç.seriler.iter_mut().enumerate() {
             let (açık_eşleme, küme_sırası, yerleşim, veri_boş) = match &*seri {
                 Seri::Çizgi(s) => (
                     s.eşleme.clone(),
@@ -394,15 +430,16 @@ impl GrafikSeçenekleri {
                     continue;
                 }
             };
-            let görsel_boyut_sırası = self
-                .görsel_eşleme
-                .as_ref()
+            let görsel_eşleme = self
+                .seri_görsel_eşlemesi(seri_sırası)
+                .filter(|eşleme| eşleme.boyut.is_some());
+            let görsel_boyut_sırası = görsel_eşleme
                 .and_then(|eşleme| eşleme.boyut.as_ref())
                 .and_then(|boyut| match boyut {
                     BoyutSeçici::Sıra(sıra) => (*sıra < küme.boyutlar.len()).then_some(*sıra),
                     BoyutSeçici::Ad(ad) => küme.boyut_sırası(ad),
                 });
-            let görsel_kapsam = self.görsel_eşleme.as_ref().and_then(|eşleme| {
+            let görsel_kapsam = görsel_eşleme.and_then(|eşleme| {
                 görsel_boyut_sırası.map(|boyut_sırası| {
                     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
                     for değer in küme
@@ -443,13 +480,11 @@ impl GrafikSeçenekleri {
                         .collect();
                     let mut öğe =
                         crate::model::deger::VeriÖğesi::adlı(ad.clone(), *değer).boyutlar(boyutlar);
-                    if let (Some(eşleme), Some(boyut_sırası), Some(kapsam)) = (
-                        self.görsel_eşleme.as_ref(),
-                        görsel_boyut_sırası,
-                        görsel_kapsam,
-                    ) && let Some(görsel_değer) = kaynak_satır
-                        .and_then(|satır| satır.get(boyut_sırası))
-                        .and_then(crate::model::deger::VeriDeğeri::sayı)
+                    if let (Some(eşleme), Some(boyut_sırası), Some(kapsam)) =
+                        (görsel_eşleme, görsel_boyut_sırası, görsel_kapsam)
+                        && let Some(görsel_değer) = kaynak_satır
+                            .and_then(|satır| satır.get(boyut_sırası))
+                            .and_then(crate::model::deger::VeriDeğeri::sayı)
                     {
                         öğe.stil = Some(
                             crate::model::stil::ÖğeStili::yeni()
@@ -1017,5 +1052,39 @@ mod testler {
                     .renk_çöz(89.3, [10.0, 90.0])
             )
         );
+    }
+
+    #[test]
+    fn çoklu_visual_map_seriyi_series_index_ile_hedefler() {
+        let seçenekler = GrafikSeçenekleri::yeni().görsel_eşlemeler([
+            GörselEşleme::yeni().seri_sırası(0).boyut(1usize),
+            GörselEşleme::yeni().seri_sırası(1).boyut(0usize),
+        ]);
+
+        assert_eq!(
+            seçenekler
+                .seri_görsel_eşlemesi(0)
+                .and_then(|eşleme| eşleme.boyut.as_ref()),
+            Some(&crate::model::veri_kumesi::BoyutSeçici::Sıra(1))
+        );
+        assert_eq!(
+            seçenekler
+                .seri_görsel_eşlemesi(1)
+                .and_then(|eşleme| eşleme.boyut.as_ref()),
+            Some(&crate::model::veri_kumesi::BoyutSeçici::Sıra(0))
+        );
+        assert!(seçenekler.seri_görsel_eşlemesi(2).is_none());
+    }
+
+    #[test]
+    fn tekil_visual_map_kurucusu_önceki_diziyi_değiştirir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .görsel_eşlemeler([GörselEşleme::yeni().seri_sırası(3)])
+            .görsel_eşleme(GörselEşleme::yeni().seri_sırası(1));
+
+        assert!(seçenekler.görsel_eşlemeler.is_empty());
+        assert_eq!(seçenekler.tüm_görsel_eşlemeler().count(), 1);
+        assert!(seçenekler.seri_görsel_eşlemesi(1).is_some());
+        assert!(seçenekler.seri_görsel_eşlemesi(3).is_none());
     }
 }

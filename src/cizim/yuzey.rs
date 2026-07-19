@@ -155,6 +155,13 @@ pub trait ÇizimYüzeyi {
     /// Yolu verilen kalınlık ve türde çizgiler.
     fn yol_çiz(&mut self, yol: &Yol, kalınlık: f32, renk: Renk, tür: ÇizgiTürü);
 
+    /// Yolu düz renk yerine desen/gradyan boyasıyla çizgiler. Basit yüzeyler
+    /// temsilî renge düşebilir; yerleşik GPUI, PNG ve SVG yüzeyleri doğrusal
+    /// gradyan vuruşunu korur.
+    fn yol_dolgulu_çiz(&mut self, yol: &Yol, kalınlık: f32, dolgu: &Dolgu, tür: ÇizgiTürü) {
+        self.yol_çiz(yol, kalınlık, dolgu.temsilî(), tür);
+    }
+
     /// Keyfi doldurulmuş yolun Canvas/zrender biçimli dış gölgesi. Yüzey
     /// gerçek bulanıklık sunmuyorsa güvenli öntanımlı davranış gölgeyi
     /// atlar; raster ve SVG yüzeyleri bu ilkelin tam karşılığını sağlar.

@@ -258,12 +258,23 @@ impl SeçenekYaması {
 
     pub fn görsel_eşleme(mut self, eşleme: GörselEşleme) -> Self {
         self.değer.görsel_eşleme = Some(eşleme);
+        self.değer.görsel_eşlemeler.clear();
+        self.sağlanan.insert(SeçenekAlanı::GörselEşleme);
+        self
+    }
+
+    pub fn görsel_eşlemeler(
+        mut self, eşlemeler: impl IntoIterator<Item = GörselEşleme>
+    ) -> Self {
+        self.değer.görsel_eşleme = None;
+        self.değer.görsel_eşlemeler = eşlemeler.into_iter().collect();
         self.sağlanan.insert(SeçenekAlanı::GörselEşleme);
         self
     }
 
     pub fn görsel_eşlemeyi_kaldır(mut self) -> Self {
         self.değer.görsel_eşleme = None;
+        self.değer.görsel_eşlemeler.clear();
         self.sağlanan.insert(SeçenekAlanı::GörselEşleme);
         self
     }
@@ -1324,7 +1335,16 @@ fn yamayı_uygula(
     alanı_uygula!(x_eksenleri, SeçenekAlanı::XEksenleri);
     alanı_uygula!(y_eksenleri, SeçenekAlanı::YEksenleri);
     alanı_uygula!(ipucu, SeçenekAlanı::İpucu);
-    alanı_uygula!(görsel_eşleme, SeçenekAlanı::GörselEşleme);
+    if yama.sağlandı_mı(SeçenekAlanı::GörselEşleme) {
+        hedef.görsel_eşleme = yama.değer.görsel_eşleme.clone();
+        hedef.görsel_eşlemeler = yama.değer.görsel_eşlemeler.clone();
+    } else if kip
+        .değiştirerek_birleştir
+        .contains(&SeçenekAlanı::GörselEşleme)
+    {
+        hedef.görsel_eşleme = öntanımlı.görsel_eşleme.clone();
+        hedef.görsel_eşlemeler = öntanımlı.görsel_eşlemeler.clone();
+    }
     alanı_uygula!(radar, SeçenekAlanı::Radar);
     alanı_uygula!(kutupsal, SeçenekAlanı::Kutupsal);
     alanı_uygula!(matris, SeçenekAlanı::Matris);

@@ -4,9 +4,11 @@
 use crate::cizim::{Yol, ÇizimYüzeyi};
 use crate::grafik::{sembol_stilli_çiz, çizgi_stili_çöz};
 use crate::koordinat::Kartezyen2B;
+use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::{Basamak, ÇizgiSerisi, Örnekleme};
 use crate::model::stil::EtiketKonumu;
-use crate::renk::{Dolgu, Renk};
+use crate::model::veri_kumesi::BoyutSeçici;
+use crate::renk::{Dolgu, Renk, RenkDurağı};
 use crate::tema;
 use crate::yardimci::bicim::ondalık_kırp;
 use crate::yerlesim::yigin::YığınAralığı;
@@ -269,6 +271,139 @@ fn parçalara_ayır(
     parçalar
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum GörselKoordinat {
+    X,
+    Y,
+}
+
+/// LineView yalnız x/y koordinat boyutuna bağlanan visualMap girdisini
+/// polyline/polygon gradyanına dönüştürür. Boyut verilmezse ECharts'ın son
+/// koordinat boyutu olan y kullanılır.
+fn görsel_koordinat(seri: &ÇizgiSerisi, eşleme: &GörselEşleme) -> Option<GörselKoordinat> {
+    match eşleme.boyut.as_ref() {
+        None | Some(BoyutSeçici::Sıra(1)) => Some(GörselKoordinat::Y),
+        Some(BoyutSeçici::Sıra(0)) => Some(GörselKoordinat::X),
+        Some(BoyutSeçici::Ad(ad)) => {
+            if ad == "x" || seri.eşleme.as_ref().is_some_and(|(x, _)| x == ad) {
+                Some(GörselKoordinat::X)
+            } else if ad == "y" || seri.eşleme.as_ref().is_some_and(|(_, y)| y == ad) {
+                Some(GörselKoordinat::Y)
+            } else {
+                None
+            }
+        }
+        Some(BoyutSeçici::Sıra(_)) => None,
+    }
+}
+
+fn görsel_değer(seri: &ÇizgiSerisi, eşleme: &GörselEşleme, sıra: usize) -> Option<f64> {
+    let öğe = seri.veri.get(sıra)?;
+    match eşleme.boyut.as_ref() {
+        None | Some(BoyutSeçici::Sıra(1)) => öğe.değer.sayı(),
+        Some(BoyutSeçici::Sıra(0)) => öğe.değer.x().or(Some(sıra as f64)),
+        Some(BoyutSeçici::Sıra(boyut)) => {
+            öğe.boyutlar.get(*boyut).and_then(|(_, değer)| değer.sayı())
+        }
+        Some(BoyutSeçici::Ad(ad)) if ad == "x" => öğe.değer.x().or(Some(sıra as f64)),
+        Some(BoyutSeçici::Ad(ad)) if ad == "y" => öğe.değer.sayı(),
+        Some(BoyutSeçici::Ad(ad)) => öğe.boyut(ad).and_then(|değer| değer.sayı()),
+    }
+}
+
+fn görsel_kapsam(seri: &ÇizgiSerisi, eşleme: &GörselEşleme) -> [f64; 2] {
+    let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+    for sıra in 0..seri.veri.len() {
+        if let Some(değer) = görsel_değer(seri, eşleme, sıra)
+            && değer.is_finite()
+        {
+            kapsam[0] = kapsam[0].min(değer);
+            kapsam[1] = kapsam[1].max(değer);
+        }
+    }
+    if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
+        kapsam = [0.0, 1.0];
+    }
+    eşleme.kapsam_çöz(kapsam)
+}
+
+/// ECharts `getVisualGradient` portu. Renk durakları veri değerinden eksen
+/// pikseline taşınır, sonra yolun sınır kutusuna göre yerelleştirilir. Bu
+/// sayede raster, SVG ve GPUI yüzeyleri aynı gradyanı paylaşır.
+fn görsel_gradyan(
+    seri: &ÇizgiSerisi,
+    eşleme: &GörselEşleme,
+    kartezyen: &Kartezyen2B,
+    yol: &Yol,
+    opaklık: f32,
+) -> Option<Dolgu> {
+    let koordinat = görsel_koordinat(seri, eşleme)?;
+    let kutu = yol.sınır_kutusu()?;
+    let (eksen, piksel0, piksel1) = match koordinat {
+        GörselKoordinat::X => (&kartezyen.x, kutu.x, kutu.sağ()),
+        GörselKoordinat::Y => (&kartezyen.y, kutu.y, kutu.alt()),
+    };
+    let açıklık = piksel1 - piksel0;
+    if açıklık.abs() < 1e-3 {
+        return None;
+    }
+    let kapsam = görsel_kapsam(seri, eşleme);
+    let mut kırılmalar = vec![piksel0, piksel1];
+    if eşleme.parçalı_mı() {
+        for parça in &eşleme.parçalar {
+            if let Some(değer) = parça.değer {
+                kırılmalar.push(eksen.veriden_piksele(değer));
+            }
+            if let Some(değer) = parça.en_az {
+                kırılmalar.push(eksen.veriden_piksele(değer));
+            }
+            if let Some(değer) = parça.en_çok {
+                kırılmalar.push(eksen.veriden_piksele(değer));
+            }
+        }
+    } else if eşleme.renkler.len() > 1 {
+        let payda = (eşleme.renkler.len() - 1) as f64;
+        for sıra in 0..eşleme.renkler.len() {
+            let değer = kapsam[0] + (kapsam[1] - kapsam[0]) * sıra as f64 / payda;
+            kırılmalar.push(eksen.veriden_piksele(değer));
+        }
+    }
+    kırılmalar.retain(|piksel| {
+        piksel.is_finite() && *piksel >= piksel0 - 1e-3 && *piksel <= piksel1 + 1e-3
+    });
+    kırılmalar.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    kırılmalar.dedup_by(|a, b| (*a - *b).abs() < 1e-3);
+
+    let renk = |piksel: f32| {
+        eşleme
+            .renk_çöz(eksen.pikselden_veriye(piksel), kapsam)
+            .opaklık(opaklık)
+    };
+    let mut duraklar = Vec::new();
+    if eşleme.parçalı_mı() {
+        for pencere in kırılmalar.windows(2) {
+            let [baş, son] = pencere else { continue };
+            let orta = (*baş + *son) / 2.0;
+            let parça_rengi = renk(orta);
+            duraklar.push(RenkDurağı::yeni((*baş - piksel0) / açıklık, parça_rengi));
+            duraklar.push(RenkDurağı::yeni((*son - piksel0) / açıklık, parça_rengi));
+        }
+    } else {
+        duraklar.extend(
+            kırılmalar
+                .into_iter()
+                .map(|piksel| RenkDurağı::yeni((piksel - piksel0) / açıklık, renk(piksel))),
+        );
+    }
+    if duraklar.is_empty() {
+        return None;
+    }
+    Some(match koordinat {
+        GörselKoordinat::X => Dolgu::doğrusal(0.0, 0.0, 1.0, 0.0, duraklar),
+        GörselKoordinat::Y => Dolgu::doğrusal(0.0, 0.0, 0.0, 1.0, duraklar),
+    })
+}
+
 /// ECharts çizgi görünümünün z2 katmanları: alan poligonu `0`, çizgi ve
 /// semboller daha üst katmandadır. Yığınlı alanlarda bütün dolguların bütün
 /// çizgilerden önce boyanması ortak sınırların kapanmaması için zorunludur.
@@ -286,11 +421,13 @@ pub fn çizgi_serisi_çiz(
     kartezyen: &Kartezyen2B,
     aralıklar: &[YığınAralığı],
     seri_rengi: Renk,
+    görsel_eşleme: Option<&GörselEşleme>,
     ilerleme: f32,
     katman: ÇizgiKatmanı,
 ) {
     let (tepeler, tabanlar) = nokta_listeleri(seri, kartezyen, aralıklar);
     let alan = kartezyen.alan;
+    let görsel_değer_kapsamı = görsel_eşleme.map(|eşleme| görsel_kapsam(seri, eşleme));
 
     let mut gövde = |ç: &mut dyn ÇizimYüzeyi| {
         let mut tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
@@ -314,11 +451,6 @@ pub fn çizgi_serisi_çiz(
         if katman == ÇizgiKatmanı::Alan
             && let Some(alan_stili) = &seri.alan_stili
         {
-            let dolgu = alan_stili
-                .renk
-                .clone()
-                .unwrap_or(Dolgu::Düz(seri_rengi))
-                .opaklık(alan_stili.opaklık);
             for (tepe_parça, taban_parça) in tepeler_parçalı.iter().zip(&tabanlar_parçalı) {
                 if tepe_parça.len() < 2 {
                     continue;
@@ -342,6 +474,16 @@ pub fn çizgi_serisi_çiz(
                 alt.reverse();
                 yumuşak_parça_ekle(&mut yol, &alt, yumuşaklık, false);
                 yol.kapat();
+                let dolgu = alan_stili
+                    .renk
+                    .clone()
+                    .map(|dolgu| dolgu.opaklık(alan_stili.opaklık))
+                    .or_else(|| {
+                        görsel_eşleme.and_then(|eşleme| {
+                            görsel_gradyan(seri, eşleme, kartezyen, &yol, alan_stili.opaklık)
+                        })
+                    })
+                    .unwrap_or_else(|| Dolgu::Düz(seri_rengi).opaklık(alan_stili.opaklık));
                 ç.yol_doldur(&yol, &dolgu);
             }
         }
@@ -382,7 +524,15 @@ pub fn çizgi_serisi_çiz(
                     seri.çizgi_stili.gölge_kayması,
                 );
             }
-            ç.yol_çiz(&yol, kalınlık, çizgi_rengi, tür);
+            if seri.çizgi_stili.renk.is_none()
+                && let Some(dolgu) = görsel_eşleme.and_then(|eşleme| {
+                    görsel_gradyan(seri, eşleme, kartezyen, &yol, seri.çizgi_stili.opaklık)
+                })
+            {
+                ç.yol_dolgulu_çiz(&yol, kalınlık, &dolgu, tür);
+            } else {
+                ç.yol_çiz(&yol, kalınlık, çizgi_rengi, tür);
+            }
         }
 
         // 3) Semboller.
@@ -390,9 +540,16 @@ pub fn çizgi_serisi_çiz(
             for (i, nokta) in tepeler.iter().enumerate() {
                 let Some(nokta) = nokta else { continue };
                 let veri_stili = seri.veri.get(i).and_then(|öğe| öğe.stil.as_ref());
-                let dolgu = veri_stili
+                let açık_dolgu = veri_stili
                     .and_then(|stil| stil.renk.as_ref())
                     .or(seri.öğe_stili.renk.as_ref());
+                let görsel_renk = görsel_eşleme.and_then(|eşleme| {
+                    görsel_değer(seri, eşleme, i)
+                        .zip(görsel_değer_kapsamı)
+                        .map(|(değer, kapsam)| eşleme.renk_çöz(değer, kapsam))
+                });
+                let görsel_dolgu = görsel_renk.map(Dolgu::Düz);
+                let dolgu = açık_dolgu.or(görsel_dolgu.as_ref());
                 let kenarlık_rengi = veri_stili
                     .and_then(|stil| stil.kenarlık_rengi)
                     .or(seri.öğe_stili.kenarlık_rengi);
@@ -412,7 +569,7 @@ pub fn çizgi_serisi_çiz(
                     seri.sembol,
                     *nokta,
                     seri.sembol_boyutu,
-                    seri_rengi,
+                    görsel_renk.unwrap_or(seri_rengi),
                     dolgu,
                     kenarlık,
                     opaklık,

@@ -972,6 +972,25 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         );
     }
 
+    fn yol_dolgulu_çiz(&mut self, yol: &Yol, kalınlık: f32, dolgu: &Dolgu, tür: ÇizgiTürü) {
+        if yol.boş_mu() || kalınlık <= 0.0 {
+            return;
+        }
+        let Some(ts_yolu) = yol_çevir(yol) else {
+            return;
+        };
+        let Some(boya) = boya_çevir(dolgu, yol.sınır_kutusu()) else {
+            return;
+        };
+        self.harita.stroke_path(
+            &ts_yolu,
+            &boya,
+            &vuruş_yap(kalınlık, tür),
+            self.dönüşüm(),
+            self.kırpma.as_ref(),
+        );
+    }
+
     fn yol_gölgesi(&mut self, yol: &Yol, renk: Renk, bulanıklık: f32, kayma: (f32, f32)) {
         if yol.boş_mu() || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
             return;

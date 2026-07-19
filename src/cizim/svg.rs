@@ -302,6 +302,34 @@ impl ÇizimYüzeyi for SvgYüzeyi {
         );
     }
 
+    fn yol_dolgulu_çiz(&mut self, yol: &Yol, kalınlık: f32, dolgu: &Dolgu, tür: ÇizgiTürü) {
+        if yol.boş_mu() || kalınlık <= 0.0 {
+            return;
+        }
+        let boya = self.dolgu_svg(dolgu);
+        let desen = match tür {
+            ÇizgiTürü::Düz => String::new(),
+            ÇizgiTürü::Kesikli => format!(
+                r#" stroke-dasharray="{} {}""#,
+                4.0 * kalınlık.max(1.0),
+                2.0 * kalınlık.max(1.0)
+            ),
+            ÇizgiTürü::Noktalı => format!(
+                r#" stroke-dasharray="{} {}""#,
+                kalınlık.max(1.0),
+                kalınlık.max(1.0)
+            ),
+        };
+        let _ = write!(
+            self.gövde,
+            r#"<path d="{}" fill="none" stroke="{}" stroke-width="{}" stroke-linecap="butt" stroke-linejoin="bevel"{}/>"#,
+            yol_svg(yol),
+            boya,
+            kalınlık,
+            desen
+        );
+    }
+
     fn yol_gölgesi(&mut self, yol: &Yol, renk: Renk, bulanıklık: f32, kayma: (f32, f32)) {
         if yol.boş_mu() || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
             return;
@@ -519,4 +547,34 @@ pub fn svg_dışa_aktar(
         &crate::cizim::gorunum::BoyamaGirdisi::default(),
     );
     yüzey.belge()
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+    use crate::renk::RenkDurağı;
+
+    #[test]
+    fn gradyan_vuruşu_svg_boya_referansını_korur() {
+        let mut yüzey = SvgYüzeyi::yeni(120.0, 80.0);
+        let mut yol = Yol::yeni();
+        yol.taşı((10.0, 20.0));
+        yol.çiz((110.0, 60.0));
+        let gradyan = Dolgu::doğrusal(
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            vec![
+                RenkDurağı::yeni(0.0, 0x5070ddu32),
+                RenkDurağı::yeni(1.0, 0xd4dcf7u32),
+            ],
+        );
+
+        yüzey.yol_dolgulu_çiz(&yol, 2.0, &gradyan, ÇizgiTürü::Düz);
+        let belge = yüzey.belge();
+        assert!(belge.contains(r#"<linearGradient id="grd1""#));
+        assert!(belge.contains(r#"stroke="url(#grd1)""#));
+        assert!(belge.contains(r#"stroke-width="2""#));
+    }
 }

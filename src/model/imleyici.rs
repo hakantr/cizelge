@@ -61,6 +61,9 @@ pub struct İmÇizgisiParçası {
 pub struct İmÇizgisi {
     pub veri: Vec<İmÇizgisiTanımı>,
     pub parçalar: Vec<İmÇizgisiParçası>,
+    /// Tek uçlu `data` çizgilerinin başlangıç/bitiş simgeleri (`symbol`).
+    pub başlangıç_simgesi: İmÇizgisiUçSimgesi,
+    pub bitiş_simgesi: İmÇizgisiUçSimgesi,
     /// Öntanımlı: seri renginde kesikli.
     pub stil: ÇizgiStili,
     pub etiket: Etiket,
@@ -71,6 +74,8 @@ impl Default for İmÇizgisi {
         İmÇizgisi {
             veri: Vec::new(),
             parçalar: Vec::new(),
+            başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
+            bitiş_simgesi: İmÇizgisiUçSimgesi::Ok,
             stil: ÇizgiStili {
                 kalınlık: 1.0,
                 tür: ÇizgiTürü::Kesikli,
@@ -155,6 +160,16 @@ impl İmÇizgisi {
 
     pub fn stil(mut self, stil: ÇizgiStili) -> Self {
         self.stil = stil;
+        self
+    }
+
+    pub fn uç_simgeleri(
+        mut self,
+        başlangıç: İmÇizgisiUçSimgesi,
+        bitiş: İmÇizgisiUçSimgesi,
+    ) -> Self {
+        self.başlangıç_simgesi = başlangıç;
+        self.bitiş_simgesi = bitiş;
         self
     }
 
