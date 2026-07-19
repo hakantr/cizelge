@@ -36,6 +36,7 @@ const SENARYOLAR = [
   { id: 'line-sections', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'area-pieces', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-gradient', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'line-aqi', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-stack', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-style', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-step', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

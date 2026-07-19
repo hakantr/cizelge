@@ -125,13 +125,17 @@ fn im_okunu_çiz(
     let mut ok = Yol::yeni();
     ok.taşı(bitiş);
     let yarı_taban = 16.0 * 2.0 / 3.0;
+    let taban_orta = (bitiş.0 - ux * 16.0, bitiş.1 - uy * 16.0);
     ok.çiz((
-        bitiş.0 - ux * 16.0 + nx * yarı_taban,
-        bitiş.1 - uy * 16.0 + ny * yarı_taban,
+        taban_orta.0 + nx * yarı_taban,
+        taban_orta.1 + ny * yarı_taban,
     ));
+    // `echarts/src/util/symbol.ts` Arrow: tabanın dörtte üçündeki iç
+    // çentik, varsayılan ok simgesini dolu üçgenden ayırır.
+    ok.çiz((bitiş.0 - ux * 12.0, bitiş.1 - uy * 12.0));
     ok.çiz((
-        bitiş.0 - ux * 16.0 - nx * yarı_taban,
-        bitiş.1 - uy * 16.0 - ny * yarı_taban,
+        taban_orta.0 - nx * yarı_taban,
+        taban_orta.1 - ny * yarı_taban,
     ));
     ok.kapat();
     yüzey.yol_doldur(&ok, &Dolgu::Düz(renk));
@@ -310,7 +314,7 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                         let boyut = çizgi_imi.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
                         yüzey.yazı(
                             &etiket_metni,
-                            (alan.sağ() + 4.0, y),
+                            (alan.sağ() + 5.0, y),
                             YatayHiza::Sol,
                             DikeyHiza::Orta,
                             boyut,

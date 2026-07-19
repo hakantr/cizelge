@@ -118,9 +118,9 @@ pub fn ısı_haritası_çiz(
     }
 }
 
-/// Görsel eşleme bileşenini sol alt köşeye çizer: sürekli kipte gradyan
-/// çubuğu, parçalı kipte tıklanabilir dilim listesi. Parçalı kipte her
-/// dilimin isabet kutusu döndürülür.
+/// Görsel eşleme bileşenini seçeneklerdeki kutu yerleşimine göre çizer:
+/// sürekli kipte gradyan çubuğu, parçalı kipte tıklanabilir dilim listesi.
+/// Parçalı kipte her dilimin isabet kutusu döndürülür.
 pub fn görsel_eşleme_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     eşleme: &GörselEşleme,
@@ -130,38 +130,84 @@ pub fn görsel_eşleme_çiz(
         return Vec::new();
     }
     if eşleme.parçalı_mı() {
-        // Dilim listesi (alttan üste).
-        const KUTU: f32 = 14.0;
-        const SATIR: f32 = 20.0;
-        const KENAR: f32 = 10.0;
+        // PiecewiseModel varsayılanları: 20×14 simge, 10 px itemGap ve
+        // ECharts 6 orta boy bileşen iç boşluğu (15 px). Dikey/inverse=false
+        // düzeninde yüksek değer üstte görünür.
+        const KUTU_GENİŞLİĞİ: f32 = 20.0;
+        const KUTU_YÜKSEKLİĞİ: f32 = 14.0;
+        const ÖĞE_BOŞLUĞU: f32 = 10.0;
+        const METİN_BOŞLUĞU: f32 = 10.0;
+        const İÇ_BOŞLUK: f32 = 15.0;
         let boyut = tema::YAZI_KÜÇÜK;
         let mut kutular = Vec::new();
         let n = eşleme.parçalar.len();
-        for (i, parça) in eşleme.parçalar.iter().enumerate() {
-            let y = çizici.yükseklik() - KENAR - SATIR * (n.saturating_sub(i)) as f32;
+        let içerik_yüksekliği =
+            n as f32 * KUTU_YÜKSEKLİĞİ + n.saturating_sub(1) as f32 * ÖĞE_BOŞLUĞU;
+        let üst = eşleme
+            .üst
+            .map(|üst| üst.çöz(çizici.yükseklik()) + İÇ_BOŞLUK)
+            .unwrap_or_else(|| {
+                çizici.yükseklik()
+                    - eşleme.alt.çöz(çizici.yükseklik())
+                    - İÇ_BOŞLUK
+                    - içerik_yüksekliği
+            });
+        let sağa_yaslı = eşleme.sağ.is_some() || eşleme.sol == YatayKonum::Sağ;
+        let en_geniş_etiket = eşleme
+            .parçalar
+            .iter()
+            .map(|parça| çizici.yazı_ölç(&parça.etiket_metni(), boyut).0)
+            .fold(0.0_f32, f32::max);
+        let içerik_genişliği = KUTU_GENİŞLİĞİ + METİN_BOŞLUĞU + en_geniş_etiket;
+        let içerik_solu = if let Some(sağ) = eşleme.sağ {
+            çizici.genişlik() - sağ.çöz(çizici.genişlik()) - İÇ_BOŞLUK - içerik_genişliği
+        } else {
+            match eşleme.sol {
+                YatayKonum::Sol => İÇ_BOŞLUK,
+                YatayKonum::Orta => (çizici.genişlik() - içerik_genişliği) / 2.0,
+                YatayKonum::Sağ => çizici.genişlik() - 10.0 - İÇ_BOŞLUK - içerik_genişliği,
+                YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) + İÇ_BOŞLUK,
+            }
+        };
+        let kutu_x = if sağa_yaslı {
+            içerik_solu + en_geniş_etiket + METİN_BOŞLUĞU
+        } else {
+            içerik_solu
+        };
+        for (satır, (i, parça)) in eşleme.parçalar.iter().enumerate().rev().enumerate() {
+            let y = üst + satır as f32 * (KUTU_YÜKSEKLİĞİ + ÖĞE_BOŞLUĞU);
             let açık = eşleme.parça_açık_mı(i);
             let renk = if açık {
                 parça.renk
             } else {
                 tema::devre_dışı()
             };
-            let kutu = Dikdörtgen::yeni(KENAR, y + (SATIR - KUTU) / 2.0, KUTU, KUTU);
+            let kutu = Dikdörtgen::yeni(kutu_x, y, KUTU_GENİŞLİĞİ, KUTU_YÜKSEKLİĞİ);
             çizici.dikdörtgen(kutu, &Dolgu::Düz(renk), [3.0; 4], None);
             let yazı_rengi = if açık {
                 tema::ikincil_metin()
             } else {
                 tema::devre_dışı()
             };
-            let (metin_gen, _) = çizici.yazı(
-                &parça.etiket_metni(),
-                (KENAR + KUTU + 6.0, y + SATIR / 2.0),
-                YatayHiza::Sol,
+            let etiket = parça.etiket_metni();
+            let (etiket_x, yatay_hiza) = if sağa_yaslı {
+                (kutu_x - METİN_BOŞLUĞU, YatayHiza::Sağ)
+            } else {
+                (kutu_x + KUTU_GENİŞLİĞİ + METİN_BOŞLUĞU, YatayHiza::Sol)
+            };
+            çizici.yazı(
+                &etiket,
+                (etiket_x, y + KUTU_YÜKSEKLİĞİ / 2.0),
+                yatay_hiza,
                 DikeyHiza::Orta,
                 boyut,
                 yazı_rengi,
                 false,
             );
-            kutular.push((Dikdörtgen::yeni(KENAR, y, KUTU + 6.0 + metin_gen, SATIR), i));
+            kutular.push((
+                Dikdörtgen::yeni(içerik_solu, y, içerik_genişliği, KUTU_YÜKSEKLİĞİ),
+                i,
+            ));
         }
         return kutular;
     }
@@ -187,13 +233,22 @@ pub fn görsel_eşleme_çiz(
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
         let toplam_genişlik =
             düşük_genişliği + METİN_BOŞLUĞU + ŞERİT_GENİŞLİĞİ + METİN_BOŞLUĞU + yüksek_genişliği;
-        let grup_x = match eşleme.sol {
-            YatayKonum::Sol => 10.0,
-            YatayKonum::Orta => (çizici.genişlik() - toplam_genişlik) / 2.0,
-            YatayKonum::Sağ => çizici.genişlik() - 10.0 - toplam_genişlik,
-            YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
+        let grup_x = if let Some(sağ) = eşleme.sağ {
+            çizici.genişlik() - sağ.çöz(çizici.genişlik()) - toplam_genişlik
+        } else {
+            match eşleme.sol {
+                YatayKonum::Sol => 10.0,
+                YatayKonum::Orta => (çizici.genişlik() - toplam_genişlik) / 2.0,
+                YatayKonum::Sağ => çizici.genişlik() - 10.0 - toplam_genişlik,
+                YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
+            }
         };
-        let y = çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - ŞERİT_YÜKSEKLİĞİ;
+        let y = eşleme
+            .üst
+            .map(|üst| üst.çöz(çizici.yükseklik()))
+            .unwrap_or_else(|| {
+                çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - ŞERİT_YÜKSEKLİĞİ
+            });
         let şerit_x = grup_x + düşük_genişliği + METİN_BOŞLUĞU;
         let durak_sayısı = eşleme.renkler.len().saturating_sub(1).max(1) as f32;
         let duraklar = eşleme
@@ -233,13 +288,20 @@ pub fn görsel_eşleme_çiz(
     }
     const GENİŞLİK: f32 = 14.0;
     const YÜKSEKLİK: f32 = 130.0;
-    let x = match eşleme.sol {
-        YatayKonum::Sol => 10.0,
-        YatayKonum::Orta => (çizici.genişlik() - GENİŞLİK) / 2.0,
-        YatayKonum::Sağ => çizici.genişlik() - 10.0 - GENİŞLİK,
-        YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
+    let x = if let Some(sağ) = eşleme.sağ {
+        çizici.genişlik() - sağ.çöz(çizici.genişlik()) - GENİŞLİK
+    } else {
+        match eşleme.sol {
+            YatayKonum::Sol => 10.0,
+            YatayKonum::Orta => (çizici.genişlik() - GENİŞLİK) / 2.0,
+            YatayKonum::Sağ => çizici.genişlik() - 10.0 - GENİŞLİK,
+            YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
+        }
     };
-    let y = çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - YÜKSEKLİK;
+    let y = eşleme
+        .üst
+        .map(|üst| üst.çöz(çizici.yükseklik()))
+        .unwrap_or_else(|| çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - YÜKSEKLİK);
 
     // Şerit: renk duraklarını dikey gradyan bantları olarak çiz
     // (üst = en yüksek değer).

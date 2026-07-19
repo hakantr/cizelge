@@ -23,6 +23,10 @@ pub struct ÇalışmaEkseni {
     /// noktaların kenara sıkıştırılmadan ızgara dışında hesaplanmasını ve
     /// seri kırpmasının devreye girmesini sağlar. `None` = tam kapsam.
     pub pencere: Option<(f64, f64)>,
+    /// Pencerenin ham eksen kapsamındaki `0..=1` oranları. `startValue` /
+    /// `endValue` kullanıldığında sürgü tutamaçlarının yüzde seçeneklerinden
+    /// değil çözülmüş değer penceresinden çizilmesini sağlar.
+    pub yakınlaştırma_oranları: Option<(f32, f32)>,
     /// Pencerenin seri verisine uygulanma biçimi (`dataZoom.filterMode`).
     /// Pencere yokken bu değer etkisizdir.
     pub yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi,
@@ -38,6 +42,7 @@ impl ÇalışmaEkseni {
             bantlı,
             konum,
             pencere: None,
+            yakınlaştırma_oranları: None,
             yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi::Yok,
         }
     }

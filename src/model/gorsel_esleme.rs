@@ -163,6 +163,12 @@ pub struct GörselEşleme {
     /// Bileşen yönü (`orient`).
     pub yön: Yön,
     pub sol: YatayKonum,
+    /// Sağ kenardan uzaklık (`right`). Verildiğinde `left` yerleşiminin
+    /// önüne geçer.
+    pub sağ: Option<Uzunluk>,
+    /// Üst kenardan uzaklık (`top`). Verildiğinde `bottom` yerleşiminin
+    /// önüne geçer.
+    pub üst: Option<Uzunluk>,
     pub alt: Uzunluk,
     /// `(yüksek, düşük)` uç metinleri (`text`). Boşsa sayısal kapsam yazılır.
     pub metin: Option<(String, String)>,
@@ -193,6 +199,8 @@ impl Default for GörselEşleme {
             seri_sıraları: Vec::new(),
             yön: Yön::Dikey,
             sol: YatayKonum::Değer(Uzunluk::Piksel(10.0)),
+            sağ: None,
+            üst: None,
             alt: Uzunluk::Piksel(10.0),
             metin: None,
             göster: true,
@@ -259,11 +267,23 @@ impl GörselEşleme {
 
     pub fn sol(mut self, sol: impl Into<YatayKonum>) -> Self {
         self.sol = sol.into();
+        self.sağ = None;
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
         self
     }
 
     pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
         self.alt = alt.into();
+        self.üst = None;
+        self
+    }
+
+    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+        self.üst = Some(üst.into());
         self
     }
 

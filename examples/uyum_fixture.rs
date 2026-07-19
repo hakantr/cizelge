@@ -412,15 +412,14 @@ fn area_simple() -> GrafikSeçenekleri {
         });
     let mut tarihler = Vec::with_capacity(19_999);
     let mut değerler = Vec::with_capacity(20_000);
-    değerler.push(kanıt_rastgele(&mut tohum) * 300.0);
-    for sıra in 1..20_000 {
+    let mut önceki = kanıt_rastgele(&mut tohum) * 300.0;
+    değerler.push(önceki);
+    for _ in 1..20_000 {
         taban += GÜN_MS;
         let tarih = cizelge::yardimci::takvim::andan_takvime(taban);
         tarihler.push(format!("{}/{}/{}", tarih.yıl, tarih.ay, tarih.gün));
-        let önceki = değerler[sıra - 1];
-        değerler.push(javascript_yuvarla(
-            (kanıt_rastgele(&mut tohum) - 0.5) * 20.0 + önceki,
-        ));
+        önceki = javascript_yuvarla((kanıt_rastgele(&mut tohum) - 0.5) * 20.0 + önceki);
+        değerler.push(önceki);
     }
 
     GrafikSeçenekleri::yeni()
@@ -1100,6 +1099,73 @@ fn line_gradient() -> GrafikSeçenekleri {
                 .sembol_göster(false)
                 .veri(değerler),
         )
+}
+
+fn line_aqi() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/aqi-beijing.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let veri: Vec<(String, f64)> = serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))?;
+    let (tarihler, değerler): (Vec<_>, Vec<_>) = veri.into_iter().unzip();
+
+    let görsel = GörselEşleme::yeni()
+        .üst(50)
+        .sağ(10)
+        .aralık_dışı_renk("#999")
+        .parçalar([
+            EşlemeParçası::aralık(Some(0.0), false, Some(50.0), true, "#93CE07").etiket("0 - 50"),
+            EşlemeParçası::aralık(Some(50.0), false, Some(100.0), true, "#FBDB0F")
+                .etiket("50 - 100"),
+            EşlemeParçası::aralık(Some(100.0), false, Some(150.0), true, "#FC7D02")
+                .etiket("100 - 150"),
+            EşlemeParçası::aralık(Some(150.0), false, Some(200.0), true, "#FD0100")
+                .etiket("150 - 200"),
+            EşlemeParçası::aralık(Some(200.0), false, Some(300.0), true, "#AA069F")
+                .etiket("200 - 300"),
+            EşlemeParçası::gt(300.0, "#AC3B2A").etiket("> 300"),
+        ]);
+    let im_çizgileri = [50.0, 100.0, 150.0, 200.0, 300.0]
+        .into_iter()
+        .fold(İmÇizgisi::yeni(), |çizgiler, değer| {
+            çizgiler.yatay(İmDeğeri::Değer(değer))
+        })
+        .stil(
+            ÇizgiStili::yeni()
+                .renk("#333")
+                .kalınlık(1.0)
+                .tür(ÇizgiTürü::Kesikli),
+        );
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Beijing AQI")
+                .sol("1%")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .ızgara(Izgara::yeni().sol("5%").sağ("15%").alt("10%"))
+        .x_ekseni(Eksen::kategori().veri(tarihler))
+        .y_ekseni(Eksen::değer())
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .sağ(10)
+                .veri_yakınlaştırma(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().başlangıç_değeri("2014-06-01"))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .görsel_eşleme(görsel)
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Beijing AQI")
+                .im_çizgisi(im_çizgileri)
+                .veri(değerler),
+        ))
 }
 
 fn area_stack() -> GrafikSeçenekleri {
@@ -3343,6 +3409,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-sections" => Ok(line_sections()),
         "area-pieces" => Ok(area_pieces()),
         "line-gradient" => Ok(line_gradient()),
+        "line-aqi" => line_aqi(),
         "area-stack" => Ok(area_stack()),
         "area-stack-gradient" => Ok(area_stack_gradient()),
         "bar-background" => Ok(bar_background()),

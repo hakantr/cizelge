@@ -386,6 +386,9 @@ pub struct AraçKutusu {
     pub göster: bool,
     pub yön: Yön,
     pub sol: YatayKonum,
+    /// Sağ kenardan açık uzaklık (`toolbox.right`). `Some` olduğunda
+    /// ECharts kutu yerleşimindeki `left` karşılığının önüne geçer.
+    pub sağ: Option<Uzunluk>,
     pub üst: DikeyKonum,
     /// Yakınlaştırma/gösterge durumunu ilk seçeneklere döndürür
     /// (`feature.restore`).
@@ -419,6 +422,7 @@ impl Default for AraçKutusu {
             göster: true,
             yön: Yön::Yatay,
             sol: YatayKonum::Sağ,
+            sağ: None,
             üst: DikeyKonum::Üst,
             geri_yükle: false,
             svg_kaydet: false,
@@ -452,6 +456,12 @@ impl AraçKutusu {
 
     pub fn sol(mut self, sol: impl Into<YatayKonum>) -> Self {
         self.sol = sol.into();
+        self.sağ = None;
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
         self
     }
 

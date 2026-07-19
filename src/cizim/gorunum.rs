@@ -719,7 +719,7 @@ fn kartezyen_kur(
     // aksi halde her render'da yüzde penceresi yeniden küçülür.
     let ham_x_kapsamlar = x_kapsamlar.clone();
     let ham_y_kapsamlar = y_kapsamlar.clone();
-    type SüzmePenceresi = ([f64; 2], YakınlaştırmaSüzmeKipi);
+    type SüzmePenceresi = ([f64; 2], (f32, f32), YakınlaştırmaSüzmeKipi);
     let x_pencereleri: Vec<Option<SüzmePenceresi>> = x_seçenekler
         .iter()
         .enumerate()
@@ -741,11 +741,11 @@ fn kartezyen_kur(
             };
             yakınlaştırma
                 .pencere_çöz(&kategoriler, ham)
-                .map(|(mut pencere, _)| {
+                .map(|(mut pencere, oranlar)| {
                     if eksen.tür == EksenTürü::Kategori {
                         pencere = [pencere[0].round(), pencere[1].round()];
                     }
-                    (pencere, yakınlaştırma.süzme_kipi)
+                    (pencere, oranlar, yakınlaştırma.süzme_kipi)
                 })
         })
         .collect();
@@ -770,17 +770,17 @@ fn kartezyen_kur(
             };
             yakınlaştırma
                 .pencere_çöz(&kategoriler, ham)
-                .map(|(mut pencere, _)| {
+                .map(|(mut pencere, oranlar)| {
                     if eksen.tür == EksenTürü::Kategori {
                         pencere = [pencere[0].round(), pencere[1].round()];
                     }
-                    (pencere, yakınlaştırma.süzme_kipi)
+                    (pencere, oranlar, yakınlaştırma.süzme_kipi)
                 })
         })
         .collect();
 
     let pencereden_geçer = |pencere: Option<SüzmePenceresi>, değerler: &[f64]| -> bool {
-        let Some(([baş, son], kip)) = pencere else {
+        let Some(([baş, son], _, kip)) = pencere else {
             return true;
         };
         match kip {
@@ -807,12 +807,12 @@ fn kartezyen_kur(
         }
     };
 
-    if x_pencereleri.iter().flatten().any(|(_, kip)| {
+    if x_pencereleri.iter().flatten().any(|(_, _, kip)| {
         matches!(
             kip,
             YakınlaştırmaSüzmeKipi::Süz | YakınlaştırmaSüzmeKipi::ZayıfSüz
         )
-    }) || y_pencereleri.iter().flatten().any(|(_, kip)| {
+    }) || y_pencereleri.iter().flatten().any(|(_, _, kip)| {
         matches!(
             kip,
             YakınlaştırmaSüzmeKipi::Süz | YakınlaştırmaSüzmeKipi::ZayıfSüz
@@ -1083,9 +1083,9 @@ fn kartezyen_kur(
                 .get(xi)
                 .copied()
                 .flatten()
-                .map(|(pencere, _)| pencere);
+                .map(|(pencere, oranlar, _)| (pencere, oranlar));
             let mut seçenek = seçenek.clone();
-            if let Some([p0, p1]) = pencere
+            if let Some(([p0, p1], _)) = pencere
                 && seçenek.tür != EksenTürü::Kategori
             {
                 if let Some(yakınlaştırma) = yakınlaştırma {
@@ -1117,7 +1117,8 @@ fn kartezyen_kur(
             });
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.x, alan.sağ()], konum);
-            if let Some([p0, p1]) = pencere {
+            if let Some(([p0, p1], oranlar)) = pencere {
+                eksen.yakınlaştırma_oranları = Some(oranlar);
                 if let Some(yakınlaştırma) = yakınlaştırma {
                     eksen.yakınlaştırma_süzme_kipi = yakınlaştırma.süzme_kipi;
                 }
@@ -1149,9 +1150,9 @@ fn kartezyen_kur(
                 .get(yi)
                 .copied()
                 .flatten()
-                .map(|(pencere, _)| pencere);
+                .map(|(pencere, oranlar, _)| (pencere, oranlar));
             let mut seçenek = seçenek.clone();
-            if let Some([p0, p1]) = pencere
+            if let Some(([p0, p1], _)) = pencere
                 && seçenek.tür != EksenTürü::Kategori
             {
                 if let Some(yakınlaştırma) = yakınlaştırma {
@@ -1180,7 +1181,8 @@ fn kartezyen_kur(
             // Dikey eksen piksel aralığı alttan yukarı doğrudur.
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.alt(), alan.y], konum);
-            if let Some([p0, p1]) = pencere {
+            if let Some(([p0, p1], oranlar)) = pencere {
+                eksen.yakınlaştırma_oranları = Some(oranlar);
                 if let Some(yakınlaştırma) = yakınlaştırma {
                     eksen.yakınlaştırma_süzme_kipi = yakınlaştırma.süzme_kipi;
                 }
@@ -1589,11 +1591,15 @@ pub fn grafiği_boya(
         } else {
             10.0
         };
-        let grup_x = match araçlar.sol {
-            YatayKonum::Sol => 15.0 - yatay_en_az,
-            YatayKonum::Orta => yüzey.genişlik() / 2.0 - (yatay_en_az + yatay_en_çok) / 2.0,
-            YatayKonum::Sağ => yüzey.genişlik() - 15.0 - yatay_en_çok,
-            YatayKonum::Değer(uzunluk) => uzunluk.çöz(yüzey.genişlik()) - yatay_en_az,
+        let grup_x = if let Some(sağ) = araçlar.sağ {
+            yüzey.genişlik() - 15.0 - sağ.çöz(yüzey.genişlik()) - yatay_en_çok
+        } else {
+            match araçlar.sol {
+                YatayKonum::Sol => 15.0 - yatay_en_az,
+                YatayKonum::Orta => yüzey.genişlik() / 2.0 - (yatay_en_az + yatay_en_çok) / 2.0,
+                YatayKonum::Sağ => yüzey.genişlik() - 15.0 - yatay_en_çok,
+                YatayKonum::Değer(uzunluk) => uzunluk.çöz(yüzey.genişlik()) - yatay_en_az,
+            }
         };
         let grup_y = match araçlar.üst {
             DikeyKonum::Üst => 15.0 - dikey_en_az,
@@ -2302,7 +2308,19 @@ pub fn grafiği_boya(
                     });
                 }
                 YakınlaştırmaTürü::Sürgü => {
-                    let (b, e) = yakınlaştırma.oranlar();
+                    let (b, e) = if let Some(y_sırası) = yakınlaştırma.y_eksen_sırası {
+                        kurulum
+                            .y_eksenler
+                            .get(y_sırası)
+                            .and_then(|eksen| eksen.yakınlaştırma_oranları)
+                            .unwrap_or_else(|| yakınlaştırma.oranlar())
+                    } else {
+                        kurulum
+                            .x_eksenler
+                            .get(yakınlaştırma.x_eksen_sırası)
+                            .and_then(|eksen| eksen.yakınlaştırma_oranları)
+                            .unwrap_or_else(|| yakınlaştırma.oranlar())
+                    };
                     let şerit = if dikey {
                         let genişlik = yakınlaştırma
                             .genişlik
@@ -3414,6 +3432,29 @@ mod yakınlaştırma_yönü_testleri {
             assert!((*x - 675.0).abs() < 1e-3);
             assert!((*y - beklenen_y).abs() < 1e-3);
         }
+    }
+
+    #[test]
+    fn araç_kutusu_sağ_uzaklığını_iç_boşluktan_sonra_uygular() {
+        let seçenekler = GrafikSeçenekleri::yeni().araç_kutusu(
+            crate::model::bilesen::AraçKutusu::yeni()
+                .sağ(10)
+                .veri_yakınlaştırma(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.araç_düğmeleri.len(), 4);
+        let ilk = çıktı.araç_düğmeleri.first().map(|(kutu, _)| kutu);
+        let son = çıktı.araç_düğmeleri.last().map(|(kutu, _)| kutu);
+        assert!(ilk.is_some_and(|kutu| {
+            (kutu.x + kutu.genişlik / 2.0 - 580.222_4).abs() < 1e-3
+                && (kutu.y + kutu.yükseklik / 2.0 - 25.0).abs() < 1e-3
+        }));
+        // 15 px bileşen iç boşluğu + açık 10 px `right` uzaklığı.
+        assert!(son.is_some_and(|kutu| (kutu.sağ() - 675.0).abs() < 1e-3));
     }
 
     #[test]

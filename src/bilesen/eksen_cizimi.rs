@@ -27,6 +27,72 @@ fn etiket_metni(eksen: &ÇalışmaEkseni, değer: f64) -> String {
     }
 }
 
+/// Kategori ekseninin otomatik `axisLabel.interval` çizim adımı. Çizgi
+/// serisinin `showAllSymbol: 'auto'` davranışı aynı görünür etiket kümesini
+/// izlediğinden bu hesap AxisBuilder ile LineView arasında ortaktır.
+pub(crate) fn kategori_etiket_adımı(
+    çizici: &dyn ÇizimYüzeyi, eksen: &ÇalışmaEkseni
+) -> usize {
+    if !eksen.ölçek.kategorik_mi() {
+        return 1;
+    }
+    if let Some(aralık) = eksen.seçenek.etiket.aralık {
+        return aralık.saturating_add(1);
+    }
+
+    let boyut = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+    let çentikler = eksen.etiket_çentikleri();
+    // ECharts büyük ordinal pencerelerde en fazla yaklaşık 40 etiketi
+    // ölçerek aralığı kestirir.
+    let örnek_adımı = if çentikler.len() > 40 {
+        (çentikler.len() / 40).max(1)
+    } else {
+        1
+    };
+    let en_geniş = çentikler
+        .iter()
+        .step_by(örnek_adımı)
+        .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut).0)
+        .fold(0.0_f32, f32::max);
+    // `calculateCategoryInterval`, alt-piksel unitSpan'i korur ve zrender
+    // metin sınırına 1.3 güvenlik çarpanı uygular.
+    let bant = eksen.bant_genişliği().max(f32::EPSILON);
+    let gerekli = if eksen.yatay_mı() {
+        en_geniş * 1.3
+    } else {
+        boyut * 1.3
+    };
+    (gerekli / bant).floor().max(0.0) as usize + 1
+}
+
+/// ECharts `ordinalScaleCreateTicks`: yakınlaştırılmış kategori ekseninde
+/// görünür etiketleri sıfıra göre sabit bir adıma hizalar. Böylece pencere
+/// kayarken etiketler ve `showAllSymbol: 'auto'` sembolleri yer değiştirmez.
+pub(crate) fn kategori_görünür_sıraları(
+    eksen: &ÇalışmaEkseni,
+    adım: usize,
+) -> Option<Vec<usize>> {
+    if !eksen.ölçek.kategorik_mi() {
+        return None;
+    }
+    let çentikler = eksen.etiket_çentikleri();
+    let ilk = çentikler.first()?.1.değer.round();
+    let son = çentikler.last()?.1.değer.round();
+    if ilk < 0.0 || son < ilk || son > usize::MAX as f64 {
+        return Some(Vec::new());
+    }
+    let ilk = ilk as usize;
+    let son = son as usize;
+    let adım = adım.max(1);
+    let çentik_sayısı = son.saturating_sub(ilk).saturating_add(1);
+    let başlangıç = if ilk != 0 && adım > 1 && çentik_sayısı as f64 / adım as f64 > 2.0 {
+        ilk.div_ceil(adım).saturating_mul(adım)
+    } else {
+        ilk
+    };
+    Some((başlangıç..=son).step_by(adım).collect())
+}
+
 /// ECharts `fixAxisOnZero` + `cartesianAxisHelper.layout` özeti. Eksen
 /// çizgisi/tikleri sıfırda kesişebilir; etiketler ise ham dış kenarda kalır.
 fn sıfırdaki_çizgi_konumu(
@@ -213,46 +279,8 @@ pub fn eksenleri_çiz(
 
         // Kategori eksenlerinde seyreltme adımı: sığmayan etiket VE
         // çentikler `interval` mantığıyla atlanır (ECharts davranışı).
-        let boyut_ön = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-        let adım = if eksen.ölçek.kategorik_mi()
-            && let Some(aralık) = eksen.seçenek.etiket.aralık
-        {
-            aralık.saturating_add(1)
-        } else if eksen.ölçek.kategorik_mi() {
-            let çentikler = eksen.etiket_çentikleri();
-            // ECharts büyük ordinal pencerelerde en fazla yaklaşık 40
-            // etiketi ölçerek aralığı kestirir. Bütün (özellikle tek bir çok
-            // uzun) etiketi ölçmek zoom sırasında bir kademe fazla seyreltir.
-            let örnek_adımı = if çentikler.len() > 40 {
-                (çentikler.len() / 40).max(1)
-            } else {
-                1
-            };
-            let en_geniş = çentikler
-                .iter()
-                .step_by(örnek_adımı)
-                .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut_ön).0)
-                .fold(0.0f32, f32::max);
-            // Büyük ordinal veriZoom pencerelerinde ardışık kategoriler
-            // bir fiziksel pikselden daha yakın olabilir. ECharts
-            // `unitSpan` değerini alt-piksele izin vererek kullanır.
-            let bant = eksen.bant_genişliği().max(f32::EPSILON);
-            // `calculateCategoryInterval`: zrender metin sınırına 1.3
-            // güvenlik çarpanı uygular, oranı aşağı yuvarlar; dönen `interval`
-            // atlanan öğe sayısı olduğundan gerçek çizim adımı +1'dir.
-            let gerekli = if eksen.yatay_mı() {
-                // `axisHelper.calculateCategoryInterval` metin sınırına
-                // doğrudan 1.3 güvenlik katsayısı uygular. Özellikle dar
-                // dataZoom pencerelerinde 1.29 kullanmak interval'i bir
-                // eksik seçip sağ uç etiketini yanlış kategoriye taşıyordu.
-                en_geniş * 1.3
-            } else {
-                boyut_ön * 1.3
-            };
-            (gerekli / bant).floor().max(0.0) as usize + 1
-        } else {
-            1
-        };
+        let adım = kategori_etiket_adımı(çizici, eksen);
+        let görünür_kategori_sıraları = kategori_görünür_sıraları(eksen, adım);
 
         // 2) Çentikler.
         if çentik_göster {
@@ -326,7 +354,14 @@ pub fn eksenleri_çiz(
             let çentikler = eksen.etiket_çentikleri();
 
             for (i, (konum, çentik)) in çentikler.iter().enumerate() {
-                if i % adım != 0 {
+                let kategori_görünür = görünür_kategori_sıraları.as_ref().is_none_or(|sıralar| {
+                    let değer = çentik.değer.round();
+                    değer >= 0.0
+                        && değer <= usize::MAX as f64
+                        && sıralar.binary_search(&(değer as usize)).is_ok()
+                });
+                if !kategori_görünür || (görünür_kategori_sıraları.is_none() && i % adım != 0)
+                {
                     continue;
                 }
                 let metin = etiket_metni(eksen, çentik.değer);

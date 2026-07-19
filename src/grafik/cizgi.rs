@@ -1,6 +1,7 @@
 //! Çizgi serisi çizimi — `echarts/src/chart/line/LineView.ts` ile
 //! `poly.ts` içindeki yumuşak eğri algoritmasının portu.
 
+use crate::bilesen::eksen_cizimi::{kategori_etiket_adımı, kategori_görünür_sıraları};
 use crate::cizim::{Yol, ÇizimYüzeyi};
 use crate::grafik::{sembol_stilli_çiz, çizgi_stili_çöz};
 use crate::koordinat::Kartezyen2B;
@@ -341,6 +342,37 @@ fn görsel_kapsam(seri: &ÇizgiSerisi, eşleme: &GörselEşleme) -> [f64; 2] {
     eşleme.kapsam_çöz(kapsam)
 }
 
+/// `LineView.getIsIgnoreFunc`: kategori ekseni dar olduğunda varsayılan
+/// `showAllSymbol: 'auto'`, yalnız görünür eksen etiketlerine denk gelen
+/// sembolleri bırakır. `None`, bütün sembollerin çizileceği anlamına gelir.
+fn görünür_sembol_sıraları(
+    çizici: &dyn ÇizimYüzeyi,
+    seri: &ÇizgiSerisi,
+    kartezyen: &Kartezyen2B,
+) -> Option<Vec<usize>> {
+    if seri.tüm_sembolleri_göster == Some(true) {
+        return None;
+    }
+    let kategori_ekseni = if kartezyen.x.ölçek.kategorik_mi() {
+        &kartezyen.x
+    } else if kartezyen.y.ölçek.kategorik_mi() {
+        &kartezyen.y
+    } else {
+        return None;
+    };
+
+    // ECharts, otomatik kipte kategori başına kullanılabilir alan sembolün
+    // 1,5 katını karşılıyorsa bütün sembolleri korur.
+    if seri.tüm_sembolleri_göster.is_none()
+        && seri.sembol_boyutu * 1.5 <= kategori_ekseni.bant_genişliği()
+    {
+        return None;
+    }
+
+    let adım = kategori_etiket_adımı(çizici, kategori_ekseni);
+    kategori_görünür_sıraları(kategori_ekseni, adım)
+}
+
 /// ECharts `getVisualGradient` portu. Renk durakları veri değerinden eksen
 /// pikseline taşınır, sonra yolun sınır kutusuna göre yerelleştirilir. Bu
 /// sayede raster, SVG ve GPUI yüzeyleri aynı gradyanı paylaşır.
@@ -442,6 +474,12 @@ pub fn çizgi_serisi_çiz(
     let (tepeler, tabanlar) = nokta_listeleri(seri, kartezyen, aralıklar);
     let alan = kartezyen.alan;
     let görsel_değer_kapsamı = görsel_eşleme.map(|eşleme| görsel_kapsam(seri, eşleme));
+    let görünür_semboller = görünür_sembol_sıraları(çizici, seri, kartezyen);
+    let sembol_görünür_mü = |sıra: usize| {
+        görünür_semboller
+            .as_ref()
+            .is_none_or(|görünürler| görünürler.binary_search(&sıra).is_ok())
+    };
 
     let mut gövde = |ç: &mut dyn ÇizimYüzeyi| {
         let mut tepeler_parçalı = parçalara_ayır(&tepeler, seri.boşları_bağla);
@@ -553,6 +591,9 @@ pub fn çizgi_serisi_çiz(
         if seri.sembol_göster && seri.sembol != crate::model::seri::Sembol::Yok {
             for (i, nokta) in tepeler.iter().enumerate() {
                 let Some(nokta) = nokta else { continue };
+                if !sembol_görünür_mü(i) {
+                    continue;
+                }
                 let veri_stili = seri.veri.get(i).and_then(|öğe| öğe.stil.as_ref());
                 let açık_dolgu = veri_stili
                     .and_then(|stil| stil.renk.as_ref())
@@ -603,6 +644,9 @@ pub fn çizgi_serisi_çiz(
             let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
             for (i, nokta) in tepeler.iter().enumerate() {
                 let Some((x, y)) = nokta else { continue };
+                if !sembol_görünür_mü(i) {
+                    continue;
+                }
                 let Some(öğe) = seri.veri.get(i) else {
                     continue;
                 };

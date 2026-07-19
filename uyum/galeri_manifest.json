@@ -9527,7 +9527,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/line-aqi.ts",
     "kaynak_sha256": "96bf58f2fa8b6228e997adce6affca2b65f481f19780aee5f1631055bce1e8ff",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#line_aqi",
     "seriler": [
       "line"
     ],
@@ -9546,7 +9546,7 @@
     "dış_varlıklar": [
       "/data/asset/data/aqi-beijing.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -9557,15 +9557,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1125,
+          "değişen_piksel_oranı": 0.004166666666666667,
+          "ssim": 0.9938437404991456,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-aqi.png",
+            "sha256": "f4de3afb01f58b879adb58aee4713a89ef76c6774a88bf227b84a80ca87d0094"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/line-aqi.png",
+            "sha256": "56408279706325bfa6f9401bae9978aaca59fd1ab89684fd334db14d2eaa0e0f"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/line-aqi.png",
+            "sha256": "046d7375759008fcbeef54126bd250a27136e21ecd7863a9df6c421c7eb9abc7"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/line-aqi-son.json",
+            "sha256": "17275ec03c8982117460c295f4e8bce8500b245498b18f1ced7aee9fb91ce42f"
+          }
+        }
+      ]
     }
   },
   {

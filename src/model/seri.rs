@@ -125,6 +125,9 @@ pub struct ÇizgiSerisi {
     pub sembol: Sembol,
     pub sembol_boyutu: f32,
     pub sembol_göster: bool,
+    /// `showAllSymbol`: `None`, ECharts'ın `'auto'` kuralıdır; kategori
+    /// aralığı daraldığında semboller eksen etiketleriyle seyreltilir.
+    pub tüm_sembolleri_göster: Option<bool>,
     pub çizgi_stili: ÇizgiStili,
     pub öğe_stili: ÖğeStili,
     pub alan_stili: Option<AlanStili>,
@@ -159,6 +162,7 @@ impl Default for ÇizgiSerisi {
             // ECharts 6.1 `LineSeries.defaultOption.symbolSize`.
             sembol_boyutu: 6.0,
             sembol_göster: true,
+            tüm_sembolleri_göster: None,
             çizgi_stili: ÇizgiStili::default(),
             öğe_stili: ÖğeStili::default(),
             alan_stili: None,
@@ -255,6 +259,17 @@ impl ÇizgiSerisi {
 
     pub fn sembol_göster(mut self, göster: bool) -> Self {
         self.sembol_göster = göster;
+        self
+    }
+
+    pub fn tüm_sembolleri_göster(mut self, göster: bool) -> Self {
+        self.tüm_sembolleri_göster = Some(göster);
+        self
+    }
+
+    /// `showAllSymbol: 'auto'` davranışına döner.
+    pub fn sembolleri_otomatik_seyrelt(mut self) -> Self {
+        self.tüm_sembolleri_göster = None;
         self
     }
 
