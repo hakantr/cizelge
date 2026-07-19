@@ -80,11 +80,17 @@ pub enum YakınlaştırmaTürü {
 #[derive(Clone, PartialEq, Debug)]
 pub struct VeriYakınlaştırma {
     pub tür: YakınlaştırmaTürü,
-    /// Bağlı x ekseninin sırası (`xAxisIndex`).
+    /// Bağlı ilk x ekseninin sırası (`xAxisIndex`). Tek eksenli eski API'nin
+    /// kaynak uyumluluğu için açık tutulur; ek hedefler
+    /// `ek_x_eksen_sıraları` içindedir.
     pub x_eksen_sırası: usize,
+    /// `xAxisIndex: [..]` dizisindeki ilk öğeden sonraki hedefler.
+    pub ek_x_eksen_sıraları: Vec<usize>,
     /// `Some` ise yakınlaştırma x yerine bu y eksenine bağlıdır
     /// (`yAxisIndex`) ve sürgü dikey çizilir.
     pub y_eksen_sırası: Option<usize>,
+    /// `yAxisIndex: [..]` dizisindeki ilk öğeden sonraki hedefler.
+    pub ek_y_eksen_sıraları: Vec<usize>,
     /// Pencere başlangıcı, yüzde `0..=100` (`start`).
     pub başlangıç: f32,
     /// Pencere bitişi, yüzde `0..=100` (`end`).
@@ -110,7 +116,9 @@ impl Default for VeriYakınlaştırma {
         VeriYakınlaştırma {
             tür: YakınlaştırmaTürü::İç,
             x_eksen_sırası: 0,
+            ek_x_eksen_sıraları: Vec::new(),
             y_eksen_sırası: None,
+            ek_y_eksen_sıraları: Vec::new(),
             başlangıç: 0.0,
             bitiş: 100.0,
             başlangıç_değeri: None,
@@ -142,14 +150,91 @@ impl VeriYakınlaştırma {
 
     pub fn x_eksen_sırası(mut self, sıra: usize) -> Self {
         self.x_eksen_sırası = sıra;
+        self.ek_x_eksen_sıraları.clear();
         self.y_eksen_sırası = None;
+        self.ek_y_eksen_sıraları.clear();
+        self
+    }
+
+    /// Yakınlaştırmayı birden çok x eksenine bağlar
+    /// (`xAxisIndex: [0, 1, ...]`). Boş hedef listesi ECharts'ın otomatik
+    /// seçimine denk gelmediği için öntanımlı `0` eksenine düşer.
+    pub fn x_eksenleri(mut self, sıralar: impl IntoIterator<Item = usize>) -> Self {
+        let mut sıralar = sıralar.into_iter();
+        self.x_eksen_sırası = sıralar.next().unwrap_or(0);
+        self.ek_x_eksen_sıraları = sıralar
+            .filter(|sıra| *sıra != self.x_eksen_sırası)
+            .collect();
+        self.ek_x_eksen_sıraları.sort_unstable();
+        self.ek_x_eksen_sıraları.dedup();
+        self.y_eksen_sırası = None;
+        self.ek_y_eksen_sıraları.clear();
         self
     }
 
     /// Yakınlaştırmayı y eksenine bağlar (`yAxisIndex`); yön dikey olur.
     pub fn y_eksen_sırası(mut self, sıra: usize) -> Self {
         self.y_eksen_sırası = Some(sıra);
+        self.ek_y_eksen_sıraları.clear();
+        self.ek_x_eksen_sıraları.clear();
         self
+    }
+
+    /// Yakınlaştırmayı birden çok y eksenine bağlar
+    /// (`yAxisIndex: [0, 1, ...]`).
+    pub fn y_eksenleri(mut self, sıralar: impl IntoIterator<Item = usize>) -> Self {
+        let mut sıralar = sıralar.into_iter();
+        let ilk = sıralar.next().unwrap_or(0);
+        self.y_eksen_sırası = Some(ilk);
+        self.ek_y_eksen_sıraları = sıralar.filter(|sıra| *sıra != ilk).collect();
+        self.ek_y_eksen_sıraları.sort_unstable();
+        self.ek_y_eksen_sıraları.dedup();
+        self.ek_x_eksen_sıraları.clear();
+        self
+    }
+
+    /// Bileşenin hedeflediği x eksenlerini ECharts dizi sırasıyla döndürür.
+    pub fn hedef_x_eksenleri(&self) -> impl Iterator<Item = usize> + '_ {
+        std::iter::once(self.x_eksen_sırası).chain(self.ek_x_eksen_sıraları.iter().copied())
+    }
+
+    /// Bileşenin hedeflediği y eksenlerini ECharts dizi sırasıyla döndürür.
+    pub fn hedef_y_eksenleri(&self) -> impl Iterator<Item = usize> + '_ {
+        self.y_eksen_sırası
+            .into_iter()
+            .chain(self.ek_y_eksen_sıraları.iter().copied())
+    }
+
+    pub fn x_eksenini_hedefler(&self, sıra: usize) -> bool {
+        self.y_eksen_sırası.is_none() && self.hedef_x_eksenleri().any(|hedef| hedef == sıra)
+    }
+
+    pub fn y_eksenini_hedefler(&self, sıra: usize) -> bool {
+        self.hedef_y_eksenleri().any(|hedef| hedef == sıra)
+    }
+
+    /// İki dataZoom bileşeninin aynı eksen kümesini yönettiğini bildirir.
+    /// ECharts'ta hedef dizi sırası anlamlı değildir; karşılaştırma bu yüzden
+    /// kümeleri sıralayıp yinelenenleri atar.
+    pub fn aynı_eksenleri_hedefler(&self, diğer: &Self) -> bool {
+        if self.dikey_mi() != diğer.dikey_mi() {
+            return false;
+        }
+        let mut bu: Vec<_> = if self.dikey_mi() {
+            self.hedef_y_eksenleri().collect()
+        } else {
+            self.hedef_x_eksenleri().collect()
+        };
+        let mut öteki: Vec<_> = if diğer.dikey_mi() {
+            diğer.hedef_y_eksenleri().collect()
+        } else {
+            diğer.hedef_x_eksenleri().collect()
+        };
+        bu.sort_unstable();
+        bu.dedup();
+        öteki.sort_unstable();
+        öteki.dedup();
+        bu == öteki
     }
 
     pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {

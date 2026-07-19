@@ -1218,14 +1218,15 @@ impl GrafikÇalışmaZamanı {
                     bileşen: "dataZoom",
                     sıra,
                 })?;
-        let hedef = yakınlaştırma_eksen_hedefi(başlangıç);
         Ok(self
             .seçenekler
             .veri_yakınlaştırmaları
             .iter()
             .enumerate()
             .filter_map(|(sıra, yakınlaştırma)| {
-                (yakınlaştırma_eksen_hedefi(yakınlaştırma) == hedef).then_some(sıra)
+                başlangıç
+                    .aynı_eksenleri_hedefler(yakınlaştırma)
+                    .then_some(sıra)
             })
             .collect())
     }
@@ -1236,13 +1237,6 @@ impl GrafikÇalışmaZamanı {
         }
         Ok(())
     }
-}
-
-fn yakınlaştırma_eksen_hedefi(yakınlaştırma: &VeriYakınlaştırma) -> (bool, usize) {
-    yakınlaştırma
-        .y_eksen_sırası
-        .map(|sıra| (true, sıra))
-        .unwrap_or((false, yakınlaştırma.x_eksen_sırası))
 }
 
 fn gösterge_adları(seçenekler: &GrafikSeçenekleri) -> Vec<String> {

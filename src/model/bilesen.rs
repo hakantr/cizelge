@@ -539,6 +539,10 @@ pub struct Izgara {
     pub sağ: Uzunluk,
     pub üst: Uzunluk,
     pub alt: Uzunluk,
+    /// Açık genişlik/yükseklik verilirse karşı kenar boşluğunun önüne geçer
+    /// (`grid.width` / `grid.height`).
+    pub genişlik: Option<Uzunluk>,
+    pub yükseklik: Option<Uzunluk>,
     /// Eksen etiketleri ızgara alanına dahil edilsin mi (`containLabel`)?
     pub etiketi_kapsa: bool,
 }
@@ -551,6 +555,8 @@ impl Default for Izgara {
             sağ: Uzunluk::Yüzde(10.0),
             üst: Uzunluk::Piksel(65.0),
             alt: Uzunluk::Piksel(80.0),
+            genişlik: None,
+            yükseklik: None,
             etiketi_kapsa: false,
         }
     }
@@ -578,6 +584,16 @@ impl Izgara {
 
     pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
         self.alt = alt.into();
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(genişlik.into());
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = Some(yükseklik.into());
         self
     }
 

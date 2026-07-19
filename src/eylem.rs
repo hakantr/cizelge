@@ -791,9 +791,15 @@ fn eksen_imleci_kategori_sırası(
         .cloned()
         .unwrap_or_default();
     let sol = ızgara.sol.çöz(genişlik);
-    let sağ = genişlik - ızgara.sağ.çöz(genişlik);
+    let sağ = ızgara
+        .genişlik
+        .map(|uzunluk| sol + uzunluk.çöz(genişlik))
+        .unwrap_or_else(|| genişlik - ızgara.sağ.çöz(genişlik));
     let üst = ızgara.üst.çöz(yükseklik);
-    let alt = yükseklik - ızgara.alt.çöz(yükseklik);
+    let alt = ızgara
+        .yükseklik
+        .map(|uzunluk| üst + uzunluk.çöz(yükseklik))
+        .unwrap_or_else(|| yükseklik - ızgara.alt.çöz(yükseklik));
     let (başlangıç, uzunluk, konum) = if x_mi {
         (sol, (sağ - sol).max(1.0), piksel)
     } else {
@@ -897,7 +903,7 @@ mod testler {
 
     use super::*;
     use crate::calisma_zamani::ÖrnekBaşlatmaSeçenekleri;
-    use crate::model::bilesen::{Başlık, Gösterge, GöstergeSeçimKipi};
+    use crate::model::bilesen::{Başlık, Gösterge, GöstergeSeçimKipi, Izgara};
     use crate::model::eksen::Eksen;
     use crate::model::secenekler::GrafikSeçenekleri;
     use crate::model::seri::ÇizgiSerisi;
@@ -935,9 +941,13 @@ mod testler {
     #[test]
     fn data_zoom_action_bagli_bilesenleri_gunceller_ve_silent_olayi_bastirir() {
         let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni_ekle(Eksen::kategori().veri(["A", "B"]))
+            .x_ekseni_ekle(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer())
             .seri(ÇizgiSerisi::yeni().veri([1, 2]))
-            .veri_yakınlaştırma(VeriYakınlaştırma::iç().x_eksen_sırası(0))
-            .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().x_eksen_sırası(0))
+            .veri_yakınlaştırma(VeriYakınlaştırma::iç().x_eksenleri([0, 1]))
+            // Hedef dizi sırası bağlantı kimliğini değiştirmez.
+            .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().x_eksenleri([1, 0]))
             .veri_yakınlaştırma(VeriYakınlaştırma::iç().y_eksen_sırası(0));
         let mut çalışma =
             GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
@@ -979,6 +989,7 @@ mod testler {
     #[test]
     fn update_axis_pointer_pikseli_kategori_sirasina_ve_axes_infoya_cevirir() {
         let seçenekler = GrafikSeçenekleri::yeni()
+            .ızgara(Izgara::yeni().sol(100).genişlik(200))
             .x_ekseni(Eksen::kategori().veri(["2012", "2013", "2014", "2015", "2016", "2017"]))
             .y_ekseni(Eksen::değer())
             .seri(ÇizgiSerisi::yeni().veri([1, 2, 3, 4, 5, 6]));
@@ -987,12 +998,12 @@ mod testler {
         let mut kayıt = EylemKayıtDefteri::yeni();
         eksen_imleci_eylemini_kaydet(&mut kayıt).unwrap();
 
-        // 700px görünümde varsayılan grid [105, 630]; üçüncü bandın merkezi.
+        // Açık grid.width ile [100, 300] alanındaki üçüncü bandın merkezi.
         let olaylar = kayıt
             .gönder(
                 &mut çalışma,
                 &EylemYükü::yeni("updateAxisPointer")
-                    .alan("x", 323.75)
+                    .alan("x", 183.333_333)
                     .alan("y", 400.0)
                     .alan("currTrigger", "mousemove"),
             )

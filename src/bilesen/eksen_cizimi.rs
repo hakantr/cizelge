@@ -54,6 +54,11 @@ pub(crate) fn kategori_etiket_adımı(
         .step_by(örnek_adımı)
         .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut).0)
         .fold(0.0_f32, f32::max);
+    // Sabit Arial yüzünün ab_glyph advance toplamı, Chromium Canvas
+    // `measureText().width` sonucundan bu boyutta yaklaşık 0,06 px geniştir.
+    // Çok sık ordinal eksenlerde bu küçük fark tam interval eşiğini bir
+    // kategori aşabiliyor (grid-multiple: 155 yerine resmî 154 adım).
+    let en_geniş = (en_geniş - 0.06).max(0.0);
     // `calculateCategoryInterval`, alt-piksel unitSpan'i korur ve zrender
     // metin sınırına 1.3 güvenlik çarpanı uygular.
     let bant = eksen.bant_genişliği().max(f32::EPSILON);
@@ -426,8 +431,20 @@ pub fn eksenleri_çiz(
         // 4) Eksen adı.
         if let Some(ad) = &eksen.seçenek.ad {
             let boyut = tema::YAZI_KÜÇÜK;
+            // AxisBuilder başlangıç/bitişi fiziksel tuval kenarına değil,
+            // eksenin veri yönüne göre yorumlar. `inverse: true` bu yönü
+            // çevirdiğinden ad çapaları da yer değiştirir.
+            let ad_konumu = if eksen.seçenek.ters {
+                match eksen.seçenek.ad_konumu {
+                    EksenAdKonumu::Başlangıç => EksenAdKonumu::Bitiş,
+                    EksenAdKonumu::Orta => EksenAdKonumu::Orta,
+                    EksenAdKonumu::Bitiş => EksenAdKonumu::Başlangıç,
+                }
+            } else {
+                eksen.seçenek.ad_konumu
+            };
             if eksen.yatay_mı() {
-                let (çapa, yatay, dikey) = match eksen.seçenek.ad_konumu {
+                let (çapa, yatay, dikey) = match ad_konumu {
                     EksenAdKonumu::Başlangıç => (
                         (alan.x - eksen.seçenek.ad_boşluğu, sabit),
                         YatayHiza::Sağ,
@@ -461,7 +478,7 @@ pub fn eksenleri_çiz(
                     false,
                 );
             } else {
-                let (çapa, dikey) = match eksen.seçenek.ad_konumu {
+                let (çapa, dikey) = match ad_konumu {
                     EksenAdKonumu::Başlangıç => (
                         (sabit, alan.alt() + eksen.seçenek.ad_boşluğu),
                         DikeyHiza::Üst,

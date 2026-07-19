@@ -347,19 +347,44 @@ impl GrafikGörünümü {
         let başlangıç = başlangıç.clamp(0.0, 100.0);
         let bitiş = bitiş.clamp(başlangıç + 1.0, 100.0);
         let seçenekler = Arc::make_mut(&mut self.seçenekler);
-        if let Some(y) = seçenekler.veri_yakınlaştırmaları.get_mut(sıra) {
-            if (y.başlangıç - başlangıç).abs() < 0.01 && (y.bitiş - bitiş).abs() < 0.01 {
-                return;
-            }
-            y.başlangıç = başlangıç;
-            y.bitiş = bitiş;
-            cx.emit(GrafikOlayı::YakınlaştırmaDeğişti {
-                sıra,
-                başlangıç,
-                bitiş,
-            });
-            cx.notify();
+        let Some(kaynak) = seçenekler.veri_yakınlaştırmaları.get(sıra).cloned() else {
+            return;
+        };
+        let bağlı_sıralar = seçenekler
+            .veri_yakınlaştırmaları
+            .iter()
+            .enumerate()
+            .filter_map(|(hedef_sırası, yakınlaştırma)| {
+                kaynak
+                    .aynı_eksenleri_hedefler(yakınlaştırma)
+                    .then_some(hedef_sırası)
+            })
+            .collect::<Vec<_>>();
+        let değişti = bağlı_sıralar.iter().any(|hedef_sırası| {
+            seçenekler
+                .veri_yakınlaştırmaları
+                .get(*hedef_sırası)
+                .is_some_and(|yakınlaştırma| {
+                    (yakınlaştırma.başlangıç - başlangıç).abs() >= 0.01
+                        || (yakınlaştırma.bitiş - bitiş).abs() >= 0.01
+                })
+        });
+        if !değişti {
+            return;
         }
+        for hedef_sırası in bağlı_sıralar {
+            if let Some(yakınlaştırma) = seçenekler.veri_yakınlaştırmaları.get_mut(hedef_sırası)
+            {
+                yakınlaştırma.başlangıç = başlangıç;
+                yakınlaştırma.bitiş = bitiş;
+            }
+        }
+        cx.emit(GrafikOlayı::YakınlaştırmaDeğişti {
+            sıra,
+            başlangıç,
+            bitiş,
+        });
+        cx.notify();
     }
 
     /// Seçenekleri değiştirir (ECharts `setOption` karşılığı). Yeni

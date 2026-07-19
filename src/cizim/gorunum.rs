@@ -1047,12 +1047,17 @@ fn kartezyen_kur(
                 }
                 sağ_boşluk = sağ_boşluk.max(20.0);
             }
-            Dikdörtgen::yeni(
-                sol,
-                üst,
-                (yüzey.genişlik() - sol - sağ_boşluk).max(1.0),
-                (yüzey.yükseklik() - üst - alt_boşluk).max(1.0),
-            )
+            let genişlik = ızgara
+                .genişlik
+                .map(|uzunluk| uzunluk.çöz(yüzey.genişlik()))
+                .unwrap_or_else(|| yüzey.genişlik() - sol - sağ_boşluk)
+                .max(1.0);
+            let yükseklik = ızgara
+                .yükseklik
+                .map(|uzunluk| uzunluk.çöz(yüzey.yükseklik()))
+                .unwrap_or_else(|| yüzey.yükseklik() - üst - alt_boşluk)
+                .max(1.0);
+            Dikdörtgen::yeni(sol, üst, genişlik, yükseklik)
         })
         .collect();
 

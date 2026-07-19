@@ -143,7 +143,7 @@ const YEREL_FIXTURE = Object.freeze({
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
   'heatmap-cartesian': 'examples/isi.rs',
   'line-marker': 'examples/uyum_fixture.rs#line_marker',
-  'grid-multiple': 'examples/coklu_izgara.rs',
+  'grid-multiple': 'examples/uyum_fixture.rs#grid_multiple',
   'mix-zoom-on-value': 'examples/uyum_fixture.rs#mix_zoom_on_value',
   'bar-polar-real-estate': 'examples/kutupsal.rs',
   'radar': 'examples/radar.rs',

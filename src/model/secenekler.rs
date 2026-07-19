@@ -555,14 +555,14 @@ impl GrafikSeçenekleri {
     pub fn x_yakınlaştırması(&self, eksen_sırası: usize) -> Option<&VeriYakınlaştırma> {
         self.veri_yakınlaştırmaları
             .iter()
-            .find(|y| y.y_eksen_sırası.is_none() && y.x_eksen_sırası == eksen_sırası)
+            .find(|yakınlaştırma| yakınlaştırma.x_eksenini_hedefler(eksen_sırası))
     }
 
     /// Verilen y eksenini yöneten ilk dataZoom bileşeni.
     pub fn y_yakınlaştırması(&self, eksen_sırası: usize) -> Option<&VeriYakınlaştırma> {
         self.veri_yakınlaştırmaları
             .iter()
-            .find(|y| y.y_eksen_sırası == Some(eksen_sırası))
+            .find(|yakınlaştırma| yakınlaştırma.y_eksenini_hedefler(eksen_sırası))
     }
 
     pub fn palet<R: Into<Renk>>(mut self, renkler: impl IntoIterator<Item = R>) -> Self {
@@ -690,15 +690,27 @@ impl GrafikSeçenekleri {
                     });
                 }
             }
-            let (bileşen, eksen_sırası, eksen_adedi) = yakınlaştırma
-                .y_eksen_sırası
-                .map(|eksen_sırası| ("yAxis", eksen_sırası, y_eksen_adedi))
-                .unwrap_or(("xAxis", yakınlaştırma.x_eksen_sırası, x_eksen_adedi));
-            if eksen_sırası >= eksen_adedi {
-                return Err(BilesenHatasi::EksikVeri {
-                    bileşen,
-                    sıra: eksen_sırası,
-                });
+            let (bileşen, eksen_adedi, hedefler): (&str, usize, Vec<usize>) =
+                if yakınlaştırma.y_eksen_sırası.is_some() {
+                    (
+                        "yAxis",
+                        y_eksen_adedi,
+                        yakınlaştırma.hedef_y_eksenleri().collect(),
+                    )
+                } else {
+                    (
+                        "xAxis",
+                        x_eksen_adedi,
+                        yakınlaştırma.hedef_x_eksenleri().collect(),
+                    )
+                };
+            for eksen_sırası in hedefler {
+                if eksen_sırası >= eksen_adedi {
+                    return Err(BilesenHatasi::EksikVeri {
+                        bileşen,
+                        sıra: eksen_sırası,
+                    });
+                }
             }
         }
         for eksen in [&self.x_ekseni, &self.y_ekseni].into_iter().flatten() {
@@ -1086,5 +1098,42 @@ mod testler {
         assert_eq!(seçenekler.tüm_görsel_eşlemeler().count(), 1);
         assert!(seçenekler.seri_görsel_eşlemesi(1).is_some());
         assert!(seçenekler.seri_görsel_eşlemesi(3).is_none());
+    }
+
+    #[test]
+    fn data_zoom_birden_cok_ekseni_tek_bilesenle_hedefler() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni_ekle(Eksen::kategori().veri(["A", "B"]))
+            .x_ekseni_ekle(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer())
+            .veri_yakınlaştırma(
+                VeriYakınlaştırma::sürgü()
+                    .x_eksenleri([0, 1, 0])
+                    .aralık(30.0, 70.0),
+            );
+
+        assert!(seçenekler.doğrula().is_ok());
+        let ilk = seçenekler.x_yakınlaştırması(0);
+        let ikinci = seçenekler.x_yakınlaştırması(1);
+        assert!(ilk.is_some());
+        assert!(ikinci.is_some());
+        assert!(std::ptr::eq(ilk.unwrap(), ikinci.unwrap()));
+        assert_eq!(seçenekler.x_penceresi(1), Some((0.3, 0.7)));
+    }
+
+    #[test]
+    fn data_zoom_ek_eksen_hedefini_de_dogrular() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer())
+            .veri_yakınlaştırma(VeriYakınlaştırma::iç().x_eksenleri([0, 2]));
+
+        assert!(matches!(
+            seçenekler.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "xAxis",
+                sıra: 2
+            })
+        ));
     }
 }

@@ -10,6 +10,7 @@ use std::sync::Arc;
 use base64::Engine as _;
 use cizelge::hazir::*;
 use serde::Deserialize;
+use serde::de::DeserializeOwned;
 
 struct Girdi {
     id: String,
@@ -1328,6 +1329,142 @@ fn line_race() -> Result<GrafikSeçenekleri, String> {
         );
     }
     Ok(seçenekler)
+}
+
+/// Sabitlenmiş `echarts-examples` TypeScript kaynağındaki yalın dizi
+/// değişmezini okur. Bu örneğin 3.079 öğelik üç dizisini ikinci bir kopya
+/// halinde elle tutmak yerine, resmi kaynağın kendisini tek veri otoritesi
+/// yapar; seçenek modeli ve bütün boyama yine cizelge çekirdeğindedir.
+fn resmi_javascript_dizisi<T: DeserializeOwned>(
+    kaynak: &str, belirteç: &str
+) -> Result<T, String> {
+    let belirteç_başı = kaynak
+        .find(belirteç)
+        .ok_or_else(|| format!("resmi kaynakta `{belirteç}` bulunamadı"))?;
+    let dizi_başı = kaynak[belirteç_başı..]
+        .find('[')
+        .map(|sıra| belirteç_başı + sıra)
+        .ok_or_else(|| format!("`{belirteç}` sonrasında dizi bulunamadı"))?;
+    let mut derinlik = 0usize;
+    let mut tırnak = None;
+    let mut kaçış = false;
+    let mut dizi_sonu = None;
+    for (göreli, karakter) in kaynak[dizi_başı..].char_indices() {
+        if let Some(açık_tırnak) = tırnak {
+            if kaçış {
+                kaçış = false;
+            } else if karakter == '\\' {
+                kaçış = true;
+            } else if karakter == açık_tırnak {
+                tırnak = None;
+            }
+            continue;
+        }
+        match karakter {
+            '\'' | '"' => tırnak = Some(karakter),
+            '[' => derinlik += 1,
+            ']' => {
+                derinlik = derinlik.saturating_sub(1);
+                if derinlik == 0 {
+                    dizi_sonu = Some(dizi_başı + göreli + karakter.len_utf8());
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+    let dizi_sonu = dizi_sonu.ok_or_else(|| format!("`{belirteç}` dizisi kapanmıyor"))?;
+    let json = kaynak[dizi_başı..dizi_sonu].replace('\'', "\"");
+    serde_json::from_str(&json)
+        .map_err(|hata| format!("`{belirteç}` dizisi ayrıştırılamadı: {hata}"))
+}
+
+fn grid_multiple() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/grid-multiple.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let mut zaman: Vec<String> = resmi_javascript_dizisi(&kaynak, "let timeData")?;
+    // Resmî örnek dizi tanımından hemen sonra aynı dönüşümü uygular.
+    for etiket in &mut zaman {
+        if let Some(kısaltılmış) = etiket.strip_prefix("2009/") {
+            *etiket = kısaltılmış.to_owned();
+        }
+    }
+    let buharlaşma: Vec<f64> = resmi_javascript_dizisi(&kaynak, "name: 'Evaporation'")?;
+    let yağış: Vec<f64> = resmi_javascript_dizisi(&kaynak, "name: 'Rainfall'")?;
+    if zaman.len() != buharlaşma.len() || zaman.len() != yağış.len() {
+        return Err(format!(
+            "grid-multiple resmi dizileri farklı uzunlukta: zaman={}, buharlaşma={}, yağış={}",
+            zaman.len(),
+            buharlaşma.len(),
+            yağış.len()
+        ));
+    }
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Rainfall vs Evaporation")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .gösterge(
+            Gösterge::yeni()
+                .sol(10.0)
+                // Kanıt ön işlemcisi resmî örneğin açık olmayan `padding`
+                // değerini bütün bileşenlerde 15 px'e sabitler.
+                .iç_boşluk(15.0)
+                .veri(["Evaporation", "Rainfall"]),
+        )
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .veri_yakınlaştırma(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .x_eksenleri([0, 1])
+                .aralık(30.0, 70.0),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::iç()
+                .x_eksenleri([0, 1])
+                .aralık(30.0, 70.0),
+        )
+        .ızgara_ekle(Izgara::yeni().sol(60).sağ(50).yükseklik("35%"))
+        .ızgara_ekle(Izgara::yeni().sol(60).sağ(50).üst("55%").yükseklik("35%"))
+        .x_ekseni_ekle(Eksen::kategori().kenar_boşluğu(false).veri(zaman.clone()))
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .ızgara_sırası(1)
+                .kenar_boşluğu(false)
+                .konum(EksenKonumu::Üst)
+                .veri(zaman),
+        )
+        .y_ekseni_ekle(Eksen::değer().ad("Evaporation(m³/s)").en_çok(500.0))
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ızgara_sırası(1)
+                .ad("Rainfall(mm)")
+                .ters(true),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Evaporation")
+                .sembol_boyutu(8.0)
+                .veri(buharlaşma),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Rainfall")
+                .eksenler(1, 1)
+                .sembol_boyutu(8.0)
+                .veri(yağış),
+        ))
 }
 
 fn area_stack() -> GrafikSeçenekleri {
@@ -3574,6 +3711,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-aqi" => line_aqi(),
         "confidence-band" => confidence_band(),
         "line-race" => line_race(),
+        "grid-multiple" => grid_multiple(),
         "area-stack" => Ok(area_stack()),
         "area-stack-gradient" => Ok(area_stack_gradient()),
         "bar-background" => Ok(bar_background()),
