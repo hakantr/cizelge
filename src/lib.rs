@@ -81,8 +81,10 @@ pub use model::bilesen::{
 };
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
-    AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenAdKonumu, EksenEtiketi, EksenKonumu,
-    EksenSıfırKipi, EksenTürü, EksenÇentiği, EksenÇizgisi, SayısalKenarBoşluğu,
+    AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenAdKonumu, EksenEtiketBağlamı,
+    EksenEtiketBiçimleyicisi, EksenEtiketi, EksenKonumu, EksenKırılmaAlanı, EksenKırılmaBilgisi,
+    EksenKırılmaBoşluğu, EksenKırılmaUcu, EksenKırılması, EksenSıfırKipi, EksenTürü, EksenÇentiği,
+    EksenÇizgisi, SayısalKenarBoşluğu,
 };
 pub use model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
 pub use model::hatlar::{
@@ -170,8 +172,10 @@ pub mod hazir {
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{
-        AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenAdKonumu, EksenEtiketi, EksenKonumu,
-        EksenSıfırKipi, EksenTürü, EksenÇentiği, EksenÇizgisi, SayısalKenarBoşluğu,
+        AraÇentik, BölmeAlanı, BölmeÇizgisi, Eksen, EksenAdKonumu, EksenEtiketBağlamı,
+        EksenEtiketBiçimleyicisi, EksenEtiketi, EksenKonumu, EksenKırılmaAlanı,
+        EksenKırılmaBilgisi, EksenKırılmaBoşluğu, EksenKırılmaUcu, EksenKırılması, EksenSıfırKipi,
+        EksenTürü, EksenÇentiği, EksenÇizgisi, SayısalKenarBoşluğu,
     };
     pub use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
     pub use crate::model::hatlar::{

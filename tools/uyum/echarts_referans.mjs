@@ -393,6 +393,18 @@ async function çalıştır() {
               ad: model.get('name'),
               kapsam: model.axis?.getExtent?.(),
               ölçekKapsamı: model.axis?.scale?.getExtent?.(),
+              ölçekAralığı: model.axis?.scale?._interval,
+              yaklaşıkAralık: model.axis?.scale?._approxInterval,
+              enAltZamanBirimi: model.axis?.scale?._minLevelUnit,
+              çentikler: model.axis?.scale?.getTicks?.().map((çentik) => ({
+                değer: çentik.value,
+                kırılma: çentik.break ? {
+                  tür: çentik.break.type,
+                  başlangıç: çentik.break.parsedBreak?.vmin,
+                  bitiş: çentik.break.parsedBreak?.vmax
+                } : null,
+                zaman: çentik.time
+              })),
               adÖğeleri,
               yazıÖğeleri
             });

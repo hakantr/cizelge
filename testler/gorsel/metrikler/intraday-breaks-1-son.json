@@ -1,0 +1,19 @@
+{
+  "id": "intraday-breaks-1",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1518,
+  "değişen_piksel_oranı": 0.005622222222222222,
+  "ssim": 0.9954424744968121,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/intraday-breaks-1.png",
+    "gerçek": "testler/gorsel/gerçek/default/intraday-breaks-1.png",
+    "fark": "testler/gorsel/fark/default/intraday-breaks-1.png"
+  }
+}

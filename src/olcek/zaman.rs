@@ -34,10 +34,23 @@ pub struct ZamanÖlçeği {
     pub birim: ZamanBirimi,
     /// Birim cinsinden adım (örn. birim=Dakika, adım=15 → çeyrek saat).
     pub birim_adımı: f64,
+    /// Nice tick seçiminin kırılmalar düşüldükten sonraki yaklaşık aralığı.
+    pub yaklaşık_aralık: f64,
 }
 
 impl ZamanÖlçeği {
     pub fn kur(veri_kapsamı: [f64; 2], bölme_sayısı: usize) -> Self {
+        let etkin_açıklık = (veri_kapsamı[1] - veri_kapsamı[0]).abs();
+        Self::kur_etkin_açıklıkla(veri_kapsamı, bölme_sayısı, etkin_açıklık)
+    }
+
+    /// Kırık eksende ham kapsamı koruyup nice tick adımını sıkıştırılmış
+    /// açıklıktan seçer (`getScaleLinearSpanEffective`).
+    pub fn kur_etkin_açıklıkla(
+        veri_kapsamı: [f64; 2],
+        bölme_sayısı: usize,
+        etkin_açıklık: f64,
+    ) -> Self {
         let mut kapsam = veri_kapsamı;
         if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
             kapsam = [0.0, GÜN];
@@ -49,7 +62,12 @@ impl ZamanÖlçeği {
             kapsam.reverse();
         }
         let açıklık = kapsam[1] - kapsam[0];
-        let hedef_adım = açıklık / bölme_sayısı.max(1) as f64;
+        let etkin_açıklık = if etkin_açıklık.is_finite() && etkin_açıklık > 0.0 {
+            etkin_açıklık
+        } else {
+            açıklık
+        };
+        let hedef_adım = etkin_açıklık / bölme_sayısı.max(1) as f64;
 
         // Aday adımlar: (birim, birim adımı, milisaniye karşılığı).
         let adaylar: [(ZamanBirimi, f64, f64); 19] = [
@@ -98,6 +116,7 @@ impl ZamanÖlçeği {
             kapsam,
             birim,
             birim_adımı,
+            yaklaşık_aralık: hedef_adım,
         }
     }
 
@@ -132,7 +151,10 @@ impl ZamanÖlçeği {
                         break;
                     }
                     if t >= self.kapsam[0] {
-                        sonuç.push(Çentik { değer: t });
+                        sonuç.push(Çentik {
+                            değer: t,
+                            kırılma: None,
+                        });
                     }
                     yıl += adım;
                     sayaç += 1;
@@ -162,7 +184,10 @@ impl ZamanÖlçeği {
                         break;
                     }
                     if t >= self.kapsam[0] {
-                        sonuç.push(Çentik { değer: t });
+                        sonuç.push(Çentik {
+                            değer: t,
+                            kırılma: None,
+                        });
                     }
                     ay0 += adım;
                     sayaç += 1;
@@ -181,7 +206,10 @@ impl ZamanÖlçeği {
                 let mut t = (self.kapsam[0] / adım_ms).ceil() * adım_ms;
                 let mut sayaç = 0;
                 while t <= self.kapsam[1] && sayaç < güvenlik_sınırı {
-                    sonuç.push(Çentik { değer: t });
+                    sonuç.push(Çentik {
+                        değer: t,
+                        kırılma: None,
+                    });
                     t += adım_ms;
                     sayaç += 1;
                 }

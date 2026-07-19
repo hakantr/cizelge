@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 2632,
   "değişen_piksel_oranı": 0.009748148148148148,
-  "ssim": 0.9967057219094229,
+  "ssim": 0.9967058181927935,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-label-rotation.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-label-rotation.png",

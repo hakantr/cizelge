@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 1571,
   "değişen_piksel_oranı": 0.005818518518518519,
-  "ssim": 0.9971363730243821,
+  "ssim": 0.9971370938569765,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-gradient.png",
     "gerçek": "testler/gorsel/gerçek/default/line-gradient.png",

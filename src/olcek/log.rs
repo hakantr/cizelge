@@ -107,6 +107,7 @@ impl LogÖlçeği {
             let düz_k = yuvarla(k, 9);
             sonuç.push(Çentik {
                 değer: self.taban.powf(düz_k),
+                kırılma: None,
             });
             k += self.adım;
             sayaç += 1;

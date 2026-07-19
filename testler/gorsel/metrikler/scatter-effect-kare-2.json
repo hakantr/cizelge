@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 461,
   "değişen_piksel_oranı": 0.0017074074074074075,
-  "ssim": 0.9985112831038631,
+  "ssim": 0.9985111609674516,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-effect-kare-2.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-effect-kare-2.png",

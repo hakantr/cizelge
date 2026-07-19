@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 998,
   "değişen_piksel_oranı": 0.0036962962962962965,
-  "ssim": 0.9974632381101594,
+  "ssim": 0.9974633104458633,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-waterfall.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-waterfall.png",

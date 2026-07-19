@@ -254,6 +254,7 @@ impl AralıkÖlçeği {
         if self.kapsam[0] < gk0 {
             sonuç.push(Çentik {
                 değer: self.kapsam[0],
+                kırılma: None,
             });
         }
         let mut değer = gk0;
@@ -263,6 +264,7 @@ impl AralıkÖlçeği {
         while değer <= gk1 + adım * 1e-6 && sayaç < güvenlik_sınırı {
             sonuç.push(Çentik {
                 değer: yuvarla(değer, self.adım_hassasiyeti),
+                kırılma: None,
             });
             değer += adım;
             sayaç += 1;
@@ -272,6 +274,7 @@ impl AralıkÖlçeği {
         {
             sonuç.push(Çentik {
                 değer: self.kapsam[1],
+                kırılma: None,
             });
         }
         sonuç

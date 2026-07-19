@@ -37,7 +37,10 @@ impl KategorikÖlçek {
     /// aralıksız hali; etiket seyreltme çizim aşamasında yapılır).
     pub fn çentikler(&self) -> Vec<Çentik> {
         (0..self.kategoriler.len())
-            .map(|i| Çentik { değer: i as f64 })
+            .map(|i| Çentik {
+                değer: i as f64,
+                kırılma: None,
+            })
             .collect()
     }
 

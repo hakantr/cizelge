@@ -1467,6 +1467,179 @@ fn grid_multiple() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn saat_dakika(zaman: f64) -> String {
+    let an = cizelge::yardimci::takvim::andan_takvime(zaman);
+    format!("{:02}:{:02}", an.saat, an.dakika)
+}
+
+fn iki_ondalık(değer: f64) -> f64 {
+    // İki intraday üreticisi her adımda yalnız tam sent (veya onda bir)
+    // eklediğinden `Number#toFixed(2)` burada tam sayı sent uzayına iner.
+    (değer * 100.0).round() / 100.0
+}
+
+fn intraday_breaks_1() -> GrafikSeçenekleri {
+    const DAKİKA: f64 = 60_000.0;
+    const GÜN: f64 = 86_400_000.0;
+    const BAŞLANGIÇ: f64 = 1_712_655_000_000.0; // 2024-04-09T09:30:00Z
+    const BİTİŞ: f64 = 1_712_966_399_000.0; // 2024-04-12T23:59:59Z
+    const AÇILIŞ_DAKİKASI: f64 = 9.0 * 60.0 + 30.0;
+    const KAPANIŞ_DAKİKASI: f64 = 16.0 * 60.0;
+
+    let mut tohum = 0x5eed_1234_u32;
+    let mut zaman = BAŞLANGIÇ;
+    let mut gün_başı = BAŞLANGIÇ - AÇILIŞ_DAKİKASI * DAKİKA;
+    let mut kapanış = gün_başı + KAPANIŞ_DAKİKASI * DAKİKA;
+    let mut değer = 1669.0_f64;
+    let mut kırılma_sıçraması = false;
+    let mut veri = Vec::new();
+    let mut kırılmalar = Vec::new();
+    let mut en_az = f64::INFINITY;
+
+    while zaman <= BİTİŞ {
+        let rastgele = kanıt_rastgele(&mut tohum);
+        let ham = (rastgele - 0.5 * (değer / 1000.0).sin()) * 20.0 * 100.0;
+        let fark = if kırılma_sıçraması {
+            kırılma_sıçraması = false;
+            ham.floor() / 10.0
+        } else {
+            ham.floor() / 100.0
+        };
+        değer = iki_ondalık(değer + fark);
+        en_az = en_az.min(değer);
+        veri.push(VeriÖğesi::yeni([zaman, değer]));
+        zaman += DAKİKA;
+
+        if zaman > kapanış {
+            // Resmî örnek NaN satırını çizgi segmentini açıkça kesmek için
+            // ekler; x değeri son kapsamı 16:01'e kadar taşır.
+            veri.push(VeriÖğesi::yeni([zaman, f64::NAN]));
+            let kırılma_başı = kapanış;
+            gün_başı += GÜN;
+            zaman = gün_başı + AÇILIŞ_DAKİKASI * DAKİKA;
+            kapanış = gün_başı + KAPANIŞ_DAKİKASI * DAKİKA;
+            kırılma_sıçraması = true;
+            kırılmalar.push(EksenKırılması::yeni(kırılma_başı, zaman).boşluk("1%"));
+        }
+    }
+
+    let etiket = EksenEtiketi::yeni()
+        .en_az_etiketini_göster(true)
+        .en_çok_etiketini_göster(true)
+        .bağlamlı_biçimleyici(|değer, _, bağlam| {
+            let saat = saat_dakika(değer);
+            if bağlam.kırılma.is_some() {
+                let gün = cizelge::yardimci::takvim::andan_takvime(değer).gün;
+                format!("{saat}\n{gün:02}d")
+            } else {
+                saat
+            }
+        });
+    let kırılma_alanı = EksenKırılmaAlanı::yeni()
+        .zikzak_genliği(0.0)
+        .tıklayınca_genişlet(false)
+        .kenarlık_göster(false)
+        .opaklık(0.0);
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Intraday Chart with Breaks (Multiple Days)")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        // Resmî `grid.outerBounds` çözümünün ürettiği kesin iç dikdörtgen.
+        .ızgara(
+            Izgara::yeni()
+                .sol(105)
+                .sağ(70)
+                .üst(111)
+                .yükseklik(224.5_f32),
+        )
+        .x_ekseni(
+            Eksen::zaman()
+                .sayısal_kenar_boşluğu(0.0, 0.0)
+                .etiket(etiket)
+                .kırılmalar(kırılmalar)
+                .kırılma_alanı(kırılma_alanı),
+        )
+        .y_ekseni(Eksen::değer().en_az(en_az))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().üst("73%"))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .sembol(Sembol::Yok)
+                .alan_stili(AlanStili::default())
+                .veri(veri),
+        )
+}
+
+fn intraday_breaks_2() -> GrafikSeçenekleri {
+    const DAKİKA: f64 = 60_000.0;
+    const BAŞLANGIÇ: f64 = 1_712_655_000_000.0; // 2024-04-09T09:30:00Z
+    const BİTİŞ: f64 = 1_712_674_800_000.0; // 2024-04-09T15:00:00Z
+    const KIRILMA_BAŞI: f64 = 1_712_662_200_000.0; // 11:30
+    const KIRILMA_SONU: f64 = 1_712_667_600_000.0; // 13:00
+
+    let mut tohum = 0x5eed_1234_u32;
+    let mut zaman = BAŞLANGIÇ;
+    let mut değer = 1669.0_f64;
+    let mut veri = Vec::new();
+    let mut en_az = f64::INFINITY;
+    while zaman <= BİTİŞ {
+        if zaman <= KIRILMA_BAŞI || zaman >= KIRILMA_SONU {
+            let ham = (kanıt_rastgele(&mut tohum) - 0.5 * (değer / 1000.0).sin()) * 20.0 * 100.0;
+            değer += ham.floor() / 100.0;
+            değer = iki_ondalık(değer);
+            en_az = en_az.min(değer);
+            veri.push(VeriÖğesi::yeni([zaman, değer]));
+        }
+        zaman += DAKİKA;
+    }
+
+    let etiket = EksenEtiketi::yeni()
+        .en_az_etiketini_göster(true)
+        .en_çok_etiketini_göster(true)
+        .bağlamlı_biçimleyici(|değer, _, bağlam| match bağlam.kırılma {
+            Some(kırılma) if kırılma.tür == EksenKırılmaUcu::Başlangıç => format!(
+                "{}/{}",
+                saat_dakika(kırılma.başlangıç),
+                saat_dakika(kırılma.bitiş)
+            ),
+            Some(_) => String::new(),
+            None => saat_dakika(değer),
+        });
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Intraday Chart with Breaks (Single Day)")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .ızgara(Izgara::yeni().sol(105).sağ(70).üst(65).yükseklik(380))
+        .x_ekseni(
+            Eksen::zaman()
+                .sayısal_kenar_boşluğu(0.0, 0.0)
+                .etiket(etiket)
+                .kırılma(EksenKırılması::yeni(KIRILMA_BAŞI, KIRILMA_SONU))
+                .kırılma_alanı(
+                    EksenKırılmaAlanı::yeni()
+                        .zikzak_genliği(0.0)
+                        .tıklayınca_genişlet(false),
+                )
+                .kırılma_etiketi_örtüşmesini_taşı(false),
+        )
+        .y_ekseni(Eksen::değer().en_az(en_az))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü())
+        .seri(ÇizgiSerisi::yeni().sembol(Sembol::Yok).veri(veri))
+}
+
 fn area_stack() -> GrafikSeçenekleri {
     let seri = |ad: &str, veri: [i32; 7]| {
         ÇizgiSerisi::yeni()
@@ -2677,7 +2850,7 @@ fn data_transform_aggregate() -> Result<GrafikSeçenekleri, String> {
     .next()
     .ok_or_else(|| "sort sonucu yok".to_owned())?;
 
-    let sayı = |satır: usize, boyut: &str| {
+    let sayısal_değer = |satır: usize, boyut: &str| {
         sıralı
             .değer(satır, &BoyutSeçici::ad(boyut))
             .and_then(VeriDeğeri::sayı)
@@ -2698,7 +2871,7 @@ fn data_transform_aggregate() -> Result<GrafikSeçenekleri, String> {
         let ad = ülke(satır)?;
         let özet = ["min", "Q1", "median", "Q3", "max"]
             .into_iter()
-            .map(|boyut| sayı(satır, boyut))
+            .map(|boyut| sayısal_değer(satır, boyut))
             .collect::<Result<Vec<_>, _>>()?;
         ülkeler.push(ad.clone());
         kutular.push(VeriÖğesi::adlı(ad, VeriDeğeri::Dizi(özet)));
@@ -3712,6 +3885,8 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "confidence-band" => confidence_band(),
         "line-race" => line_race(),
         "grid-multiple" => grid_multiple(),
+        "intraday-breaks-1" => Ok(intraday_breaks_1()),
+        "intraday-breaks-2" => Ok(intraday_breaks_2()),
         "area-stack" => Ok(area_stack()),
         "area-stack-gradient" => Ok(area_stack_gradient()),
         "bar-background" => Ok(bar_background()),

@@ -5,18 +5,23 @@
 
 pub mod aralik;
 pub mod kategorik;
+pub mod kirilma;
 pub mod log;
 pub mod zaman;
 
 pub use aralik::AralıkÖlçeği;
 pub use kategorik::KategorikÖlçek;
+pub use kirilma::{KırılmaEşleyici, ÇözülmüşEksenKırılması};
 pub use log::LogÖlçeği;
 pub use zaman::ZamanÖlçeği;
+
+use crate::model::eksen::EksenKırılmaBilgisi;
 
 /// Eksen üzerindeki tek bir çentik (`ScaleTick` karşılığı).
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Çentik {
     pub değer: f64,
+    pub kırılma: Option<EksenKırılmaBilgisi>,
 }
 
 /// Tüm ölçek türlerini saran toplam tip (`Scale` taban sınıfının karşılığı).

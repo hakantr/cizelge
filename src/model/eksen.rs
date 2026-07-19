@@ -1,6 +1,9 @@
 //! Eksen seçenekleri — ECharts'taki `xAxis` / `yAxis` tanımlarının karşılığı
 //! (`echarts/src/coord/axisCommonTypes.ts` ve `axisDefault.ts`).
 
+use std::fmt;
+use std::sync::Arc;
+
 use crate::model::stil::{Biçimleyici, YazıStili, ÇizgiTürü};
 use crate::renk::Renk;
 
@@ -16,6 +19,215 @@ pub enum EksenTürü {
     Zaman,
     /// Logaritmik eksen (`'log'`).
     Log,
+}
+
+/// Kırık eksende gizlenen veri aralığının ekranda bırakacağı boşluk
+/// (`axis.breaks[].gap`). Sayısal değer eksen birimindedir; yüzde biçimi
+/// etkin eksen açıklığının oranıdır.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum EksenKırılmaBoşluğu {
+    Değer(f64),
+    Yüzde(f64),
+}
+
+impl Default for EksenKırılmaBoşluğu {
+    fn default() -> Self {
+        Self::Değer(0.0)
+    }
+}
+
+impl From<f64> for EksenKırılmaBoşluğu {
+    fn from(değer: f64) -> Self {
+        Self::Değer(değer)
+    }
+}
+
+impl From<f32> for EksenKırılmaBoşluğu {
+    fn from(değer: f32) -> Self {
+        Self::Değer(değer as f64)
+    }
+}
+
+impl From<i32> for EksenKırılmaBoşluğu {
+    fn from(değer: i32) -> Self {
+        Self::Değer(değer as f64)
+    }
+}
+
+impl From<&str> for EksenKırılmaBoşluğu {
+    fn from(değer: &str) -> Self {
+        let değer = değer.trim();
+        değer
+            .strip_suffix('%')
+            .and_then(|yüzde| yüzde.trim().parse::<f64>().ok())
+            .map(|yüzde| Self::Yüzde(yüzde / 100.0))
+            .unwrap_or_else(|| Self::Değer(değer.parse().unwrap_or(0.0)))
+    }
+}
+
+impl From<String> for EksenKırılmaBoşluğu {
+    fn from(değer: String) -> Self {
+        Self::from(değer.as_str())
+    }
+}
+
+/// Tek kırık eksen aralığı (`axis.breaks[]`). Başlangıç ve bitiş ters
+/// sırada verilebilir; çalışma ölçeği bunları artan sıraya getirir.
+#[derive(Clone, PartialEq, Debug)]
+pub struct EksenKırılması {
+    pub başlangıç: f64,
+    pub bitiş: f64,
+    pub boşluk: EksenKırılmaBoşluğu,
+    /// ECharts `isExpanded`; açıkken kırılma geçici olarak devre dışıdır.
+    pub genişletilmiş: bool,
+}
+
+impl EksenKırılması {
+    pub fn yeni(başlangıç: f64, bitiş: f64) -> Self {
+        Self {
+            başlangıç,
+            bitiş,
+            boşluk: EksenKırılmaBoşluğu::Değer(0.0),
+            genişletilmiş: false,
+        }
+    }
+
+    pub fn boşluk(mut self, boşluk: impl Into<EksenKırılmaBoşluğu>) -> Self {
+        self.boşluk = boşluk.into();
+        self
+    }
+
+    pub fn genişletilmiş(mut self, genişletilmiş: bool) -> Self {
+        self.genişletilmiş = genişletilmiş;
+        self
+    }
+}
+
+/// Eksen etiketinin bir kırılmanın hangi ucuna ait olduğu.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum EksenKırılmaUcu {
+    Başlangıç,
+    Bitiş,
+}
+
+/// ECharts `axisLabel.formatter` üçüncü argümanındaki `break` bilgisi.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct EksenKırılmaBilgisi {
+    pub tür: EksenKırılmaUcu,
+    pub başlangıç: f64,
+    pub bitiş: f64,
+}
+
+/// Bağlamlı eksen etiketi biçimleyicisine aktarılan çentik bilgisi.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct EksenEtiketBağlamı {
+    pub sıra: usize,
+    pub kırılma: Option<EksenKırılmaBilgisi>,
+}
+
+type EksenEtiketBiçimleyiciİşlevi = dyn Fn(f64, &str, EksenEtiketBağlamı) -> String + Send + Sync;
+
+/// `axisLabel.formatter(value, index, extra)` işlevinin Rust karşılığı.
+#[derive(Clone)]
+pub struct EksenEtiketBiçimleyicisi(Arc<EksenEtiketBiçimleyiciİşlevi>);
+
+impl EksenEtiketBiçimleyicisi {
+    pub fn yeni(
+        işlev: impl Fn(f64, &str, EksenEtiketBağlamı) -> String + Send + Sync + 'static,
+    ) -> Self {
+        Self(Arc::new(işlev))
+    }
+
+    pub fn uygula(&self, değer: f64, ham: &str, bağlam: EksenEtiketBağlamı) -> String {
+        (self.0)(değer, ham, bağlam)
+    }
+}
+
+impl fmt::Debug for EksenEtiketBiçimleyicisi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("EksenEtiketBiçimleyicisi(..)")
+    }
+}
+
+impl PartialEq for EksenEtiketBiçimleyicisi {
+    fn eq(&self, diğer: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &diğer.0)
+    }
+}
+
+/// Kırık eksen alanının çizimi (`axis.breakArea`).
+#[derive(Clone, PartialEq, Debug)]
+pub struct EksenKırılmaAlanı {
+    pub göster: bool,
+    pub renk: Option<Renk>,
+    pub kenarlık_göster: bool,
+    pub kenarlık_rengi: Option<Renk>,
+    pub kenarlık_kalınlığı: f32,
+    pub kenarlık_türü: ÇizgiTürü,
+    pub opaklık: f32,
+    pub zikzak_genliği: f32,
+    pub zikzak_en_küçük_açıklık: f32,
+    pub zikzak_en_büyük_açıklık: f32,
+    pub tıklayınca_genişlet: bool,
+}
+
+impl Default for EksenKırılmaAlanı {
+    fn default() -> Self {
+        Self {
+            göster: true,
+            renk: None,
+            kenarlık_göster: true,
+            kenarlık_rengi: None,
+            kenarlık_kalınlığı: 1.0,
+            kenarlık_türü: ÇizgiTürü::Kesikli,
+            opaklık: 0.6,
+            zikzak_genliği: 4.0,
+            zikzak_en_küçük_açıklık: 4.0,
+            zikzak_en_büyük_açıklık: 20.0,
+            tıklayınca_genişlet: true,
+        }
+    }
+}
+
+impl EksenKırılmaAlanı {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
+    }
+
+    pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
+        self.renk = Some(renk.into());
+        self
+    }
+
+    pub fn kenarlık_göster(mut self, göster: bool) -> Self {
+        self.kenarlık_göster = göster;
+        self
+    }
+
+    pub fn kenarlık_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.kenarlık_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        self.opaklık = opaklık.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn zikzak_genliği(mut self, genlik: f32) -> Self {
+        self.zikzak_genliği = genlik.max(0.0);
+        self
+    }
+
+    pub fn tıklayınca_genişlet(mut self, açık: bool) -> Self {
+        self.tıklayınca_genişlet = açık;
+        self
+    }
 }
 
 /// Değer/zaman eksenlerinde `boundaryGap` uçlarından biri. ECharts sayı
@@ -172,6 +384,9 @@ pub struct EksenEtiketi {
     pub göster: bool,
     pub yazı: YazıStili,
     pub biçimleyici: Option<Biçimleyici>,
+    /// Değer, sıra ve kırılma ucu bilgisini birlikte alan gelişmiş
+    /// biçimleyici. Verilmişse iki argümanlı `biçimleyici`nin önüne geçer.
+    pub bağlamlı_biçimleyici: Option<EksenEtiketBiçimleyicisi>,
     /// Etiket ile eksen arasındaki boşluk (`axisLabel.margin`).
     pub boşluk: f32,
     /// Derece cinsinden dönüş (`axisLabel.rotate`); pozitif değer ECharts
@@ -180,6 +395,9 @@ pub struct EksenEtiketi {
     /// Açık kategori aralığı (`axisLabel.interval`): `0` bütün etiketler,
     /// `1` birer atlayarak. `None`, ECharts'ın otomatik hesabıdır.
     pub aralık: Option<usize>,
+    /// `axisLabel.showMinLabel` / `showMaxLabel`; `None` tür öntanımlısıdır.
+    pub en_az_etiketini_göster: Option<bool>,
+    pub en_çok_etiketini_göster: Option<bool>,
 }
 
 impl Default for EksenEtiketi {
@@ -188,9 +406,12 @@ impl Default for EksenEtiketi {
             göster: true,
             yazı: YazıStili::default(),
             biçimleyici: None,
+            bağlamlı_biçimleyici: None,
             boşluk: 8.0,
             döndürme: 0.0,
             aralık: None,
+            en_az_etiketini_göster: None,
+            en_çok_etiketini_göster: None,
         }
     }
 }
@@ -212,6 +433,15 @@ impl EksenEtiketi {
 
     pub fn biçimleyici(mut self, biçimleyici: impl Into<Biçimleyici>) -> Self {
         self.biçimleyici = Some(biçimleyici.into());
+        self.bağlamlı_biçimleyici = None;
+        self
+    }
+
+    pub fn bağlamlı_biçimleyici(
+        mut self,
+        biçimleyici: impl Fn(f64, &str, EksenEtiketBağlamı) -> String + Send + Sync + 'static,
+    ) -> Self {
+        self.bağlamlı_biçimleyici = Some(EksenEtiketBiçimleyicisi::yeni(biçimleyici));
         self
     }
 
@@ -232,6 +462,16 @@ impl EksenEtiketi {
 
     pub fn otomatik_aralık(mut self) -> Self {
         self.aralık = None;
+        self
+    }
+
+    pub fn en_az_etiketini_göster(mut self, göster: bool) -> Self {
+        self.en_az_etiketini_göster = Some(göster);
+        self
+    }
+
+    pub fn en_çok_etiketini_göster(mut self, göster: bool) -> Self {
+        self.en_çok_etiketini_göster = Some(göster);
         self
     }
 }
@@ -333,6 +573,12 @@ pub struct Eksen {
     pub ara_bölme_çizgisi: BölmeÇizgisi,
     /// Bölme alanı (`splitArea`).
     pub bölme_alanı: BölmeAlanı,
+    /// Kırık eksen aralıkları (`breaks`) ve bunların görsel alanı.
+    pub kırılmalar: Vec<EksenKırılması>,
+    pub kırılma_alanı: EksenKırılmaAlanı,
+    /// `breakLabelLayout.moveOverlap`; `false` kırılma uç etiketlerinin
+    /// otomatik olarak iki yana taşınmasını kapatır.
+    pub kırılma_etiketi_örtüşmesini_taşı: bool,
 }
 
 impl Default for Eksen {
@@ -367,6 +613,9 @@ impl Default for Eksen {
                 ..Default::default()
             },
             bölme_alanı: BölmeAlanı::default(),
+            kırılmalar: Vec::new(),
+            kırılma_alanı: EksenKırılmaAlanı::default(),
+            kırılma_etiketi_örtüşmesini_taşı: true,
         }
     }
 }
@@ -530,6 +779,15 @@ impl Eksen {
 
     pub fn etiket_biçimleyici(mut self, b: impl Into<Biçimleyici>) -> Self {
         self.etiket.biçimleyici = Some(b.into());
+        self.etiket.bağlamlı_biçimleyici = None;
+        self
+    }
+
+    pub fn etiket_bağlamlı_biçimleyici(
+        mut self,
+        biçimleyici: impl Fn(f64, &str, EksenEtiketBağlamı) -> String + Send + Sync + 'static,
+    ) -> Self {
+        self.etiket.bağlamlı_biçimleyici = Some(EksenEtiketBiçimleyicisi::yeni(biçimleyici));
         self
     }
 
@@ -565,6 +823,28 @@ impl Eksen {
 
     pub fn bölme_alanı_göster(mut self, göster: bool) -> Self {
         self.bölme_alanı.göster = göster;
+        self
+    }
+
+    pub fn kırılma(mut self, kırılma: EksenKırılması) -> Self {
+        self.kırılmalar.push(kırılma);
+        self
+    }
+
+    pub fn kırılmalar(
+        mut self, kırılmalar: impl IntoIterator<Item = EksenKırılması>
+    ) -> Self {
+        self.kırılmalar = kırılmalar.into_iter().collect();
+        self
+    }
+
+    pub fn kırılma_alanı(mut self, alan: EksenKırılmaAlanı) -> Self {
+        self.kırılma_alanı = alan;
+        self
+    }
+
+    pub fn kırılma_etiketi_örtüşmesini_taşı(mut self, taşı: bool) -> Self {
+        self.kırılma_etiketi_örtüşmesini_taşı = taşı;
         self
     }
 

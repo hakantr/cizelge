@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 543,
   "değişen_piksel_oranı": 0.002011111111111111,
-  "ssim": 0.9988350111727221,
+  "ssim": 0.9988351074561028,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/data-transform-sort-bar.png",
     "gerçek": "testler/gorsel/gerçek/default/data-transform-sort-bar.png",

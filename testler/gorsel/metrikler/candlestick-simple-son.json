@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 312,
   "değişen_piksel_oranı": 0.0011555555555555555,
-  "ssim": 0.9990831802536672,
+  "ssim": 0.9990825937707634,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/candlestick-simple.png",
     "gerçek": "testler/gorsel/gerçek/default/candlestick-simple.png",

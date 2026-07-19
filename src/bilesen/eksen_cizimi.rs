@@ -6,10 +6,11 @@
 
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, keskin, ÇizimYüzeyi};
 use crate::koordinat::{Dikdörtgen, ÇalışmaEkseni};
-use crate::model::eksen::EksenAdKonumu;
-use crate::model::eksen::EksenKonumu;
-use crate::model::eksen::{EksenSıfırKipi, EksenTürü};
-use crate::model::stil::ÇizgiTürü;
+use crate::model::eksen::{
+    EksenAdKonumu, EksenEtiketBağlamı, EksenKonumu, EksenSıfırKipi, EksenTürü,
+};
+use crate::model::stil::{zengin_metin_içeriği, ÇizgiTürü};
+use crate::olcek::Çentik;
 use crate::tema;
 
 // AxisBuilder'ın tspan'leri `textBaseline=middle` ile bağladığı eksen
@@ -19,12 +20,31 @@ use crate::tema;
 const EKSEN_YAZI_TABAN_DENGESİ: f32 = 0.2;
 
 /// Etiket metni: biçimleyici uygulanmış çentik etiketi.
-fn etiket_metni(eksen: &ÇalışmaEkseni, değer: f64) -> String {
-    let ham = eksen.ölçek.etiket(değer);
+fn etiket_metni(eksen: &ÇalışmaEkseni, çentik: &Çentik, sıra: usize) -> String {
+    let ham = eksen.ölçek.etiket(çentik.değer);
+    if let Some(biçimleyici) = &eksen.seçenek.etiket.bağlamlı_biçimleyici {
+        return zengin_metin_içeriği(biçimleyici.uygula(
+            çentik.değer,
+            &ham,
+            EksenEtiketBağlamı {
+                sıra,
+                kırılma: çentik.kırılma,
+            },
+        ));
+    }
     match &eksen.seçenek.etiket.biçimleyici {
-        Some(b) => b.uygula(değer, &ham),
+        Some(b) => b.uygula(çentik.değer, &ham),
         None => ham,
     }
+}
+
+fn eksen_metni_ölç(çizici: &dyn ÇizimYüzeyi, metin: &str, boyut: f32) -> (f32, f32) {
+    let satırlar = metin.split('\n').collect::<Vec<_>>();
+    let genişlik = satırlar
+        .iter()
+        .map(|satır| çizici.yazı_ölç(satır, boyut).0)
+        .fold(0.0_f32, f32::max);
+    (genişlik, boyut * satırlar.len().max(1) as f32)
 }
 
 /// Kategori ekseninin otomatik `axisLabel.interval` çizim adımı. Çizgi
@@ -51,8 +71,11 @@ pub(crate) fn kategori_etiket_adımı(
     };
     let en_geniş = çentikler
         .iter()
+        .enumerate()
         .step_by(örnek_adımı)
-        .map(|(_, ç)| çizici.yazı_ölç(&etiket_metni(eksen, ç.değer), boyut).0)
+        .map(|(sıra, (_, çentik))| {
+            eksen_metni_ölç(çizici, &etiket_metni(eksen, çentik, sıra), boyut).0
+        })
         .fold(0.0_f32, f32::max);
     // Sabit Arial yüzünün ab_glyph advance toplamı, Chromium Canvas
     // `measureText().width` sonucundan bu boyutta yaklaşık 0,06 px geniştir.
@@ -211,6 +234,105 @@ pub fn bölme_çizgilerini_çiz(
             }
         }
     }
+
+    // 4) Kırılma alanı (`breakArea`). Kırılma uçları tüm ızgara boyunca
+    // çizilir; seri katmanı daha sonra üstlerinden geçerek ECharts'ın z
+    // düzenindeki kesintisiz veri uçlarını korur.
+    for eksen in eksenler {
+        let seçenek = &eksen.seçenek.kırılma_alanı;
+        if !seçenek.göster {
+            continue;
+        }
+        for (ilk, ikinci, _) in eksen.kırılma_piksel_aralıkları() {
+            let başlangıç = ilk.min(ikinci);
+            let bitiş = ilk.max(ikinci);
+            if bitiş > başlangıç + f32::EPSILON && seçenek.opaklık > 0.0 {
+                let dikdörtgen = if eksen.yatay_mı() {
+                    Dikdörtgen::yeni(başlangıç, alan.y, bitiş - başlangıç, alan.yükseklik)
+                } else {
+                    Dikdörtgen::yeni(alan.x, başlangıç, alan.genişlik, bitiş - başlangıç)
+                };
+                let renk = seçenek
+                    .renk
+                    .unwrap_or_else(tema::nötr_00)
+                    .opaklık(seçenek.opaklık);
+                çizici.dikdörtgen(dikdörtgen, &crate::renk::Dolgu::Düz(renk), [0.0; 4], None);
+            }
+            if !seçenek.kenarlık_göster || seçenek.kenarlık_kalınlığı <= 0.0 {
+                continue;
+            }
+            let renk = seçenek.kenarlık_rengi.unwrap_or_else(tema::nötr_30);
+            kırılma_zikzağını_çiz(
+                çizici,
+                alan,
+                eksen.yatay_mı(),
+                başlangıç,
+                seçenek.zikzak_genliği,
+                seçenek.zikzak_en_küçük_açıklık,
+                seçenek.zikzak_en_büyük_açıklık,
+                seçenek.kenarlık_kalınlığı,
+                renk,
+                seçenek.kenarlık_türü,
+            );
+            if bitiş > başlangıç + 1e-3 {
+                kırılma_zikzağını_çiz(
+                    çizici,
+                    alan,
+                    eksen.yatay_mı(),
+                    bitiş,
+                    -seçenek.zikzak_genliği,
+                    seçenek.zikzak_en_küçük_açıklık,
+                    seçenek.zikzak_en_büyük_açıklık,
+                    seçenek.kenarlık_kalınlığı,
+                    renk,
+                    seçenek.kenarlık_türü,
+                );
+            }
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn kırılma_zikzağını_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    yatay_eksen: bool,
+    sabit: f32,
+    genlik: f32,
+    en_küçük_açıklık: f32,
+    en_büyük_açıklık: f32,
+    kalınlık: f32,
+    renk: crate::renk::Renk,
+    tür: ÇizgiTürü,
+) {
+    let başlangıç = if yatay_eksen { alan.y } else { alan.x };
+    let bitiş = if yatay_eksen { alan.alt() } else { alan.sağ() };
+    let adım = ((en_küçük_açıklık.max(2.0) + en_büyük_açıklık.max(2.0)) / 2.0).max(2.0);
+    let mut yol = crate::cizim::Yol::yeni();
+    let ilk = if yatay_eksen {
+        (keskin(sabit), başlangıç)
+    } else {
+        (başlangıç, keskin(sabit))
+    };
+    yol.taşı(ilk);
+    let mut ilerleme = başlangıç + adım;
+    let mut yön = 1.0_f32;
+    while ilerleme < bitiş {
+        let nokta = if yatay_eksen {
+            (sabit + genlik * yön, ilerleme)
+        } else {
+            (ilerleme, sabit + genlik * yön)
+        };
+        yol.çiz(nokta);
+        ilerleme += adım;
+        yön = -yön;
+    }
+    yol.çiz(if yatay_eksen {
+        (keskin(sabit), bitiş)
+    } else {
+        (bitiş, keskin(sabit))
+    });
+    çizici.yol_çiz(&yol, kalınlık, renk, tür);
 }
 
 /// Eksen çizgisi, çentikler ve etiketleri çizer.
@@ -263,22 +385,50 @@ pub fn eksenleri_çiz(
             } else {
                 çizgi_sabiti
             };
-            if eksen.yatay_mı() {
-                çizici.çizgi(
-                    (alan.x, konum),
-                    (alan.sağ(), konum),
-                    kalınlık,
-                    renk,
-                    ÇizgiTürü::Düz,
-                );
+            let mut kesintiler = eksen
+                .kırılma_piksel_aralıkları()
+                .into_iter()
+                .map(|(a, b, _)| (a.min(b), a.max(b)))
+                .collect::<Vec<_>>();
+            kesintiler.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+            let kırılma_var = !kesintiler.is_empty();
+            let (baş, son) = if eksen.yatay_mı() {
+                (alan.x, alan.sağ())
             } else {
-                çizici.çizgi(
-                    (konum, alan.y),
-                    (konum, alan.alt()),
-                    kalınlık,
-                    renk,
-                    ÇizgiTürü::Düz,
-                );
+                (alan.y, alan.alt())
+            };
+            let mut imleç = baş;
+            let mut parçalar = Vec::new();
+            for (kırılma_başı, kırılma_sonu) in kesintiler {
+                if kırılma_başı > imleç + 1e-3 {
+                    parçalar.push((imleç, kırılma_başı));
+                }
+                imleç = imleç.max(kırılma_sonu);
+            }
+            if imleç < son - 1e-3 {
+                parçalar.push((imleç, son));
+            }
+            if parçalar.is_empty() && !kırılma_var && (son - baş).abs() > 1e-3 {
+                parçalar.push((baş, son));
+            }
+            for (parça_başı, parça_sonu) in parçalar {
+                if eksen.yatay_mı() {
+                    çizici.çizgi(
+                        (parça_başı, konum),
+                        (parça_sonu, konum),
+                        kalınlık,
+                        renk,
+                        ÇizgiTürü::Düz,
+                    );
+                } else {
+                    çizici.çizgi(
+                        (konum, parça_başı),
+                        (konum, parça_sonu),
+                        kalınlık,
+                        renk,
+                        ÇizgiTürü::Düz,
+                    );
+                }
             }
         }
 
@@ -357,6 +507,64 @@ pub fn eksenleri_çiz(
                 .unwrap_or(tema::eksen_etiketi());
             let boşluk = eksen.seçenek.etiket.boşluk;
             let çentikler = eksen.etiket_çentikleri();
+            let mut etiket_konumları = çentikler
+                .iter()
+                .map(|(konum, _)| *konum)
+                .collect::<Vec<_>>();
+
+            if eksen.seçenek.kırılma_etiketi_örtüşmesini_taşı {
+                for (başlangıç_sırası, (_, başlangıç_çentiği)) in çentikler.iter().enumerate()
+                {
+                    let Some(başlangıç_bilgisi) = başlangıç_çentiği.kırılma else {
+                        continue;
+                    };
+                    if başlangıç_bilgisi.tür != crate::model::eksen::EksenKırılmaUcu::Başlangıç
+                    {
+                        continue;
+                    }
+                    let Some((bitiş_sırası, (_, bitiş_çentiği))) =
+                        çentikler.iter().enumerate().find(|(_, (_, çentik))| {
+                            çentik.kırılma.is_some_and(|bilgi| {
+                                bilgi.tür == crate::model::eksen::EksenKırılmaUcu::Bitiş
+                                    && (bilgi.başlangıç - başlangıç_bilgisi.başlangıç).abs() <= 1e-9
+                                    && (bilgi.bitiş - başlangıç_bilgisi.bitiş).abs() <= 1e-9
+                            })
+                        })
+                    else {
+                        continue;
+                    };
+                    let başlangıç_metni = etiket_metni(eksen, başlangıç_çentiği, başlangıç_sırası);
+                    let bitiş_metni = etiket_metni(eksen, bitiş_çentiği, bitiş_sırası);
+                    let başlangıç_ölçüsü = eksen_metni_ölç(çizici, &başlangıç_metni, boyut);
+                    let bitiş_ölçüsü = eksen_metni_ölç(çizici, &bitiş_metni, boyut);
+                    let (başlangıç_boyutu, bitiş_boyutu) = if eksen.yatay_mı() {
+                        (başlangıç_ölçüsü.0, bitiş_ölçüsü.0)
+                    } else {
+                        (başlangıç_ölçüsü.1, bitiş_ölçüsü.1)
+                    };
+                    if başlangıç_boyutu <= 0.0 || bitiş_boyutu <= 0.0 {
+                        continue;
+                    }
+                    let (Some(ilk), Some(ikinci)) = (
+                        etiket_konumları.get(başlangıç_sırası).copied(),
+                        etiket_konumları.get(bitiş_sırası).copied(),
+                    ) else {
+                        continue;
+                    };
+                    let yön = if ikinci >= ilk { 1.0 } else { -1.0 };
+                    let geçerli_uzaklık = (ikinci - ilk).abs();
+                    let gerekli_uzaklık = (başlangıç_boyutu + bitiş_boyutu) / 2.0 + 6.0;
+                    if geçerli_uzaklık < gerekli_uzaklık {
+                        let taşıma = (gerekli_uzaklık - geçerli_uzaklık) / 2.0;
+                        if let Some(konum) = etiket_konumları.get_mut(başlangıç_sırası) {
+                            *konum -= yön * taşıma;
+                        }
+                        if let Some(konum) = etiket_konumları.get_mut(bitiş_sırası) {
+                            *konum += yön * taşıma;
+                        }
+                    }
+                }
+            }
 
             for (i, (konum, çentik)) in çentikler.iter().enumerate() {
                 let kategori_görünür = görünür_kategori_sıraları.as_ref().is_none_or(|sıralar| {
@@ -369,25 +577,29 @@ pub fn eksenleri_çiz(
                 {
                     continue;
                 }
-                let metin = etiket_metni(eksen, çentik.değer);
+                let metin = etiket_metni(eksen, çentik, i);
+                let konum = etiket_konumları.get(i).copied().unwrap_or(*konum);
                 if eksen.yatay_mı() {
-                    let çapa = (*konum, sabit + dış_yön * boşluk);
+                    let çapa = (konum, sabit + dış_yön * boşluk);
                     let derece = eksen.seçenek.etiket.döndürme;
                     if derece.abs() <= f32::EPSILON {
-                        let dikey = if dış_yön > 0.0 {
-                            DikeyHiza::Üst
+                        let satırlar = metin.split('\n').collect::<Vec<_>>();
+                        let üst = if dış_yön > 0.0 {
+                            çapa.1 + EKSEN_YAZI_TABAN_DENGESİ
                         } else {
-                            DikeyHiza::Alt
+                            çapa.1 - boyut * satırlar.len() as f32 + EKSEN_YAZI_TABAN_DENGESİ
                         };
-                        çizici.yazı(
-                            &metin,
-                            (çapa.0, çapa.1 + EKSEN_YAZI_TABAN_DENGESİ),
-                            YatayHiza::Orta,
-                            dikey,
-                            boyut,
-                            renk,
-                            false,
-                        );
+                        for (satır_sırası, satır) in satırlar.iter().enumerate() {
+                            çizici.yazı(
+                                satır,
+                                (çapa.0, üst + satır_sırası as f32 * boyut),
+                                YatayHiza::Orta,
+                                DikeyHiza::Üst,
+                                boyut,
+                                renk,
+                                false,
+                            );
+                        }
                     } else {
                         // AxisBuilder pozitif `rotate` değerini Canvas'ta
                         // saat yönünün tersine uygular. Alt eksende pozitif
@@ -415,15 +627,20 @@ pub fn eksenleri_çiz(
                     } else {
                         YatayHiza::Sağ
                     };
-                    çizici.yazı(
-                        &metin,
-                        (sabit + dış_yön * boşluk, *konum + EKSEN_YAZI_TABAN_DENGESİ),
-                        yatay,
-                        DikeyHiza::Orta,
-                        boyut,
-                        renk,
-                        false,
-                    );
+                    let satırlar = metin.split('\n').collect::<Vec<_>>();
+                    let üst =
+                        konum - boyut * satırlar.len() as f32 / 2.0 + EKSEN_YAZI_TABAN_DENGESİ;
+                    for (satır_sırası, satır) in satırlar.iter().enumerate() {
+                        çizici.yazı(
+                            satır,
+                            (sabit + dış_yön * boşluk, üst + satır_sırası as f32 * boyut),
+                            yatay,
+                            DikeyHiza::Üst,
+                            boyut,
+                            renk,
+                            false,
+                        );
+                    }
                 }
             }
         }

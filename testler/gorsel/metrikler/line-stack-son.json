@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 721,
   "değişen_piksel_oranı": 0.0026703703703703703,
-  "ssim": 0.9981649593665541,
+  "ssim": 0.9981650317022343,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-stack.png",
     "gerçek": "testler/gorsel/gerçek/default/line-stack.png",

@@ -55,7 +55,9 @@ use crate::model::seri::{EksenBağı, Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
-use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, LogÖlçeği, ZamanÖlçeği, Ölçek};
+use crate::olcek::{
+    AralıkÖlçeği, KategorikÖlçek, KırılmaEşleyici, LogÖlçeği, ZamanÖlçeği, Ölçek
+};
 use crate::renk::Dolgu;
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
@@ -428,7 +430,14 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
             if let Some(eç) = seçenek.en_çok {
                 kapsam[1] = eç;
             }
-            Ölçek::Zaman(ZamanÖlçeği::kur(kapsam, seçenek.bölme_sayısı))
+            let etkin_açıklık = KırılmaEşleyici::kur(&seçenek.kırılmalar, kapsam)
+                .map(|eşleyici| eşleyici.etkin_açıklık())
+                .unwrap_or_else(|| (kapsam[1] - kapsam[0]).abs());
+            Ölçek::Zaman(ZamanÖlçeği::kur_etkin_açıklıkla(
+                kapsam,
+                seçenek.bölme_sayısı,
+                etkin_açıklık,
+            ))
         }
         EksenTürü::Log => Ölçek::Log(LogÖlçeği::kur(
             kapsam,
@@ -641,6 +650,17 @@ fn kartezyen_kur(
         }
 
         let sütun_mu = matches!(seri, Seri::Sütun(_));
+        // Bir XY öğesinin karşı boyutu NaN olsa da sonlu x değeri eksen
+        // kapsamına katılır. ECharts bunu özellikle çizgiyi kesen
+        // `[timestamp, NaN]` satırlarında korur; son zaman çentiği ve eksen
+        // kırılması bu x ucuna kadar uzanır.
+        if !x_kategorik {
+            for öğe in seri.veri() {
+                if let Some(x) = öğe.değer.x() {
+                    kapsa(x_kapsam, x);
+                }
+            }
+        }
         let Some(seri_aralıkları) = aralıklar.get(i) else {
             continue;
         };
@@ -2487,6 +2507,34 @@ pub fn grafiği_boya(
                             ((değer - alt_kapsam) / (üst_kapsam - alt_kapsam)) as f32
                                 * şerit.yükseklik
                         };
+                        // SliderZoomView zaman ekseninde yatay gölge
+                        // koordinatını veri sırasından değil ham zaman
+                        // değerinin kapsam içindeki konumundan üretir. Bu
+                        // ayrım, seans aralarındaki boş satırların önizlemede
+                        // doğru genişlikte görünmesi için gereklidir. Kırık
+                        // eksen sıkıştırması burada özellikle uygulanmaz:
+                        // ECharts `_renderDataShadow` da `getDataExtent` ile
+                        // ham zaman kapsamını doğrusal eşler.
+                        let zaman_x_kapsamı = kurulum
+                            .x_eksenler
+                            .get(yakınlaştırma.x_eksen_sırası)
+                            .filter(|eksen| eksen.seçenek.tür == EksenTürü::Zaman)
+                            .and_then(|_| {
+                                let kapsam = veri
+                                    .iter()
+                                    .filter_map(|öğe| öğe.değer.x())
+                                    .filter(|değer| değer.is_finite())
+                                    .fold(
+                                        [f64::INFINITY, f64::NEG_INFINITY],
+                                        |[en_az, en_çok], değer| {
+                                            [en_az.min(değer), en_çok.max(değer)]
+                                        },
+                                    );
+                                (kapsam[0].is_finite()
+                                    && kapsam[1].is_finite()
+                                    && kapsam[1] > kapsam[0])
+                                    .then_some(kapsam)
+                            });
                         let mut alan_yolu = crate::cizim::Yol::yeni();
                         alan_yolu.taşı((şerit.sağ(), şerit.alt()));
                         alan_yolu.çiz((şerit.x, şerit.alt()));
@@ -2502,11 +2550,20 @@ pub fn grafiği_boya(
                             if sıra % adım != 0 {
                                 continue;
                             }
-                            let oran = if veri.len() > 1 {
-                                sıra as f32 / (veri.len() - 1) as f32
-                            } else {
-                                0.5
-                            };
+                            let oran =
+                                zaman_x_kapsamı
+                                    .and_then(|[en_az, en_çok]| {
+                                        öğe.değer.x().filter(|değer| değer.is_finite()).map(
+                                            |değer| ((değer - en_az) / (en_çok - en_az)) as f32,
+                                        )
+                                    })
+                                    .unwrap_or_else(|| {
+                                        if veri.len() > 1 {
+                                            sıra as f32 / (veri.len() - 1) as f32
+                                        } else {
+                                            0.5
+                                        }
+                                    });
                             let x = şerit.x + şerit.genişlik * oran;
                             let değer = öğe.değer.sayı().filter(|değer| değer.is_finite());
                             if değer.is_none() && !son_boş && sıra > 0 {

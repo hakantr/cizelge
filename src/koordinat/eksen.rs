@@ -3,9 +3,9 @@
 //! Bir ölçeği piksel aralığına bağlar; kategori eksenlerinde bant (aralıklı
 //! yerleşim) hesabını üstlenir.
 
-use crate::model::eksen::{Eksen, EksenKonumu};
+use crate::model::eksen::{Eksen, EksenKonumu, EksenKırılmaBilgisi, EksenKırılmaUcu};
 use crate::model::yakinlastirma::YakınlaştırmaSüzmeKipi;
-use crate::olcek::{Çentik, Ölçek};
+use crate::olcek::{KırılmaEşleyici, Çentik, ÇözülmüşEksenKırılması, Ölçek};
 use crate::yardimci::sayi::doğrusal_eşle;
 
 /// Ölçek + piksel aralığı: veriyi ekran koordinatına eşleyen eksen.
@@ -30,11 +30,14 @@ pub struct ÇalışmaEkseni {
     /// Pencerenin seri verisine uygulanma biçimi (`dataZoom.filterMode`).
     /// Pencere yokken bu değer etkisizdir.
     pub yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi,
+    /// Etkin kapsam için çözülmüş ECharts 6 kırık ölçek katmanı.
+    pub kırılma_eşleyici: Option<KırılmaEşleyici>,
 }
 
 impl ÇalışmaEkseni {
     pub fn yeni(seçenek: Eksen, ölçek: Ölçek, piksel: [f32; 2], konum: EksenKonumu) -> Self {
         let bantlı = seçenek.bantlı_mı() && ölçek.kategorik_mi();
+        let kırılma_eşleyici = KırılmaEşleyici::kur(&seçenek.kırılmalar, ölçek.kapsam());
         ÇalışmaEkseni {
             seçenek,
             ölçek,
@@ -44,6 +47,7 @@ impl ÇalışmaEkseni {
             pencere: None,
             yakınlaştırma_oranları: None,
             yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi::Yok,
+            kırılma_eşleyici,
         }
     }
 
@@ -70,6 +74,8 @@ impl ÇalışmaEkseni {
     pub fn değer_penceresi_uygula(&mut self, başlangıç: f64, bitiş: f64) {
         if başlangıç.is_finite() && bitiş.is_finite() && bitiş > başlangıç {
             self.pencere = Some((başlangıç, bitiş));
+            self.kırılma_eşleyici =
+                KırılmaEşleyici::kur(&self.seçenek.kırılmalar, [başlangıç, bitiş]);
         }
     }
 
@@ -84,14 +90,23 @@ impl ÇalışmaEkseni {
 
     /// Veri değerini piksele eşler (`Axis#dataToCoord`).
     pub fn veriden_piksele(&self, değer: f64) -> f32 {
-        let oran = match (self.pencere, self.bantlı) {
-            (Some((p0, p1)), true) => (değer - p0 + 0.5) / (p1 - p0 + 1.0),
-            (Some((p0, p1)), false) => (değer - p0) / (p1 - p0).max(1e-12),
-            (None, true) => {
-                let n = self.ölçek.kategori_sayısı().max(1) as f64;
-                (değer + 0.5) / n
+        let oran = if !self.bantlı
+            && let Some(eşleyici) = &self.kırılma_eşleyici
+        {
+            let kapsam = eşleyici.kapsam();
+            let başlangıç = eşleyici.içe(kapsam[0]);
+            let bitiş = eşleyici.içe(kapsam[1]);
+            (eşleyici.içe(değer) - başlangıç) / (bitiş - başlangıç).max(1e-12)
+        } else {
+            match (self.pencere, self.bantlı) {
+                (Some((p0, p1)), true) => (değer - p0 + 0.5) / (p1 - p0 + 1.0),
+                (Some((p0, p1)), false) => (değer - p0) / (p1 - p0).max(1e-12),
+                (None, true) => {
+                    let n = self.ölçek.kategori_sayısı().max(1) as f64;
+                    (değer + 0.5) / n
+                }
+                (None, false) => self.ölçek.oranla(değer),
             }
-            (None, false) => self.ölçek.oranla(değer),
         };
         // Pencere dışı değerler ızgara dışına taşar; çizim kırpılır.
         doğrusal_eşle(
@@ -105,6 +120,14 @@ impl ÇalışmaEkseni {
     /// Pikseli veri değerine eşler (`Axis#coordToData`).
     pub fn pikselden_veriye(&self, piksel: f32) -> f64 {
         let oran = doğrusal_eşle(piksel as f64, self.etkin_piksel(), [0.0, 1.0], true);
+        if !self.bantlı
+            && let Some(eşleyici) = &self.kırılma_eşleyici
+        {
+            let kapsam = eşleyici.kapsam();
+            let başlangıç = eşleyici.içe(kapsam[0]);
+            let bitiş = eşleyici.içe(kapsam[1]);
+            return eşleyici.dışa(başlangıç + oran * (bitiş - başlangıç));
+        }
         match (self.pencere, self.bantlı) {
             (Some((p0, p1)), true) => {
                 let n = self.ölçek.kategori_sayısı().max(1) as f64;
@@ -182,10 +205,29 @@ impl ÇalışmaEkseni {
     /// eksenlerinde etiketler bant ortasındadır; pencere dışı çentikler
     /// atlanır.
     pub fn etiket_çentikleri(&self) -> Vec<(f32, Çentik)> {
-        self.ölçek
-            .çentikler()
+        self.işlenmiş_çentikler()
             .into_iter()
             .filter(|ç| self.pencerede_mi(ç.değer))
+            .filter(|çentik| {
+                let kapsam = self
+                    .kırılma_eşleyici
+                    .as_ref()
+                    .map(KırılmaEşleyici::kapsam)
+                    .unwrap_or_else(|| self.ölçek.kapsam());
+                if çentik.kırılma.is_none()
+                    && (çentik.değer - kapsam[0]).abs() <= 1e-9
+                    && self.seçenek.etiket.en_az_etiketini_göster == Some(false)
+                {
+                    return false;
+                }
+                if çentik.kırılma.is_none()
+                    && (çentik.değer - kapsam[1]).abs() <= 1e-9
+                    && self.seçenek.etiket.en_çok_etiketini_göster == Some(false)
+                {
+                    return false;
+                }
+                true
+            })
             .map(|ç| (self.veriden_piksele(ç.değer), ç))
             .collect()
     }
@@ -212,8 +254,7 @@ impl ÇalışmaEkseni {
                 })
                 .collect()
         } else {
-            self.ölçek
-                .çentikler()
+            self.işlenmiş_çentikler()
                 .into_iter()
                 .filter(|ç| self.pencerede_mi(ç.değer))
                 .map(|ç| self.veriden_piksele(ç.değer))
@@ -226,8 +267,116 @@ impl ÇalışmaEkseni {
         self.ölçek
             .ara_çentikler(bölme_sayısı)
             .into_iter()
+            .filter(|değer| !self.kırılmada_mı(*değer))
             .map(|d| self.veriden_piksele(d))
             .collect()
+    }
+
+    /// Etkin kapsamla kesişen kırılmalar.
+    pub fn görünür_kırılmalar(&self) -> Vec<ÇözülmüşEksenKırılması> {
+        self.kırılma_eşleyici
+            .as_ref()
+            .map(KırılmaEşleyici::görünür_kırılmalar)
+            .unwrap_or_default()
+    }
+
+    /// Kırılma alanlarının veri ve piksel uçları.
+    pub fn kırılma_piksel_aralıkları(&self) -> Vec<(f32, f32, ÇözülmüşEksenKırılması)> {
+        self.görünür_kırılmalar()
+            .into_iter()
+            .map(|kırılma| {
+                (
+                    self.veriden_piksele(kırılma.başlangıç),
+                    self.veriden_piksele(kırılma.bitiş),
+                    kırılma,
+                )
+            })
+            .collect()
+    }
+
+    fn kırılmada_mı(&self, değer: f64) -> bool {
+        self.görünür_kırılmalar()
+            .iter()
+            .any(|kırılma| değer > kırılma.başlangıç && değer < kırılma.bitiş)
+    }
+
+    /// Normal çentikleri kırılma çevresinde budar ve kırılmanın iki ucunu
+    /// yüksek öncelikli ayrı çentikler olarak ekler.
+    fn işlenmiş_çentikler(&self) -> Vec<Çentik> {
+        let mut çentikler = self.ölçek.çentikler();
+        let Some(eşleyici) = &self.kırılma_eşleyici else {
+            return çentikler;
+        };
+        let kapsam = eşleyici.kapsam();
+        // TimeScale uç çentikleri nice diziden ayrı ve `notNice` olarak
+        // ekler. Kırık eksende uçlar, etiket görünürlüğünden bağımsız olarak
+        // kırılma eşlemesinin parçasıdır.
+        çentikler.push(Çentik {
+            değer: kapsam[0],
+            kırılma: None,
+        });
+        çentikler.push(Çentik {
+            değer: kapsam[1],
+            kırılma: None,
+        });
+
+        let yaklaşık_aralık = match &self.ölçek {
+            Ölçek::Zaman(ölçek) => ölçek.yaklaşık_aralık,
+            _ => {
+                let farklar = çentikler
+                    .windows(2)
+                    .filter_map(|çift| match çift {
+                        [ilk, ikinci] => Some((ikinci.değer - ilk.değer).abs()),
+                        _ => None,
+                    })
+                    .filter(|fark| *fark > 0.0 && fark.is_finite());
+                farklar
+                    .fold(f64::INFINITY, f64::min)
+                    .min((kapsam[1] - kapsam[0]).abs() / self.seçenek.bölme_sayısı.max(1) as f64)
+            }
+        };
+        let budama_boşluğu = if yaklaşık_aralık.is_finite() {
+            yaklaşık_aralık * 0.75
+        } else {
+            0.0
+        };
+        for kırılma in eşleyici.görünür_kırılmalar() {
+            çentikler.retain(|çentik| {
+                !(çentik.değer > kırılma.başlangıç - budama_boşluğu
+                    && çentik.değer < kırılma.bitiş + budama_boşluğu)
+            });
+            çentikler.push(Çentik {
+                değer: kırılma.başlangıç,
+                kırılma: Some(EksenKırılmaBilgisi {
+                    tür: EksenKırılmaUcu::Başlangıç,
+                    başlangıç: kırılma.başlangıç,
+                    bitiş: kırılma.bitiş,
+                }),
+            });
+            çentikler.push(Çentik {
+                değer: kırılma.bitiş,
+                kırılma: Some(EksenKırılmaBilgisi {
+                    tür: EksenKırılmaUcu::Bitiş,
+                    başlangıç: kırılma.başlangıç,
+                    bitiş: kırılma.bitiş,
+                }),
+            });
+        }
+        çentikler.sort_by(|a, b| {
+            a.değer
+                .partial_cmp(&b.değer)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        çentikler.dedup_by(|a, b| {
+            if (a.değer - b.değer).abs() > 1e-9 {
+                return false;
+            }
+            if a.kırılma.is_none() && b.kırılma.is_some() {
+                *a = *b;
+            }
+            true
+        });
+        çentikler
     }
 
     /// Yatay eksen mi?
@@ -239,8 +388,8 @@ impl ÇalışmaEkseni {
 #[cfg(test)]
 mod testler {
     use super::*;
-    use crate::model::eksen::Eksen;
-    use crate::olcek::KategorikÖlçek;
+    use crate::model::eksen::{Eksen, EksenKırılmaUcu, EksenKırılması};
+    use crate::olcek::{AralıkÖlçeği, KategorikÖlçek};
 
     #[test]
     fn aralıksız_kategori_zoom_birimini_alt_piksel_hesaplar() {
@@ -268,5 +417,48 @@ mod testler {
         assert!(eksen.veri_penceresinde_mi(2.0));
         eksen.yakınlaştırma_süzme_kipi = YakınlaştırmaSüzmeKipi::Süz;
         assert!(!eksen.veri_penceresinde_mi(2.0));
+    }
+
+    #[test]
+    fn kırık_eksen_piksel_eslemesini_ve_uc_centiklerini_korur() {
+        let seçenek = Eksen::değer()
+            .en_az(0.0)
+            .en_çok(100.0)
+            .kırılma(EksenKırılması::yeni(20.0, 40.0).boşluk(5.0));
+        let ölçek = Ölçek::Aralık(AralıkÖlçeği::kur(
+            [0.0, 100.0],
+            Some(0.0),
+            Some(100.0),
+            false,
+            5,
+            None,
+            None,
+        ));
+        let eksen = ÇalışmaEkseni::yeni(seçenek, ölçek, [0.0, 100.0], EksenKonumu::Alt);
+
+        // 20 birim gizlenip yerine 5 birim boşluk kaldığından etkin açıklık
+        // 85'tir; kırılmanın ekrandaki genişliği bunun 5/85'i olur.
+        let kırılma_başı = eksen.veriden_piksele(20.0);
+        let kırılma_sonu = eksen.veriden_piksele(40.0);
+        assert!((kırılma_sonu - kırılma_başı - 100.0 * 5.0 / 85.0).abs() < 1e-5);
+        for değer in [0.0, 10.0, 20.0, 25.0, 40.0, 70.0, 100.0] {
+            let dönüş = eksen.pikselden_veriye(eksen.veriden_piksele(değer));
+            assert!((dönüş - değer).abs() < 1e-5, "{değer} -> {dönüş}");
+        }
+
+        let çentikler = eksen.etiket_çentikleri();
+        assert!(
+            !çentikler
+                .iter()
+                .any(|(_, çentik)| çentik.değer > 20.0 && çentik.değer < 40.0)
+        );
+        let uçlar = çentikler
+            .iter()
+            .filter_map(|(_, çentik)| çentik.kırılma.map(|bilgi| bilgi.tür))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            uçlar,
+            vec![EksenKırılmaUcu::Başlangıç, EksenKırılmaUcu::Bitiş]
+        );
     }
 }

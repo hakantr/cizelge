@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 601,
-  "değişen_piksel_oranı": 0.002225925925925926,
-  "ssim": 0.9976740160923915,
+  "değişen_piksel": 600,
+  "değişen_piksel_oranı": 0.0022222222222222222,
+  "ssim": 0.9976741924636107,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/area-stack-gradient.png",
     "gerçek": "testler/gorsel/gerçek/default/area-stack-gradient.png",

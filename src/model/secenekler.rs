@@ -660,8 +660,10 @@ impl GrafikSeçenekleri {
                 ),
             });
         }
-        let x_eksen_adedi = self.etkin_x_eksenleri().len();
-        let y_eksen_adedi = self.etkin_y_eksenleri().len();
+        let x_eksenler = self.etkin_x_eksenleri();
+        let y_eksenler = self.etkin_y_eksenleri();
+        let x_eksen_adedi = x_eksenler.len();
+        let y_eksen_adedi = y_eksenler.len();
         for (sıra, yakınlaştırma) in self.veri_yakınlaştırmaları.iter().enumerate() {
             if !yakınlaştırma.başlangıç.is_finite()
                 || !yakınlaştırma.bitiş.is_finite()
@@ -713,7 +715,7 @@ impl GrafikSeçenekleri {
                 }
             }
         }
-        for eksen in [&self.x_ekseni, &self.y_ekseni].into_iter().flatten() {
+        for eksen in x_eksenler.iter().chain(y_eksenler.iter()) {
             if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
                 && en_az >= en_çok
             {
@@ -726,6 +728,51 @@ impl GrafikSeçenekleri {
                 return Err(BilesenHatasi::GeçersizSeçenek {
                     alan: "eksen.log_tabanı",
                     ayrıntı: format!("log tabanı 1'den büyük olmalı ({})", eksen.log_tabanı),
+                });
+            }
+            if !eksen.kırılmalar.is_empty()
+                && eksen.tür == crate::model::eksen::EksenTürü::Kategori
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "axis.breaks",
+                    ayrıntı: "kategori ekseninde kırılma desteklenmez".to_owned(),
+                });
+            }
+            let mut aralıklar = Vec::with_capacity(eksen.kırılmalar.len());
+            for (sıra, kırılma) in eksen.kırılmalar.iter().enumerate() {
+                if !kırılma.başlangıç.is_finite() || !kırılma.bitiş.is_finite() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "axis.breaks.start/end",
+                        ayrıntı: format!("{sıra}. kırılmanın uçları sonlu olmalı"),
+                    });
+                }
+                let boşluk_geçerli = match kırılma.boşluk {
+                    crate::model::eksen::EksenKırılmaBoşluğu::Değer(değer) => {
+                        değer.is_finite() && değer >= 0.0
+                    }
+                    crate::model::eksen::EksenKırılmaBoşluğu::Yüzde(oran) => {
+                        oran.is_finite() && (0.0..(1.0 - 1e-5)).contains(&oran)
+                    }
+                };
+                if !boşluk_geçerli {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "axis.breaks.gap",
+                        ayrıntı: format!("{sıra}. kırılmanın boşluğu geçerli değil"),
+                    });
+                }
+                aralıklar.push((
+                    kırılma.başlangıç.min(kırılma.bitiş),
+                    kırılma.başlangıç.max(kırılma.bitiş),
+                ));
+            }
+            aralıklar.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+            if aralıklar
+                .windows(2)
+                .any(|çift| matches!(çift, [ilk, ikinci] if ilk.1 > ikinci.0))
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "axis.breaks",
+                    ayrıntı: "kırılma aralıkları çakışmamalı".to_owned(),
                 });
             }
         }
@@ -915,6 +962,7 @@ impl GrafikSeçenekleri {
 mod testler {
     use super::*;
     use crate::model::deger::VeriDeğeri;
+    use crate::model::eksen::EksenKırılması;
     use crate::model::seri::{SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::ÖğeStili;
     use crate::renk::{Dolgu, Renk};
@@ -1133,6 +1181,34 @@ mod testler {
             Err(crate::hata::BilesenHatasi::EksikVeri {
                 bileşen: "xAxis",
                 sıra: 2
+            })
+        ));
+    }
+
+    #[test]
+    fn eksen_kirilmalari_cakisma_ve_kategori_kullanimini_reddeder() {
+        let çakışan = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::değer().kırılmalar([
+                EksenKırılması::yeni(10.0, 30.0),
+                EksenKırılması::yeni(20.0, 40.0),
+            ]))
+            .y_ekseni(Eksen::değer());
+        assert!(matches!(
+            çakışan.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "axis.breaks",
+                ..
+            })
+        ));
+
+        let kategorik = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().kırılma(EksenKırılması::yeni(0.0, 1.0)))
+            .y_ekseni(Eksen::değer());
+        assert!(matches!(
+            kategorik.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "axis.breaks",
+                ..
             })
         ));
     }

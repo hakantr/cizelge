@@ -144,6 +144,8 @@ const YEREL_FIXTURE = Object.freeze({
   'heatmap-cartesian': 'examples/isi.rs',
   'line-marker': 'examples/uyum_fixture.rs#line_marker',
   'grid-multiple': 'examples/uyum_fixture.rs#grid_multiple',
+  'intraday-breaks-1': 'examples/uyum_fixture.rs#intraday_breaks_1',
+  'intraday-breaks-2': 'examples/uyum_fixture.rs#intraday_breaks_2',
   'mix-zoom-on-value': 'examples/uyum_fixture.rs#mix_zoom_on_value',
   'bar-polar-real-estate': 'examples/kutupsal.rs',
   'radar': 'examples/radar.rs',
