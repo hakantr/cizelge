@@ -15918,7 +15918,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-painter-choice.ts",
     "kaynak_sha256": "63c52c2d2ba4eef726cd3640f6be8eb7a969760b078fcbd37164d14fea6a3a86",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_painter_choice",
     "seriler": [
       "scatter"
     ],
@@ -15931,7 +15931,7 @@
     "dış_varlıklar": [
       "/data/asset/data/masterPainterColorChoice.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15942,15 +15942,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1216,
+          "değişen_piksel_oranı": 0.004503703703703703,
+          "ssim": 0.9979355964719476,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-painter-choice.png",
+            "sha256": "4fe0f684d4e4b8d8c0c3591680396b27eec0a93bc4933e2426ae1010311527e0"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-painter-choice.png",
+            "sha256": "497549f6038e3bc908ec23299f553f7fbd21b4eb12d495d3ea5a1b8fec83aceb"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-painter-choice.png",
+            "sha256": "22f5266991898ceb86b043c79c3820ca017d9628fefe26e2bd9fbfdc34d28c2e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-painter-choice-son.json",
+            "sha256": "dd29a256bf5a22c9e7421e674d9cf11de6c4876b9574c44824173cdc73e1eb7f"
+          }
+        }
+      ]
     }
   },
   {
