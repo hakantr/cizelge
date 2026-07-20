@@ -4473,6 +4473,112 @@ mod scatter_ressam_verisi_testleri {
     }
 }
 
+fn scatter_kümeleme_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-clustering.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    resmi_javascript_dizisi(&kaynak, "const data")
+}
+
+fn scatter_kümeleme_dönüşümü() -> KümelemeDönüşümü {
+    KümelemeDönüşümü::yeni(6, 2)
+        .boyutlar([0usize, 1usize])
+        .çıktı_küme_adı("cluster")
+        .tohum(0x5eed_1234)
+}
+
+fn scatter_clustering() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_kümeleme_verisini_oku()?;
+    let kaynak = veri
+        .into_iter()
+        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+            küme.satır([x.into(), y.into()])
+        });
+    let renkler = [
+        "#5070dd", "#b6d634", "#505372", "#ff994d", "#0ca8df", "#ffd10a",
+    ];
+    let parçalar = renkler.into_iter().enumerate().map(|(sıra, renk)| {
+        EşlemeParçası::değer(sıra as f64, renk).etiket(format!("cluster {sıra}"))
+    });
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .veri_kümeleri([
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::kümele(scatter_kümeleme_dönüşümü()),
+        ])
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .konum(İpucuKonumu::Üst),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .üst("center")
+                .sol(10.0)
+                .en_az(0.0)
+                .en_çok(6.0)
+                .boyut(2usize)
+                .parçalar(parçalar),
+        )
+        .ızgara(Izgara::yeni().sol(120))
+        .x_ekseni(Eksen::değer())
+        .y_ekseni(Eksen::değer())
+        .seri(
+            SaçılımSerisi::yeni()
+                .eşle("x", "y")
+                .veri_kümesi_sırası(1)
+                .sembol_boyutu(15.0)
+                .öğe_stili(
+                    ÖğeStili::yeni()
+                        .kenarlık_rengi("#555")
+                        // zrender Path'in borderColor verildiğindeki etkili
+                        // lineWidth öntanımlısı.
+                        .kenarlık_kalınlığı(1.0),
+                ),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_kümeleme_verisi_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_kumeleme_atamalari_ecstat_akisini_izler() {
+        let veri = scatter_kümeleme_verisini_oku().expect("resmi kümeleme verisi okunmalı");
+        assert_eq!(veri.len(), 60);
+        assert_eq!(veri.first(), Some(&[3.275154, 2.957587]));
+        assert_eq!(veri.last(), Some(&[0.639276, -3.41284]));
+        let kaynak = veri
+            .into_iter()
+            .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+                küme.satır([x.into(), y.into()])
+            });
+        let sonuçlar = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::kümele(scatter_kümeleme_dönüşümü()),
+        ])
+        .expect("ecStat kümeleme dönüşümü çalışmalı");
+        let atamalar = sonuçlar[1]
+            .sayılar("cluster")
+            .expect("cluster boyutu bulunmalı")
+            .into_iter()
+            .map(|değer| değer as usize)
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            atamalar,
+            vec![
+                4, 5, 0, 4, 5, 3, 4, 5, 3, 1, 5, 3, 1, 5, 0, 1, 5, 3, 4, 5, 0, 4, 5, 3, 4, 2, 3, 4,
+                2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 0, 4, 5, 3, 4, 2, 0, 1, 2, 0, 4, 2, 0, 1, 5, 0, 4, 2,
+                3, 4, 5, 0,
+            ]
+        );
+    }
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6676,6 +6782,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-weight" => scatter_weight(),
         "scatter-stream-visual" => scatter_stream_visual(),
         "scatter-painter-choice" => scatter_painter_choice(),
+        "scatter-clustering" => scatter_clustering(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

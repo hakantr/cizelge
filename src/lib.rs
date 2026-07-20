@@ -121,8 +121,8 @@ pub use model::takvim::{
 };
 pub use model::veri_kumesi::{
     BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi, KaynakBaşlığı,
-    KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, SeriYerleşimi, SüzmeDönüşümü,
-    SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni, ToplamaBoyutu,
+    KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü, SeriYerleşimi,
+    SüzmeDönüşümü, SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni, ToplamaBoyutu,
     ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü, VeriKaynağı,
     VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
 };
@@ -220,10 +220,11 @@ pub mod hazir {
     };
     pub use crate::model::veri_kumesi::{
         BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi,
-        KaynakBaşlığı, KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, SeriYerleşimi,
-        SüzmeDönüşümü, SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni,
-        ToplamaBoyutu, ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü,
-        VeriKaynağı, VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
+        KaynakBaşlığı, KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü,
+        SeriYerleşimi, SüzmeDönüşümü, SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü,
+        SıralamaDüzeni, ToplamaBoyutu, ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi,
+        VeriDeposu, VeriDönüşümü, VeriKaynağı, VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri,
+        veri_kümelerini_çöz,
     };
     pub use crate::model::yakinlastirma::{
         VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,

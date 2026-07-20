@@ -89,6 +89,9 @@ function örnekJavaScript(id) {
 }
 
 function html(id, kaynak, frame, state, width, height) {
+  const ecStatBetigi = kaynak.includes('ecStat')
+    ? '<script src="/ecStat.min.js"></script>'
+    : '';
   const sonEylem = id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'dataset-link' && state === 'son'
@@ -150,7 +153,7 @@ function html(id, kaynak, frame, state, width, height) {
     : 0;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body,#viewport{margin:0;width:${width}px;height:${height}px;overflow:hidden}
-</style><script src="/echarts.js"></script></head><body><div id="viewport"></div><script>
+</style><script src="/echarts.js"></script>${ecStatBetigi}</head><body><div id="viewport"></div><script>
 (() => {
   let now = 0;
   let nextId = 1;
@@ -342,6 +345,11 @@ async function sunucuBaşlat(sayfa) {
     const url = new URL(istek.url || '/', 'http://localhost');
     let dosya = null;
     if (url.pathname === '/echarts.js') dosya = path.join(ECHARTS, 'dist/echarts.js');
+    else if (url.pathname === '/ecStat.min.js') {
+      // Pinned ECharts klonunun test varlığı, resmî echarts-stat UMD
+      // dağıtımını taşır; kümeleme/regresyon referansları CDN'e çıkmaz.
+      dosya = path.join(ECHARTS, 'test/lib/ecStat.min.js');
+    }
     else if (url.pathname === '/echarts-simple-transform/dist/ecSimpleTransform.min.js') {
       // ECharts'ın kendi pinned test paketindeki resmî UMD derlemesi;
       // harici CDN kullanılmadan örnekle aynı registerTransform yolu çalışır.
@@ -353,6 +361,7 @@ async function sunucuBaşlat(sayfa) {
     if (dosya) {
       if (!path.resolve(dosya).startsWith(path.resolve(ÖRNEKLER, 'public'))
           && path.resolve(dosya) !== path.resolve(ECHARTS, 'dist/echarts.js')
+          && path.resolve(dosya) !== path.resolve(ECHARTS, 'test/lib/ecStat.min.js')
           && path.resolve(dosya) !== path.resolve(ECHARTS, 'test/lib/ecSimpleTransform.js')) {
         yanıt.writeHead(403).end();
         return;

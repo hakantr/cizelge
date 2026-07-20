@@ -654,6 +654,10 @@ pub enum VeriKümesiTanımı {
         kaynak: Option<usize>,
         koşul: SüzmeKoşulu,
     },
+    Kümele {
+        kaynak: Option<usize>,
+        dönüşüm: KümelemeDönüşümü,
+    },
 }
 
 impl VeriKümesiTanımı {
@@ -689,6 +693,22 @@ impl VeriKümesiTanımı {
         Self::Süz {
             kaynak: Some(kaynak),
             koşul,
+        }
+    }
+
+    /// `ecStat:clustering` dönüşümünü varsayılan ilk dataset'e uygular.
+    pub fn kümele(dönüşüm: KümelemeDönüşümü) -> Self {
+        Self::Kümele {
+            kaynak: None,
+            dönüşüm,
+        }
+    }
+
+    /// `ecStat:clustering` dönüşümünü açık upstream dataset'e uygular.
+    pub fn kaynaktan_kümele(kaynak: usize, dönüşüm: KümelemeDönüşümü) -> Self {
+        Self::Kümele {
+            kaynak: Some(kaynak),
+            dönüşüm,
         }
     }
 }
@@ -731,6 +751,26 @@ pub fn veri_kümelerini_çöz(
                 let depo = upstream.depoya()?;
                 koşul.doğrula(&depo)?;
                 VeriKümesi::depodan(&depo.süz(|satır, _| koşul.değerlendir(&depo, satır)))
+            }
+            VeriKümesiTanımı::Kümele {
+                kaynak, dönüşüm
+            } => {
+                let kaynak_sırası = kaynak.unwrap_or(0);
+                let upstream = sonuçlar
+                    .get(kaynak_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "dataset.fromDatasetIndex",
+                        sıra: kaynak_sırası,
+                    })?;
+                let depo = upstream.depoya()?;
+                let çıktılar = dönüşüm.uygula(&[depo])?;
+                let ilk = çıktılar
+                    .first()
+                    .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                        alan: "transform.result",
+                        ayrıntı: "ecStat:clustering veri sonucu üretmedi".to_owned(),
+                    })?;
+                VeriKümesi::depodan(ilk)
             }
         };
         sonuçlar.push(sonuç);
@@ -851,6 +891,360 @@ impl VeriDönüşümü for SıralamaDönüşümü {
     fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
         let kaynak = tek_upstream(upstream, "sort")?;
         Ok(vec![kaynak.sırala(&self.anahtarlar)?])
+    }
+}
+
+/// `echarts-stat` paketinin `ecStat:clustering` dönüşümü.
+///
+/// Gerçekleme, paketteki `hierarchicalKMeans` algoritmasını izler: bütün
+/// veri önce tek küme kabul edilir, toplam karesel hatayı en çok azaltan
+/// küme iki-means ile bölünür ve istenen küme sayısına kadar sürdürülür.
+#[derive(Clone, PartialEq, Debug)]
+pub struct KümelemeDönüşümü {
+    pub küme_sayısı: usize,
+    /// Hesaba katılacak mevcut boyutlar; boşsa bütün kaynak boyutları.
+    pub boyutlar: Vec<BoyutSeçici>,
+    /// `outputClusterIndexDimension.index`.
+    pub çıktı_küme_sırası: usize,
+    /// `outputClusterIndexDimension.name`.
+    pub çıktı_küme_adı: Option<String>,
+    /// `outputCentroidDimensions`: merkez değerlerinin yazılacağı yeni
+    /// boyut sıraları.
+    pub çıktı_merkez_boyutları: Vec<usize>,
+    /// ECharts `Math.random` akışının SSR/kanıt karşılığı.
+    pub tohum: u32,
+}
+
+impl KümelemeDönüşümü {
+    pub fn yeni(küme_sayısı: usize, çıktı_küme_sırası: usize) -> Self {
+        Self {
+            küme_sayısı,
+            boyutlar: Vec::new(),
+            çıktı_küme_sırası,
+            çıktı_küme_adı: None,
+            çıktı_merkez_boyutları: Vec::new(),
+            tohum: 0x5eed_1234,
+        }
+    }
+
+    pub fn boyutlar(mut self, boyutlar: impl IntoIterator<Item = impl Into<BoyutSeçici>>) -> Self {
+        self.boyutlar = boyutlar.into_iter().map(Into::into).collect();
+        self
+    }
+
+    pub fn çıktı_küme_adı(mut self, ad: impl Into<String>) -> Self {
+        self.çıktı_küme_adı = Some(ad.into());
+        self
+    }
+
+    pub fn çıktı_merkez_boyutları(mut self, boyutlar: impl IntoIterator<Item = usize>) -> Self {
+        self.çıktı_merkez_boyutları = boyutlar.into_iter().collect();
+        self
+    }
+
+    pub fn tohum(mut self, tohum: u32) -> Self {
+        self.tohum = tohum;
+        self
+    }
+}
+
+#[derive(Clone, Debug)]
+struct İkiMeansSonucu {
+    merkezler: Vec<Vec<f64>>,
+    atamalar: Vec<(usize, f64)>,
+}
+
+#[derive(Clone, Debug)]
+struct HiyerarşikKümelemeSonucu {
+    merkezler: Vec<Vec<f64>>,
+    atamalar: Vec<usize>,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct KümelemeRastgelesi(u32);
+
+impl KümelemeRastgelesi {
+    fn sıradaki(&mut self) -> f64 {
+        self.0 = self.0.wrapping_add(0x6d2b_79f5);
+        let mut t = (self.0 ^ (self.0 >> 15)).wrapping_mul(1 | self.0);
+        t = t.wrapping_add((t ^ (t >> 7)).wrapping_mul(61 | t)) ^ t;
+        f64::from(t ^ (t >> 14)) / 4_294_967_296.0
+    }
+}
+
+fn kümeleme_merkezi(veri: &[Vec<f64>], boyut_sayısı: usize) -> Vec<f64> {
+    if veri.is_empty() {
+        return vec![f64::NAN; boyut_sayısı];
+    }
+    (0..boyut_sayısı)
+        .map(|boyut| {
+            veri.iter()
+                .filter_map(|satır| satır.get(boyut))
+                .sum::<f64>()
+                / veri.len() as f64
+        })
+        .collect()
+}
+
+fn kümeleme_uzaklığı(veri: &[f64], merkez: &[f64], açıklıklar: &[f64]) -> f64 {
+    veri.iter()
+        .zip(merkez)
+        .zip(açıklıklar)
+        .filter(|(_, açıklık)| **açıklık != 0.0)
+        .map(|((değer, merkez), açıklık)| ((değer - merkez) / açıklık).powi(2))
+        .sum()
+}
+
+fn iki_means(
+    veri: &[Vec<f64>],
+    açıklıklar: &[f64],
+    rastgele: &mut KümelemeRastgelesi,
+) -> İkiMeansSonucu {
+    let boyut_sayısı = açıklıklar.len();
+    let mut en_azlar = vec![f64::INFINITY; boyut_sayısı];
+    let mut en_çoklar = vec![f64::NEG_INFINITY; boyut_sayısı];
+    for satır in veri {
+        for boyut in 0..boyut_sayısı {
+            let değer = satır[boyut];
+            en_azlar[boyut] = en_azlar[boyut].min(değer);
+            en_çoklar[boyut] = en_çoklar[boyut].max(değer);
+        }
+    }
+    let mut merkezler = vec![vec![0.0; boyut_sayısı]; 2];
+    // ecStat `createRandCent`: boyut dış döngü, merkez iç döngüdür.
+    for boyut in 0..boyut_sayısı {
+        let açıklık = en_çoklar[boyut] - en_azlar[boyut];
+        for merkez in &mut merkezler {
+            merkez[boyut] = en_azlar[boyut] + açıklık * rastgele.sıradaki();
+        }
+    }
+
+    let mut atamalar = vec![(0usize, 0.0f64); veri.len()];
+    let mut değişti = true;
+    let mut geçiş = 0usize;
+    while değişti && geçiş < 10_000 {
+        değişti = false;
+        for (sıra, satır) in veri.iter().enumerate() {
+            let mut en_kısa = f64::INFINITY;
+            let mut en_yakın = 0usize;
+            for (merkez_sırası, merkez) in merkezler.iter().enumerate() {
+                let uzaklık = kümeleme_uzaklığı(satır, merkez, açıklıklar);
+                if uzaklık < en_kısa {
+                    en_kısa = uzaklık;
+                    en_yakın = merkez_sırası;
+                }
+            }
+            if atamalar[sıra].0 != en_yakın {
+                değişti = true;
+            }
+            atamalar[sıra] = (en_yakın, en_kısa);
+        }
+        for (merkez_sırası, merkez) in merkezler.iter_mut().enumerate() {
+            let öğeler = veri
+                .iter()
+                .zip(&atamalar)
+                .filter(|(_, atama)| atama.0 == merkez_sırası)
+                .map(|(satır, _)| satır.clone())
+                .collect::<Vec<_>>();
+            *merkez = kümeleme_merkezi(&öğeler, boyut_sayısı);
+        }
+        geçiş += 1;
+    }
+    İkiMeansSonucu {
+        merkezler,
+        atamalar,
+    }
+}
+
+fn hiyerarşik_k_means(
+    veri: &[Vec<f64>],
+    küme_sayısı: usize,
+    tohum: u32,
+) -> HiyerarşikKümelemeSonucu {
+    let boyut_sayısı = veri.first().map(Vec::len).unwrap_or(0);
+    let mut en_azlar = vec![f64::INFINITY; boyut_sayısı];
+    let mut en_çoklar = vec![f64::NEG_INFINITY; boyut_sayısı];
+    for satır in veri {
+        for boyut in 0..boyut_sayısı {
+            let değer = satır[boyut];
+            en_azlar[boyut] = en_azlar[boyut].min(değer);
+            en_çoklar[boyut] = en_çoklar[boyut].max(değer);
+        }
+    }
+    let açıklıklar = en_azlar
+        .iter()
+        .zip(en_çoklar)
+        .map(|(en_az, en_çok)| en_çok - en_az)
+        .collect::<Vec<_>>();
+    let ilk_merkez = kümeleme_merkezi(veri, boyut_sayısı);
+    let mut merkezler = vec![ilk_merkez.clone()];
+    let mut atamalar = vec![0usize; veri.len()];
+    let mut uzaklıklar = veri
+        .iter()
+        .map(|satır| kümeleme_uzaklığı(satır, &ilk_merkez, &açıklıklar))
+        .collect::<Vec<_>>();
+    let mut rastgele = KümelemeRastgelesi(tohum);
+
+    while merkezler.len() < küme_sayısı {
+        let mut en_düşük_hata = f64::INFINITY;
+        let mut seçilen: Option<(usize, İkiMeansSonucu)> = None;
+        for bölünecek in 0..merkezler.len() {
+            let küme_verisi = veri
+                .iter()
+                .zip(&atamalar)
+                .filter(|(_, atama)| **atama == bölünecek)
+                .map(|(satır, _)| satır.clone())
+                .collect::<Vec<_>>();
+            if küme_verisi.is_empty() {
+                continue;
+            }
+            let iki = iki_means(&küme_verisi, &açıklıklar, &mut rastgele);
+            let bölünmüş_hata = iki.atamalar.iter().map(|atama| atama.1).sum::<f64>();
+            let bölünmeyen_hata = atamalar
+                .iter()
+                .zip(&uzaklıklar)
+                .filter(|(atama, _)| **atama != bölünecek)
+                .map(|(_, uzaklık)| *uzaklık)
+                .sum::<f64>();
+            let toplam = bölünmüş_hata + bölünmeyen_hata;
+            if toplam < en_düşük_hata {
+                en_düşük_hata = toplam;
+                seçilen = Some((bölünecek, iki));
+            }
+        }
+
+        let Some((bölünecek, iki)) = seçilen else {
+            break;
+        };
+        let yeni_küme = merkezler.len();
+        merkezler[bölünecek] = iki.merkezler[0].clone();
+        merkezler.push(iki.merkezler[1].clone());
+        let mut yerel_sıra = 0usize;
+        for sıra in 0..veri.len() {
+            if atamalar[sıra] != bölünecek {
+                continue;
+            }
+            let yerel = iki.atamalar[yerel_sıra];
+            atamalar[sıra] = if yerel.0 == 0 {
+                bölünecek
+            } else {
+                yeni_küme
+            };
+            uzaklıklar[sıra] = yerel.1;
+            yerel_sıra += 1;
+        }
+    }
+
+    HiyerarşikKümelemeSonucu {
+        merkezler,
+        atamalar,
+    }
+}
+
+impl VeriDönüşümü for KümelemeDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "ecStat:clustering"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, self.tür_adı())?;
+        if self.küme_sayısı == 0 {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.clusterCount",
+                ayrıntı: "küme sayısı sıfırdan büyük olmalı".to_owned(),
+            });
+        }
+        let boyut_sıraları = if self.boyutlar.is_empty() {
+            (0..kaynak.boyutlar.len()).collect::<Vec<_>>()
+        } else {
+            self.boyutlar
+                .iter()
+                .map(|boyut| {
+                    kaynak
+                        .boyut_sırası(boyut)
+                        .ok_or_else(|| boyut_hatası(boyut))
+                })
+                .collect::<Result<Vec<_>, _>>()?
+        };
+        if boyut_sıraları.is_empty() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.dimensions",
+                ayrıntı: "kümeleme en az bir sayısal boyut gerektirir".to_owned(),
+            });
+        }
+
+        // ecStat `dataPreprocess`, seçili boyutları sayısal olmayan satırları
+        // sonuçtan çıkarır; kalan ham hücreler aynen korunur.
+        let mut ham_satırlar = Vec::new();
+        let mut sayısal_veri = Vec::new();
+        for satır in kaynak.satırları_kopyala() {
+            let değerler = boyut_sıraları
+                .iter()
+                .map(|boyut| satır.get(*boyut).and_then(VeriDeğeri::sayı))
+                .collect::<Option<Vec<_>>>();
+            if let Some(değerler) = değerler
+                && değerler.iter().all(|değer| !değer.is_nan())
+            {
+                ham_satırlar.push(satır);
+                sayısal_veri.push(değerler);
+            }
+        }
+        if sayısal_veri.is_empty() || self.küme_sayısı > sayısal_veri.len() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.clusterCount",
+                ayrıntı: format!(
+                    "{} geçerli satır {} kümeye ayrılamaz",
+                    sayısal_veri.len(),
+                    self.küme_sayısı
+                ),
+            });
+        }
+
+        let sonuç = hiyerarşik_k_means(&sayısal_veri, self.küme_sayısı, self.tohum);
+        let en_büyük_boyut = self
+            .çıktı_merkez_boyutları
+            .iter()
+            .copied()
+            .chain(std::iter::once(self.çıktı_küme_sırası))
+            .max()
+            .unwrap_or(self.çıktı_küme_sırası);
+        let mut çıktı_boyutları = kaynak.boyutlar.clone();
+        while çıktı_boyutları.len() <= en_büyük_boyut {
+            let sıra = çıktı_boyutları.len();
+            çıktı_boyutları.push(BoyutTanımı::yeni(format!("boyut{sıra}")).tür(BoyutTürü::Sayı));
+        }
+        if let Some(ad) = &self.çıktı_küme_adı {
+            çıktı_boyutları[self.çıktı_küme_sırası].ad = ad.clone();
+        }
+        çıktı_boyutları[self.çıktı_küme_sırası].tür = BoyutTürü::Sayı;
+
+        for (sıra, satır) in ham_satırlar.iter_mut().enumerate() {
+            satır.resize(çıktı_boyutları.len(), VeriDeğeri::Boş);
+            let küme = sonuç.atamalar[sıra];
+            satır[self.çıktı_küme_sırası] = (küme as f64).into();
+            if let Some(merkez) = sonuç.merkezler.get(küme) {
+                for (merkez_boyutu, çıktı_sırası) in self.çıktı_merkez_boyutları.iter().enumerate()
+                {
+                    if let Some(değer) = merkez.get(merkez_boyutu) {
+                        satır[*çıktı_sırası] = (*değer).into();
+                    }
+                }
+            }
+        }
+
+        let merkez_boyutları = boyut_sıraları
+            .iter()
+            .filter_map(|sıra| kaynak.boyutlar.get(*sıra).cloned())
+            .collect::<Vec<_>>();
+        let merkez_satırları = sonuç
+            .merkezler
+            .iter()
+            .map(|merkez| merkez.iter().copied().map(VeriDeğeri::from).collect())
+            .collect();
+        Ok(vec![
+            VeriDeposu::satırlardan(çıktı_boyutları, ham_satırlar)?,
+            VeriDeposu::satırlardan(merkez_boyutları, merkez_satırları)?,
+        ])
     }
 }
 
@@ -1809,6 +2203,55 @@ mod testler {
                 .unwrap()
                 .değer(0, &BoyutSeçici::ad("ürün")),
             Some(&VeriDeğeri::Metin("B".to_owned()))
+        );
+    }
+
+    #[test]
+    fn ecstat_hiyerarsik_k_means_kume_ve_merkez_boyutlarini_uretir() {
+        let kaynak = VeriKümesi::yeni(["x", "y"])
+            .satır([0.0.into(), 0.0.into()])
+            .satır([0.0.into(), 1.0.into()])
+            .satır([10.0.into(), 10.0.into()])
+            .satır([11.0.into(), 10.0.into()])
+            .satır([(-10.0).into(), 8.0.into()])
+            .satır([(-11.0).into(), 9.0.into()]);
+        let dönüşüm = KümelemeDönüşümü::yeni(3, 2)
+            .çıktı_küme_adı("cluster")
+            .çıktı_merkez_boyutları([3, 4])
+            .tohum(0x5eed_1234);
+
+        let çıktılar = dönüşüm.uygula(&[kaynak.depoya().unwrap()]).unwrap();
+
+        assert_eq!(çıktılar.len(), 2);
+        assert_eq!(
+            çıktılar[0]
+                .satırları_kopyala()
+                .into_iter()
+                .map(|satır| satır[2].sayı().unwrap() as usize)
+                .collect::<Vec<_>>(),
+            vec![0, 0, 1, 1, 2, 2]
+        );
+        assert_eq!(
+            çıktılar[0].satırları_kopyala()[0],
+            vec![0.0.into(), 0.0.into(), 0.0.into(), 0.0.into(), 0.5.into()]
+        );
+        assert_eq!(
+            çıktılar[1].satırları_kopyala(),
+            vec![
+                vec![0.0.into(), 0.5.into()],
+                vec![10.5.into(), 10.0.into()],
+                vec![(-10.5).into(), 8.5.into()],
+            ]
+        );
+
+        let zincir = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::kümele(dönüşüm),
+        ])
+        .unwrap();
+        assert_eq!(
+            zincir[1].boyutlar,
+            ["x", "y", "cluster", "boyut3", "boyut4"]
         );
     }
 
