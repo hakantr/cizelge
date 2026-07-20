@@ -5407,7 +5407,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-linear-regression.ts",
     "kaynak_sha256": "34f97a118f18096d538381ab5c38e5ebee706e95503c9a1a7b21b86135b22852",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_linear_regression",
     "seriler": [
       "cross",
       "dashed",
@@ -5425,7 +5425,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5436,15 +5436,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 990,
+          "değişen_piksel_oranı": 0.0036666666666666666,
+          "ssim": 0.9944965316375877,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-linear-regression.png",
+            "sha256": "b26ae4188431051754018f8aac45eda68af092f6d821c4938f744b786bbc982c"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-linear-regression.png",
+            "sha256": "deac81c7191eb8d835325bcd8dc037d79b39c22728e62643d16cded1084e7a78"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-linear-regression.png",
+            "sha256": "d77dd17a89d49e52d829cd0540ac2a235a0233b190dd7bdfe5453e7db55b86ee"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-linear-regression-son.json",
+            "sha256": "7c629e37660aaafca699484bcda57983c7260e606cf0a11d624e6f81012543ae"
+          }
+        }
+      ]
     }
   },
   {
