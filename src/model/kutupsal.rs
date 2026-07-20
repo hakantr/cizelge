@@ -8,6 +8,10 @@ use crate::model::eksen::Eksen;
 #[derive(Clone, PartialEq, Debug)]
 pub struct KutupsalKoordinat {
     pub merkez: (Uzunluk, Uzunluk),
+    /// Radyal eksenin iç yarıçapı (`polar.radius[0]`).
+    pub iç_yarıçap: Uzunluk,
+    /// Radyal eksenin dış yarıçapı (`polar.radius[1]` ya da tekil
+    /// `polar.radius`).
     pub yarıçap: Uzunluk,
     /// Açısal eksen (`angleAxis`): verisi doluysa kategorik.
     pub açısal_eksen: Eksen,
@@ -23,6 +27,7 @@ impl Default for KutupsalKoordinat {
     fn default() -> Self {
         KutupsalKoordinat {
             merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(50.0)),
+            iç_yarıçap: Uzunluk::Piksel(0.0),
             yarıçap: Uzunluk::Yüzde(80.0),
             açısal_eksen: Eksen::değer().bölme_sayısı(12),
             radyal_eksen: Eksen::değer(),
@@ -43,7 +48,17 @@ impl KutupsalKoordinat {
     }
 
     pub fn yarıçap(mut self, yarıçap: impl Into<Uzunluk>) -> Self {
+        self.iç_yarıçap = Uzunluk::Piksel(0.0);
         self.yarıçap = yarıçap.into();
+        self
+    }
+
+    /// ECharts `polar.radius: [inner, outer]` biçimi.
+    pub fn yarıçap_aralığı(
+        mut self, iç: impl Into<Uzunluk>, dış: impl Into<Uzunluk>
+    ) -> Self {
+        self.iç_yarıçap = iç.into();
+        self.yarıçap = dış.into();
         self
     }
 

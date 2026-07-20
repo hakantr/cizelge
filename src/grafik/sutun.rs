@@ -200,6 +200,13 @@ fn sütun_etiket_yerleşimi(
             DikeyHiza::Alt,
             true,
         ),
+        // Bu dört değer ECharts'ta yalnız kutupsal bar sektörlerine aittir.
+        // Kartezyen bir seriye verilirse bağlı metnin güvenli varsayılanı
+        // olan şekil merkezine düşer.
+        EtiketKonumu::Başlangıç
+        | EtiketKonumu::İçBaşlangıç
+        | EtiketKonumu::Bitiş
+        | EtiketKonumu::İçBitiş => ((orta_x, orta_y), YatayHiza::Orta, DikeyHiza::Orta, true),
         // `Dış` yukarıda yönlü yerleşime dönüştürülür; bu dal yalnız ileri
         // bir enum değişikliğinde güvenli merkez geri düşüşü olarak kalır.
         EtiketKonumu::Dış => ((orta_x, orta_y), YatayHiza::Orta, DikeyHiza::Orta, true),

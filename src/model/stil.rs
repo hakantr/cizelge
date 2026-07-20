@@ -385,6 +385,15 @@ pub enum EtiketKonumu {
     Alt,
     Sol,
     Sağ,
+    /// Kutupsal sütunda değer aralığının başlangıcı (`'start'`).
+    Başlangıç,
+    /// Kutupsal sütunda başlangıcın şekil içindeki yanı
+    /// (`'insideStart'`).
+    İçBaşlangıç,
+    /// Kutupsal sütunda değer aralığının bitişi (`'end'`).
+    Bitiş,
+    /// Kutupsal sütunda bitişin şekil içindeki yanı (`'insideEnd'`).
+    İçBitiş,
     #[default]
     İç,
     İçÜst,

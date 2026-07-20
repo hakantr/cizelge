@@ -4742,7 +4742,7 @@ pub fn grafiği_boya(
                 &görünürler,
                 Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik()),
             );
-            kutupsal_ağ_çiz(yüzey, koordinat, &düzen);
+            kutupsal_ağ_çiz(yüzey, koordinat, &düzen, false);
             kutupsal_serileri_çiz(
                 yüzey,
                 seçenekler,
@@ -4754,6 +4754,7 @@ pub fn grafiği_boya(
                 zaman_sn,
                 &mut çıktı.isabetler,
             );
+            kutupsal_ağ_çiz(yüzey, koordinat, &düzen, true);
         }
     }
 
