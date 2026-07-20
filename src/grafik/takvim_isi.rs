@@ -4,15 +4,25 @@
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
-use crate::koordinat::Dikdörtgen;
+use crate::koordinat::{Dikdörtgen, TakvimYerleşimi};
+use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::TakvimSerisi;
+use crate::model::takvim::TakvimKoordinatı;
 use crate::renk::Dolgu;
 use crate::tema;
 use crate::yardimci::takvim::{TakvimAnı, andan_takvime, takvimden_ana};
 use crate::yerel::{ay_kısaltması, etkin_yerel};
 
 const GÜN_MS: f64 = 86_400_000.0;
+
+fn takvim_verisi(öğe: &VeriÖğesi) -> Option<(f64, f64)> {
+    match &öğe.değer {
+        VeriDeğeri::Çift([zaman, değer]) => Some((*zaman, *değer)),
+        VeriDeğeri::Dizi(dizi) => Some((*dizi.first()?, *dizi.get(1)?)),
+        _ => None,
+    }
+}
 
 /// Unix gününden haftanın gününe (0 = Pazartesi).
 fn haftanın_günü(gün_sayısı: i64) -> usize {
@@ -24,7 +34,7 @@ fn haftanın_günü(gün_sayısı: i64) -> usize {
 pub fn takvim_değer_kapsamı(seri: &TakvimSerisi) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
     for öğe in &seri.veri {
-        if let Some(&değer) = öğe.değer.dizi().and_then(|d| d.get(1))
+        if let Some((_, değer)) = takvim_verisi(öğe)
             && değer.is_finite()
         {
             kapsam[0] = kapsam[0].min(değer);
@@ -35,6 +45,64 @@ pub fn takvim_değer_kapsamı(seri: &TakvimSerisi) -> [f64; 2] {
         kapsam
     } else {
         [0.0, 1.0]
+    }
+}
+
+/// Bir `heatmap` serisini bağlı ECharts `calendar` koordinatında çizer.
+/// Takvim bileşeninin gün zemini daha önce, ay çizgileri ve etiketleri daha
+/// sonra boyandığı için seri hücreleri resmî z-sırasına oturur.
+#[allow(clippy::too_many_arguments)]
+pub fn takvim_koordinatında_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &TakvimSerisi,
+    genel_sıra: usize,
+    takvim: &TakvimKoordinatı,
+    yerleşim: &TakvimYerleşimi,
+    eşleme: &GörselEşleme,
+    eşleme_kapsamı: [f64; 2],
+    ilerleme: f32,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) {
+    let opaklık = ilerleme.clamp(0.0, 1.0);
+    // Calendar.dataToLayout.contentRect, takvim itemStyle vuruşunun yarısı
+    // kadar içeri alınır; seri böylece gün kenarlıklarını kapatmaz.
+    let iç_pay = (takvim.öğe_stili.kenarlık_kalınlığı.max(0.0) / 2.0).max(0.0);
+    for (veri_sırası, öğe) in seri.veri.iter().enumerate() {
+        let Some((zaman_ms, değer)) = takvim_verisi(öğe) else {
+            continue;
+        };
+        if !zaman_ms.is_finite() || !değer.is_finite() || !eşleme.seçili_mi(değer, eşleme_kapsamı)
+        {
+            continue;
+        }
+        if eşleme.parçalı_mı() {
+            match eşleme.parça_bul_kapsamda(değer, eşleme_kapsamı) {
+                Some(parça) if eşleme.parça_açık_mı(parça) => {}
+                _ => continue,
+            }
+        }
+        let Some(ham_hücre) = yerleşim.hücre(zaman_ms) else {
+            continue;
+        };
+        let pay_x = iç_pay.min(ham_hücre.genişlik / 2.0);
+        let pay_y = iç_pay.min(ham_hücre.yükseklik / 2.0);
+        let hücre = Dikdörtgen::yeni(
+            ham_hücre.x + pay_x,
+            ham_hücre.y + pay_y,
+            (ham_hücre.genişlik - 2.0 * pay_x).max(0.0),
+            (ham_hücre.yükseklik - 2.0 * pay_y).max(0.0),
+        );
+        let renk = eşleme.renk_çöz(değer, eşleme_kapsamı).opaklık(opaklık);
+        çizici.dikdörtgen(hücre, &Dolgu::Düz(renk), [0.0; 4], None);
+        let an = andan_takvime(zaman_ms);
+        isabetler.push(İsabetBölgesi {
+            seri_sırası: genel_sıra,
+            veri_sırası,
+            seri_adı: seri.ad.clone(),
+            ad: Some(format!("{} {} {}", an.gün, ay_kısaltması(an.ay), an.yıl)),
+            değer: Some(değer),
+            geometri: İsabetGeometrisi::Dikdörtgen(hücre),
+        });
     }
 }
 
@@ -92,10 +160,7 @@ pub fn takvim_çiz(
     // Değer arama tablosu (gün → değer).
     let mut değerler: Vec<Option<f64>> = vec![None; gün_sayısı.max(0) as usize];
     for öğe in &seri.veri {
-        let Some(dizi) = öğe.değer.dizi() else {
-            continue;
-        };
-        let (Some(&ms), Some(&değer)) = (dizi.first(), dizi.get(1)) else {
+        let Some((ms, değer)) = takvim_verisi(öğe) else {
             continue;
         };
         if !ms.is_finite() || !değer.is_finite() {

@@ -3763,6 +3763,70 @@ fn heatmap_large_piecewise(parça_kapalı: bool) -> GrafikSeçenekleri {
         )
 }
 
+fn calendar_heatmap() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let başlangıç = takvimden_ana(TakvimAnı {
+        yıl: 2016,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let bitiş = takvimden_ana(TakvimAnı {
+        yıl: 2017,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut tohum = 0x5eed_1234;
+    let mut veri = Vec::with_capacity(366);
+    let mut zaman = başlangıç;
+    while zaman < bitiş {
+        veri.push(VeriÖğesi::from([
+            zaman,
+            (kanıt_rastgele(&mut tohum) * 10_000.0).floor(),
+        ]));
+        zaman += 86_400_000.0;
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .başlık(
+            Başlık::yeni()
+                .metin("Daily Step Count")
+                .sol("center")
+                .üst(30)
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni())
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(10_000.0)
+                .bölme_sayısı(5)
+                .yön(Yön::Yatay)
+                .sol("center")
+                .üst(65),
+        )
+        .takvim(
+            TakvimKoordinatı::yıl(2016)
+                .sol(30.0)
+                .sağ(30)
+                .üst(120)
+                .hücre_boyutu(None, Some(13.0))
+                .yıl_etiketi(Etiket::yeni().göster(false))
+                .öğe_stili(ÖğeStili::yeni().kenarlık_kalınlığı(0.5)),
+        )
+        .seri(TakvimSerisi::yeni(2016).takvim_sırası(0).veri(veri))
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4486,6 +4550,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
+        "calendar-heatmap" => Ok(calendar_heatmap()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

@@ -319,6 +319,97 @@ pub fn görsel_eşleme_çiz(
         let parçalar = eşleme.parçaları_çöz(kapsam);
         let mut kutular = Vec::new();
         let n = parçalar.len();
+        if eşleme.yön == Yön::Yatay {
+            // PiecewiseView yatay akışında parça sırası düşükten yükseğe,
+            // soldan sağadır. Her öğenin genişliği kendi etiketiyle ölçülür;
+            // böylece `left: 'center'` ECharts grubuyla aynı merkezi bulur.
+            let etiketler = parçalar
+                .iter()
+                .map(|parça| {
+                    let metin = parça.etiket_metni();
+                    let genişlik = çizici.yazı_ölç(&metin, boyut).0;
+                    (metin, genişlik)
+                })
+                .collect::<Vec<_>>();
+            let öğe_genişlikleri = etiketler
+                .iter()
+                .map(|(_, genişlik)| KUTU_GENİŞLİĞİ + METİN_BOŞLUĞU + genişlik)
+                .collect::<Vec<_>>();
+            let içerik_genişliği =
+                öğe_genişlikleri.iter().sum::<f32>() + n.saturating_sub(1) as f32 * ÖĞE_BOŞLUĞU;
+            let içerik_yüksekliği = KUTU_YÜKSEKLİĞİ;
+            let üst = match eşleme.dikey_konum {
+                Some(DikeyKonum::Üst) => İÇ_BOŞLUK,
+                Some(DikeyKonum::Orta) => (çizici.yükseklik() - içerik_yüksekliği) / 2.0,
+                Some(DikeyKonum::Alt) => çizici.yükseklik() - İÇ_BOŞLUK - içerik_yüksekliği,
+                Some(DikeyKonum::Değer(uzunluk)) => uzunluk.çöz(çizici.yükseklik()) + İÇ_BOŞLUK,
+                None => eşleme.üst.map_or_else(
+                    || {
+                        çizici.yükseklik()
+                            - eşleme.alt.çöz(çizici.yükseklik())
+                            - İÇ_BOŞLUK
+                            - içerik_yüksekliği
+                    },
+                    |üst| üst.çöz(çizici.yükseklik()) + İÇ_BOŞLUK,
+                ),
+            };
+            let içerik_solu = if let Some(sağ) = eşleme.sağ {
+                çizici.genişlik() - sağ.çöz(çizici.genişlik()) - İÇ_BOŞLUK - içerik_genişliği
+            } else {
+                match eşleme.sol {
+                    YatayKonum::Sol => İÇ_BOŞLUK,
+                    YatayKonum::Orta => (çizici.genişlik() - içerik_genişliği) / 2.0,
+                    YatayKonum::Sağ => çizici.genişlik() - İÇ_BOŞLUK - içerik_genişliği,
+                    YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) + İÇ_BOŞLUK,
+                }
+            };
+            let sağa_yaslı = eşleme.sağ.is_some() || eşleme.sol == YatayKonum::Sağ;
+            let mut x = içerik_solu;
+            for (i, ((parça, (etiket, etiket_genişliği)), öğe_genişliği)) in parçalar
+                .iter()
+                .zip(&etiketler)
+                .zip(&öğe_genişlikleri)
+                .enumerate()
+            {
+                let açık = eşleme.parça_açık_mı(i);
+                let renk = if açık {
+                    parça.renk
+                } else {
+                    tema::devre_dışı()
+                };
+                let kutu_x = if sağa_yaslı {
+                    x + etiket_genişliği + METİN_BOŞLUĞU
+                } else {
+                    x
+                };
+                let kutu = Dikdörtgen::yeni(kutu_x, üst, KUTU_GENİŞLİĞİ, KUTU_YÜKSEKLİĞİ);
+                çizici.dikdörtgen(kutu, &Dolgu::Düz(renk), [3.5; 4], None);
+                let (etiket_x, hiza) = if sağa_yaslı {
+                    (kutu_x - METİN_BOŞLUĞU, YatayHiza::Sağ)
+                } else {
+                    (kutu_x + KUTU_GENİŞLİĞİ + METİN_BOŞLUĞU, YatayHiza::Sol)
+                };
+                çizici.yazı(
+                    etiket,
+                    (etiket_x, üst + KUTU_YÜKSEKLİĞİ / 2.0),
+                    hiza,
+                    DikeyHiza::Orta,
+                    boyut,
+                    if açık {
+                        tema::ikincil_metin()
+                    } else {
+                        tema::ikincil_metin().opaklık(0.5)
+                    },
+                    false,
+                );
+                kutular.push((Dikdörtgen::yeni(x, üst, *öğe_genişliği, KUTU_YÜKSEKLİĞİ), i));
+                x += *öğe_genişliği + ÖĞE_BOŞLUĞU;
+            }
+            return GörselEşlemeÇıktısı {
+                parça_kutuları: kutular,
+                sürekli: None,
+            };
+        }
         let içerik_yüksekliği =
             n as f32 * KUTU_YÜKSEKLİĞİ + n.saturating_sub(1) as f32 * ÖĞE_BOŞLUĞU;
         let üst = match eşleme.dikey_konum {
@@ -871,5 +962,26 @@ mod sürekli_bölge_testleri {
         assert!((bölge.alt_tutamaç.y - 500.103_45).abs() < 1e-4);
         assert!((bölge.üst_tutamaç.y - 360.103_45).abs() < 1e-4);
         assert_eq!(bölge.sürükleme_ekseni((20.0, 400.0)), -400.0);
+    }
+
+    #[test]
+    fn yatay_parçalı_eşleme_düşükten_yükseğe_ve_ortalanmış_akar() {
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(10_000.0)
+            .bölme_sayısı(5)
+            .yön(Yön::Yatay)
+            .sol("center")
+            .üst(65);
+
+        let çıktı = görsel_eşleme_çiz(&mut yüzey, &eşleme, [0.0, 10_000.0]);
+        assert_eq!(çıktı.parça_kutuları.len(), 5);
+        assert_eq!(çıktı.parça_kutuları[0].1, 0);
+        assert_eq!(çıktı.parça_kutuları[4].1, 4);
+        assert_eq!(çıktı.parça_kutuları[0].0.y, 80.0);
+        assert!(çıktı.parça_kutuları[0].0.x < çıktı.parça_kutuları[4].0.x);
+        let kayıt = yüzey.döküm();
+        assert!(kayıt.find("0 - 2000").unwrap() < kayıt.find("8000 - 10000").unwrap());
     }
 }

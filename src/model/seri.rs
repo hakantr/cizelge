@@ -2075,6 +2075,9 @@ impl ParalelSerisi {
 #[derive(Clone, Debug)]
 pub struct TakvimSerisi {
     pub ad: Option<String>,
+    /// Bağlı `calendar` bileşeninin sırası (`calendarIndex`).
+    pub takvim_sırası: usize,
+    /// Eski, bileşensiz kullanım için korunan yıl ve yerleşim alanları.
     pub yıl: i32,
     pub veri: Vec<VeriÖğesi>,
     pub sol: Uzunluk,
@@ -2088,6 +2091,7 @@ impl Default for TakvimSerisi {
     fn default() -> Self {
         TakvimSerisi {
             ad: None,
+            takvim_sırası: 0,
             yıl: 2026,
             veri: Vec::new(),
             sol: Uzunluk::Yüzde(4.0),
@@ -2109,6 +2113,11 @@ impl TakvimSerisi {
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
         self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = sıra;
         self
     }
 

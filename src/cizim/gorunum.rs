@@ -14,7 +14,7 @@ use crate::bilesen::eksen_cizimi::{bölme_çizgilerini_çiz, eksenleri_çiz};
 use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::bilesen::matris_cizimi::matris_çiz;
-use crate::bilesen::takvim_cizimi::takvim_bileşeni_çiz;
+use crate::bilesen::takvim_cizimi::{takvim_arka_planı_çiz, takvim_üst_katmanı_çiz};
 use crate::bilesen::zaman_seridi::{ZamanŞeridiEylemi, zaman_şeridi_çiz};
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
@@ -43,7 +43,7 @@ use crate::grafik::radar::{
 use crate::grafik::sacilim::{SaçılımNoktası, saçılım_noktaları, saçılım_çiz};
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
-use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_çiz};
+use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_koordinatında_çiz, takvim_çiz};
 use crate::grafik::tema_nehri::tema_nehri_çiz;
 use crate::koordinat::{Dikdörtgen, Kartezyen2B, TakvimYerleşimi, ÇalışmaEkseni};
 use crate::model::bilesen::{
@@ -1607,7 +1607,7 @@ pub fn grafiği_boya(
         .collect();
     for (takvim, yerleşim) in seçenekler.takvimler.iter().zip(&takvim_yerleşimleri) {
         if let Some(yerleşim) = yerleşim {
-            takvim_bileşeni_çiz(yüzey, takvim, yerleşim);
+            takvim_arka_planı_çiz(yüzey, takvim, yerleşim);
         }
     }
 
@@ -3084,6 +3084,7 @@ pub fn grafiği_boya(
             .iter()
             .find_map(|s| match s {
                 Seri::Isı(ısı) => Some(ısı_değer_kapsamı(ısı)),
+                Seri::Takvim(takvim) => Some(takvim_değer_kapsamı(takvim)),
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
@@ -3341,18 +3342,40 @@ pub fn grafiği_boya(
                     continue;
                 }
                 let önce = çıktı.isabetler.len();
-                let eşleme = seçenekler.görsel_eşleme.clone().unwrap_or_default();
+                let eşleme = seçenekler
+                    .seri_görsel_eşlemesi(i)
+                    .cloned()
+                    .unwrap_or_default();
                 let kapsam = eşleme.kapsam_çöz(takvim_değer_kapsamı(s));
-                takvim_çiz(
-                    yüzey,
-                    s,
-                    i,
-                    tüm_alan,
-                    &eşleme,
-                    kapsam,
-                    ilerleme,
-                    &mut çıktı.isabetler,
-                );
+                if let (Some(takvim), Some(Some(yerleşim))) = (
+                    seçenekler.takvimler.get(s.takvim_sırası),
+                    takvim_yerleşimleri.get(s.takvim_sırası),
+                ) {
+                    takvim_koordinatında_çiz(
+                        yüzey,
+                        s,
+                        i,
+                        takvim,
+                        yerleşim,
+                        &eşleme,
+                        kapsam,
+                        ilerleme,
+                        &mut çıktı.isabetler,
+                    );
+                } else {
+                    // Eski `TakvimSerisi::yeni(yıl)` bileşensiz kullanımını
+                    // kaynak uyumluluğu için koru.
+                    takvim_çiz(
+                        yüzey,
+                        s,
+                        i,
+                        tüm_alan,
+                        &eşleme,
+                        kapsam,
+                        ilerleme,
+                        &mut çıktı.isabetler,
+                    );
+                }
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
                     && let Some(b) = çıktı
@@ -3636,6 +3659,14 @@ pub fn grafiği_boya(
                 }
             }
             _ => {}
+        }
+    }
+
+    // CalendarView ayırıcı ve metinleri z2=20/30 ile seri şekillerinin
+    // üstünde tutar. Gün zemini ise serilerden önce çizilmişti.
+    for (takvim, yerleşim) in seçenekler.takvimler.iter().zip(&takvim_yerleşimleri) {
+        if let Some(yerleşim) = yerleşim {
+            takvim_üst_katmanı_çiz(yüzey, takvim, yerleşim);
         }
     }
 

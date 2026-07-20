@@ -114,7 +114,9 @@ pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
     YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü, ÖğeStili,
 };
-pub use model::takvim::{TakvimAralığı, TakvimKoordinatı, TakvimYönü};
+pub use model::takvim::{
+    TakvimAralığı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
+};
 pub use model::veri_kumesi::{
     BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi, KaynakBaşlığı,
     KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, SeriYerleşimi, SüzmeDönüşümü,
@@ -208,7 +210,9 @@ pub mod hazir {
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,
         EtiketYaması, YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü, ÖğeStili,
     };
-    pub use crate::model::takvim::{TakvimAralığı, TakvimKoordinatı, TakvimYönü};
+    pub use crate::model::takvim::{
+        TakvimAralığı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
+    };
     pub use crate::model::veri_kumesi::{
         BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi,
         KaynakBaşlığı, KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, SeriYerleşimi,

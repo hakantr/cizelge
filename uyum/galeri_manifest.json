@@ -1423,7 +1423,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/calendar-heatmap.ts",
     "kaynak_sha256": "12e3804fa1fab147f6574034cb372e7458c304d8380e080e7a76965ab372ee78",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#calendar_heatmap",
     "seriler": [
       "heatmap",
       "piecewise"
@@ -1440,7 +1440,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -1452,15 +1452,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 367,
+          "değişen_piksel_oranı": 0.0013592592592592593,
+          "ssim": 0.9993155082522578,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-heatmap.png",
+            "sha256": "1af4b0fab4ba1a6eb51d9d248297eb6b80edaf89ad4ee34cd20dfcc289c2a4cc"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-heatmap.png",
+            "sha256": "f2eafe2370b3eaa9b378d8875ec12903aa4a34b7bfc006b555e4b2ec86c0b47d"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-heatmap.png",
+            "sha256": "dec53826e88e547e39b9e68be7927afb349f5329b8e45c1bcf4a9ce4e4fe4c28"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-heatmap-son.json",
+            "sha256": "75ac3faedfbcb248a16b6122151de5c03db3df2a2ce6f165fe5626ef140701d3"
+          }
+        }
+      ]
     }
   },
   {
