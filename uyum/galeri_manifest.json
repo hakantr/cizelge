@@ -5923,7 +5923,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-breaks-simple.ts",
     "kaynak_sha256": "43304b117013d3d2edb8a51e15da2661d480e1773fb8d76a9cbb17554b6ced6b",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_breaks_simple",
     "seriler": [
       "bar",
       "collapseAxisBreak",
@@ -5948,7 +5948,7 @@
       "click"
     ],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5962,12 +5962,12 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
       "kareler": []
