@@ -2189,6 +2189,7 @@ fn eksen_ipucu_derle(
             veri_sırası,
             ad: öğe.ad.clone().unwrap_or(grup_başlığı),
             değer: öğe.değer.clone(),
+            boyutlar: öğe.boyutlar.clone(),
         });
     }
     if gruplar.is_empty() {
@@ -3405,6 +3406,11 @@ pub fn grafiği_boya(
                         let x = yakınlaştırma
                             .sol
                             .map(|u| u.çöz(yüzey.genişlik()))
+                            .or_else(|| {
+                                yakınlaştırma
+                                    .sağ
+                                    .map(|u| yüzey.genişlik() - u.çöz(yüzey.genişlik()) - genişlik)
+                            })
                             .unwrap_or(yüzey.genişlik() - genişlik - 15.0)
                             + 0.5;
                         let y = yakınlaştırma
@@ -3431,6 +3437,11 @@ pub fn grafiği_boya(
                         let x = yakınlaştırma
                             .sol
                             .map(|u| u.çöz(yüzey.genişlik()))
+                            .or_else(|| {
+                                yakınlaştırma
+                                    .sağ
+                                    .map(|u| yüzey.genişlik() - u.çöz(yüzey.genişlik()) - genişlik)
+                            })
                             .unwrap_or(alan.x)
                             + 2.8;
                         let y = yakınlaştırma
@@ -3453,38 +3464,55 @@ pub fn grafiği_boya(
                         [0.0; 4],
                         None,
                     );
-                    // ECharts `showDataShadow: auto`: ilk uygun serinin tüm
-                    // verisini sürgünün arkasında düşük opaklıklı alan olarak
-                    // gösterir.
+                    // ECharts `showDataShadow: auto`: hedef eksenlerden
+                    // birine bağlı ilk uygun serinin karşı boyutunu sürgü
+                    // arkasında gösterir. Dikey SliderZoomView aynı yerel
+                    // yolu 90° döndürür; burada eşdeğer koordinatlar doğrudan
+                    // tuval uzayında üretilir.
                     if yakınlaştırma.veri_gölgesi
-                        && !dikey
-                        && let Some(gölge_serisi) =
-                            seçenekler.seriler.iter().find(|seri| match seri {
-                                Seri::Saçılım(saçılım) => saçılım.veri_sayısı() > 0,
-                                _ => !seri.veri().is_empty(),
-                            })
+                        && let Some(gölge_serisi) = seçenekler.seriler.iter().find(|seri| {
+                            if !seri.kartezyen_mi() {
+                                return false;
+                            }
+                            let bağ = seri.eksen_bağı();
+                            let hedefte = if dikey {
+                                yakınlaştırma.y_eksenini_hedefler(bağ.y)
+                            } else {
+                                yakınlaştırma.x_eksenini_hedefler(bağ.x)
+                            };
+                            hedefte
+                                && match seri {
+                                    Seri::Saçılım(saçılım) => saçılım.veri_sayısı() > 0,
+                                    _ => !seri.veri().is_empty(),
+                                }
+                        })
                     {
                         let veri_sayısı = match gölge_serisi {
                             Seri::Saçılım(saçılım) => saçılım.veri_sayısı(),
                             _ => gölge_serisi.veri().len(),
                         };
-                        let değer_al = |sıra: usize| match gölge_serisi {
+                        let xy_al = |sıra: usize| match gölge_serisi {
                             Seri::Saçılım(saçılım) if saçılım.düz_veri.is_some() => {
-                                saçılım.xy(sıra).map(|(_, y)| y)
+                                saçılım.xy(sıra)
                             }
-                            _ => gölge_serisi
-                                .veri()
-                                .get(sıra)
-                                .and_then(|öğe| öğe.değer.sayı()),
+                            _ => gölge_serisi.veri().get(sıra).and_then(|öğe| {
+                                if let Some(x) = öğe.değer.x() {
+                                    Some((x, öğe.değer.sayı()?))
+                                } else {
+                                    // Kategori eksenli line/bar verisi
+                                    // tek bir sayıdır; ECharts veri
+                                    // deposu örtük kategori boyutunu
+                                    // satır sırasından üretir.
+                                    Some((sıra as f64, öğe.değer.sayı()?))
+                                }
+                            }),
                         };
-                        let x_al = |sıra: usize| match gölge_serisi {
-                            Seri::Saçılım(saçılım) if saçılım.düz_veri.is_some() => {
-                                saçılım.xy(sıra).map(|(x, _)| x)
-                            }
-                            _ => gölge_serisi.veri().get(sıra).and_then(|öğe| öğe.değer.x()),
-                        };
+                        let bu_eksen_değeri_al =
+                            |sıra: usize| xy_al(sıra).map(|(x, y)| if dikey { y } else { x });
+                        let karşı_değer_al =
+                            |sıra: usize| xy_al(sıra).map(|(x, y)| if dikey { x } else { y });
                         let kapsam = (0..veri_sayısı)
-                            .filter_map(değer_al)
+                            .filter_map(karşı_değer_al)
                             .filter(|değer| değer.is_finite())
                             .fold(
                                 [f64::INFINITY, f64::NEG_INFINITY],
@@ -3497,11 +3525,21 @@ pub fn grafiği_boya(
                         let açıklık = (kapsam[1] - kapsam[0]).max(f64::EPSILON);
                         let alt_kapsam = kapsam[0] - açıklık * 0.3;
                         let üst_kapsam = kapsam[1] + açıklık * 0.3;
-                        let eşle = |değer: f64| {
-                            ((değer - alt_kapsam) / (üst_kapsam - alt_kapsam)) as f32
-                                * şerit.yükseklik
+                        let uzunluk = if dikey {
+                            şerit.yükseklik
+                        } else {
+                            şerit.genişlik
                         };
-                        // SliderZoomView zaman ekseninde yatay gölge
+                        let kalınlık = if dikey {
+                            şerit.genişlik
+                        } else {
+                            şerit.yükseklik
+                        };
+                        let eşle = |değer: f64| {
+                            (((değer - alt_kapsam) / (üst_kapsam - alt_kapsam)) as f32 * kalınlık)
+                                .clamp(0.0, kalınlık)
+                        };
+                        // SliderZoomView zaman ekseninde gölge
                         // koordinatını veri sırasından değil ham zaman
                         // değerinin kapsam içindeki konumundan üretir. Bu
                         // ayrım, seans aralarındaki boş satırların önizlemede
@@ -3509,44 +3547,59 @@ pub fn grafiği_boya(
                         // eksen sıkıştırması burada özellikle uygulanmaz:
                         // ECharts `_renderDataShadow` da `getDataExtent` ile
                         // ham zaman kapsamını doğrusal eşler.
-                        let zaman_x_kapsamı = kurulum
-                            .x_eksenler
-                            .get(yakınlaştırma.x_eksen_sırası)
-                            .filter(|eksen| eksen.seçenek.tür == EksenTürü::Zaman)
-                            .and_then(|_| {
-                                let kapsam = (0..veri_sayısı)
-                                    .filter_map(x_al)
-                                    .filter(|değer| değer.is_finite())
-                                    .fold(
-                                        [f64::INFINITY, f64::NEG_INFINITY],
-                                        |[en_az, en_çok], değer| {
-                                            [en_az.min(değer), en_çok.max(değer)]
-                                        },
-                                    );
-                                (kapsam[0].is_finite()
-                                    && kapsam[1].is_finite()
-                                    && kapsam[1] > kapsam[0])
-                                    .then_some(kapsam)
-                            });
+                        let zaman_kapsamı = if dikey {
+                            yakınlaştırma
+                                .y_eksen_sırası
+                                .and_then(|sıra| kurulum.y_eksenler.get(sıra))
+                        } else {
+                            kurulum.x_eksenler.get(yakınlaştırma.x_eksen_sırası)
+                        }
+                        .filter(|eksen| eksen.seçenek.tür == EksenTürü::Zaman)
+                        .and_then(|_| {
+                            let kapsam = (0..veri_sayısı)
+                                .filter_map(bu_eksen_değeri_al)
+                                .filter(|değer| değer.is_finite())
+                                .fold(
+                                    [f64::INFINITY, f64::NEG_INFINITY],
+                                    |[en_az, en_çok], değer| [en_az.min(değer), en_çok.max(değer)],
+                                );
+                            (kapsam[0].is_finite()
+                                && kapsam[1].is_finite()
+                                && kapsam[1] > kapsam[0])
+                                .then_some(kapsam)
+                        });
+                        let dönüştür = |eksen: f32, karşı: f32| {
+                            if dikey {
+                                // SliderZoomView dikey sürgüyü yerel yatay
+                                // koordinatlarda çizer ve grubu +PI/2 ile
+                                // döndürür. zrender dönüşümünde bu,
+                                // `(u, v) -> (sol + v, alt - u)` olur:
+                                // veri sırası aşağıdan yukarı, karşı eksen
+                                // değeri soldan sağa ilerler.
+                                (şerit.x + karşı, şerit.alt() - eksen)
+                            } else {
+                                (şerit.x + eksen, şerit.alt() - karşı)
+                            }
+                        };
+                        let taban = |eksen: f32| dönüştür(eksen, 0.0);
                         let mut alan_yolu = crate::cizim::Yol::yeni();
-                        alan_yolu.taşı((şerit.sağ(), şerit.alt()));
-                        alan_yolu.çiz((şerit.x, şerit.alt()));
+                        alan_yolu.taşı(taban(uzunluk));
+                        alan_yolu.çiz(taban(0.0));
                         let mut çizgi_yolu = crate::cizim::Yol::yeni();
                         let mut çizgi_başladı = false;
                         let mut son_boş = false;
-                        let mut son_x = şerit.x;
+                        let mut son_eksen = 0.0;
                         // ECharts büyük veri gölgesinde yaklaşık bir örnek /
-                        // yatay piksel bırakır (`Math.round(count / width)`).
-                        let adım = ((veri_sayısı as f32 / şerit.genişlik.max(1.0)).round()
-                            as usize)
-                            .max(1);
+                        // eksen pikseli bırakır (`Math.round(count / size[0])`).
+                        let adım =
+                            ((veri_sayısı as f32 / uzunluk.max(1.0)).round() as usize).max(1);
                         for sıra in 0..veri_sayısı {
                             if sıra % adım != 0 {
                                 continue;
                             }
-                            let oran = zaman_x_kapsamı
+                            let oran = zaman_kapsamı
                                 .and_then(|[en_az, en_çok]| {
-                                    x_al(sıra)
+                                    bu_eksen_değeri_al(sıra)
                                         .filter(|değer| değer.is_finite())
                                         .map(|değer| ((değer - en_az) / (en_çok - en_az)) as f32)
                                 })
@@ -3557,21 +3610,21 @@ pub fn grafiği_boya(
                                         0.5
                                     }
                                 });
-                            let x = şerit.x + şerit.genişlik * oran;
-                            let değer = değer_al(sıra).filter(|değer| değer.is_finite());
+                            let eksen = uzunluk * oran;
+                            let değer = karşı_değer_al(sıra).filter(|değer| değer.is_finite());
                             if değer.is_none() && !son_boş && sıra > 0 {
-                                alan_yolu.çiz((son_x, şerit.alt()));
+                                alan_yolu.çiz(taban(son_eksen));
                                 if çizgi_başladı {
-                                    çizgi_yolu.çiz((son_x, şerit.alt()));
+                                    çizgi_yolu.çiz(taban(son_eksen));
                                 }
                             } else if değer.is_some() && son_boş {
-                                alan_yolu.çiz((x, şerit.alt()));
+                                alan_yolu.çiz(taban(eksen));
                                 if çizgi_başladı {
-                                    çizgi_yolu.çiz((x, şerit.alt()));
+                                    çizgi_yolu.çiz(taban(eksen));
                                 }
                             }
                             if let Some(değer) = değer {
-                                let nokta = (x, şerit.alt() - eşle(değer));
+                                let nokta = dönüştür(eksen, eşle(değer));
                                 alan_yolu.çiz(nokta);
                                 if çizgi_başladı {
                                     çizgi_yolu.çiz(nokta);
@@ -3581,26 +3634,78 @@ pub fn grafiği_boya(
                                 }
                             }
                             son_boş = değer.is_none();
-                            son_x = x;
+                            son_eksen = eksen;
                         }
                         alan_yolu.kapat();
-                        let seçili_sol = şerit.x + şerit.genişlik * b;
-                        let seçili_sağ = şerit.x + şerit.genişlik * e;
-                        let parçalar = [
-                            (şerit.x, seçili_sol, false),
-                            (seçili_sol, seçili_sağ, true),
-                            (seçili_sağ, şerit.sağ(), false),
-                        ];
-                        for (parça_sol, parça_sağ, seçili) in parçalar {
-                            if parça_sağ <= parça_sol {
+                        let parçalar = if dikey {
+                            let seçili_üst = şerit.y + şerit.yükseklik * (1.0 - e);
+                            let seçili_alt = şerit.y + şerit.yükseklik * (1.0 - b);
+                            [
+                                (
+                                    Dikdörtgen::yeni(
+                                        şerit.x,
+                                        şerit.y,
+                                        şerit.genişlik,
+                                        seçili_üst - şerit.y,
+                                    ),
+                                    false,
+                                ),
+                                (
+                                    Dikdörtgen::yeni(
+                                        şerit.x,
+                                        seçili_üst,
+                                        şerit.genişlik,
+                                        seçili_alt - seçili_üst,
+                                    ),
+                                    true,
+                                ),
+                                (
+                                    Dikdörtgen::yeni(
+                                        şerit.x,
+                                        seçili_alt,
+                                        şerit.genişlik,
+                                        şerit.alt() - seçili_alt,
+                                    ),
+                                    false,
+                                ),
+                            ]
+                        } else {
+                            let seçili_sol = şerit.x + şerit.genişlik * b;
+                            let seçili_sağ = şerit.x + şerit.genişlik * e;
+                            [
+                                (
+                                    Dikdörtgen::yeni(
+                                        şerit.x,
+                                        şerit.y,
+                                        seçili_sol - şerit.x,
+                                        şerit.yükseklik,
+                                    ),
+                                    false,
+                                ),
+                                (
+                                    Dikdörtgen::yeni(
+                                        seçili_sol,
+                                        şerit.y,
+                                        seçili_sağ - seçili_sol,
+                                        şerit.yükseklik,
+                                    ),
+                                    true,
+                                ),
+                                (
+                                    Dikdörtgen::yeni(
+                                        seçili_sağ,
+                                        şerit.y,
+                                        şerit.sağ() - seçili_sağ,
+                                        şerit.yükseklik,
+                                    ),
+                                    false,
+                                ),
+                            ]
+                        };
+                        for (kırpma, seçili) in parçalar {
+                            if kırpma.genişlik <= 0.0 || kırpma.yükseklik <= 0.0 {
                                 continue;
                             }
-                            let kırpma = Dikdörtgen::yeni(
-                                parça_sol,
-                                şerit.y,
-                                parça_sağ - parça_sol,
-                                şerit.yükseklik,
-                            );
                             let alan_rengi = crate::renk::Renk::onaltılık(0xc0c9e6)
                                 // Canvas kaynak-üstte birleşimi en yakın
                                 // kanala yuvarlar; tiny-skia yolu aşağı
@@ -4912,6 +5017,36 @@ mod yakınlaştırma_yönü_testleri {
     }
 
     #[test]
+    fn dikey_datazoom_golgesi_zrender_donusum_yonunu_izler() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::değer())
+            .y_ekseni(Eksen::değer())
+            .veri_yakınlaştırma(
+                crate::model::yakinlastirma::VeriYakınlaştırma::sürgü()
+                    .y_eksen_sırası(0)
+                    .sol(10)
+                    .üst(20)
+                    .genişlik(20)
+                    .yükseklik(100),
+            )
+            .seri(crate::model::seri::SaçılımSerisi::yeni().veri([
+                [0.0, 0.0],
+                [1.0, 10.0],
+                [2.0, 0.0],
+            ]));
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(200.0, 200.0);
+
+        grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("çiz #8292cc@1.0 k=0.5 düz | T(14.3,120.0) Ç(20.5,70.0) Ç(26.8,20.0)"),
+            "{döküm}"
+        );
+    }
+
+    #[test]
     fn özel_datazoom_tutamacı_yüzde_boyutunu_ve_dikey_dönüşü_korur() {
         let simge = crate::model::seri::Sembol::svg_yolu("path://M0 0H10V20H0Z")
             .expect("özel tutamaç yolu çözülmeli");
@@ -4961,9 +5096,18 @@ mod yakınlaştırma_yönü_testleri {
                             return String::new();
                         };
                         format!(
-                            "{}:{}",
+                            "{}:{}:{}",
                             parametre.veri_sırası,
-                            parametre.değer.sayı().unwrap_or_default()
+                            parametre.değer.sayı().unwrap_or_default(),
+                            parametre
+                                .boyut("schema")
+                                .and_then(|değer| match değer {
+                                    crate::model::deger::VeriDeğeri::Metin(metin) => {
+                                        Some(metin.as_str())
+                                    }
+                                    _ => None,
+                                })
+                                .unwrap_or("")
                         )
                     }),
             )
@@ -4974,7 +5118,10 @@ mod yakınlaştırma_yönü_testleri {
                     .sembol_göster(false)
                     .veri([
                         crate::model::deger::VeriÖğesi::yeni([0.0, 10.0]),
-                        crate::model::deger::VeriÖğesi::yeni([86_400_000.0, 20.0]),
+                        crate::model::deger::VeriÖğesi::yeni([86_400_000.0, 20.0]).boyutlar([(
+                            "schema".to_owned(),
+                            crate::model::deger::VeriDeğeri::Metin("calcium".to_owned()),
+                        )]),
                     ]),
             );
         let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
@@ -4989,7 +5136,7 @@ mod yakınlaştırma_yönü_testleri {
         );
 
         let döküm = yüzey.döküm();
-        assert!(döküm.contains("yazı \"1:20\""), "{döküm}");
+        assert!(döküm.contains("yazı \"1:20:calcium\""), "{döküm}");
         assert!(
             döküm.contains("Y(4.0 bS 626.0,65.0)"),
             "showSymbol=false imleç vurgu sembolü eksik: {döküm}"

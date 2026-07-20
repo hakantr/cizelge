@@ -1392,12 +1392,22 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
     };
     // EffectSymbol çekirdeği önce, z2=99 dalgaları sonra boyar.
     for nokta in noktalar {
-        let renk = nokta_rengi(nokta);
         let vurgulu_mu = vurgulu == Some(nokta.sıra);
         let boyut = nokta.boyut * ilerleme.clamp(0.0, 1.0) * if vurgulu_mu { 1.15 } else { 1.0 };
         let öğe_stili = seri.veri.get(nokta.sıra).and_then(|öğe| öğe.stil.as_ref());
+        let mut dolgu = nokta_görselleri
+            .get(nokta.sıra)
+            .and_then(Option::as_ref)
+            .and_then(|(_, dolgu)| dolgu.clone());
+        if vurgulu_mu && let Some(vurgu_dolgusu) = &seri.vurgu_öğe_stili.renk {
+            dolgu = Some(vurgu_dolgusu.clone());
+        }
+        let renk = dolgu
+            .as_ref()
+            .map(Dolgu::temsilî)
+            .unwrap_or_else(|| nokta_rengi(nokta));
         let nokta_opaklığı = if vurgulu_mu {
-            1.0
+            seri.vurgu_öğe_stili.opaklık.unwrap_or(1.0)
         } else {
             öğe_stili.and_then(|stil| stil.opaklık).unwrap_or(opaklık)
         };
@@ -1418,23 +1428,27 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
                 seri.öğe_stili.gölge_kayması,
             );
         }
-        let kenarlık = (seri.öğe_stili.kenarlık_kalınlığı > 0.0).then(|| {
+        let kenarlık_stili = if vurgulu_mu
+            && (seri.vurgu_öğe_stili.kenarlık_kalınlığı > 0.0
+                || seri.vurgu_öğe_stili.kenarlık_rengi.is_some())
+        {
+            &seri.vurgu_öğe_stili
+        } else {
+            &seri.öğe_stili
+        };
+        let kenarlık = (kenarlık_stili.kenarlık_kalınlığı > 0.0).then(|| {
             (
-                seri.öğe_stili.kenarlık_kalınlığı,
-                seri.öğe_stili.kenarlık_rengi.unwrap_or(renk),
+                kenarlık_stili.kenarlık_kalınlığı,
+                kenarlık_stili.kenarlık_rengi.unwrap_or(renk),
             )
         });
-        let dolgu = nokta_görselleri
-            .get(nokta.sıra)
-            .and_then(Option::as_ref)
-            .and_then(|(_, dolgu)| dolgu.as_ref());
         sembol_stilli_çiz(
             çizici,
             &seri.sembol,
             nokta.konum,
             boyut,
             renk,
-            dolgu,
+            dolgu.as_ref(),
             kenarlık,
             nokta_opaklığı,
             seri.sembol_oranını_koru,
@@ -2215,5 +2229,35 @@ mod testler {
         let noktalar = saçılım_etiket_çizgisi_noktaları(&etiket, 5.0);
 
         assert_eq!(noktalar, [(15.0, 50.0), (55.0, 50.0), (60.0, 50.0)]);
+    }
+
+    #[test]
+    fn scatter_vurgu_oge_stili_normal_dolgunun_ustune_yazilir() {
+        let seri = SaçılımSerisi::yeni()
+            .öğe_stili(crate::model::stil::ÖğeStili::yeni().renk(0x5470c6))
+            .vurgu_öğe_stili(crate::model::stil::ÖğeStili::yeni().renk(0xffffff))
+            .veri([[1.0, 1.0]]);
+        let noktalar = [SaçılımNoktası {
+            sıra: 0,
+            konum: (50.0, 50.0),
+            boyut: 8.0,
+            x_değeri: 1.0,
+            y_değeri: 1.0,
+            palet_sırası: None,
+        }];
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+
+        saçılım_çiz(
+            &mut yüzey,
+            &seri,
+            &noktalar,
+            Renk::onaltılık(0x5470c6),
+            1.0,
+            0.0,
+            Some(0),
+        );
+
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("#ffffff@1.0"), "{döküm}");
     }
 }

@@ -105,8 +105,12 @@ pub struct VeriYakınlaştırma {
     pub bitiş_değeri: Option<YakınlaştırmaDeğeri>,
     /// Pencere dışındaki verinin işlenme biçimi (`filterMode`).
     pub süzme_kipi: YakınlaştırmaSüzmeKipi,
+    /// Sürükleme sırasında verinin eşzamanlı güncellenmesi (`realtime`).
+    /// Kapalı olduğunda etkileşim katmanı pencereyi bırakma anında uygular.
+    pub gerçek_zamanlı: bool,
     /// İsteğe bağlı kutu yerleşimi (`left/top/bottom/width/height`).
     pub sol: Option<Uzunluk>,
+    pub sağ: Option<Uzunluk>,
     pub üst: Option<Uzunluk>,
     pub alt: Option<Uzunluk>,
     pub genişlik: Option<Uzunluk>,
@@ -135,7 +139,9 @@ impl Default for VeriYakınlaştırma {
             başlangıç_değeri: None,
             bitiş_değeri: None,
             süzme_kipi: YakınlaştırmaSüzmeKipi::Süz,
+            gerçek_zamanlı: true,
             sol: None,
+            sağ: None,
             üst: None,
             alt: None,
             genişlik: None,
@@ -257,6 +263,13 @@ impl VeriYakınlaştırma {
 
     pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
         self.sol = Some(sol.into());
+        self.sağ = None;
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
+        self.sol = None;
         self
     }
 
@@ -343,6 +356,11 @@ impl VeriYakınlaştırma {
         self
     }
 
+    pub fn gerçek_zamanlı(mut self, gerçek_zamanlı: bool) -> Self {
+        self.gerçek_zamanlı = gerçek_zamanlı;
+        self
+    }
+
     /// Pencere oranları `0..=1`.
     pub fn oranlar(&self) -> (f32, f32) {
         (self.başlangıç / 100.0, self.bitiş / 100.0)
@@ -397,5 +415,25 @@ impl VeriYakınlaştırma {
             (0.0, 1.0)
         };
         Some(([başlangıç, bitiş], oranlar))
+    }
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+
+    #[test]
+    fn slider_realtime_kapali_ve_coklu_eksen_hedefleri_korunur() {
+        let yakınlaştırma = VeriYakınlaştırma::sürgü()
+            .x_eksenleri([0, 1])
+            .süzme_kipi(YakınlaştırmaSüzmeKipi::Boşalt)
+            .gerçek_zamanlı(false);
+
+        assert!(!yakınlaştırma.gerçek_zamanlı);
+        assert_eq!(
+            yakınlaştırma.hedef_x_eksenleri().collect::<Vec<_>>(),
+            [0, 1]
+        );
+        assert_eq!(yakınlaştırma.süzme_kipi, YakınlaştırmaSüzmeKipi::Boşalt);
     }
 }

@@ -1341,6 +1341,9 @@ pub struct SaçılımSerisi {
     /// Özel SVG yolunun en/boy oranını korur (`symbolKeepAspect`).
     pub sembol_oranını_koru: bool,
     pub öğe_stili: ÖğeStili,
+    /// `emphasis.itemStyle`; vurgulanan sembolde yalnız açık alanlar normal
+    /// stilin üstüne uygulanır.
+    pub vurgu_öğe_stili: ÖğeStili,
     /// Seri düzeyindeki işlevsel `itemStyle.color`. Veri öğesinin açık
     /// `itemStyle.color` değeri bu callback'in önüne geçer.
     pub öğe_rengi_işlevi: Option<ÖğeRengiİşlevi>,
@@ -1410,6 +1413,7 @@ impl Default for SaçılımSerisi {
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
             sembol_oranını_koru: false,
             öğe_stili: ÖğeStili::default(),
+            vurgu_öğe_stili: ÖğeStili::default(),
             öğe_rengi_işlevi: None,
             etiket: Etiket::default(),
             etiket_çizgisi: None,
@@ -1634,6 +1638,11 @@ impl SaçılımSerisi {
     /// (`symbolKeepAspect`).
     pub fn sembol_oranını_koru(mut self, koru: bool) -> Self {
         self.sembol_oranını_koru = koru;
+        self
+    }
+
+    pub fn vurgu_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.vurgu_öğe_stili = stil;
         self
     }
 

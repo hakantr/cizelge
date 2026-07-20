@@ -714,6 +714,18 @@ pub struct İpucuParametresi {
     pub veri_sırası: usize,
     pub ad: String,
     pub değer: VeriDeğeri,
+    /// ECharts `params.data` içindeki adlandırılmış ham boyutlar. Koordinat
+    /// dışındaki group/schema gibi alanlar özel formatter'da kaybolmaz.
+    pub boyutlar: Vec<(String, VeriDeğeri)>,
+}
+
+impl İpucuParametresi {
+    pub fn boyut(&self, ad: &str) -> Option<&VeriDeğeri> {
+        self.boyutlar
+            .iter()
+            .find(|(boyut_adı, _)| boyut_adı == ad)
+            .map(|(_, değer)| değer)
+    }
 }
 
 type İpucuBiçimleyiciİşlevi = dyn Fn(&[İpucuParametresi]) -> String + Send + Sync;

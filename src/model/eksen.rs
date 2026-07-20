@@ -366,6 +366,9 @@ pub struct EksenÇentiği {
     /// Kategori eksenlerinde çentiği etiketle hizalar
     /// (`axisTick.alignWithLabel`).
     pub etiketle_hizala: bool,
+    /// Çentik çizgisi rengi (`axisTick.lineStyle.color`). `None` iken
+    /// etkin tema rengi kullanılır.
+    pub renk: Option<Renk>,
 }
 
 impl Default for EksenÇentiği {
@@ -374,7 +377,34 @@ impl Default for EksenÇentiği {
             göster: None,
             uzunluk: 5.0,
             etiketle_hizala: false,
+            renk: None,
         }
+    }
+}
+
+impl EksenÇentiği {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = Some(göster);
+        self
+    }
+
+    pub fn uzunluk(mut self, uzunluk: f32) -> Self {
+        self.uzunluk = uzunluk.max(0.0);
+        self
+    }
+
+    pub fn etiketle_hizala(mut self, hizala: bool) -> Self {
+        self.etiketle_hizala = hizala;
+        self
+    }
+
+    pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
+        self.renk = Some(renk.into());
+        self
     }
 }
 
@@ -980,5 +1010,19 @@ mod testler {
         let eksen = Eksen::zaman();
         assert_eq!(eksen.bölme_sayısı, 6);
         assert!(!eksen.bölme_görünür_mü());
+    }
+
+    #[test]
+    fn eksen_centigi_cizgi_stilinin_rengini_ve_olculerini_korur() {
+        let çentik = EksenÇentiği::yeni()
+            .göster(true)
+            .uzunluk(9.0)
+            .etiketle_hizala(true)
+            .renk(0x2a8339);
+
+        assert_eq!(çentik.göster, Some(true));
+        assert_eq!(çentik.uzunluk, 9.0);
+        assert!(çentik.etiketle_hizala);
+        assert_eq!(çentik.renk, Some(Renk::onaltılık(0x2a8339)));
     }
 }

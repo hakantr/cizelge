@@ -464,7 +464,11 @@ pub fn eksenleri_çiz(
 
         // 2) Çentikler.
         if çentik_göster {
-            let renk = tema::eksen_çentiği();
+            let renk = eksen
+                .seçenek
+                .çentik
+                .renk
+                .unwrap_or_else(tema::eksen_çentiği);
             let uzunluk = eksen.seçenek.çentik.uzunluk;
             for (i, konum) in eksen
                 .çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala)
