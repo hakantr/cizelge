@@ -1,0 +1,19 @@
+{
+  "id": "scatter-nutrients-matrix",
+  "senaryo": "etkileşim",
+  "kare": "zoom-left",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2190,
+  "değişen_piksel_oranı": 0.00811111111111111,
+  "ssim": 0.9904338094456787,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-nutrients-matrix-zoom-left.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-nutrients-matrix-zoom-left.png",
+    "fark": "testler/gorsel/fark/default/scatter-nutrients-matrix-zoom-left.png"
+  }
+}
