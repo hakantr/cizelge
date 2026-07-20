@@ -169,7 +169,13 @@ pub fn yerleşim_hesapla(girdiler: &[SütunGirdisi], bant_genişliği: f32) -> V
             yığın_kimliği: yığın_kimliği(g.seri, g.genel_sıra),
             genişlik: g.seri.genişlik,
             en_çok_genişlik: g.seri.en_çok_genişlik,
-            en_az_genişlik: g.seri.en_az_genişlik,
+            // ECharts `barGrid.createLayoutInfoListOnAxis`: büyük kipte
+            // açık barMinWidth yoksa 0,5 px kullanılır. Yüz binlerce dar
+            // kategori bu sayede Canvas rect rasterinde kesintisiz görünür.
+            en_az_genişlik: g.seri.en_az_genişlik.or_else(|| {
+                (g.seri.büyük && g.seri.veri.len() >= g.seri.büyük_eşiği)
+                    .then_some(crate::model::Uzunluk::Piksel(0.5))
+            }),
             sütun_boşluğu: g.seri.sütun_boşluğu,
             kategori_boşluğu: g.seri.kategori_boşluğu,
         })

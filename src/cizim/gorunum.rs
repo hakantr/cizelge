@@ -1359,7 +1359,17 @@ fn kartezyen_kur(
                 y_kapsam
             };
             kapsa(değer_kapsamı, *tepe);
-            if sütun_mu || taban.abs() > 1e-12 {
+            // Bar'ın geometrik tabanı her zaman sıfırdır; ancak `scale: true`
+            // (`sıfırı_içer: false`) değer ekseninin veri kapsamına sıfırı
+            // katmaz. ECharts tabanı ölçek dışında eşleyip grid'de kırpar.
+            // Yığılmış serinin sıfırdan farklı tabanı ise gerçek veri
+            // kapsamıdır ve her iki kipte de korunmalıdır.
+            let değer_ekseni_sıfırı_içer = if y_kategorik && !x_kategorik {
+                x_seçenek.sıfırı_içer
+            } else {
+                y_seçenek.sıfırı_içer
+            };
+            if taban.abs() > 1e-12 || (sütun_mu && değer_ekseni_sıfırı_içer) {
                 kapsa(değer_kapsamı, *taban);
             }
             if x_kategorik || !y_kategorik {
@@ -1711,7 +1721,12 @@ fn kartezyen_kur(
                     &mut *y_kapsam
                 };
                 kapsa(değer_kapsamı, *tepe);
-                if sütun_mu || taban.abs() > 1e-12 {
+                let değer_ekseni_sıfırı_içer = if y_kategorik && !x_kategorik {
+                    x_seçenek.sıfırı_içer
+                } else {
+                    y_seçenek.sıfırı_içer
+                };
+                if taban.abs() > 1e-12 || (sütun_mu && değer_ekseni_sıfırı_içer) {
                     kapsa(değer_kapsamı, *taban);
                 }
                 if x_kategorik || !y_kategorik {
@@ -3571,10 +3586,36 @@ pub fn grafiği_boya(
                             Seri::Saçılım(saçılım) => saçılım.veri_sayısı(),
                             _ => gölge_serisi.veri().len(),
                         };
+                        let gölge_bağı = gölge_serisi.eksen_bağı();
+                        let gölge_x_kategorik = kurulum
+                            .x_eksenler
+                            .get(gölge_bağı.x)
+                            .is_some_and(|eksen| eksen.seçenek.tür == EksenTürü::Kategori);
+                        let gölge_y_kategorik = kurulum
+                            .y_eksenler
+                            .get(gölge_bağı.y)
+                            .is_some_and(|eksen| eksen.seçenek.tür == EksenTürü::Kategori);
                         let xy_al = |sıra: usize| match gölge_serisi {
                             Seri::Saçılım(saçılım) if saçılım.düz_veri.is_some() => {
                                 saçılım.xy(sıra)
                             }
+                            // Candlestick/boxplot veri deposunda karşı
+                            // eksenin öntanımlı boyutu ilk çoklu değerdir
+                            // (`open` / `min`). SliderZoomView gölge serisi
+                            // için `data.mapDimension(otherAxis.dim)` ile
+                            // tam olarak bu boyutu seçer.
+                            Seri::Mum(_) | Seri::Kutu(_) => gölge_serisi
+                                .veri()
+                                .get(sıra)
+                                .and_then(|öğe| öğe.değer.dizi())
+                                .and_then(|değerler| değerler.first().copied())
+                                .map(|değer| {
+                                    if gölge_y_kategorik && !gölge_x_kategorik {
+                                        (değer, sıra as f64)
+                                    } else {
+                                        (sıra as f64, değer)
+                                    }
+                                }),
                             _ => gölge_serisi.veri().get(sıra).and_then(|öğe| {
                                 if let Some(x) = öğe.değer.x() {
                                     Some((x, öğe.değer.sayı()?))
@@ -4986,6 +5027,23 @@ mod yakınlaştırma_yönü_testleri {
     }
 
     #[test]
+    fn olcekli_deger_ekseni_sutun_tabanini_veri_kapsamina_katmaz() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer().ölçekli(true).bölme_sayısı(2))
+            .seri(crate::model::seri::SütunSerisi::yeni().veri([5_401_538.0, 12_204_426.0]));
+        let yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let kurulum = kartezyen_kur(&yüzey, &seçenekler, &HashSet::new())
+            .expect("kartezyen kurulum üretilmeli");
+
+        assert_eq!(
+            kurulum.y_eksenler[0].ölçek.kapsam(),
+            [3_000_000.0, 15_000_000.0]
+        );
+    }
+
+    #[test]
     fn sessiz_scatter_çizilir_ama_isabet_bölgesi_üretmez() {
         let seçenekler = GrafikSeçenekleri::yeni()
             .animasyon(false)
@@ -5194,6 +5252,36 @@ mod yakınlaştırma_yönü_testleri {
         let döküm = yüzey.döküm();
         assert!(
             döküm.contains("çiz #8292cc@1.0 k=0.5 düz | T(14.3,121.8) Ç(20.5,71.8) Ç(26.8,21.8)"),
+            "{döküm}"
+        );
+    }
+
+    #[test]
+    fn candlestick_datazoom_golgesi_acilis_boyutunu_kullanir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+            .y_ekseni(Eksen::değer().ölçekli(true))
+            .veri_yakınlaştırma(
+                crate::model::yakinlastirma::VeriYakınlaştırma::sürgü()
+                    .sol(20)
+                    .alt(10)
+                    .genişlik(120)
+                    .yükseklik(30),
+            )
+            .seri(crate::model::seri::MumSerisi::yeni().veri([
+                [1.0, 2.0, 0.0, 3.0],
+                [10.0, 9.0, 8.0, 11.0],
+                [1.0, 2.0, 0.0, 3.0],
+            ]));
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(200.0, 200.0);
+
+        grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm
+                .contains("çiz #8292cc@1.0 k=0.5 düz | T(22.8,190.9) Ç(82.8,172.1) Ç(142.8,190.9)"),
             "{döküm}"
         );
     }
