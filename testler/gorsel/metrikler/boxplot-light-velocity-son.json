@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1193,
-  "değişen_piksel_oranı": 0.004418518518518519,
-  "ssim": 0.9966864632666103,
+  "değişen_piksel": 1192,
+  "değişen_piksel_oranı": 0.004414814814814815,
+  "ssim": 0.9966941194219088,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/boxplot-light-velocity.png",
     "gerçek": "testler/gorsel/gerçek/default/boxplot-light-velocity.png",

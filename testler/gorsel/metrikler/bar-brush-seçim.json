@@ -1,0 +1,19 @@
+{
+  "id": "bar-brush",
+  "senaryo": "etkileşim",
+  "kare": "seçim",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1316,
+  "değişen_piksel_oranı": 0.004874074074074074,
+  "ssim": 0.9986309559505773,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-brush-seçim.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-brush-seçim.png",
+    "fark": "testler/gorsel/fark/default/bar-brush-seçim.png"
+  }
+}
