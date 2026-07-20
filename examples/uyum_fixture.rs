@@ -3827,6 +3827,51 @@ fn calendar_heatmap() -> GrafikSeçenekleri {
         .seri(TakvimSerisi::yeni(2016).takvim_sırası(0).veri(veri))
 }
 
+fn calendar_simple() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let başlangıç = takvimden_ana(TakvimAnı {
+        yıl: 2017,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let bitiş = takvimden_ana(TakvimAnı {
+        yıl: 2018,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut tohum = 0x5eed_1234;
+    let mut veri = Vec::with_capacity(365);
+    let mut zaman = başlangıç;
+    while zaman < bitiş {
+        veri.push(VeriÖğesi::from([
+            zaman,
+            (kanıt_rastgele(&mut tohum) * 10_000.0).floor(),
+        ]));
+        zaman += 86_400_000.0;
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .en_az(0.0)
+                .en_çok(10_000.0),
+        )
+        .takvim(TakvimKoordinatı::yıl(2017))
+        .seri(TakvimSerisi::yeni(2017).takvim_sırası(0).veri(veri))
+}
+
 fn calendar_vertical() -> GrafikSeçenekleri {
     use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
 
@@ -4689,6 +4734,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "heatmap-large" => Ok(heatmap_large()),
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
         "calendar-heatmap" => Ok(calendar_heatmap()),
+        "calendar-simple" => Ok(calendar_simple()),
         "calendar-vertical" => Ok(calendar_vertical()),
         "calendar-horizontal" => Ok(calendar_horizontal()),
         "pie-simple" => Ok(pie_simple()),

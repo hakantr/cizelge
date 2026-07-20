@@ -262,7 +262,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -275,14 +275,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 138,
+          "değişen_piksel_oranı": 0.0005111111111111112,
+          "ssim": 0.9994870257850397,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-simple.png",
+            "sha256": "1cbb6e5520503fb2620e2b83809de3f02ddbe2557db98338ab716d97baacde9c"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-simple.png",
+            "sha256": "58e8f983bfb0b0f9f78dcd9b1a8fc74efe76b77a4a6ee54dd7969de462ed61cb"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-simple.png",
+            "sha256": "d33c3d86895b07372068199f0a9fc1a31b7f2eacf65518d2700c7ed769b31fd9"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-simple-son.json",
+            "sha256": "a9c39a68be15dfebfaa916b2457add387e68393a5e78ecac9951d0cce82a9976"
+          }
+        }
+      ]
     }
   },
   {

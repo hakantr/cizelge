@@ -149,6 +149,7 @@ const YEREL_FIXTURE = Object.freeze({
   'heatmap-large': 'examples/uyum_fixture.rs#heatmap_large',
   'heatmap-large-piecewise': 'examples/uyum_fixture.rs#heatmap_large_piecewise',
   'calendar-heatmap': 'examples/uyum_fixture.rs#calendar_heatmap',
+  'calendar-simple': 'examples/uyum_fixture.rs#calendar_simple',
   'calendar-vertical': 'examples/uyum_fixture.rs#calendar_vertical',
   'calendar-horizontal': 'examples/uyum_fixture.rs#calendar_horizontal',
   'line-marker': 'examples/uyum_fixture.rs#line_marker',
