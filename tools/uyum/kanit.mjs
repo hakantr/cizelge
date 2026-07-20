@@ -109,6 +109,15 @@ const SENARYOLAR = [
       { ad: 'sıfırla', kare: 1, durum: 'sıfırla' }
     ]
   },
+  {
+    id: 'bar-gradient',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'vurgu', kare: 1, durum: 'vurgu' },
+      { ad: 'yakınlaştır', kare: 1, durum: 'yakınlaştır' }
+    ]
+  },
   { id: 'data-transform-sort-bar', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'dataset-simple0', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'dataset-simple1', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

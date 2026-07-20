@@ -559,6 +559,47 @@ async function çalıştır() {
     await sayfa.waitForFunction(() => window.__ready || window.__referenceError, { timeout: 30000 });
     const hata = await sayfa.evaluate(() => window.__referenceError || null);
     if (hata) throw new Error(hata);
+    if (args.id === 'bar-gradient' && (args.state === 'vurgu' || args.state === 'yakınlaştır')) {
+      // Gerçek canvas işaretçi yolunu kullan: vurgu karesi zrender hit-test
+      // üzerinden emphasis durumuna, yakınlaştırma karesi ise resmî kaynakta
+      // kayıtlı chart.on('click') callback'ine ulaşır.
+      const nokta = await sayfa.evaluate(() => {
+        const chart = window.__chart;
+        const seri = chart.getModel().getSeriesByIndex(0);
+        const öğe = seri?.getData?.()?.getItemGraphicEl?.(8);
+        const kutu = öğe?.getBoundingRect?.()?.clone?.();
+        const dönüşüm = öğe?.getComputedTransform?.();
+        if (!kutu) throw new Error('bar-gradient dataIndex=8 grafik öğesi bulunamadı');
+        if (dönüşüm) kutu.applyTransform(dönüşüm);
+        return { x: kutu.x + kutu.width / 2, y: kutu.y + kutu.height / 2 };
+      });
+      if (args.state === 'vurgu') await sayfa.mouse.move(nokta.x, nokta.y);
+      else await sayfa.mouse.click(nokta.x, nokta.y);
+      const etkileşim = await sayfa.evaluate((durum) => {
+        const chart = window.__chart;
+        window.__advance(350);
+        chart.getZr().animation.update();
+        chart.getZr().flush();
+        const öğe = chart.getModel().getSeriesByIndex(0).getData().getItemGraphicEl(8);
+        const seçenek = chart.getOption();
+        return {
+          vurgulu: öğe?.currentStates?.includes?.('emphasis') === true,
+          başlangıç: seçenek.dataZoom?.[0]?.startValue,
+          bitiş: seçenek.dataZoom?.[0]?.endValue
+        };
+      }, args.state);
+      if (args.state === 'vurgu' && !etkileşim.vurgulu) {
+        throw new Error('bar-gradient gerçek pointer hareketi emphasis durumunu üretmedi');
+      }
+      if (args.state === 'yakınlaştır'
+          && !['者', 5].includes(etkileşim.başlangıç)) {
+        throw new Error(`bar-gradient click startValue üretmedi: ${etkileşim.başlangıç}`);
+      }
+      if (args.state === 'yakınlaştır'
+          && !['上', 11].includes(etkileşim.bitiş)) {
+        throw new Error(`bar-gradient click endValue üretmedi: ${etkileşim.bitiş}`);
+      }
+    }
     if (process.env.UYUM_DEBUG_LAYOUT) {
       const yerleşim = await sayfa.evaluate((yalnızDataZoom) => {
         const chart = window.__chart;

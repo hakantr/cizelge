@@ -2930,6 +2930,185 @@ fn bar_breaks_simple(durum: &str) -> Result<GrafikSeçenekleri, String> {
     Ok(seçenekler)
 }
 
+fn bar_gradient(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let kategoriler = [
+        "点", "击", "柱", "子", "或", "者", "两", "指", "在", "触", "屏", "上", "滑", "动", "能",
+        "够", "自", "动", "缩", "放",
+    ];
+    let normal = Dolgu::doğrusal(
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        vec![
+            RenkDurağı::yeni(0.0, "#83bff6"),
+            RenkDurağı::yeni(0.5, "#188df0"),
+            RenkDurağı::yeni(1.0, "#188df0"),
+        ],
+    );
+    let vurgu = Dolgu::doğrusal(
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        vec![
+            RenkDurağı::yeni(0.0, "#2378f7"),
+            RenkDurağı::yeni(0.7, "#2378f7"),
+            RenkDurağı::yeni(1.0, "#83bff6"),
+        ],
+    );
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("特性示例：渐变色 阴影 点击缩放")
+                .alt_metin("Feature Sample: Gradient Color, Shadow, Click Zoom")
+                .iç_boşluk(15.0),
+        )
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(kategoriler)
+                .z(10)
+                .çizgi(EksenÇizgisi::yeni().göster(false))
+                .çentik(EksenÇentiği::yeni().göster(false))
+                .etiket(
+                    EksenEtiketi::yeni()
+                        .içeride(true)
+                        .yazı(YazıStili::yeni().renk("#fff")),
+                ),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .çizgi(EksenÇizgisi::yeni().göster(false))
+                .çentik(EksenÇentiği::yeni().göster(false))
+                .etiket(EksenEtiketi::yeni().yazı(YazıStili::yeni().renk("#999"))),
+        )
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .seri(
+            SütunSerisi::yeni()
+                .arka_plan_göster(true)
+                .öğe_stili(ÖğeStili::yeni().renk(normal))
+                .vurgu_öğe_stili(ÖğeStili::yeni().renk(vurgu))
+                .veri([
+                    220, 182, 191, 234, 290, 330, 310, 123, 442, 321, 90, 149, 210, 122, 133, 334,
+                    198, 123, 125, 220,
+                ]),
+        );
+
+    match durum {
+        "başlangıç" | "vurgu" => Ok(seçenekler),
+        "yakınlaştır" => {
+            // Resmî click callback'i dataIndex=8 için zoomSize=6 ile bu iki
+            // kategori adını `dispatchAction` yüküne koyar.
+            let mut çalışma =
+                GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler)
+                    .map_err(|hata| hata.to_string())?;
+            let mut eylemler = EylemKayıtDefteri::yeni();
+            veri_yakınlaştırma_eylemini_kaydet(&mut eylemler).map_err(|hata| hata.to_string())?;
+            eylemler
+                .gönder(
+                    &mut çalışma,
+                    &EylemYükü::yeni("dataZoom")
+                        .alan("startValue", "者")
+                        .alan("endValue", "上"),
+                )
+                .map_err(|hata| hata.to_string())?;
+            çalışma.seçenekleri_al().map_err(|hata| hata.to_string())
+        }
+        _ => Err(format!(
+            "bar-gradient durumu başlangıç, vurgu veya yakınlaştır olmalı: {durum}"
+        )),
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::expect_used, clippy::panic)]
+mod bar_gradient_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_option_kategorileri_eksenleri_ve_gradyanlari_kayipsiz_tasir() {
+        let seçenekler = bar_gradient("başlangıç").expect("fixture kurulmalı");
+        let başlık = seçenekler.başlık.as_ref().expect("başlık");
+        assert_eq!(
+            başlık.metin.as_deref(),
+            Some("特性示例：渐变色 阴影 点击缩放")
+        );
+        assert_eq!(
+            başlık.alt_metin.as_deref(),
+            Some("Feature Sample: Gradient Color, Shadow, Click Zoom")
+        );
+        let x = seçenekler.x_ekseni.as_ref().expect("x ekseni");
+        assert_eq!(x.veri.len(), 20);
+        assert_eq!(x.veri.first().map(String::as_str), Some("点"));
+        assert_eq!(x.veri.last().map(String::as_str), Some("放"));
+        assert_eq!(x.z, 10);
+        assert!(x.etiket.içeride);
+        assert_eq!(x.etiket.yazı.renk, Some(Renk::BEYAZ));
+        assert_eq!(x.çizgi.göster, Some(false));
+        assert_eq!(x.çentik.göster, Some(false));
+
+        let Seri::Sütun(seri) = &seçenekler.seriler[0] else {
+            panic!("sütun serisi bekleniyordu");
+        };
+        assert!(seri.arka_plan_göster);
+        assert_eq!(seri.veri.len(), 20);
+        assert_eq!(seri.veri[8].değer.sayı(), Some(442.0));
+        let Some(Dolgu::DoğrusalGradyan { duraklar, .. }) = &seri.öğe_stili.renk else {
+            panic!("normal doğrusal gradyan");
+        };
+        assert_eq!(
+            duraklar
+                .iter()
+                .map(|durak| (durak.konum, durak.renk))
+                .collect::<Vec<_>>(),
+            [
+                (0.0, Renk::onaltılık(0x83bff6)),
+                (0.5, Renk::onaltılık(0x188df0)),
+                (1.0, Renk::onaltılık(0x188df0)),
+            ]
+        );
+        let Some(Dolgu::DoğrusalGradyan { duraklar, .. }) = &seri.vurgu_öğe_stili.renk else {
+            panic!("vurgu doğrusal gradyanı");
+        };
+        assert_eq!(duraklar[1].konum, 0.7);
+        assert_eq!(duraklar[1].renk, Renk::onaltılık(0x2378f7));
+    }
+
+    #[test]
+    fn tiklama_durumu_resmi_start_value_end_value_actionini_uygular() {
+        let seçenekler = bar_gradient("yakınlaştır").expect("yakınlaştırma durumu");
+        let yakınlaştırma = &seçenekler.veri_yakınlaştırmaları[0];
+        assert_eq!(
+            yakınlaştırma.başlangıç_değeri,
+            Some(YakınlaştırmaDeğeri::Kategori("者".to_owned()))
+        );
+        assert_eq!(
+            yakınlaştırma.bitiş_değeri,
+            Some(YakınlaştırmaDeğeri::Kategori("上".to_owned()))
+        );
+    }
+
+    #[test]
+    fn vurgu_karesi_faredeki_sutuna_emphasis_gradyanini_verir() {
+        let seçenekler = bar_gradient("vurgu").expect("vurgu durumu");
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        grafiği_boya(
+            &mut yüzey,
+            &seçenekler,
+            &BoyamaGirdisi {
+                fare: Some((328.0, 280.0)),
+                ..BoyamaGirdisi::default()
+            },
+        );
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("0.0:#2378f7@1.0 0.7:#2378f7@1.0 1.0:#83bff6@1.0"),
+            "{döküm}"
+        );
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::indexing_slicing, clippy::expect_used, clippy::panic)]
 mod bar_breaks_simple_testleri {
@@ -9103,6 +9282,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),
+        "bar-gradient" => bar_gradient(durum),
         "data-transform-sort-bar" => data_transform_sort_bar(),
         "dataset-simple0" => Ok(dataset_simple0()),
         "dataset-simple1" => dataset_simple1(),
@@ -9186,6 +9366,8 @@ fn çalıştır() -> Result<(), String> {
         Some((472.87, 250.0))
     } else if girdi.id == "dynamic-data" && girdi.durum == "ipucu" {
         Some((446.25, 250.0))
+    } else if girdi.id == "bar-gradient" && girdi.durum == "vurgu" {
+        Some((328.0, 280.0))
     } else {
         None
     };
