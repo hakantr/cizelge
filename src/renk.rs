@@ -124,6 +124,24 @@ impl Renk {
         self
     }
 
+    /// zrender `Path#getInsideTextFill/Stroke` karşılığı. Dolgu
+    /// parlaklığına göre iç etiket rengini ve gerekirse otomatik
+    /// konturun rengini döndürür.
+    pub fn zrender_iç_etiket_stili(self, koyu_kip: bool) -> (Renk, Option<Renk>) {
+        let parlaklık = (0.299 * self.kırmızı + 0.587 * self.yeşil + 0.114 * self.mavi) * self.alfa;
+        let metin = if parlaklık > 0.5 {
+            Renk::onaltılık(0x333333)
+        } else if parlaklık > 0.2 {
+            Renk::onaltılık(0xeeeeee)
+        } else {
+            Renk::onaltılık(0xcccccc)
+        };
+        let metin_parlaklığı = 0.299 * metin.kırmızı + 0.587 * metin.yeşil + 0.114 * metin.mavi;
+        let metin_koyu = metin_parlaklığı < 0.4;
+        let kontur = (koyu_kip == metin_koyu).then_some(self);
+        (metin, kontur)
+    }
+
     /// İki renk arasında doğrusal ara değer.
     pub fn karıştır(self, diğer: Renk, t: f32) -> Renk {
         let t = t.clamp(0.0, 1.0);
@@ -349,6 +367,18 @@ impl Dolgu {
         }
     }
 
+    /// zrender path iç-etiket karşılığı. Düz renklerde parlaklık hesabı
+    /// yapılır; gradyan ve görüntü desenleri renk metni olmadığından
+    /// `Path#getInsideTextFill` açık etikete, kontursuz olarak düşer.
+    pub fn zrender_iç_etiket_stili(&self, koyu_kip: bool) -> (Renk, Option<Renk>) {
+        match self {
+            Dolgu::Düz(renk) => renk.zrender_iç_etiket_stili(koyu_kip),
+            Dolgu::DoğrusalGradyan { .. } | Dolgu::RadyalGradyan { .. } | Dolgu::Desen(_) => {
+                (Renk::onaltılık(0xcccccc), None)
+            }
+        }
+    }
+
     pub fn radyal(x: f32, y: f32, yarıçap: f32, duraklar: Vec<RenkDurağı>) -> Self {
         Dolgu::RadyalGradyan {
             x,
@@ -499,6 +529,45 @@ mod testler {
         assert_eq!(
             Renk::çöz("rgba(255, 0, 0, 0.5)"),
             Some(Renk::kyma(1.0, 0.0, 0.0, 0.5))
+        );
+    }
+
+    #[test]
+    fn zrender_iç_etiket_parlaklığı_ve_konturu_path_dolgusunu_izler() {
+        let mavi = Renk::onaltılık(0x5070dd);
+        let yeşil = Renk::onaltılık(0xb6d634);
+        let siyah = Renk::SİYAH;
+
+        assert_eq!(
+            mavi.zrender_iç_etiket_stili(false),
+            (Renk::onaltılık(0xeeeeee), Some(mavi))
+        );
+        assert_eq!(
+            yeşil.zrender_iç_etiket_stili(false),
+            (Renk::onaltılık(0x333333), None)
+        );
+        assert_eq!(
+            siyah.zrender_iç_etiket_stili(false),
+            (Renk::onaltılık(0xcccccc), Some(siyah))
+        );
+        assert_eq!(
+            yeşil.zrender_iç_etiket_stili(true),
+            (Renk::onaltılık(0x333333), Some(yeşil))
+        );
+
+        let gradyan = Dolgu::doğrusal(
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            vec![
+                RenkDurağı::yeni(0.0, Renk::SİYAH),
+                RenkDurağı::yeni(1.0, Renk::BEYAZ),
+            ],
+        );
+        assert_eq!(
+            gradyan.zrender_iç_etiket_stili(false),
+            (Renk::onaltılık(0xcccccc), None)
         );
     }
 

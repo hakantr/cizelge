@@ -4407,6 +4407,101 @@ fn calendar_lunar() -> GrafikSeçenekleri {
         )
 }
 
+fn calendar_pie() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let tarih = |gün| {
+        takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay: 2,
+            gün,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        })
+    };
+    let tarihler = (1..=28).map(tarih).collect::<Vec<_>>();
+    let mut tohum = 0x5eed_1234;
+
+    // Resmî kaynak önce getVirtualData ile 28 rastgele scatter değeri,
+    // ardından her gün için üç pasta değeri tüketir.
+    let scatter_verisi = tarihler
+        .iter()
+        .enumerate()
+        .map(|(sıra, zaman)| {
+            VeriÖğesi::from([*zaman, (kanıt_rastgele(&mut tohum) * 10_000.0).floor()])
+                .boyutlar([("gün".to_string(), format!("{:02}", sıra + 1).into())])
+        })
+        .collect::<Vec<_>>();
+    let pasta_serileri = tarihler
+        .iter()
+        .map(|zaman| {
+            let iş = (kanıt_rastgele(&mut tohum) * 24.0).round();
+            let eğlence = (kanıt_rastgele(&mut tohum) * 24.0).round();
+            let uyku = (kanıt_rastgele(&mut tohum) * 24.0).round();
+            PastaSerisi::yeni()
+                .takvim_merkezi(*zaman)
+                .yarıçap(30.0)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .konum(EtiketKonumu::İç)
+                        .biçimleyici("{c}"),
+                )
+                .veri([
+                    VeriÖğesi::adlı("Work", iş),
+                    VeriÖğesi::adlı("Entertainment", eğlence),
+                    VeriÖğesi::adlı("Sleep", uyku),
+                ])
+        })
+        .collect::<Vec<_>>();
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .ipucu(İpucu::yeni())
+        .gösterge(
+            Gösterge::yeni()
+                .alt(20)
+                .iç_boşluk(15.0)
+                .veri(["Work", "Entertainment", "Sleep"]),
+        )
+        .takvim(
+            TakvimKoordinatı::yeni(TakvimAralığı::yeni(tarih(1), tarih(28)))
+                .sol("center")
+                .üst("middle")
+                .yön(TakvimYönü::Dikey)
+                .ilk_gün(1)
+                .hücre_boyutu(Some(80.0), Some(80.0))
+                .yıl_etiketi(
+                    Etiket::yeni()
+                        .göster(false)
+                        .yazı(YazıStili::yeni().boyut(30.0)),
+                )
+                .gün_etiketi_kenar_boşluğu(20.0)
+                .gün_adları(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
+                .ay_etiketi(Etiket::yeni().göster(false)),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .takvim_sırası(0)
+                .sembol_boyutu(0.0)
+                .etiket_boyutunu_eşle("gün")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .kayma(-30.0, -30.0)
+                        .yazı(YazıStili::yeni().boyut(14.0)),
+                )
+                .veri(scatter_verisi),
+        );
+    for pasta in pasta_serileri {
+        seçenekler = seçenekler.seri(pasta);
+    }
+    seçenekler
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5137,6 +5232,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-effectscatter" => Ok(calendar_effectscatter()),
         "calendar-graph" => Ok(calendar_graph()),
         "calendar-lunar" => Ok(calendar_lunar()),
+        "calendar-pie" => Ok(calendar_pie()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

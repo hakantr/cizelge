@@ -35,7 +35,7 @@ use crate::grafik::kutupsal::{kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::paralel::paralel_çiz;
 use crate::grafik::pasta::{
-    Dilim, boş_pasta_çiz, dilim_değer_metni, pasta_yerleşimi, pasta_çiz
+    Dilim, boş_pasta_çiz_merkezle, dilim_değer_metni, pasta_yerleşimi_merkezle, pasta_çiz,
 };
 use crate::grafik::radar::{
     radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
@@ -3336,9 +3336,25 @@ pub fn grafiği_boya(
         if !ad_görünür(seri.ad(), kapalı) {
             continue;
         }
-        let dilimler: Vec<Dilim> = pasta_yerleşimi(p, seçenekler, tüm_alan, kapalı, ilerleme);
+        let takvim_merkezi = match p.takvim_sırası {
+            Some(takvim_sırası) => {
+                let Some(tarih) = p.takvim_merkez_tarihi else {
+                    continue;
+                };
+                let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+                    continue;
+                };
+                let Some(merkez) = yerleşim.veriden_noktaya(tarih) else {
+                    continue;
+                };
+                Some(merkez)
+            }
+            None => None,
+        };
+        let dilimler: Vec<Dilim> =
+            pasta_yerleşimi_merkezle(p, seçenekler, tüm_alan, kapalı, ilerleme, takvim_merkezi);
         if dilimler.is_empty() {
-            boş_pasta_çiz(yüzey, p, tüm_alan);
+            boş_pasta_çiz_merkezle(yüzey, p, tüm_alan, takvim_merkezi);
         }
 
         // Öğe ipucu: fare hangi dilimde?

@@ -650,6 +650,11 @@ impl fmt::Debug for EtiketYerleşimİşlevi {
 pub struct PastaSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
+    /// Takvim koordinatına bağlıysa `calendarIndex`; `None`, klasik
+    /// görünüm kutusu yerleşimidir.
+    pub takvim_sırası: Option<usize>,
+    /// `coordinateSystem: 'calendar'` kullanımındaki tarih merkezidir.
+    pub takvim_merkez_tarihi: Option<f64>,
     /// Seri görünüm kutusu (`left/right/top/bottom/width/height`). Yüzdeler
     /// ana çizim alanına göre çözülür.
     pub sol: Uzunluk,
@@ -702,6 +707,8 @@ impl Default for PastaSerisi {
         PastaSerisi {
             ad: None,
             veri: Vec::new(),
+            takvim_sırası: None,
+            takvim_merkez_tarihi: None,
             sol: Uzunluk::Piksel(0.0),
             sağ: Uzunluk::Piksel(0.0),
             üst: Uzunluk::Piksel(0.0),
@@ -766,6 +773,20 @@ impl PastaSerisi {
 
     pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
         self.veri = veri_listesi(veri);
+        self
+    }
+
+    /// Pastayı belirtilen `calendarIndex` bileşenine bağlar.
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = Some(sıra);
+        self
+    }
+
+    /// Pasta merkezini takvimdeki bir tarihe bağlar. Açık bir
+    /// `calendarIndex` verilmediyse ECharts gibi sıfırıncı takvim seçilir.
+    pub fn takvim_merkezi(mut self, tarih_ms: f64) -> Self {
+        self.takvim_sırası.get_or_insert(0);
+        self.takvim_merkez_tarihi = Some(tarih_ms);
         self
     }
 

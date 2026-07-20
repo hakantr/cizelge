@@ -419,6 +419,9 @@ impl From<String> for Biçimleyici {
 pub struct Etiket {
     pub göster: bool,
     pub konum: EtiketKonumu,
+    /// Ana şekille hesaplanan konuma eklenen piksel kayması
+    /// (`label.offset: [x, y]`).
+    pub kayma: (f32, f32),
     pub biçimleyici: Option<Biçimleyici>,
     pub yazı: YazıStili,
     /// `label.rich`: adlandırılmış metin koşularının taban yazı stilinin
@@ -451,6 +454,7 @@ impl Default for Etiket {
             // zrender bağlı metin öntanımlısıdır. Line/Pie/Funnel gibi
             // seriler kendi resmi konum öntanımlarını seri modelinde koyar.
             konum: EtiketKonumu::İç,
+            kayma: (0.0, 0.0),
             biçimleyici: None,
             yazı: YazıStili::default(),
             zengin: BTreeMap::new(),
@@ -483,6 +487,11 @@ impl Etiket {
 
     pub fn konum(mut self, konum: EtiketKonumu) -> Self {
         self.konum = konum;
+        self
+    }
+
+    pub fn kayma(mut self, x: f32, y: f32) -> Self {
+        self.kayma = (x, y);
         self
     }
 
@@ -565,6 +574,7 @@ impl Etiket {
 pub struct EtiketYaması {
     pub göster: Option<bool>,
     pub konum: Option<EtiketKonumu>,
+    pub kayma: Option<(f32, f32)>,
     pub biçimleyici: Option<Biçimleyici>,
     pub yazı: Option<YazıStili>,
     pub zengin: Option<BTreeMap<String, YazıStili>>,
@@ -592,6 +602,11 @@ impl EtiketYaması {
 
     pub fn konum(mut self, konum: EtiketKonumu) -> Self {
         self.konum = Some(konum);
+        self
+    }
+
+    pub fn kayma(mut self, x: f32, y: f32) -> Self {
+        self.kayma = Some((x, y));
         self
     }
 
@@ -634,6 +649,9 @@ impl EtiketYaması {
         }
         if let Some(değer) = self.konum {
             sonuç.konum = değer;
+        }
+        if let Some(değer) = self.kayma {
+            sonuç.kayma = değer;
         }
         if let Some(değer) = &self.biçimleyici {
             sonuç.biçimleyici = Some(değer.clone());
@@ -683,6 +701,7 @@ impl From<Etiket> for EtiketYaması {
         EtiketYaması {
             göster: Some(etiket.göster),
             konum: Some(etiket.konum),
+            kayma: Some(etiket.kayma),
             biçimleyici: etiket.biçimleyici,
             yazı: Some(etiket.yazı),
             zengin: Some(etiket.zengin),
@@ -736,10 +755,12 @@ mod testler {
         let seri = Etiket::yeni()
             .göster(true)
             .biçimleyici("{a}/{b}/{c}")
+            .kayma(3.0, -4.0)
             .uzaklık(7.0);
         let sonuç = EtiketYaması::yeni().konum(EtiketKonumu::Sağ).uygula(&seri);
         assert!(sonuç.göster);
         assert_eq!(sonuç.konum, EtiketKonumu::Sağ);
+        assert_eq!(sonuç.kayma, (3.0, -4.0));
         assert_eq!(sonuç.uzaklık, 7.0);
         assert_eq!(
             sonuç

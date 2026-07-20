@@ -78,11 +78,26 @@ pub fn pasta_yerleşimi(
     kapalı: &HashSet<String>,
     ilerleme: f32,
 ) -> Vec<Dilim> {
+    pasta_yerleşimi_merkezle(seri, seçenekler, alan, kapalı, ilerleme, None)
+}
+
+/// Takvim gibi bir koordinat sisteminin veri noktasından çözdüğü kesin
+/// piksel merkezini kullanarak pasta yerleşimini kurar.
+pub fn pasta_yerleşimi_merkezle(
+    seri: &PastaSerisi,
+    seçenekler: &GrafikSeçenekleri,
+    alan: Dikdörtgen,
+    kapalı: &HashSet<String>,
+    ilerleme: f32,
+    merkez_yaması: Option<(f32, f32)>,
+) -> Vec<Dilim> {
     let alan = pasta_görünüm_alanı(seri, alan);
-    let merkez = (
-        alan.x + seri.merkez.0.çöz(alan.genişlik),
-        alan.y + seri.merkez.1.çöz(alan.yükseklik),
-    );
+    let merkez = merkez_yaması.unwrap_or_else(|| {
+        (
+            alan.x + seri.merkez.0.çöz(alan.genişlik),
+            alan.y + seri.merkez.1.çöz(alan.yükseklik),
+        )
+    });
     // ECharts: yüzde yarıçaplar görünür alanın kısa kenarının yarısına
     // oranlıdır.
     let taban_yarıçap = alan.genişlik.min(alan.yükseklik) / 2.0;
@@ -325,14 +340,25 @@ fn açıları_normalleştir(
 
 /// Geçerli veri kalmadığında ECharts `showEmptyCircle` sektörü.
 pub fn boş_pasta_çiz(çizici: &mut dyn ÇizimYüzeyi, seri: &PastaSerisi, alan: Dikdörtgen) {
+    boş_pasta_çiz_merkezle(çizici, seri, alan, None);
+}
+
+pub fn boş_pasta_çiz_merkezle(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &PastaSerisi,
+    alan: Dikdörtgen,
+    merkez_yaması: Option<(f32, f32)>,
+) {
     if !seri.boş_daire_göster {
         return;
     }
     let alan = pasta_görünüm_alanı(seri, alan);
-    let merkez = (
-        alan.x + seri.merkez.0.çöz(alan.genişlik),
-        alan.y + seri.merkez.1.çöz(alan.yükseklik),
-    );
+    let merkez = merkez_yaması.unwrap_or_else(|| {
+        (
+            alan.x + seri.merkez.0.çöz(alan.genişlik),
+            alan.y + seri.merkez.1.çöz(alan.yükseklik),
+        )
+    });
     let taban_yarıçap = alan.genişlik.min(alan.yükseklik) / 2.0;
     let iç = seri.yarıçap.0.çöz(taban_yarıçap);
     let dış = seri.yarıçap.1.çöz(taban_yarıçap);
@@ -464,19 +490,32 @@ pub fn pasta_çiz(
                 );
             }
             EtiketKonumu::İç => {
-                let yarıçap = (dilim.iç_yarıçap + dilim.dış_yarıçap) / 2.0;
+                // `pie/labelLayout.ts`, iç etiketi dilim yarıçaplarının
+                // ortasından normal yönünde 3 px daha dışarı taşır.
+                let yarıçap = (dilim.iç_yarıçap + dilim.dış_yarıçap) / 2.0 + 3.0;
                 let konum = (
                     dilim.merkez.0 + yarıçap * orta_kosinüs,
                     dilim.merkez.1 + yarıçap * orta_sinüs,
                 );
-                let renk = seri.etiket.yazı.renk.unwrap_or(Renk::BEYAZ);
-                zengin_etiketi_yaz(
+                let opaklık = seri.öğe_stili.opaklık.unwrap_or(1.0);
+                let (renk, kontur) = match seri.etiket.yazı.renk {
+                    Some(renk) => (renk, None),
+                    None => {
+                        let (metin, kontur) = dilim.dolgu.zrender_iç_etiket_stili(tema::koyu_mu());
+                        (
+                            metin.opaklık(opaklık),
+                            kontur.map(|kontur| kontur.opaklık(opaklık)),
+                        )
+                    }
+                };
+                zengin_etiketi_konturlu_yaz(
                     çizici,
                     &ham_metin,
                     &seri.etiket,
                     konum,
                     YatayHiza::Orta,
                     renk,
+                    kontur,
                     etiket_dönüş_açısı(seri.etiket.döndürme, orta_açı as f32, true),
                 );
             }
@@ -716,8 +755,32 @@ pub(crate) fn zengin_etiketi_yaz(
     varsayılan_renk: Renk,
     dönüş: f32,
 ) {
+    zengin_etiketi_konturlu_yaz(
+        çizici,
+        ham_metin,
+        etiket,
+        konum,
+        hiza,
+        varsayılan_renk,
+        None,
+        dönüş,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn zengin_etiketi_konturlu_yaz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    ham_metin: &str,
+    etiket: &Etiket,
+    konum: (f32, f32),
+    hiza: YatayHiza,
+    varsayılan_renk: Renk,
+    varsayılan_kontur: Option<Renk>,
+    dönüş: f32,
+) {
     let yerleşim = zengin_metin_yerleşimi(çizici, ham_metin, etiket);
     let mut satır_y = -yerleşim.yükseklik / 2.0;
+    let konum = (konum.0 + etiket.kayma.0, konum.1 + etiket.kayma.1);
     let dönüşüm = AfinMatris::ötele(konum.0, konum.1).çarp(AfinMatris::döndür(dönüş));
     for satır in yerleşim.satırlar {
         let mut koşu_x = match hiza {
@@ -730,7 +793,26 @@ pub(crate) fn zengin_etiketi_yaz(
             let boyut = koşu.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
             let genişlik = çizici.yazı_ölç(&koşu.metin, boyut).0;
             let renk = koşu.yazı.renk.unwrap_or(varsayılan_renk);
-            if dönüş.abs() <= 1e-6 {
+            let kontur = koşu
+                .yazı
+                .renk
+                .is_none()
+                .then_some(varsayılan_kontur)
+                .flatten();
+            if let Some(kontur) = kontur {
+                çizici.dönüşümlü_konturlu_yazı(
+                    &koşu.metin,
+                    (koşu_x, koşu_y),
+                    YatayHiza::Sol,
+                    DikeyHiza::Orta,
+                    boyut,
+                    renk,
+                    koşu.yazı.kalın,
+                    kontur,
+                    2.0,
+                    dönüşüm,
+                );
+            } else if dönüş.abs() <= 1e-6 {
                 çizici.yazı(
                     &koşu.metin,
                     (konum.0 + koşu_x, konum.1 + koşu_y),
@@ -1738,6 +1820,28 @@ mod testler {
     }
 
     #[test]
+    fn iç_pasta_etiketi_dilim_parlaklığına_göre_renk_ve_kontur_seçer() {
+        let seri = PastaSerisi::yeni()
+            .yarıçap(30.0)
+            .etiket(
+                crate::model::stil::Etiket::yeni()
+                    .göster(true)
+                    .konum(EtiketKonumu::İç),
+            )
+            .veri([("A", 1.0)]);
+        let dilimler = yerleşim(&seri);
+        let mut yüzey = KayıtYüzeyi::yeni(400.0, 300.0);
+
+        pasta_çiz(&mut yüzey, &seri, &dilimler, None, &mut Vec::new());
+
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("#eeeeee"), "{döküm}");
+        assert!(döküm.contains("#5070dd"), "{döküm}");
+        // Tek tam dilimin orta açısı aşağı bakar: (30 / 2) + 3 = 18 px.
+        assert!(döküm.contains(" 200.0 168.0]"), "{döküm}");
+    }
+
+    #[test]
     fn seri_görünüm_kutusu_merkez_ve_yarıçapı_kendi_alanında_çözer() {
         let seri = PastaSerisi::yeni()
             .sol("33.3333%")
@@ -1750,6 +1854,23 @@ mod testler {
         assert!((dilim.görünüm_alanı.genişlik - 133.3336).abs() < 1e-3);
         assert!((dilim.merkez.0 - 200.0).abs() < 1e-3);
         assert!((dilim.dış_yarıçap - 16.6667).abs() < 1e-3);
+    }
+
+    #[test]
+    fn koordinat_merkezi_pasta_görünüm_merkezinin_yerini_alır() {
+        let seri = PastaSerisi::yeni().yarıçap(30.0).veri([("A", 1.0)]);
+        let seçenekler = GrafikSeçenekleri::yeni().seri(seri.clone());
+        let dilimler = pasta_yerleşimi_merkezle(
+            &seri,
+            &seçenekler,
+            Dikdörtgen::yeni(0.0, 0.0, 400.0, 300.0),
+            &HashSet::new(),
+            1.0,
+            Some((123.0, 234.0)),
+        );
+
+        assert_eq!(dilimler[0].merkez, (123.0, 234.0));
+        assert_eq!(dilimler[0].dış_yarıçap, 30.0);
     }
 
     #[test]

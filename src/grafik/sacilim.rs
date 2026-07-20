@@ -141,6 +141,57 @@ fn sembol_gölge_yolu(sembol: Sembol, merkez: (f32, f32), boyut: f32) -> Option<
 /// Saçılım serisini çizer; `vurgulu` ipucuyla öne çıkarılan noktadır.
 /// `zaman_sn`, sürekli dalga efekti için geçen süredir (saniye).
 #[allow(clippy::too_many_arguments)]
+fn saçılım_etiketini_yaz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    metin: &str,
+    konum: (f32, f32),
+    yatay: YatayHiza,
+    dikey: DikeyHiza,
+    boyut: f32,
+    renk: Renk,
+    kalın: bool,
+    kontur: Option<Renk>,
+    dönüşüm: Option<AfinMatris>,
+) {
+    match (kontur, dönüşüm) {
+        (Some(kontur), Some(dönüşüm)) => {
+            çizici.dönüşümlü_konturlu_yazı(
+                metin,
+                konum,
+                yatay,
+                dikey,
+                boyut,
+                renk,
+                kalın,
+                kontur,
+                2.0,
+                dönüşüm,
+            );
+        }
+        (Some(kontur), None) => {
+            çizici.dönüşümlü_konturlu_yazı(
+                metin,
+                (0.0, 0.0),
+                yatay,
+                dikey,
+                boyut,
+                renk,
+                kalın,
+                kontur,
+                2.0,
+                AfinMatris::ötele(konum.0, konum.1),
+            );
+        }
+        (None, Some(dönüşüm)) => {
+            çizici.dönüşümlü_yazı(metin, konum, yatay, dikey, boyut, renk, kalın, dönüşüm);
+        }
+        (None, None) => {
+            çizici.yazı(metin, konum, yatay, dikey, boyut, renk, kalın);
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
 pub fn saçılım_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     seri: &SaçılımSerisi,
@@ -240,7 +291,7 @@ pub fn saçılım_çiz(
             })
             .unwrap_or(ham);
         let uzaklık = etiket.uzaklık + nokta.boyut / 2.0;
-        let (çapa, doğal_yatay, doğal_dikey) = match etiket.konum {
+        let (mut çapa, doğal_yatay, doğal_dikey) = match etiket.konum {
             EtiketKonumu::Üst => (
                 (nokta.konum.0, nokta.konum.1 - uzaklık),
                 YatayHiza::Orta,
@@ -263,6 +314,8 @@ pub fn saçılım_çiz(
             ),
             _ => (nokta.konum, YatayHiza::Orta, DikeyHiza::Orta),
         };
+        çapa.0 += etiket.kayma.0;
+        çapa.1 += etiket.kayma.1;
         let yatay = etiket
             .yatay_hiza
             .map(|hiza| match hiza {
@@ -280,25 +333,57 @@ pub fn saçılım_çiz(
             })
             .unwrap_or(doğal_dikey);
         let boyut = etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-        let renk = etiket.yazı.renk.unwrap_or(tema::birincil_metin());
+        // SymbolDraw, iç etikette açık renk yokken path dolgusuna göre
+        // otomatik karşıt renk ve gerektiğinde 2 px kontur kullanır.
+        let (etiket_rengi, etiket_konturu) = match etiket.yazı.renk {
+            Some(renk) => (renk, None),
+            None if etiket.konum == EtiketKonumu::İç => {
+                let (metin, kontur) = seri
+                    .öğe_stili
+                    .renk
+                    .as_ref()
+                    .map(|dolgu| dolgu.zrender_iç_etiket_stili(tema::koyu_mu()))
+                    .unwrap_or_else(|| renk.zrender_iç_etiket_stili(tema::koyu_mu()));
+                (
+                    metin.opaklık(opaklık),
+                    kontur.map(|kontur| kontur.opaklık(opaklık)),
+                )
+            }
+            None => (tema::birincil_metin().opaklık(opaklık), None),
+        };
         let satırlar = metin.split('\n').collect::<Vec<_>>();
         if satırlar.len() == 1 {
             match etiket.döndürme {
                 EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => {
-                    çizici.dönüşümlü_yazı(
+                    saçılım_etiketini_yaz(
+                        çizici,
                         &metin,
                         (0.0, 0.0),
                         yatay,
                         dikey,
                         boyut,
-                        renk,
+                        etiket_rengi,
                         etiket.yazı.kalın,
-                        AfinMatris::ötele(çapa.0, çapa.1)
-                            .çarp(AfinMatris::döndür(-derece.to_radians())),
+                        etiket_konturu,
+                        Some(
+                            AfinMatris::ötele(çapa.0, çapa.1)
+                                .çarp(AfinMatris::döndür(-derece.to_radians())),
+                        ),
                     );
                 }
                 _ => {
-                    çizici.yazı(&metin, çapa, yatay, dikey, boyut, renk, etiket.yazı.kalın);
+                    saçılım_etiketini_yaz(
+                        çizici,
+                        &metin,
+                        çapa,
+                        yatay,
+                        dikey,
+                        boyut,
+                        etiket_rengi,
+                        etiket.yazı.kalın,
+                        etiket_konturu,
+                        None,
+                    );
                 }
             }
             continue;
@@ -324,25 +409,30 @@ pub fn saçılım_çiz(
             }
             let y = ilk_satır_y + satır_sırası as f32 * boyut;
             if let Some(dönüşüm) = dönüşüm {
-                çizici.dönüşümlü_yazı(
+                saçılım_etiketini_yaz(
+                    çizici,
                     satır,
                     (0.0, y),
                     yatay,
                     DikeyHiza::Orta,
                     boyut,
-                    renk,
+                    etiket_rengi,
                     etiket.yazı.kalın,
-                    dönüşüm,
+                    etiket_konturu,
+                    Some(dönüşüm),
                 );
             } else {
-                çizici.yazı(
+                saçılım_etiketini_yaz(
+                    çizici,
                     satır,
                     (çapa.0, çapa.1 + y),
                     yatay,
                     DikeyHiza::Orta,
                     boyut,
-                    renk,
+                    etiket_rengi,
                     etiket.yazı.kalın,
+                    etiket_konturu,
+                    None,
                 );
             }
         }
@@ -486,7 +576,11 @@ mod testler {
         let seri = SaçılımSerisi::yeni()
             .sembol_boyutu(0.0)
             .etiket_boyutunu_eşle("etiket")
-            .etiket(Etiket::yeni().göster(true))
+            .etiket(
+                Etiket::yeni()
+                    .göster(true)
+                    .yazı(crate::model::stil::YazıStili::yeni().renk(Renk::SİYAH)),
+            )
             .veri([VeriÖğesi::from([0.0, 1.0])
                 .boyutlar([("etiket".to_string(), "1\n\n初四\n\n".into())])]);
         let noktalar = [SaçılımNoktası {
@@ -507,6 +601,36 @@ mod testler {
         );
         assert!(
             döküm.contains("yazı \"初四\" (50.0,50.0) orta/orta"),
+            "{döküm}"
+        );
+    }
+
+    #[test]
+    fn scatter_etiket_kayması_bağlı_metin_çapasına_eklenir() {
+        let seri = SaçılımSerisi::yeni()
+            .sembol_boyutu(0.0)
+            .etiket(
+                Etiket::yeni().göster(true).kayma(-30.0, -30.0).yazı(
+                    crate::model::stil::YazıStili::yeni()
+                        .boyut(14.0)
+                        .renk(Renk::SİYAH),
+                ),
+            )
+            .veri([[0.0, 1.0]]);
+        let noktalar = [SaçılımNoktası {
+            sıra: 0,
+            konum: (50.0, 50.0),
+            boyut: 0.0,
+            x_değeri: 0.0,
+            y_değeri: 1.0,
+        }];
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+
+        saçılım_çiz(&mut yüzey, &seri, &noktalar, Renk::SİYAH, 1.0, 0.0, None);
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("yazı \"0,1\" (20.0,20.0) orta/orta"),
             "{döküm}"
         );
     }

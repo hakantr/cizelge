@@ -796,6 +796,21 @@ impl GrafikSeçenekleri {
                 });
             }
             if let Seri::Pasta(p) = seri {
+                if let Some(takvim_sırası) = p.takvim_sırası {
+                    if self.takvimler.get(takvim_sırası).is_none() {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "calendar",
+                            sıra: takvim_sırası,
+                        });
+                    }
+                    if !p.takvim_merkez_tarihi.is_some_and(f64::is_finite) {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.pie.center",
+                            ayrıntı: "takvim pastasının merkezi sonlu bir tarih olmalı"
+                                .to_owned(),
+                        });
+                    }
+                }
                 let açılar = [
                     ("series.pie.startAngle", Some(p.başlangıç_açısı)),
                     ("series.pie.endAngle", p.bitiş_açısı),
@@ -1213,6 +1228,33 @@ mod testler {
             Err(crate::hata::BilesenHatasi::EksikVeri {
                 bileşen: "calendar",
                 sıra: 2
+            })
+        ));
+    }
+
+    #[test]
+    fn takvime_bağlı_pasta_takvimi_ve_tarih_merkezini_doğrular() {
+        let eksik_takvim = GrafikSeçenekleri::yeni().seri(
+            crate::model::seri::PastaSerisi::yeni()
+                .takvim_sırası(2)
+                .takvim_merkezi(0.0),
+        );
+        assert!(matches!(
+            eksik_takvim.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "calendar",
+                sıra: 2
+            })
+        ));
+
+        let eksik_merkez = GrafikSeçenekleri::yeni()
+            .takvim(crate::model::takvim::TakvimKoordinatı::yıl(2017))
+            .seri(crate::model::seri::PastaSerisi::yeni().takvim_sırası(0));
+        assert!(matches!(
+            eksik_merkez.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "series.pie.center",
+                ..
             })
         ));
     }
