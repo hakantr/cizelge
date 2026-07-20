@@ -3,6 +3,7 @@
 //! şeritteki tutamaçlarla pencereyi değiştirir.
 
 use crate::model::Uzunluk;
+use crate::model::seri::Sembol;
 
 /// `dataZoom.startValue` / `endValue` eksen ucu.
 #[derive(Clone, PartialEq, Debug)]
@@ -112,6 +113,12 @@ pub struct VeriYakınlaştırma {
     pub yükseklik: Option<Uzunluk>,
     /// Veri gölgesi (`showDataShadow`).
     pub veri_gölgesi: bool,
+    /// Sürgü uçlarının özel simgesi (`handleIcon`). `None`, ECharts'ın
+    /// öntanımlı tutamaç yolunu kullanır.
+    pub tutamaç_simgesi: Option<Sembol>,
+    /// Tutamaç boyu (`handleSize`); yüzde değer sürgünün kısa kenarına göre
+    /// çözülür.
+    pub tutamaç_boyutu: Uzunluk,
 }
 
 impl Default for VeriYakınlaştırma {
@@ -134,6 +141,8 @@ impl Default for VeriYakınlaştırma {
             genişlik: None,
             yükseklik: None,
             veri_gölgesi: true,
+            tutamaç_simgesi: None,
+            tutamaç_boyutu: Uzunluk::Yüzde(100.0),
         }
     }
 }
@@ -275,6 +284,21 @@ impl VeriYakınlaştırma {
 
     pub fn veri_gölgesi(mut self, göster: bool) -> Self {
         self.veri_gölgesi = göster;
+        self
+    }
+
+    /// Sürgünün iki ucunda kullanılacak özel `handleIcon` simgesini ayarlar.
+    /// `Sembol::svg_yolu("path://...")`, ECharts option değerini doğrudan
+    /// taşımak için kullanılabilir.
+    pub fn tutamaç_simgesi(mut self, simge: Sembol) -> Self {
+        self.tutamaç_simgesi = Some(simge);
+        self
+    }
+
+    /// `handleSize`; örneğin `"80%"` sürgünün 30 px kısa kenarında 24 px
+    /// tutamaç yüksekliği üretir.
+    pub fn tutamaç_boyutu(mut self, boyut: impl Into<Uzunluk>) -> Self {
+        self.tutamaç_boyutu = boyut.into();
         self
     }
 

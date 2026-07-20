@@ -3415,7 +3415,9 @@ pub fn grafiği_boya(
                                     yüzey.yükseklik() - u.çöz(yüzey.yükseklik()) - yükseklik
                                 })
                             })
-                            .unwrap_or((yüzey.yükseklik() - yükseklik) / 2.0 + 10.0);
+                            // SliderZoomView'in dikey öntanımlısı hedef
+                            // kartezyen alanın üst kenarına hizalanır.
+                            .unwrap_or(alan.y);
                         Dikdörtgen::yeni(x, y, genişlik, yükseklik)
                     } else {
                         let genişlik = yakınlaştırma
@@ -3679,67 +3681,154 @@ pub fn grafiği_boya(
                             ÇizgiTürü::Düz,
                         );
                     }
-                    // Tutamaçlar.
-                    let (sol, sağ) = if dikey {
-                        // ECharts'ın öntanımlı handleIcon yolu 40 birimlik
-                        // eksende 7.5 / 25.06 / 7.44 oranında sap–gövde–sap
-                        // parçalarından oluşur. 30 px handleSize karşılıkları:
-                        // 5.625 / 18.795 / 5.58 px.
-                        (
-                            Dikdörtgen::yeni(şerit.x + 5.625, pencere.alt() - 4.0, 18.795, 6.0),
-                            Dikdörtgen::yeni(şerit.x + 5.625, pencere.y - 2.0, 18.795, 6.0),
-                        )
+                    // Tutamaçlar. ECharts yolu önce kare bir sembol kutusuna
+                    // oranı korunarak sığdırır, sonra `handleSize` ile kısa
+                    // kenara göre ölçekler. Dikey grupta aynı yol saat yönünün
+                    // tersine 90 derece döndürülür.
+                    let kısa_kenar = if dikey {
+                        şerit.genişlik
                     } else {
-                        // Varsayılan handle yolunda uçları pencereye doğru
-                        // birer piksel kaydıran ECharts hizalama hilesi.
-                        (
-                            Dikdörtgen::yeni(pencere.x - 2.0, şerit.y + 5.625, 6.0, 18.795),
-                            Dikdörtgen::yeni(pencere.sağ() - 4.0, şerit.y + 5.625, 6.0, 18.795),
-                        )
+                        şerit.yükseklik
                     };
-                    for t in [sol, sağ] {
-                        yüzey.dikdörtgen(
-                            t,
-                            &Dolgu::Düz(crate::renk::Renk::BEYAZ),
-                            [1.5; 4],
-                            Some((1.0, crate::renk::Renk::onaltılık(0xc0c9e6))),
-                        );
-                    }
-                    if dikey {
-                        for merkez_y in [sol.merkez().1, sağ.merkez().1] {
-                            yüzey.çizgi(
-                                (şerit.x, merkez_y),
-                                (şerit.x + 5.625, merkez_y),
-                                1.0,
-                                crate::renk::Renk::onaltılık(0xc0c9e6),
-                                ÇizgiTürü::Düz,
-                            );
-                            yüzey.çizgi(
-                                (şerit.x + 24.42, merkez_y),
-                                (şerit.sağ(), merkez_y),
-                                1.0,
-                                crate::renk::Renk::onaltılık(0xc0c9e6),
-                                ÇizgiTürü::Düz,
-                            );
-                        }
+                    let tutamaç_boyutu = yakınlaştırma.tutamaç_boyutu.çöz(kısa_kenar).max(0.0);
+                    let merkezler = if dikey {
+                        [
+                            (şerit.merkez().0, pencere.alt() - 1.0),
+                            (şerit.merkez().0, pencere.y + 1.0),
+                        ]
                     } else {
-                        for merkez_x in [sol.merkez().0, sağ.merkez().0] {
-                            yüzey.çizgi(
-                                (merkez_x, şerit.y),
-                                (merkez_x, şerit.y + 5.625),
-                                1.0,
-                                crate::renk::Renk::onaltılık(0xc0c9e6),
-                                ÇizgiTürü::Düz,
-                            );
-                            yüzey.çizgi(
-                                (merkez_x, şerit.y + 24.42),
-                                (merkez_x, şerit.alt()),
-                                1.0,
-                                crate::renk::Renk::onaltılık(0xc0c9e6),
-                                ÇizgiTürü::Düz,
+                        [
+                            (pencere.x + 1.0, şerit.merkez().1),
+                            (pencere.sağ() - 1.0, şerit.merkez().1),
+                        ]
+                    };
+                    let (sol, sağ) = if let Some(simge) = &yakınlaştırma.tutamaç_simgesi {
+                        let mut tutamacı_çiz = |merkez: (f32, f32)| {
+                            let yol =
+                                crate::grafik::sembol_yolu(simge, merkez, tutamaç_boyutu, true)
+                                    .map(|yol| {
+                                        if dikey {
+                                            let dönüşüm = AfinMatris::ötele(merkez.0, merkez.1)
+                                                .çarp(AfinMatris::döndür(
+                                                    -std::f32::consts::FRAC_PI_2,
+                                                ))
+                                                .çarp(AfinMatris::ötele(-merkez.0, -merkez.1));
+                                            yolu_dönüştür(&yol, dönüşüm)
+                                        } else {
+                                            yol
+                                        }
+                                    });
+                            if let Some(yol) = yol {
+                                yüzey.yol_doldur(&yol, &Dolgu::Düz(crate::renk::Renk::BEYAZ));
+                                yüzey.yol_çiz(
+                                    &yol,
+                                    1.0,
+                                    crate::renk::Renk::onaltılık(0xc0c9e6),
+                                    ÇizgiTürü::Düz,
+                                );
+                                yol.kesin_sınır_kutusu().unwrap_or_else(|| {
+                                    Dikdörtgen::yeni(merkez.0, merkez.1, 0.0, 0.0)
+                                })
+                            } else {
+                                Dikdörtgen::yeni(merkez.0, merkez.1, 0.0, 0.0)
+                            }
+                        };
+                        let [sol_merkez, sağ_merkez] = merkezler;
+                        (tutamacı_çiz(sol_merkez), tutamacı_çiz(sağ_merkez))
+                    } else {
+                        // Öntanımlı handleIcon yolu: sap–gövde–sap oranları
+                        // 30 px / %100 için 5.625 / 18.795 / 5.58 px'tir.
+                        let ölçek = if kısa_kenar > f32::EPSILON {
+                            tutamaç_boyutu / kısa_kenar
+                        } else {
+                            0.0
+                        };
+                        let (sol, sağ) = if dikey {
+                            let başlangıç = şerit.merkez().0 - tutamaç_boyutu / 2.0;
+                            let x = başlangıç + 5.625 * ölçek;
+                            (
+                                Dikdörtgen::yeni(
+                                    x,
+                                    merkezler[0].1 - 3.0 * ölçek,
+                                    18.795 * ölçek,
+                                    6.0 * ölçek,
+                                ),
+                                Dikdörtgen::yeni(
+                                    x,
+                                    merkezler[1].1 - 3.0 * ölçek,
+                                    18.795 * ölçek,
+                                    6.0 * ölçek,
+                                ),
+                            )
+                        } else {
+                            let başlangıç = şerit.merkez().1 - tutamaç_boyutu / 2.0;
+                            let y = başlangıç + 5.625 * ölçek;
+                            (
+                                Dikdörtgen::yeni(
+                                    merkezler[0].0 - 3.0 * ölçek,
+                                    y,
+                                    6.0 * ölçek,
+                                    18.795 * ölçek,
+                                ),
+                                Dikdörtgen::yeni(
+                                    merkezler[1].0 - 3.0 * ölçek,
+                                    y,
+                                    6.0 * ölçek,
+                                    18.795 * ölçek,
+                                ),
+                            )
+                        };
+                        for t in [sol, sağ] {
+                            yüzey.dikdörtgen(
+                                t,
+                                &Dolgu::Düz(crate::renk::Renk::BEYAZ),
+                                [1.5 * ölçek; 4],
+                                Some((1.0, crate::renk::Renk::onaltılık(0xc0c9e6))),
                             );
                         }
-                    }
+                        if dikey {
+                            let başlangıç = şerit.merkez().0 - tutamaç_boyutu / 2.0;
+                            let bitiş = başlangıç + tutamaç_boyutu;
+                            for kutu in [sol, sağ] {
+                                let merkez_y = kutu.merkez().1;
+                                yüzey.çizgi(
+                                    (başlangıç, merkez_y),
+                                    (kutu.x, merkez_y),
+                                    1.0,
+                                    crate::renk::Renk::onaltılık(0xc0c9e6),
+                                    ÇizgiTürü::Düz,
+                                );
+                                yüzey.çizgi(
+                                    (kutu.sağ(), merkez_y),
+                                    (bitiş, merkez_y),
+                                    1.0,
+                                    crate::renk::Renk::onaltılık(0xc0c9e6),
+                                    ÇizgiTürü::Düz,
+                                );
+                            }
+                        } else {
+                            let başlangıç = şerit.merkez().1 - tutamaç_boyutu / 2.0;
+                            let bitiş = başlangıç + tutamaç_boyutu;
+                            for kutu in [sol, sağ] {
+                                let merkez_x = kutu.merkez().0;
+                                yüzey.çizgi(
+                                    (merkez_x, başlangıç),
+                                    (merkez_x, kutu.y),
+                                    1.0,
+                                    crate::renk::Renk::onaltılık(0xc0c9e6),
+                                    ÇizgiTürü::Düz,
+                                );
+                                yüzey.çizgi(
+                                    (merkez_x, kutu.alt()),
+                                    (merkez_x, bitiş),
+                                    1.0,
+                                    crate::renk::Renk::onaltılık(0xc0c9e6),
+                                    ÇizgiTürü::Düz,
+                                );
+                            }
+                        }
+                        (sol, sağ)
+                    };
                     // Alt/sağ taşıma tutamacı (`brushSelect`).
                     let taşıma = if dikey {
                         Dikdörtgen::yeni(şerit.sağ(), pencere.y, 7.0, pencere.yükseklik)
@@ -4820,6 +4909,43 @@ mod yakınlaştırma_yönü_testleri {
         };
         assert_eq!(sürgü.eksen_uzunluğu(), 200.0);
         assert!(sürgü.eksen_konumu((20.0, 40.0)) > sürgü.eksen_konumu((20.0, 80.0)));
+    }
+
+    #[test]
+    fn özel_datazoom_tutamacı_yüzde_boyutunu_ve_dikey_dönüşü_korur() {
+        let simge = crate::model::seri::Sembol::svg_yolu("path://M0 0H10V20H0Z")
+            .expect("özel tutamaç yolu çözülmeli");
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .ızgara(crate::model::bilesen::Izgara::yeni().sağ(70).alt(70))
+            .x_ekseni(Eksen::değer())
+            .y_ekseni(Eksen::değer())
+            .veri_yakınlaştırma(
+                crate::model::yakinlastirma::VeriYakınlaştırma::sürgü()
+                    .veri_gölgesi(false)
+                    .tutamaç_simgesi(simge.clone())
+                    .tutamaç_boyutu("80%"),
+            )
+            .veri_yakınlaştırma(
+                crate::model::yakinlastirma::VeriYakınlaştırma::sürgü()
+                    .y_eksen_sırası(0)
+                    .veri_gölgesi(false)
+                    .tutamaç_simgesi(simge)
+                    .tutamaç_boyutu("80%"),
+            )
+            .seri(crate::model::seri::SaçılımSerisi::yeni().veri([[0.0, 0.0]]));
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+        let yatay = çıktı.sürgüler.first().expect("yatay sürgü");
+        let dikey = çıktı.sürgüler.get(1).expect("dikey sürgü");
+
+        assert!((yatay.sol_tutamaç.genişlik - 12.0).abs() < 1e-3);
+        assert!((yatay.sol_tutamaç.yükseklik - 24.0).abs() < 1e-3);
+        assert!((dikey.sol_tutamaç.genişlik - 24.0).abs() < 1e-3);
+        assert!((dikey.sol_tutamaç.yükseklik - 12.0).abs() < 1e-3);
+        assert!((dikey.şerit.y - 65.0).abs() < 1e-3, "{:?}", dikey.şerit);
+        assert!((dikey.şerit.yükseklik - 390.0).abs() < 1e-3);
     }
 
     #[test]
