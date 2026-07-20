@@ -98,7 +98,15 @@ const TÜM_ALANLAR: [SeçenekAlanı; 27] = [
 pub struct SeçenekYaması {
     değer: GrafikSeçenekleri,
     sağlanan: BTreeSet<SeçenekAlanı>,
+    x_ekseni_veri_yamaları: Vec<EksenVeriYaması>,
+    y_ekseni_veri_yamaları: Vec<EksenVeriYaması>,
     seri_veri_yamaları: Vec<SeriVeriYaması>,
+}
+
+#[derive(Clone, Debug)]
+struct EksenVeriYaması {
+    sıra: usize,
+    veri: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -119,6 +127,8 @@ impl SeçenekYaması {
         Self {
             değer: GrafikSeçenekleri::default(),
             sağlanan: BTreeSet::new(),
+            x_ekseni_veri_yamaları: Vec::new(),
+            y_ekseni_veri_yamaları: Vec::new(),
             seri_veri_yamaları: Vec::new(),
         }
     }
@@ -128,6 +138,8 @@ impl SeçenekYaması {
         Self {
             değer,
             sağlanan: TÜM_ALANLAR.into_iter().collect(),
+            x_ekseni_veri_yamaları: Vec::new(),
+            y_ekseni_veri_yamaları: Vec::new(),
             seri_veri_yamaları: Vec::new(),
         }
     }
@@ -218,6 +230,35 @@ impl SeçenekYaması {
     pub fn y_eksenleri(mut self, eksenler: impl IntoIterator<Item = Eksen>) -> Self {
         self.değer.y_eksenleri = eksenler.into_iter().collect();
         self.sağlanan.insert(SeçenekAlanı::YEksenleri);
+        self
+    }
+
+    /// ECharts'ın `setOption({ xAxis: [{ data }] })` biçimindeki iç içe
+    /// yamasının tipli karşılığı. Yalnız seçilen kategori verisi değişir;
+    /// eksenin türü, adı, sınırları ve bütün görsel seçenekleri korunur.
+    pub fn x_ekseni_verisi<S: Into<String>>(
+        mut self,
+        sıra: usize,
+        veri: impl IntoIterator<Item = S>,
+    ) -> Self {
+        self.x_ekseni_veri_yamaları.push(EksenVeriYaması {
+            sıra,
+            veri: veri.into_iter().map(Into::into).collect(),
+        });
+        self
+    }
+
+    /// ECharts'ın `setOption({ yAxis: [{ data }] })` biçimindeki iç içe
+    /// yamasının tipli karşılığı. Yalnız seçilen kategori verisi değişir.
+    pub fn y_ekseni_verisi<S: Into<String>>(
+        mut self,
+        sıra: usize,
+        veri: impl IntoIterator<Item = S>,
+    ) -> Self {
+        self.y_ekseni_veri_yamaları.push(EksenVeriYaması {
+            sıra,
+            veri: veri.into_iter().map(Into::into).collect(),
+        });
         self
     }
 
@@ -1400,6 +1441,13 @@ fn yamayı_uygula(
         hedef.seri_kimlikleri.clear();
     }
 
+    for veri_yaması in &yama.x_ekseni_veri_yamaları {
+        eksen_verisini_yamala(hedef, true, veri_yaması)?;
+    }
+    for veri_yaması in &yama.y_ekseni_veri_yamaları {
+        eksen_verisini_yamala(hedef, false, veri_yaması)?;
+    }
+
     for veri_yaması in &yama.seri_veri_yamaları {
         let sıra = seri_sırasını_bul(hedef, &veri_yaması.seçici).ok_or_else(|| {
             BilesenHatasi::EksikVeri {
@@ -1423,6 +1471,34 @@ fn yamayı_uygula(
         *depo = veri_yaması.veri.clone();
     }
 
+    Ok(())
+}
+
+fn eksen_verisini_yamala(
+    hedef: &mut GrafikSeçenekleri,
+    yatay: bool,
+    yama: &EksenVeriYaması,
+) -> Result<(), BilesenHatasi> {
+    let (bileşen, eksen) = if yatay {
+        let eksen = if hedef.x_eksenleri.is_empty() {
+            (yama.sıra == 0).then(|| hedef.x_ekseni.get_or_insert_with(Eksen::kategori))
+        } else {
+            hedef.x_eksenleri.get_mut(yama.sıra)
+        };
+        ("setOption.xAxis", eksen)
+    } else {
+        let eksen = if hedef.y_eksenleri.is_empty() {
+            (yama.sıra == 0).then(|| hedef.y_ekseni.get_or_insert_with(Eksen::değer))
+        } else {
+            hedef.y_eksenleri.get_mut(yama.sıra)
+        };
+        ("setOption.yAxis", eksen)
+    };
+    let eksen = eksen.ok_or(BilesenHatasi::EksikVeri {
+        bileşen,
+        sıra: yama.sıra,
+    })?;
+    eksen.veri.clone_from(&yama.veri);
     Ok(())
 }
 
@@ -1651,6 +1727,83 @@ mod testler {
             Some("Korunacak")
         );
         assert_eq!(ilk_değer(&sonuç, 0), 1.0);
+    }
+
+    #[test]
+    fn eksen_verisi_yaması_diger_eksen_alanlarini_korur() {
+        let başlangıç = GrafikSeçenekleri::yeni()
+            .x_ekseni_ekle(
+                Eksen::kategori()
+                    .ad("Saat")
+                    .kenar_boşluğu(true)
+                    .veri(["eski-a", "eski-b"]),
+            )
+            .x_ekseni_ekle(
+                Eksen::kategori()
+                    .ad("Sıra")
+                    .kenar_boşluğu(false)
+                    .veri(["0", "1"]),
+            )
+            .y_ekseni_ekle(Eksen::kategori().ad("Grup").veri(["eski"]))
+            .seri(ÇizgiSerisi::yeni().veri([1, 2]));
+        let mut çalışma = çalışma(başlangıç);
+
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni()
+                    .x_ekseni_verisi(0, ["yeni-a", "yeni-b"])
+                    .x_ekseni_verisi(1, ["8", "9"])
+                    .y_ekseni_verisi(0, ["yeni"]),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .unwrap();
+
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        assert_eq!(sonuç.x_eksenleri[0].veri, ["yeni-a", "yeni-b"]);
+        assert_eq!(sonuç.x_eksenleri[0].ad.as_deref(), Some("Saat"));
+        assert_eq!(sonuç.x_eksenleri[0].kenar_boşluğu, Some(true));
+        assert_eq!(sonuç.x_eksenleri[1].veri, ["8", "9"]);
+        assert_eq!(sonuç.x_eksenleri[1].ad.as_deref(), Some("Sıra"));
+        assert_eq!(sonuç.x_eksenleri[1].kenar_boşluğu, Some(false));
+        assert_eq!(sonuç.y_eksenleri[0].veri, ["yeni"]);
+        assert_eq!(sonuç.y_eksenleri[0].ad.as_deref(), Some("Grup"));
+        assert_eq!(
+            çalışma.olayları_al(),
+            vec![ÇalışmaOlayı::SeçenekDeğişti, ÇalışmaOlayı::YenidenÇizildi]
+        );
+    }
+
+    #[test]
+    fn eksen_verisi_yaması_geçersiz_sırada_atomiktir() {
+        let başlangıç = GrafikSeçenekleri::yeni()
+            .başlık(Başlık::yeni().metin("Korunacak"))
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .seri(ÇizgiSerisi::yeni().veri([1, 2]));
+        let mut çalışma = çalışma(başlangıç);
+
+        let hata = çalışma.seçenekleri_ayarla(
+            SeçenekYaması::yeni()
+                .başlık(Başlık::yeni().metin("Uygulanmamalı"))
+                .x_ekseni_verisi(1, ["C"]),
+            SeçenekAyarlamaKipi::default(),
+        );
+
+        assert!(matches!(
+            hata,
+            Err(BilesenHatasi::EksikVeri {
+                bileşen: "setOption.xAxis",
+                sıra: 1
+            })
+        ));
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        assert_eq!(
+            sonuç
+                .başlık
+                .as_ref()
+                .and_then(|başlık| başlık.metin.as_deref()),
+            Some("Korunacak")
+        );
+        assert_eq!(sonuç.etkin_x_eksenleri()[0].veri, ["A", "B"]);
     }
 
     #[test]

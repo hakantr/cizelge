@@ -1115,19 +1115,39 @@ impl ÇizimYüzeyi for PikselYüzeyi {
     }
 
     fn gölge(&mut self, d: Dikdörtgen, yarıçap: f32, renk: Renk, bulanıklık: f32) {
-        // Yumuşatma: dışa doğru genişleyen, gitgide soluklaşan katmanlar.
-        let katman_sayısı = 5usize;
-        for i in 0..katman_sayısı {
-            let taşma = bulanıklık * (i as f32 + 1.0) / katman_sayısı as f32;
-            let katman = Dikdörtgen::yeni(
-                d.x - taşma / 2.0,
-                d.y - taşma / 2.0 + 1.0,
-                d.genişlik + taşma,
-                d.yükseklik + taşma,
-            );
-            let soluk = renk.opaklık(1.0 / (katman_sayısı as f32 * 1.5));
-            self.dikdörtgen(katman, &Dolgu::Düz(soluk), [yarıçap + taşma / 2.0; 4], None);
+        if d.genişlik <= 0.0 || d.yükseklik <= 0.0 || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
+            return;
         }
+        let r = yarıçap.clamp(0.0, d.genişlik.min(d.yükseklik) / 2.0);
+        let mut yol = Yol::yeni();
+        yol.taşı((d.x + r, d.y));
+        yol.çiz((d.sağ() - r, d.y));
+        if r > 0.0 {
+            yol.yay(r, false, true, (d.sağ(), d.y + r));
+        }
+        yol.çiz((d.sağ(), d.alt() - r));
+        if r > 0.0 {
+            yol.yay(r, false, true, (d.sağ() - r, d.alt()));
+        }
+        yol.çiz((d.x + r, d.alt()));
+        if r > 0.0 {
+            yol.yay(r, false, true, (d.x, d.alt() - r));
+        }
+        yol.çiz((d.x, d.y + r));
+        if r > 0.0 {
+            yol.yay(r, false, true, (d.x + r, d.y));
+        }
+        yol.kapat();
+        let Some(ts_yolu) = yol_çevir(&yol) else {
+            return;
+        };
+        let Some(mut maske) = ts::Mask::new(self.harita.width(), self.harita.height()) else {
+            self.tanı("gölge", "gölge maskesi ayrılamadı".to_owned());
+            return;
+        };
+        maske.fill_path(&ts_yolu, ts::FillRule::Winding, true, self.dönüşüm());
+        // TooltipHTMLContent öntanımlısı: `1px 2px 10px rgba(0,0,0,.2)`.
+        self.gölge_maskesini_boya(maske.data().to_vec(), renk, bulanıklık, (1.0, 2.0));
     }
 
     fn kırpılı(&mut self, d: Dikdörtgen, işlev: &mut dyn FnMut(&mut dyn ÇizimYüzeyi)) {

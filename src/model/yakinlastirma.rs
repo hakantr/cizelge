@@ -80,6 +80,9 @@ pub enum YakınlaştırmaTürü {
 #[derive(Clone, PartialEq, Debug)]
 pub struct VeriYakınlaştırma {
     pub tür: YakınlaştırmaTürü,
+    /// `dataZoom.show`; `false` bileşeni görünmez kılar, fakat pencereyi ve
+    /// programatik `dataZoom` güncellemelerini etkin tutar.
+    pub göster: bool,
     /// Bağlı ilk x ekseninin sırası (`xAxisIndex`). Tek eksenli eski API'nin
     /// kaynak uyumluluğu için açık tutulur; ek hedefler
     /// `ek_x_eksen_sıraları` içindedir.
@@ -115,6 +118,7 @@ impl Default for VeriYakınlaştırma {
     fn default() -> Self {
         VeriYakınlaştırma {
             tür: YakınlaştırmaTürü::İç,
+            göster: true,
             x_eksen_sırası: 0,
             ek_x_eksen_sıraları: Vec::new(),
             y_eksen_sırası: None,
@@ -146,6 +150,11 @@ impl VeriYakınlaştırma {
             tür: YakınlaştırmaTürü::Sürgü,
             ..Default::default()
         }
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
     }
 
     pub fn x_eksen_sırası(mut self, sıra: usize) -> Self {

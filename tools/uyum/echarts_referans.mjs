@@ -96,6 +96,11 @@ function html(id, kaynak, frame, state) {
             const x = myChart.convertToPixel({xAxisIndex: 0}, data[700].value[0]);
             myChart.dispatchAction({type:'updateAxisPointer', x, y:250});
           }`
+        : id === 'dynamic-data' && state === 'ipucu'
+          ? `{
+              const x = myChart.convertToPixel({xAxisIndex: 0}, categories[6]);
+              myChart.dispatchAction({type:'updateAxisPointer', x, y:250});
+            }`
         : id === 'dynamic-data2' && state === 'son'
         ? `{
             const zamanlayıcı = window.__capturedIntervals[0];
@@ -106,6 +111,19 @@ function html(id, kaynak, frame, state) {
             // kaydırır; son kare tam olarak 20 saniyelik canlı durumdur.
             for (let tik = 0; tik < 20; tik += 1) zamanlayıcı.callback();
           }`
+        : id === 'dynamic-data' && state === 'son'
+          ? `{
+              const zamanlayıcı = window.__capturedIntervals[0];
+              if (!zamanlayıcı || zamanlayıcı.ms !== 2100) {
+                throw new Error('dynamic-data 2100 ms zamanlayıcısı yakalanamadı');
+              }
+              // On tik, başlangıç penceresindeki bütün örnekleri kaynak
+              // callback'in ürettiği canlı değerlerle değiştirir.
+              for (let tik = 0; tik < 10; tik += 1) {
+                window.__setNow((tik + 1) * 2100);
+                zamanlayıcı.callback();
+              }
+            }`
       : '';
   const zamanlayıcıyıBekle = id === 'dataset-link' || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
@@ -119,7 +137,19 @@ html,body,#viewport{margin:0;width:700px;height:525px;overflow:hidden}
   let nextId = 1;
   let queue = [];
   const epoch = 1704067200000;
-  Date.now = () => epoch + now;
+  const NativeDate = window.Date;
+  function FixedDate(...args) {
+    if (!new.target) return new NativeDate(epoch + now).toString();
+    return args.length === 0
+      ? new NativeDate(epoch + now)
+      : new NativeDate(...args);
+  }
+  FixedDate.prototype = NativeDate.prototype;
+  Object.setPrototypeOf(FixedDate, NativeDate);
+  FixedDate.now = () => epoch + now;
+  FixedDate.parse = NativeDate.parse;
+  FixedDate.UTC = NativeDate.UTC;
+  window.Date = FixedDate;
   try { Object.defineProperty(performance, 'now', { value: () => now }); } catch (_) {}
   window.requestAnimationFrame = (callback) => {
     const id = nextId++;
@@ -127,6 +157,10 @@ html,body,#viewport{margin:0;width:700px;height:525px;overflow:hidden}
     return id;
   };
   window.cancelAnimationFrame = (id) => { queue = queue.filter((item) => item.id !== id); };
+  // Kaynak zamanlayıcısının Date saatini, renderer kare kuyruğunu araya
+  // sokmadan ilerletir. Böylece örneğin Math.random akışı yalnız kaynak
+  // callback'leri tarafından tüketilir ve iki koşucu arasında birebirdir.
+  window.__setNow = (target) => { now = Math.max(now, target); };
   window.__advance = (target) => {
     const end = Math.max(now, target);
     do {
@@ -187,7 +221,18 @@ const myChart = echarts.init(document.getElementById('viewport'), null, {
 });
 window.__chart = myChart;
 const originalSetOption = myChart.setOption.bind(myChart);
-myChart.setOption = (...args) => { const value = originalSetOption(...args); window.__applied = true; return value; };
+myChart.setOption = (...args) => {
+  // dynamic-data her callback'te setOption'dan sonra yeniden rastgele
+  // değer üretir. Görselleştiricinin dahili tüketimini yalnız bu kaynağın
+  // veri akışından ayır; diğer kilitli referansların tarihsel davranışını
+  // değiştirme.
+  const sourceRandomKorunacak = ${id === 'dynamic-data'};
+  const sourceSeed = seed;
+  const value = originalSetOption(...args);
+  if (sourceRandomKorunacak) seed = sourceSeed;
+  window.__applied = true;
+  return value;
+};
 echarts.registerPreprocessor((opt) => {
   opt.animation = false;
   const series = Array.isArray(opt.series) ? opt.series : opt.series ? [opt.series] : [];
@@ -200,7 +245,7 @@ echarts.registerPreprocessor((opt) => {
     for (const item of values) if (item.padding == null) item.padding = 15;
   }
 });
-${id === 'dynamic-data2' ? `
+${id === 'dynamic-data2' || id === 'dynamic-data' ? `
 // Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
 // ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
 // girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.
@@ -321,6 +366,7 @@ async function çalıştır() {
       if (ileti.type() === 'error') process.stderr.write(`ECharts console: ${ileti.text()}\n`);
     });
     await sayfa.setViewport({ width: 700, height: 525, deviceScaleFactor: 1 });
+    await sayfa.emulateTimezone('Europe/Istanbul');
     await sayfa.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
     await sayfa.waitForFunction(() => window.__ready || window.__referenceError, { timeout: 30000 });
     const hata = await sayfa.evaluate(() => window.__referenceError || null);
@@ -329,6 +375,28 @@ async function çalıştır() {
       const yerleşim = await sayfa.evaluate(() => {
         const chart = window.__chart;
         const sonuç = [];
+        const tooltipAdayları = [...document.querySelectorAll('div')]
+          .filter((öğe) => öğe.textContent?.includes('Dynamic Bar') && getComputedStyle(öğe).position === 'absolute');
+        if (tooltipAdayları.length) {
+          const kök = tooltipAdayları.sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width).at(-1);
+          const özetle = (öğe) => {
+            const kutu = öğe.getBoundingClientRect();
+            const stil = getComputedStyle(öğe);
+            return {
+              etiket: öğe.tagName,
+              metin: öğe.childElementCount ? null : öğe.textContent,
+              kutu: {x: kutu.x, y: kutu.y, width: kutu.width, height: kutu.height},
+              stil: {
+                marginTop: stil.marginTop,
+                padding: stil.padding,
+                fontSize: stil.fontSize,
+                lineHeight: stil.lineHeight
+              },
+              çocuklar: [...öğe.children].map(özetle)
+            };
+          };
+          sonuç.push({bileşen: 'tooltipDom', ağaç: özetle(kök)});
+        }
         const ölçümBağlamı = document.createElement('canvas').getContext('2d');
         if (ölçümBağlamı) {
           ölçümBağlamı.font = '12px sans-serif';

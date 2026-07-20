@@ -1341,6 +1341,9 @@ fn ipucu_satırlarını_biçimle(
     satırlar
         .into_iter()
         .map(|satır| {
+            if satır.im_rengi.is_none() && satır.değer.is_empty() {
+                return satır;
+            }
             let (seri_adı, öğe_adı) = if ipucu.tetikleme == Tetikleme::Eksen {
                 (satır.ad.as_str(), başlık.unwrap_or(""))
             } else {
@@ -1413,17 +1416,32 @@ fn eksen_ipucu_derle(
             .filter_map(|(sıra, öğe)| öğe.değer.x().map(|x| (sıra, x)))
             .min_by(|(_, a), (_, b)| (a - fare_değeri).abs().total_cmp(&(b - fare_değeri).abs()))?
     };
-    let başlık = bant_ekseni.ölçek.etiket(eksen_değeri);
+    let varsayılan_başlık = bant_ekseni.ölçek.etiket(eksen_değeri);
 
-    let mut satırlar = Vec::new();
+    // Aynı ızgaradaki paralel kategori eksenleri ortak sıra üzerinde
+    // tetiklenir. ECharts her kartezyen çifti için kendi eksen başlığını
+    // gösterir; seri sırası grup sırasını belirler.
+    let mut gruplar: Vec<(usize, String, Vec<İpucuSatırı>)> = Vec::new();
     let mut parametreler = Vec::new();
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         if !seri.kartezyen_mi() || !kurulum.görünürler.get(i).copied().unwrap_or(false) {
             continue;
         }
-        // Yalnız bu bant eksenine bağlı seriler.
         let bağ = seri.eksen_bağı();
-        if (bant_x && bağ.x != eksen_sırası) || (!bant_x && bağ.y != eksen_sırası) {
+        let seri_ekseni = if bant_x {
+            kurulum.x_eksenler.get(bağ.x)
+        } else {
+            kurulum.y_eksenler.get(bağ.y)
+        };
+        let Some(seri_ekseni) = seri_ekseni else {
+            continue;
+        };
+        let seri_eksen_sırası = if bant_x { bağ.x } else { bağ.y };
+        let aynı_tetik = seri_eksen_sırası == eksen_sırası
+            || (kategorik
+                && seri_ekseni.seçenek.ızgara_sırası == ızgara
+                && seri_ekseni.ölçek.kategorik_mi());
+        if !aynı_tetik {
             continue;
         }
         let veri_sırası = if kategorik {
@@ -1461,21 +1479,43 @@ fn eksen_ipucu_derle(
                 None => binlik_ayır(değer),
             }
         };
-        satırlar.push(İpucuSatırı {
+        let grup_başlığı = if kategorik {
+            seri_ekseni.ölçek.etiket(sıra as f64)
+        } else {
+            varsayılan_başlık.clone()
+        };
+        let satır = İpucuSatırı {
             im_rengi: Some(seçenekler.seri_rengi(i)),
             ad: seri.ad().unwrap_or("-").to_string(),
             değer: metin,
-        });
+        };
+        match gruplar
+            .iter_mut()
+            .find(|(grup_sırası, _, _)| *grup_sırası == seri_eksen_sırası)
+        {
+            Some((_, _, satırlar)) => satırlar.push(satır),
+            None => gruplar.push((seri_eksen_sırası, grup_başlığı.clone(), vec![satır])),
+        }
         parametreler.push(İpucuParametresi {
             seri_sırası: i,
             seri_adı: seri.ad().unwrap_or("").to_string(),
             veri_sırası,
-            ad: öğe.ad.clone().unwrap_or_else(|| başlık.clone()),
+            ad: öğe.ad.clone().unwrap_or(grup_başlığı),
             değer: öğe.değer.clone(),
         });
     }
-    if satırlar.is_empty() {
+    if gruplar.is_empty() {
         return None;
+    }
+    let mut gruplar = gruplar.into_iter();
+    let (_, başlık, mut satırlar) = gruplar.next()?;
+    for (_, grup_başlığı, grup_satırları) in gruplar {
+        satırlar.push(İpucuSatırı {
+            im_rengi: None,
+            ad: grup_başlığı,
+            değer: String::new(),
+        });
+        satırlar.extend(grup_satırları);
     }
     Some(Eksenİpucu {
         ızgara,
@@ -2391,10 +2431,10 @@ pub fn grafiği_boya(
             let alan = kartezyen.alan;
             let (fx, fy) = (keskin(f.0), keskin(f.1));
             yüzey.çizgi(
-                (fx, alan.y),
                 (fx, alan.alt()),
+                (fx, alan.y),
                 1.0,
-                tema::imleç_çizgisi(),
+                tema::nötr_30(),
                 ÇizgiTürü::Kesikli,
             );
             yüzey.çizgi(
@@ -2404,38 +2444,60 @@ pub fn grafiği_boya(
                 tema::imleç_çizgisi(),
                 ÇizgiTürü::Kesikli,
             );
-            let mut kenar_etiketi = |metin: &str, konum: (f32, f32), yatay_orta: bool| {
-                let boyut = tema::YAZI_KÜÇÜK;
-                let (gş, y) = yüzey.yazı_ölç(metin, boyut);
-                let kutu = if yatay_orta {
-                    Dikdörtgen::yeni(konum.0 - gş / 2.0 - 5.0, konum.1, gş + 10.0, y + 4.0)
-                } else {
-                    Dikdörtgen::yeni(
-                        konum.0 - gş - 10.0,
-                        konum.1 - y / 2.0 - 2.0,
-                        gş + 10.0,
-                        y + 4.0,
-                    )
+            let arkaplan = ipucu.imleç_etiketi_arkaplanı.unwrap_or(tema::nötr_70());
+            let mut kenar_etiketi =
+                |metin: &str, koordinat: f32, konum: EksenKonumu, yatay: bool| {
+                    let boyut = tema::YAZI_KÜÇÜK;
+                    let (gş, y) = yüzey.yazı_ölç(metin, boyut);
+                    let genişlik = gş + 14.0;
+                    let yükseklik = y + 10.0;
+                    let kutu = if yatay {
+                        let üst = match konum {
+                            EksenKonumu::Üst => alan.y - yükseklik - 3.0,
+                            _ => alan.alt() + 3.0,
+                        };
+                        Dikdörtgen::yeni(koordinat - genişlik / 2.0, üst, genişlik, yükseklik)
+                    } else {
+                        let sol = match konum {
+                            EksenKonumu::Sağ => alan.sağ() + 3.0,
+                            _ => alan.x - genişlik - 3.0,
+                        };
+                        Dikdörtgen::yeni(sol, koordinat - yükseklik / 2.0, genişlik, yükseklik)
+                    };
+                    yüzey.dikdörtgen(kutu, &Dolgu::Düz(arkaplan), [2.0; 4], None);
+                    yüzey.yazı(
+                        metin,
+                        kutu.merkez(),
+                        crate::cizim::YatayHiza::Orta,
+                        crate::cizim::DikeyHiza::Orta,
+                        boyut,
+                        crate::renk::Renk::BEYAZ,
+                        false,
+                    );
                 };
-                yüzey.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_70()), [2.0; 4], None);
-                yüzey.yazı(
-                    metin,
-                    kutu.merkez(),
-                    crate::cizim::YatayHiza::Orta,
-                    crate::cizim::DikeyHiza::Orta,
-                    boyut,
-                    crate::renk::Renk::BEYAZ,
-                    false,
-                );
-            };
-            let x_metin = kartezyen.x.ölçek.etiket(kartezyen.x.pikselden_veriye(f.0));
-            let y_metin = kartezyen.y.ölçek.etiket(kartezyen.y.pikselden_veriye(f.1));
-            kenar_etiketi(&x_metin, (fx, alan.alt() + 4.0), true);
-            kenar_etiketi(&y_metin, (alan.x - 4.0, fy), false);
+            for eksen in kurulum
+                .x_eksenler
+                .iter()
+                .filter(|eksen| eksen.seçenek.ızgara_sırası == g)
+            {
+                let metin = eksen.ölçek.etiket(eksen.pikselden_veriye(f.0));
+                kenar_etiketi(&metin, f.0, eksen.konum, true);
+            }
+            for eksen in kurulum
+                .y_eksenler
+                .iter()
+                .filter(|eksen| eksen.seçenek.ızgara_sırası == g)
+            {
+                let metin = eksen.ölçek.etiket(eksen.pikselden_veriye(f.1));
+                kenar_etiketi(&metin, fy, eksen.konum, false);
+            }
         }
 
         // Veri yakınlaştırma: iç alan kayıtları + sürgü çizimi.
         for (z, yakınlaştırma) in seçenekler.veri_yakınlaştırmaları.iter().enumerate() {
+            if !yakınlaştırma.göster {
+                continue;
+            }
             let dikey = yakınlaştırma.dikey_mi();
             let hedef_ızgara = if let Some(y_sırası) = yakınlaştırma.y_eksen_sırası {
                 kurulum

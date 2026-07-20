@@ -475,6 +475,12 @@ fn javascript_yuvarla(değer: f64) -> f64 {
     (değer + 0.5).floor()
 }
 
+/// Pozitif örnek verilerinde JavaScript `toFixed(1)` ile aynı onda bir
+/// hassasiyetini sayısal değere geri çevirir.
+fn javascript_onda_bir(değer: f64) -> f64 {
+    (değer * 10.0).round() / 10.0
+}
+
 fn area_simple() -> GrafikSeçenekleri {
     const GÜN_MS: f64 = 86_400_000.0;
     let mut tohum = 0x5eed_1234;
@@ -772,6 +778,132 @@ fn dynamic_data2(durum: &str) -> Result<GrafikSeçenekleri, String> {
         çalışma
             .seçenekleri_ayarla(
                 SeçenekYaması::yeni().seri_verisi(SeriSeçici::Sıra(0), veri.iter().cloned()),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .map_err(|hata| hata.to_string())?;
+    }
+    çalışma.seçenekleri_al().map_err(|hata| hata.to_string())
+}
+
+/// Referans tarayıcısı 2024-01-01 03:00:00 (Europe/Istanbul) anına
+/// sabitlenir. `toLocaleTimeString()` çıktısını aynı en-US biçiminde üretir.
+fn dinamik_saat_etiketi(milisaniye: i64) -> String {
+    let toplam_saniye = (3 * 60 * 60 + milisaniye.div_euclid(1000)).rem_euclid(24 * 60 * 60);
+    let saat_24 = toplam_saniye / 3600;
+    let dakika = toplam_saniye % 3600 / 60;
+    let saniye = toplam_saniye % 60;
+    let dönem = if saat_24 < 12 { "AM" } else { "PM" };
+    let saat_12 = match saat_24 % 12 {
+        0 => 12,
+        saat => saat,
+    };
+    format!("{saat_12}:{dakika:02}:{saniye:02} {dönem}")
+}
+
+fn dynamic_data(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    const SON_DURUM_TİKİ: usize = 10;
+    const TİK_MS: i64 = 2_100;
+
+    let mut tohum = 0x5eed_1234;
+    let mut kategoriler = (-9_i64..=0)
+        .map(|sıra| dinamik_saat_etiketi(sıra * 2_000))
+        .collect::<Vec<_>>();
+    let mut sıra_kategorileri = (0..10).map(|sıra| sıra.to_string()).collect::<Vec<_>>();
+    let mut sütun_verisi = (0..10)
+        .map(|_| javascript_yuvarla(kanıt_rastgele(&mut tohum) * 1000.0))
+        .collect::<Vec<_>>();
+    let mut çizgi_verisi = (0..10)
+        .map(|_| javascript_onda_bir(kanıt_rastgele(&mut tohum) * 10.0 + 5.0))
+        .collect::<Vec<_>>();
+
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .başlık(Başlık::yeni().metin("Dynamic Data").iç_boşluk(15.0))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz)
+                .imleç_etiketi_arkaplanı("#283b56"),
+        )
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0))
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .veri_görünümü(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().göster(false).aralık(0.0, 100.0))
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .kenar_boşluğu(true)
+                .veri(kategoriler.iter().cloned()),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .kenar_boşluğu(true)
+                .veri(sıra_kategorileri.iter().cloned()),
+        )
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ad("Price")
+                .ölçekli(true)
+                .en_az(0.0)
+                .en_çok(30.0)
+                .sayısal_kenar_boşluğu(0.2, 0.2),
+        )
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ad("Order")
+                .ölçekli(true)
+                .en_az(0.0)
+                .en_çok(1200.0)
+                .sayısal_kenar_boşluğu(0.2, 0.2),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Dynamic Bar")
+                .eksenler(1, 1)
+                .veri(sütun_verisi.iter().copied()),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Dynamic Line")
+                .veri(çizgi_verisi.iter().copied()),
+        );
+
+    if durum != "son" {
+        return Ok(seçenekler);
+    }
+
+    // Resmî 2100 ms callback'i on kez yeniden oynatılır. Eksen ve seri
+    // yamaları yalnız `data` yollarını değiştirir; ilk option'daki tür,
+    // eksen bağı, ad ve görsel seçenekler aynen korunur.
+    let mut çalışma = GrafikÇalışmaZamanı::yeni(
+        ÖrnekBaşlatmaSeçenekleri {
+            yerel: &İNGİLİZCE,
+            ..ÖrnekBaşlatmaSeçenekleri::default()
+        },
+        seçenekler,
+    )
+    .map_err(|hata| hata.to_string())?;
+    for tik in 0..SON_DURUM_TİKİ {
+        sütun_verisi.remove(0);
+        sütun_verisi.push(javascript_yuvarla(kanıt_rastgele(&mut tohum) * 1000.0));
+        çizgi_verisi.remove(0);
+        çizgi_verisi.push(javascript_onda_bir(kanıt_rastgele(&mut tohum) * 10.0 + 5.0));
+        kategoriler.remove(0);
+        kategoriler.push(dinamik_saat_etiketi((tik as i64 + 1) * TİK_MS));
+        sıra_kategorileri.remove(0);
+        sıra_kategorileri.push((11 + tik).to_string());
+
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni()
+                    .x_ekseni_verisi(0, kategoriler.iter().cloned())
+                    .x_ekseni_verisi(1, sıra_kategorileri.iter().cloned())
+                    .seri_verisi(SeriSeçici::Sıra(0), sütun_verisi.iter().copied())
+                    .seri_verisi(SeriSeçici::Sıra(1), çizgi_verisi.iter().copied()),
                 SeçenekAyarlamaKipi::default(),
             )
             .map_err(|hata| hata.to_string())?;
@@ -4134,6 +4266,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "area-time-axis" => Ok(area_time_axis()),
         "area-rainfall" => area_rainfall(),
         "dynamic-data2" => dynamic_data2(durum),
+        "dynamic-data" => dynamic_data(durum),
         "line-stack" => Ok(line_stack()),
         "line-style" => Ok(line_style()),
         "line-step" => Ok(line_step()),
@@ -4205,6 +4338,15 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
 fn çalıştır() -> Result<(), String> {
     let girdi = argümanları_oku()?;
     let seçenekler = seçenekler(&girdi.id, &girdi.durum)?;
+    let kanıt_faresi = if girdi.id == "dataset-link" && girdi.durum == "son" {
+        Some((323.75, 400.0))
+    } else if girdi.id == "dynamic-data2" && girdi.durum == "ipucu" {
+        Some((472.87, 250.0))
+    } else if girdi.id == "dynamic-data" && girdi.durum == "ipucu" {
+        Some((446.25, 250.0))
+    } else {
+        None
+    };
     if std::env::var_os("UYUM_DEBUG_LAYOUT").is_some() {
         // Referans üreticisinin aynı adlı tanı kipiyle birlikte kullanılır;
         // kayıt yüzeyi gerçek boyama hattındaki kesin geometriyi verir.
@@ -4235,7 +4377,14 @@ fn çalıştır() -> Result<(), String> {
             }
         }
         let mut kayıt = KayıtYüzeyi::yeni(700.0, 525.0);
-        let _ = grafiği_boya(&mut kayıt, &seçenekler, &BoyamaGirdisi::default());
+        let _ = grafiği_boya(
+            &mut kayıt,
+            &seçenekler,
+            &BoyamaGirdisi {
+                fare: kanıt_faresi,
+                ..BoyamaGirdisi::default()
+            },
+        );
         eprintln!("{}", kayıt.döküm());
     }
     // Resmi örnek üreticisinin viewport'u 700×525'tir; kanıt aracı bu ham
@@ -4274,13 +4423,7 @@ fn çalıştır() -> Result<(), String> {
         // yalnız sürekli efekt saatini ilerletir.
         ilerleme: 1.0,
         zaman_sn: girdi.kare * 2.0,
-        fare: if girdi.id == "dataset-link" && girdi.durum == "son" {
-            Some((323.75, 400.0))
-        } else if girdi.id == "dynamic-data2" && girdi.durum == "ipucu" {
-            Some((472.87, 250.0))
-        } else {
-            None
-        },
+        fare: kanıt_faresi,
         ..BoyamaGirdisi::default()
     };
     let boyama_çıktısı = grafiği_boya(&mut yüzey, &seçenekler, &boyama);

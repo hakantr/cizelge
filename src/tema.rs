@@ -117,8 +117,8 @@ pub const AÇIK: TemaRenkleri = TemaRenkleri {
     imleç_gölgesi: Renk::kyma(150.0 / 255.0, 150.0 / 255.0, 150.0 / 255.0, 0.2),
     imleç_çizgisi: Renk::onaltılık(0x9ea0a5),
     ipucu_arkaplanı: Renk::onaltılık(0xffffff),
-    ipucu_kenarlığı: Renk::onaltılık(0xdbdee4),
-    ipucu_metni: Renk::onaltılık(0x3c3c41),
+    ipucu_kenarlığı: Renk::onaltılık(0xb7b9be),
+    ipucu_metni: Renk::onaltılık(0x6d6e73),
     ipucu_gölgesi: Renk::kyma(0.0, 0.0, 0.0, 0.2),
 };
 

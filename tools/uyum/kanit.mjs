@@ -48,6 +48,15 @@ const SENARYOLAR = [
       { ad: 'son', kare: 1, durum: 'son' }
     ]
   },
+  {
+    id: 'dynamic-data',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'ipucu', kare: 1, durum: 'ipucu' },
+      { ad: 'son', kare: 1, durum: 'son' }
+    ]
+  },
   { id: 'line-sections', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'area-pieces', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-gradient', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

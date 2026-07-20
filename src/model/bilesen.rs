@@ -680,6 +680,8 @@ pub struct İpucu {
     /// `tooltip.axisPointer.animation`; false canlı akışlarda imlecin veri
     /// güncellemesinin gerisinde kalmasını önler.
     pub imleç_animasyonu: bool,
+    /// `tooltip.axisPointer.label.backgroundColor`.
+    pub imleç_etiketi_arkaplanı: Option<Renk>,
     pub arkaplan: Option<Renk>,
     pub yazı: YazıStili,
     /// Değer biçimleyici (satırlardaki sayılar için).
@@ -703,6 +705,7 @@ impl Default for İpucu {
             tetikleme: Tetikleme::Öğe,
             imleç: İmleçTürü::Çizgi,
             imleç_animasyonu: true,
+            imleç_etiketi_arkaplanı: None,
             arkaplan: None,
             yazı: YazıStili::default(),
             değer_biçimleyici: None,
@@ -740,6 +743,11 @@ impl İpucu {
 
     pub fn imleç_animasyonu(mut self, açık: bool) -> Self {
         self.imleç_animasyonu = açık;
+        self
+    }
+
+    pub fn imleç_etiketi_arkaplanı(mut self, renk: impl Into<Renk>) -> Self {
+        self.imleç_etiketi_arkaplanı = Some(renk.into());
         self
     }
 
