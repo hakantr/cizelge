@@ -4704,6 +4704,243 @@ fn scatter_clustering() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn scatter_kümeleme_süreç_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-clustering-process.js");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    resmi_javascript_dizisi(&kaynak, "var originalData")
+}
+
+fn kümeleme_süreç_öğesi(
+    x: f64,
+    y: f64,
+    küme: Option<f64>,
+    merkez: Option<[f64; 2]>,
+) -> VeriÖğesi {
+    let mut boyutlar = Vec::new();
+    if let Some(küme) = küme {
+        boyutlar.push(("cluster".to_owned(), küme.into()));
+    }
+    if let Some([merkez_x, merkez_y]) = merkez {
+        boyutlar.push(("center_x".to_owned(), merkez_x.into()));
+        boyutlar.push(("center_y".to_owned(), merkez_y.into()));
+    }
+    VeriÖğesi::yeni([x, y]).boyutlar(boyutlar)
+}
+
+fn scatter_kümeleme_süreç_karesi(
+    özgün: &[[f64; 2]],
+    sıra: usize,
+) -> Result<(Vec<VeriÖğesi>, Vec<VeriÖğesi>), String> {
+    if sıra == 0 {
+        return Ok((
+            özgün
+                .iter()
+                .map(|[x, y]| kümeleme_süreç_öğesi(*x, *y, None, None))
+                .collect(),
+            Vec::new(),
+        ));
+    }
+    let küme_sayısı = sıra + 1;
+    let kaynak = özgün
+        .iter()
+        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+            küme.satır([(*x).into(), (*y).into()])
+        });
+    let dönüşüm = KümelemeDönüşümü::yeni(küme_sayısı, 2)
+        .boyutlar([0usize, 1usize])
+        .çıktı_küme_adı("cluster")
+        .çıktı_merkez_boyutları([3, 4])
+        .tohum(0x5eed_1234);
+    let çözülmüş = veri_kümelerini_çöz(&[
+        VeriKümesiTanımı::kaynak(kaynak),
+        VeriKümesiTanımı::kümele(dönüşüm),
+    ])
+    .map_err(|hata| hata.to_string())?;
+    let depo = çözülmüş
+        .get(1)
+        .ok_or_else(|| "kümeleme süreç çıktısı yok".to_owned())?
+        .depoya()
+        .map_err(|hata| hata.to_string())?;
+    let satırlar = depo.satırları_kopyala();
+    let sayı = |satır: &[VeriDeğeri], boyut: usize| {
+        satır
+            .get(boyut)
+            .and_then(VeriDeğeri::sayı)
+            .ok_or_else(|| format!("kümeleme süreç çıktısında {boyut}. boyut yok"))
+    };
+    let mut noktalar = Vec::with_capacity(satırlar.len());
+    let mut merkezler = vec![None; küme_sayısı];
+    for satır in &satırlar {
+        let x = sayı(satır, 0)?;
+        let y = sayı(satır, 1)?;
+        let küme = sayı(satır, 2)?;
+        let merkez = [sayı(satır, 3)?, sayı(satır, 4)?];
+        if let Some(hedef) = merkezler.get_mut(küme as usize) {
+            *hedef = Some(merkez);
+        }
+        noktalar.push(kümeleme_süreç_öğesi(x, y, Some(küme), Some(merkez)));
+    }
+    let yeni_küme = küme_sayısı - 1;
+    let merkez = merkezler
+        .get(yeni_küme)
+        .copied()
+        .flatten()
+        .ok_or_else(|| format!("{yeni_küme}. kümenin merkezi yok"))?;
+    let en_büyük_uzaklık = noktalar
+        .iter()
+        .filter(|öğe| öğe.boyut("cluster").and_then(VeriDeğeri::sayı) == Some(yeni_küme as f64))
+        .filter_map(|öğe| Some([öğe.değer.x()? - merkez[0], öğe.değer.sayı()? - merkez[1]]))
+        .map(|[dx, dy]| dx * dx + dy * dy)
+        .fold(0.0_f64, f64::max)
+        .sqrt();
+    let sınır = VeriÖğesi::yeni(merkez)
+        .boyutlar([("radius".to_owned(), VeriDeğeri::Sayı(en_büyük_uzaklık))]);
+    Ok((noktalar, vec![sınır]))
+}
+
+fn kümeleme_süreç_nokta_serisi(veri: Vec<VeriÖğesi>) -> ÖzelSeri {
+    ÖzelSeri::yeni().veri(veri).çizim(|yüzey, bağlam| {
+        let Some(kartezyen) = bağlam.kartezyen else {
+            return;
+        };
+        let renkler: [Renk; 8] = [
+            "#bbb".into(),
+            "#37A2DA".into(),
+            "#e06343".into(),
+            "#37a354".into(),
+            "#b55dba".into(),
+            "#b5bd48".into(),
+            "#8378EA".into(),
+            "#96BFFF".into(),
+        ];
+        for öğe in bağlam.veri {
+            let (Some(x), Some(y)) = (öğe.değer.x(), öğe.değer.sayı()) else {
+                continue;
+            };
+            let küme = öğe
+                .boyut("cluster")
+                .and_then(VeriDeğeri::sayı)
+                .filter(|değer| değer.is_finite())
+                .unwrap_or(0.0)
+                .max(0.0) as usize;
+            let renk = renkler.get(küme).copied().unwrap_or(renkler[0]);
+            yüzey.daire(
+                kartezyen.nokta(x, y),
+                10.0,
+                Some(&Dolgu::Düz(renk)),
+                Some((1.0, "#333".into())),
+            );
+        }
+    })
+}
+
+fn elips_yolu(merkez: (f32, f32), yarıçap_x: f32, yarıçap_y: f32) -> Yol {
+    let k = 0.552_284_8_f32;
+    let (x, y) = merkez;
+    let mut yol = Yol::yeni();
+    // zrender `Ellipse.buildPath` ile aynı başlangıç noktası ve parça
+    // sırası. Geometri aynı kalsa bile bu sıra `lineDash` fazını
+    // belirlediğinden görsel uyum için önemlidir.
+    yol.taşı((x - yarıçap_x, y));
+    yol.kübik(
+        (x - yarıçap_x, y - k * yarıçap_y),
+        (x - k * yarıçap_x, y - yarıçap_y),
+        (x, y - yarıçap_y),
+    );
+    yol.kübik(
+        (x + k * yarıçap_x, y - yarıçap_y),
+        (x + yarıçap_x, y - k * yarıçap_y),
+        (x + yarıçap_x, y),
+    );
+    yol.kübik(
+        (x + yarıçap_x, y + k * yarıçap_y),
+        (x + k * yarıçap_x, y + yarıçap_y),
+        (x, y + yarıçap_y),
+    );
+    yol.kübik(
+        (x - k * yarıçap_x, y + yarıçap_y),
+        (x - yarıçap_x, y + k * yarıçap_y),
+        (x - yarıçap_x, y),
+    );
+    yol.kapat();
+    yol
+}
+
+fn kümeleme_süreç_sınır_serisi(veri: Vec<VeriÖğesi>) -> ÖzelSeri {
+    ÖzelSeri::yeni().veri(veri).çizim(|yüzey, bağlam| {
+        let Some(kartezyen) = bağlam.kartezyen else {
+            return;
+        };
+        for öğe in bağlam.veri {
+            let (Some(x), Some(y), Some(uzaklık)) = (
+                öğe.değer.x(),
+                öğe.değer.sayı(),
+                öğe.boyut("radius").and_then(VeriDeğeri::sayı),
+            ) else {
+                continue;
+            };
+            let merkez = kartezyen.nokta(x, y);
+            let yarıçap_x = (kartezyen.nokta(x + uzaklık, y).0 - merkez.0).abs() + 15.0;
+            let yarıçap_y = (kartezyen.nokta(x, y + uzaklık).1 - merkez.1).abs() + 15.0;
+            yüzey.yol_çizgi_deseni(
+                &elips_yolu(merkez, yarıçap_x, yarıçap_y),
+                4.0,
+                "rgba(0,0,0,0.2)".into(),
+                &[4.0, 4.0],
+                0.0,
+            );
+        }
+    })
+}
+
+fn scatter_clustering_process(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let özgün = scatter_kümeleme_süreç_verisini_oku()?;
+    let zaman_şeridi = ZamanŞeridi::yeni()
+        .üst("center")
+        .sağ(50)
+        .yükseklik(300)
+        .genişlik(10)
+        .ters(true)
+        .otomatik_oynat(false)
+        .oynatma_aralığı(2_500.0)
+        .simge(ZamanŞeridiSimgesi::Yok)
+        .yön(Yön::Dikey)
+        .eksen_türü(ZamanŞeridiEksenTürü::Kategori)
+        .etiket(
+            ZamanŞeridiEtiketi::yeni()
+                .biçimleyici("step {value}")
+                .konum(ZamanŞeridiEtiketKonumu::Uzaklık(10.0)),
+        )
+        .kontrol_noktası_stili(ZamanŞeridiKontrolNoktasıStili::yeni().animasyon_süresi(1_500.0))
+        .veri(["0", "1", "2", "3", "4", "5"]);
+    let temel = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .animasyon_süresi_güncelleme(1_500.0)
+        .ipucu(İpucu::yeni())
+        .zaman_şeridi(zaman_şeridi)
+        .x_ekseni(Eksen::değer())
+        .y_ekseni(Eksen::değer());
+    let mut bileşik = BileşikSeçenekler::yeni(temel);
+    for sıra in 0..6 {
+        let (noktalar, sınır) = scatter_kümeleme_süreç_karesi(&özgün, sıra)?;
+        bileşik = bileşik.zaman_karesi(
+            SeçenekYaması::yeni()
+                .seri(kümeleme_süreç_nokta_serisi(noktalar))
+                .seri(kümeleme_süreç_sınır_serisi(sınır)),
+        );
+    }
+    let sıra = durum
+        .strip_prefix("step-")
+        .and_then(|değer| değer.parse::<usize>().ok())
+        .unwrap_or(0)
+        .min(5);
+    bileşik
+        .çöz(700.0, 525.0, Some(sıra))
+        .map_err(|hata| hata.to_string())
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_kümeleme_verisi_testleri {
@@ -4740,6 +4977,46 @@ mod scatter_kümeleme_verisi_testleri {
                 3, 4, 5, 0,
             ]
         );
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_kümeleme_süreç_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_süreç_verisi_ve_altı_kare_kayipsiz_çözülür() {
+        let veri = scatter_kümeleme_süreç_verisini_oku().expect("resmi süreç verisi okunmalı");
+        assert_eq!(veri.len(), 60);
+        assert_eq!(veri.first(), Some(&[3.275154, 2.957587]));
+        assert_eq!(veri.last(), Some(&[0.639276, -3.41284]));
+        for sıra in 0..6 {
+            let (noktalar, sınır) =
+                scatter_kümeleme_süreç_karesi(&veri, sıra).expect("kümeleme karesi çözülmeli");
+            assert_eq!(noktalar.len(), 60);
+            assert_eq!(sınır.len(), usize::from(sıra > 0));
+        }
+    }
+
+    #[test]
+    fn fixture_dikey_timeline_ve_iki_custom_seriyi_bağlar() {
+        let seçenekler = scatter_clustering_process("step-5").expect("fixture kurulmalı");
+        let şerit = seçenekler.zaman_şeridi.as_ref().expect("timeline olmalı");
+        assert_eq!(şerit.yön, Yön::Dikey);
+        assert!(şerit.ters);
+        assert_eq!(şerit.geçerli_sıra, 5);
+        assert_eq!(şerit.veri.len(), 6);
+        assert_eq!(seçenekler.seriler.len(), 2);
+        assert!(
+            seçenekler
+                .seriler
+                .iter()
+                .all(|seri| matches!(seri, Seri::Özel(_)))
+        );
+        seçenekler
+            .doğrula()
+            .expect("timeline seçeneği geçerli olmalı");
     }
 }
 
@@ -7445,6 +7722,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-stream-visual" => scatter_stream_visual(),
         "scatter-painter-choice" => scatter_painter_choice(),
         "scatter-clustering" => scatter_clustering(),
+        "scatter-clustering-process" => scatter_clustering_process(durum),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),

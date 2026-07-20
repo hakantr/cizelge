@@ -131,6 +131,15 @@ const SENARYOLAR = [
   { id: 'scatter-stream-visual', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-painter-choice', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-clustering', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'scatter-clustering-process',
+    tür: 'etkileşim',
+    kareler: [0, 1, 2, 3, 4, 5].map((sıra) => ({
+      ad: `adım-${sıra}`,
+      kare: 1,
+      durum: `step-${sıra}`
+    }))
+  },
   { id: 'scatter-exponential-regression', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-linear-regression', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-polynomial-regression', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

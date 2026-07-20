@@ -92,7 +92,12 @@ function html(id, kaynak, frame, state, width, height) {
   const ecStatBetigi = kaynak.includes('ecStat')
     ? '<script src="/ecStat.min.js"></script>'
     : '';
-  const sonEylem = id === 'mix-zoom-on-value' && state === 'son'
+  const kümelemeSırası = id === 'scatter-clustering-process' && state.startsWith('step-')
+    ? Number(state.slice('step-'.length))
+    : null;
+  const sonEylem = Number.isInteger(kümelemeSırası)
+    ? `myChart.dispatchAction({type:'timelineChange', currentIndex:${kümelemeSırası}});`
+    : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'dataset-link' && state === 'son'
       ? `{
@@ -146,11 +151,19 @@ function html(id, kaynak, frame, state, width, height) {
   const zamanlayıcıyıBekle = id === 'dataset-link' || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
-  const hedefMs = id === 'scatter-effect'
-    || id === 'calendar-effectscatter'
-    || id === 'calendar-charts'
-    ? frame * 2000
-    : 0;
+  const zamanŞeridiAnimasyonunuTamamla = id === 'scatter-clustering-process'
+    && Number.isInteger(kümelemeSırası);
+  const hedefMs = zamanŞeridiAnimasyonunuTamamla
+    // Resmî örnek checkpointStyle.animationDuration=1500 kullanıyor.
+    // timelineChange veriyi hemen güncellese de kontrol noktasını bir
+    // sonraki karelerde taşır; kanıt seçilen adımın tamamlanmış
+    // görsel durumunu karşılaştırır.
+    ? 1500
+    : id === 'scatter-effect'
+      || id === 'calendar-effectscatter'
+      || id === 'calendar-charts'
+      ? frame * 2000
+      : 0;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body,#viewport{margin:0;width:${width}px;height:${height}px;overflow:hidden}
 </style><script src="/echarts.js"></script>${ecStatBetigi}</head><body><div id="viewport"></div><script>
@@ -326,7 +339,13 @@ window.__sourceDone = true;
   ${zamanlayıcıyıBekle}
   if (!window.__applied && typeof option !== 'undefined' && option) myChart.setOption(option);
   ${sonEylem}
+  if (${zamanŞeridiAnimasyonunuTamamla}) myChart.getZr().animation.update();
   window.__advance(${hedefMs});
+  // ECharts betiği yüklenirken native requestAnimationFrame'i kendi içine
+  // bağlar. Sanal saati ilerlettikten sonra zrender animasyon yöneticisini
+  // bir kez elle güncelleyerek hedef andaki tamamlanmış durumu deterministik
+  // biçimde boya; gerçek zamanlı bir beklemeye bağlı kalma.
+  if (${zamanŞeridiAnimasyonunuTamamla}) myChart.getZr().animation.update();
   myChart.getZr().flush();
   window.__ready = true;
 })().catch((error) => { window.__referenceError = error.stack || String(error); });
