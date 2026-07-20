@@ -262,6 +262,23 @@ impl ÇalışmaEkseni {
         }
     }
 
+    /// Bölme çizgisi ve alanı konumları. ECharts bu iki bileşeni
+    /// `breakTicks: 'none'` ve `pruneByBreak: 'preserve_extent_bound'`
+    /// seçenekleriyle kurar: kırılmaya yakın normal çentikler budanır,
+    /// kırılmanın özel uç çentikleri ise eksen işareti/etiketi için korunup
+    /// ızgaraya taşınmaz.
+    pub fn bölme_çentikleri(&self) -> Vec<f32> {
+        if self.bantlı {
+            return self.çizgi_çentikleri(false);
+        }
+        self.işlenmiş_çentikler()
+            .into_iter()
+            .filter(|çentik| çentik.kırılma.is_none())
+            .filter(|çentik| self.pencerede_mi(çentik.değer))
+            .map(|çentik| self.veriden_piksele(çentik.değer))
+            .collect()
+    }
+
     /// Ara (minör) çentiklerin piksel konumları.
     pub fn ara_çentik_pikselleri(&self, bölme_sayısı: usize) -> Vec<f32> {
         self.ölçek
@@ -459,6 +476,29 @@ mod testler {
         assert_eq!(
             uçlar,
             vec![EksenKırılmaUcu::Başlangıç, EksenKırılmaUcu::Bitiş]
+        );
+
+        let bölmeler = eksen.bölme_çentikleri();
+        assert!(
+            !bölmeler
+                .iter()
+                .any(|konum| (*konum - kırılma_başı).abs() < 1e-5)
+        );
+        assert!(
+            !bölmeler
+                .iter()
+                .any(|konum| (*konum - kırılma_sonu).abs() < 1e-5)
+        );
+        let eksen_çentikleri = eksen.çizgi_çentikleri(false);
+        assert!(
+            eksen_çentikleri
+                .iter()
+                .any(|konum| (*konum - kırılma_başı).abs() < 1e-5)
+        );
+        assert!(
+            eksen_çentikleri
+                .iter()
+                .any(|konum| (*konum - kırılma_sonu).abs() < 1e-5)
         );
     }
 }

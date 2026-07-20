@@ -172,7 +172,7 @@ pub fn bölme_çizgilerini_çiz(
         } else {
             &eksen.seçenek.bölme_alanı.renkler
         };
-        let bütün_konumlar = eksen.çizgi_çentikleri(false);
+        let bütün_konumlar = eksen.bölme_çentikleri();
         // Category splitArea kendi `interval: 'auto'` öntanımlısında
         // axisLabel ile aynı ordinal adımı kullanır. Sık x ekseninde bu,
         // tek hücrelik dama deseni yerine görünür etiketler arasındaki
@@ -240,7 +240,7 @@ pub fn bölme_çizgilerini_çiz(
             .renk
             .unwrap_or(tema::bölme_çizgisi());
         let tür = eksen.seçenek.bölme_çizgisi.tür;
-        for konum in eksen.çizgi_çentikleri(false) {
+        for konum in eksen.bölme_çentikleri() {
             let konum = keskin(konum);
             if eksen.yatay_mı() {
                 // Dikey bölme çizgisi.
@@ -632,7 +632,10 @@ pub fn eksenleri_çiz(
                     };
                     let yön = if ikinci >= ilk { 1.0 } else { -1.0 };
                     let geçerli_uzaklık = (ikinci - ilk).abs();
-                    let gerekli_uzaklık = (başlangıç_boyutu + bitiş_boyutu) / 2.0 + 6.0;
+                    // ECharts `labelIntersect(..., {touchThreshold: 0})` ile
+                    // yalnız gerçek kesişme kadar ayırır; iki kutu birbirine
+                    // değdiğinde ek bir görsel boşluk bırakmaz.
+                    let gerekli_uzaklık = (başlangıç_boyutu + bitiş_boyutu) / 2.0;
                     if geçerli_uzaklık < gerekli_uzaklık {
                         let taşıma = (gerekli_uzaklık - geçerli_uzaklık) / 2.0;
                         if let Some(konum) = etiket_konumları.get_mut(başlangıç_sırası) {
