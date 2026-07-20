@@ -294,8 +294,9 @@ fn takvim_saçılım_serisini_çiz(
     isabetler: &mut Vec<İsabetBölgesi>,
 ) -> Option<Bekleyenİpucu> {
     let noktalar = takvim_saçılım_noktaları(seri, yerleşim);
-    let vurgu = match (ipucu_seçeneği, fare) {
-        (Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => noktalar
+    let vurgu = match (seri.sessiz, ipucu_seçeneği, fare) {
+        (true, _, _) => None,
+        (false, Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => noktalar
             .iter()
             .filter(|nokta| {
                 let dx = nokta.konum.0 - f.0;
@@ -314,18 +315,20 @@ fn takvim_saçılım_serisini_çiz(
     saçılım_çiz(
         yüzey, seri, &noktalar, seri_rengi, ilerleme, zaman_sn, vurgu,
     );
-    for nokta in &noktalar {
-        isabetler.push(İsabetBölgesi {
-            seri_sırası,
-            veri_sırası: nokta.sıra,
-            seri_adı: seri.ad.clone(),
-            ad: seri.veri.get(nokta.sıra).and_then(|öğe| öğe.ad.clone()),
-            değer: Some(nokta.y_değeri),
-            geometri: İsabetGeometrisi::Daire {
-                merkez: nokta.konum,
-                yarıçap: (nokta.boyut / 2.0 + 3.0).max(8.0),
-            },
-        });
+    if !seri.sessiz {
+        for nokta in &noktalar {
+            isabetler.push(İsabetBölgesi {
+                seri_sırası,
+                veri_sırası: nokta.sıra,
+                seri_adı: seri.ad.clone(),
+                ad: seri.veri.get(nokta.sıra).and_then(|öğe| öğe.ad.clone()),
+                değer: Some(nokta.y_değeri),
+                geometri: İsabetGeometrisi::Daire {
+                    merkez: nokta.konum,
+                    yarıçap: (nokta.boyut / 2.0 + 3.0).max(8.0),
+                },
+            });
+        }
     }
     let (Some(veri_sırası), Some(f)) = (vurgu, fare) else {
         return None;
@@ -2208,21 +2211,23 @@ pub fn grafiği_boya(
                     continue;
                 };
                 let noktalar = saçılım_noktaları(s, &kartezyen);
-                let vurgu = match (&ipucu_seçeneği, fare) {
-                    (Some(ipucu), Some(f)) if ipucu.tetikleme == Tetikleme::Öğe => noktalar
-                        .iter()
-                        .filter(|n| {
-                            let dx = n.konum.0 - f.0;
-                            let dy = n.konum.1 - f.1;
-                            let yarıçap = (n.boyut / 2.0 + 3.0).max(8.0);
-                            dx * dx + dy * dy <= yarıçap * yarıçap
-                        })
-                        .min_by(|a, b| {
-                            let da = (a.konum.0 - f.0).powi(2) + (a.konum.1 - f.1).powi(2);
-                            let db = (b.konum.0 - f.0).powi(2) + (b.konum.1 - f.1).powi(2);
-                            da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
-                        })
-                        .map(|n| n.sıra),
+                let vurgu = match (s.sessiz, &ipucu_seçeneği, fare) {
+                    (false, Some(ipucu), Some(f)) if ipucu.tetikleme == Tetikleme::Öğe => {
+                        noktalar
+                            .iter()
+                            .filter(|n| {
+                                let dx = n.konum.0 - f.0;
+                                let dy = n.konum.1 - f.1;
+                                let yarıçap = (n.boyut / 2.0 + 3.0).max(8.0);
+                                dx * dx + dy * dy <= yarıçap * yarıçap
+                            })
+                            .min_by(|a, b| {
+                                let da = (a.konum.0 - f.0).powi(2) + (a.konum.1 - f.1).powi(2);
+                                let db = (b.konum.0 - f.0).powi(2) + (b.konum.1 - f.1).powi(2);
+                                da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+                            })
+                            .map(|n| n.sıra)
+                    }
                     _ => None,
                 };
                 saçılım_vurguları.push((i, vurgu, noktalar));
@@ -2368,18 +2373,20 @@ pub fn grafiği_boya(
                                     zaman_sn,
                                     *vurgu,
                                 );
-                                for n in noktalar {
-                                    isabetler.push(İsabetBölgesi {
-                                        seri_sırası: i,
-                                        veri_sırası: n.sıra,
-                                        seri_adı: s.ad.clone(),
-                                        ad: s.veri.get(n.sıra).and_then(|ö| ö.ad.clone()),
-                                        değer: Some(n.y_değeri),
-                                        geometri: İsabetGeometrisi::Daire {
-                                            merkez: n.konum,
-                                            yarıçap: (n.boyut / 2.0 + 3.0).max(8.0),
-                                        },
-                                    });
+                                if !s.sessiz {
+                                    for n in noktalar {
+                                        isabetler.push(İsabetBölgesi {
+                                            seri_sırası: i,
+                                            veri_sırası: n.sıra,
+                                            seri_adı: s.ad.clone(),
+                                            ad: s.veri.get(n.sıra).and_then(|ö| ö.ad.clone()),
+                                            değer: Some(n.y_değeri),
+                                            geometri: İsabetGeometrisi::Daire {
+                                                merkez: n.konum,
+                                                yarıçap: (n.boyut / 2.0 + 3.0).max(8.0),
+                                            },
+                                        });
+                                    }
                                 }
                                 // Öğe ipucu.
                                 if let (Some(sıra), Some(f)) = (vurgu, fare)
@@ -3457,29 +3464,9 @@ pub fn grafiği_boya(
                 }
             }
             Seri::Saçılım(s) if s.takvim_sırası.is_some() => {
-                // Pozitif zlevel, CalendarView'ın z=2 üst katmanını da aşar;
-                // bu seriler aşağıdaki ikinci geçişte çizilir.
-                if s.z_seviyesi > 0 || !ad_görünür(seri.ad(), kapalı) {
-                    continue;
-                }
-                let takvim_sırası = s.takvim_sırası.unwrap_or(0);
-                let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
-                    continue;
-                };
-                if let Some(ipucu) = takvim_saçılım_serisini_çiz(
-                    yüzey,
-                    s,
-                    i,
-                    yerleşim,
-                    seçenekler.seri_rengi(i),
-                    ilerleme,
-                    zaman_sn,
-                    ipucu_seçeneği.as_ref(),
-                    fare,
-                    &mut çıktı.isabetler,
-                ) {
-                    bekleyen_ipucu = Some(ipucu);
-                }
+                // Scatter sembol/etiketleri z2=100'dür; heatmap ile takvim
+                // ayırıcı/etiketlerinden sonra katman geçişinde çizilir.
+                continue;
             }
             Seri::Takvim(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
@@ -3810,6 +3797,38 @@ pub fn grafiği_boya(
         }
     }
 
+    // Aynı tuval katmanındaki calendar scatter sembol ve etiketleri,
+    // CalendarView z2=20/30 üst katmanının üzerinde yer alır.
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Saçılım(saçılım) = seri else {
+            continue;
+        };
+        if saçılım.z_seviyesi > 0
+            || saçılım.takvim_sırası.is_none()
+            || !ad_görünür(seri.ad(), kapalı)
+        {
+            continue;
+        }
+        let takvim_sırası = saçılım.takvim_sırası.unwrap_or(0);
+        let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+            continue;
+        };
+        if let Some(ipucu) = takvim_saçılım_serisini_çiz(
+            yüzey,
+            saçılım,
+            seri_sırası,
+            yerleşim,
+            seçenekler.seri_rengi(seri_sırası),
+            ilerleme,
+            zaman_sn,
+            ipucu_seçeneği.as_ref(),
+            fare,
+            &mut çıktı.isabetler,
+        ) {
+            bekleyen_ipucu = Some(ipucu);
+        }
+    }
+
     // CalendarView z=2'den yüksek takvim graph serileri ayırıcıların
     // üstündedir (`calendar-graph` resmî örneğinde z=20).
     for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
@@ -3924,6 +3943,26 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn sessiz_scatter_çizilir_ama_isabet_bölgesi_üretmez() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::değer())
+            .y_ekseni(Eksen::değer())
+            .seri(
+                crate::model::seri::SaçılımSerisi::yeni()
+                    .sessiz(true)
+                    .veri([[1.0, 2.0]]),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert!(çıktı.isabetler.is_empty());
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("#5070dd@0.8"), "{döküm}");
+    }
 
     #[test]
     fn sayısal_boundary_gap_veri_açıklığını_yüzdeyle_genişletir() {

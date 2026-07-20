@@ -428,17 +428,19 @@ pub fn kutupsal_serileri_çiz(
                     let nokta = düzen.nokta(açısal, radyal);
                     let boyut = s.sembol_boyutu.çöz(öğe) * ilerleme;
                     sembol_çiz(çizici, s.sembol, nokta, boyut, renk.opaklık(0.8));
-                    isabetler.push(İsabetBölgesi {
-                        seri_sırası: i,
-                        veri_sırası: j,
-                        seri_adı: s.ad.clone(),
-                        ad: öğe.ad.clone(),
-                        değer: Some(radyal),
-                        geometri: İsabetGeometrisi::Daire {
-                            merkez: nokta,
-                            yarıçap: (boyut / 2.0 + 3.0).max(8.0),
-                        },
-                    });
+                    if !s.sessiz {
+                        isabetler.push(İsabetBölgesi {
+                            seri_sırası: i,
+                            veri_sırası: j,
+                            seri_adı: s.ad.clone(),
+                            ad: öğe.ad.clone(),
+                            değer: Some(radyal),
+                            geometri: İsabetGeometrisi::Daire {
+                                merkez: nokta,
+                                yarıçap: (boyut / 2.0 + 3.0).max(8.0),
+                            },
+                        });
+                    }
                 }
             }
             Seri::Hatlar(s) => {

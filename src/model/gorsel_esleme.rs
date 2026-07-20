@@ -156,6 +156,9 @@ pub struct GörselEşleme {
     /// HSL açıklık şeridi (`inRange.colorLightness`). Bu kanal renk
     /// kanalından farklı olarak öğenin/paletin mevcut rengini değiştirir.
     pub renk_açıklığı: Option<[f32; 2]>,
+    /// Opaklık şeridi (`inRange.opacity`). Tek değer iki uca aynı değer
+    /// yazılarak sabit opaklık olarak temsil edilir.
+    pub opaklık: Option<[f32; 2]>,
     /// `visualMap.dimension`: seri koordinat değerinden farklı bir dataset
     /// boyutu da renk kanalını sürebilir.
     pub boyut: Option<BoyutSeçici>,
@@ -216,6 +219,7 @@ impl Default for GörselEşleme {
             ],
             aralık_dışı_renk: Renk::SAYDAM,
             renk_açıklığı: None,
+            opaklık: None,
             boyut: None,
             seri_sıraları: Vec::new(),
             yön: Yön::Dikey,
@@ -266,6 +270,19 @@ impl GörselEşleme {
     /// `inRange.colorLightness: [düşük, yüksek]`.
     pub fn renk_açıklığı(mut self, düşük: f32, yüksek: f32) -> Self {
         self.renk_açıklığı = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
+        self
+    }
+
+    /// `inRange.opacity: değer`.
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        let opaklık = opaklık.clamp(0.0, 1.0);
+        self.opaklık = Some([opaklık, opaklık]);
+        self
+    }
+
+    /// `inRange.opacity: [düşük, yüksek]`.
+    pub fn opaklık_aralığı(mut self, düşük: f32, yüksek: f32) -> Self {
+        self.opaklık = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
         self
     }
 
@@ -537,7 +554,7 @@ impl GörselEşleme {
                 return self.aralık_dışı_renk;
             };
             if let Some(parça) = self.parçalar.get(sıra) {
-                return parça.renk;
+                return self.opaklığı_uygula(parça.renk, değer, kapsam);
             }
             let toplam = self
                 .bölme_sayısı
@@ -549,14 +566,14 @@ impl GörselEşleme {
             } else {
                 sıra as f32 / (toplam - 1) as f32
             };
-            return self.şerit_rengi(oran);
+            return self.opaklığı_uygula(self.şerit_rengi(oran), değer, kapsam);
         }
         let oran = if kapsam[1] > kapsam[0] {
             ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
         } else {
             0.0
         };
-        self.şerit_rengi(oran)
+        self.opaklığı_uygula(self.şerit_rengi(oran), değer, kapsam)
     }
 
     fn şerit_rengi(&self, oran: f32) -> Renk {
@@ -611,7 +628,23 @@ impl GörselEşleme {
         } else {
             0.0
         };
-        taban.açıklık_ile(düşük + (yüksek - düşük) * oran)
+        self.opaklığı_uygula(
+            taban.açıklık_ile(düşük + (yüksek - düşük) * oran),
+            değer,
+            kapsam,
+        )
+    }
+
+    fn opaklığı_uygula(&self, renk: Renk, değer: f64, kapsam: [f64; 2]) -> Renk {
+        let Some([düşük, yüksek]) = self.opaklık else {
+            return renk;
+        };
+        let oran = if kapsam[1] > kapsam[0] {
+            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
+        } else {
+            0.0
+        };
+        renk.opaklık(düşük + (yüksek - düşük) * oran)
     }
 }
 
@@ -651,6 +684,21 @@ mod testler {
         assert_eq!(e.renk_çöz_tabanla(10.0, [0.0, 10.0], taban), Renk::BEYAZ);
         let orta = e.renk_çöz_tabanla(5.0, [0.0, 10.0], taban);
         assert!(orta.kırmızı > orta.yeşil && orta.yeşil > orta.mavi);
+    }
+
+    #[test]
+    fn opaklık_kanalı_sabit_ve_aralıklı_değerleri_renge_uygular() {
+        let sabit = GörselEşleme::yeni()
+            .renkler([0x006eddu32])
+            .opaklık(0.3)
+            .renk_çöz(150.0, [0.0, 300.0]);
+        assert!((sabit.alfa - 0.3).abs() < 1e-6);
+
+        let yüksek = GörselEşleme::yeni()
+            .renkler([0x006eddu32])
+            .opaklık_aralığı(0.2, 0.8)
+            .renk_çöz(300.0, [0.0, 300.0]);
+        assert!((yüksek.alfa - 0.8).abs() < 1e-6);
     }
 
     #[test]

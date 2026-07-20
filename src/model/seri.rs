@@ -1171,6 +1171,8 @@ pub struct SaçılımSerisi {
     /// ZRender tuval katmanı (`zlevel`). Takvim bileşeninde pozitif değer,
     /// seriyi ay/etiket üst katmanının da üzerine taşır.
     pub z_seviyesi: i32,
+    /// İşaretçi/isabet olaylarını kapatır (`silent`).
+    pub sessiz: bool,
     /// Veri kümesi eşlemesi: `(x boyutu, y boyutu)` (`encode.x/y`).
     pub eşleme: Option<(String, String)>,
     /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
@@ -1198,6 +1200,7 @@ impl Default for SaçılımSerisi {
             kutupsal: false,
             takvim_sırası: None,
             z_seviyesi: 0,
+            sessiz: false,
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
@@ -1249,6 +1252,11 @@ impl SaçılımSerisi {
 
     pub fn z_seviyesi(mut self, seviye: i32) -> Self {
         self.z_seviyesi = seviye;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
         self
     }
 

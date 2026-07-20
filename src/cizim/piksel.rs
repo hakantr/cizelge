@@ -167,11 +167,16 @@ fn mac_cjk_glif_çiz(
         );
         let konum = CGPoint::new(f64::from(x), yükseklik as f64 - f64::from(taban_y));
         yazı_tipi.draw_glyphs(&[glif], &[konum], bağlam.clone());
-        // Chromium/Skia'nın küçük PingFang glif örtüsü CoreGraphics'in tek
-        // gri-ton geçişinden daha doygundur. Aynı glifi ikinci kez geçirmek
-        // yalnız kısmi örtülü kenarları koyulaştırır; tam pikseller değişmez.
-        bağlam.set_alpha(0.5);
-        yazı_tipi.draw_glyphs(&[glif], &[konum], bağlam);
+        // Chromium'un renkli/gri CJK örtüsü CoreGraphics'in tek geçişinden
+        // daha doygundur; ikinci düşük alfa geçişi bunu yaklaştırır. Saf
+        // siyah gliflerde aynı işlem küçük 12 px metni gereğinden kalın
+        // yaptığı için tek gri-ton geçişi korunur.
+        let saf_siyah =
+            renk.kırmızı <= f32::EPSILON && renk.yeşil <= f32::EPSILON && renk.mavi <= f32::EPSILON;
+        if !saf_siyah {
+            bağlam.set_alpha(0.5);
+            yazı_tipi.draw_glyphs(&[glif], &[konum], bağlam);
+        }
     }
 
     if let (Some(maske), Some(önceki)) = (kırpma, önceki) {

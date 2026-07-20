@@ -281,22 +281,69 @@ pub fn saçılım_çiz(
             .unwrap_or(doğal_dikey);
         let boyut = etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
         let renk = etiket.yazı.renk.unwrap_or(tema::birincil_metin());
-        match etiket.döndürme {
-            EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => {
+        let satırlar = metin.split('\n').collect::<Vec<_>>();
+        if satırlar.len() == 1 {
+            match etiket.döndürme {
+                EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => {
+                    çizici.dönüşümlü_yazı(
+                        &metin,
+                        (0.0, 0.0),
+                        yatay,
+                        dikey,
+                        boyut,
+                        renk,
+                        etiket.yazı.kalın,
+                        AfinMatris::ötele(çapa.0, çapa.1)
+                            .çarp(AfinMatris::döndür(-derece.to_radians())),
+                    );
+                }
+                _ => {
+                    çizici.yazı(&metin, çapa, yatay, dikey, boyut, renk, etiket.yazı.kalın);
+                }
+            }
+            continue;
+        }
+
+        // zrender düz metinde öntanımlı lineHeight olarak font boyutunu
+        // kullanır ve sondaki boş satırları da blok yüksekliğine katar.
+        let toplam_yükseklik = boyut * satırlar.len() as f32;
+        let ilk_satır_y = match dikey {
+            DikeyHiza::Üst => boyut / 2.0,
+            DikeyHiza::Orta => -toplam_yükseklik / 2.0 + boyut / 2.0,
+            DikeyHiza::Alt => -toplam_yükseklik + boyut / 2.0,
+        };
+        let dönüşüm = match etiket.döndürme {
+            EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => Some(
+                AfinMatris::ötele(çapa.0, çapa.1).çarp(AfinMatris::döndür(-derece.to_radians())),
+            ),
+            _ => None,
+        };
+        for (satır_sırası, satır) in satırlar.into_iter().enumerate() {
+            if satır.is_empty() {
+                continue;
+            }
+            let y = ilk_satır_y + satır_sırası as f32 * boyut;
+            if let Some(dönüşüm) = dönüşüm {
                 çizici.dönüşümlü_yazı(
-                    &metin,
-                    (0.0, 0.0),
+                    satır,
+                    (0.0, y),
                     yatay,
-                    dikey,
+                    DikeyHiza::Orta,
                     boyut,
                     renk,
                     etiket.yazı.kalın,
-                    AfinMatris::ötele(çapa.0, çapa.1)
-                        .çarp(AfinMatris::döndür(-derece.to_radians())),
+                    dönüşüm,
                 );
-            }
-            _ => {
-                çizici.yazı(&metin, çapa, yatay, dikey, boyut, renk, etiket.yazı.kalın);
+            } else {
+                çizici.yazı(
+                    satır,
+                    (çapa.0, çapa.1 + y),
+                    yatay,
+                    DikeyHiza::Orta,
+                    boyut,
+                    renk,
+                    etiket.yazı.kalın,
+                );
             }
         }
     }
@@ -334,8 +381,10 @@ pub fn saçılım_çiz(
 #[allow(clippy::indexing_slicing)]
 mod testler {
     use super::*;
+    use crate::cizim::KayıtYüzeyi;
     use crate::koordinat::{Dikdörtgen, ÇalışmaEkseni};
     use crate::model::eksen::{Eksen, EksenKonumu};
+    use crate::model::stil::Etiket;
     use crate::model::takvim::TakvimKoordinatı;
     use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, Ölçek};
     use crate::yardimci::takvim::{TakvimAnı, takvimden_ana};
@@ -430,5 +479,35 @@ mod testler {
         assert_eq!(noktalar[0].boyut, 10.0);
         assert_eq!(noktalar[0].x_değeri, tarih);
         assert_eq!(noktalar[0].y_değeri, 500.0);
+    }
+
+    #[test]
+    fn çok_satırlı_scatter_etiketi_boş_satırları_blok_yüksekliğinde_korur() {
+        let seri = SaçılımSerisi::yeni()
+            .sembol_boyutu(0.0)
+            .etiket_boyutunu_eşle("etiket")
+            .etiket(Etiket::yeni().göster(true))
+            .veri([VeriÖğesi::from([0.0, 1.0])
+                .boyutlar([("etiket".to_string(), "1\n\n初四\n\n".into())])]);
+        let noktalar = [SaçılımNoktası {
+            sıra: 0,
+            konum: (50.0, 50.0),
+            boyut: 0.0,
+            x_değeri: 0.0,
+            y_değeri: 1.0,
+        }];
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+
+        saçılım_çiz(&mut yüzey, &seri, &noktalar, Renk::SİYAH, 1.0, 0.0, None);
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("yazı \"1\" (50.0,26.0) orta/orta"),
+            "{döküm}"
+        );
+        assert!(
+            döküm.contains("yazı \"初四\" (50.0,50.0) orta/orta"),
+            "{döküm}"
+        );
     }
 }

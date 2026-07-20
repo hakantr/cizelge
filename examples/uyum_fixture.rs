@@ -4256,6 +4256,157 @@ fn calendar_graph() -> GrafikSeçenekleri {
         .seri(TakvimSerisi::yeni(2017).takvim_sırası(0).veri(ısı_verisi))
 }
 
+fn calendar_lunar() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let tarih = |ay, gün| {
+        takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay,
+            gün,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        })
+    };
+    let mart = [
+        ("初四", None),
+        ("初五", None),
+        ("初六", None),
+        ("初七", None),
+        ("初八", Some("驚蟄")),
+        ("初九", None),
+        ("初十", None),
+        ("十一", None),
+        ("十二", None),
+        ("十三", None),
+        ("十四", None),
+        ("十五", None),
+        ("十六", None),
+        ("十七", None),
+        ("十八", None),
+        ("十九", None),
+        ("二十", None),
+        ("廿一", None),
+        ("廿二", None),
+        ("廿三", Some("春分")),
+        ("廿四", None),
+        ("廿五", None),
+        ("廿六", None),
+        ("廿七", None),
+        ("廿八", None),
+        ("廿九", None),
+        ("三十", None),
+        ("三月", None),
+        ("初二", None),
+        ("初三", None),
+        ("初四", None),
+    ];
+    let ay_verisi = mart
+        .iter()
+        .enumerate()
+        .map(|(sıra, (ay_günü, güneş_terimi))| {
+            let gün = sıra + 1;
+            VeriÖğesi::from([tarih(3, gün as u32), 1.0]).boyutlar([
+                (
+                    "ay_etiketi".to_string(),
+                    format!("{gün}\n\n{ay_günü}\n\n").into(),
+                ),
+                (
+                    "güneş_terimi".to_string(),
+                    format!("\n\n\n{}", güneş_terimi.unwrap_or("")).into(),
+                ),
+            ])
+        })
+        .collect::<Vec<_>>();
+
+    let başlangıç = tarih(1, 1);
+    let bitiş_sonrası = takvimden_ana(TakvimAnı {
+        yıl: 2018,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut tohum = 0x5eed_1234;
+    let mut ısı_verisi = Vec::with_capacity(365);
+    let mut zaman = başlangıç;
+    while zaman < bitiş_sonrası {
+        ısı_verisi.push(VeriÖğesi::from(
+            [zaman, kanıt_rastgele(&mut tohum) * 300.0],
+        ));
+        zaman += 86_400_000.0;
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .ipucu(
+            İpucu::yeni().biçimleyici(Biçimleyici::İşlev(Arc::new(|_, ham| {
+                let değer = ham.parse::<f64>().unwrap_or_default();
+                format!("降雨量: {değer:.2}")
+            }))),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .en_az(0.0)
+                .en_çok(300.0)
+                .hesaplanabilir(true)
+                .seri_sırası(2)
+                .yön(Yön::Yatay)
+                .sol("center")
+                .alt(20)
+                .renkler(["#e0ffff", "#006edd"])
+                .opaklık(0.3),
+        )
+        .takvim(
+            TakvimKoordinatı::yeni(TakvimAralığı::yeni(tarih(3, 1), tarih(3, 31)))
+                .sol("center")
+                .üst("middle")
+                .hücre_boyutu(Some(70.0), Some(70.0))
+                .yön(TakvimYönü::Dikey)
+                .ilk_gün(1)
+                .yıl_etiketi(Etiket::yeni().göster(false))
+                .ay_etiketi(Etiket::yeni().göster(false)),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .takvim_sırası(0)
+                .sembol_boyutu(0.0)
+                .etiket_boyutunu_eşle("ay_etiketi")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().renk("#000")),
+                )
+                .sessiz(true)
+                .veri(ay_verisi.clone()),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .takvim_sırası(0)
+                .sembol_boyutu(0.0)
+                .etiket_boyutunu_eşle("güneş_terimi")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().boyut(14.0).kalın(true).renk("#a00")),
+                )
+                .sessiz(true)
+                .veri(ay_verisi),
+        )
+        .seri(
+            TakvimSerisi::yeni(2017)
+                .ad("降雨量")
+                .takvim_sırası(0)
+                .veri(ısı_verisi),
+        )
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4985,6 +5136,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-horizontal" => Ok(calendar_horizontal()),
         "calendar-effectscatter" => Ok(calendar_effectscatter()),
         "calendar-graph" => Ok(calendar_graph()),
+        "calendar-lunar" => Ok(calendar_lunar()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),
