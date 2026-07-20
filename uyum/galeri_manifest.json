@@ -11051,7 +11051,7 @@
     "videoEnd": 6000,
     "kaynak": "public/examples/ts/scatter-aggregate-bar.ts",
     "kaynak_sha256": "74ced687512ef0e5f0d5621c22c2474819f2dd35d9cc5b4c1b7c9190456aad96",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_aggregate_bar",
     "seriler": [
       "bar",
       "scatter"
@@ -11063,7 +11063,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -11074,15 +11074,88 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "bar",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 171,
+          "değişen_piksel_oranı": 0.0006333333333333333,
+          "ssim": 0.9994597003547298,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aggregate-bar-bar.png",
+            "sha256": "a9ddbf92d533b436de071a9d14d2cdeb127e8c2990f96ea0c59bd406acddcc54"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-aggregate-bar-bar.png",
+            "sha256": "8d6673f563bb48ec48a5299506c356e8355a21c0628efb93212643849c368ecc"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-aggregate-bar-bar.png",
+            "sha256": "1d62892c56ffbf54b2b6c1a7d1e2b85b008f1a028693bc98c46f7b1b23afb313"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-aggregate-bar-bar.json",
+            "sha256": "953157b36af946344484d0ad1ec306ad346573ea625921e77666b9c5d97409c8"
+          }
+        },
+        {
+          "ad": "scatter",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 260,
+          "değişen_piksel_oranı": 0.000962962962962963,
+          "ssim": 0.9991380524961152,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aggregate-bar-scatter.png",
+            "sha256": "c1acde008c66424412489f5a881505e17f18bb5e6acc8b77c55ca6934d04a1db"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-aggregate-bar-scatter.png",
+            "sha256": "aea29424eb53331c8b25d779f2a2ceb1fb1cf7b766b96d11a2f672948ba4b687"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-aggregate-bar-scatter.png",
+            "sha256": "67e5a46bf66bf1a958ae09ca349823f10dbbe0a1dece520bfcc477ac8688c680"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-aggregate-bar-scatter.json",
+            "sha256": "93ee03ef31b2ec645e412ef34eba3a287a436f140f4b5507fa3e8ab99d261ea9"
+          }
+        },
+        {
+          "ad": "scatter-dönüş",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 260,
+          "değişen_piksel_oranı": 0.000962962962962963,
+          "ssim": 0.9991380524961152,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aggregate-bar-scatter-dönüş.png",
+            "sha256": "c1acde008c66424412489f5a881505e17f18bb5e6acc8b77c55ca6934d04a1db"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-aggregate-bar-scatter-dönüş.png",
+            "sha256": "aea29424eb53331c8b25d779f2a2ceb1fb1cf7b766b96d11a2f672948ba4b687"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-aggregate-bar-scatter-dönüş.png",
+            "sha256": "67e5a46bf66bf1a958ae09ca349823f10dbbe0a1dece520bfcc477ac8688c680"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-aggregate-bar-scatter-dönüş.json",
+            "sha256": "06dcd32c1a0fe4a884c799d5eb54f00c66c7f8c5fb500871baeb0a6290522afa"
+          }
+        }
+      ]
     }
   },
   {

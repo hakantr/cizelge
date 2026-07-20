@@ -1,0 +1,19 @@
+{
+  "id": "scatter-aggregate-bar",
+  "senaryo": "animasyon",
+  "kare": "bar",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 171,
+  "değişen_piksel_oranı": 0.0006333333333333333,
+  "ssim": 0.9994597003547298,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aggregate-bar-bar.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-aggregate-bar-bar.png",
+    "fark": "testler/gorsel/fark/default/scatter-aggregate-bar-bar.png"
+  }
+}
