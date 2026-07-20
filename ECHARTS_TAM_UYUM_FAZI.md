@@ -608,14 +608,79 @@ Gerçekleşen dilim — `candlestick-large` (2026-07-20):
   testleriyle kapatıldı. Bu testler görsel eşiği gevşetmeden gerçek çekirdek
   davranışını korur.
 - Kilitli ECharts `74e9e09…` referansı iki ardışık üretimde piksel düzeyinde
-  aynı çıktı verdi. 600×450 Cizelge sonucu `%0,610` değişen piksel oranı ve
-  `0,99533` SSIM ile `%1 / 0,99` kabul eşiğini geçti; referans, gerçek, fark
+  aynı çıktı verdi. 600×450 Cizelge sonucu `%0,608` değişen piksel oranı ve
+  `0,99534` SSIM ile `%1 / 0,99` kabul eşiğini geçti; referans, gerçek, fark
   ve metrik dosyaları galeri manifestine hashleriyle bağlandı.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
   `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 144/332, yani `%43,4`
   oldu. Gerçek scheduler progressive parçalama, etkileşim,
   erişilebilirlik ve ölçümlü performans Faz 7/8 kapıları tamamlanmadan kart
   nihai `tam_kanıtlı` sayılmaz.
+
+Gerçekleşen dilim — `candlestick-sh` (2026-07-20):
+
+- Resmî örnek ve veri akışı
+  `../echarts-examples/public/examples/ts/candlestick-sh.ts` dosyasından
+  alındı. Marker istatistikleri için
+  `../echarts/src/component/marker/markerHelper.ts`,
+  `../echarts/src/component/marker/MarkPointView.ts` ve
+  `../echarts/src/component/marker/MarkLineView.ts`; zoom penceresi için
+  `../echarts/src/component/dataZoom/AxisProxy.ts`; mum genişliği ve eksen
+  kapsamı için `../echarts/src/chart/candlestick/candlestickLayout.ts`,
+  `CandlestickSeries.ts` ve
+  `../echarts/src/chart/helper/axisSnippets.ts`; legend mirası için
+  `../echarts/src/component/legend/LegendView.ts` sabit ECharts commitinde
+  doğrulandı.
+- Kaynaktaki 88 tarihli `[open, close, lowest, highest]` satırı azaltılmadan
+  `examples/uyum_veri/candlestick_sh.rs` içine taşındı. `calculateMA`
+  yordamının ilk `dayCount` öğeyi boş bırakma ve geçerli noktada bugün ile
+  önceki `dayCount - 1` kapanışı toplama sırası korunarak MA5, MA10,
+  MA20 ve MA30 serileri üretildi. Kaynak uçları ve ilk MA5 sonucu fixture
+  testinde kilitlendi.
+- Başlık, beş öğeli legend, `%10/%10/%15` grid, `boundaryGap: false`,
+  `axisLine.onZero: false`, `min/max: dataMin/dataMax`, `scale: true`,
+  `splitArea`, eksen tetiklemeli çapraz pointer ve `%50..%100` aralıklı
+  `inside` + `slider` dataZoom aynı option anlamlarıyla fixture'a bağlandı.
+  MA çizgilerinin `smooth: true` ve `lineStyle.opacity: 0.5` değerleri ile
+  resmi palet sırası korunur.
+- Marker modeli `valueDim` için ad ve sıra seçicilerini taşır. Dataset
+  kullanılmadığında da mumun `open`, `close`, `lowest`/`low` ve
+  `highest`/`high`; kutunun `min`, `q1`, `median`, `q3`, `max` boyutları
+  çözülür. `min`, `max` ve `average` hesabı yalnız dataZoom `filter`
+  penceresinde kalan sonlu öğeleri tüketir.
+- `markPoint` için 2013/5/31 kategorisindeki koyu 2300 raptiyesi, en yüksek
+  `highest`, en düşük `lowest` ve ortalama `close` raptiyeleri taşındı.
+  ECharts `markerHelper`, ortalama koordinatında soyut ortalamayı değil
+  eksen piksel uzayında ona en yakın gerçek veri öğesini seçer; bu nedenle
+  resmi etiket `2242` olur. Eşit uzaklıkta taraf seçimi çekirdek testinde;
+  öğeye özgü `itemStyle`, genel formatter ve seri/veri adı bağlamı
+  görsel kanıtta doğrulandı.
+- `markLine` için `lowest` minimumundan `highest` maksimumuna giden,
+  iki ucunda 10 px daire bulunan ve etiketi gizli çift uçlu çizgi ile
+  `close` minimum/maksimum yatay çizgileri eklendi. Uçlar ayrı `valueDim`,
+  simge ve simge boyutu taşır; tekil ortalama çizgisi hesaplanmış sayıyı,
+  istatistik uçlu çizgi ise ECharts gibi en yakın gerçek öğeyi kullanır.
+- ECharts 6 `createBandWidthBasedAxisContainShapeHandler` karşılığı,
+  `boundaryGap: false` kategori eksenindeki mum/kutu/sütun gövdelerini
+  dataZoom penceresinin iki ucunda yarım bantla kapsar. Böylece ilk ve son
+  mum kırpılmaz ve kategori koordinatları resmi görüntüyle eşleşir. Mumun
+  yükselen rengi ile kenarlığı legend/marker'a geçer, mum serisi sonraki
+  MA çizgilerinin palet sırasını tüketmez ve karışık legend satırı ortak
+  görünen sınıra hizalanır.
+- Birim kapısı 274/274, fixture kapısı 33/33 geçti;
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Tam kanıt koşusu yeni kart
+  dahil 170/170 kareyi geçirdi; mevcut kilitli referanslar yenilenmedi.
+- Yeni resmi referans iki ardışık üretimde piksel düzeyinde kararlıdır.
+  600×450 Cizelge sonucu 1.969 değişen piksel, `%0,7293` fark ve
+  `0,991814` SSIM ile `%1 / 0,99` kabul eşiğini geçti. Referans, gerçek,
+  fark ve metrik dosyaları ECharts tarzı galeri manifestine SHA-256
+  değerleriyle bağlandı.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 145/332, yani
+  `%43,7` oldu. Animasyon, etkileşim, erişilebilirlik ve ölçümlü performans
+  kapıları ilgili ileri fazlarda kapanmadan kart nihai `tam_kanıtlı`
+  sayılmaz.
 
 Kabul:
 
