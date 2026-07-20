@@ -32,6 +32,12 @@ impl Kök {
                     değer.map(|d| d.to_string()).unwrap_or_else(|| "-".into())
                 )
                 .into(),
+                GrafikOlayı::GrafikÖğesiTıklandı { kimlik, ad } => format!(
+                    "Graphic tıklandı → kimlik: {}, ad: {}",
+                    kimlik.as_deref().unwrap_or("-"),
+                    ad.as_deref().unwrap_or("-")
+                )
+                .into(),
                 GrafikOlayı::GöstergeDeğişti { ad, görünür } => format!(
                     "Gösterge → {ad} artık {}",
                     if *görünür { "görünür" } else { "gizli" }
