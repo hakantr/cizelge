@@ -12814,7 +12814,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-stream-visual.ts",
     "kaynak_sha256": "4fb037a1138ec03be5efddb9c032c1d1db2a5632a0bf6dc2a18752204b6a9748",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_stream_visual",
     "seriler": [
       "cross",
       "scatter"
@@ -12831,7 +12831,7 @@
     "dış_varlıklar": [
       "/data/asset/data/house-price-area2.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -12842,15 +12842,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 875,
+          "değişen_piksel_oranı": 0.0032407407407407406,
+          "ssim": 0.9973382980005093,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-stream-visual.png",
+            "sha256": "24934a6f6d7bf089cf93ba26a64fc81945c2839c5a132d8f1b047d7b0601e760"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-stream-visual.png",
+            "sha256": "17e27b3188da53c083f288b7783970ca7386a3915bdbd98625b0f2c68dea2917"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-stream-visual.png",
+            "sha256": "35b296fc66178966b72dcf19af39a6e0c7ffc2fabc55988bc6a4c0d350e8e54d"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-stream-visual-son.json",
+            "sha256": "bab05dec4c2c8bc496b915f319fab68068a6d8e932f885aeb5252fe470c5f246"
+          }
+        }
+      ]
     }
   },
   {
