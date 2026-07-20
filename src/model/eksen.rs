@@ -435,6 +435,8 @@ impl EksenÇentiği {
 #[derive(Clone, PartialEq, Debug)]
 pub struct EksenEtiketi {
     pub göster: bool,
+    /// Etiketi eksenin ızgara tarafına taşır (`axisLabel.inside`).
+    pub içeride: bool,
     pub yazı: YazıStili,
     pub biçimleyici: Option<Biçimleyici>,
     /// Değer, sıra ve kırılma ucu bilgisini birlikte alan gelişmiş
@@ -457,6 +459,7 @@ impl Default for EksenEtiketi {
     fn default() -> Self {
         EksenEtiketi {
             göster: true,
+            içeride: false,
             yazı: YazıStili::default(),
             biçimleyici: None,
             bağlamlı_biçimleyici: None,
@@ -476,6 +479,11 @@ impl EksenEtiketi {
 
     pub fn göster(mut self, göster: bool) -> Self {
         self.göster = göster;
+        self
+    }
+
+    pub fn içeride(mut self, içeride: bool) -> Self {
+        self.içeride = içeride;
         self
     }
 
@@ -585,6 +593,9 @@ pub struct Eksen {
     /// Bütün eksen görsellerini kapatır (`xAxis.show` / `yAxis.show`). Ölçek
     /// ve koordinat dönüşümü etkin kalır.
     pub göster: bool,
+    /// Zrender katman sırası (`xAxis.z` / `yAxis.z`). ECharts eksen
+    /// öntanımlısı `0`, kartezyen seri öntanımlısı `2`dir.
+    pub z: i32,
     pub tür: EksenTürü,
     pub ad: Option<String>,
     pub ad_konumu: EksenAdKonumu,
@@ -664,6 +675,7 @@ impl Default for Eksen {
     fn default() -> Self {
         Eksen {
             göster: true,
+            z: 0,
             tür: EksenTürü::Değer,
             ad: None,
             ad_konumu: EksenAdKonumu::Bitiş,
@@ -713,6 +725,11 @@ impl Eksen {
     /// açar/kapatır; koordinat sistemi her iki durumda da çalışır.
     pub fn göster(mut self, göster: bool) -> Self {
         self.göster = göster;
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
         self
     }
 
@@ -1047,5 +1064,18 @@ mod testler {
         assert_eq!(çentik.uzunluk, 9.0);
         assert!(çentik.etiketle_hizala);
         assert_eq!(çentik.renk, Some(Renk::onaltılık(0x2a8339)));
+    }
+
+    #[test]
+    fn axis_label_inside_ve_axis_z_builderlari_resmi_varsayilani_korur() {
+        let öntanımlı = Eksen::kategori();
+        assert_eq!(öntanımlı.z, 0);
+        assert!(!öntanımlı.etiket.içeride);
+
+        let eksen = Eksen::kategori()
+            .z(10)
+            .etiket(EksenEtiketi::yeni().içeride(true));
+        assert_eq!(eksen.z, 10);
+        assert!(eksen.etiket.içeride);
     }
 }

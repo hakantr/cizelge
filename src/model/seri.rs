@@ -424,6 +424,9 @@ pub struct SütunSerisi {
     /// (`barCategoryGap`).
     pub kategori_boşluğu: Option<Uzunluk>,
     pub öğe_stili: ÖğeStili,
+    /// Fare/odak vurgusunda normal stile bindirilen
+    /// `emphasis.itemStyle`.
+    pub vurgu_öğe_stili: ÖğeStili,
     /// `showBackground`: her veri sütununun değer ekseni boyunca arka planı.
     pub arka_plan_göster: bool,
     /// `backgroundStyle`; `None`, ECharts'ın yarı saydam gri varsayılanıdır.
@@ -456,6 +459,7 @@ impl Default for SütunSerisi {
             sütun_boşluğu: None,
             kategori_boşluğu: None,
             öğe_stili: ÖğeStili::default(),
+            vurgu_öğe_stili: ÖğeStili::default(),
             arka_plan_göster: false,
             arka_plan_stili: None,
             // zrender'in bağlı metin öntanımlısı `inside`dır. Line serisi
@@ -560,6 +564,11 @@ impl SütunSerisi {
 
     pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
         self.öğe_stili = stil;
+        self
+    }
+
+    pub fn vurgu_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.vurgu_öğe_stili = stil;
         self
     }
 

@@ -429,7 +429,31 @@ fn kırılma_zikzağını_çiz(
 pub fn eksenleri_çiz(
     çizici: &mut dyn ÇizimYüzeyi, alan: Dikdörtgen, eksenler: &[&ÇalışmaEkseni]
 ) {
+    eksenleri_çiz_iç(çizici, alan, eksenler, None);
+}
+
+/// Eksenleri kartezyen serilerin öntanımlı `z: 2` katmanının altında veya
+/// üstünde çizer. Karşı eksen türü gibi otomatik kararlar için tam eksen
+/// listesi korunur; yalnız boya komutları katmana göre süzülür.
+pub fn eksenleri_çiz_katman(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+    serilerin_üstünde: bool,
+) {
+    eksenleri_çiz_iç(çizici, alan, eksenler, Some(serilerin_üstünde));
+}
+
+fn eksenleri_çiz_iç(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+    katman: Option<bool>,
+) {
     for eksen in eksenler {
+        if katman.is_some_and(|üstte| (eksen.seçenek.z > 2) != üstte) {
+            continue;
+        }
         if !eksen.seçenek.göster {
             continue;
         }
@@ -469,6 +493,11 @@ pub fn eksenleri_çiz(
         let dış_yön: f32 = match eksen.konum {
             EksenKonumu::Alt | EksenKonumu::Sağ => 1.0,
             EksenKonumu::Üst | EksenKonumu::Sol => -1.0,
+        };
+        let etiket_yönü = if eksen.seçenek.etiket.içeride {
+            -dış_yön
+        } else {
+            dış_yön
         };
         let çizgi_sabiti_keskin = keskin(çizgi_sabiti);
 
@@ -688,11 +717,11 @@ pub fn eksenleri_çiz(
                 let metin = etiket_metni(eksen, çentik, i);
                 let konum = etiket_konumları.get(i).copied().unwrap_or(*konum);
                 if eksen.yatay_mı() {
-                    let çapa = (konum, sabit + dış_yön * boşluk);
+                    let çapa = (konum, sabit + etiket_yönü * boşluk);
                     let derece = eksen.seçenek.etiket.döndürme;
                     if derece.abs() <= f32::EPSILON {
                         let satırlar = metin.split('\n').collect::<Vec<_>>();
-                        let üst = if dış_yön > 0.0 {
+                        let üst = if etiket_yönü > 0.0 {
                             çapa.1 + EKSEN_YAZI_TABAN_DENGESİ
                         } else {
                             çapa.1 - boyut * satırlar.len() as f32 + EKSEN_YAZI_TABAN_DENGESİ
@@ -730,7 +759,7 @@ pub fn eksenleri_çiz(
                         );
                     }
                 } else {
-                    let yatay = if dış_yön > 0.0 {
+                    let yatay = if etiket_yönü > 0.0 {
                         YatayHiza::Sol
                     } else {
                         YatayHiza::Sağ
@@ -741,7 +770,10 @@ pub fn eksenleri_çiz(
                     for (satır_sırası, satır) in satırlar.iter().enumerate() {
                         çizici.yazı(
                             satır,
-                            (sabit + dış_yön * boşluk, üst + satır_sırası as f32 * boyut),
+                            (
+                                sabit + etiket_yönü * boşluk,
+                                üst + satır_sırası as f32 * boyut,
+                            ),
                             yatay,
                             DikeyHiza::Üst,
                             boyut,

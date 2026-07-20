@@ -11,7 +11,7 @@ use std::collections::HashSet;
 
 use crate::bilesen::baslik::başlık_çiz;
 use crate::bilesen::eksen_cizimi::{
-    bölme_çizgilerini_çiz, eksenleri_çiz, kırılma_alanlarını_çiz
+    bölme_çizgilerini_çiz, eksenleri_çiz, eksenleri_çiz_katman, kırılma_alanlarını_çiz,
 };
 use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::grafik::{GrafikSahnesi, grafik_sahnesi_hazırla};
@@ -2725,7 +2725,12 @@ pub fn grafiği_boya(
             if ızgara_eksenleri.is_empty() {
                 continue;
             }
-            bölme_çizgilerini_çiz(yüzey, *alan, &ızgara_eksenleri);
+            let alt_eksenler = ızgara_eksenleri
+                .iter()
+                .copied()
+                .filter(|eksen| eksen.seçenek.z <= 2)
+                .collect::<Vec<_>>();
+            bölme_çizgilerini_çiz(yüzey, *alan, &alt_eksenler);
 
             if let (Some(ipucu), Some(eksen_ip)) = (&ipucu_seçeneği, &eksen_ipucu)
                 && ipucu.imleç == İmleçTürü::Gölge
@@ -2755,7 +2760,7 @@ pub fn grafiği_boya(
                 }
             }
 
-            eksenleri_çiz(yüzey, *alan, &ızgara_eksenleri);
+            eksenleri_çiz_katman(yüzey, *alan, &ızgara_eksenleri, false);
         }
 
         // İm alanları serilerin altına boyanır.
@@ -3021,7 +3026,7 @@ pub fn grafiği_boya(
                                 && let Some((_, girdiler)) =
                                     sütun_grupları.iter().find(|(aday, _)| *aday == anahtar)
                             {
-                                sütunları_çiz(yüzey, girdiler, ilerleme, isabetler);
+                                sütunları_çiz(yüzey, girdiler, ilerleme, fare, isabetler);
                             }
                         }
                         Seri::Saçılım(s) => {
@@ -3310,6 +3315,29 @@ pub fn grafiği_boya(
                     kategori_kaydırması,
                 );
             }
+        }
+
+        // ECharts kartezyen serileri z=2 katmanındadır. Daha yüksek `axis.z`
+        // isteyen eksenlerin bölme/etiket görselleri seri ve imleyicilerden
+        // sonra boyanır; örneğin beyaz `axisLabel.inside` metni sütunların
+        // üstünde kalır.
+        for (g, alan) in kurulum.ızgara_alanları.iter().enumerate() {
+            let ızgara_eksenleri = kurulum
+                .x_eksenler
+                .iter()
+                .chain(kurulum.y_eksenler.iter())
+                .filter(|eksen| eksen.seçenek.ızgara_sırası == g)
+                .collect::<Vec<_>>();
+            let üst_eksenler = ızgara_eksenleri
+                .iter()
+                .copied()
+                .filter(|eksen| eksen.seçenek.z > 2)
+                .collect::<Vec<_>>();
+            if üst_eksenler.is_empty() {
+                continue;
+            }
+            bölme_çizgilerini_çiz(yüzey, *alan, &üst_eksenler);
+            eksenleri_çiz_katman(yüzey, *alan, &ızgara_eksenleri, true);
         }
 
         // `breakArea.zigzagZ` öntanımlı olarak 100'dür; dolgu ve zikzaklar
@@ -4975,6 +5003,55 @@ mod yakınlaştırma_yönü_testleri {
         assert!(çıktı.isabetler.is_empty());
         let döküm = yüzey.döküm();
         assert!(döküm.contains("#5070dd@0.8"), "{döküm}");
+    }
+
+    #[test]
+    fn bar_emphasis_faredeki_sutuna_uygulanir_ve_yuksek_z_inside_etiket_uste_cizilir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(
+                Eksen::kategori()
+                    .veri(["A"])
+                    .z(10)
+                    .çizgi(crate::model::eksen::EksenÇizgisi::yeni().göster(false))
+                    .çentik(crate::model::eksen::EksenÇentiği::yeni().göster(false))
+                    .etiket(
+                        crate::model::eksen::EksenEtiketi::yeni()
+                            .içeride(true)
+                            .yazı(crate::model::stil::YazıStili::yeni().renk(0xffffff)),
+                    ),
+            )
+            .y_ekseni(Eksen::değer().göster(false))
+            .seri(
+                crate::model::seri::SütunSerisi::yeni()
+                    .öğe_stili(crate::model::stil::ÖğeStili::yeni().renk(0xff0000))
+                    .vurgu_öğe_stili(crate::model::stil::ÖğeStili::yeni().renk(0x0000ff))
+                    .veri([100]),
+            );
+        let mut normal = crate::cizim::KayıtYüzeyi::yeni(200.0, 200.0);
+        let çıktı = grafiği_boya(&mut normal, &seçenekler, &BoyamaGirdisi::default());
+        let İsabetGeometrisi::Dikdörtgen(sütun) = çıktı.isabetler[0].geometri else {
+            panic!("sütun dikdörtgen isabeti bekleniyordu");
+        };
+        let normal_döküm = normal.döküm();
+        let sütun_sırası = normal_döküm
+            .find("#ff0000@1.0")
+            .expect("normal sütun dolgusu");
+        let etiket_sırası = normal_döküm.find("yazı \"A\"").expect("x etiketi");
+        assert!(etiket_sırası > sütun_sırası, "{normal_döküm}");
+
+        let mut vurgulu = crate::cizim::KayıtYüzeyi::yeni(200.0, 200.0);
+        grafiği_boya(
+            &mut vurgulu,
+            &seçenekler,
+            &BoyamaGirdisi {
+                fare: Some(sütun.merkez()),
+                ..BoyamaGirdisi::default()
+            },
+        );
+        let vurgu_dökümü = vurgulu.döküm();
+        assert!(vurgu_dökümü.contains("#0000ff@1.0"), "{vurgu_dökümü}");
+        assert!(!vurgu_dökümü.contains("#ff0000@1.0"), "{vurgu_dökümü}");
     }
 
     #[test]

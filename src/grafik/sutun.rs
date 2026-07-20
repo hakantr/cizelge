@@ -2,7 +2,7 @@
 //! Genişlik/kaydırma hesabı [`crate::yerlesim::sutun`] portunu kullanır.
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, ÇizimYüzeyi};
+use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::pasta::zengin_etiketi_yaz;
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
 use crate::model::seri::SütunSerisi;
@@ -195,6 +195,7 @@ pub fn sütunları_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     girdiler: &[SütunGirdisi],
     ilerleme: f32,
+    fare: Option<(f32, f32)>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
     let Some(ilk_girdi) = girdiler.first() else {
@@ -248,18 +249,71 @@ pub fn sütunları_çiz(
             };
 
             let öğe_stili = veri_öğesi.stil.as_ref();
-            let dolgu = öğe_stili
+            let normal_dolgu = öğe_stili
                 .and_then(|s| s.renk.clone())
                 .or_else(|| seri.öğe_stili.renk.clone())
                 .unwrap_or(Dolgu::Düz(girdi.renk));
-            let yarıçap = öğe_stili
-                .map(|s| s.kenarlık_yarıçapı)
+            let normal_yarıçap = öğe_stili
+                .filter(|stil| stil.kenarlık_yarıçapı.iter().any(|yarıçap| *yarıçap > 0.0))
+                .map(|stil| stil.kenarlık_yarıçapı)
                 .unwrap_or(seri.öğe_stili.kenarlık_yarıçapı);
-            let kenarlık = seri
-                .öğe_stili
-                .kenarlık_rengi
-                .map(|r| (seri.öğe_stili.kenarlık_kalınlığı.max(1.0), r));
-            let opaklık = seri.öğe_stili.opaklık.unwrap_or(1.0);
+            let normal_kenarlık_rengi = öğe_stili
+                .and_then(|stil| stil.kenarlık_rengi)
+                .or(seri.öğe_stili.kenarlık_rengi);
+            let normal_kenarlık_kalınlığı = öğe_stili
+                .filter(|stil| stil.kenarlık_kalınlığı > 0.0)
+                .map(|stil| stil.kenarlık_kalınlığı)
+                .unwrap_or(seri.öğe_stili.kenarlık_kalınlığı);
+            let normal_opaklık = öğe_stili
+                .and_then(|stil| stil.opaklık)
+                .or(seri.öğe_stili.opaklık)
+                .unwrap_or(1.0);
+            let normal_gölge = öğe_stili
+                .filter(|stil| {
+                    stil.gölge_bulanıklığı > 0.0
+                        || stil.gölge_rengi.is_some()
+                        || stil.gölge_kayması != (0.0, 0.0)
+                })
+                .unwrap_or(&seri.öğe_stili);
+
+            let vurgulu = fare.is_some_and(|nokta| d.içeriyor_mu(nokta));
+            let vurgu = &seri.vurgu_öğe_stili;
+            let dolgu = if vurgulu {
+                vurgu.renk.clone().unwrap_or(normal_dolgu)
+            } else {
+                normal_dolgu
+            };
+            let yarıçap = if vurgulu && vurgu.kenarlık_yarıçapı.iter().any(|yarıçap| *yarıçap > 0.0)
+            {
+                vurgu.kenarlık_yarıçapı
+            } else {
+                normal_yarıçap
+            };
+            let kenarlık_rengi = if vurgulu {
+                vurgu.kenarlık_rengi.or(normal_kenarlık_rengi)
+            } else {
+                normal_kenarlık_rengi
+            };
+            let kenarlık_kalınlığı = if vurgulu && vurgu.kenarlık_kalınlığı > 0.0 {
+                vurgu.kenarlık_kalınlığı
+            } else {
+                normal_kenarlık_kalınlığı
+            };
+            let kenarlık = kenarlık_rengi.map(|renk| (kenarlık_kalınlığı.max(1.0), renk));
+            let opaklık = if vurgulu {
+                vurgu.opaklık.unwrap_or(normal_opaklık)
+            } else {
+                normal_opaklık
+            };
+            let gölge = if vurgulu
+                && (vurgu.gölge_bulanıklığı > 0.0
+                    || vurgu.gölge_rengi.is_some()
+                    || vurgu.gölge_kayması != (0.0, 0.0))
+            {
+                vurgu
+            } else {
+                normal_gölge
+            };
 
             if seri.arka_plan_göster {
                 let arka = seri.arka_plan_stili.as_ref();
@@ -326,6 +380,22 @@ pub fn sütunları_çiz(
                     }
                 }
             } else {
+                if gölge.gölge_bulanıklığı > 0.0
+                    && let Some(gölge_rengi) = gölge.gölge_rengi
+                {
+                    let mut yol = Yol::yeni();
+                    yol.taşı((d.x, d.y));
+                    yol.çiz((d.sağ(), d.y));
+                    yol.çiz((d.sağ(), d.alt()));
+                    yol.çiz((d.x, d.alt()));
+                    yol.kapat();
+                    çizici.yol_gölgesi(
+                        &yol,
+                        gölge_rengi.opaklık(opaklık),
+                        gölge.gölge_bulanıklığı,
+                        gölge.gölge_kayması,
+                    );
+                }
                 çizici.dikdörtgen(d, &dolgu.opaklık(opaklık), yarıçap, kenarlık);
             }
 

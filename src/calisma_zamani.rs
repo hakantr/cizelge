@@ -26,7 +26,7 @@ use crate::model::seri::Seri;
 use crate::model::takvim::TakvimKoordinatı;
 use crate::model::tek_eksen::TekEksen;
 use crate::model::veri_kumesi::{VeriKümesi, VeriKümesiTanımı};
-use crate::model::yakinlastirma::VeriYakınlaştırma;
+use crate::model::yakinlastirma::{VeriYakınlaştırma, YakınlaştırmaDeğeri};
 use crate::model::zaman_seridi::ZamanŞeridi;
 use crate::renk::{Dolgu, Renk};
 use crate::yerel::{TÜRKÇE, Yerel};
@@ -1114,8 +1114,29 @@ impl GrafikÇalışmaZamanı {
         bitiş: Option<f32>,
         sessiz: bool,
     ) -> Result<Vec<(usize, f32, f32)>, BilesenHatasi> {
+        self.veri_yakınlaştırma_aralığını_ayarla(sıra, başlangıç, bitiş, None, None, sessiz)
+    }
+
+    /// Yüzde ve değer tabanlı `dataZoom` uçlarını tek action işlemi olarak
+    /// uygular. Aynı uçta hem yüzde hem değer verilirse ECharts
+    /// `DataZoomModel.setRawRange` gibi yüzde önceliklidir ve eski değer ucu
+    /// temizlenir. Yalnız değer verilirse yüzde alanı geri dönüş değeri olarak
+    /// korunur.
+    pub(crate) fn veri_yakınlaştırma_aralığını_ayarla(
+        &mut self,
+        sıra: Option<usize>,
+        başlangıç: Option<f32>,
+        bitiş: Option<f32>,
+        başlangıç_değeri: Option<YakınlaştırmaDeğeri>,
+        bitiş_değeri: Option<YakınlaştırmaDeğeri>,
+        sessiz: bool,
+    ) -> Result<Vec<(usize, f32, f32)>, BilesenHatasi> {
         self.açık_mı("dispatchAction.dataZoom")?;
-        if başlangıç.is_none() && bitiş.is_none() {
+        if başlangıç.is_none()
+            && bitiş.is_none()
+            && başlangıç_değeri.is_none()
+            && bitiş_değeri.is_none()
+        {
             return Ok(Vec::new());
         }
         for (alan, değer) in [("dataZoom.start", başlangıç), ("dataZoom.end", bitiş)] {
@@ -1130,16 +1151,30 @@ impl GrafikÇalışmaZamanı {
         }
 
         let sıralar = self.bağlı_yakınlaştırma_sıraları(sıra)?;
+        let mut aday = self.seçenekler.clone();
         let mut değişiklikler = Vec::with_capacity(sıralar.len());
         for &hedef in &sıralar {
-            let yakınlaştırma = self.seçenekler.veri_yakınlaştırmaları.get(hedef).ok_or(
-                BilesenHatasi::EksikVeri {
-                    bileşen: "dataZoom",
-                    sıra: hedef,
-                },
-            )?;
-            let yeni_başlangıç = başlangıç.unwrap_or(yakınlaştırma.başlangıç);
-            let yeni_bitiş = bitiş.unwrap_or(yakınlaştırma.bitiş);
+            let yakınlaştırma =
+                aday.veri_yakınlaştırmaları
+                    .get_mut(hedef)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "dataZoom",
+                        sıra: hedef,
+                    })?;
+            if let Some(başlangıç) = başlangıç {
+                yakınlaştırma.başlangıç = başlangıç;
+                yakınlaştırma.başlangıç_değeri = None;
+            } else if let Some(değer) = başlangıç_değeri.clone() {
+                yakınlaştırma.başlangıç_değeri = Some(değer);
+            }
+            if let Some(bitiş) = bitiş {
+                yakınlaştırma.bitiş = bitiş;
+                yakınlaştırma.bitiş_değeri = None;
+            } else if let Some(değer) = bitiş_değeri.clone() {
+                yakınlaştırma.bitiş_değeri = Some(değer);
+            }
+            let yeni_başlangıç = yakınlaştırma.başlangıç;
+            let yeni_bitiş = yakınlaştırma.bitiş;
             if yeni_başlangıç > yeni_bitiş {
                 return Err(BilesenHatasi::GeçersizSeçenek {
                     alan: "dataZoom.start/end",
@@ -1150,14 +1185,8 @@ impl GrafikÇalışmaZamanı {
             }
             değişiklikler.push((hedef, yeni_başlangıç, yeni_bitiş));
         }
-
-        for &(hedef, yeni_başlangıç, yeni_bitiş) in &değişiklikler {
-            if let Some(yakınlaştırma) = self.seçenekler.veri_yakınlaştırmaları.get_mut(hedef)
-            {
-                yakınlaştırma.başlangıç = yeni_başlangıç;
-                yakınlaştırma.bitiş = yeni_bitiş;
-            }
-        }
+        seçenekleri_doğrula(&aday)?;
+        self.seçenekler = aday;
         if !sessiz && !değişiklikler.is_empty() {
             self.olaylar.push(ÇalışmaOlayı::YakınlaştırmaDeğişti {
                 değişiklikler: değişiklikler.clone(),

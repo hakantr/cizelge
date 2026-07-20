@@ -12,6 +12,7 @@ use crate::calisma_zamani::{
 };
 use crate::hata::BilesenHatasi;
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
+use crate::model::yakinlastirma::YakınlaştırmaDeğeri;
 
 /// JSON-benzeri action/event yük değeri.
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -508,18 +509,19 @@ pub fn veri_yakınlaştırma_eylemini_kaydet(
                         .to_owned(),
                 });
             }
-            if yük.al("startValue").is_some() || yük.al("endValue").is_some() {
-                return Err(BilesenHatasi::Desteklenmeyen {
-                    özellik: "dataZoom.startValue/endValue",
-                    ayrıntı: "bu model şu anda yüzde tabanlı start/end aralığı kullanıyor"
-                        .to_owned(),
-                });
-            }
             let sıra = isteğe_bağlı_sıra(yük, "dataZoomIndex")?;
             let başlangıç = isteğe_bağlı_sayı(yük, "start")?.map(|değer| değer as f32);
             let bitiş = isteğe_bağlı_sayı(yük, "end")?.map(|değer| değer as f32);
-            let değişiklikler =
-                çalışma.veri_yakınlaştırmayı_ayarla(sıra, başlangıç, bitiş, true)?;
+            let başlangıç_değeri = isteğe_bağlı_yakınlaştırma_değeri(yük, "startValue")?;
+            let bitiş_değeri = isteğe_bağlı_yakınlaştırma_değeri(yük, "endValue")?;
+            let değişiklikler = çalışma.veri_yakınlaştırma_aralığını_ayarla(
+                sıra,
+                başlangıç,
+                bitiş,
+                başlangıç_değeri.clone(),
+                bitiş_değeri.clone(),
+                true,
+            )?;
 
             let mut olay = OlayYükü {
                 bileşen_türü: Some("dataZoom".to_owned()),
@@ -533,6 +535,16 @@ pub fn veri_yakınlaştırma_eylemini_kaydet(
             if let Some(bitiş) = bitiş {
                 olay.alanlar
                     .insert("end".to_owned(), EylemDeğeri::from(bitiş));
+            }
+            if let Some(değer) = başlangıç_değeri {
+                olay.alanlar.insert(
+                    "startValue".to_owned(),
+                    yakınlaştırma_değerinden_eylem(değer),
+                );
+            }
+            if let Some(değer) = bitiş_değeri {
+                olay.alanlar
+                    .insert("endValue".to_owned(), yakınlaştırma_değerinden_eylem(değer));
             }
             olay.alanlar.insert(
                 "affectedIndices".to_owned(),
@@ -1100,6 +1112,34 @@ fn isteğe_bağlı_sayı(
         })
 }
 
+fn isteğe_bağlı_yakınlaştırma_değeri(
+    yük: &EylemYükü,
+    alan: &'static str,
+) -> Result<Option<YakınlaştırmaDeğeri>, BilesenHatasi> {
+    let Some(değer) = yük.al(alan) else {
+        return Ok(None);
+    };
+    match değer {
+        EylemDeğeri::Sayı(sayı) if sayı.is_finite() => {
+            Ok(Some(YakınlaştırmaDeğeri::Sayı(*sayı)))
+        }
+        EylemDeğeri::Metin(kategori) => {
+            Ok(Some(YakınlaştırmaDeğeri::Kategori(kategori.clone())))
+        }
+        _ => Err(BilesenHatasi::GeçersizSeçenek {
+            alan,
+            ayrıntı: "sonlu sayı veya kategori adı gerekli".to_owned(),
+        }),
+    }
+}
+
+fn yakınlaştırma_değerinden_eylem(değer: YakınlaştırmaDeğeri) -> EylemDeğeri {
+    match değer {
+        YakınlaştırmaDeğeri::Sayı(sayı) => EylemDeğeri::Sayı(sayı),
+        YakınlaştırmaDeğeri::Kategori(kategori) => EylemDeğeri::Metin(kategori),
+    }
+}
+
 fn isteğe_bağlı_sıra(
     yük: &EylemYükü,
     alan: &'static str,
@@ -1242,6 +1282,66 @@ mod testler {
             çalışma.seçenekleri_al().unwrap().veri_yakınlaştırmaları[2].başlangıç,
             10.0
         );
+    }
+
+    #[test]
+    fn data_zoom_action_kategori_deger_uclarini_uygular_ve_yuzdeyle_temizler() {
+        let kategoriler = ["A", "B", "C", "D", "E", "F", "G"];
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().veri(kategoriler))
+            .y_ekseni(Eksen::değer())
+            .seri(ÇizgiSerisi::yeni().veri([1, 2, 3, 4, 5, 6, 7]))
+            .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+            .veri_yakınlaştırma(VeriYakınlaştırma::sürgü());
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        veri_yakınlaştırma_eylemini_kaydet(&mut kayıt).unwrap();
+
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("dataZoom")
+                    .alan("dataZoomIndex", 0usize)
+                    .alan("startValue", "C")
+                    .alan("endValue", "F"),
+            )
+            .unwrap();
+        assert_eq!(olaylar[0].alanlar.get("startValue"), Some(&"C".into()));
+        assert_eq!(olaylar[0].alanlar.get("endValue"), Some(&"F".into()));
+        assert_eq!(
+            olaylar[0].alanlar.get("affectedIndices"),
+            Some(&EylemDeğeri::Dizi(vec![0usize.into(), 1usize.into()]))
+        );
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        for yakınlaştırma in &sonuç.veri_yakınlaştırmaları {
+            assert_eq!(
+                yakınlaştırma.başlangıç_değeri,
+                Some(YakınlaştırmaDeğeri::Kategori("C".to_owned()))
+            );
+            assert_eq!(
+                yakınlaştırma.bitiş_değeri,
+                Some(YakınlaştırmaDeğeri::Kategori("F".to_owned()))
+            );
+        }
+
+        kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("dataZoom")
+                    .alan("dataZoomIndex", 0usize)
+                    .alan("start", 25.0),
+            )
+            .unwrap();
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        for yakınlaştırma in &sonuç.veri_yakınlaştırmaları {
+            assert_eq!(yakınlaştırma.başlangıç, 25.0);
+            assert_eq!(yakınlaştırma.başlangıç_değeri, None);
+            assert_eq!(
+                yakınlaştırma.bitiş_değeri,
+                Some(YakınlaştırmaDeğeri::Kategori("F".to_owned()))
+            );
+        }
     }
 
     #[test]
