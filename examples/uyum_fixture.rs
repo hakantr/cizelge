@@ -20,6 +20,8 @@ use serde::de::DeserializeOwned;
 
 #[path = "uyum_veri/area_rainfall.rs"]
 mod area_rainfall_verisi;
+#[path = "uyum_veri/candlestick_sh.rs"]
+mod candlestick_sh_verisi;
 #[path = "uyum_veri/custom_calendar_icon.rs"]
 mod custom_calendar_icon_verisi;
 #[path = "uyum_veri/perlin.rs"]
@@ -185,6 +187,10 @@ fn line_marker() -> GrafikSeçenekleri {
         bitiş: İmÇizgisiUcu::Koordinat(6.0, 5.0),
         başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
         bitiş_simgesi: İmÇizgisiUçSimgesi::Yok,
+        başlangıç_simge_boyutu: 8.0,
+        bitiş_simge_boyutu: 8.0,
+        başlangıç_değer_boyutu: None,
+        bitiş_değer_boyutu: None,
         etiket: None,
     });
 
@@ -7120,6 +7126,149 @@ fn candlestick_simple() -> GrafikSeçenekleri {
         ]))
 }
 
+fn candlestick_sh_hareketli_ortalama(gün_sayısı: usize) -> Vec<VeriÖğesi> {
+    let veri = candlestick_sh_verisi::VERİ;
+    (0..veri.len())
+        .map(|sıra| {
+            if sıra < gün_sayısı {
+                VeriÖğesi::default()
+            } else {
+                let toplam = (0..gün_sayısı)
+                    .map(|geri| veri[sıra - geri].1[1])
+                    .sum::<f64>();
+                VeriÖğesi::yeni(toplam / gün_sayısı as f64)
+            }
+        })
+        .collect()
+}
+
+fn candlestick_sh() -> GrafikSeçenekleri {
+    let kategoriler = candlestick_sh_verisi::VERİ
+        .iter()
+        .map(|(tarih, _)| *tarih)
+        .collect::<Vec<_>>();
+    let mumlar = candlestick_sh_verisi::VERİ
+        .iter()
+        .map(|(tarih, değerler)| VeriÖğesi::adlı(*tarih, *değerler))
+        .collect::<Vec<_>>();
+    let yuvarlak_etiket = Etiket::yeni()
+        .göster(true)
+        .biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+            format!("{:.0}", javascript_yuvarla(değer))
+        })))
+        .yazı(YazıStili::yeni().kalın(true));
+    let ham_etiket = Etiket::yeni()
+        .göster(true)
+        .biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+            ondalık_kırp(değer)
+        })));
+    let gizli_etiket = İmÇizgisiEtiketYaması::yeni().göster(false);
+    let im_çizgisi = İmÇizgisi::yeni()
+        .uç_simgeleri(İmÇizgisiUçSimgesi::Yok, İmÇizgisiUçSimgesi::Yok)
+        .parça(
+            İmÇizgisiParçası::yeni(
+                İmÇizgisiUcu::İstatistik(İmDeğeri::EnKüçük),
+                İmÇizgisiUcu::İstatistik(İmDeğeri::EnBüyük),
+            )
+            .ad("from lowest to highest")
+            .uç_simgeleri(İmÇizgisiUçSimgesi::Daire, İmÇizgisiUçSimgesi::Daire)
+            .uç_simge_boyutları(10.0, 10.0)
+            .değer_boyutları("lowest", "highest")
+            .etiket(gizli_etiket),
+        )
+        .tanım(
+            İmÇizgisiTanımı::yeni(İmYönü::Yatay, İmDeğeri::EnKüçük)
+                .ad("min line on close")
+                .değer_boyutu("close"),
+        )
+        .tanım(
+            İmÇizgisiTanımı::yeni(İmYönü::Yatay, İmDeğeri::EnBüyük)
+                .ad("max line on close")
+                .değer_boyutu("close"),
+        )
+        .etiket(ham_etiket);
+    let im_noktası = İmNoktası::yeni()
+        .tanım(
+            İmNoktasıTanımı::koordinat(81.0, 2300.0)
+                .ad("Mark")
+                .gösterilen_değer(2300.0)
+                .stil(ÖğeStili::yeni().renk("rgb(41,60,85)")),
+        )
+        .istatistik(İmDeğeri::EnBüyük, "highest")
+        .istatistik(İmDeğeri::EnKüçük, "lowest")
+        .istatistik(İmDeğeri::Ortalama, "close")
+        .etiket(yuvarlak_etiket);
+    let hareketli_ortalama = |ad: &str, gün| {
+        ÇizgiSerisi::yeni()
+            .ad(ad)
+            .yumuşat(true)
+            .çizgi_stili(ÇizgiStili::yeni().opaklık(0.5))
+            .veri(candlestick_sh_hareketli_ortalama(gün))
+    };
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("上证指数").sol(0.0).iç_boşluk(15.0))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .veri(["日K", "MA5", "MA10", "MA20", "MA30"])
+                .üst(20)
+                .iç_boşluk(15.0),
+        )
+        .ızgara(Izgara::yeni().sol("10%").sağ("10%").alt("15%"))
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(kategoriler)
+                .kenar_boşluğu(false)
+                .çizgi(EksenÇizgisi::yeni().sıfır(EksenSıfırKipi::Kapalı))
+                .bölme_çizgisi_göster(false)
+                .en_az_veri()
+                .en_çok_veri(),
+        )
+        .y_ekseni(Eksen::değer().ölçekli(true).bölme_alanı_göster(true))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(50.0, 100.0))
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().üst("90%").aralık(50.0, 100.0))
+        .seri(
+            MumSerisi::yeni()
+                .ad("日K")
+                .yükselen_renk(0xec0000)
+                .düşen_renk(0x00da3c)
+                .yükselen_kenarlık_rengi(0x8a0000)
+                .düşen_kenarlık_rengi(0x008f28)
+                .im_noktası(im_noktası)
+                .im_çizgisi(im_çizgisi)
+                .veri(mumlar),
+        )
+        .seri(hareketli_ortalama("MA5", 5))
+        .seri(hareketli_ortalama("MA10", 10))
+        .seri(hareketli_ortalama("MA20", 20))
+        .seri(hareketli_ortalama("MA30", 30))
+}
+
+#[cfg(test)]
+#[test]
+fn candlestick_sh_kaynagi_ve_hareketli_ortalamasi_kayipsizdir() {
+    let veri = candlestick_sh_verisi::VERİ;
+    assert_eq!(veri.len(), 88);
+    assert_eq!(
+        veri.first(),
+        Some(&("2013/1/24", [2320.26, 2320.26, 2287.3, 2362.94]))
+    );
+    assert_eq!(
+        veri.last(),
+        Some(&("2013/6/13", [2190.1, 2148.35, 2126.22, 2190.1]))
+    );
+    let ma5 = candlestick_sh_hareketli_ortalama(5);
+    assert!(ma5[..5].iter().all(|öğe| öğe.değer.boş_mu()));
+    let beklenen = (1..=5).map(|sıra| veri[sıra].1[1]).sum::<f64>() / 5.0;
+    assert_eq!(ma5[5].değer.sayı(), Some(beklenen));
+}
+
 /// Resmî örnek `new Date(2011, 0, 1)` ile yerel dakikaları ilerletir.
 /// Referans koşucusu zaman dilimini Europe/Istanbul'a kilitler; 2011 yaz
 /// saati 28 Mart 03:00'te bir saat ileri atlar.
@@ -9517,6 +9666,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-polynomial-regression" => scatter_polynomial_regression(),
         "scatter-logarithmic-regression" => scatter_logarithmic_regression(),
         "candlestick-simple" => Ok(candlestick_simple()),
+        "candlestick-sh" => Ok(candlestick_sh()),
         "candlestick-large" => Ok(candlestick_large()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
