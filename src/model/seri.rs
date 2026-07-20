@@ -88,13 +88,22 @@ pub enum GülTürü {
 pub enum SembolBoyutu {
     Sabit(f32),
     İşlev(Arc<dyn Fn(&VeriÖğesi) -> f32 + Send + Sync>),
+    Bağlamlıİşlev(Arc<dyn Fn(&VeriÖğesi, VeriİşlevBağlamı) -> f32 + Send + Sync>),
 }
 
 impl SembolBoyutu {
+    /// Eski tek-parametreli API için bağlamsız çözüm. Bağlamlı işlevlerde
+    /// veri sırası `0` kabul edilir; çizim hattı her zaman
+    /// [`Self::bağlamla_çöz`] kullanır.
     pub fn çöz(&self, öğe: &VeriÖğesi) -> f32 {
+        self.bağlamla_çöz(öğe, 0)
+    }
+
+    pub fn bağlamla_çöz(&self, öğe: &VeriÖğesi, veri_sırası: usize) -> f32 {
         match self {
             SembolBoyutu::Sabit(b) => *b,
             SembolBoyutu::İşlev(f) => f(öğe),
+            SembolBoyutu::Bağlamlıİşlev(f) => f(öğe, VeriİşlevBağlamı { veri_sırası }),
         }
     }
 }
@@ -104,6 +113,7 @@ impl fmt::Debug for SembolBoyutu {
         match self {
             SembolBoyutu::Sabit(b) => f.debug_tuple("Sabit").field(b).finish(),
             SembolBoyutu::İşlev(_) => f.write_str("İşlev(..)"),
+            SembolBoyutu::Bağlamlıİşlev(_) => f.write_str("Bağlamlıİşlev(..)"),
         }
     }
 }
@@ -111,6 +121,39 @@ impl fmt::Debug for SembolBoyutu {
 impl From<f32> for SembolBoyutu {
     fn from(b: f32) -> Self {
         SembolBoyutu::Sabit(b)
+    }
+}
+
+/// ECharts veri callback'lerindeki `params.dataIndex` karşılığı.
+///
+/// Callback'in aldığı [`VeriÖğesi`] ham `value`/öğe seçeneklerini taşırken
+/// bu bağlam, öğenin seri içindeki özgün sırasını verir. Filtreleme ve kırpma
+/// sonrasında da sıra değişmez.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct VeriİşlevBağlamı {
+    pub veri_sırası: usize,
+}
+
+/// Saçılım `itemStyle.color` callback'i. Düz renklerin yanında ECharts
+/// grafik gradyanları ve görüntü desenleri de [`Dolgu`] olarak döndürülebilir.
+#[derive(Clone)]
+pub struct ÖğeRengiİşlevi(Arc<dyn Fn(&VeriÖğesi, VeriİşlevBağlamı) -> Dolgu + Send + Sync>);
+
+impl ÖğeRengiİşlevi {
+    fn yeni(
+        işlev: impl Fn(&VeriÖğesi, VeriİşlevBağlamı) -> Dolgu + Send + Sync + 'static
+    ) -> Self {
+        Self(Arc::new(işlev))
+    }
+
+    pub fn çöz(&self, öğe: &VeriÖğesi, veri_sırası: usize) -> Dolgu {
+        (self.0)(öğe, VeriİşlevBağlamı { veri_sırası })
+    }
+}
+
+impl fmt::Debug for ÖğeRengiİşlevi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("ÖğeRengiİşlevi(..)")
     }
 }
 
@@ -1231,6 +1274,9 @@ pub struct SaçılımSerisi {
     pub sembol: Sembol,
     pub sembol_boyutu: SembolBoyutu,
     pub öğe_stili: ÖğeStili,
+    /// Seri düzeyindeki işlevsel `itemStyle.color`. Veri öğesinin açık
+    /// `itemStyle.color` değeri bu callback'in önüne geçer.
+    pub öğe_rengi_işlevi: Option<ÖğeRengiİşlevi>,
     pub etiket: Etiket,
     /// Sembol ile `labelLayout` tarafından taşınan etiket arasındaki kılavuz
     /// çizgisi (`labelLine`). `None`, scatter öntanımlısı olan gizli durumdur.
@@ -1279,6 +1325,7 @@ impl Default for SaçılımSerisi {
             sembol: Sembol::Daire,
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
             öğe_stili: ÖğeStili::default(),
+            öğe_rengi_işlevi: None,
             etiket: Etiket::default(),
             etiket_çizgisi: None,
             etiket_yerleşimi: None,
@@ -1416,8 +1463,33 @@ impl SaçılımSerisi {
         self
     }
 
+    /// `symbolSize(value, params)` biçimindeki callback. Bağlamın
+    /// `veri_sırası` alanı ECharts `params.dataIndex` ile aynıdır.
+    pub fn sembol_boyutu_bağlamlı_işlevi(
+        mut self,
+        işlev: impl Fn(&VeriÖğesi, VeriİşlevBağlamı) -> f32 + Send + Sync + 'static,
+    ) -> Self {
+        self.sembol_boyutu = SembolBoyutu::Bağlamlıİşlev(Arc::new(işlev));
+        self
+    }
+
     pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
         self.öğe_stili = stil;
+        self
+    }
+
+    /// `itemStyle.color(value, params)` biçimindeki callback. Dönen değer
+    /// düz renk, gradyan veya görüntü deseni olabilir.
+    pub fn öğe_rengi_işlevi<D>(
+        mut self,
+        işlev: impl Fn(&VeriÖğesi, VeriİşlevBağlamı) -> D + Send + Sync + 'static,
+    ) -> Self
+    where
+        D: Into<Dolgu> + 'static,
+    {
+        self.öğe_rengi_işlevi = Some(ÖğeRengiİşlevi::yeni(move |öğe, bağlam| {
+            işlev(öğe, bağlam).into()
+        }));
         self
     }
 

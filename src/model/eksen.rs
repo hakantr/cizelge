@@ -557,6 +557,12 @@ pub struct Eksen {
     pub sayısal_kenar_boşluğu: Option<[SayısalKenarBoşluğu; 2]>,
     pub en_az: Option<f64>,
     pub en_çok: Option<f64>,
+    /// ECharts `min: 'dataMin'`: alt sınırı güzel çentik genişletmesi
+    /// yapmadan ham veri kapsamına kilitler.
+    pub en_az_veri: bool,
+    /// ECharts `max: 'dataMax'`: üst sınırı güzel çentik genişletmesi
+    /// yapmadan ham veri kapsamına kilitler.
+    pub en_çok_veri: bool,
     /// `false` ise kapsam sıfırı içerecek şekilde genişletilir; ECharts'taki
     /// `scale` seçeneğinin tersidir (`scale: true` ⇔ `sıfırı_içer: false`).
     pub sıfırı_içer: bool,
@@ -566,6 +572,9 @@ pub struct Eksen {
     /// bölme sayısına uyar; bölme çizgileri üst üste düşer (yalnız değer
     /// eksenlerinde anlamlıdır).
     pub çentik_hizala: bool,
+    /// Değer ekseninin açık çentik aralığı (`interval`). Verildiğinde
+    /// `minInterval`/`maxInterval` kısıtlarının önüne geçer.
+    pub aralık: Option<f64>,
     pub en_küçük_adım: Option<f64>,
     pub en_büyük_adım: Option<f64>,
     /// Log ekseni tabanı (`logBase`), öntanımlı 10.
@@ -612,9 +621,12 @@ impl Default for Eksen {
             sayısal_kenar_boşluğu: None,
             en_az: None,
             en_çok: None,
+            en_az_veri: false,
+            en_çok_veri: false,
             sıfırı_içer: true,
             bölme_sayısı: 5,
             çentik_hizala: false,
+            aralık: None,
             en_küçük_adım: None,
             en_büyük_adım: None,
             log_tabanı: 10.0,
@@ -741,11 +753,27 @@ impl Eksen {
 
     pub fn en_az(mut self, değer: f64) -> Self {
         self.en_az = Some(değer);
+        self.en_az_veri = false;
         self
     }
 
     pub fn en_çok(mut self, değer: f64) -> Self {
         self.en_çok = Some(değer);
+        self.en_çok_veri = false;
+        self
+    }
+
+    /// Alt sınırı ham veri en küçüğüne kilitler (`min: 'dataMin'`).
+    pub fn en_az_veri(mut self) -> Self {
+        self.en_az = None;
+        self.en_az_veri = true;
+        self
+    }
+
+    /// Üst sınırı ham veri en büyüğüne kilitler (`max: 'dataMax'`).
+    pub fn en_çok_veri(mut self) -> Self {
+        self.en_çok = None;
+        self.en_çok_veri = true;
         self
     }
 
@@ -763,6 +791,15 @@ impl Eksen {
     /// Çentik hizalamayı açar (`alignTicks`).
     pub fn çentik_hizala(mut self, açık: bool) -> Self {
         self.çentik_hizala = açık;
+        self
+    }
+
+    /// Değer ekseninin çentik aralığını sabitler (`interval`).
+    pub fn aralık(mut self, aralık: f64) -> Self {
+        self.aralık = aralık
+            .is_finite()
+            .then_some(aralık.abs())
+            .filter(|v| *v > 0.0);
         self
     }
 

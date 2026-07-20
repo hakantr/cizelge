@@ -811,6 +811,14 @@ pub(crate) fn gösterge_adları(seçenekler: &GrafikSeçenekleri) -> Vec<String>
 /// Eksen seçeneğinden ölçek kurar.
 fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> Ölçek {
     let mut kapsam = kapsam;
+    let veri_en_azı = kapsam[0];
+    let veri_en_çoğu = kapsam[1];
+    let en_az = seçenek
+        .en_az
+        .or_else(|| seçenek.en_az_veri.then_some(veri_en_azı));
+    let en_çok = seçenek
+        .en_çok
+        .or_else(|| seçenek.en_çok_veri.then_some(veri_en_çoğu));
     if seçenek.tür != EksenTürü::Kategori
         && let Some([alt, üst]) = seçenek.sayısal_kenar_boşluğu
         && kapsam[0].is_finite()
@@ -818,10 +826,10 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
     {
         let fark = (kapsam[1] - kapsam[0]).abs();
         let açıklık = if fark > 0.0 { fark } else { kapsam[0].abs() };
-        if seçenek.en_az.is_none() {
+        if en_az.is_none() {
             kapsam[0] -= alt.çöz(açıklık);
         }
-        if seçenek.en_çok.is_none() {
+        if en_çok.is_none() {
             kapsam[1] += üst.çöz(açıklık);
         }
     }
@@ -829,19 +837,19 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
         EksenTürü::Kategori => Ölçek::Kategorik(KategorikÖlçek::yeni(kategoriler)),
         EksenTürü::Değer => Ölçek::Aralık(AralıkÖlçeği::kur(
             kapsam,
-            seçenek.en_az,
-            seçenek.en_çok,
+            en_az,
+            en_çok,
             seçenek.sıfırı_içer,
             seçenek.bölme_sayısı,
-            seçenek.en_küçük_adım,
-            seçenek.en_büyük_adım,
+            seçenek.aralık.or(seçenek.en_küçük_adım),
+            seçenek.aralık.or(seçenek.en_büyük_adım),
         )),
         EksenTürü::Zaman => {
             let mut kapsam = kapsam;
-            if let Some(ea) = seçenek.en_az {
+            if let Some(ea) = en_az {
                 kapsam[0] = ea;
             }
-            if let Some(eç) = seçenek.en_çok {
+            if let Some(eç) = en_çok {
                 kapsam[1] = eç;
             }
             let etkin_açıklık = KırılmaEşleyici::kur(&seçenek.kırılmalar, kapsam)
@@ -856,8 +864,8 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
         EksenTürü::Log => Ölçek::Log(LogÖlçeği::kur(
             kapsam,
             seçenek.log_tabanı,
-            seçenek.en_az,
-            seçenek.en_çok,
+            en_az,
+            en_çok,
             seçenek.bölme_sayısı,
         )),
     }
@@ -4382,6 +4390,48 @@ mod yakınlaştırma_yönü_testleri {
             [200.0, 750.0],
         );
         assert_eq!(sabit_üst.kapsam(), [0.0, 800.0]);
+    }
+
+    #[test]
+    fn data_min_max_ham_veri_sınırlarını_güzel_kapsama_kilitler() {
+        let güzel = ölçek_kur(
+            &Eksen::değer().ölçekli(true).bölme_sayısı(5),
+            Vec::new(),
+            [1007.0, 1925.0],
+        );
+        assert!(güzel.kapsam()[1] > 1925.0, "{:?}", güzel.kapsam());
+
+        let veri_sınırlı = ölçek_kur(
+            &Eksen::değer()
+                .ölçekli(true)
+                .bölme_sayısı(5)
+                .en_az_veri()
+                .en_çok_veri()
+                .sayısal_kenar_boşluğu("20%", "30%"),
+            Vec::new(),
+            [1007.0, 1925.0],
+        );
+
+        assert_eq!(veri_sınırlı.kapsam(), [1007.0, 1925.0]);
+    }
+
+    #[test]
+    fn değer_ekseni_açık_interval_ile_sabit_adımlı_çentikler_üretir() {
+        let ölçek = ölçek_kur(
+            &Eksen::değer().en_az(0.0).en_çok(360.0).aralık(60.0),
+            Vec::new(),
+            [0.0, 359.0],
+        );
+
+        assert_eq!(ölçek.kapsam(), [0.0, 360.0]);
+        assert_eq!(
+            ölçek
+                .çentikler()
+                .into_iter()
+                .map(|çentik| çentik.değer)
+                .collect::<Vec<_>>(),
+            vec![0.0, 60.0, 120.0, 180.0, 240.0, 300.0, 360.0]
+        );
     }
 
     #[test]

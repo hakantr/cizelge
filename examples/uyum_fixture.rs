@@ -4339,6 +4339,140 @@ mod scatter_stream_verisi_testleri {
     }
 }
 
+#[derive(Deserialize)]
+struct RessamRenkİzi {
+    x: Vec<String>,
+    y: Vec<f64>,
+    marker: Ressamİşaretçisi,
+}
+
+#[derive(Deserialize)]
+struct Ressamİşaretçisi {
+    size: Vec<f64>,
+    color: Vec<String>,
+    sizeref: f64,
+}
+
+fn scatter_ressam_verisini_oku() -> Result<RessamRenkİzi, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/masterPainterColorChoice.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let mut izler: Vec<RessamRenkİzi> = serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))?;
+    if izler.len() != 1 {
+        return Err(format!(
+            "{} tek Plot.ly izi taşımalı; {} bulundu",
+            dosya.display(),
+            izler.len()
+        ));
+    }
+    Ok(izler.remove(0))
+}
+
+fn scatter_painter_choice() -> Result<GrafikSeçenekleri, String> {
+    let RessamRenkİzi { x, y, marker } = scatter_ressam_verisini_oku()?;
+    let uzunluk = x.len();
+    if y.len() != uzunluk || marker.size.len() != uzunluk || marker.color.len() != uzunluk {
+        return Err(format!(
+            "ressam verisinin x/y/size/color uzunlukları uyuşmuyor: {uzunluk}/{}/{}/{}",
+            y.len(),
+            marker.size.len(),
+            marker.color.len()
+        ));
+    }
+    if !marker.sizeref.is_finite() || marker.sizeref <= 0.0 {
+        return Err(format!("geçersiz marker.sizeref: {}", marker.sizeref));
+    }
+
+    let veri = x
+        .into_iter()
+        .zip(y)
+        .map(|(yıl, ton)| {
+            yıl.parse::<f64>()
+                .map(|yıl| [yıl, ton])
+                .map_err(|hata| format!("geçersiz ressam yılı {yıl:?}: {hata}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let boyutlar = Arc::new(marker.size);
+    let renkler = Arc::new(
+        marker
+            .color
+            .into_iter()
+            .map(|renk| Renk::çöz(&renk).ok_or_else(|| format!("geçersiz ressam rengi: {renk}")))
+            .collect::<Result<Vec<_>, _>>()?,
+    );
+    let boyut_referansı = marker.sizeref;
+    let callback_boyutları = Arc::clone(&boyutlar);
+    let callback_renkleri = Arc::clone(&renkler);
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Master Painter Color Choices Throughout History")
+                .alt_metin("Data From Plot.ly")
+                .sol("right")
+                .iç_boşluk(15.0),
+        )
+        .x_ekseni(
+            Eksen::değer()
+                .ölçekli(true)
+                .bölme_sayısı(5)
+                .en_çok_veri()
+                .etiket_bağlamlı_biçimleyici(|değer, _, _| format!("{}s", ondalık_kırp(değer)))
+                .bölme_çizgisi_göster(false),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .ad("Hue")
+                .en_az(0.0)
+                .en_çok(360.0)
+                .aralık(60.0)
+                .bölme_çizgisi_göster(false),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("scatter")
+                .sembol_boyutu_bağlamlı_işlevi(move |_, bağlam| {
+                    callback_boyutları
+                        .get(bağlam.veri_sırası)
+                        .copied()
+                        .unwrap_or_default() as f32
+                        / boyut_referansı as f32
+                })
+                .öğe_rengi_işlevi(move |_, bağlam| {
+                    callback_renkleri
+                        .get(bağlam.veri_sırası)
+                        .copied()
+                        .unwrap_or(Renk::SAYDAM)
+                })
+                .veri(veri),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_ressam_verisi_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_ressam_renk_izi_kayipsiz_okunur() {
+        let iz = scatter_ressam_verisini_oku().expect("resmi ressam verisi okunmalı");
+        assert_eq!(iz.x.len(), 4_111);
+        assert_eq!(iz.y.len(), 4_111);
+        assert_eq!(iz.marker.size.len(), 4_111);
+        assert_eq!(iz.marker.color.len(), 4_111);
+        assert_eq!(iz.marker.sizeref, 0.05);
+        assert_eq!(iz.x.first().map(String::as_str), Some("1007"));
+        assert_eq!(iz.y.first(), Some(&40.0));
+        assert_eq!(iz.marker.color.first().map(String::as_str), Some("#a3864a"));
+        assert_eq!(iz.x.last().map(String::as_str), Some("1925"));
+        assert_eq!(iz.y.last(), Some(&222.0));
+        assert_eq!(iz.marker.color.last().map(String::as_str), Some("#9ba6c1"));
+    }
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6541,6 +6675,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-aqi-color" => scatter_aqi_color(),
         "scatter-weight" => scatter_weight(),
         "scatter-stream-visual" => scatter_stream_visual(),
+        "scatter-painter-choice" => scatter_painter_choice(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

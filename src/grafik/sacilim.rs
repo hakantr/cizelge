@@ -11,7 +11,7 @@ use crate::model::seri::{
 };
 use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
 use crate::model::veri_kumesi::BoyutSeçici;
-use crate::renk::Renk;
+use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::ondalık_kırp;
 
@@ -211,7 +211,7 @@ pub fn saçılım_noktaları(
         sonuç.push(SaçılımNoktası {
             sıra: i,
             konum: kartezyen.nokta(x, y),
-            boyut: seri.sembol_boyutu.çöz(öğe),
+            boyut: seri.sembol_boyutu.bağlamla_çöz(öğe, i),
             x_değeri: x,
             y_değeri: y,
             palet_sırası: if kartezyen.x.ölçek.kategorik_mi() {
@@ -248,7 +248,7 @@ pub fn takvim_saçılım_noktaları(
             Some(SaçılımNoktası {
                 sıra,
                 konum: takvim.veriden_noktaya(tarih)?,
-                boyut: seri.sembol_boyutu.çöz(öğe),
+                boyut: seri.sembol_boyutu.bağlamla_çöz(öğe, sıra),
                 x_değeri: tarih,
                 y_değeri: değer,
                 palet_sırası: None,
@@ -1179,44 +1179,62 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
         .öğe_stili
         .opaklık
         .unwrap_or(if seri.efektli { 1.0 } else { 0.8 });
-    let taban_rengi = seri
-        .öğe_stili
-        .renk
-        .as_ref()
-        .map(|d| d.temsilî())
-        .unwrap_or(seri_rengi);
-    let nokta_rengi = |nokta: &SaçılımNoktası| {
-        let mut renk = if let Some(renk) = seri
-            .veri
-            .get(nokta.sıra)
-            .and_then(|öğe| öğe.stil.as_ref())
-            .and_then(|stil| stil.renk.as_ref())
-        {
-            renk.temsilî()
-        } else if seri.öğe_stili.renk.is_some() {
-            taban_rengi
-        } else if seri.veriye_göre_renk {
-            let palet_sırası = nokta.palet_sırası.unwrap_or(nokta.sıra);
-            palet
-                .get(palet_sırası % palet.len().max(1))
-                .copied()
-                .unwrap_or_else(|| tema::palet_rengi(palet_sırası))
-        } else {
-            taban_rengi
-        };
-        for (eşleme, kapsam) in görsel_eşlemeler {
-            if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, nokta.sıra) {
-                renk = eşleme.rengi_uygula(değer, *kapsam, renk);
-            }
-        }
-        renk
-    };
     let görsel_renk_kanalı = görsel_eşlemeler.iter().any(|(eşleme, _)| {
         eşleme.renk_kanalı
             || eşleme.renk_açıklığı.is_some()
             || eşleme.opaklık.is_some()
             || eşleme.aralık_dışı_renk_kanalı
     });
+    // `itemStyle.color(value, params)` ECharts görsel kodlama aşamasında bir
+    // kez çözülür. Sonuçları özgün dataIndex ile önbelleğe almak callback'in
+    // etiket ve vurgu geçişlerinde yeniden çalışmasını da önler.
+    let mut nokta_görselleri: Vec<Option<(Renk, Option<Dolgu>)>> = vec![None; seri.veri.len()];
+    for nokta in noktalar {
+        let Some(öğe) = seri.veri.get(nokta.sıra) else {
+            continue;
+        };
+        let dolgu = öğe
+            .stil
+            .as_ref()
+            .and_then(|stil| stil.renk.clone())
+            .or_else(|| {
+                seri.öğe_rengi_işlevi
+                    .as_ref()
+                    .map(|işlev| işlev.çöz(öğe, nokta.sıra))
+            })
+            .or_else(|| seri.öğe_stili.renk.clone());
+        let mut renk = dolgu.as_ref().map(Dolgu::temsilî).unwrap_or_else(|| {
+            if seri.veriye_göre_renk {
+                let palet_sırası = nokta.palet_sırası.unwrap_or(nokta.sıra);
+                palet
+                    .get(palet_sırası % palet.len().max(1))
+                    .copied()
+                    .unwrap_or_else(|| tema::palet_rengi(palet_sırası))
+            } else {
+                seri_rengi
+            }
+        });
+        for (eşleme, kapsam) in görsel_eşlemeler {
+            if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, nokta.sıra) {
+                renk = eşleme.rengi_uygula(değer, *kapsam, renk);
+            }
+        }
+        let dolgu = if görsel_renk_kanalı {
+            Some(Dolgu::Düz(renk))
+        } else {
+            dolgu
+        };
+        if let Some(görsel) = nokta_görselleri.get_mut(nokta.sıra) {
+            *görsel = Some((renk, dolgu));
+        }
+    }
+    let nokta_rengi = |nokta: &SaçılımNoktası| {
+        nokta_görselleri
+            .get(nokta.sıra)
+            .and_then(Option::as_ref)
+            .map(|(renk, _)| *renk)
+            .unwrap_or(seri_rengi)
+    };
     // EffectSymbol çekirdeği önce, z2=99 dalgaları sonra boyar.
     for nokta in noktalar {
         let renk = nokta_rengi(nokta);
@@ -1246,12 +1264,10 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
                 seri.öğe_stili.kenarlık_rengi.unwrap_or(renk),
             )
         });
-        let eşlenmiş_dolgu = görsel_renk_kanalı.then_some(crate::renk::Dolgu::Düz(renk));
-        let dolgu = eşlenmiş_dolgu.as_ref().or_else(|| {
-            öğe_stili
-                .and_then(|stil| stil.renk.as_ref())
-                .or(seri.öğe_stili.renk.as_ref())
-        });
+        let dolgu = nokta_görselleri
+            .get(nokta.sıra)
+            .and_then(Option::as_ref)
+            .and_then(|(_, dolgu)| dolgu.as_ref());
         sembol_stilli_çiz(
             çizici,
             seri.sembol,
@@ -1595,6 +1611,37 @@ mod testler {
         assert_eq!(noktalar[0].y_değeri, 2.0);
         assert_eq!(noktalar[0].boyut, 14.0);
         assert_eq!(saçılım_değer_kapsamı(&seri), [2.0, 2.0]);
+    }
+
+    #[test]
+    fn scatter_callback_bağlamı_özgün_data_index_sırasını_taşır() {
+        let boyutlar = [6.0_f32, 14.0, 22.0];
+        let renkler = [
+            Renk::onaltılık(0xaa0000),
+            Renk::onaltılık(0x00aa00),
+            Renk::onaltılık(0x0000aa),
+        ];
+        let seri = SaçılımSerisi::yeni()
+            .sembol_boyutu_bağlamlı_işlevi(move |_, bağlam| boyutlar[bağlam.veri_sırası])
+            .öğe_rengi_işlevi(move |_, bağlam| renkler[bağlam.veri_sırası])
+            .veri([[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]]);
+        let kartezyen = Kartezyen2B {
+            x: değer_ekseni([0.0, 4.0], [0.0, 100.0], EksenKonumu::Alt),
+            y: değer_ekseni([0.0, 4.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+
+        let noktalar = saçılım_noktaları(&seri, &kartezyen);
+        let renk_işlevi = seri
+            .öğe_rengi_işlevi
+            .as_ref()
+            .expect("renk callback'i korunmalı");
+
+        assert_eq!(
+            noktalar.iter().map(|nokta| nokta.boyut).collect::<Vec<_>>(),
+            boyutlar
+        );
+        assert_eq!(renk_işlevi.çöz(&seri.veri[2], 2).temsilî(), renkler[2]);
     }
 
     #[test]
