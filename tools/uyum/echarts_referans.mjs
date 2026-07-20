@@ -98,8 +98,19 @@ function html(id, kaynak, frame, state, width, height) {
   const aggregateTikleri = id === 'scatter-aggregate-bar'
     ? state === 'bar' ? 1 : state === 'scatter-return' ? 2 : 0
     : null;
+  const symbolMorphTikleri = id === 'scatter-symbol-morph' && state.startsWith('shape-')
+    ? Number(state.slice('shape-'.length))
+    : null;
   const sonEylem = Number.isInteger(kümelemeSırası)
     ? `myChart.dispatchAction({type:'timelineChange', currentIndex:${kümelemeSırası}});`
+    : Number.isInteger(symbolMorphTikleri) && symbolMorphTikleri > 0
+      ? `{
+          const zamanlayıcı = window.__capturedIntervals[0];
+          if (!zamanlayıcı || zamanlayıcı.ms !== 700) {
+            throw new Error('scatter-symbol-morph 700 ms zamanlayıcısı yakalanamadı');
+          }
+          for (let tik = 0; tik < ${symbolMorphTikleri}; tik += 1) zamanlayıcı.callback();
+        }`
     : Number.isInteger(aggregateTikleri) && aggregateTikleri > 0
       ? `{
           const zamanlayıcı = window.__capturedIntervals[0];
@@ -297,7 +308,7 @@ echarts.registerPreprocessor((opt) => {
     for (const item of values) if (item.padding == null) item.padding = 15;
   }
 });
-${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' ? `
+${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' ? `
 // Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
 // ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
 // girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.

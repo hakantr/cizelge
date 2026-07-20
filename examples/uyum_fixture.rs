@@ -4979,6 +4979,68 @@ fn scatter_aggregate_bar(durum: &str) -> Result<GrafikSeçenekleri, String> {
         .kimlikli_seri("male", SaçılımSerisi::yeni().veri(erkek)))
 }
 
+fn scatter_symbol_morph_yollarını_oku() -> Result<Vec<String>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-symbol-morph.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let mut yollar = Vec::new();
+    let mut kalan = kaynak.as_str();
+    while let Some(başlangıç) = kalan.find("'path://") {
+        let değer = &kalan[başlangıç + 1..];
+        let son = değer
+            .find('\'')
+            .ok_or_else(|| "scatter-symbol-morph path değeri kapanmıyor".to_owned())?;
+        yollar.push(değer[..son].to_owned());
+        kalan = &değer[son + 1..];
+    }
+    if yollar.len() != 9 {
+        return Err(format!(
+            "scatter-symbol-morph dokuz SVG yolu bekleniyordu, {} bulundu",
+            yollar.len()
+        ));
+    }
+    Ok(yollar)
+}
+
+fn scatter_symbol_morph(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let sıra = durum
+        .strip_prefix("shape-")
+        .and_then(|değer| değer.parse::<usize>().ok())
+        .unwrap_or(0)
+        .min(10);
+    let sembol = match sıra {
+        0 => Sembol::YuvarlakDikdörtgen,
+        1 => Sembol::Daire,
+        _ => {
+            let yollar = scatter_symbol_morph_yollarını_oku()?;
+            Sembol::svg_yolu(&yollar[sıra - 2]).map_err(|hata| hata.to_string())?
+        }
+    };
+    let veri = (0..10).flat_map(|y| (0..10).map(move |x| [x as f64, y as f64, 10.0]));
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ızgara(Izgara::yeni().sol(0).sağ(0).üst(0).alt(0))
+        .x_ekseni(
+            Eksen::kategori()
+                .göster(false)
+                .veri((0..10).map(|x| x.to_string())),
+        )
+        .y_ekseni(
+            Eksen::kategori()
+                .göster(false)
+                .veri((0..10).map(|y| y.to_string())),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .veri(veri)
+                .sembol(sembol)
+                .sembol_oranını_koru(true)
+                .sembol_boyutu(50.0),
+        ))
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_kümeleme_verisi_testleri {
@@ -5098,6 +5160,54 @@ mod scatter_aggregate_bar_testleri {
             .collect::<Vec<_>>();
         assert!((değerler[0] - 177.745).abs() < 0.001);
         assert!((değerler[1] - 164.872).abs() < 0.001);
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_symbol_morph_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_dokuz_svg_yolu_kayipsiz_cozulur() {
+        let yollar = scatter_symbol_morph_yollarını_oku().expect("resmi SVG yolları okunmalı");
+        assert_eq!(yollar.len(), 9);
+        assert!(
+            yollar
+                .first()
+                .is_some_and(|yol| yol.starts_with("path://M23.6 2c"))
+        );
+        assert!(yollar.last().is_some_and(|yol| yol.ends_with("-7.999 0z")));
+        assert!(yollar.iter().all(|yol| Sembol::svg_yolu(yol).is_ok()));
+    }
+
+    #[test]
+    fn on_bir_set_option_durumu_ayni_yuz_noktayi_korur() {
+        for sıra in 0..=10 {
+            let seçenekler =
+                scatter_symbol_morph(&format!("shape-{sıra}")).expect("sembol durumu kurulmalı");
+            let Some(Seri::Saçılım(seri)) = seçenekler.seriler.first() else {
+                panic!("scatter serisi bekleniyordu");
+            };
+            assert_eq!(seri.veri.len(), 100);
+            assert!(seri.sembol_oranını_koru);
+            assert_eq!(seri.sembol_boyutu.çöz(&seri.veri[0]), 50.0);
+        }
+
+        let ilk = scatter_symbol_morph("shape-0").expect("ilk durum kurulmalı");
+        let ikinci = scatter_symbol_morph("shape-1").expect("ikinci durum kurulmalı");
+        let son = scatter_symbol_morph("shape-10").expect("son durum kurulmalı");
+        assert!(
+            matches!(ilk.seriler.first(), Some(Seri::Saçılım(seri)) if seri.sembol == Sembol::YuvarlakDikdörtgen)
+        );
+        assert!(
+            matches!(ikinci.seriler.first(), Some(Seri::Saçılım(seri)) if seri.sembol == Sembol::Daire)
+        );
+        assert!(
+            matches!(son.seriler.first(), Some(Seri::Saçılım(seri)) if matches!(seri.sembol, Sembol::SvgYolu(_)))
+        );
+        assert!(ilk.x_ekseni.as_ref().is_some_and(|eksen| !eksen.göster));
+        assert!(ilk.y_ekseni.as_ref().is_some_and(|eksen| !eksen.göster));
     }
 }
 
@@ -7805,6 +7915,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-clustering" => scatter_clustering(),
         "scatter-clustering-process" => scatter_clustering_process(durum),
         "scatter-aggregate-bar" => scatter_aggregate_bar(durum),
+        "scatter-symbol-morph" => scatter_symbol_morph(durum),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),
