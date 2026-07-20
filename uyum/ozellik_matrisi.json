@@ -5888,7 +5888,7 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (dataZoom.handleIcon)",
+    "rust_api": "src/model/yakinlastirma.rs (VeriYakınlaştırma::tutamaç_simgesi)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -5930,7 +5930,7 @@
     "ts_türü": "string | number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (dataZoom.handleSize)",
+    "rust_api": "src/model/yakinlastirma.rs (VeriYakınlaştırma::tutamaç_boyutu)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -6413,7 +6413,7 @@
     "ts_türü": "'auto' | boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (dataZoom.showDataShadow)",
+    "rust_api": "src/model/yakinlastirma.rs (VeriYakınlaştırma::veri_gölgesi)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
