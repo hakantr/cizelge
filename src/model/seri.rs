@@ -1395,6 +1395,9 @@ pub struct SaçılımSerisi {
     /// Artımlı işleme eşiği (`progressiveThreshold`, ECharts öntanımlısı
     /// 10000).
     pub aşamalı_eşiği: usize,
+    /// Seri animasyonunun kapatılacağı veri sayısı (`animationThreshold`,
+    /// ECharts öntanımlısı 2000). Eşiğin tam üstünde animasyon devre dışıdır.
+    pub animasyon_eşiği: usize,
 }
 
 impl Default for SaçılımSerisi {
@@ -1431,6 +1434,7 @@ impl Default for SaçılımSerisi {
             büyük_eşiği: 2_000,
             aşamalı: 5_000,
             aşamalı_eşiği: 10_000,
+            animasyon_eşiği: 2_000,
         }
     }
 }
@@ -1572,6 +1576,16 @@ impl SaçılımSerisi {
     pub fn aşamalı_eşiği(mut self, eşik: usize) -> Self {
         self.aşamalı_eşiği = eşik;
         self
+    }
+
+    pub fn animasyon_eşiği(mut self, eşik: usize) -> Self {
+        self.animasyon_eşiği = eşik;
+        self
+    }
+
+    /// ECharts `SeriesModel::isAnimationEnabled` veri sayısı kapısı.
+    pub fn animasyon_eşiğinde_mi(&self) -> bool {
+        self.veri_sayısı() <= self.animasyon_eşiği
     }
 
     /// ECharts `pipelineContext.large` koşulunun seri düzeyindeki karşılığı.

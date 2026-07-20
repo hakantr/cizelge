@@ -2,7 +2,10 @@
 //! değerleri renk şeridine eşler. Sürekli (`continuous`) ve parçalı
 //! (`piecewise`) kipler aynı modelde tutulur.
 
+use std::borrow::Cow;
+
 use crate::model::bilesen::Yön;
+use crate::model::deger::VeriDeğeri;
 use crate::model::veri_kumesi::BoyutSeçici;
 use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
 use crate::renk::Renk;
@@ -216,12 +219,20 @@ pub struct GörselEşleme {
     /// Sürekli eşlemede iki tutamaçlı değer aralığı denetimi
     /// (`visualMap.calculable`).
     pub hesaplanabilir: bool,
+    /// Sürükleme/seçim sırasında hedef görseller anlık güncellensin mi
+    /// (`visualMap.realtime`). Parçalı ve gizli eşlemelerde de seçenek
+    /// değeri kayıpsız korunur.
+    pub gerçek_zamanlı: bool,
     /// Sürekli eşlemenin seçili veri aralığı (`visualMap.range`). `None`,
     /// bütün etkin kapsamın seçili olduğu otomatik durumdur.
     pub seçili_aralık: Option<[f64; 2]>,
     /// Parçalı kip (`visualMap: piecewise`): boş değilse renkler
     /// parçalardan çözülür ve bileşen tıklanabilir bir listedir.
     pub parçalar: Vec<EşlemeParçası>,
+    /// `visualMap-piecewise.categories`: veri boyutundaki metin değerlerini
+    /// sıra korumalı kategorilere eşler. ECharts'ta `categories`, `pieces`
+    /// ve `splitNumber` kipleri birbirini dışlar.
+    pub kategoriler: Vec<String>,
     /// `visualMap-piecewise.splitNumber`: eşit aralıklı otomatik parça
     /// sayısı. `Some` olması parçalı kipi etkinleştirir.
     pub bölme_sayısı: Option<usize>,
@@ -274,8 +285,10 @@ impl Default for GörselEşleme {
             metin: None,
             göster: true,
             hesaplanabilir: false,
+            gerçek_zamanlı: true,
             seçili_aralık: None,
             parçalar: Vec::new(),
+            kategoriler: Vec::new(),
             bölme_sayısı: None,
             hassasiyet: 0,
             en_az_açık: false,
@@ -474,6 +487,11 @@ impl GörselEşleme {
         self
     }
 
+    pub fn gerçek_zamanlı(mut self, gerçek_zamanlı: bool) -> Self {
+        self.gerçek_zamanlı = gerçek_zamanlı;
+        self
+    }
+
     pub fn seçili_aralık(mut self, en_az: f64, en_çok: f64) -> Self {
         self.seçili_aralık = Some([en_az.min(en_çok), en_az.max(en_çok)]);
         self
@@ -487,6 +505,19 @@ impl GörselEşleme {
     /// Parçalı kip: dilim listesi.
     pub fn parçalar(mut self, parçalar: impl IntoIterator<Item = EşlemeParçası>) -> Self {
         self.parçalar = parçalar.into_iter().collect();
+        self.kategoriler.clear();
+        self.bölme_sayısı = None;
+        self
+    }
+
+    /// Sıra korumalı kategorik parçalı kip (`categories`). `inRange.color`
+    /// dizisinin aynı sırasındaki renk kategoriye doğrudan uygulanır.
+    pub fn kategoriler<S>(mut self, kategoriler: impl IntoIterator<Item = S>) -> Self
+    where
+        S: Into<String>,
+    {
+        self.kategoriler = kategoriler.into_iter().map(Into::into).collect();
+        self.parçalar.clear();
         self.bölme_sayısı = None;
         self
     }
@@ -495,6 +526,7 @@ impl GörselEşleme {
     pub fn bölme_sayısı(mut self, sayı: usize) -> Self {
         self.bölme_sayısı = Some(sayı.max(1));
         self.parçalar.clear();
+        self.kategoriler.clear();
         self
     }
 
@@ -525,7 +557,12 @@ impl GörselEşleme {
 
     /// Parçalı kip mi?
     pub fn parçalı_mı(&self) -> bool {
-        !self.parçalar.is_empty() || self.bölme_sayısı.is_some()
+        !self.parçalar.is_empty() || !self.kategoriler.is_empty() || self.bölme_sayısı.is_some()
+    }
+
+    /// `categories` kullanan kategorik parçalı kip mi?
+    pub fn kategorik_mi(&self) -> bool {
+        !self.kategoriler.is_empty()
     }
 
     /// Parça açık mı (bileşende kapatılmamış mı)?
@@ -537,6 +574,8 @@ impl GörselEşleme {
     pub fn parça_sayısı(&self) -> usize {
         if !self.parçalar.is_empty() {
             self.parçalar.len()
+        } else if !self.kategoriler.is_empty() {
+            self.kategoriler.len()
         } else {
             self.bölme_sayısı
                 .unwrap_or(0)
@@ -547,12 +586,34 @@ impl GörselEşleme {
 
     /// Değerin düştüğü parça sırası.
     pub fn parça_bul(&self, değer: f64) -> Option<usize> {
+        if self.kategorik_mi() {
+            return self.kategori_bul(&VeriDeğeri::Sayı(değer));
+        }
         self.parçalar.iter().position(|p| p.içeriyor_mu(değer))
+    }
+
+    /// Ham veri değerinin `categories` dizisindeki sırası. JavaScript nesne
+    /// anahtarları gibi metin, sayı, zaman ve mantıksal değerler metinsel
+    /// anahtarla karşılaştırılır; bileşik/boş değerler kategori değildir.
+    pub fn kategori_bul(&self, değer: &VeriDeğeri) -> Option<usize> {
+        let anahtar = match değer {
+            VeriDeğeri::Metin(metin) => Cow::Borrowed(metin.as_str()),
+            VeriDeğeri::Sayı(sayı) => Cow::Owned(sayı.to_string()),
+            VeriDeğeri::Zaman(ms) => Cow::Owned(ms.to_string()),
+            VeriDeğeri::Mantıksal(mantıksal) => Cow::Owned(mantıksal.to_string()),
+            VeriDeğeri::Boş | VeriDeğeri::Çift(_) | VeriDeğeri::Dizi(_) => return None,
+        };
+        self.kategoriler
+            .iter()
+            .position(|kategori| kategori == anahtar.as_ref())
     }
 
     /// Değerin düştüğü parça sırası. Otomatik `splitNumber` parçalarını da
     /// etkin min/max kapsamıyla çözer.
     pub fn parça_bul_kapsamda(&self, değer: f64, kapsam: [f64; 2]) -> Option<usize> {
+        if self.kategorik_mi() {
+            return self.kategori_bul(&VeriDeğeri::Sayı(değer));
+        }
         if !self.parçalar.is_empty() {
             return self.parça_bul(değer);
         }
@@ -588,6 +649,21 @@ impl GörselEşleme {
     pub fn parçaları_çöz(&self, kapsam: [f64; 2]) -> Vec<EşlemeParçası> {
         if !self.parçalar.is_empty() {
             return self.parçalar.clone();
+        }
+        if self.kategorik_mi() {
+            return self
+                .kategoriler
+                .iter()
+                .enumerate()
+                .map(|(sıra, kategori)| {
+                    let renk = self
+                        .renkler
+                        .get(sıra)
+                        .copied()
+                        .unwrap_or(self.aralık_dışı_renk);
+                    EşlemeParçası::değer(sıra as f64, renk).etiket(kategori)
+                })
+                .collect();
         }
         let Some((kapsam, sayı, adım, hassasiyet, _, toplam)) = self.otomatik_bölme(kapsam)
         else {
@@ -686,6 +762,9 @@ impl GörselEşleme {
     /// Değeri renge çözer: parçalı kipte ilgili dilimin rengi, sürekli
     /// kipte şeritte çok duraklı doğrusal ara değerleme.
     pub fn renk_çöz(&self, değer: f64, kapsam: [f64; 2]) -> Renk {
+        if self.kategorik_mi() {
+            return self.kategori_rengi_uygula(&VeriDeğeri::Sayı(değer), Renk::SAYDAM);
+        }
         if self.parçalı_mı() {
             let Some(sıra) = self
                 .parça_bul_kapsamda(değer, kapsam)
@@ -783,6 +862,9 @@ impl GörselEşleme {
     /// `color` kanalı taban rengi değiştirir; `colorLightness` ve `opacity`
     /// ise sonuç üzerindeki kısmi kanallardır.
     pub fn rengi_uygula(&self, değer: f64, kapsam: [f64; 2], taban: Renk) -> Renk {
+        if self.kategorik_mi() {
+            return self.kategori_rengi_uygula(&VeriDeğeri::Sayı(değer), taban);
+        }
         let etkin = self.seçili_mi(değer, kapsam)
             && (!self.parçalı_mı()
                 || self
@@ -807,6 +889,24 @@ impl GörselEşleme {
             renk = renk.açıklık_ile(düşük + (yüksek - düşük) * oran);
         }
         self.opaklığı_uygula(renk, değer, kapsam)
+    }
+
+    /// Kategorik parçalı eşlemenin renk kanalını ham veri değerine uygular.
+    /// `categories[i]`, `inRange.color[i]` ile doğrudan eşlenir; bilinmeyen,
+    /// kapalı veya karşılık rengi bulunmayan kategori `outOfRange` kanalına
+    /// düşer.
+    pub fn kategori_rengi_uygula(&self, değer: &VeriDeğeri, taban: Renk) -> Renk {
+        let sıra = self
+            .kategori_bul(değer)
+            .filter(|sıra| self.parça_açık_mı(*sıra));
+        let Some(renk) = sıra.and_then(|sıra| self.renkler.get(sıra)).copied() else {
+            return if self.aralık_dışı_renk_kanalı || self.renk_kanalı {
+                self.aralık_dışı_renk
+            } else {
+                taban
+            };
+        };
+        if self.renk_kanalı { renk } else { taban }
     }
 
     /// Geriye uyumlu ad; yeni kodda [`Self::rengi_uygula`] tercih edilir.
@@ -959,6 +1059,46 @@ mod testler {
         assert_eq!(eşleme.renk_çöz(3.0, [0.0, 4.0]), yeşil);
         assert_eq!(eşleme.parçalar[0].etiket_metni(), "(1 – 3)");
         assert_eq!(eşleme.parçalar[1].etiket_metni(), "3");
+    }
+
+    #[test]
+    fn kategorik_piecewise_metni_sira_rengine_esler_ve_secimi_uygular() {
+        let taban = Renk::onaltılık(0x112233);
+        let eşleme = GörselEşleme::yeni()
+            .kategoriler(["süt", "baharat", "yağ"])
+            .renkler([0xdf5a5au32, 0xdf775a, 0xdf945a])
+            .aralık_dışı_renk("#ccc")
+            .parça_seçimi(1, false);
+
+        assert!(eşleme.parçalı_mı());
+        assert!(eşleme.kategorik_mi());
+        assert_eq!(eşleme.parça_sayısı(), 3);
+        assert_eq!(
+            eşleme.kategori_rengi_uygula(&VeriDeğeri::Metin("süt".to_owned()), taban),
+            Renk::onaltılık(0xdf5a5a)
+        );
+        assert_eq!(
+            eşleme.kategori_rengi_uygula(&VeriDeğeri::Metin("baharat".to_owned()), taban),
+            Renk::onaltılık(0xcccccc)
+        );
+        assert_eq!(
+            eşleme.kategori_rengi_uygula(&VeriDeğeri::Metin("bilinmeyen".to_owned()), taban),
+            Renk::onaltılık(0xcccccc)
+        );
+        let parçalar = eşleme.parçaları_çöz([0.0, 1.0]);
+        assert_eq!(parçalar[0].etiket_metni(), "süt");
+        assert_eq!(parçalar[2].renk, Renk::onaltılık(0xdf945a));
+    }
+
+    #[test]
+    fn kategorik_kurucu_diger_piecewise_kiplerini_dislar() {
+        let kategorik = GörselEşleme::yeni().bölme_sayısı(5).kategoriler(["A", "B"]);
+        assert_eq!(kategorik.bölme_sayısı, None);
+        assert!(kategorik.parçalar.is_empty());
+
+        let sayısal = kategorik.parçalar([EşlemeParçası::değer(1.0, "red")]);
+        assert!(sayısal.kategoriler.is_empty());
+        assert_eq!(sayısal.parça_sayısı(), 1);
     }
 
     #[test]

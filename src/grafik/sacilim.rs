@@ -1,5 +1,7 @@
 //! Saçılım serisi çizimi — `echarts/src/chart/scatter` karşılığı.
 
+use std::borrow::Cow;
+
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::sembol_stilli_çiz;
 use crate::koordinat::{
@@ -393,49 +395,70 @@ pub fn saçılım_değer_kapsamı(seri: &SaçılımSerisi) -> [f64; 2] {
     }
 }
 
-fn saçılım_görsel_değeri(
-    seri: &SaçılımSerisi,
+fn saçılım_görsel_ham_değeri<'a>(
+    seri: &'a SaçılımSerisi,
     eşleme: &GörselEşleme,
     sıra: usize,
-) -> Option<f64> {
+) -> Option<Cow<'a, VeriDeğeri>> {
     if let Some((x, y)) = seri.düz_veri.as_ref().and_then(|veri| veri.xy(sıra)) {
         return match eşleme.boyut.as_ref() {
-            None | Some(BoyutSeçici::Sıra(1)) => Some(y),
-            Some(BoyutSeçici::Sıra(0)) => Some(x),
-            Some(BoyutSeçici::Ad(ad)) if ad == "x" => Some(x),
-            Some(BoyutSeçici::Ad(ad)) if ad == "y" => Some(y),
+            None | Some(BoyutSeçici::Sıra(1)) => Some(Cow::Owned(VeriDeğeri::Sayı(y))),
+            Some(BoyutSeçici::Sıra(0)) => Some(Cow::Owned(VeriDeğeri::Sayı(x))),
+            Some(BoyutSeçici::Ad(ad)) if ad == "x" => Some(Cow::Owned(VeriDeğeri::Sayı(x))),
+            Some(BoyutSeçici::Ad(ad)) if ad == "y" => Some(Cow::Owned(VeriDeğeri::Sayı(y))),
             Some(BoyutSeçici::Sıra(_)) | Some(BoyutSeçici::Ad(_)) => None,
         };
     }
     let öğe = seri.veri.get(sıra)?;
     match eşleme.boyut.as_ref() {
-        None => saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y),
+        None => saçılım_xy(&öğe.değer, sıra).map(|(_, y)| Cow::Owned(VeriDeğeri::Sayı(y))),
         Some(BoyutSeçici::Sıra(boyut)) => {
             if !öğe.boyutlar.is_empty() {
-                return öğe.boyutlar.get(*boyut).and_then(|(_, değer)| değer.sayı());
+                return öğe
+                    .boyutlar
+                    .get(*boyut)
+                    .map(|(_, değer)| Cow::Borrowed(değer));
             }
             match &öğe.değer {
-                VeriDeğeri::Dizi(değerler) => değerler.get(*boyut).copied(),
-                VeriDeğeri::Çift(değerler) => değerler.get(*boyut).copied(),
-                _ if *boyut == 0 => öğe.değer.x().or(Some(sıra as f64)),
-                _ if *boyut == 1 => öğe.değer.sayı(),
+                VeriDeğeri::Dizi(değerler) => değerler
+                    .get(*boyut)
+                    .map(|değer| Cow::Owned(VeriDeğeri::Sayı(*değer))),
+                VeriDeğeri::Çift(değerler) => değerler
+                    .get(*boyut)
+                    .map(|değer| Cow::Owned(VeriDeğeri::Sayı(*değer))),
+                _ if *boyut == 0 => öğe
+                    .değer
+                    .x()
+                    .or(Some(sıra as f64))
+                    .map(|değer| Cow::Owned(VeriDeğeri::Sayı(değer))),
+                _ if *boyut == 1 => Some(Cow::Borrowed(&öğe.değer)),
                 _ => None,
             }
         }
-        Some(BoyutSeçici::Ad(ad)) if ad == "x" => seri
-            .eşleme
-            .as_ref()
-            .and_then(|(x, _)| öğe.boyut(x))
-            .and_then(VeriDeğeri::sayı)
-            .or_else(|| saçılım_xy(&öğe.değer, sıra).map(|(x, _)| x)),
-        Some(BoyutSeçici::Ad(ad)) if ad == "y" => seri
-            .eşleme
-            .as_ref()
-            .and_then(|(_, y)| öğe.boyut(y))
-            .and_then(VeriDeğeri::sayı)
-            .or_else(|| saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y)),
-        Some(BoyutSeçici::Ad(ad)) => öğe.boyut(ad).and_then(VeriDeğeri::sayı),
+        Some(BoyutSeçici::Ad(ad)) if ad == "x" => {
+            if let Some(değer) = seri.eşleme.as_ref().and_then(|(x, _)| öğe.boyut(x)) {
+                Some(Cow::Borrowed(değer))
+            } else {
+                saçılım_xy(&öğe.değer, sıra).map(|(x, _)| Cow::Owned(VeriDeğeri::Sayı(x)))
+            }
+        }
+        Some(BoyutSeçici::Ad(ad)) if ad == "y" => {
+            if let Some(değer) = seri.eşleme.as_ref().and_then(|(_, y)| öğe.boyut(y)) {
+                Some(Cow::Borrowed(değer))
+            } else {
+                saçılım_xy(&öğe.değer, sıra).map(|(_, y)| Cow::Owned(VeriDeğeri::Sayı(y)))
+            }
+        }
+        Some(BoyutSeçici::Ad(ad)) => öğe.boyut(ad).map(Cow::Borrowed),
     }
+}
+
+fn saçılım_görsel_değeri(
+    seri: &SaçılımSerisi,
+    eşleme: &GörselEşleme,
+    sıra: usize,
+) -> Option<f64> {
+    saçılım_görsel_ham_değeri(seri, eşleme, sıra).and_then(|değer| değer.sayı())
 }
 
 /// Seçilen `visualMap.dimension` için scatter veri kapsamı.
@@ -1297,6 +1320,11 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
     görsel_eşlemeler: &[SaçılımGörselEşlemesi<'_>],
     palet: &[Renk],
 ) {
+    let ilerleme = if seri.animasyon_eşiğinde_mi() {
+        ilerleme
+    } else {
+        1.0
+    };
     // `scatter` öntanımlı 0.8, `effectScatter` ise 1.0 opaklıktadır.
     let opaklık = seri
         .öğe_stili
@@ -1338,8 +1366,12 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
             }
         });
         for (eşleme, kapsam) in görsel_eşlemeler {
-            if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, nokta.sıra) {
-                renk = eşleme.rengi_uygula(değer, *kapsam, renk);
+            if let Some(değer) = saçılım_görsel_ham_değeri(seri, eşleme, nokta.sıra) {
+                if eşleme.kategorik_mi() {
+                    renk = eşleme.kategori_rengi_uygula(&değer, renk);
+                } else if let Some(sayısal) = değer.sayı() {
+                    renk = eşleme.rengi_uygula(sayısal, *kapsam, renk);
+                }
             }
         }
         let dolgu = if görsel_renk_kanalı {
@@ -1679,6 +1711,20 @@ mod testler {
     }
 
     #[test]
+    fn scatter_animation_threshold_esigin_tam_ustunde_gecisi_kapatir() {
+        let eşikte = SaçılımSerisi::yeni()
+            .animasyon_eşiği(2)
+            .veri([[1.0, 1.0], [2.0, 2.0]]);
+        let üstünde =
+            SaçılımSerisi::yeni()
+                .animasyon_eşiği(2)
+                .veri([[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]]);
+
+        assert!(eşikte.animasyon_eşiğinde_mi());
+        assert!(!üstünde.animasyon_eşiğinde_mi());
+    }
+
+    #[test]
     fn büyük_scatter_kırpılan_sırayı_nan_ile_korur_ve_parçalı_toplu_çizer() {
         let seri = SaçılımSerisi::yeni()
             .düz_veri(vec![1.0_f32, 1.0, 2.0, 2.0, 20.0, 20.0])
@@ -1869,6 +1915,54 @@ mod testler {
         assert!((boyut.sembol_boyutu_çöz(boyut_değeri, [0.0, 250.0], 10.0) - 40.0).abs() < 1e-6);
         assert_ne!(renk, taban);
         assert!(renk.kırmızı > renk.yeşil && renk.yeşil >= renk.mavi);
+    }
+
+    #[test]
+    fn kategorik_visual_map_metin_boyutunu_renge_ardindan_acikliga_aktarir() {
+        let seri = SaçılımSerisi::yeni().veri([VeriÖğesi::yeni([10.0, 20.0]).boyutlar([
+            ("protein".to_owned(), 10.0.into()),
+            ("calcium".to_owned(), 20.0.into()),
+            ("group".to_owned(), "Dairy".into()),
+            ("index".to_owned(), 50.0.into()),
+        ])]);
+        let kategori = GörselEşleme::yeni()
+            .boyut(2usize)
+            .kategoriler(["Dairy", "Spices"])
+            .renkler([0xdf5a5au32, 0xdf775a]);
+        let açıklık = GörselEşleme::yeni()
+            .boyut(3usize)
+            .en_çok(100.0)
+            .renk_açıklığı(0.15, 0.6);
+
+        let ham = saçılım_görsel_ham_değeri(&seri, &kategori, 0).unwrap();
+        assert_eq!(&*ham, &VeriDeğeri::Metin("Dairy".to_owned()));
+        assert_eq!(saçılım_görsel_kapsamı(&seri, &kategori), [0.0, 1.0]);
+        let grup_rengi = kategori.kategori_rengi_uygula(&ham, Renk::SİYAH);
+        assert_eq!(grup_rengi, Renk::onaltılık(0xdf5a5a));
+        let son = açıklık.rengi_uygula(50.0, [0.0, 100.0], grup_rengi);
+        assert_eq!(son, grup_rengi.açıklık_ile(0.375));
+
+        let noktalar = [SaçılımNoktası {
+            sıra: 0,
+            konum: (50.0, 50.0),
+            boyut: 10.0,
+            x_değeri: 10.0,
+            y_değeri: 20.0,
+            palet_sırası: None,
+        }];
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+        saçılım_çiz_çoklu_eşlemeli(
+            &mut yüzey,
+            &seri,
+            &noktalar,
+            Renk::onaltılık(0x5470c6),
+            1.0,
+            0.0,
+            None,
+            &[(&kategori, [0.0, 1.0]), (&açıklık, [0.0, 100.0])],
+            &tema::PALET,
+        );
+        assert!(yüzey.döküm().contains("#a01f1f@0.8"), "{}", yüzey.döküm());
     }
 
     #[test]

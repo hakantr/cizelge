@@ -187,7 +187,52 @@ impl Renk {
             _ => (kroma, 0.0, x),
         };
         let eşik = açıklık - kroma / 2.0;
-        Renk::kyma(kırmızı + eşik, yeşil + eşik, mavi + eşik, self.alfa)
+        // zrender `modifyHSL`, sonucu `rgba(...)` metnine çevirirken RGB
+        // kanallarını CSS baytına yuvarlar. Bu ara rengin daha sonra başka
+        // bir visualMap HSL kanalına girdiği zincirlerde yuvarlamayı burada
+        // korumak gerekir.
+        let bayt = |kanal: f32| (kanal.clamp(0.0, 1.0) * 255.0).round() / 255.0;
+        Renk::kyma(
+            bayt(kırmızı + eşik),
+            bayt(yeşil + eşik),
+            bayt(mavi + eşik),
+            self.alfa,
+        )
+    }
+
+    /// Rengin HSL tonunu derece cinsinden mutlak olarak değiştirir.
+    /// ECharts/zrender `color.modifyHSL(color, hue)` davranışını izleyerek
+    /// dereceyi en yakın tam sayıya yuvarlar ve `0..=360` aralığına kıstırır;
+    /// doygunluk, açıklık ve alfa korunur.
+    pub fn ton_ile(self, derece: f32) -> Renk {
+        let en_büyük = self.kırmızı.max(self.yeşil).max(self.mavi);
+        let en_küçük = self.kırmızı.min(self.yeşil).min(self.mavi);
+        let fark = en_büyük - en_küçük;
+        let açıklık = (en_büyük + en_küçük) / 2.0;
+        let doygunluk = if fark <= f32::EPSILON {
+            0.0
+        } else {
+            fark / (1.0 - (2.0 * açıklık - 1.0).abs()).max(f32::EPSILON)
+        };
+        let ton = derece.round().clamp(0.0, 360.0).rem_euclid(360.0) / 60.0;
+        let kroma = (1.0 - (2.0 * açıklık - 1.0).abs()) * doygunluk;
+        let x = kroma * (1.0 - (ton.rem_euclid(2.0) - 1.0).abs());
+        let (kırmızı, yeşil, mavi) = match ton {
+            t if t < 1.0 => (kroma, x, 0.0),
+            t if t < 2.0 => (x, kroma, 0.0),
+            t if t < 3.0 => (0.0, kroma, x),
+            t if t < 4.0 => (0.0, x, kroma),
+            t if t < 5.0 => (x, 0.0, kroma),
+            _ => (kroma, 0.0, x),
+        };
+        let eşik = açıklık - kroma / 2.0;
+        let bayt = |kanal: f32| (kanal.clamp(0.0, 1.0) * 255.0).round() / 255.0;
+        Renk::kyma(
+            bayt(kırmızı + eşik),
+            bayt(yeşil + eşik),
+            bayt(mavi + eşik),
+            self.alfa,
+        )
     }
 
     #[cfg(feature = "gpui")]
@@ -533,6 +578,23 @@ mod testler {
             Renk::çöz("rgba(255, 0, 0, 0.5)"),
             Some(Renk::kyma(1.0, 0.0, 0.0, 0.5))
         );
+    }
+
+    #[test]
+    fn hsl_tonu_zrender_modify_hsl_sonucuyla_eslesir() {
+        let rgb8 = |renk: Renk| {
+            [
+                (renk.kırmızı * 255.0).round() as u8,
+                (renk.yeşil * 255.0).round() as u8,
+                (renk.mavi * 255.0).round() as u8,
+            ]
+        };
+        let taban = Renk::onaltılık(0x5a94df);
+
+        assert_eq!(rgb8(taban.ton_ile(0.0)), [223, 90, 90]);
+        assert_eq!(rgb8(taban.ton_ile(13.0)), [223, 119, 90]);
+        assert_eq!(rgb8(taban.ton_ile(156.0)), [90, 223, 170]);
+        assert_eq!(rgb8(taban.ton_ile(312.0)), [223, 90, 196]);
     }
 
     #[test]
