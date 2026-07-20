@@ -251,15 +251,27 @@ pub fn bölme_çizgilerini_çiz(
         }
     }
 
-    // 4) Kırılma alanı (`breakArea`). Kırılma uçları tüm ızgara boyunca
-    // çizilir; seri katmanı daha sonra üstlerinden geçerek ECharts'ın z
-    // düzenindeki kesintisiz veri uçlarını korur.
+    // 4) Seri z sırasına eşit ya da daha alçak kırılma alanları. ECharts'ın
+    // öntanımlı `zigzagZ: 100` katmanı seri çiziminden sonra ayrıca çağrılır.
+    kırılma_alanlarını_çiz(çizici, alan, eksenler, false);
+}
+
+/// Kırılma alanı (`breakArea`). `serilerin_üstünde`, `zigzagZ` değeri
+/// normal seri z sırası olan 2'yi aşan alanları seçer. Böylece dolgu da
+/// zikzaklar da yüksek sütunları ECharts gibi keser; düşük açık z değerleri
+/// ise bölme çizgileriyle beraber serilerin altında kalır.
+pub fn kırılma_alanlarını_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+    serilerin_üstünde: bool,
+) {
     for eksen in eksenler {
         if !eksen.seçenek.göster {
             continue;
         }
         let seçenek = &eksen.seçenek.kırılma_alanı;
-        if !seçenek.göster {
+        if !seçenek.göster || (seçenek.zikzak_z > 2) != serilerin_üstünde {
             continue;
         }
         for (ilk, ikinci, _) in eksen.kırılma_piksel_aralıkları() {

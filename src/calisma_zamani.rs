@@ -14,7 +14,7 @@ use crate::hata::BilesenHatasi;
 use crate::koordinat::Kartezyen2B;
 use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
 use crate::model::deger::VeriÖğesi;
-use crate::model::eksen::Eksen;
+use crate::model::eksen::{Eksen, EksenKırılması};
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::hatlar::HatVerisi;
 use crate::model::kutupsal::KutupsalKoordinat;
@@ -106,6 +106,7 @@ pub struct SeçenekYaması {
     sağlanan: BTreeSet<SeçenekAlanı>,
     x_ekseni_veri_yamaları: Vec<EksenVeriYaması>,
     y_ekseni_veri_yamaları: Vec<EksenVeriYaması>,
+    eksen_kırılma_yamaları: Vec<EksenKırılmaYaması>,
     seri_veri_yamaları: Vec<SeriVeriYaması>,
 }
 
@@ -113,6 +114,13 @@ pub struct SeçenekYaması {
 struct EksenVeriYaması {
     sıra: usize,
     veri: Vec<String>,
+}
+
+#[derive(Clone, Debug)]
+struct EksenKırılmaYaması {
+    boyut: EksenBoyutu,
+    sıra: usize,
+    kırılmalar: Vec<EksenKırılması>,
 }
 
 #[derive(Clone, Debug)]
@@ -135,6 +143,7 @@ impl SeçenekYaması {
             sağlanan: BTreeSet::new(),
             x_ekseni_veri_yamaları: Vec::new(),
             y_ekseni_veri_yamaları: Vec::new(),
+            eksen_kırılma_yamaları: Vec::new(),
             seri_veri_yamaları: Vec::new(),
         }
     }
@@ -146,6 +155,7 @@ impl SeçenekYaması {
             sağlanan: TÜM_ALANLAR.into_iter().collect(),
             x_ekseni_veri_yamaları: Vec::new(),
             y_ekseni_veri_yamaları: Vec::new(),
+            eksen_kırılma_yamaları: Vec::new(),
             seri_veri_yamaları: Vec::new(),
         }
     }
@@ -264,6 +274,49 @@ impl SeçenekYaması {
         self.y_ekseni_veri_yamaları.push(EksenVeriYaması {
             sıra,
             veri: veri.into_iter().map(Into::into).collect(),
+        });
+        self
+    }
+
+    /// `setOption({xAxis: [{breaks}]})`: yalnız seçilen eksenin kırık
+    /// listesini değiştirir, diğer eksen seçeneklerini korur.
+    pub fn x_ekseni_kırılmaları(
+        mut self,
+        sıra: usize,
+        kırılmalar: impl IntoIterator<Item = EksenKırılması>,
+    ) -> Self {
+        self.eksen_kırılma_yamaları.push(EksenKırılmaYaması {
+            boyut: EksenBoyutu::X,
+            sıra,
+            kırılmalar: kırılmalar.into_iter().collect(),
+        });
+        self
+    }
+
+    /// `setOption({yAxis: [{breaks}]})` iç içe yaması.
+    pub fn y_ekseni_kırılmaları(
+        mut self,
+        sıra: usize,
+        kırılmalar: impl IntoIterator<Item = EksenKırılması>,
+    ) -> Self {
+        self.eksen_kırılma_yamaları.push(EksenKırılmaYaması {
+            boyut: EksenBoyutu::Y,
+            sıra,
+            kırılmalar: kırılmalar.into_iter().collect(),
+        });
+        self
+    }
+
+    /// `setOption({singleAxis: [{breaks}]})` iç içe yaması.
+    pub fn tek_eksen_kırılmaları(
+        mut self,
+        sıra: usize,
+        kırılmalar: impl IntoIterator<Item = EksenKırılması>,
+    ) -> Self {
+        self.eksen_kırılma_yamaları.push(EksenKırılmaYaması {
+            boyut: EksenBoyutu::Tek,
+            sıra,
+            kırılmalar: kırılmalar.into_iter().collect(),
         });
         self
     }
@@ -757,6 +810,33 @@ pub enum GöstergeSeçimEylemi {
     TersiniSeç,
 }
 
+/// Axis-break action seçicisinin hedef koordinat boyutu.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EksenBoyutu {
+    X,
+    Y,
+    Tek,
+}
+
+/// `expandAxisBreak` / `collapseAxisBreak` / `toggleAxisBreak` işlemi.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EksenKırılmaEylemi {
+    Genişlet,
+    Daralt,
+    Değiştir,
+}
+
+/// Bir axis-break action'ının olay yüküne taşınan eski/yeni durum kaydı.
+#[derive(Clone, Debug, PartialEq)]
+pub struct EksenKırılmaDeğişikliği {
+    pub boyut: EksenBoyutu,
+    pub eksen_sırası: usize,
+    pub başlangıç: f64,
+    pub bitiş: f64,
+    pub eski_genişletilmiş: bool,
+    pub genişletilmiş: bool,
+}
+
 impl SeriSeçici {
     pub fn kimlik(kimlik: impl Into<String>) -> Self {
         Self::Kimlik(kimlik.into())
@@ -796,6 +876,9 @@ pub enum ÇalışmaOlayı {
     },
     GöstergeDeğişti {
         seçili: BTreeMap<String, bool>,
+    },
+    EksenKırılmasıDeğişti {
+        değişiklikler: Vec<EksenKırılmaDeğişikliği>,
     },
     GeriYüklendi,
     YüklemeDeğişti {
@@ -914,6 +997,93 @@ impl GrafikÇalışmaZamanı {
 
     pub fn yeniden_çizim_bekliyor_mu(&self) -> bool {
         self.yeniden_çizim_bekliyor
+    }
+
+    /// ECharts 6 `expandAxisBreak`, `collapseAxisBreak` ve
+    /// `toggleAxisBreak` action'larının atomik model güncellemesi.
+    /// `sıralar=None` seçilen boyuttaki bütün eksenleri hedefler; kırılmalar
+    /// kullanıcı option'ındaki özgün `start`/`end` çiftiyle tanınır.
+    pub fn eksen_kırılmalarını_ayarla(
+        &mut self,
+        boyut: EksenBoyutu,
+        sıralar: Option<&[usize]>,
+        kırılmalar: &[(f64, f64)],
+        eylem: EksenKırılmaEylemi,
+        sessiz: bool,
+    ) -> Result<Vec<EksenKırılmaDeğişikliği>, BilesenHatasi> {
+        self.açık_mı("dispatchAction.axisBreak")?;
+        if let Some((başlangıç, bitiş)) = kırılmalar
+            .iter()
+            .copied()
+            .find(|(başlangıç, bitiş)| !başlangıç.is_finite() || !bitiş.is_finite())
+        {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "action.breaks",
+                ayrıntı: format!("kırılma uçları sonlu olmalı: start={başlangıç}, end={bitiş}"),
+            });
+        }
+
+        let toplam = eksen_sayısı(&self.seçenekler, boyut);
+        let hedefler = sıralar
+            .map(|sıralar| sıralar.to_vec())
+            .unwrap_or_else(|| (0..toplam).collect());
+        if let Some(&geçersiz) = hedefler.iter().find(|sıra| **sıra >= toplam) {
+            return Err(BilesenHatasi::EksikVeri {
+                bileşen: match boyut {
+                    EksenBoyutu::X => "xAxis",
+                    EksenBoyutu::Y => "yAxis",
+                    EksenBoyutu::Tek => "singleAxis",
+                },
+                sıra: geçersiz,
+            });
+        }
+
+        let mut aday = self.seçenekler.clone();
+        let mut değişiklikler = Vec::new();
+        let mut görülen = BTreeSet::new();
+        for eksen_sırası in hedefler {
+            if !görülen.insert(eksen_sırası) {
+                continue;
+            }
+            let Some(eksen) = ekseni_mut(&mut aday, boyut, eksen_sırası) else {
+                continue;
+            };
+            for &(başlangıç, bitiş) in kırılmalar {
+                let Some(kırılma) = eksen
+                    .kırılmalar
+                    .iter_mut()
+                    .find(|kırılma| kırılma.başlangıç == başlangıç && kırılma.bitiş == bitiş)
+                else {
+                    // Resmî uygulama bulunamayan tanımlayıcıyı yalnız
+                    // geliştirme uyarısıyla atlar; action başarısız olmaz.
+                    continue;
+                };
+                let eski = kırılma.genişletilmiş;
+                kırılma.genişletilmiş = match eylem {
+                    EksenKırılmaEylemi::Genişlet => true,
+                    EksenKırılmaEylemi::Daralt => false,
+                    EksenKırılmaEylemi::Değiştir => !eski,
+                };
+                değişiklikler.push(EksenKırılmaDeğişikliği {
+                    boyut,
+                    eksen_sırası,
+                    başlangıç,
+                    bitiş,
+                    eski_genişletilmiş: eski,
+                    genişletilmiş: kırılma.genişletilmiş,
+                });
+            }
+        }
+
+        seçenekleri_doğrula(&aday)?;
+        self.seçenekler = aday;
+        if !sessiz && !değişiklikler.is_empty() {
+            self.olaylar.push(ÇalışmaOlayı::EksenKırılmasıDeğişti {
+                değişiklikler: değişiklikler.clone(),
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(değişiklikler)
     }
 
     /// `dispatchAction({type: "dataZoom"})` model güncellemesi.
@@ -1580,6 +1750,9 @@ fn yamayı_uygula(
     for veri_yaması in &yama.y_ekseni_veri_yamaları {
         eksen_verisini_yamala(hedef, false, veri_yaması)?;
     }
+    for kırılma_yaması in &yama.eksen_kırılma_yamaları {
+        eksen_kırılmalarını_yamala(hedef, kırılma_yaması)?;
+    }
 
     for veri_yaması in &yama.seri_veri_yamaları {
         let sıra = seri_sırasını_bul(hedef, &veri_yaması.seçici).ok_or_else(|| {
@@ -1633,6 +1806,64 @@ fn eksen_verisini_yamala(
     })?;
     eksen.veri.clone_from(&yama.veri);
     Ok(())
+}
+
+fn eksen_kırılmalarını_yamala(
+    hedef: &mut GrafikSeçenekleri,
+    yama: &EksenKırılmaYaması,
+) -> Result<(), BilesenHatasi> {
+    let bileşen = match yama.boyut {
+        EksenBoyutu::X => "setOption.xAxis",
+        EksenBoyutu::Y => "setOption.yAxis",
+        EksenBoyutu::Tek => "setOption.singleAxis",
+    };
+    let eksen = ekseni_mut(hedef, yama.boyut, yama.sıra).ok_or(BilesenHatasi::EksikVeri {
+        bileşen,
+        sıra: yama.sıra,
+    })?;
+    eksen.kırılmalar.clone_from(&yama.kırılmalar);
+    Ok(())
+}
+
+fn eksen_sayısı(seçenekler: &GrafikSeçenekleri, boyut: EksenBoyutu) -> usize {
+    match boyut {
+        EksenBoyutu::X => {
+            if seçenekler.x_eksenleri.is_empty() {
+                usize::from(seçenekler.x_ekseni.is_some())
+            } else {
+                seçenekler.x_eksenleri.len()
+            }
+        }
+        EksenBoyutu::Y => {
+            if seçenekler.y_eksenleri.is_empty() {
+                usize::from(seçenekler.y_ekseni.is_some())
+            } else {
+                seçenekler.y_eksenleri.len()
+            }
+        }
+        EksenBoyutu::Tek => seçenekler.tek_eksenler.len(),
+    }
+}
+
+fn ekseni_mut(
+    seçenekler: &mut GrafikSeçenekleri,
+    boyut: EksenBoyutu,
+    sıra: usize,
+) -> Option<&mut Eksen> {
+    match boyut {
+        EksenBoyutu::X if seçenekler.x_eksenleri.is_empty() => (sıra == 0)
+            .then_some(seçenekler.x_ekseni.as_mut())
+            .flatten(),
+        EksenBoyutu::X => seçenekler.x_eksenleri.get_mut(sıra),
+        EksenBoyutu::Y if seçenekler.y_eksenleri.is_empty() => (sıra == 0)
+            .then_some(seçenekler.y_ekseni.as_mut())
+            .flatten(),
+        EksenBoyutu::Y => seçenekler.y_eksenleri.get_mut(sıra),
+        EksenBoyutu::Tek => seçenekler
+            .tek_eksenler
+            .get_mut(sıra)
+            .map(|tek| &mut tek.eksen),
+    }
 }
 
 fn serileri_birleştir(
@@ -1738,6 +1969,7 @@ mod testler {
     use super::*;
     use crate::model::bilesen::Başlık;
     use crate::model::deger::VeriDeğeri;
+    use crate::model::eksen::EksenKırılmaAlanı;
     use crate::model::seri::{PastaSerisi, ÇizgiSerisi};
 
     fn çalışma(seçenekler: GrafikSeçenekleri) -> GrafikÇalışmaZamanı {
@@ -1937,6 +2169,48 @@ mod testler {
             Some("Korunacak")
         );
         assert_eq!(sonuç.etkin_x_eksenleri()[0].veri, ["A", "B"]);
+    }
+
+    #[test]
+    fn eksen_kirilma_yamasi_diger_eksen_alanlarini_korur() {
+        let başlangıç = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(
+                Eksen::değer()
+                    .ad("Fiyat")
+                    .kırılma_alanı(
+                        EksenKırılmaAlanı::yeni()
+                            .opaklık(1.0)
+                            .zikzak_genliği(2.0)
+                            .zikzak_z(200),
+                    )
+                    .kırılma(EksenKırılması::yeni(5_000.0, 100_000.0).boşluk("2%")),
+            )
+            .seri(ÇizgiSerisi::yeni().veri([1, 2]));
+        let mut çalışma = çalışma(başlangıç);
+
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni().y_ekseni_kırılmaları(
+                    0,
+                    [
+                        EksenKırılması::yeni(5_000.0, 100_000.0).boşluk("2%"),
+                        EksenKırılması::yeni(2_000.0, 3_000.0).boşluk("2%"),
+                    ],
+                ),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .unwrap();
+
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        let eksen = sonuç.y_ekseni.as_ref().unwrap();
+        assert_eq!(eksen.ad.as_deref(), Some("Fiyat"));
+        assert_eq!(eksen.kırılmalar.len(), 2);
+        assert_eq!(eksen.kırılmalar[1].başlangıç, 2_000.0);
+        assert_eq!(eksen.kırılmalar[1].bitiş, 3_000.0);
+        assert_eq!(eksen.kırılma_alanı.opaklık, 1.0);
+        assert_eq!(eksen.kırılma_alanı.zikzak_genliği, 2.0);
+        assert_eq!(eksen.kırılma_alanı.zikzak_z, 200);
     }
 
     #[test]

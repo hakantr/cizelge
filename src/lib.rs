@@ -44,9 +44,9 @@ pub mod zamanlayici;
 pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
 pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
 pub use calisma_zamani::{
-    BileşikSeçenekler, GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu,
-    SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
-    ÖrnekBaşlatmaSeçenekleri,
+    BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
+    GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu, SeriSeçici, SeçenekAlanı,
+    SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü, ÖrnekBaşlatmaSeçenekleri,
 };
 pub use cizim::gorunum::{
     AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya,
@@ -65,8 +65,8 @@ pub use cizim::{
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, eksen_imleci_eylemini_kaydet,
-    geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-    veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+    eksen_kırılma_eylemlerini_kaydet, geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet,
+    gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -150,8 +150,9 @@ pub mod hazir {
     pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
     pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
     pub use crate::calisma_zamani::{
-        BileşikSeçenekler, GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu,
-        SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
+        BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
+        GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu, SeriSeçici,
+        SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
         ÖrnekBaşlatmaSeçenekleri,
     };
     pub use crate::cizim::gorunum::{
@@ -170,9 +171,9 @@ pub mod hazir {
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
-        eksen_imleci_eylemini_kaydet, geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet,
-        gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet,
-        öntanımlı_eylemleri_kaydet,
+        eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet,
+        geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
+        veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
     pub use crate::genisletme::{
         Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,

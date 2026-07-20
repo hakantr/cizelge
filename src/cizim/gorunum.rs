@@ -10,7 +10,9 @@
 use std::collections::HashSet;
 
 use crate::bilesen::baslik::başlık_çiz;
-use crate::bilesen::eksen_cizimi::{bölme_çizgilerini_çiz, eksenleri_çiz};
+use crate::bilesen::eksen_cizimi::{
+    bölme_çizgilerini_çiz, eksenleri_çiz, kırılma_alanlarını_çiz
+};
 use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::bilesen::matris_cizimi::matris_çiz;
@@ -3275,6 +3277,19 @@ pub fn grafiği_boya(
                     kategori_kaydırması,
                 );
             }
+        }
+
+        // `breakArea.zigzagZ` öntanımlı olarak 100'dür; dolgu ve zikzaklar
+        // normal z=2 seri katmanının üstünde yeniden boyanarak kırığı geçen
+        // sütun/çizgileri görünür biçimde keser.
+        for (g, alan) in kurulum.ızgara_alanları.iter().enumerate() {
+            let ızgara_eksenleri = kurulum
+                .x_eksenler
+                .iter()
+                .chain(kurulum.y_eksenler.iter())
+                .filter(|eksen| eksen.seçenek.ızgara_sırası == g)
+                .collect::<Vec<_>>();
+            kırılma_alanlarını_çiz(yüzey, *alan, &ızgara_eksenleri, true);
         }
 
         // Çapraz imleç: fareden geçen kesikli yatay+dikey çizgiler ve

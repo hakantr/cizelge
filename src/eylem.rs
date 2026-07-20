@@ -6,7 +6,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
-use crate::calisma_zamani::{GrafikÇalışmaZamanı, GöstergeSeçimEylemi, SeriSeçici};
+use crate::calisma_zamani::{
+    EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi, GrafikÇalışmaZamanı,
+    GöstergeSeçimEylemi, SeriSeçici,
+};
 use crate::hata::BilesenHatasi;
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 
@@ -545,6 +548,82 @@ pub fn veri_yakınlaştırma_eylemini_kaydet(
     )
 }
 
+/// ECharts 6 kırık eksen action takımını kaydeder. Kırılmalar özgün
+/// `start`/`end` çiftleriyle seçilir; `axisbreakchanged` olayı eski/yeni
+/// `isExpanded` durumunu ve hedef eksen sırasını birlikte taşır.
+pub fn eksen_kırılma_eylemlerini_kaydet(
+    kayıt: &mut EylemKayıtDefteri,
+) -> Result<(), BilesenHatasi> {
+    for (eylem_türü, eylem) in [
+        ("expandAxisBreak", EksenKırılmaEylemi::Genişlet),
+        ("collapseAxisBreak", EksenKırılmaEylemi::Daralt),
+        ("toggleAxisBreak", EksenKırılmaEylemi::Değiştir),
+    ] {
+        kayıt.kaydet(
+            eylem_türü,
+            "axisbreakchanged",
+            EylemGüncellemesi::Tam,
+            move |çalışma, yük| {
+                for alan in [
+                    "xAxisId",
+                    "xAxisName",
+                    "yAxisId",
+                    "yAxisName",
+                    "singleAxisId",
+                    "singleAxisName",
+                ] {
+                    if yük.al(alan).is_some() {
+                        return Err(BilesenHatasi::Desteklenmeyen {
+                            özellik: "axisBreak id/name selector",
+                            ayrıntı: format!(
+                                "`{alan}` için eksen bileşen kimliği/adı modeli henüz yok; index kullanın"
+                            ),
+                        });
+                    }
+                }
+                let kırılmalar = zorunlu_kırılma_tanımlayıcıları(yük)?;
+                let x = isteğe_bağlı_sıralar(yük, "xAxisIndex")?;
+                let y = isteğe_bağlı_sıralar(yük, "yAxisIndex")?;
+                let tek = isteğe_bağlı_sıralar(yük, "singleAxisIndex")?;
+                let açık_boyut = x.is_some() || y.is_some() || tek.is_some();
+                let mut değişiklikler = Vec::new();
+                for (boyut, sıralar) in [
+                    (EksenBoyutu::X, x.as_deref()),
+                    (EksenBoyutu::Y, y.as_deref()),
+                    (EksenBoyutu::Tek, tek.as_deref()),
+                ] {
+                    if açık_boyut && sıralar.is_none() {
+                        continue;
+                    }
+                    değişiklikler.extend(çalışma.eksen_kırılmalarını_ayarla(
+                        boyut,
+                        sıralar,
+                        &kırılmalar,
+                        eylem,
+                        true,
+                    )?);
+                }
+
+                let olay_kırılmaları = değişiklikler
+                    .iter()
+                    .map(eksen_kırılma_olay_değeri)
+                    .collect::<Vec<_>>();
+                Ok(vec![OlayYükü {
+                    alanlar: BTreeMap::from([
+                        ("fromAction".to_owned(), EylemDeğeri::from(eylem_türü)),
+                        (
+                            "breaks".to_owned(),
+                            EylemDeğeri::Dizi(olay_kırılmaları),
+                        ),
+                    ]),
+                    ..OlayYükü::default()
+                }])
+            },
+        )?;
+    }
+    Ok(())
+}
+
 /// Sürekli ve parçalı `visualMap` için resmî `selectDataRange` action'ı.
 pub fn görsel_aralık_eylemini_kaydet(
     kayıt: &mut EylemKayıtDefteri
@@ -914,10 +993,94 @@ fn eksen_imleci_kategori_sırası(
 pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
     append_data_eylemini_kaydet(kayıt)?;
     veri_yakınlaştırma_eylemini_kaydet(kayıt)?;
+    eksen_kırılma_eylemlerini_kaydet(kayıt)?;
     görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
     gösterge_eylemlerini_kaydet(kayıt)?;
     eksen_imleci_eylemini_kaydet(kayıt)
+}
+
+fn isteğe_bağlı_sıralar(
+    yük: &EylemYükü,
+    alan: &'static str,
+) -> Result<Option<Vec<usize>>, BilesenHatasi> {
+    let Some(değer) = yük.al(alan) else {
+        return Ok(None);
+    };
+    let değerler = değer
+        .dizi()
+        .map_or_else(|| vec![değer], |dizi| dizi.iter().collect());
+    let mut sıralar = Vec::with_capacity(değerler.len());
+    for değer in değerler {
+        let sayı = değer
+            .sayı()
+            .filter(|sayı| {
+                sayı.is_finite()
+                    && *sayı >= 0.0
+                    && sayı.fract() == 0.0
+                    && *sayı <= usize::MAX as f64
+            })
+            .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                alan,
+                ayrıntı: "negatif olmayan tam sayı veya bunların dizisi gerekli".to_owned(),
+            })?;
+        sıralar.push(sayı as usize);
+    }
+    Ok(Some(sıralar))
+}
+
+fn zorunlu_kırılma_tanımlayıcıları(
+    yük: &EylemYükü,
+) -> Result<Vec<(f64, f64)>, BilesenHatasi> {
+    let değerler = yük
+        .al("breaks")
+        .and_then(EylemDeğeri::dizi)
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "action.breaks",
+            ayrıntı: "start/end nesnelerinden oluşan bir dizi gerekli".to_owned(),
+        })?;
+    let mut kırılmalar = Vec::with_capacity(değerler.len());
+    for (sıra, değer) in değerler.iter().enumerate() {
+        let nesne = değer
+            .nesne()
+            .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                alan: "action.breaks",
+                ayrıntı: format!("{sıra}. öğe start/end nesnesi olmalı"),
+            })?;
+        let uç = |ad: &str| {
+            nesne
+                .get(ad)
+                .and_then(EylemDeğeri::sayı)
+                .filter(|değer| değer.is_finite())
+                .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                    alan: "action.breaks",
+                    ayrıntı: format!("{sıra}. öğenin `{ad}` ucu sonlu sayı olmalı"),
+                })
+        };
+        kırılmalar.push((uç("start")?, uç("end")?));
+    }
+    Ok(kırılmalar)
+}
+
+fn eksen_kırılma_olay_değeri(değişiklik: &EksenKırılmaDeğişikliği) -> EylemDeğeri {
+    let sıra_alanı = match değişiklik.boyut {
+        EksenBoyutu::X => "xAxisIndex",
+        EksenBoyutu::Y => "yAxisIndex",
+        EksenBoyutu::Tek => "singleAxisIndex",
+    };
+    EylemDeğeri::Nesne(BTreeMap::from([
+        ("start".to_owned(), değişiklik.başlangıç.into()),
+        ("end".to_owned(), değişiklik.bitiş.into()),
+        ("isExpanded".to_owned(), değişiklik.genişletilmiş.into()),
+        (
+            "old".to_owned(),
+            EylemDeğeri::Nesne(BTreeMap::from([(
+                "isExpanded".to_owned(),
+                değişiklik.eski_genişletilmiş.into(),
+            )])),
+        ),
+        (sıra_alanı.to_owned(), değişiklik.eksen_sırası.into()),
+    ]))
 }
 
 fn isteğe_bağlı_sayı(
@@ -998,7 +1161,7 @@ mod testler {
     use super::*;
     use crate::calisma_zamani::ÖrnekBaşlatmaSeçenekleri;
     use crate::model::bilesen::{Başlık, Gösterge, GöstergeSeçimKipi, Izgara};
-    use crate::model::eksen::Eksen;
+    use crate::model::eksen::{Eksen, EksenKırılması};
     use crate::model::gorsel_esleme::GörselEşleme;
     use crate::model::secenekler::GrafikSeçenekleri;
     use crate::model::seri::ÇizgiSerisi;
@@ -1078,6 +1241,76 @@ mod testler {
         assert_eq!(
             çalışma.seçenekleri_al().unwrap().veri_yakınlaştırmaları[2].başlangıç,
             10.0
+        );
+    }
+
+    #[test]
+    fn axis_break_actionlari_modeli_ve_refined_olayi_gunceller() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().veri(["A"]))
+            .y_ekseni(Eksen::değer().kırılma(EksenKırılması::yeni(5_000.0, 100_000.0).boşluk("2%")))
+            .seri(ÇizgiSerisi::yeni().veri([1]));
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        eksen_kırılma_eylemlerini_kaydet(&mut kayıt).unwrap();
+        let kırılmalar = EylemDeğeri::Dizi(vec![EylemDeğeri::Nesne(BTreeMap::from([
+            ("start".to_owned(), 5_000.0f64.into()),
+            ("end".to_owned(), 100_000.0f64.into()),
+        ]))]);
+
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("expandAxisBreak")
+                    .alan("yAxisIndex", 0usize)
+                    .alan("breaks", kırılmalar.clone()),
+            )
+            .unwrap();
+        assert_eq!(olaylar.len(), 1);
+        assert_eq!(olaylar[0].tür, "axisbreakchanged");
+        assert_eq!(
+            olaylar[0]
+                .alanlar
+                .get("fromAction")
+                .and_then(EylemDeğeri::metin),
+            Some("expandAxisBreak")
+        );
+        let değişiklik = olaylar[0].alanlar["breaks"].dizi().unwrap()[0]
+            .nesne()
+            .unwrap();
+        assert_eq!(değişiklik["yAxisIndex"].sayı(), Some(0.0));
+        assert_eq!(değişiklik["isExpanded"].mantıksal(), Some(true));
+        assert_eq!(
+            değişiklik["old"].nesne().unwrap()["isExpanded"].mantıksal(),
+            Some(false)
+        );
+        assert!(
+            çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .y_ekseni
+                .unwrap()
+                .kırılmalar[0]
+                .genişletilmiş
+        );
+
+        kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("toggleAxisBreak")
+                    .alan("yAxisIndex", EylemDeğeri::Dizi(vec![0usize.into()]))
+                    .alan("breaks", kırılmalar),
+            )
+            .unwrap();
+        assert!(
+            !çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .y_ekseni
+                .unwrap()
+                .kırılmalar[0]
+                .genişletilmiş
         );
     }
 

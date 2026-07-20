@@ -168,6 +168,10 @@ pub struct EksenKırılmaAlanı {
     pub zikzak_genliği: f32,
     pub zikzak_en_küçük_açıklık: f32,
     pub zikzak_en_büyük_açıklık: f32,
+    /// Kırılma dolgusu ve zikzaklarının z sırası (`breakArea.zigzagZ`).
+    /// ECharts öntanımlısı 100 olduğundan normal seri katmanlarının üstünde
+    /// kalır; örnekler değeri daha da yükseltebilir.
+    pub zikzak_z: i32,
     pub tıklayınca_genişlet: bool,
 }
 
@@ -184,6 +188,7 @@ impl Default for EksenKırılmaAlanı {
             zikzak_genliği: 4.0,
             zikzak_en_küçük_açıklık: 4.0,
             zikzak_en_büyük_açıklık: 20.0,
+            zikzak_z: 100,
             tıklayınca_genişlet: true,
         }
     }
@@ -221,6 +226,24 @@ impl EksenKırılmaAlanı {
 
     pub fn zikzak_genliği(mut self, genlik: f32) -> Self {
         self.zikzak_genliği = genlik.max(0.0);
+        self
+    }
+
+    pub fn zikzak_en_küçük_açıklık(mut self, açıklık: f32) -> Self {
+        self.zikzak_en_küçük_açıklık = açıklık.max(2.0);
+        self.zikzak_en_büyük_açıklık = self
+            .zikzak_en_büyük_açıklık
+            .max(self.zikzak_en_küçük_açıklık);
+        self
+    }
+
+    pub fn zikzak_en_büyük_açıklık(mut self, açıklık: f32) -> Self {
+        self.zikzak_en_büyük_açıklık = açıklık.max(self.zikzak_en_küçük_açıklık);
+        self
+    }
+
+    pub fn zikzak_z(mut self, z: i32) -> Self {
+        self.zikzak_z = z;
         self
     }
 
