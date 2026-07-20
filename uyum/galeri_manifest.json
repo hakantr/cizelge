@@ -13132,7 +13132,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bubble-gradient.ts",
     "kaynak_sha256": "b195a926253d309c18d2d86f9b1f0c3be8528be1d2dea98ba15e60a4561b43d8",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bubble_gradient",
     "seriler": [
       "dashed",
       "scatter"
@@ -13146,7 +13146,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -13157,15 +13157,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 846,
+          "değişen_piksel_oranı": 0.0031333333333333335,
+          "ssim": 0.9967250954512766,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bubble-gradient.png",
+            "sha256": "599aa1e0db243b010a0375afccd3992a57ea78cd5db292651e18fb43792fa955"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bubble-gradient.png",
+            "sha256": "86c8e9814130e2197ac62e93afdee8400419855c9cef1b5510802b464a56e256"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bubble-gradient.png",
+            "sha256": "af897c820928bbb906174f1021fdbc78c9953a113aacc5194806b33c77a83c7e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bubble-gradient-son.json",
+            "sha256": "1883fad68a26d487b1f0c3bd72c9bad5eef399df7431d1ff42fdcb45f11b9617"
+          }
+        }
+      ]
     }
   },
   {
