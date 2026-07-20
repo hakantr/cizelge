@@ -7714,6 +7714,176 @@ fn candlestick_brush_dji_kaynagi_ma_hacim_ve_action_araligini_korur() {
     );
 }
 
+type CandlestickSh2015Satırı = (String, [f64; 4]);
+
+/// Sabitlenmiş örneğin tek satırlık `rawData` dizisini kayıpsız okur.
+/// Kaynaktaki son iki boş satır `.reverse()` sonrasında başa gelir ve
+/// JavaScript tekli `+''` işlemi gibi dört sıfır değere dönüşür.
+fn candlestick_sh_2015_verisini_oku() -> Result<Vec<CandlestickSh2015Satırı>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/candlestick-sh-2015.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let bildirim = kaynak
+        .find("const rawData = [")
+        .ok_or_else(|| format!("{} içinde rawData başlangıcı yok", dosya.display()))?;
+    let başlangıç = kaynak[bildirim..]
+        .find('[')
+        .map(|sıra| bildirim + sıra)
+        .ok_or_else(|| format!("{} içinde rawData dizisi yok", dosya.display()))?;
+    let bitiş = kaynak[başlangıç..]
+        .find("].reverse();")
+        .map(|sıra| başlangıç + sıra + 1)
+        .ok_or_else(|| format!("{} içinde rawData sonu yok", dosya.display()))?;
+    let json = kaynak[başlangıç..bitiş].replace('\'', "\"");
+    let mut satırlar: Vec<Vec<String>> = serde_json::from_str(&json)
+        .map_err(|hata| format!("{} rawData ayrıştırılamadı: {hata}", dosya.display()))?;
+    satırlar.reverse();
+
+    satırlar
+        .into_iter()
+        .enumerate()
+        .map(|(sıra, satır)| {
+            if satır.len() < 7 {
+                return Err(format!(
+                    "{} rawData[{sıra}] en az yedi alan içermeli",
+                    dosya.display()
+                ));
+            }
+            let sayı = |alan: usize| -> Result<f64, String> {
+                let ham = satır.get(alan).map(String::as_str).unwrap_or_default();
+                if ham.is_empty() {
+                    Ok(0.0)
+                } else {
+                    ham.parse::<f64>().map_err(|hata| {
+                        format!(
+                            "{} rawData[{sıra}][{alan}] sayıya çevrilemedi: {hata}",
+                            dosya.display()
+                        )
+                    })
+                }
+            };
+            Ok((satır[0].clone(), [sayı(1)?, sayı(2)?, sayı(5)?, sayı(6)?]))
+        })
+        .collect()
+}
+
+fn candlestick_sh_2015_hareketli_ortalama(
+    gün_sayısı: usize,
+    veri: &[CandlestickSh2015Satırı],
+) -> Vec<VeriÖğesi> {
+    (0..veri.len())
+        .map(|sıra| {
+            if sıra < gün_sayısı {
+                VeriÖğesi::default()
+            } else {
+                let toplam = (0..gün_sayısı)
+                    .map(|geri| veri[sıra - geri].1[1])
+                    .sum::<f64>();
+                VeriÖğesi::yeni(toplam / gün_sayısı as f64)
+            }
+        })
+        .collect()
+}
+
+fn candlestick_sh_2015() -> Result<GrafikSeçenekleri, String> {
+    const TUTAMAÇ: &str = "path://M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z";
+
+    let veri = candlestick_sh_2015_verisini_oku()?;
+    let kategoriler = veri
+        .iter()
+        .map(|(tarih, _)| tarih.clone())
+        .collect::<Vec<_>>();
+    let mumlar = veri
+        .iter()
+        .map(|(tarih, değer)| VeriÖğesi::adlı(tarih.clone(), *değer))
+        .collect::<Vec<_>>();
+    let hareketli_ortalama = |ad: &str, gün| {
+        ÇizgiSerisi::yeni()
+            .ad(ad)
+            .yumuşat(true)
+            .sembol_göster(false)
+            .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0))
+            .veri(candlestick_sh_2015_hareketli_ortalama(gün, &veri))
+    };
+    let eksen_çizgisi = EksenÇizgisi::yeni().renk(0x8392a5);
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .gösterge(
+            Gösterge::yeni()
+                .veri(["日K", "MA5", "MA10", "MA20", "MA30"])
+                .devre_dışı_rengi(0x777777)
+                .üst(20)
+                .iç_boşluk(15.0),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz)
+                .imleç_animasyonu(false),
+        )
+        .ızgara(Izgara::yeni().alt(80))
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(kategoriler)
+                .çizgi(eksen_çizgisi.clone()),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .ölçekli(true)
+                .çizgi(eksen_çizgisi)
+                .bölme_çizgisi_göster(false),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .tutamaç_simgesi(Sembol::svg_yolu(TUTAMAÇ).map_err(|hata| hata.to_string())?),
+        )
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .seri(
+            MumSerisi::yeni()
+                .ad("Day")
+                .yükselen_renk(0xfd1050)
+                .düşen_renk(0x0cf49b)
+                .yükselen_kenarlık_rengi(0xfd1050)
+                .düşen_kenarlık_rengi(0x0cf49b)
+                .veri(mumlar),
+        )
+        .seri(hareketli_ortalama("MA5", 5))
+        .seri(hareketli_ortalama("MA10", 10))
+        .seri(hareketli_ortalama("MA20", 20))
+        .seri(hareketli_ortalama("MA30", 30)))
+}
+
+#[cfg(test)]
+#[test]
+fn candlestick_sh_2015_kaynagi_bos_satirlari_ve_ortalamayi_korur() {
+    let veri = candlestick_sh_2015_verisini_oku().expect("resmî rawData okunmalı");
+    assert_eq!(veri.len(), 246);
+    assert_eq!(veri[0], (String::new(), [0.0; 4]));
+    assert_eq!(veri[1], (String::new(), [0.0; 4]));
+    assert_eq!(
+        veri[2],
+        ("2015/1/5".to_owned(), [3258.63, 3350.52, 3253.88, 3369.28])
+    );
+    assert_eq!(
+        veri.last(),
+        Some(&("2015/12/31".to_owned(), [3570.47, 3539.18, 3538.35, 3580.6]))
+    );
+    let ma5 = candlestick_sh_2015_hareketli_ortalama(5, &veri);
+    assert!(ma5[..5].iter().all(|öğe| öğe.değer.boş_mu()));
+    assert_eq!(ma5[5].değer.sayı(), Some(2673.876));
+
+    let seçenekler = candlestick_sh_2015().expect("fixture kurulmalı");
+    assert_eq!(seçenekler.seriler.len(), 5);
+    assert_eq!(seçenekler.seriler[0].ad(), Some("Day"));
+    assert!(
+        seçenekler.veri_yakınlaştırmaları[0]
+            .tutamaç_simgesi
+            .is_some()
+    );
+}
+
 fn heatmap_cartesian(seçili_aralık: bool) -> GrafikSeçenekleri {
     const SAATLER: [&str; 24] = [
         "12a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12p", "1p",
@@ -9925,6 +10095,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "candlestick-sh" => Ok(candlestick_sh()),
         "candlestick-large" => Ok(candlestick_large()),
         "candlestick-brush" => candlestick_brush(),
+        "candlestick-sh-2015" => candlestick_sh_2015(),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
