@@ -1,0 +1,19 @@
+{
+  "id": "heatmap-cartesian",
+  "senaryo": "etkileşim",
+  "kare": "aralık",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1038,
+  "değişen_piksel_oranı": 0.0038444444444444446,
+  "ssim": 0.9973823996458862,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-cartesian-aralık.png",
+    "gerçek": "testler/gorsel/gerçek/default/heatmap-cartesian-aralık.png",
+    "fark": "testler/gorsel/fark/default/heatmap-cartesian-aralık.png"
+  }
+}

@@ -27,7 +27,9 @@ use crate::grafik::gunes::güneş_patlaması_çiz;
 use crate::grafik::hatlar::hatlar_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
-use crate::grafik::isi::{görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz};
+use crate::grafik::isi::{
+    SürekliGörselEşlemeBölgesi, görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz,
+};
 use crate::grafik::kiris::kiriş_çiz;
 use crate::grafik::kutupsal::{kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
@@ -236,6 +238,8 @@ pub struct BoyamaÇıktısı {
     pub iç_yakınlaştırmalar: Vec<İçYakınlaştırmaAlanı>,
     /// Parçalı görsel eşleme dilimlerinin isabet kutuları.
     pub eşleme_kutuları: Vec<(Dikdörtgen, usize)>,
+    /// Sürekli, hesaplanabilir görsel eşlemenin tutamaç/şerit bölgesi.
+    pub sürekli_eşleme: Option<SürekliGörselEşlemeBölgesi>,
     /// Kaydırmalı gösterge okları: `(kutu, yön)`.
     pub gösterge_okları: Vec<(Dikdörtgen, i32)>,
     /// Araç kutusu düğmeleri.
@@ -3083,8 +3087,9 @@ pub fn grafiği_boya(
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
-        çıktı.eşleme_kutuları =
-            görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
+        let eşleme_çıktısı = görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
+        çıktı.eşleme_kutuları = eşleme_çıktısı.parça_kutuları;
+        çıktı.sürekli_eşleme = eşleme_çıktısı.sürekli;
     }
 
     // 4c) Kutupsal koordinat ve kutupsal seriler.

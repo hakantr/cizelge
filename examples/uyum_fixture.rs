@@ -3597,7 +3597,7 @@ fn candlestick_simple() -> GrafikSeçenekleri {
         ]))
 }
 
-fn heatmap_cartesian() -> GrafikSeçenekleri {
+fn heatmap_cartesian(seçili_aralık: bool) -> GrafikSeçenekleri {
     const SAATLER: [&str; 24] = [
         "12a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12p", "1p",
         "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p",
@@ -3637,21 +3637,24 @@ fn heatmap_cartesian() -> GrafikSeçenekleri {
         })
         .collect::<Vec<_>>();
 
+    let mut eşleme = GörselEşleme::yeni()
+        .en_az(0.0)
+        .en_çok(10.0)
+        .hesaplanabilir(true)
+        .yön(Yön::Yatay)
+        .sol("center")
+        .alt("15%");
+    if seçili_aralık {
+        eşleme = eşleme.seçili_aralık(3.0, 7.0);
+    }
+
     GrafikSeçenekleri::yeni()
         .animasyon(false)
         .ipucu(İpucu::yeni().konum(İpucuKonumu::Üst))
         .ızgara(Izgara::yeni().üst("10%").yükseklik("50%"))
         .x_ekseni(Eksen::kategori().veri(SAATLER).bölme_alanı_göster(true))
         .y_ekseni(Eksen::kategori().veri(GÜNLER).bölme_alanı_göster(true))
-        .görsel_eşleme(
-            GörselEşleme::yeni()
-                .en_az(0.0)
-                .en_çok(10.0)
-                .hesaplanabilir(true)
-                .yön(Yön::Yatay)
-                .sol("center")
-                .alt("15%"),
-        )
+        .görsel_eşleme(eşleme)
         .seri(
             IsıHaritasıSerisi::yeni()
                 .ad("Punch Card")
@@ -4386,7 +4389,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "boxplot-light-velocity2" => boxplot_light_velocity(true),
         "scatter-simple" => Ok(scatter_simple()),
         "candlestick-simple" => Ok(candlestick_simple()),
-        "heatmap-cartesian" => Ok(heatmap_cartesian()),
+        "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

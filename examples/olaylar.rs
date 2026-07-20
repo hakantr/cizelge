@@ -1,5 +1,5 @@
-//! Olay sistemi örneği: dilim/sütun tıklamaları ve gösterge değişimleri
-//! `GrafikOlayı` olarak yayımlanır; alt çubukta son olay gösterilir.
+//! Olay sistemi örneği: dilim/sütun tıklamaları, gösterge ve görsel eşleme
+//! değişimleri `GrafikOlayı` olarak yayımlanır; alt çubukta son olay gösterilir.
 //!
 //! Çalıştırma: `cargo run --example olaylar`
 
@@ -42,6 +42,9 @@ impl Kök {
                     başlangıç,
                     bitiş,
                 } => format!("Yakınlaştırma {sıra} → %{başlangıç:.0}–%{bitiş:.0}").into(),
+                GrafikOlayı::GörselAralıkDeğişti { sıra, alt, üst } => {
+                    format!("Görsel eşleme {sıra} → {alt:.2}–{üst:.2}").into()
+                }
                 GrafikOlayı::FırçaSeçildi { öğeler } => {
                     format!("Fırça → {} öğe seçildi", öğeler.len()).into()
                 }

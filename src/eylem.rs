@@ -538,6 +538,49 @@ pub fn veri_yakınlaştırma_eylemini_kaydet(
     )
 }
 
+/// Sürekli `visualMap` için resmî `selectDataRange` action'ı.
+pub fn görsel_aralık_eylemini_kaydet(
+    kayıt: &mut EylemKayıtDefteri
+) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "selectDataRange",
+        "dataRangeSelected",
+        EylemGüncellemesi::Tam,
+        |çalışma, yük| {
+            if yük.al("visualMapId").is_some() {
+                return Err(BilesenHatasi::Desteklenmeyen {
+                    özellik: "visualMapId",
+                    ayrıntı: "Rust visualMap modelinde henüz bileşen kimliği bulunmuyor"
+                        .to_owned(),
+                });
+            }
+            let sıra = isteğe_bağlı_sıra(yük, "visualMapIndex")?;
+            let seçili = yük
+                .al("selected")
+                .and_then(EylemDeğeri::dizi)
+                .filter(|değerler| değerler.len() == 2)
+                .and_then(|değerler| Some([değerler.first()?.sayı()?, değerler.get(1)?.sayı()?]))
+                .filter(|değerler| değerler.iter().all(|değer| değer.is_finite()))
+                .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                    alan: "visualMap.selected",
+                    ayrıntı: "iki sonlu sayıdan oluşan dizi gerekli".to_owned(),
+                })?;
+            let seçili = çalışma.görsel_aralığı_ayarla(sıra, seçili, true)?;
+            let sıra = sıra.unwrap_or(0);
+            Ok(vec![OlayYükü {
+                bileşen_türü: Some("visualMap".to_owned()),
+                bileşen_alt_türü: Some("continuous".to_owned()),
+                bileşen_sırası: Some(sıra),
+                alanlar: BTreeMap::from([(
+                    "selected".to_owned(),
+                    EylemDeğeri::Dizi(seçili.into_iter().map(EylemDeğeri::from).collect()),
+                )]),
+                ..OlayYükü::default()
+            }])
+        },
+    )
+}
+
 /// Toolbox `restore` action'ını kaydeder.
 pub fn geri_yükleme_eylemini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
     kayıt.kaydet(
@@ -821,6 +864,7 @@ fn eksen_imleci_kategori_sırası(
 pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
     append_data_eylemini_kaydet(kayıt)?;
     veri_yakınlaştırma_eylemini_kaydet(kayıt)?;
+    görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
     gösterge_eylemlerini_kaydet(kayıt)?;
     eksen_imleci_eylemini_kaydet(kayıt)
@@ -905,6 +949,7 @@ mod testler {
     use crate::calisma_zamani::ÖrnekBaşlatmaSeçenekleri;
     use crate::model::bilesen::{Başlık, Gösterge, GöstergeSeçimKipi, Izgara};
     use crate::model::eksen::Eksen;
+    use crate::model::gorsel_esleme::GörselEşleme;
     use crate::model::secenekler::GrafikSeçenekleri;
     use crate::model::seri::ÇizgiSerisi;
     use crate::model::yakinlastirma::VeriYakınlaştırma;
@@ -983,6 +1028,38 @@ mod testler {
         assert_eq!(
             çalışma.seçenekleri_al().unwrap().veri_yakınlaştırmaları[2].başlangıç,
             10.0
+        );
+    }
+
+    #[test]
+    fn select_data_range_sürekli_görsel_eşleme_aralığını_günceller() {
+        let seçenekler =
+            GrafikSeçenekleri::yeni().görsel_eşleme(GörselEşleme::yeni().en_az(0.0).en_çok(10.0));
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        görsel_aralık_eylemini_kaydet(&mut kayıt).unwrap();
+
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("selectDataRange").alan(
+                    "selected",
+                    EylemDeğeri::Dizi(vec![7.0f64.into(), 3.0f64.into()]),
+                ),
+            )
+            .unwrap();
+        assert_eq!(olaylar.len(), 1);
+        assert_eq!(olaylar[0].tür, "dataRangeSelected");
+        assert_eq!(olaylar[0].bileşen_türü.as_deref(), Some("visualMap"));
+        assert_eq!(
+            çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .görsel_eşleme
+                .unwrap()
+                .seçili_aralık,
+            Some([3.0, 7.0])
         );
     }
 

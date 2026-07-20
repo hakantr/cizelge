@@ -195,6 +195,13 @@ pub enum GrafikOlayı {
         başlangıç: f32,
         bitiş: f32,
     },
+    /// Sürekli görsel eşleme aralığı değişti (`'dataRangeSelected'`).
+    GörselAralıkDeğişti {
+        /// `visualMap` bileşen sırası.
+        sıra: usize,
+        alt: f64,
+        üst: f64,
+    },
     /// Fırça seçimi tamamlandı (`'brushselected'`): kapsanan öğeler.
     FırçaSeçildi {
         /// `(seri sırası, veri sırası)` çiftleri.

@@ -119,7 +119,8 @@ const SENARYOLAR = [
     tür: 'etkileşim',
     kareler: [
       { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
-      { ad: 'ipucu', kare: 1, durum: 'ipucu' }
+      { ad: 'ipucu', kare: 1, durum: 'ipucu' },
+      { ad: 'aralık', kare: 1, durum: 'aralık' }
     ]
   },
   { id: 'pie-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

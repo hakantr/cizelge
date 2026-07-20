@@ -752,6 +752,10 @@ pub enum ÇalışmaOlayı {
     YakınlaştırmaDeğişti {
         değişiklikler: Vec<(usize, f32, f32)>,
     },
+    GörselAralıkDeğişti {
+        sıra: usize,
+        seçili: [f64; 2],
+    },
     GöstergeDeğişti {
         seçili: BTreeMap<String, bool>,
     },
@@ -938,6 +942,46 @@ impl GrafikÇalışmaZamanı {
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok(değişiklikler)
+    }
+
+    /// `dispatchAction({type: "selectDataRange"})` model güncellemesi.
+    pub fn görsel_aralığı_ayarla(
+        &mut self,
+        sıra: Option<usize>,
+        seçili: [f64; 2],
+        sessiz: bool,
+    ) -> Result<[f64; 2], BilesenHatasi> {
+        self.açık_mı("dispatchAction.selectDataRange")?;
+        if !seçili.iter().all(|değer| değer.is_finite()) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "visualMap.selected",
+                ayrıntı: "iki uç da sonlu sayı olmalı".to_owned(),
+            });
+        }
+        let sıra = sıra.unwrap_or(0);
+        let eşleme = if let Some(tekil) = self.seçenekler.görsel_eşleme.as_mut() {
+            (sıra == 0).then_some(tekil)
+        } else {
+            self.seçenekler.görsel_eşlemeler.get_mut(sıra)
+        }
+        .ok_or(BilesenHatasi::EksikVeri {
+            bileşen: "visualMap",
+            sıra,
+        })?;
+        if eşleme.parçalı_mı() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "visualMap.selected",
+                ayrıntı: "dizi biçimli selected yalnız sürekli visualMap içindir".to_owned(),
+            });
+        }
+        let seçili = [seçili[0].min(seçili[1]), seçili[0].max(seçili[1])];
+        eşleme.seçili_aralık = Some(seçili);
+        if !sessiz {
+            self.olaylar
+                .push(ÇalışmaOlayı::GörselAralıkDeğişti { sıra, seçili });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(seçili)
     }
 
     /// Toolbox `restore` eylemi. Etkileşimle veya sonraki normal merge'lerle

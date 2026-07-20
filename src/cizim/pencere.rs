@@ -24,6 +24,7 @@ use crate::cizim::gorunum::{
     İçYakınlaştırmaAlanı,
 };
 use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi};
+use crate::grafik::isi::{GörselEşlemeSürgüParçası, SürekliGörselEşlemeBölgesi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::secenekler::GrafikSeçenekleri;
@@ -44,6 +45,9 @@ type GöstergeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, String)>>>;
 
 /// Parçalı eşleme dilimlerinin pencere-mutlak kutuları.
 type EşlemeKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
+
+/// Sürekli görsel eşleme bölgesinin pencere-mutlak kopyası.
+type SürekliEşlemeAlanı = Rc<RefCell<Option<SürekliGörselEşlemeBölgesi>>>;
 
 /// Gösterge kaydırma oklarının pencere-mutlak kutuları.
 type OkKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, i32)>>>;
@@ -87,6 +91,8 @@ pub struct GrafikGörünümü {
     sürgü_bölgeleri: Rc<RefCell<Vec<SürgüBölgesi>>>,
     /// Pencere-mutlak parçalı eşleme dilim kutuları.
     eşleme_kutuları: EşlemeKutuları,
+    /// Pencere-mutlak sürekli eşleme tutamaç/şerit bölgesi.
+    sürekli_eşleme_alanı: SürekliEşlemeAlanı,
     /// Pencere-mutlak gösterge kaydırma okları.
     gösterge_okları: OkKutuları,
     /// Pencere-mutlak araç kutusu düğmeleri.
@@ -144,6 +150,12 @@ enum Sürükleme {
         şerit_uzunluğu: f32,
         dikey: bool,
     },
+    /// Sürekli `visualMap` tutamacı ya da seçili aralık sürükleme.
+    GörselEşleme {
+        parça: GörselEşlemeSürgüParçası,
+        başlangıç_x: f32,
+        bölge: SürekliGörselEşlemeBölgesi,
+    },
 }
 
 impl EventEmitter<GrafikOlayı> for GrafikGörünümü {}
@@ -166,6 +178,7 @@ impl GrafikGörünümü {
             bekleyen_tanılar: Rc::new(RefCell::new(Vec::new())),
             sürgü_bölgeleri: Rc::new(RefCell::new(Vec::new())),
             eşleme_kutuları: Rc::new(RefCell::new(Vec::new())),
+            sürekli_eşleme_alanı: Rc::new(RefCell::new(None)),
             gösterge_okları: Rc::new(RefCell::new(Vec::new())),
             araç_düğmeleri: Rc::new(RefCell::new(Vec::new())),
             iç_yakınlaştırma_alanları: Rc::new(RefCell::new(Vec::new())),
@@ -525,6 +538,7 @@ impl Render for GrafikGörünümü {
         let sürgüler = self.sürgü_bölgeleri.clone();
         let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
         let eşleme_kutuları = self.eşleme_kutuları.clone();
+        let sürekli_eşleme_alanı = self.sürekli_eşleme_alanı.clone();
         let gösterge_okları = self.gösterge_okları.clone();
         let araç_düğmeleri = self.araç_düğmeleri.clone();
         let film_düğmeleri = self.film_düğmeleri.clone();
@@ -639,6 +653,14 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             Err(_) => tanı_bildir("eşleme_kutuları"),
+                        }
+                        match sürekli_eşleme_alanı.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                *kayıt = çıktı
+                                    .sürekli_eşleme
+                                    .map(|bölge| bölge.kaydır(köken.0, köken.1));
+                            }
+                            Err(_) => tanı_bildir("sürekli_eşleme_alanı"),
                         }
                         match gösterge_okları.try_borrow_mut() {
                             Ok(mut kayıt) => {
@@ -761,6 +783,26 @@ impl Render for GrafikGörünümü {
                                 }
                             };
                             bu.pencereyi_güncelle(yakınlaştırma_sırası, b, e, cx);
+                            return;
+                        }
+                        Some(Sürükleme::GörselEşleme {
+                            parça,
+                            başlangıç_x,
+                            bölge,
+                        }) => {
+                            let [alt, üst] =
+                                bölge.sürüklenmiş_aralık(parça, yeni.0 - başlangıç_x);
+                            if let Some(eşleme) =
+                                Arc::make_mut(&mut bu.seçenekler).görsel_eşleme.as_mut()
+                            {
+                                eşleme.seçili_aralık = Some([alt, üst]);
+                                cx.emit(GrafikOlayı::GörselAralıkDeğişti {
+                                    sıra: 0,
+                                    alt,
+                                    üst,
+                                });
+                                cx.notify();
+                            }
                             return;
                         }
                         None => {}
@@ -1047,7 +1089,22 @@ impl Render for GrafikGörünümü {
                         }
                         return;
                     }
-                    // 1b) Sürgü parçası sürüklemesi.
+                    // 1b) Sürekli görsel eşleme tutamacı/seçili şerit.
+                    let sürekli_vuruş = match bu.sürekli_eşleme_alanı.try_borrow() {
+                        Ok(alan) => alan
+                            .as_ref()
+                            .and_then(|bölge| bölge.parça_bul(konum).map(|parça| (*bölge, parça))),
+                        Err(_) => None,
+                    };
+                    if let Some((bölge, parça)) = sürekli_vuruş {
+                        bu.sürükleme = Some(Sürükleme::GörselEşleme {
+                            parça,
+                            başlangıç_x: konum.0,
+                            bölge,
+                        });
+                        return;
+                    }
+                    // 1c) Veri yakınlaştırma sürgüsü parçası.
                     let sürgü_vuruşu = match bu.sürgü_bölgeleri.try_borrow() {
                         Ok(bölgeler) => bölgeler.iter().find_map(|s| {
                             let parça = if s.sol_tutamaç.içeriyor_mu(konum) {
@@ -1076,7 +1133,7 @@ impl Render for GrafikGörünümü {
                         }
                         return;
                     }
-                    // 1c) İç yakınlaştırma alanında kaydırma başlat.
+                    // 1d) İç yakınlaştırma alanında kaydırma başlat.
                     let iç_vuruş = match bu.iç_yakınlaştırma_alanları.try_borrow() {
                         Ok(alanlar) => alanlar.iter().find(|a| a.alan.içeriyor_mu(konum)).cloned(),
                         Err(_) => None,

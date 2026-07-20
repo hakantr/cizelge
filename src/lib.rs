@@ -65,8 +65,8 @@ pub use cizim::{
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, eksen_imleci_eylemini_kaydet,
-    geri_yükleme_eylemini_kaydet, gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet,
-    öntanımlı_eylemleri_kaydet,
+    geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
+    veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -157,8 +157,9 @@ pub mod hazir {
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
-        eksen_imleci_eylemini_kaydet, geri_yükleme_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-        veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+        eksen_imleci_eylemini_kaydet, geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet,
+        gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet,
+        öntanımlı_eylemleri_kaydet,
     };
     pub use crate::genisletme::{
         Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,

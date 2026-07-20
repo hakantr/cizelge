@@ -103,6 +103,8 @@ function html(id, kaynak, frame, state) {
             }`
         : id === 'heatmap-cartesian' && state === 'ipucu'
           ? `myChart.dispatchAction({type:'showTip', seriesIndex:0, dataIndex:${3 * 24 + 13}});`
+        : id === 'heatmap-cartesian' && state === 'aralık'
+          ? `myChart.dispatchAction({type:'selectDataRange', visualMapIndex:0, selected:[3, 7]});`
         : id === 'dynamic-data2' && state === 'son'
         ? `{
             const zamanlayıcı = window.__capturedIntervals[0];

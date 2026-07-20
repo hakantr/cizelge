@@ -192,6 +192,86 @@ pub fn ısı_haritası_çiz(
     vurgulu
 }
 
+/// Sürekli `visualMap` sürüklemesinde vurulan parça.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum GörselEşlemeSürgüParçası {
+    AltTutamaç,
+    ÜstTutamaç,
+    Aralık,
+}
+
+/// Sürekli, hesaplanabilir `visualMap` bileşeninin isabet geometrisi.
+#[derive(Clone, Copy, Debug)]
+pub struct SürekliGörselEşlemeBölgesi {
+    pub şerit: Dikdörtgen,
+    pub seçili_şerit: Dikdörtgen,
+    pub alt_tutamaç: Dikdörtgen,
+    pub üst_tutamaç: Dikdörtgen,
+    pub kapsam: [f64; 2],
+    pub seçili_aralık: [f64; 2],
+}
+
+impl SürekliGörselEşlemeBölgesi {
+    pub fn kaydır(self, dx: f32, dy: f32) -> Self {
+        let kaydır = |d: Dikdörtgen| Dikdörtgen::yeni(d.x + dx, d.y + dy, d.genişlik, d.yükseklik);
+        Self {
+            şerit: kaydır(self.şerit),
+            seçili_şerit: kaydır(self.seçili_şerit),
+            alt_tutamaç: kaydır(self.alt_tutamaç),
+            üst_tutamaç: kaydır(self.üst_tutamaç),
+            kapsam: self.kapsam,
+            seçili_aralık: self.seçili_aralık,
+        }
+    }
+
+    pub fn parça_bul(&self, nokta: (f32, f32)) -> Option<GörselEşlemeSürgüParçası> {
+        if self.alt_tutamaç.içeriyor_mu(nokta) {
+            Some(GörselEşlemeSürgüParçası::AltTutamaç)
+        } else if self.üst_tutamaç.içeriyor_mu(nokta) {
+            Some(GörselEşlemeSürgüParçası::ÜstTutamaç)
+        } else if self.seçili_şerit.içeriyor_mu(nokta) {
+            Some(GörselEşlemeSürgüParçası::Aralık)
+        } else {
+            None
+        }
+    }
+
+    /// Bir sürükleme parçasını yatay piksel farkıyla taşıyıp yeni değer
+    /// aralığını üretir. Tutamaçlar birbirini geçmez; aralık dolgusu kendi
+    /// genişliğini koruyarak etkin kapsamın uçlarında durur.
+    pub fn sürüklenmiş_aralık(
+        &self,
+        parça: GörselEşlemeSürgüParçası,
+        piksel_farkı: f32,
+    ) -> [f64; 2] {
+        let açıklık = (self.kapsam[1] - self.kapsam[0]).max(f64::EPSILON);
+        let fark = f64::from(piksel_farkı / self.şerit.genişlik.max(1.0)) * açıklık;
+        let [ilk_alt, ilk_üst] = self.seçili_aralık;
+        match parça {
+            GörselEşlemeSürgüParçası::AltTutamaç => {
+                [(ilk_alt + fark).clamp(self.kapsam[0], ilk_üst), ilk_üst]
+            }
+            GörselEşlemeSürgüParçası::ÜstTutamaç => {
+                [ilk_alt, (ilk_üst + fark).clamp(ilk_alt, self.kapsam[1])]
+            }
+            GörselEşlemeSürgüParçası::Aralık => {
+                let genişlik = ilk_üst - ilk_alt;
+                let alt = (ilk_alt + fark).clamp(
+                    self.kapsam[0],
+                    (self.kapsam[1] - genişlik).max(self.kapsam[0]),
+                );
+                [alt, alt + genişlik]
+            }
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct GörselEşlemeÇıktısı {
+    pub parça_kutuları: Vec<(Dikdörtgen, usize)>,
+    pub sürekli: Option<SürekliGörselEşlemeBölgesi>,
+}
+
 /// Görsel eşleme bileşenini seçeneklerdeki kutu yerleşimine göre çizer:
 /// sürekli kipte gradyan çubuğu, parçalı kipte tıklanabilir dilim listesi.
 /// Parçalı kipte her dilimin isabet kutusu döndürülür.
@@ -199,9 +279,9 @@ pub fn görsel_eşleme_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     eşleme: &GörselEşleme,
     kapsam: [f64; 2],
-) -> Vec<(Dikdörtgen, usize)> {
+) -> GörselEşlemeÇıktısı {
     if !eşleme.göster {
-        return Vec::new();
+        return GörselEşlemeÇıktısı::default();
     }
     if eşleme.parçalı_mı() {
         // PiecewiseModel varsayılanları: 20×14 simge, 10 px itemGap ve
@@ -283,10 +363,13 @@ pub fn görsel_eşleme_çiz(
                 i,
             ));
         }
-        return kutular;
+        return GörselEşlemeÇıktısı {
+            parça_kutuları: kutular,
+            sürekli: None,
+        };
     }
     if eşleme.renkler.is_empty() {
-        return Vec::new();
+        return GörselEşlemeÇıktısı::default();
     }
     if eşleme.yön == Yön::Yatay && eşleme.hesaplanabilir {
         // ContinuousView yatay `calculable` öntanımlıları: itemSize
@@ -355,14 +438,21 @@ pub fn görsel_eşleme_çiz(
         });
 
         let tutamaç_y = şerit_y - (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0;
-        for (değer, oran) in [(seçili[0], alt_oran), (seçili[1], üst_oran)] {
+        let alt_tutamaç = Dikdörtgen::yeni(
+            şerit.x + alt_oran * şerit.genişlik - yarım_tutamaç,
+            tutamaç_y,
+            TUTAMAÇ_GENİŞLİĞİ,
+            TUTAMAÇ_YÜKSEKLİĞİ,
+        );
+        let üst_tutamaç = Dikdörtgen::yeni(
+            şerit.x + üst_oran * şerit.genişlik - yarım_tutamaç,
+            tutamaç_y,
+            TUTAMAÇ_GENİŞLİĞİ,
+            TUTAMAÇ_YÜKSEKLİĞİ,
+        );
+        for (değer, tutamaç) in [(seçili[0], alt_tutamaç), (seçili[1], üst_tutamaç)] {
             çizici.dikdörtgen(
-                Dikdörtgen::yeni(
-                    şerit.x + oran * şerit.genişlik - yarım_tutamaç,
-                    tutamaç_y,
-                    TUTAMAÇ_GENİŞLİĞİ,
-                    TUTAMAÇ_YÜKSEKLİĞİ,
-                ),
+                tutamaç,
                 &Dolgu::Düz(eşleme.renk_çöz(değer, kapsam)),
                 [3.5; 4],
                 Some((2.0, tema::nötr_00())),
@@ -387,7 +477,17 @@ pub fn görsel_eşleme_çiz(
             tema::ikincil_metin(),
             false,
         );
-        return Vec::new();
+        return GörselEşlemeÇıktısı {
+            parça_kutuları: Vec::new(),
+            sürekli: Some(SürekliGörselEşlemeBölgesi {
+                şerit,
+                seçili_şerit: seçili_kutu,
+                alt_tutamaç,
+                üst_tutamaç,
+                kapsam,
+                seçili_aralık: seçili,
+            }),
+        };
     }
     if eşleme.yön == Yön::Yatay {
         const ŞERİT_GENİŞLİĞİ: f32 = 140.0;
@@ -459,7 +559,7 @@ pub fn görsel_eşleme_çiz(
             tema::ikincil_metin(),
             false,
         );
-        return Vec::new();
+        return GörselEşlemeÇıktısı::default();
     }
     const GENİŞLİK: f32 = 14.0;
     const YÜKSEKLİK: f32 = 130.0;
@@ -541,5 +641,58 @@ pub fn görsel_eşleme_çiz(
         tema::ikincil_metin(),
         false,
     );
-    Vec::new()
+    GörselEşlemeÇıktısı::default()
+}
+
+#[cfg(test)]
+mod sürekli_bölge_testleri {
+    use super::*;
+
+    fn bölge() -> SürekliGörselEşlemeBölgesi {
+        SürekliGörselEşlemeBölgesi {
+            şerit: Dikdörtgen::yeni(10.0, 10.0, 100.0, 20.0),
+            seçili_şerit: Dikdörtgen::yeni(30.0, 10.0, 40.0, 20.0),
+            alt_tutamaç: Dikdörtgen::yeni(26.0, 7.0, 8.0, 26.0),
+            üst_tutamaç: Dikdörtgen::yeni(66.0, 7.0, 8.0, 26.0),
+            kapsam: [0.0, 10.0],
+            seçili_aralık: [2.0, 6.0],
+        }
+    }
+
+    #[test]
+    fn tutamaçlar_seçili_şeritten_önce_isabet_alır() {
+        let bölge = bölge();
+
+        assert_eq!(
+            bölge.parça_bul((30.0, 15.0)),
+            Some(GörselEşlemeSürgüParçası::AltTutamaç)
+        );
+        assert_eq!(
+            bölge.parça_bul((50.0, 15.0)),
+            Some(GörselEşlemeSürgüParçası::Aralık)
+        );
+        assert_eq!(bölge.parça_bul((15.0, 15.0)), None);
+    }
+
+    #[test]
+    fn sürükleme_tutamaçları_ve_aralığı_kapsamda_tutar() {
+        let bölge = bölge();
+
+        assert_eq!(
+            bölge.sürüklenmiş_aralık(GörselEşlemeSürgüParçası::AltTutamaç, 80.0),
+            [6.0, 6.0]
+        );
+        assert_eq!(
+            bölge.sürüklenmiş_aralık(GörselEşlemeSürgüParçası::ÜstTutamaç, 80.0),
+            [2.0, 10.0]
+        );
+        assert_eq!(
+            bölge.sürüklenmiş_aralık(GörselEşlemeSürgüParçası::Aralık, 80.0),
+            [6.0, 10.0]
+        );
+        assert_eq!(
+            bölge.sürüklenmiş_aralık(GörselEşlemeSürgüParçası::Aralık, -80.0),
+            [0.0, 4.0]
+        );
+    }
 }

@@ -565,6 +565,30 @@
     "çıktılar": {
       "kareler": [
         {
+          "ad": "aralık",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 1038,
+          "değişen_piksel_oranı": 0.0038444444444444446,
+          "ssim": 0.9973823996458862,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-cartesian-aralık.png",
+            "sha256": "e3a3cdf89289a5fc6368068f986fe4ec05b7f5ea5344a20a1397f707565071b9"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/heatmap-cartesian-aralık.png",
+            "sha256": "2f06da056308496287f1b5851a7bb6f804ea5e18d31014881f50dd0f3f872dd6"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/heatmap-cartesian-aralık.png",
+            "sha256": "5f05dddd131f435703e0625ea59379d1248e5a9e026a654bc38c4c50fc9f6c12"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/heatmap-cartesian-aralık.json",
+            "sha256": "29613303f63ae66f4247cfc1f6dd606c7302e2fefded3049d87dc178dbcb638d"
+          }
+        },
+        {
           "ad": "başlangıç",
           "senaryo": "etkileşim",
           "geçti": true,
