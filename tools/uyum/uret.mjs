@@ -185,6 +185,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-logarithmic-regression': 'examples/uyum_fixture.rs#scatter_logarithmic_regression',
   'scatter-effect': 'examples/uyum_fixture.rs#scatter_effect',
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
+  'candlestick-large': 'examples/uyum_fixture.rs#candlestick_large',
   'heatmap-cartesian': 'examples/uyum_fixture.rs#heatmap_cartesian',
   'heatmap-large': 'examples/uyum_fixture.rs#heatmap_large',
   'heatmap-large-piecewise': 'examples/uyum_fixture.rs#heatmap_large_piecewise',
