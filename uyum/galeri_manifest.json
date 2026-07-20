@@ -17488,7 +17488,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/candlestick-brush.ts",
     "kaynak_sha256": "b555c035c5856508d29f8c660ddf39adee957325db14c23ae40e6639ec6eb9ad",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#candlestick_brush",
     "seriler": [
       "bar",
       "brush",
@@ -17515,7 +17515,7 @@
     "dış_varlıklar": [
       "/data/asset/data/stock-DJI.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -17526,15 +17526,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1390,
+          "değişen_piksel_oranı": 0.005148148148148148,
+          "ssim": 0.9901325527048036,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/candlestick-brush.png",
+            "sha256": "fda18d53a9e42e7dd2374de79eb85c2387fe4ed975e3f89222747d24a16e35cd"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/candlestick-brush.png",
+            "sha256": "11fde5ddcff486a876a2cf5fed9253a74c266619e6d86d65ea1f5bbf1f8ab51c"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/candlestick-brush.png",
+            "sha256": "6cfe1e20a2ce5a5608f13c27184a474f8e87ab3f5edc466967a9df68187da18d"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/candlestick-brush-son.json",
+            "sha256": "02718a818c6dc47e3fcd2ea11c47a6314e76d885af3c0a73d3a03dcb4fcec7c4"
+          }
+        }
+      ]
     }
   },
   {

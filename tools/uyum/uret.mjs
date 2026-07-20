@@ -187,6 +187,7 @@ const YEREL_FIXTURE = Object.freeze({
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
   'candlestick-sh': 'examples/uyum_fixture.rs#candlestick_sh',
   'candlestick-large': 'examples/uyum_fixture.rs#candlestick_large',
+  'candlestick-brush': 'examples/uyum_fixture.rs#candlestick_brush',
   'heatmap-cartesian': 'examples/uyum_fixture.rs#heatmap_cartesian',
   'heatmap-large': 'examples/uyum_fixture.rs#heatmap_large',
   'heatmap-large-piecewise': 'examples/uyum_fixture.rs#heatmap_large_piecewise',
