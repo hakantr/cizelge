@@ -1,3 +1,7 @@
+// Türkçe `sayı` API'si ile ASCII modül yolu `sayi` bu fixture'da birlikte
+// kullanılır; lint bunu kasıtlı eşleşme olmasına rağmen benzer sayar.
+#![allow(confusable_idents)]
+
 //! Uyum kanıt hattı için belirlenimci, başsız PNG fixture üreticisi.
 //!
 //! Bu örnek kullanıcı galerisi değildir. `tools/uyum/kanit.mjs`, kilitli
@@ -7116,6 +7120,195 @@ fn candlestick_simple() -> GrafikSeçenekleri {
         ]))
 }
 
+/// Resmî örnek `new Date(2011, 0, 1)` ile yerel dakikaları ilerletir.
+/// Referans koşucusu zaman dilimini Europe/Istanbul'a kilitler; 2011 yaz
+/// saati 28 Mart 03:00'te bir saat ileri atlar.
+fn candlestick_large_zamanı(geçen_dakika: usize) -> String {
+    const YAZ_SAATİ_GEÇİŞİ: usize = 124_020;
+    let yerel_dakika = geçen_dakika + usize::from(geçen_dakika >= YAZ_SAATİ_GEÇİŞİ) * 60;
+    let gün_sırası = yerel_dakika / (24 * 60);
+    let gün_dakikası = yerel_dakika % (24 * 60);
+    let (ay, gün) = if gün_sırası < 31 {
+        (1, gün_sırası + 1)
+    } else if gün_sırası < 59 {
+        (2, gün_sırası - 31 + 1)
+    } else if gün_sırası < 90 {
+        (3, gün_sırası - 59 + 1)
+    } else if gün_sırası < 120 {
+        (4, gün_sırası - 90 + 1)
+    } else {
+        (5, gün_sırası - 120 + 1)
+    };
+    format!(
+        "2011-{ay:02}-{gün:02}\n{:02}:{:02}:00",
+        gün_dakikası / 60,
+        gün_dakikası % 60
+    )
+}
+
+fn candlestick_large_verisi(sayı: usize) -> (Vec<VeriÖğesi>, Vec<VeriÖğesi>) {
+    let mut tohum = 0x5eed_1234;
+    let mut taban = kanıt_rastgele(&mut tohum) * 12_000.0;
+    let mut önceki_kapanış = None;
+    let mut mumlar = Vec::with_capacity(sayı);
+    let mut hacimler = Vec::with_capacity(sayı);
+
+    for sıra in 0..sayı {
+        taban += kanıt_rastgele(&mut tohum) * 20.0 - 10.0;
+        let mut kutu = [
+            (kanıt_rastgele(&mut tohum) - 0.5) * 12.0 + taban,
+            (kanıt_rastgele(&mut tohum) - 0.5) * 12.0 + taban,
+            (kanıt_rastgele(&mut tohum) - 0.5) * 12.0 + taban,
+            (kanıt_rastgele(&mut tohum) - 0.5) * 12.0 + taban,
+        ];
+        kutu.sort_by(f64::total_cmp);
+        let açılış_sırası = javascript_yuvarla(kanıt_rastgele(&mut tohum) * 3.0) as usize;
+        let mut kapanış_sırası = javascript_yuvarla(kanıt_rastgele(&mut tohum) * 2.0) as usize;
+        if kapanış_sırası == açılış_sırası {
+            kapanış_sırası += 1;
+        }
+        let açılış_ham = kutu.get(açılış_sırası).copied().unwrap_or(taban);
+        let kapanış_ham = kutu.get(kapanış_sırası).copied().unwrap_or(taban);
+        let en_düşük_ham = kutu.first().copied().unwrap_or(taban);
+        let en_yüksek_ham = kutu.get(3).copied().unwrap_or(taban);
+        let hacim = cizelge::yardimci::sayi::yuvarla(
+            en_yüksek_ham * (1_000.0 + kanıt_rastgele(&mut tohum) * 500.0),
+            0,
+        );
+        let işaret = if açılış_ham > kapanış_ham {
+            -1.0
+        } else if açılış_ham < kapanış_ham {
+            1.0
+        } else if önceki_kapanış.is_none_or(|önceki| önceki <= kapanış_ham) {
+            1.0
+        } else {
+            -1.0
+        };
+        let açılış = cizelge::yardimci::sayi::yuvarla(açılış_ham, 2);
+        let kapanış = cizelge::yardimci::sayi::yuvarla(kapanış_ham, 2);
+        let en_düşük = cizelge::yardimci::sayi::yuvarla(en_düşük_ham, 2);
+        let en_yüksek = cizelge::yardimci::sayi::yuvarla(en_yüksek_ham, 2);
+        önceki_kapanış = Some(kapanış);
+
+        mumlar.push(VeriÖğesi::adlı(
+            candlestick_large_zamanı(sıra + 1),
+            [açılış, kapanış, en_düşük, en_yüksek],
+        ));
+        hacimler.push(VeriÖğesi::yeni(hacim).boyutlar([("sign".to_owned(), işaret.into())]));
+    }
+    (mumlar, hacimler)
+}
+
+fn candlestick_large() -> GrafikSeçenekleri {
+    const VERİ_SAYISI: usize = 200_000;
+    let (mumlar, hacimler) = candlestick_large_verisi(VERİ_SAYISI);
+    let sıfırda_değil = EksenÇizgisi::yeni().sıfır(EksenSıfırKipi::Kapalı);
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Data Amount: 200,000").iç_boşluk(15.0))
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .araç_kutusu(AraçKutusu::yeni().veri_yakınlaştırma(true))
+        .ızgara_ekle(Izgara::yeni().sol("10%").sağ("10%").alt(200))
+        .ızgara_ekle(Izgara::yeni().sol("10%").sağ("10%").yükseklik(80).alt(80))
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .kenar_boşluğu(false)
+                .çizgi(sıfırda_değil.clone())
+                .bölme_çizgisi_göster(false)
+                .en_az_veri()
+                .en_çok_veri(),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .ızgara_sırası(1)
+                .kenar_boşluğu(false)
+                .çizgi(sıfırda_değil)
+                .çentik(EksenÇentiği::yeni().göster(false))
+                .etiket(EksenEtiketi::yeni().göster(false))
+                .bölme_çizgisi_göster(false)
+                .en_az_veri()
+                .en_çok_veri(),
+        )
+        .y_ekseni_ekle(Eksen::değer().ölçekli(true).bölme_alanı_göster(true))
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ızgara_sırası(1)
+                .ölçekli(true)
+                .bölme_sayısı(2)
+                .etiket(EksenEtiketi::yeni().göster(false))
+                .çizgi(EksenÇizgisi::yeni().göster(false))
+                .çentik(EksenÇentiği::yeni().göster(false))
+                .bölme_çizgisi_göster(false),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::iç()
+                .x_eksenleri([0, 1])
+                .aralık(10.0, 100.0),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .x_eksenleri([0, 1])
+                .alt(10)
+                .aralık(10.0, 100.0),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .seri_sırası(1)
+                .boyut("sign")
+                .parçalar([
+                    EşlemeParçası::değer(1.0, 0xec0000),
+                    EşlemeParçası::değer(-1.0, 0x00da3c),
+                ]),
+        )
+        .seri(
+            MumSerisi::yeni()
+                .yükselen_renk(0xec0000)
+                .düşen_renk(0x00da3c)
+                .yükselen_kenarlık_rengi(0x8a0000)
+                .düşen_kenarlık_rengi(0x008f28)
+                .veri(mumlar),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Volumn")
+                .eksenler(1, 1)
+                .öğe_stili(ÖğeStili::yeni().renk(0x7fbe9e))
+                .büyük(true)
+                .veri(hacimler),
+        )
+}
+
+#[cfg(test)]
+#[test]
+fn candlestick_large_kaynak_akisi_resmi_mulberry32_sonucunu_korur() {
+    let (mumlar, hacimler) = candlestick_large_verisi(200_000);
+    assert_eq!(mumlar.len(), 200_000);
+    assert_eq!(hacimler.len(), 200_000);
+    assert_eq!(mumlar[0].ad.as_deref(), Some("2011-01-01\n00:01:00"));
+    assert_eq!(
+        mumlar[0].değer.dizi(),
+        Some([4940.04, 4942.39, 4940.04, 4951.59].as_slice())
+    );
+    assert_eq!(hacimler[0].değer.sayı(), Some(7_027_679.0));
+    assert_eq!(mumlar[1].ad.as_deref(), Some("2011-01-01\n00:02:00"));
+    assert_eq!(
+        mumlar[1].değer.dizi(),
+        Some([4939.84, 4942.2, 4939.49, 4947.9].as_slice())
+    );
+    let son = mumlar.last().expect("200.000 mum üretilmeli");
+    assert_eq!(son.ad.as_deref(), Some("2011-05-19\n22:20:00"));
+    assert_eq!(
+        son.değer.dizi(),
+        Some([5938.58, 5937.04, 5934.92, 5941.83].as_slice())
+    );
+    assert_eq!(
+        hacimler.last().and_then(|öğe| öğe.değer.sayı()),
+        Some(7_601_892.0)
+    );
+}
+
 fn heatmap_cartesian(seçili_aralık: bool) -> GrafikSeçenekleri {
     const SAATLER: [&str; 24] = [
         "12a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12p", "1p",
@@ -9324,6 +9517,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-polynomial-regression" => scatter_polynomial_regression(),
         "scatter-logarithmic-regression" => scatter_logarithmic_regression(),
         "candlestick-simple" => Ok(candlestick_simple()),
+        "candlestick-large" => Ok(candlestick_large()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
