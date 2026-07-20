@@ -108,6 +108,11 @@ const SENARYOLAR = [
     tür: 'statik',
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
+  {
+    id: 'bar-polar-stack',
+    tür: 'statik',
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'bar-breaks-simple',
