@@ -464,7 +464,14 @@ fn gösterge_öğeleri(
                         .as_ref()
                         .and_then(|s| s.renk.as_ref())
                         .map(|d| d.temsilî())
-                        .unwrap_or_else(|| seçenekler.palet_rengi(j));
+                        .unwrap_or_else(|| {
+                            seçenekler.palet_rengi(crate::grafik::pasta::pasta_palet_sırası(
+                                seçenekler,
+                                p,
+                                j,
+                                &ad,
+                            ))
+                        });
                     öğeler.push(GöstergeÖğesi {
                         kapalı: kapalı.contains(&ad),
                         ad,

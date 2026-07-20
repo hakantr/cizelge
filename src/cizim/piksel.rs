@@ -1313,6 +1313,17 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         self.yazı_ölç_ağırlıklı(metin, boyut, false)
     }
 
+    fn stilli_yazı_ölç(&self, metin: &str, boyut: f32, kalın: bool) -> (f32, f32) {
+        let (genişlik, yükseklik) = self.yazı_ölç_ağırlıklı(metin, boyut, kalın);
+        // Aynı sistem sans yazı tipi kullanılsa da zrender/Canvas2D'nin
+        // ilerleme toplamı ab_glyph'ten yaklaşık binde 0,918 daha kısa.
+        // Bu yöntem rich-text yerleşimi için kullanılır; glif rasterini ya da
+        // genel eksen/gösterge ölçülerini değiştirmeden resmî kutu sınırını
+        // korur (özellikle sınıra tam oturan yüzde rozetlerinde).
+        const ZRENDER_İLERLEME_ORANI: f32 = 0.999_082;
+        (genişlik * ZRENDER_İLERLEME_ORANI, yükseklik)
+    }
+
     fn dönüşümlü_yazı(
         &mut self,
         metin: &str,

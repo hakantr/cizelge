@@ -4861,6 +4861,105 @@ fn pie_simple() -> GrafikSeçenekleri {
         ]))
 }
 
+fn pie_nest() -> GrafikSeçenekleri {
+    let dış_etiket = Etiket::yeni()
+        .göster(true)
+        .konum(EtiketKonumu::Dış)
+        .biçimleyici("{a|{a}}{abg|}\n{hr|}\n  {b|{b}：}{c}  {per|{d}%}  ")
+        .yazı(
+            YazıStili::yeni()
+                .arkaplan("#F6F8FC")
+                .kenarlık_rengi("#8C8D8E")
+                .kenarlık_kalınlığı(1.0)
+                .kenarlık_yarıçapı(4.0),
+        )
+        .zengin_stil(
+            "a",
+            YazıStili::yeni()
+                .renk("#6E7079")
+                .satır_yüksekliği(22.0)
+                .yatay_hiza(YazıYatayHizası::Orta),
+        )
+        .zengin_stil(
+            "hr",
+            YazıStili::yeni()
+                .kenarlık_rengi("#8C8D8E")
+                .kenarlık_kalınlığı(1.0)
+                .genişlik("100%")
+                .yükseklik(0.0),
+        )
+        .zengin_stil(
+            "b",
+            YazıStili::yeni()
+                .renk("#4C5058")
+                .boyut(14.0)
+                .kalın(true)
+                .satır_yüksekliği(33.0),
+        )
+        .zengin_stil(
+            "per",
+            YazıStili::yeni()
+                .renk("#fff")
+                .arkaplan("#4C5058")
+                .iç_boşluk([3.0, 4.0, 3.0, 4.0])
+                .kenarlık_yarıçapı(4.0),
+        );
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .biçimleyici("{a} <br/>{b}: {c} ({d}%)"),
+        )
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0).veri([
+            "Direct",
+            "Marketing",
+            "Search Engine",
+            "Email",
+            "Union Ads",
+            "Video Ads",
+            "Baidu",
+            "Google",
+            "Bing",
+            "Others",
+        ]))
+        .seri(
+            PastaSerisi::yeni()
+                .ad("Access From")
+                .halka(0, "30%")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .konum(EtiketKonumu::İç)
+                        .yazı(YazıStili::yeni().boyut(14.0)),
+                )
+                .etiket_çizgisi(EtiketÇizgisi::yeni().göster(false))
+                .veri([
+                    VeriÖğesi::adlı("Search Engine", 1548),
+                    VeriÖğesi::adlı("Direct", 775),
+                    VeriÖğesi::adlı("Marketing", 679).seçili(true),
+                ]),
+        )
+        .seri(
+            PastaSerisi::yeni()
+                .ad("Access From")
+                .halka("45%", "60%")
+                .etiket(dış_etiket)
+                .etiket_çizgisi(EtiketÇizgisi::yeni().uzunluk1(30.0))
+                .veri([
+                    VeriÖğesi::adlı("Baidu", 1048),
+                    VeriÖğesi::adlı("Direct", 335),
+                    VeriÖğesi::adlı("Email", 310),
+                    VeriÖğesi::adlı("Google", 251),
+                    VeriÖğesi::adlı("Union Ads", 234),
+                    VeriÖğesi::adlı("Bing", 147),
+                    VeriÖğesi::adlı("Video Ads", 135),
+                    VeriÖğesi::adlı("Others", 102),
+                ]),
+        )
+}
+
 fn pie_doughnut() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5573,6 +5672,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-pie" => Ok(calendar_pie()),
         "custom-calendar-icon" => custom_calendar_icon(),
         "calendar-charts" => Ok(calendar_charts()),
+        "pie-nest" => Ok(pie_nest()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

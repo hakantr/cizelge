@@ -284,6 +284,13 @@ pub trait ÇizimYüzeyi {
     /// Yazının kaplayacağı `(genişlik, yükseklik)` boyutunu ölçer.
     fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32);
 
+    /// Yazıyı gerçekten çizilecek ağırlıkla ölçer. Basit yüzeyler normal
+    /// metriklere düşebilir; yazı tipi şekillendiren yüzeyler kalın yüzün
+    /// kendi ilerleme değerlerini kullanır.
+    fn stilli_yazı_ölç(&self, metin: &str, boyut: f32, _kalın: bool) -> (f32, f32) {
+        self.yazı_ölç(metin, boyut)
+    }
+
     // ------------------------------------------------------------------
     // Ortak yardımcılar (ilkellerden türetilir; her yüzeyde aynı çalışır).
     // ------------------------------------------------------------------

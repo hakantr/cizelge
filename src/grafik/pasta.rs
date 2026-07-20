@@ -5,14 +5,15 @@ use std::collections::{HashMap, HashSet};
 
 use crate::cizim::donusum::AfinMatris;
 use crate::cizim::yuzey::yuvarlatılmış_dilim_yolu;
-use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
+use crate::cizim::{DikeyHiza, SahneŞekli, YatayHiza, Yol, yolu_dönüştür, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
+use crate::model::Uzunluk;
 use crate::model::deger::VeriDeğeri;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::{EtiketYerleşimParametreleri, GülTürü, PastaSerisi, Seri};
 use crate::model::stil::{
-    Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, YazıStili,
-    zengin_metin_içeriği,
+    Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıStili,
+    YazıYatayHizası, zengin_metin_içeriği, ÇizgiTürü,
 };
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
@@ -285,7 +286,7 @@ fn dilim_adı(öğe: &crate::model::deger::VeriÖğesi, sıra: usize) -> String 
 /// ECharts pie verileri renk paletini veri adıyla grafik çapında paylaşır.
 /// Aynı adlı dilim sonraki pasta serilerinde aynı rengi alır; yeni adlar
 /// önceki pasta serilerinin tükettiği sıradan devam eder.
-fn pasta_palet_sırası(
+pub(crate) fn pasta_palet_sırası(
     seçenekler: &GrafikSeçenekleri,
     hedef: &PastaSerisi,
     hedef_sıra: usize,
@@ -544,7 +545,8 @@ pub fn pasta_çiz(
                     _ => ((b2.0 - seri.etiket.çizgi_uzaklığı, b2.1), YatayHiza::Sağ),
                 };
                 let metin_ölçüsü = zengin_metin_ölç(çizici, &ham_metin, &seri.etiket);
-                let yarım_boşluk = seri.etiket.en_küçük_boşluk / 2.0;
+                let kenarlık_payını = etiket_kenarlık_payını(&seri.etiket);
+                let yarım_boşluk = (seri.etiket.en_küçük_boşluk + kenarlık_payını) / 2.0;
                 dış_etiketler.push(DışEtiketYerleşimi {
                     dilim_sırası,
                     tam_ham_metin: ham_metin.clone(),
@@ -557,8 +559,11 @@ pub fn pasta_çiz(
                     orta_açı,
                     metin_genişliği: metin_ölçüsü.0,
                     metin_yüksekliği: metin_ölçüsü.1,
+                    kısıtlı_genişlik: None,
                     dikdörtgen_y: konum.1 - metin_ölçüsü.1 / 2.0 - yarım_boşluk,
-                    dikdörtgen_yüksekliği: metin_ölçüsü.1 + seri.etiket.en_küçük_boşluk,
+                    dikdörtgen_yüksekliği: metin_ölçüsü.1
+                        + seri.etiket.en_küçük_boşluk
+                        + kenarlık_payını,
                 });
             }
         }
@@ -603,6 +608,11 @@ fn pasta_etiket_zengin_metni(seri: &PastaSerisi, dilim: &Dilim) -> String {
 struct ZenginKoşu {
     metin: String,
     yazı: YazıStili,
+    metin_genişliği: f32,
+    içerik_genişliği: f32,
+    içerik_yüksekliği: f32,
+    dış_genişlik: f32,
+    dış_yükseklik: f32,
 }
 
 struct ZenginSatır {
@@ -613,86 +623,224 @@ struct ZenginSatır {
 
 struct ZenginMetinYerleşimi {
     satırlar: Vec<ZenginSatır>,
+    içerik_genişliği: f32,
     genişlik: f32,
     yükseklik: f32,
+    iç_boşluk: [f32; 4],
 }
 
-fn yazı_stilini_birleştir(taban: &YazıStili, yama: &YazıStili) -> YazıStili {
-    let mut sonuç = taban.clone();
-    if yama.renk.is_some() {
-        sonuç.renk = yama.renk;
+fn zengin_koşu_tabanı(yazı: &YazıStili) -> YazıStili {
+    // `backgroundColor`, `padding`, `width` ve hizalar bütün rich-text
+    // bloğuna aittir; her koşuya kalıtılırsa her parça aynı kutuyu yeniden
+    // üretir. zrender yalnız tipografik alanları koşu tabanına aktarır.
+    YazıStili {
+        renk: yazı.renk,
+        opaklık: yazı.opaklık,
+        boyut: yazı.boyut.or(Some(tema::YAZI_KÜÇÜK)),
+        satır_yüksekliği: yazı.satır_yüksekliği,
+        kalın: yazı.kalın,
+        kalınlık_belirtildi: yazı.kalınlık_belirtildi,
+        aile: yazı.aile.clone(),
+        ..YazıStili::default()
     }
-    if yama.boyut.is_some() {
-        sonuç.boyut = yama.boyut;
-    }
-    if yama.satır_yüksekliği.is_some() {
-        sonuç.satır_yüksekliği = yama.satır_yüksekliği;
-    }
-    if yama.kalınlık_belirtildi {
-        sonuç.kalın = yama.kalın;
-        sonuç.kalınlık_belirtildi = true;
-    }
-    if yama.aile.is_some() {
-        sonuç.aile.clone_from(&yama.aile);
-    }
-    sonuç
 }
 
 fn zengin_satırı_çöz(satır: &str, etiket: &Etiket) -> Vec<ZenginKoşu> {
-    let mut taban = etiket.yazı.clone();
-    if taban.boyut.is_none() {
-        taban.boyut = Some(tema::YAZI_KÜÇÜK);
-    }
+    let taban = zengin_koşu_tabanı(&etiket.yazı);
+    let yeni_koşu = |metin: String, yazı: YazıStili| ZenginKoşu {
+        metin,
+        yazı,
+        metin_genişliği: 0.0,
+        içerik_genişliği: 0.0,
+        içerik_yüksekliği: 0.0,
+        dış_genişlik: 0.0,
+        dış_yükseklik: 0.0,
+    };
     let mut koşular = Vec::new();
     let mut kalan = satır;
     while let Some(açılış) = kalan.find('{') {
         if açılış > 0
             && let Some(önek) = kalan.get(..açılış)
         {
-            koşular.push(ZenginKoşu {
-                metin: önek.to_owned(),
-                yazı: taban.clone(),
-            });
+            koşular.push(yeni_koşu(önek.to_owned(), taban.clone()));
         }
         let Some(açılış_sonrası) = kalan.get(açılış + 1..) else {
             break;
         };
         let Some(kapanış_göreli) = açılış_sonrası.find('}') else {
-            koşular.push(ZenginKoşu {
-                metin: kalan.get(açılış..).unwrap_or_default().to_owned(),
-                yazı: taban.clone(),
-            });
+            koşular.push(yeni_koşu(
+                kalan.get(açılış..).unwrap_or_default().to_owned(),
+                taban.clone(),
+            ));
             kalan = "";
             break;
         };
         let kapanış = açılış + 1 + kapanış_göreli;
         let belirteç = kalan.get(açılış + 1..kapanış).unwrap_or_default();
         let Some((ad, içerik)) = belirteç.split_once('|') else {
-            koşular.push(ZenginKoşu {
-                metin: kalan.get(açılış..=kapanış).unwrap_or_default().to_owned(),
-                yazı: taban.clone(),
-            });
+            koşular.push(yeni_koşu(
+                kalan.get(açılış..=kapanış).unwrap_or_default().to_owned(),
+                taban.clone(),
+            ));
             kalan = kalan.get(kapanış + 1..).unwrap_or_default();
             continue;
         };
         let yazı = etiket
             .zengin
             .get(ad)
-            .map(|yama| yazı_stilini_birleştir(&taban, yama))
+            .map(|yama| taban.yama_uygula(yama))
             .unwrap_or_else(|| taban.clone());
-        koşular.push(ZenginKoşu {
-            metin: içerik.to_owned(),
-            yazı,
-        });
+        koşular.push(yeni_koşu(içerik.to_owned(), yazı));
         kalan = kalan.get(kapanış + 1..).unwrap_or_default();
     }
     if !kalan.is_empty() || koşular.is_empty() {
-        koşular.push(ZenginKoşu {
-            metin: kalan.to_owned(),
-            yazı: taban,
-        });
+        koşular.push(yeni_koşu(kalan.to_owned(), taban));
     }
     koşular
+}
+
+fn yazı_iç_boşluğu(yazı: &YazıStili) -> [f32; 4] {
+    yazı.iç_boşluk.unwrap_or([0.0; 4])
+}
+
+fn zengin_koşuyu_ölç(
+    çizici: &dyn ÇizimYüzeyi,
+    koşu: &mut ZenginKoşu,
+    yüzde_tabanı: Option<f32>,
+) {
+    let boyut = koşu.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+    let (metin_genişliği, metin_yüksekliği) =
+        çizici.stilli_yazı_ölç(&koşu.metin, boyut, koşu.yazı.kalın);
+    let iç_boşluk = yazı_iç_boşluğu(&koşu.yazı);
+    let doğal_genişlik = if koşu.metin.is_empty() {
+        match (&koşu.yazı.arkaplan, koşu.yazı.yükseklik) {
+            (Some(Dolgu::Desen(desen)), Some(yükseklik)) if desen.yükseklik > 0 => {
+                yükseklik * desen.genişlik as f32 / desen.yükseklik as f32
+            }
+            _ => metin_genişliği,
+        }
+    } else {
+        metin_genişliği
+    };
+    let içerik_genişliği = match koşu.yazı.genişlik {
+        Some(Uzunluk::Piksel(genişlik)) => genişlik.max(0.0),
+        Some(Uzunluk::Yüzde(yüzde)) => yüzde_tabanı
+            .map(|taban| (taban * yüzde / 100.0).max(0.0))
+            .unwrap_or(0.0),
+        None => doğal_genişlik,
+    };
+    let içerik_yüksekliği = koşu.yazı.yükseklik.unwrap_or(metin_yüksekliği).max(0.0);
+    koşu.metin_genişliği = metin_genişliği;
+    koşu.içerik_genişliği = içerik_genişliği;
+    koşu.içerik_yüksekliği = içerik_yüksekliği;
+    koşu.dış_genişlik = içerik_genişliği + iç_boşluk[1] + iç_boşluk[3];
+    koşu.dış_yükseklik = içerik_yüksekliği + iç_boşluk[0] + iç_boşluk[2];
+}
+
+fn zengin_satır_ölçülerini_güncelle(satır: &mut ZenginSatır) {
+    satır.genişlik = satır.koşular.iter().map(|koşu| koşu.dış_genişlik).sum();
+    satır.yükseklik = satır
+        .koşular
+        .iter()
+        .map(|koşu| koşu.yazı.satır_yüksekliği.unwrap_or(koşu.dış_yükseklik))
+        .fold(0.0_f32, f32::max);
+}
+
+fn zengin_koşu_metnini_sığdır(
+    çizici: &dyn ÇizimYüzeyi,
+    metin: &str,
+    yazı: &YazıStili,
+    kutu_genişliği: f32,
+) -> String {
+    let boyut = yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+    let ölç = |metin: &str| çizici.stilli_yazı_ölç(metin, boyut, yazı.kalın).0;
+    if kutu_genişliği <= 0.0 {
+        return String::new();
+    }
+
+    // zrender `prepareTruncateOptions` önce kutudan bir piksellik güvenlik
+    // payı düşürür. `truncateSingleLine`ın ilk denemesi karakterleri hedefe
+    // ulaşana dek (son karakter hedefi aşsa bile) toplar; ikinci deneme ise
+    // ölçülen öneği oranlayarak düzeltir. Bu küçük ayrıntı `40.62%` gibi dar
+    // rich-text rozetlerinin resmî örnekte `4...` olmasını belirler.
+    let kutu = (kutu_genişliği - 1.0).max(0.0);
+    let mut metin_genişliği = ölç(metin);
+    if metin_genişliği <= kutu {
+        return metin.to_owned();
+    }
+    const ÜÇ_NOKTA: &str = "...";
+    let üç_nokta = ölç(ÜÇ_NOKTA);
+    let (üç_nokta, içerik) = if üç_nokta > kutu {
+        ("", kutu)
+    } else {
+        (ÜÇ_NOKTA, kutu - üç_nokta)
+    };
+    let mut karakterler: Vec<char> = metin.chars().collect();
+    for geçiş in 0..2 {
+        if metin_genişliği <= içerik {
+            return karakterler.into_iter().chain(üç_nokta.chars()).collect();
+        }
+        let yeni_uzunluk = if geçiş == 0 {
+            let mut genişlik = 0.0_f32;
+            let mut uzunluk = 0_usize;
+            while genişlik < içerik {
+                let Some(karakter) = karakterler.get(uzunluk) else {
+                    break;
+                };
+                genişlik += ölç(&karakter.to_string());
+                uzunluk += 1;
+            }
+            uzunluk
+        } else if metin_genişliği > 0.0 {
+            ((karakterler.len() as f32 * içerik / metin_genişliği).floor() as usize)
+                .min(karakterler.len())
+        } else {
+            0
+        };
+        karakterler.truncate(yeni_uzunluk);
+        metin_genişliği = ölç(&karakterler.iter().collect::<String>());
+    }
+    karakterler.into_iter().chain(üç_nokta.chars()).collect()
+}
+
+fn zengin_satırı_genişliğe_sığdır(
+    çizici: &dyn ÇizimYüzeyi,
+    satır: &mut ZenginSatır,
+    içerik_genişliği: f32,
+) {
+    let mut kullanılan = 0.0_f32;
+    for koşu in &mut satır.koşular {
+        // zrender yüzde genişlikleri son geçişte çözer; ilk geçişte bunları
+        // daraltmaz. Diğer koşular yatay hizalarından bağımsız olarak metin
+        // sırasındaki birikmiş genişliğe göre değerlendirilir.
+        if matches!(koşu.yazı.genişlik, Some(Uzunluk::Yüzde(_))) {
+            kullanılan += koşu.dış_genişlik;
+            continue;
+        }
+        let kalan = (içerik_genişliği - kullanılan).max(0.0);
+        // `parseRichText` karşılaştırmayı token'ın içerik genişliğiyle yapar
+        // ve padding'i ancak kararın ardından `token.width`e ekler. Böylece
+        // metni sığan bir rozet padding nedeniyle kutuyu az miktarda aşabilir;
+        // resmî `pie-nest` Google rozeti bunun kasıtlı bir örneğidir.
+        if kalan < koşu.içerik_genişliği && !koşu.metin.is_empty() {
+            let iç_boşluk = yazı_iç_boşluğu(&koşu.yazı);
+            let yatay_iç_boşluk = iç_boşluk[1] + iç_boşluk[3];
+            let genişlik_belirtildi = matches!(koşu.yazı.genişlik, Some(Uzunluk::Piksel(_)));
+            if genişlik_belirtildi || kalan < yatay_iç_boşluk {
+                koşu.metin.clear();
+                koşu.yazı.genişlik = Some(Uzunluk::Piksel(0.0));
+            } else {
+                koşu.metin = zengin_koşu_metnini_sığdır(
+                    çizici,
+                    &koşu.metin,
+                    &koşu.yazı,
+                    kalan - yatay_iç_boşluk,
+                );
+            }
+            zengin_koşuyu_ölç(çizici, koşu, Some(içerik_genişliği));
+        }
+        kullanılan += koşu.dış_genişlik;
+    }
 }
 
 fn zengin_metin_yerleşimi(
@@ -701,43 +849,50 @@ fn zengin_metin_yerleşimi(
     etiket: &Etiket,
 ) -> ZenginMetinYerleşimi {
     let mut satırlar = Vec::new();
-    let mut toplam_yükseklik = 0.0_f32;
-    let mut en_büyük_genişlik = 0.0_f32;
     for satır in ham_metin.split('\n') {
-        let koşular = zengin_satırı_çöz(satır, etiket);
+        let mut koşular = zengin_satırı_çöz(satır, etiket);
+        for koşu in &mut koşular {
+            zengin_koşuyu_ölç(çizici, koşu, None);
+        }
+        // Yüzde genişlikler blok genişliğini belirlemez; zrender önce sabit
+        // içerikten metin kutusunu bulur, ardından yüzdeyi bu kutuya çözer.
         let genişlik = koşular
             .iter()
-            .map(|koşu| {
-                çizici
-                    .yazı_ölç(&koşu.metin, koşu.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK))
-                    .0
-            })
+            .filter(|koşu| !matches!(koşu.yazı.genişlik, Some(Uzunluk::Yüzde(_))))
+            .map(|koşu| koşu.dış_genişlik)
             .sum();
-        let doğal_yükseklik = koşular
-            .iter()
-            .map(|koşu| {
-                koşu
-                    .yazı
-                    .satır_yüksekliği
-                    .unwrap_or(koşu.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK))
-            })
-            .fold(0.0_f32, f32::max);
-        let yükseklik = etiket
-            .yazı
-            .satır_yüksekliği
-            .unwrap_or(doğal_yükseklik.max(tema::YAZI_KÜÇÜK));
-        en_büyük_genişlik = en_büyük_genişlik.max(genişlik);
-        toplam_yükseklik += yükseklik;
+        let yükseklik = 0.0;
         satırlar.push(ZenginSatır {
             koşular,
             genişlik,
             yükseklik,
         });
     }
+    let doğal_genişlik = satırlar
+        .iter()
+        .map(|satır| satır.genişlik)
+        .fold(0.0_f32, f32::max);
+    let içerik_genişliği = match etiket.yazı.genişlik {
+        Some(Uzunluk::Piksel(genişlik)) => genişlik.max(0.0),
+        _ => doğal_genişlik,
+    };
+    for satır in &mut satırlar {
+        if matches!(etiket.yazı.genişlik, Some(Uzunluk::Piksel(_))) {
+            zengin_satırı_genişliğe_sığdır(çizici, satır, içerik_genişliği);
+        }
+        for koşu in &mut satır.koşular {
+            zengin_koşuyu_ölç(çizici, koşu, Some(içerik_genişliği));
+        }
+        zengin_satır_ölçülerini_güncelle(satır);
+    }
+    let içerik_yüksekliği: f32 = satırlar.iter().map(|satır| satır.yükseklik).sum();
+    let iç_boşluk = yazı_iç_boşluğu(&etiket.yazı);
     ZenginMetinYerleşimi {
         satırlar,
-        genişlik: en_büyük_genişlik,
-        yükseklik: toplam_yükseklik,
+        içerik_genişliği,
+        genişlik: içerik_genişliği + iç_boşluk[1] + iç_boşluk[3],
+        yükseklik: içerik_yüksekliği + iç_boşluk[0] + iç_boşluk[2],
+        iç_boşluk,
     }
 }
 
@@ -779,31 +934,125 @@ fn zengin_etiketi_konturlu_yaz(
     dönüş: f32,
 ) {
     let yerleşim = zengin_metin_yerleşimi(çizici, ham_metin, etiket);
-    let mut satır_y = -yerleşim.yükseklik / 2.0;
     let konum = (konum.0 + etiket.kayma.0, konum.1 + etiket.kayma.1);
     let dönüşüm = AfinMatris::ötele(konum.0, konum.1).çarp(AfinMatris::döndür(dönüş));
-    for satır in yerleşim.satırlar {
-        let mut koşu_x = match hiza {
-            YatayHiza::Sol => 0.0,
-            YatayHiza::Orta => -satır.genişlik / 2.0,
-            YatayHiza::Sağ => -satır.genişlik,
-        };
-        let koşu_y = satır_y + satır.yükseklik / 2.0;
-        for koşu in satır.koşular {
+    let kutu_x = match hiza {
+        YatayHiza::Sol => 0.0,
+        YatayHiza::Orta => -yerleşim.genişlik / 2.0,
+        YatayHiza::Sağ => -yerleşim.genişlik,
+    };
+    let kutu_y = -yerleşim.yükseklik / 2.0;
+    zengin_stil_kutusunu_çiz(
+        çizici,
+        Dikdörtgen::yeni(kutu_x, kutu_y, yerleşim.genişlik, yerleşim.yükseklik),
+        &etiket.yazı,
+        dönüşüm,
+    );
+
+    let içerik_x = kutu_x + yerleşim.iç_boşluk[3];
+    let içerik_y = kutu_y + yerleşim.iç_boşluk[0];
+    let varsayılan_koşu_hizası = match hiza {
+        YatayHiza::Sol => YazıYatayHizası::Sol,
+        YatayHiza::Orta => YazıYatayHizası::Orta,
+        YatayHiza::Sağ => YazıYatayHizası::Sağ,
+    };
+    let mut içeriği_çiz = |yüzey: &mut dyn ÇizimYüzeyi| {
+        zengin_metin_içeriğini_çiz(
+            yüzey,
+            &yerleşim,
+            (içerik_x, içerik_y),
+            varsayılan_koşu_hizası,
+            varsayılan_renk,
+            varsayılan_kontur,
+            dönüşüm,
+            konum,
+            dönüş,
+        );
+    };
+    if etiket.yazı.genişlik.is_some() && dönüş.abs() <= 1e-6 {
+        let kırpma = Dikdörtgen::yeni(
+            konum.0 + kutu_x,
+            konum.1 + kutu_y,
+            yerleşim.genişlik,
+            yerleşim.yükseklik,
+        );
+        çizici.kırpılı(kırpma, &mut içeriği_çiz);
+    } else {
+        içeriği_çiz(çizici);
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn zengin_metin_içeriğini_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    yerleşim: &ZenginMetinYerleşimi,
+    içerik_konumu: (f32, f32),
+    varsayılan_hiza: YazıYatayHizası,
+    varsayılan_renk: Renk,
+    varsayılan_kontur: Option<Renk>,
+    dönüşüm: AfinMatris,
+    konum: (f32, f32),
+    dönüş: f32,
+) {
+    let (içerik_x, mut satır_y) = içerik_konumu;
+    for satır in &yerleşim.satırlar {
+        let koşu_xleri = zengin_koşu_xleri(satır, yerleşim.içerik_genişliği, varsayılan_hiza);
+
+        // ECharts başlık şeridindeki `{abg|}` gibi geniş arka planlar metin
+        // koşularından sonra gelebilir. Bütün kutuları önce boyamak, metnin
+        // kaynak sırasından bağımsız olarak üstte kalmasını sağlar.
+        for (koşu, koşu_x) in satır.koşular.iter().zip(&koşu_xleri) {
+            let koşu_y = zengin_koşu_y(satır_y, satır.yükseklik, koşu);
+            zengin_stil_kutusunu_çiz(
+                çizici,
+                Dikdörtgen::yeni(
+                    içerik_x + *koşu_x,
+                    koşu_y,
+                    koşu.dış_genişlik,
+                    koşu.dış_yükseklik,
+                ),
+                &koşu.yazı,
+                dönüşüm,
+            );
+        }
+
+        for (koşu, koşu_x) in satır.koşular.iter().zip(&koşu_xleri) {
+            if koşu.metin.is_empty() {
+                continue;
+            }
             let boyut = koşu.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            let genişlik = çizici.yazı_ölç(&koşu.metin, boyut).0;
-            let renk = koşu.yazı.renk.unwrap_or(varsayılan_renk);
+            let iç_boşluk = yazı_iç_boşluğu(&koşu.yazı);
+            let koşu_y = zengin_koşu_y(satır_y, satır.yükseklik, koşu);
+            let etkin_hiza = koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza);
+            let metin_x = match etkin_hiza {
+                YazıYatayHizası::Sol => içerik_x + *koşu_x + iç_boşluk[3],
+                YazıYatayHizası::Orta => {
+                    içerik_x + *koşu_x + iç_boşluk[3] + koşu.içerik_genişliği / 2.0
+                }
+                YazıYatayHizası::Sağ => {
+                    içerik_x + *koşu_x + iç_boşluk[3] + koşu.içerik_genişliği
+                }
+            };
+            let metin_hizası = match etkin_hiza {
+                YazıYatayHizası::Sol => YatayHiza::Sol,
+                YazıYatayHizası::Orta => YatayHiza::Orta,
+                YazıYatayHizası::Sağ => YatayHiza::Sağ,
+            };
+            let metin_y = koşu_y + iç_boşluk[0] + koşu.içerik_yüksekliği / 2.0;
+            let opaklık = koşu.yazı.opaklık.unwrap_or(1.0);
+            let renk = koşu.yazı.renk.unwrap_or(varsayılan_renk).opaklık(opaklık);
             let kontur = koşu
                 .yazı
                 .renk
                 .is_none()
                 .then_some(varsayılan_kontur)
-                .flatten();
+                .flatten()
+                .map(|renk| renk.opaklık(opaklık));
             if let Some(kontur) = kontur {
                 çizici.dönüşümlü_konturlu_yazı(
                     &koşu.metin,
-                    (koşu_x, koşu_y),
-                    YatayHiza::Sol,
+                    (metin_x, metin_y),
+                    metin_hizası,
                     DikeyHiza::Orta,
                     boyut,
                     renk,
@@ -815,8 +1064,8 @@ fn zengin_etiketi_konturlu_yaz(
             } else if dönüş.abs() <= 1e-6 {
                 çizici.yazı(
                     &koşu.metin,
-                    (konum.0 + koşu_x, konum.1 + koşu_y),
-                    YatayHiza::Sol,
+                    (konum.0 + metin_x, konum.1 + metin_y),
+                    metin_hizası,
                     DikeyHiza::Orta,
                     boyut,
                     renk,
@@ -825,8 +1074,8 @@ fn zengin_etiketi_konturlu_yaz(
             } else {
                 çizici.dönüşümlü_yazı(
                     &koşu.metin,
-                    (koşu_x, koşu_y),
-                    YatayHiza::Sol,
+                    (metin_x, metin_y),
+                    metin_hizası,
                     DikeyHiza::Orta,
                     boyut,
                     renk,
@@ -834,9 +1083,123 @@ fn zengin_etiketi_konturlu_yaz(
                     dönüşüm,
                 );
             }
-            koşu_x += genişlik;
         }
         satır_y += satır.yükseklik;
+    }
+}
+
+fn zengin_koşu_xleri(
+    satır: &ZenginSatır,
+    içerik_genişliği: f32,
+    varsayılan_hiza: YazıYatayHizası,
+) -> Vec<f32> {
+    let mut sonuç = vec![0.0; satır.koşular.len()];
+    let mut sol = 0.0_f32;
+    for (sıra, koşu) in satır.koşular.iter().enumerate() {
+        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Sol {
+            sonuç[sıra] = sol;
+            sol += koşu.dış_genişlik;
+        }
+    }
+    let mut sağ = içerik_genişliği;
+    for (sıra, koşu) in satır.koşular.iter().enumerate().rev() {
+        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Sağ {
+            sağ -= koşu.dış_genişlik;
+            sonuç[sıra] = sağ;
+        }
+    }
+    let orta_genişliği: f32 = satır
+        .koşular
+        .iter()
+        .filter(|koşu| koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Orta)
+        .map(|koşu| koşu.dış_genişlik)
+        .sum();
+    let mut orta = (içerik_genişliği - orta_genişliği) / 2.0;
+    for (sıra, koşu) in satır.koşular.iter().enumerate() {
+        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Orta {
+            sonuç[sıra] = orta;
+            orta += koşu.dış_genişlik;
+        }
+    }
+    sonuç
+}
+
+fn zengin_koşu_y(satır_y: f32, satır_yüksekliği: f32, koşu: &ZenginKoşu) -> f32 {
+    match koşu.yazı.dikey_hiza.unwrap_or(YazıDikeyHizası::Orta) {
+        YazıDikeyHizası::Üst => satır_y,
+        YazıDikeyHizası::Orta => satır_y + (satır_yüksekliği - koşu.dış_yükseklik) / 2.0,
+        YazıDikeyHizası::Alt => satır_y + satır_yüksekliği - koşu.dış_yükseklik,
+    }
+}
+
+fn zengin_stil_kutusunu_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    kutu: Dikdörtgen,
+    yazı: &YazıStili,
+    dönüşüm: AfinMatris,
+) {
+    let opaklık = yazı.opaklık.unwrap_or(1.0);
+    let dolgu = yazı.arkaplan.as_ref().map(|dolgu| dolgu.opaklık(opaklık));
+    let kenarlık = yazı
+        .kenarlık_rengi
+        .map(|renk| {
+            (
+                yazı.kenarlık_kalınlığı.unwrap_or(1.0),
+                renk.opaklık(opaklık),
+            )
+        })
+        .filter(|(kalınlık, _)| *kalınlık > 0.0);
+    if dolgu.is_none() && kenarlık.is_none() {
+        return;
+    }
+    let yarıçap = yazı.kenarlık_yarıçapları.unwrap_or([0.0; 4]);
+    if yazı.yükseklik == Some(0.0) {
+        if let Some((kalınlık, renk)) = kenarlık {
+            let y = kutu.y + kutu.yükseklik / 2.0;
+            let mut çizgi = Yol::yeni();
+            çizgi.taşı(dönüşüm.noktayı_dönüştür((kutu.x, y)));
+            çizgi.çiz(dönüşüm.noktayı_dönüştür((kutu.sağ(), y)));
+            // Chromium Canvas2D, sıfır yükseklikli rich arka planın 1 px
+            // vuruşunu iki satıra toplam 1,5 px örtüyle yayar. tiny-skia'nın
+            // tam 1 px maskesini bu özel ayraç geometrisinde eşleştir.
+            çizici.yol_çiz(&çizgi, kalınlık * 1.5, renk, ÇizgiTürü::Düz);
+        }
+        return;
+    }
+    let yalnız_öteleme = (dönüşüm.a - 1.0).abs() <= 1e-6
+        && dönüşüm.b.abs() <= 1e-6
+        && dönüşüm.c.abs() <= 1e-6
+        && (dönüşüm.d - 1.0).abs() <= 1e-6;
+    if yalnız_öteleme {
+        let dünya_kutusu = Dikdörtgen::yeni(
+            kutu.x + dönüşüm.e,
+            kutu.y + dönüşüm.f,
+            kutu.genişlik,
+            kutu.yükseklik,
+        );
+        // zrender rich-text arka planlarını `strokeFirst` ile üretir ve
+        // belirtilen borderWidth'i iki kat vuruş kalınlığına çevirir. Dolgu
+        // sonradan iç yarıyı kapatınca dışarıda kullanıcı değerindeki kadar
+        // görünür kenarlık kalır.
+        if let Some((kalınlık, renk)) = kenarlık {
+            çizici.dikdörtgen(
+                dünya_kutusu,
+                &Dolgu::Düz(Renk::SAYDAM),
+                yarıçap,
+                Some((kalınlık * 2.0, renk)),
+            );
+        }
+        if let Some(dolgu) = dolgu.as_ref() {
+            çizici.dikdörtgen(dünya_kutusu, dolgu, yarıçap, None);
+        }
+        return;
+    }
+    let yol = yolu_dönüştür(&SahneŞekli::Dikdörtgen { kutu, yarıçap }.yol(), dönüşüm);
+    if let Some((kalınlık, renk)) = kenarlık {
+        çizici.yol_çiz(&yol, kalınlık * 2.0, renk, ÇizgiTürü::Düz);
+    }
+    if let Some(dolgu) = dolgu {
+        çizici.yol_doldur(&yol, &dolgu);
     }
 }
 
@@ -967,6 +1330,9 @@ struct DışEtiketYerleşimi {
     orta_açı: f64,
     metin_genişliği: f32,
     metin_yüksekliği: f32,
+    /// Görünüm kenarına sığdırılırken rich-text yapısını bozmadan uygulanan
+    /// içerik genişliği. `None`, doğal genişliği kullanır.
+    kısıtlı_genişlik: Option<f32>,
     dikdörtgen_y: f32,
     dikdörtgen_yüksekliği: f32,
 }
@@ -977,6 +1343,14 @@ fn kenar_uzaklığını_çöz(seri: &PastaSerisi, görünüm: Dikdörtgen) -> f3
     } else {
         seri.etiket.kenar_uzaklığı.çöz(görünüm.genişlik)
     }
+}
+
+fn etiket_kenarlık_payını(etiket: &Etiket) -> f32 {
+    etiket
+        .yazı
+        .kenarlık_rengi
+        .map(|_| etiket.yazı.kenarlık_kalınlığı.unwrap_or(1.0) * 2.0)
+        .unwrap_or(0.0)
 }
 
 fn etiket_dönüş_açısı(döndürme: EtiketDöndürme, orta_açı: f32, iç: bool) -> f32 {
@@ -1117,16 +1491,17 @@ fn dış_etiketleri_yerleştir_ve_çiz(
             seri.etiket_çizgisi.en_büyük_yüzey_açısı,
         );
         let etiket_kutusu = |etiket: &DışEtiketYerleşimi| {
+            let kenarlık_payını = etiket_kenarlık_payını(&seri.etiket);
             let x = match etiket.hiza {
                 YatayHiza::Sol => etiket.konum.0,
                 YatayHiza::Orta => etiket.konum.0 - etiket.metin_genişliği / 2.0,
                 YatayHiza::Sağ => etiket.konum.0 - etiket.metin_genişliği,
-            };
+            } - kenarlık_payını / 2.0;
             Dikdörtgen::yeni(
                 x,
-                etiket.konum.1 - etiket.metin_yüksekliği / 2.0,
-                etiket.metin_genişliği,
-                etiket.metin_yüksekliği,
+                etiket.konum.1 - (etiket.metin_yüksekliği + kenarlık_payını) / 2.0,
+                etiket.metin_genişliği + kenarlık_payını,
+                etiket.metin_yüksekliği + kenarlık_payını,
             )
         };
         if let Some(işlev) = &seri.etiket_yerleşimi {
@@ -1204,10 +1579,14 @@ fn dış_etiketleri_yerleştir_ve_çiz(
         } else {
             &etiket.metin
         };
+        let mut çizim_etiketi = seri.etiket.clone();
+        if let Some(genişlik) = etiket.kısıtlı_genişlik {
+            çizim_etiketi.yazı.genişlik = Some(Uzunluk::Piksel(genişlik));
+        }
         zengin_etiketi_yaz(
             çizici,
             çizilecek_metin,
-            &seri.etiket,
+            &çizim_etiketi,
             etiket.konum,
             etiket.hiza,
             renk,
@@ -1277,21 +1656,36 @@ fn etiket_metinlerini_sınırla(
             etiket.ham_metin.clone_from(&etiket.tam_ham_metin);
             etiket.metin_genişliği = tam_ölçü.0;
             etiket.metin_yüksekliği = tam_ölçü.1;
+            etiket.kısıtlı_genişlik = None;
         } else {
-            etiket.metin = etiket
-                .tam_metin
-                .split('\n')
-                .map(|satır| metni_üç_noktayla_sığdır(çizici, satır, boyut, hedef))
-                .collect::<Vec<_>>()
-                .join("\n");
-            etiket.ham_metin.clone_from(&etiket.metin);
-            let ölçü = zengin_metin_ölç(çizici, &etiket.ham_metin, &seri.etiket);
-            etiket.metin_genişliği = ölçü.0;
-            etiket.metin_yüksekliği = ölçü.1;
+            if seri.etiket.zengin.is_empty() {
+                etiket.metin = etiket
+                    .tam_metin
+                    .split('\n')
+                    .map(|satır| metni_üç_noktayla_sığdır(çizici, satır, boyut, hedef))
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                etiket.ham_metin.clone_from(&etiket.metin);
+                let ölçü = zengin_metin_ölç(çizici, &etiket.ham_metin, &seri.etiket);
+                etiket.metin_genişliği = ölçü.0;
+                etiket.metin_yüksekliği = ölçü.1;
+                etiket.kısıtlı_genişlik = None;
+            } else {
+                // Rich metni düz yazıya indirmek başlık şeridi, ayraç ve
+                // rozetleri kaybettirir. zrender aynı yapıyı hedef genişlik
+                // içinde tutar; çizim aşaması bu genişliği blokta uygular.
+                etiket.metin.clone_from(&etiket.tam_metin);
+                etiket.ham_metin.clone_from(&etiket.tam_ham_metin);
+                etiket.metin_genişliği = hedef;
+                etiket.metin_yüksekliği = tam_ölçü.1;
+                etiket.kısıtlı_genişlik = Some(hedef);
+            }
         }
-        let yarım_boşluk = seri.etiket.en_küçük_boşluk / 2.0;
+        let kenarlık_payını = etiket_kenarlık_payını(&seri.etiket);
+        let yarım_boşluk = (seri.etiket.en_küçük_boşluk + kenarlık_payını) / 2.0;
         etiket.dikdörtgen_y = etiket.konum.1 - etiket.metin_yüksekliği / 2.0 - yarım_boşluk;
-        etiket.dikdörtgen_yüksekliği = etiket.metin_yüksekliği + seri.etiket.en_küçük_boşluk;
+        etiket.dikdörtgen_yüksekliği =
+            etiket.metin_yüksekliği + seri.etiket.en_küçük_boşluk + kenarlık_payını;
     }
 }
 
@@ -1916,6 +2310,40 @@ mod testler {
         assert!(döküm.contains("yazı \"AB\""));
         assert!(döküm.contains("yazı \"12 h\""));
         assert!(döküm.contains("#999999"));
+    }
+
+    #[test]
+    fn zengin_metin_daraltması_zrender_iki_geçişli_tahmini_izler() {
+        let yüzey = KayıtYüzeyi::yeni(400.0, 300.0);
+        let yazı = crate::model::stil::YazıStili::yeni().boyut(12.0);
+
+        assert_eq!(
+            zengin_koşu_metnini_sığdır(&yüzey, "40.9%", &yazı, 31.0),
+            "4..."
+        );
+        assert_eq!(
+            zengin_koşu_metnini_sığdır(&yüzey, "9.8%", &yazı, 29.9),
+            "9.8%"
+        );
+    }
+
+    #[test]
+    fn zengin_koşular_üst_metin_hizasını_miras_alır() {
+        let yüzey = KayıtYüzeyi::yeni(400.0, 300.0);
+        let etiket = crate::model::stil::Etiket::yeni()
+            .yazı(crate::model::stil::YazıStili::yeni().genişlik(100.0))
+            .zengin_stil("a", crate::model::stil::YazıStili::yeni())
+            .zengin_stil("b", crate::model::stil::YazıStili::yeni());
+        let yerleşim = zengin_metin_yerleşimi(&yüzey, "{a|A}{b|B}", &etiket);
+        let satır = &yerleşim.satırlar[0];
+
+        let sağ = zengin_koşu_xleri(satır, yerleşim.içerik_genişliği, YazıYatayHizası::Sağ);
+        assert!((sağ[0] - (100.0 - satır.genişlik)).abs() < 1e-4);
+        assert!((sağ[1] + satır.koşular[1].dış_genişlik - 100.0).abs() < 1e-4);
+
+        let sol = zengin_koşu_xleri(satır, yerleşim.içerik_genişliği, YazıYatayHizası::Sol);
+        assert_eq!(sol[0], 0.0);
+        assert!((sol[1] - satır.koşular[0].dış_genişlik).abs() < 1e-4);
     }
 
     #[test]

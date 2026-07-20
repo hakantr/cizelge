@@ -201,6 +201,8 @@ impl AlanStili {
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct YazıStili {
     pub renk: Option<Renk>,
+    /// Metin ve arka planın ortak opaklığı (`opacity`).
+    pub opaklık: Option<f32>,
     pub boyut: Option<f32>,
     /// Açık satır yüksekliği (`lineHeight`). `None` ise yazı boyutu.
     pub satır_yüksekliği: Option<f32>,
@@ -209,6 +211,19 @@ pub struct YazıStili {
     /// öntanımlılarını (başlıkta kalın, çoğu etikette normal) korur.
     pub kalınlık_belirtildi: bool,
     pub aile: Option<String>,
+    /// Metin kutusu/rich-text parçası arka planı (`backgroundColor`).
+    pub arkaplan: Option<Dolgu>,
+    pub kenarlık_rengi: Option<Renk>,
+    pub kenarlık_kalınlığı: Option<f32>,
+    /// CSS sıralı köşe yarıçapları: sol üst, sağ üst, sağ alt, sol alt.
+    pub kenarlık_yarıçapları: Option<[f32; 4]>,
+    /// CSS sıralı iç boşluk: üst, sağ, alt, sol.
+    pub iç_boşluk: Option<[f32; 4]>,
+    /// Açık rich-text içerik genişliği/yüksekliği. Genişlik yüzde olabilir.
+    pub genişlik: Option<Uzunluk>,
+    pub yükseklik: Option<f32>,
+    pub yatay_hiza: Option<YazıYatayHizası>,
+    pub dikey_hiza: Option<YazıDikeyHizası>,
 }
 
 impl YazıStili {
@@ -218,6 +233,11 @@ impl YazıStili {
 
     pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
         self.renk = Some(renk.into());
+        self
+    }
+
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        self.opaklık = Some(opaklık.clamp(0.0, 1.0));
         self
     }
 
@@ -240,6 +260,114 @@ impl YazıStili {
     pub fn aile(mut self, aile: impl Into<String>) -> Self {
         self.aile = Some(aile.into());
         self
+    }
+
+    pub fn arkaplan(mut self, arkaplan: impl Into<Dolgu>) -> Self {
+        self.arkaplan = Some(arkaplan.into());
+        self
+    }
+
+    pub fn kenarlık_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.kenarlık_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
+        self.kenarlık_kalınlığı = Some(kalınlık.max(0.0));
+        self
+    }
+
+    pub fn kenarlık_yarıçapı(mut self, yarıçap: f32) -> Self {
+        self.kenarlık_yarıçapları = Some([yarıçap.max(0.0); 4]);
+        self
+    }
+
+    pub fn kenarlık_yarıçapları(mut self, yarıçaplar: [f32; 4]) -> Self {
+        self.kenarlık_yarıçapları = Some(yarıçaplar.map(|yarıçap| yarıçap.max(0.0)));
+        self
+    }
+
+    pub fn iç_boşluk(mut self, boşluk: [f32; 4]) -> Self {
+        self.iç_boşluk = Some(boşluk.map(|değer| değer.max(0.0)));
+        self
+    }
+
+    pub fn eş_iç_boşluk(mut self, boşluk: f32) -> Self {
+        self.iç_boşluk = Some([boşluk.max(0.0); 4]);
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(genişlik.into());
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: f32) -> Self {
+        self.yükseklik = Some(yükseklik.max(0.0));
+        self
+    }
+
+    pub fn yatay_hiza(mut self, hiza: YazıYatayHizası) -> Self {
+        self.yatay_hiza = Some(hiza);
+        self
+    }
+
+    pub fn dikey_hiza(mut self, hiza: YazıDikeyHizası) -> Self {
+        self.dikey_hiza = Some(hiza);
+        self
+    }
+
+    /// Bir rich-text/veri öğesi yamasını mevcut yazı stilinin üzerine
+    /// uygular; yalnız açık alanlar kalıtılan değeri değiştirir.
+    pub(crate) fn yama_uygula(&self, yama: &YazıStili) -> YazıStili {
+        let mut sonuç = self.clone();
+        if yama.renk.is_some() {
+            sonuç.renk = yama.renk;
+        }
+        if yama.opaklık.is_some() {
+            sonuç.opaklık = yama.opaklık;
+        }
+        if yama.boyut.is_some() {
+            sonuç.boyut = yama.boyut;
+        }
+        if yama.satır_yüksekliği.is_some() {
+            sonuç.satır_yüksekliği = yama.satır_yüksekliği;
+        }
+        if yama.kalınlık_belirtildi {
+            sonuç.kalın = yama.kalın;
+            sonuç.kalınlık_belirtildi = true;
+        }
+        if yama.aile.is_some() {
+            sonuç.aile.clone_from(&yama.aile);
+        }
+        if yama.arkaplan.is_some() {
+            sonuç.arkaplan.clone_from(&yama.arkaplan);
+        }
+        if yama.kenarlık_rengi.is_some() {
+            sonuç.kenarlık_rengi = yama.kenarlık_rengi;
+        }
+        if yama.kenarlık_kalınlığı.is_some() {
+            sonuç.kenarlık_kalınlığı = yama.kenarlık_kalınlığı;
+        }
+        if yama.kenarlık_yarıçapları.is_some() {
+            sonuç.kenarlık_yarıçapları = yama.kenarlık_yarıçapları;
+        }
+        if yama.iç_boşluk.is_some() {
+            sonuç.iç_boşluk = yama.iç_boşluk;
+        }
+        if yama.genişlik.is_some() {
+            sonuç.genişlik = yama.genişlik;
+        }
+        if yama.yükseklik.is_some() {
+            sonuç.yükseklik = yama.yükseklik;
+        }
+        if yama.yatay_hiza.is_some() {
+            sonuç.yatay_hiza = yama.yatay_hiza;
+        }
+        if yama.dikey_hiza.is_some() {
+            sonuç.dikey_hiza = yama.dikey_hiza;
+        }
+        sonuç
     }
 }
 
@@ -657,7 +785,7 @@ impl EtiketYaması {
             sonuç.biçimleyici = Some(değer.clone());
         }
         if let Some(değer) = &self.yazı {
-            sonuç.yazı = değer.clone();
+            sonuç.yazı = sonuç.yazı.yama_uygula(değer);
         }
         if let Some(değer) = &self.zengin {
             sonuç.zengin.extend(değer.clone());
