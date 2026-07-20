@@ -14,6 +14,7 @@ use gpui::{
     Pixels, Render, ScrollWheelEvent, Window, canvas, div, prelude::*,
 };
 
+use crate::bilesen::grafik::GrafikSahnesi;
 use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
 use crate::calisma_zamani::{
     GrafikÇalışmaZamanı, SeçenekAyarlamaKipi, SeçenekYaması, ÖrnekBaşlatmaSeçenekleri,
@@ -60,6 +61,9 @@ type FilmDüğmeleri = Rc<RefCell<Vec<(Bounds<Pixels>, ZamanŞeridiEylemi)>>>;
 
 /// Hiyerarşi kırıntılarının pencere-mutlak kutuları: `(kutu, yeni yol uzunluğu)`.
 type KırıntıKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
+
+/// Son boyamadaki `graphic` sahnesi ve pencere-mutlak tuval kökeni.
+type GrafikSahneKaydı = Rc<RefCell<Option<(GrafikSahnesi, (f32, f32))>>>;
 
 /// Zaman şeridi (timeline) durumu: kare listesi + oynatma.
 struct Film {
@@ -122,6 +126,8 @@ pub struct GrafikGörünümü {
     hiyerarşi_yolu: Vec<String>,
     /// Pencere-mutlak kırıntı kutuları.
     kırıntı_kutuları: KırıntıKutuları,
+    /// Dönüşümlü `graphic` isabet sınamasında kullanılan sahnenin kendisi.
+    grafik_sahnesi: GrafikSahneKaydı,
     /// Grafo gezinmesi: `(kayma_x, kayma_y, ölçek)`.
     grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları.
@@ -197,6 +203,7 @@ impl GrafikGörünümü {
             son_boyut: Rc::new(Cell::new((800.0, 600.0))),
             hiyerarşi_yolu: Vec::new(),
             kırıntı_kutuları: Rc::new(RefCell::new(Vec::new())),
+            grafik_sahnesi: Rc::new(RefCell::new(None)),
             grafo_görünümü: (0.0, 0.0, 1.0),
             grafo_kaymaları: std::collections::HashMap::new(),
         }
@@ -554,6 +561,7 @@ impl Render for GrafikGörünümü {
         let araç_düğmeleri = self.araç_düğmeleri.clone();
         let film_düğmeleri = self.film_düğmeleri.clone();
         let kırıntı_kutuları = self.kırıntı_kutuları.clone();
+        let grafik_sahnesi = self.grafik_sahnesi.clone();
         let son_boyut = self.son_boyut.clone();
         let hiyerarşi_yolu = self.hiyerarşi_yolu.clone();
         let grafo_görünümü = self.grafo_görünümü;
@@ -595,7 +603,7 @@ impl Render for GrafikGörünümü {
                             grafo_görünümü,
                             grafo_kaymaları: grafo_kaymaları.clone(),
                         };
-                        let çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
+                        let mut çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
                         let tanı_bildir = |bileşen: &'static str| {
                             if let Ok(mut kayıt) = tanılar.try_borrow_mut() {
                                 kayıt.push(BilesenTanisi::yeni(
@@ -718,6 +726,12 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             Err(_) => tanı_bildir("kırıntı_kutuları"),
+                        }
+                        match grafik_sahnesi.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                *kayıt = çıktı.grafik_sahnesi.take().map(|sahne| (sahne, köken));
+                            }
+                            Err(_) => tanı_bildir("graphic_sahnesi"),
                         }
                     },
                 )
@@ -1148,6 +1162,25 @@ impl Render for GrafikGörünümü {
                     if let Some(uzunluk) = kırıntı_vuruşu {
                         bu.hiyerarşi_yolu.truncate(uzunluk);
                         cx.notify();
+                        return;
+                    }
+                    // 0e) Serbest graphic öğeleri: sahnenin affine isabet
+                    // sınaması, çizimde kullanılan dönüşümün aynısını izler.
+                    let grafik_vuruşu = match bu.grafik_sahnesi.try_borrow() {
+                        Ok(kayıt) => kayıt.as_ref().and_then(|(hazır, köken)| {
+                            let yerel = (konum.0 - köken.0, konum.1 - köken.1);
+                            hazır
+                                .sahne
+                                .isabet(yerel)
+                                .and_then(|isabet| hazır.öğe_bilgileri.get(&isabet.kimlik).cloned())
+                        }),
+                        Err(_) => None,
+                    };
+                    if let Some(bilgi) = grafik_vuruşu {
+                        cx.emit(GrafikOlayı::GrafikÖğesiTıklandı {
+                            kimlik: bilgi.kimlik,
+                            ad: bilgi.ad,
+                        });
                         return;
                     }
                     // 0c) Fırça etkinse seçim başlat.

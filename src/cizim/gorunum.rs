@@ -14,6 +14,7 @@ use crate::bilesen::eksen_cizimi::{
     bölme_çizgilerini_çiz, eksenleri_çiz, kırılma_alanlarını_çiz
 };
 use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
+use crate::bilesen::grafik::{GrafikSahnesi, grafik_sahnesi_hazırla};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::bilesen::matris_cizimi::matris_çiz;
 use crate::bilesen::takvim_cizimi::{takvim_arka_planı_çiz, takvim_üst_katmanı_çiz};
@@ -516,6 +517,9 @@ pub struct BoyamaÇıktısı {
     pub zaman_düğmeleri: Vec<(Dikdörtgen, ZamanŞeridiEylemi)>,
     /// Hiyerarşi kırıntıları (breadcrumb / geri): `(kutu, yeni yol uzunluğu)`.
     pub kırıntılar: Vec<(Dikdörtgen, usize)>,
+    /// `graphic` bileşeninin dönüşümlü isabet sınamasında da kullanılan
+    /// gerçek sahnesi.
+    pub grafik_sahnesi: Option<GrafikSahnesi>,
 }
 
 /// Araç kutusu düğme türleri.
@@ -4903,6 +4907,14 @@ pub fn grafiği_boya(
         fırça_alanını_çiz(yüzey, alan);
     }
 
+    // 5e) Serbest `graphic` bileşeni. Sahnenin aynısı çıktı içinde
+    // korunur; gpui tıklama sınamasında ikinci bir geometri üretmez.
+    if let Some(grafik) = &seçenekler.grafik {
+        let sahne = grafik_sahnesi_hazırla(grafik, yüzey.genişlik(), yüzey.yükseklik());
+        sahne.sahne.çiz(yüzey);
+        çıktı.grafik_sahnesi = Some(sahne);
+    }
+
     // 6) İpucu penceresi (her şeyin üstüne). `formatter` verilmişse
     // satırlar şablonla yeniden yazılır.
     if let (Some(ipucu), Some((başlık, satırlar, konum))) = (&ipucu_seçeneği, bekleyen_ipucu) {
@@ -5346,6 +5358,28 @@ mod yakınlaştırma_yönü_testleri {
         assert!(alan.içeriyor_mu((30.0, 20.0)));
         assert!(alan.içeriyor_mu((10.0, 10.0)), "kenar seçime dahildir");
         assert!(!alan.içeriyor_mu((8.0, 30.0)));
+    }
+
+    #[test]
+    fn graphic_sahnesi_ortak_boyama_hattinda_cizilir_ve_dondurulur() {
+        use crate::model::grafik_bileseni::{GrafikBağlıMetni, GrafikBileşeni, GrafikÖğesi};
+
+        let seçenekler = GrafikSeçenekleri::yeni().grafik(
+            GrafikBileşeni::yeni().öğe(
+                GrafikÖğesi::dikdörtgen(Dikdörtgen::yeni(0.0, 0.0, 140.0, 24.0))
+                    .kimlik("düğme")
+                    .sol(5.0)
+                    .üst(5.0)
+                    .bağlı_metin(GrafikBağlıMetni::yeni("Collapse Axis Breaks")),
+            ),
+        );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let sahne = çıktı.grafik_sahnesi.expect("graphic sahnesi");
+        assert!(sahne.sahne.isabet((75.0, 17.0)).is_some());
+        assert!(yüzey.döküm().contains("Collapse Axis Breaks"));
     }
 
     #[test]

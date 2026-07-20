@@ -186,6 +186,12 @@ pub enum GrafikOlayı {
         ad: Option<String>,
         değer: Option<f64>,
     },
+    /// Serbest `graphic` öğesine tıklandı. Kimlik ve ad, ECharts olay
+    /// parametresindeki `element.id` / `name` değerleridir.
+    GrafikÖğesiTıklandı {
+        kimlik: Option<String>,
+        ad: Option<String>,
+    },
     /// Gösterge öğesi tıklanıp bir ad açıldı/kapandı
     /// (`'legendselectchanged'`).
     GöstergeDeğişti { ad: String, görünür: bool },

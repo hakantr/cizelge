@@ -376,7 +376,7 @@ impl SahneMetni {
         }
     }
 
-    fn sınır_kutusu(&self) -> Dikdörtgen {
+    pub fn sınır_kutusu(&self) -> Dikdörtgen {
         let genişlik = self.metin.chars().count() as f32 * self.boyut * 0.6;
         let yükseklik = self.boyut * crate::cizim::yuzey::SATIR_ORANI;
         let x = match self.yatay {
@@ -509,6 +509,13 @@ impl SahneDüğümü {
         }
         stil.opaklık = stil.opaklık.clamp(0.0, 1.0);
         stil
+    }
+
+    /// Düğümün bütün alt ağacını ve yerel dönüşümlerini kapsayan, ebeveyn
+    /// koordinatındaki sınır kutusu. `graphic` yerleşimi ile dış
+    /// bütünleştiriciler aynı geometri hesabını kullanır.
+    pub fn sınır_kutusu(&self) -> Option<Dikdörtgen> {
+        düğüm_sınır_kutusu(self, AfinMatris::BİRİM)
     }
 }
 
@@ -853,6 +860,53 @@ fn öğe_içeriyor(düğüm: &SahneDüğümü, nokta: (f32, f32)) -> bool {
         SahneÖğesi::Resim(resim) => resim.kutu.içeriyor_mu(nokta),
         SahneÖğesi::Grup(_) => false,
     }
+}
+
+fn düğüm_sınır_kutusu(düğüm: &SahneDüğümü, ebeveyn: AfinMatris) -> Option<Dikdörtgen> {
+    let dünya = ebeveyn.çarp(düğüm.dönüşüm.matris());
+    match &düğüm.öğe {
+        SahneÖğesi::Grup(çocuklar) => çocuklar
+            .iter()
+            .filter_map(|çocuk| düğüm_sınır_kutusu(çocuk, dünya))
+            .reduce(kutuları_birleştir),
+        SahneÖğesi::Şekil(şekil) => şekil
+            .sınır_kutusu()
+            .map(|kutu| kutuyu_dönüştür(kutu, dünya)),
+        SahneÖğesi::Metin(metin) => Some(kutuyu_dönüştür(metin.sınır_kutusu(), dünya)),
+        SahneÖğesi::Resim(resim) => Some(kutuyu_dönüştür(resim.kutu, dünya)),
+    }
+}
+
+fn kutuyu_dönüştür(kutu: Dikdörtgen, matris: AfinMatris) -> Dikdörtgen {
+    let noktalar = [
+        matris.noktayı_dönüştür((kutu.x, kutu.y)),
+        matris.noktayı_dönüştür((kutu.sağ(), kutu.y)),
+        matris.noktayı_dönüştür((kutu.sağ(), kutu.alt())),
+        matris.noktayı_dönüştür((kutu.x, kutu.alt())),
+    ];
+    let min_x = noktalar
+        .iter()
+        .map(|nokta| nokta.0)
+        .fold(f32::INFINITY, f32::min);
+    let max_x = noktalar
+        .iter()
+        .map(|nokta| nokta.0)
+        .fold(f32::NEG_INFINITY, f32::max);
+    let min_y = noktalar
+        .iter()
+        .map(|nokta| nokta.1)
+        .fold(f32::INFINITY, f32::min);
+    let max_y = noktalar
+        .iter()
+        .map(|nokta| nokta.1)
+        .fold(f32::NEG_INFINITY, f32::max);
+    Dikdörtgen::yeni(min_x, min_y, max_x - min_x, max_y - min_y)
+}
+
+fn kutuları_birleştir(a: Dikdörtgen, b: Dikdörtgen) -> Dikdörtgen {
+    let x = a.x.min(b.x);
+    let y = a.y.min(b.y);
+    Dikdörtgen::yeni(x, y, a.sağ().max(b.sağ()) - x, a.alt().max(b.alt()) - y)
 }
 
 fn isabet_sonucu(

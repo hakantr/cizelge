@@ -6,6 +6,7 @@ use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
 use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
 use crate::model::eksen::{Eksen, EksenTürü};
 use crate::model::gorsel_esleme::GörselEşleme;
+use crate::model::grafik_bileseni::GrafikBileşeni;
 use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::matris::MatrisKoordinatı;
 use crate::model::radar::RadarKoordinatı;
@@ -74,6 +75,8 @@ pub struct GrafikSeçenekleri {
     pub araç_kutusu: Option<AraçKutusu>,
     /// Fırça (`brush`): dikdörtgen seçim.
     pub fırça: Option<Fırça>,
+    /// Serbest zrender öğeleri (`graphic`).
+    pub grafik: Option<GrafikBileşeni>,
     /// Zaman şeridi (`timeline`). `BileşikSeçenekler`, seçilen `options`
     /// karesini bu bileşenin `geçerli_sıra` değeriyle birleştirir.
     pub zaman_şeridi: Option<ZamanŞeridi>,
@@ -121,6 +124,7 @@ impl Default for GrafikSeçenekleri {
             veri_yakınlaştırmaları: Vec::new(),
             araç_kutusu: None,
             fırça: None,
+            grafik: None,
             zaman_şeridi: None,
             palet: tema::PALET.to_vec(),
             arkaplan: None,
@@ -336,6 +340,11 @@ impl GrafikSeçenekleri {
 
     pub fn zaman_şeridi(mut self, zaman_şeridi: ZamanŞeridi) -> Self {
         self.zaman_şeridi = Some(zaman_şeridi);
+        self
+    }
+
+    pub fn grafik(mut self, grafik: GrafikBileşeni) -> Self {
+        self.grafik = Some(grafik);
         self
     }
 
@@ -712,6 +721,9 @@ impl GrafikSeçenekleri {
                     self.animasyon_süresi_güncelleme
                 ),
             });
+        }
+        if let Some(grafik) = &self.grafik {
+            grafik.doğrula()?;
         }
         if let Some(zaman_şeridi) = &self.zaman_şeridi {
             if !zaman_şeridi.oynatma_aralığı.is_finite() || zaman_şeridi.oynatma_aralığı < 0.0

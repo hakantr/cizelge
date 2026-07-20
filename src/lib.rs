@@ -42,6 +42,7 @@ pub mod yerlesim;
 pub mod zamanlayici;
 
 pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
+pub use bilesen::grafik::{GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla};
 pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
 pub use calisma_zamani::{
     BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
@@ -88,6 +89,10 @@ pub use model::eksen::{
     EksenÇizgisi, SayısalKenarBoşluğu,
 };
 pub use model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
+pub use model::grafik_bileseni::{
+    GrafikBağlıMetni, GrafikBileşeni, GrafikMetinKonumu, GrafikYerleşimi, GrafikÖğesi,
+    GrafikÖğeİçeriği,
+};
 pub use model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
 };
@@ -148,6 +153,7 @@ pub use zamanlayici::{
 /// girişinin karşılığı).
 pub mod hazir {
     pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
+    pub use crate::bilesen::grafik::{GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla};
     pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
     pub use crate::calisma_zamani::{
         BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
@@ -195,6 +201,10 @@ pub mod hazir {
         EksenTürü, EksenÇentiği, EksenÇizgisi, SayısalKenarBoşluğu,
     };
     pub use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
+    pub use crate::model::grafik_bileseni::{
+        GrafikBağlıMetni, GrafikBileşeni, GrafikMetinKonumu, GrafikYerleşimi, GrafikÖğesi,
+        GrafikÖğeİçeriği,
+    };
     pub use crate::model::hatlar::{
         HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
     };

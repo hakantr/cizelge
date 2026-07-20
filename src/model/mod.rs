@@ -6,6 +6,7 @@ pub mod bilesen;
 pub mod deger;
 pub mod eksen;
 pub mod gorsel_esleme;
+pub mod grafik_bileseni;
 pub mod hatlar;
 pub mod imleyici;
 pub mod kutupsal;
