@@ -260,7 +260,7 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
+    "rust_api": "src/model/seri.rs (SaçılımSerisi::animasyon_eşiği)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -270,7 +270,7 @@
     },
     "testler": [],
     "galeri_örnekleri": [],
-    "durum": "yok"
+    "durum": "kısmi"
   },
   {
     "id": "093e6c5e50f83f472d8b",
@@ -32810,7 +32810,7 @@
     "ts_türü": "string[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (visualMap.categories)",
+    "rust_api": "src/model/gorsel_esleme.rs (GörselEşleme::kategoriler)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -32831,7 +32831,7 @@
     "ts_türü": "unknown",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (visualMap.categories)",
+    "rust_api": "src/model/gorsel_esleme.rs (GörselEşleme::kategoriler)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -32915,7 +32915,7 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (visualMap.dimension)",
+    "rust_api": "src/model/gorsel_esleme.rs (GörselEşleme::boyut)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -33608,7 +33608,7 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (visualMap.realtime)",
+    "rust_api": "src/model/gorsel_esleme.rs (GörselEşleme::gerçek_zamanlı)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {

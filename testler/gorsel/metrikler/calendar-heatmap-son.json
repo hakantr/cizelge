@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 367,
   "değişen_piksel_oranı": 0.0013592592592592593,
-  "ssim": 0.9993155082522578,
+  "ssim": 0.9993169364736817,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-heatmap.png",
     "gerçek": "testler/gorsel/gerçek/default/calendar-heatmap.png",

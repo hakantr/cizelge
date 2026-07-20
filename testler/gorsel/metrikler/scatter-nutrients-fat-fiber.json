@@ -1,0 +1,19 @@
+{
+  "id": "scatter-nutrients",
+  "senaryo": "etkileşim",
+  "kare": "fat-fiber",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1419,
+  "değişen_piksel_oranı": 0.005255555555555556,
+  "ssim": 0.997555114061636,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-nutrients-fat-fiber.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-nutrients-fat-fiber.png",
+    "fark": "testler/gorsel/fark/default/scatter-nutrients-fat-fiber.png"
+  }
+}

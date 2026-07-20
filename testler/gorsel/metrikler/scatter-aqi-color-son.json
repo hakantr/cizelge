@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 815,
   "değişen_piksel_oranı": 0.0030185185185185185,
-  "ssim": 0.9933093807374985,
+  "ssim": 0.9933274428958512,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aqi-color.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-aqi-color.png",
