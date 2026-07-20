@@ -76,6 +76,7 @@ pub fn gösterge_çiz(
         .iter()
         .zip(&görünen_adlar)
         .map(|(öğe, görünen_ad)| {
+            let simge = seçenek.simge.unwrap_or(öğe.simge);
             let öğe_kenar_taşması = öğe
                 .kenarlık
                 .map(|(kalınlık, _)| kalınlık / 2.0)
@@ -83,9 +84,16 @@ pub fn gösterge_çiz(
             // Çizgi simgesinin 2px vuruşu yerel kutunun solundan 1px
             // taşar. Legend yerleşimi zrender sınır kutusunu kullandığı için
             // bu taşma sonraki öğenin başlangıcına da katılır.
-            let çizgi_taşması = if seçenek.simge.unwrap_or(öğe.simge) == GöstergeSimgesi::Çizgi
-            {
+            let çizgi_taşması = if simge == GöstergeSimgesi::Çizgi {
                 öğe.çizgi_kalınlığı.unwrap_or(2.0).max(0.0) / 2.0
+            } else {
+                0.0
+            };
+            // `symbolKeepAspect`: daire, 25×14 item kutusunda 14×14 çizilir.
+            // boxLayout görünen sınırı kullandığından soldaki 5.5 px iç
+            // boşluk toplam öğe genişliğine katılmaz.
+            let daire_iç_boşluğu = if simge == GöstergeSimgesi::Daire {
+                (seçenek.simge_genişliği - seçenek.simge_yüksekliği).max(0.0) / 2.0
             } else {
                 0.0
             };
@@ -94,6 +102,7 @@ pub fn gösterge_çiz(
                 + SİMGE_METİN_ARASI
                 + çizici.yazı_ölç(görünen_ad, boyut).0
                 + kenar_taşması
+                - daire_iç_boşluğu
         })
         .collect();
 
@@ -458,6 +467,14 @@ fn öğe_çiz(
         0.0
     });
     let içerik_x = kutu.x + yatay_taşma;
+    let daire_iç_boşluğu = if simge == GöstergeSimgesi::Daire {
+        (seçenek.simge_genişliği - seçenek.simge_yüksekliği).max(0.0) / 2.0
+    } else {
+        0.0
+    };
+    // Dairede `kutu.x`, kırpılmış sembolün görünen soludur; zrender öğe
+    // koordinatını görünmeyen keep-aspect payı kadar sola taşır.
+    let simge_x = içerik_x - daire_iç_boşluğu;
     // Line legend'in sınır kutusu yerel y=0.4'ten başlasa da sembol ve
     // metin tabanının ortak merkezi item koordinatında daima y=7'dir.
     let orta_y = kutu.y + kenar_taşması + seçenek.simge_yüksekliği / 2.0;
@@ -475,7 +492,7 @@ fn öğe_çiz(
         GöstergeSimgesi::Daire => {
             let yarıçap = seçenek.simge_yüksekliği / 2.0;
             çizici.daire(
-                (kutu.x + seçenek.simge_genişliği / 2.0, orta_y),
+                (simge_x + seçenek.simge_genişliği / 2.0, orta_y),
                 yarıçap,
                 Some(&Dolgu::Düz(renk)),
                 None,
@@ -512,7 +529,7 @@ fn öğe_çiz(
     çizici.yazı(
         görünen_ad,
         (
-            içerik_x + seçenek.simge_genişliği + SİMGE_METİN_ARASI,
+            simge_x + seçenek.simge_genişliği + SİMGE_METİN_ARASI,
             orta_y,
         ),
         YatayHiza::Sol,

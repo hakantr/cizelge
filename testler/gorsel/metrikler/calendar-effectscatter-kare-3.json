@@ -1,0 +1,19 @@
+{
+  "id": "calendar-effectscatter",
+  "senaryo": "animasyon",
+  "kare": "kare-3",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1731,
+  "değişen_piksel_oranı": 0.006411111111111111,
+  "ssim": 0.9964570669949123,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-3.png",
+    "gerçek": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-3.png",
+    "fark": "testler/gorsel/fark/default/calendar-effectscatter-kare-3.png"
+  }
+}

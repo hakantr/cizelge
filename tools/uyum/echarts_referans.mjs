@@ -138,7 +138,7 @@ function html(id, kaynak, frame, state) {
   const zamanlayıcıyıBekle = id === 'dataset-link' || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
-  const hedefMs = id === 'scatter-effect' ? frame * 2000 : 0;
+  const hedefMs = id === 'scatter-effect' || id === 'calendar-effectscatter' ? frame * 2000 : 0;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body,#viewport{margin:0;width:700px;height:525px;overflow:hidden}
 </style><script src="/echarts.js"></script></head><body><div id="viewport"></div><script>

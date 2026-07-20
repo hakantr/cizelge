@@ -15854,7 +15854,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/calendar-effectscatter.ts",
     "kaynak_sha256": "0809a46576738ab0d4497381132be0543a1477bc2bb96b168331914f332231ac",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#calendar_effectscatter",
     "seriler": [
       "effectScatter",
       "scatter",
@@ -15872,7 +15872,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15884,15 +15884,136 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "tam_kanıtlı",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "kare-0",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 1429,
+          "değişen_piksel_oranı": 0.005292592592592593,
+          "ssim": 0.9966458197914766,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-0.png",
+            "sha256": "3268cc9700d63047e85e6df1c53828a68132f2b1f2798fa2899a6c723bd62a96"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-0.png",
+            "sha256": "d505bbe0bbd88fcb85f13c87246bd2d1b2402195a6ffb3d2f5167cfa804daa32"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-effectscatter-kare-0.png",
+            "sha256": "c74d9d0121935d3d20740c94bc4986327ca6d26627ab2baaac8b3a68627283ed"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-effectscatter-kare-0.json",
+            "sha256": "f27a77e379f57338bd568a4aa64e0b765dda8500ee183490f82a6a3fd4d08379"
+          }
+        },
+        {
+          "ad": "kare-1",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 1311,
+          "değişen_piksel_oranı": 0.004855555555555556,
+          "ssim": 0.9966240491440335,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-1.png",
+            "sha256": "101591d20953b91557b9d1bc28abe1249ab02277a2ae4080f32702148800a5d5"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-1.png",
+            "sha256": "7376282aa30fd06867609a02dcb634209e1f7d4aed1f12f79ee6c3d90c45fb76"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-effectscatter-kare-1.png",
+            "sha256": "3bd6174901c01078d7822b524c00fe57b1f6b6b150e31aecfc3d69e153accfa4"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-effectscatter-kare-1.json",
+            "sha256": "c3c857c913e8d2f7278e9ada8199bbe420cc5cb5f0c132ca926097708690cdbc"
+          }
+        },
+        {
+          "ad": "kare-2",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 1101,
+          "değişen_piksel_oranı": 0.004077777777777777,
+          "ssim": 0.9967410781241705,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-2.png",
+            "sha256": "06e301dcca9a3b5425b31839373aa4b9d1a70a6baf6ae3f55b468bf468df53d0"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-2.png",
+            "sha256": "bfc78295a15867cc9e9682372832ce580e93c89b946b194a95a3dda344e7e773"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-effectscatter-kare-2.png",
+            "sha256": "a46d1e4e526d6c6c1bbec1c8b24862bc7c5cffe486d318a64a2eeca2147cb17d"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-effectscatter-kare-2.json",
+            "sha256": "83ca7ff6a0a4d1c11e32252eb09be33dc03623b8b1828c99332f644ecdbab8f9"
+          }
+        },
+        {
+          "ad": "kare-3",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 1731,
+          "değişen_piksel_oranı": 0.006411111111111111,
+          "ssim": 0.9964570669949123,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-3.png",
+            "sha256": "6e35c718a0efe9d5536eb86015765539844a9f12f619b7df32d7885e111cab33"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-3.png",
+            "sha256": "31900968aae056919c0382dc5e4da59322e8578b493922aaf6b8a4984a008081"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-effectscatter-kare-3.png",
+            "sha256": "eddef996c71c59c5aa26cdf1e821c305bf29d34864195996846e0dc5eb1d042c"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-effectscatter-kare-3.json",
+            "sha256": "70b2595da7b47c899692b6ad5ded1fcfc80409a36150846833ba6b77c93702f0"
+          }
+        },
+        {
+          "ad": "kare-4",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 1214,
+          "değişen_piksel_oranı": 0.004496296296296296,
+          "ssim": 0.99671553545423,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-4.png",
+            "sha256": "9756cbfad5921711d106e3f1dfdcf83eb6a094cf92aeff96f35de2a1b4d06f4b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-4.png",
+            "sha256": "cd17e83cc41658799a851188f0ea66202f44e161996e6a22fcf1dbd2a407a7e0"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-effectscatter-kare-4.png",
+            "sha256": "1bfa50b1717719ed8de49ff5ba9011d34bb55efda8dc0eb5ab5a35023d51192e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-effectscatter-kare-4.json",
+            "sha256": "a0f857eb996b12704e3bfedbe4aa519dfc423d5966d21afc490f7447da4d02dc"
+          }
+        }
+      ]
     }
   },
   {

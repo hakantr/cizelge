@@ -2,7 +2,7 @@
 
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::TakvimYerleşimi;
-use crate::model::stil::{YazıDikeyHizası, YazıYatayHizası};
+use crate::model::stil::{Biçimleyici, YazıDikeyHizası, YazıYatayHizası};
 use crate::model::takvim::{
     TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
 };
@@ -419,11 +419,23 @@ fn yıl_etiketini_çiz(
     }
     let başlangıç = andan_takvime(seçenek.aralık.başlangıç_ms).yıl;
     let bitiş = andan_takvime(seçenek.aralık.bitiş_ms).yıl;
-    let metin = if bitiş > başlangıç {
+    let varsayılan_metin = if bitiş > başlangıç {
         format!("{başlangıç}-{bitiş}")
     } else {
         başlangıç.to_string()
     };
+    let metin = seçenek
+        .yıl_etiketi
+        .biçimleyici
+        .as_ref()
+        .map(|biçimleyici| match biçimleyici {
+            Biçimleyici::Şablon(şablon) => şablon
+                .replace("{start}", &başlangıç.to_string())
+                .replace("{end}", &bitiş.to_string())
+                .replace("{nameMap}", &varsayılan_metin),
+            Biçimleyici::İşlev(işlev) => işlev(başlangıç as f64, &varsayılan_metin),
+        })
+        .unwrap_or(varsayılan_metin);
     let konum = match seçenek.yıl_etiketi_konumu {
         TakvimYılEtiketiKonumu::Otomatik if seçenek.yön == TakvimYönü::Yatay => {
             TakvimYılEtiketiKonumu::Sol
@@ -550,5 +562,24 @@ mod testler {
         let kayıt = yüzey.döküm();
         assert!(kayıt.contains("dönüşümlü-yazı \"2017\""));
         assert!(kayıt.contains("m=[0.0 -1.0 1.0 0.0 50.0 130.0] Orta/Alt"));
+    }
+
+    #[test]
+    fn yıl_etiketi_echarts_start_end_ve_name_map_yer_tutucularını_çözer() {
+        let seçenek = TakvimKoordinatı::yıl(2017).yıl_etiketi(
+            crate::model::stil::Etiket::yeni()
+                .göster(true)
+                .biçimleyici("{start}  1st · {end} · {nameMap}"),
+        );
+        let yerleşim = TakvimYerleşimi::kur(&seçenek, (700.0, 525.0)).unwrap();
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        yıl_etiketini_çiz(&mut yüzey, &seçenek, &yerleşim);
+
+        let kayıt = yüzey.döküm();
+        assert!(
+            kayıt.contains("dönüşümlü-yazı \"2017  1st · 2017 · 2017\""),
+            "{kayıt}"
+        );
     }
 }

@@ -40,7 +40,9 @@ use crate::grafik::pasta::{
 use crate::grafik::radar::{
     radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
 };
-use crate::grafik::sacilim::{SaçılımNoktası, saçılım_noktaları, saçılım_çiz};
+use crate::grafik::sacilim::{
+    SaçılımNoktası, saçılım_noktaları, saçılım_çiz, takvim_saçılım_noktaları,
+};
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
 use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_koordinatında_çiz, takvim_çiz};
@@ -53,14 +55,14 @@ use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
 use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
-use crate::model::seri::{EksenBağı, Seri, ÖzelBağlam};
+use crate::model::seri::{EksenBağı, SaçılımSerisi, Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
 use crate::olcek::{
     AralıkÖlçeği, KategorikÖlçek, KırılmaEşleyici, LogÖlçeği, ZamanÖlçeği, Ölçek
 };
-use crate::renk::Dolgu;
+use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
 use crate::yerlesim::yigin::{YığınAralığı, yığın_aralıkları};
@@ -271,6 +273,73 @@ pub enum AraçTürü {
 /// Ad görünür mü (gösterge ile kapatılmamış mı)?
 fn ad_görünür(ad: Option<&str>, kapalı: &HashSet<String>) -> bool {
     ad.map(|a| !kapalı.contains(a)).unwrap_or(true)
+}
+
+type Bekleyenİpucu = (Option<String>, Vec<İpucuSatırı>, (f32, f32));
+
+/// Takvim koordinatındaki scatter/effectScatter serisini tek katmanda
+/// boyar. `zlevel > 0` serileri takvim üst katmanından sonra yeniden aynı
+/// yordamla çizilebildiği için isabet ve tooltip davranışı katmandan kopmaz.
+#[allow(clippy::too_many_arguments)]
+fn takvim_saçılım_serisini_çiz(
+    yüzey: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    seri_sırası: usize,
+    yerleşim: &TakvimYerleşimi,
+    seri_rengi: Renk,
+    ilerleme: f32,
+    zaman_sn: f32,
+    ipucu_seçeneği: Option<&İpucu>,
+    fare: Option<(f32, f32)>,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) -> Option<Bekleyenİpucu> {
+    let noktalar = takvim_saçılım_noktaları(seri, yerleşim);
+    let vurgu = match (ipucu_seçeneği, fare) {
+        (Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => noktalar
+            .iter()
+            .filter(|nokta| {
+                let dx = nokta.konum.0 - f.0;
+                let dy = nokta.konum.1 - f.1;
+                let yarıçap = (nokta.boyut / 2.0 + 3.0).max(8.0);
+                dx * dx + dy * dy <= yarıçap * yarıçap
+            })
+            .min_by(|a, b| {
+                let da = (a.konum.0 - f.0).powi(2) + (a.konum.1 - f.1).powi(2);
+                let db = (b.konum.0 - f.0).powi(2) + (b.konum.1 - f.1).powi(2);
+                da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+            })
+            .map(|nokta| nokta.sıra),
+        _ => None,
+    };
+    saçılım_çiz(
+        yüzey, seri, &noktalar, seri_rengi, ilerleme, zaman_sn, vurgu,
+    );
+    for nokta in &noktalar {
+        isabetler.push(İsabetBölgesi {
+            seri_sırası,
+            veri_sırası: nokta.sıra,
+            seri_adı: seri.ad.clone(),
+            ad: seri.veri.get(nokta.sıra).and_then(|öğe| öğe.ad.clone()),
+            değer: Some(nokta.y_değeri),
+            geometri: İsabetGeometrisi::Daire {
+                merkez: nokta.konum,
+                yarıçap: (nokta.boyut / 2.0 + 3.0).max(8.0),
+            },
+        });
+    }
+    let (Some(veri_sırası), Some(f)) = (vurgu, fare) else {
+        return None;
+    };
+    let nokta = noktalar.iter().find(|nokta| nokta.sıra == veri_sırası)?;
+    Some((
+        seri.ad.clone(),
+        vec![İpucuSatırı {
+            im_rengi: Some(seri_rengi),
+            ad: binlik_ayır(nokta.x_değeri),
+            değer: binlik_ayır(nokta.y_değeri),
+        }],
+        f,
+    ))
 }
 
 /// Gösterge öğelerini serilerden derler: kartezyen seriler ad, pasta
@@ -1957,8 +2026,7 @@ pub fn grafiği_boya(
 
     // 4) Kartezyen bölüm (çoklu ızgara/eksen).
     let kurulum = kartezyen_kur(yüzey, seçenekler, kapalı);
-    /// `(başlık, satırlar, konum)`.
-    type Bekleyenİpucu = (Option<String>, Vec<İpucuSatırı>, (f32, f32));
+    // `(başlık, satırlar, konum)`.
     let mut bekleyen_ipucu: Option<Bekleyenİpucu> = None;
 
     if let Some(kurulum) = &kurulum {
@@ -3337,6 +3405,31 @@ pub fn grafiği_boya(
                     }
                 }
             }
+            Seri::Saçılım(s) if s.takvim_sırası.is_some() => {
+                // Pozitif zlevel, CalendarView'ın z=2 üst katmanını da aşar;
+                // bu seriler aşağıdaki ikinci geçişte çizilir.
+                if s.z_seviyesi > 0 || !ad_görünür(seri.ad(), kapalı) {
+                    continue;
+                }
+                let takvim_sırası = s.takvim_sırası.unwrap_or(0);
+                let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+                    continue;
+                };
+                if let Some(ipucu) = takvim_saçılım_serisini_çiz(
+                    yüzey,
+                    s,
+                    i,
+                    yerleşim,
+                    seçenekler.seri_rengi(i),
+                    ilerleme,
+                    zaman_sn,
+                    ipucu_seçeneği.as_ref(),
+                    fare,
+                    &mut çıktı.isabetler,
+                ) {
+                    bekleyen_ipucu = Some(ipucu);
+                }
+            }
             Seri::Takvim(s) => {
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
@@ -3667,6 +3760,39 @@ pub fn grafiği_boya(
     for (takvim, yerleşim) in seçenekler.takvimler.iter().zip(&takvim_yerleşimleri) {
         if let Some(yerleşim) = yerleşim {
             takvim_üst_katmanı_çiz(yüzey, takvim, yerleşim);
+        }
+    }
+
+    // Ayrı zlevel tuvali kullanan takvim scatter/effectScatter serileri,
+    // CalendarView'ın ayırıcı ve etiketlerinden sonra boyanır. Resmî
+    // `calendar-effectscatter` örneğindeki zlevel=1 bunun görünür kanıtıdır.
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Saçılım(saçılım) = seri else {
+            continue;
+        };
+        if saçılım.z_seviyesi <= 0
+            || saçılım.takvim_sırası.is_none()
+            || !ad_görünür(seri.ad(), kapalı)
+        {
+            continue;
+        }
+        let takvim_sırası = saçılım.takvim_sırası.unwrap_or(0);
+        let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+            continue;
+        };
+        if let Some(ipucu) = takvim_saçılım_serisini_çiz(
+            yüzey,
+            saçılım,
+            seri_sırası,
+            yerleşim,
+            seçenekler.seri_rengi(seri_sırası),
+            ilerleme,
+            zaman_sn,
+            ipucu_seçeneği.as_ref(),
+            fare,
+            &mut çıktı.isabetler,
+        ) {
+            bekleyen_ipucu = Some(ipucu);
         }
     }
 

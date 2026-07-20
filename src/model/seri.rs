@@ -1159,10 +1159,18 @@ pub struct SaçılımSerisi {
     pub efekt_ölçeği: f32,
     /// Bir dalga turunun süresi, saniye (`rippleEffect.period`, öntanımlı 4).
     pub efekt_süresi_sn: f32,
+    /// Dalga yalnız vuruş olarak çizilir (`rippleEffect.brushType: 'stroke'`).
+    pub efekt_vuruşlu: bool,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Takvim koordinatına bağlıysa `calendarIndex`; `None`, kartezyen ya da
+    /// kutupsal saçılım demektir.
+    pub takvim_sırası: Option<usize>,
+    /// ZRender tuval katmanı (`zlevel`). Takvim bileşeninde pozitif değer,
+    /// seriyi ay/etiket üst katmanının da üzerine taşır.
+    pub z_seviyesi: i32,
     /// Veri kümesi eşlemesi: `(x boyutu, y boyutu)` (`encode.x/y`).
     pub eşleme: Option<(String, String)>,
     /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
@@ -1185,8 +1193,11 @@ impl Default for SaçılımSerisi {
             efektli: false,
             efekt_ölçeği: 2.5,
             efekt_süresi_sn: 4.0,
+            efekt_vuruşlu: false,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
+            takvim_sırası: None,
+            z_seviyesi: 0,
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
@@ -1222,12 +1233,30 @@ impl SaçılımSerisi {
     /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
     pub fn kutupsal(mut self, açık: bool) -> Self {
         self.kutupsal = açık;
+        if açık {
+            self.takvim_sırası = None;
+        }
+        self
+    }
+
+    /// Seriyi takvim koordinatına bağlar (`coordinateSystem: 'calendar'`,
+    /// `calendarIndex`).
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = Some(sıra);
+        self.kutupsal = false;
+        self
+    }
+
+    pub fn z_seviyesi(mut self, seviye: i32) -> Self {
+        self.z_seviyesi = seviye;
         self
     }
 
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
     pub fn eksenler(mut self, x: usize, y: usize) -> Self {
         self.eksen_bağı = EksenBağı { x, y };
+        self.takvim_sırası = None;
+        self.kutupsal = false;
         self
     }
 
@@ -1264,6 +1293,11 @@ impl SaçılımSerisi {
 
     pub fn efekt_süresi_sn(mut self, saniye: f32) -> Self {
         self.efekt_süresi_sn = saniye.max(0.1);
+        self
+    }
+
+    pub fn efekt_vuruşlu(mut self, vuruşlu: bool) -> Self {
+        self.efekt_vuruşlu = vuruşlu;
         self
     }
 
@@ -2233,7 +2267,7 @@ impl Seri {
         match self {
             Seri::Çizgi(s) => s.kutupsal,
             Seri::Sütun(s) => s.kutupsal,
-            Seri::Saçılım(s) => s.kutupsal,
+            Seri::Saçılım(s) => s.kutupsal && s.takvim_sırası.is_none(),
             Seri::Hatlar(s) => s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal,
             _ => false,
         }
@@ -2248,7 +2282,10 @@ impl Seri {
             self,
             Seri::Çizgi(_)
                 | Seri::Sütun(_)
-                | Seri::Saçılım(_)
+                | Seri::Saçılım(SaçılımSerisi {
+                    takvim_sırası: None,
+                    ..
+                })
                 | Seri::Mum(_)
                 | Seri::Kutu(_)
                 | Seri::Isı(_)

@@ -152,6 +152,7 @@ const YEREL_FIXTURE = Object.freeze({
   'calendar-simple': 'examples/uyum_fixture.rs#calendar_simple',
   'calendar-vertical': 'examples/uyum_fixture.rs#calendar_vertical',
   'calendar-horizontal': 'examples/uyum_fixture.rs#calendar_horizontal',
+  'calendar-effectscatter': 'examples/uyum_fixture.rs#calendar_effectscatter',
   'line-marker': 'examples/uyum_fixture.rs#line_marker',
   'grid-multiple': 'examples/uyum_fixture.rs#grid_multiple',
   'intraday-breaks-1': 'examples/uyum_fixture.rs#intraday_breaks_1',

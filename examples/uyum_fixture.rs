@@ -4010,6 +4010,135 @@ fn calendar_horizontal() -> GrafikSeçenekleri {
         .seri(TakvimSerisi::yeni(2015).takvim_sırası(2).veri(veri_2015))
 }
 
+fn calendar_effectscatter() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let tarih = |ay, gün| {
+        takvimden_ana(TakvimAnı {
+            yıl: 2016,
+            ay,
+            gün,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        })
+    };
+    let başlangıç = tarih(1, 1);
+    let bitiş_sonrası = takvimden_ana(TakvimAnı {
+        yıl: 2017,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut tohum = 0x5eed_1234;
+    let mut veri = Vec::with_capacity(366);
+    let mut zaman = başlangıç;
+    while zaman < bitiş_sonrası {
+        veri.push(VeriÖğesi::from([
+            zaman,
+            (kanıt_rastgele(&mut tohum) * 10_000.0).floor(),
+        ]));
+        zaman += 86_400_000.0;
+    }
+    // Resmî örnekte `Array.sort` aynı veri dizisini yerinde sıralar. Takvim
+    // koordinatı tarih değerini kullandığı için tam scatter geometrisi bundan
+    // etkilenmez; Top 12 için kararlı azalan bir kopya eşdeğer sonucu verir.
+    let mut en_yüksekler = veri.clone();
+    en_yüksekler.sort_by(|a, b| {
+        b.değer
+            .sayı()
+            .partial_cmp(&a.değer.sayı())
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
+    en_yüksekler.truncate(12);
+
+    let takvim = |üst, başlangıç, bitiş, dönem: &str| {
+        TakvimKoordinatı::yeni(TakvimAralığı::yeni(başlangıç, bitiş))
+            .üst(üst)
+            .sol("center")
+            .ayırıcı(ÇizgiStili::yeni().renk("#000").kalınlık(4.0))
+            .yıl_etiketi(
+                Etiket::yeni()
+                    .göster(true)
+                    .biçimleyici(format!("{{start}}  {dönem}"))
+                    .yazı(YazıStili::yeni().renk("#fff").boyut(20.0).kalın(true)),
+            )
+            .ay_etiketi(
+                Etiket::yeni()
+                    .göster(true)
+                    .yazı(YazıStili::yeni().renk("#aaa")),
+            )
+            .gün_etiketi(
+                Etiket::yeni()
+                    .göster(true)
+                    .yazı(YazıStili::yeni().renk("#aaa")),
+            )
+            .öğe_stili(
+                ÖğeStili::yeni()
+                    .renk("#323c48")
+                    .kenarlık_kalınlığı(1.0)
+                    .kenarlık_rengi("#111"),
+            )
+    };
+    let adım_serisi = |takvim_sırası| {
+        SaçılımSerisi::yeni()
+            .ad("Steps")
+            .takvim_sırası(takvim_sırası)
+            .sembol_boyutu_işlevi(|öğe| öğe.değer.sayı().unwrap_or_default() as f32 / 500.0)
+            .öğe_stili(ÖğeStili::yeni().renk("#ddb926"))
+            .veri(veri.clone())
+    };
+    let üst_serisi = |takvim_sırası| {
+        SaçılımSerisi::yeni()
+            .ad("Top 12")
+            .takvim_sırası(takvim_sırası)
+            .z_seviyesi(1)
+            .sembol_boyutu_işlevi(|öğe| öğe.değer.sayı().unwrap_or_default() as f32 / 500.0)
+            .efektli(true)
+            .efekt_vuruşlu(true)
+            .öğe_stili(
+                ÖğeStili::yeni()
+                    .renk("#f4e925")
+                    .gölge_bulanıklığı(10.0)
+                    .gölge_rengi("#333"),
+            )
+            .veri(en_yüksekler.clone())
+    };
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .arkaplan("#404a59")
+        .başlık(
+            Başlık::yeni()
+                .metin("Daily Step Count in 2016")
+                .alt_metin("Fake Data")
+                .üst(30)
+                .sol("center")
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().renk("#fff")),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .gösterge(
+            Gösterge::yeni()
+                .üst(30)
+                .sol(100.0)
+                .veri(["Steps", "Top 12"])
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().renk("#fff")),
+        )
+        .takvim(takvim(120, tarih(1, 1), tarih(6, 30), "1st"))
+        .takvim(takvim(340, tarih(7, 1), tarih(12, 31), "2nd"))
+        .seri(adım_serisi(0))
+        .seri(adım_serisi(1))
+        .seri(üst_serisi(1))
+        .seri(üst_serisi(0))
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4737,6 +4866,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-simple" => Ok(calendar_simple()),
         "calendar-vertical" => Ok(calendar_vertical()),
         "calendar-horizontal" => Ok(calendar_horizontal()),
+        "calendar-effectscatter" => Ok(calendar_effectscatter()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

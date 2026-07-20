@@ -1,10 +1,10 @@
 //! Saçılım serisi çizimi — `echarts/src/chart/scatter` karşılığı.
 
-use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, ÇizimYüzeyi};
-use crate::grafik::sembol_çiz;
-use crate::koordinat::Kartezyen2B;
+use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
+use crate::grafik::sembol_stilli_çiz;
+use crate::koordinat::{Kartezyen2B, TakvimYerleşimi};
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
-use crate::model::seri::SaçılımSerisi;
+use crate::model::seri::{SaçılımSerisi, Sembol};
 use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
 use crate::renk::Renk;
 use crate::tema;
@@ -79,6 +79,65 @@ pub fn saçılım_noktaları(
     sonuç
 }
 
+/// Takvim koordinatına bağlı scatter/effectScatter noktalarını üretir.
+/// Veri ECharts'taki gibi `[tarih, değer]` çiftidir; tarih hücre merkezine,
+/// ikinci boyut sembol boyutu/etiket/ipucu değerine akar.
+pub fn takvim_saçılım_noktaları(
+    seri: &SaçılımSerisi,
+    takvim: &TakvimYerleşimi,
+) -> Vec<SaçılımNoktası> {
+    seri.veri
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, öğe)| {
+            let tarih = öğe.değer.x()?;
+            let değer = öğe.değer.sayı()?;
+            Some(SaçılımNoktası {
+                sıra,
+                konum: takvim.veriden_noktaya(tarih)?,
+                boyut: seri.sembol_boyutu.çöz(öğe),
+                x_değeri: tarih,
+                y_değeri: değer,
+            })
+        })
+        .collect()
+}
+
+fn sembol_gölge_yolu(sembol: Sembol, merkez: (f32, f32), boyut: f32) -> Option<Yol> {
+    let yarıçap = boyut / 2.0;
+    if yarıçap <= 0.0 || sembol == Sembol::Yok {
+        return None;
+    }
+    let mut yol = Yol::yeni();
+    match sembol {
+        Sembol::Daire | Sembol::İçiBoşDaire => {
+            yol.taşı((merkez.0 + yarıçap, merkez.1));
+            yol.yay(yarıçap, false, true, (merkez.0 - yarıçap, merkez.1));
+            yol.yay(yarıçap, false, true, (merkez.0 + yarıçap, merkez.1));
+        }
+        Sembol::Kare => {
+            yol.taşı((merkez.0 - yarıçap, merkez.1 - yarıçap));
+            yol.çiz((merkez.0 + yarıçap, merkez.1 - yarıçap));
+            yol.çiz((merkez.0 + yarıçap, merkez.1 + yarıçap));
+            yol.çiz((merkez.0 - yarıçap, merkez.1 + yarıçap));
+        }
+        Sembol::Üçgen => {
+            yol.taşı((merkez.0, merkez.1 - yarıçap));
+            yol.çiz((merkez.0 + yarıçap, merkez.1 + yarıçap));
+            yol.çiz((merkez.0 - yarıçap, merkez.1 + yarıçap));
+        }
+        Sembol::Elmas => {
+            yol.taşı((merkez.0, merkez.1 - yarıçap));
+            yol.çiz((merkez.0 + yarıçap, merkez.1));
+            yol.çiz((merkez.0, merkez.1 + yarıçap));
+            yol.çiz((merkez.0 - yarıçap, merkez.1));
+        }
+        Sembol::Yok => return None,
+    }
+    yol.kapat();
+    Some(yol)
+}
+
 /// Saçılım serisini çizer; `vurgulu` ipucuyla öne çıkarılan noktadır.
 /// `zaman_sn`, sürekli dalga efekti için geçen süredir (saniye).
 #[allow(clippy::too_many_arguments)]
@@ -106,12 +165,35 @@ pub fn saçılım_çiz(
     for nokta in noktalar {
         let vurgulu_mu = vurgulu == Some(nokta.sıra);
         let boyut = nokta.boyut * ilerleme.clamp(0.0, 1.0) * if vurgulu_mu { 1.15 } else { 1.0 };
-        let renk = if vurgulu_mu {
-            renk.opaklık(1.0)
-        } else {
-            renk.opaklık(opaklık)
-        };
-        sembol_çiz(çizici, seri.sembol, nokta.konum, boyut, renk);
+        let nokta_opaklığı = if vurgulu_mu { 1.0 } else { opaklık };
+        if let Some(gölge_rengi) = seri.öğe_stili.gölge_rengi
+            && (seri.öğe_stili.gölge_bulanıklığı > 0.0
+                || seri.öğe_stili.gölge_kayması != (0.0, 0.0))
+            && let Some(yol) = sembol_gölge_yolu(seri.sembol, nokta.konum, boyut)
+        {
+            çizici.yol_gölgesi(
+                &yol,
+                gölge_rengi.opaklık(nokta_opaklığı),
+                seri.öğe_stili.gölge_bulanıklığı,
+                seri.öğe_stili.gölge_kayması,
+            );
+        }
+        let kenarlık = (seri.öğe_stili.kenarlık_kalınlığı > 0.0).then(|| {
+            (
+                seri.öğe_stili.kenarlık_kalınlığı,
+                seri.öğe_stili.kenarlık_rengi.unwrap_or(renk),
+            )
+        });
+        sembol_stilli_çiz(
+            çizici,
+            seri.sembol,
+            nokta.konum,
+            boyut,
+            renk,
+            seri.öğe_stili.renk.as_ref(),
+            kenarlık,
+            nokta_opaklığı,
+        );
     }
 
     // Dataset `encode.label` dâhil saçılım etiketleri. Öğe yaması seri
@@ -233,12 +315,16 @@ pub fn saçılım_çiz(
                 if alfa <= 0.001 {
                     continue;
                 }
-                çizici.daire(
-                    nokta.konum,
-                    yarıçap,
-                    Some(&crate::renk::Dolgu::Düz(renk.alfa_ile(alfa))),
-                    None,
-                );
+                if seri.efekt_vuruşlu {
+                    çizici.daire(nokta.konum, yarıçap, None, Some((1.0, renk.alfa_ile(alfa))));
+                } else {
+                    çizici.daire(
+                        nokta.konum,
+                        yarıçap,
+                        Some(&crate::renk::Dolgu::Düz(renk.alfa_ile(alfa))),
+                        None,
+                    );
+                }
             }
         }
     }
@@ -250,7 +336,9 @@ mod testler {
     use super::*;
     use crate::koordinat::{Dikdörtgen, ÇalışmaEkseni};
     use crate::model::eksen::{Eksen, EksenKonumu};
+    use crate::model::takvim::TakvimKoordinatı;
     use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, Ölçek};
+    use crate::yardimci::takvim::{TakvimAnı, takvimden_ana};
 
     fn değer_ekseni(kapsam: [f64; 2], piksel: [f32; 2], konum: EksenKonumu) -> ÇalışmaEkseni {
         ÇalışmaEkseni::yeni(
@@ -315,5 +403,32 @@ mod testler {
         assert_eq!(noktalar.len(), 1);
         assert!((noktalar[0].konum.0 - 100.0).abs() < 1e-5);
         assert!((noktalar[0].konum.1 - 50.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn takvim_scatter_tarihi_hücre_merkezine_ve_değeri_boyuta_aktarır() {
+        let tarih = takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay: 1,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let seri = SaçılımSerisi::yeni()
+            .takvim_sırası(0)
+            .sembol_boyutu_işlevi(|öğe| öğe.değer.sayı().unwrap_or(0.0) as f32 / 50.0)
+            .veri([VeriÖğesi::from([tarih, 500.0])]);
+        let yerleşim = TakvimYerleşimi::kur(&TakvimKoordinatı::yıl(2017), (700.0, 525.0))
+            .expect("takvim yerleşimi kurulmalı");
+
+        let noktalar = takvim_saçılım_noktaları(&seri, &yerleşim);
+
+        assert_eq!(noktalar.len(), 1);
+        assert_eq!(noktalar[0].konum, (90.0, 70.0));
+        assert_eq!(noktalar[0].boyut, 10.0);
+        assert_eq!(noktalar[0].x_değeri, tarih);
+        assert_eq!(noktalar[0].y_değeri, 500.0);
     }
 }
