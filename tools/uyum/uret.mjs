@@ -169,6 +169,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-aggregate-bar': 'examples/uyum_fixture.rs#scatter_aggregate_bar',
   'scatter-symbol-morph': 'examples/uyum_fixture.rs#scatter_symbol_morph',
   'scatter-large': 'examples/uyum_fixture.rs#scatter_large',
+  'scatter-nebula': 'examples/uyum_fixture.rs#scatter_nebula',
   'scatter-stream-visual': 'examples/uyum_fixture.rs#scatter_stream_visual',
   'scatter-painter-choice': 'examples/uyum_fixture.rs#scatter_painter_choice',
   'scatter-clustering': 'examples/uyum_fixture.rs#scatter_clustering',
@@ -516,6 +517,15 @@ function varsayılanlarıTopla(kaynakDosya) {
 }
 
 function rustKarşılığı(kök, özellik) {
+  if (kök.toLowerCase() === 'datazoom' && özellik === 'handleIcon') {
+    return { api: 'src/model/yakinlastirma.rs (VeriYakınlaştırma::tutamaç_simgesi)', durum: 'kısmi' };
+  }
+  if (kök.toLowerCase() === 'datazoom' && özellik === 'handleSize') {
+    return { api: 'src/model/yakinlastirma.rs (VeriYakınlaştırma::tutamaç_boyutu)', durum: 'kısmi' };
+  }
+  if (kök.toLowerCase() === 'datazoom' && özellik === 'showDataShadow') {
+    return { api: 'src/model/yakinlastirma.rs (VeriYakınlaştırma::veri_gölgesi)', durum: 'kısmi' };
+  }
   if (kök === 'series.large' && özellik === 'large') {
     return { api: 'src/model/seri.rs (SaçılımSerisi::büyük)', durum: 'kısmi' };
   }

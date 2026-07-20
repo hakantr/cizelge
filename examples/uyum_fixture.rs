@@ -5087,6 +5087,77 @@ fn scatter_large() -> GrafikSeçenekleri {
         )
 }
 
+const NEBULA_TUTAMAÇ_YOLU: &str = "path://M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z";
+
+fn scatter_nebula_verisini_oku() -> Result<Vec<f32>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/fake-nebula.bin");
+    let baytlar =
+        std::fs::read(&dosya).map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    if baytlar.len() % 8 != 0 {
+        return Err(format!(
+            "{} ikili x/y Float32 çiftlerinden oluşmuyor: {} bayt",
+            dosya.display(),
+            baytlar.len()
+        ));
+    }
+    let mut veri = Vec::with_capacity(baytlar.len() / 4);
+    for parça in baytlar.chunks_exact(4) {
+        let dizi: [u8; 4] = parça
+            .try_into()
+            .map_err(|_| format!("{} içinde eksik Float32 bulundu", dosya.display()))?;
+        veri.push(f32::from_le_bytes(dizi));
+    }
+    Ok(veri)
+}
+
+fn scatter_nebula() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_nebula_verisini_oku()?;
+    let tutamaç = Sembol::svg_yolu(NEBULA_TUTAMAÇ_YOLU)
+        .map_err(|hata| format!("nebula dataZoom tutamacı çözülemedi: {hata}"))?;
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .sol("center")
+                .metin("1,000,000 Points")
+                .alt_metin("Fake data")
+                // TitleView'in varsayılan 5 px padding'i, bileşenin otomatik
+                // üst yerleşim kutusuyla birleştiğinde metni ham tuvalde
+                // 30 px'e taşır; Cizelge'nin açık üst konumuna eşdeğer değer.
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni())
+        .araç_kutusu(AraçKutusu::yeni().sağ(20).veri_yakınlaştırma(true))
+        .ızgara(Izgara::yeni().sağ(70).alt(70))
+        .x_ekseni(Eksen::değer())
+        .y_ekseni(Eksen::değer())
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .veri_gölgesi(false)
+                .tutamaç_simgesi(tutamaç.clone())
+                .tutamaç_boyutu("80%"),
+        )
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().y_eksen_sırası(0))
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .y_eksen_sırası(0)
+                .veri_gölgesi(false)
+                .tutamaç_simgesi(tutamaç)
+                .tutamaç_boyutu("80%"),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .düz_veri(veri)
+                .sembol_boyutu(3.0)
+                .öğe_stili(ÖğeStili::yeni().opaklık(0.4))
+                .büyük(true)
+                .büyük_eşiği(500),
+        ))
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_kümeleme_verisi_testleri {
@@ -5298,6 +5369,55 @@ mod scatter_large_testleri {
                 Some((f64::from(beklenen.2), f64::from(beklenen.3)))
             );
         }
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_nebula_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_ikili_varlik_ve_cift_yonlu_datazoom_kayipsiz_tasinir() {
+        let seçenekler = scatter_nebula().expect("nebula fixture kurulmalı");
+        let Some(Seri::Saçılım(seri)) = seçenekler.seriler.first() else {
+            panic!("scatter serisi bekleniyordu");
+        };
+        let veri = seri.düz_veri.as_ref().expect("Float32 deposu olmalı");
+
+        assert_eq!(veri.len(), 1_000_000);
+        assert_eq!(
+            veri.xy(0),
+            Some((165.617_004_394_531_25, 168.591_003_417_968_75))
+        );
+        assert_eq!(
+            veri.xy(1),
+            Some((99.336_997_985_839_84, 100.050_003_051_757_81))
+        );
+        assert_eq!(
+            veri.xy(999_999),
+            Some((63.497_001_647_949_22, 59.645_000_457_763_67))
+        );
+        assert!(seri.büyük_etkin_mi());
+        assert_eq!(seri.büyük_eşiği, 500);
+
+        assert_eq!(seçenekler.veri_yakınlaştırmaları.len(), 4);
+        let yatay = seçenekler
+            .veri_yakınlaştırmaları
+            .get(1)
+            .expect("yatay sürgü");
+        let dikey = seçenekler
+            .veri_yakınlaştırmaları
+            .get(3)
+            .expect("dikey sürgü");
+        assert!(!yatay.veri_gölgesi);
+        assert!(!dikey.veri_gölgesi);
+        assert!(!yatay.dikey_mi());
+        assert!(dikey.dikey_mi());
+        assert_eq!(yatay.tutamaç_boyutu, Uzunluk::Yüzde(80.0));
+        assert_eq!(dikey.tutamaç_boyutu, Uzunluk::Yüzde(80.0));
+        assert!(matches!(yatay.tutamaç_simgesi, Some(Sembol::SvgYolu(_))));
+        assert!(matches!(dikey.tutamaç_simgesi, Some(Sembol::SvgYolu(_))));
     }
 }
 
@@ -8007,6 +8127,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-aggregate-bar" => scatter_aggregate_bar(durum),
         "scatter-symbol-morph" => scatter_symbol_morph(durum),
         "scatter-large" => Ok(scatter_large()),
+        "scatter-nebula" => scatter_nebula(),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),
