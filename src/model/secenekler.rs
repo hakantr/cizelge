@@ -786,6 +786,15 @@ impl GrafikSeçenekleri {
                     sıra: takvim_sırası,
                 });
             }
+            if let Seri::Grafo(grafo) = seri
+                && let Some(takvim_sırası) = grafo.takvim_sırası
+                && self.takvimler.get(takvim_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "calendar",
+                    sıra: takvim_sırası,
+                });
+            }
             if let Seri::Pasta(p) = seri {
                 let açılar = [
                     ("series.pie.startAngle", Some(p.başlangıç_açısı)),
@@ -1198,6 +1207,20 @@ mod testler {
     fn takvime_bağlı_scatter_eksik_calendar_index_değerini_reddeder() {
         let seçenekler = GrafikSeçenekleri::yeni()
             .seri(crate::model::seri::SaçılımSerisi::yeni().takvim_sırası(2));
+
+        assert!(matches!(
+            seçenekler.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "calendar",
+                sıra: 2
+            })
+        ));
+    }
+
+    #[test]
+    fn takvime_bağlı_graph_eksik_calendar_index_değerini_reddeder() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .seri(crate::model::seri::GrafoSerisi::yeni().takvim_sırası(2));
 
         assert!(matches!(
             seçenekler.doğrula(),

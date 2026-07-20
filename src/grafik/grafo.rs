@@ -6,8 +6,8 @@
 use std::collections::HashMap;
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
-use crate::koordinat::Dikdörtgen;
+use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
+use crate::koordinat::{Dikdörtgen, TakvimYerleşimi};
 use crate::model::seri::{GrafoSerisi, GrafoYerleşimi};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
@@ -23,6 +23,7 @@ pub fn grafo_çiz(
     ilerleme: f32,
     görünüm: (f32, f32, f32),
     kaymalar: &[(usize, f32, f32)],
+    takvim: Option<&TakvimYerleşimi>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
     if seri.düğümler.is_empty() {
@@ -51,20 +52,34 @@ pub fn grafo_çiz(
         })
         .collect();
 
-    // 1) Başlangıç: çember üzerinde eşit aralık (belirlenimci).
+    // 1) Takvim koordinatında ilk veri boyutu doğrudan tarih hücresine;
+    // görünüm koordinatında düğümler belirlenimci çembere yerleşir.
     let n = seri.düğümler.len();
-    let mut konumlar: Vec<(f32, f32)> = (0..n)
-        .map(|i| {
-            let açı = -std::f32::consts::FRAC_PI_2 + i as f32 * std::f32::consts::TAU / n as f32;
-            (
-                merkez.0 + yarıçap * 0.7 * açı.cos(),
-                merkez.1 + yarıçap * 0.7 * açı.sin(),
-            )
-        })
-        .collect();
+    let mut konumlar: Vec<(f32, f32)> = if let Some(takvim) = takvim {
+        seri.düğümler
+            .iter()
+            .map(|düğüm| {
+                düğüm
+                    .takvim_tarihi_ms
+                    .and_then(|tarih| takvim.veriden_noktaya(tarih))
+                    .unwrap_or((f32::NAN, f32::NAN))
+            })
+            .collect()
+    } else {
+        (0..n)
+            .map(|i| {
+                let açı =
+                    -std::f32::consts::FRAC_PI_2 + i as f32 * std::f32::consts::TAU / n as f32;
+                (
+                    merkez.0 + yarıçap * 0.7 * açı.cos(),
+                    merkez.1 + yarıçap * 0.7 * açı.sin(),
+                )
+            })
+            .collect()
+    };
 
     // 2) Kuvvet yerleşimi (Fruchterman–Reingold benzeri, sabit yineleme).
-    if seri.yerleşim == GrafoYerleşimi::Kuvvet && n > 1 {
+    if takvim.is_none() && seri.yerleşim == GrafoYerleşimi::Kuvvet && n > 1 {
         let k = (yarıçap * yarıçap * std::f32::consts::PI / n as f32)
             .sqrt()
             .max(8.0);
@@ -135,32 +150,81 @@ pub fn grafo_çiz(
     } else {
         1.0
     };
-    if ölçek != 1.0 || kayma_x != 0.0 || kayma_y != 0.0 {
+    if takvim.is_none() && (ölçek != 1.0 || kayma_x != 0.0 || kayma_y != 0.0) {
         for konum in konumlar.iter_mut() {
             konum.0 = merkez.0 + (konum.0 - merkez.0) * ölçek + kayma_x;
             konum.1 = merkez.1 + (konum.1 - merkez.1) * ölçek + kayma_y;
         }
     }
-    for (sıra, dx, dy) in kaymalar {
-        if let Some(konum) = konumlar.get_mut(*sıra) {
-            konum.0 += dx;
-            konum.1 += dy;
+    if takvim.is_none() {
+        for (sıra, dx, dy) in kaymalar {
+            if let Some(konum) = konumlar.get_mut(*sıra) {
+                konum.0 += dx;
+                konum.1 += dy;
+            }
         }
     }
 
     // 3) Bağlar.
     let opaklık = ilerleme.clamp(0.0, 1.0);
+    let çizgi_rengi = seri.çizgi_stili.renk.unwrap_or_else(tema::nötr_50);
+    let çizgi_opaklığı = opaklık * seri.çizgi_stili.opaklık.clamp(0.0, 1.0);
     for (i, j) in &bağ_sıraları {
         let (Some(a), Some(b)) = (konumlar.get(*i), konumlar.get(*j)) else {
             continue;
         };
+        if !a.0.is_finite() || !a.1.is_finite() || !b.0.is_finite() || !b.1.is_finite() {
+            continue;
+        }
+        let dx = b.0 - a.0;
+        let dy = b.1 - a.1;
+        let uzunluk = (dx * dx + dy * dy).sqrt();
+        if uzunluk <= f32::EPSILON {
+            continue;
+        }
+        let birim = (dx / uzunluk, dy / uzunluk);
+        let hedef_yarıçapı = seri
+            .düğümler
+            .get(*j)
+            .map(|düğüm| düğüm.boyut.max(0.0) * ölçek / 2.0)
+            .unwrap_or_default();
+        let bitiş = if seri.hedef_oku {
+            (
+                b.0 - birim.0 * hedef_yarıçapı,
+                b.1 - birim.1 * hedef_yarıçapı,
+            )
+        } else {
+            *b
+        };
         çizici.çizgi(
             *a,
-            *b,
-            1.0,
-            tema::nötr_30().opaklık(opaklık),
-            crate::model::stil::ÇizgiTürü::Düz,
+            bitiş,
+            seri.çizgi_stili.kalınlık,
+            çizgi_rengi.opaklık(çizgi_opaklığı),
+            seri.çizgi_stili.tür,
         );
+        if seri.hedef_oku && seri.hedef_oku_boyutu > 0.0 {
+            let boyut = seri.hedef_oku_boyutu;
+            let dik = (-birim.1, birim.0);
+            let taban = (bitiş.0 - birim.0 * boyut, bitiş.1 - birim.1 * boyut);
+            let çentik = (
+                bitiş.0 - birim.0 * boyut * 0.75,
+                bitiş.1 - birim.1 * boyut * 0.75,
+            );
+            let mut ok = Yol::yeni();
+            ok.taşı(bitiş);
+            ok.çiz((
+                taban.0 + dik.0 * boyut * 2.0 / 3.0,
+                taban.1 + dik.1 * boyut * 2.0 / 3.0,
+            ));
+            ok.çiz(çentik);
+            ok.çiz((
+                taban.0 - dik.0 * boyut * 2.0 / 3.0,
+                taban.1 - dik.1 * boyut * 2.0 / 3.0,
+            ));
+            ok.kapat();
+            çizici.yol_doldur(&ok, &Dolgu::Düz(çizgi_rengi.opaklık(çizgi_opaklığı)));
+        }
     }
 
     // 4) Düğümler + etiketler.
@@ -168,15 +232,42 @@ pub fn grafo_çiz(
         let Some(&konum) = konumlar.get(i) else {
             continue;
         };
+        if !konum.0.is_finite() || !konum.1.is_finite() {
+            continue;
+        }
         let boyut = düğüm.boyut.max(4.0) * opaklık.max(0.01) * ölçek;
-        let renk = palet(düğüm.kategori.unwrap_or(i));
-        çizici.daire(
-            konum,
-            boyut / 2.0,
-            Some(&Dolgu::Düz(renk)),
-            Some((1.5, Renk::BEYAZ)),
-        );
-        if düğüm.boyut >= seri.etiket_eşiği {
+        let palet_rengi = palet(düğüm.kategori.unwrap_or(i));
+        let dolgu = seri
+            .öğe_stili
+            .renk
+            .clone()
+            .unwrap_or(Dolgu::Düz(palet_rengi))
+            .opaklık(seri.öğe_stili.opaklık.unwrap_or(1.0));
+        if let Some(gölge_rengi) = seri.öğe_stili.gölge_rengi
+            && (seri.öğe_stili.gölge_bulanıklığı > 0.0
+                || seri.öğe_stili.gölge_kayması != (0.0, 0.0))
+        {
+            let yarıçap = boyut / 2.0;
+            let mut yol = Yol::yeni();
+            yol.taşı((konum.0 + yarıçap, konum.1));
+            yol.yay(yarıçap, false, true, (konum.0 - yarıçap, konum.1));
+            yol.yay(yarıçap, false, true, (konum.0 + yarıçap, konum.1));
+            yol.kapat();
+            çizici.yol_gölgesi(
+                &yol,
+                gölge_rengi.opaklık(opaklık),
+                seri.öğe_stili.gölge_bulanıklığı,
+                seri.öğe_stili.gölge_kayması,
+            );
+        }
+        let kenarlık = (seri.öğe_stili.kenarlık_kalınlığı > 0.0).then(|| {
+            (
+                seri.öğe_stili.kenarlık_kalınlığı,
+                seri.öğe_stili.kenarlık_rengi.unwrap_or(palet_rengi),
+            )
+        });
+        çizici.daire(konum, boyut / 2.0, Some(&dolgu), kenarlık);
+        if seri.etiket_göster && düğüm.boyut >= seri.etiket_eşiği {
             çizici.yazı(
                 &düğüm.ad,
                 (konum.0, konum.1 + boyut / 2.0 + 3.0),
@@ -198,5 +289,59 @@ pub fn grafo_çiz(
                 yarıçap: (boyut / 2.0 + 3.0).max(8.0),
             },
         });
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing)]
+mod testler {
+    use super::*;
+    use crate::cizim::KayıtYüzeyi;
+    use crate::model::seri::GrafoDüğümü;
+    use crate::model::takvim::TakvimKoordinatı;
+    use crate::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    #[test]
+    fn takvime_bağlı_düğüm_tarih_hücresinin_merkezine_yerleşir() {
+        let tarih = takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay: 1,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let seri = GrafoSerisi::yeni()
+            .takvim_sırası(0)
+            .düğümler([GrafoDüğümü::yeni("2017-01-01", 15.0)
+                .değerli(260.0)
+                .takvim_tarihi(tarih)]);
+        let yerleşim = TakvimYerleşimi::kur(&TakvimKoordinatı::yıl(2017), (700.0, 525.0))
+            .expect("takvim yerleşimi kurulmalı");
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let mut isabetler = Vec::new();
+
+        grafo_çiz(
+            &mut yüzey,
+            &seri,
+            0,
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+            &|_| Renk::SİYAH,
+            1.0,
+            (0.0, 0.0, 1.0),
+            &[],
+            Some(&yerleşim),
+            &mut isabetler,
+        );
+
+        assert_eq!(isabetler.len(), 1);
+        assert!(matches!(
+            isabetler[0].geometri,
+            İsabetGeometrisi::Daire {
+                merkez: (90.0, 70.0),
+                ..
+            }
+        ));
     }
 }

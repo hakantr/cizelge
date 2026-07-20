@@ -13,6 +13,7 @@ fn seçenekler() -> GrafikSeçenekleri {
         .seri(
             GrafoSerisi::yeni()
                 .ad("Ağ")
+                .etiket_göster(true)
                 .düğümler([
                     GrafoDüğümü::yeni("Çekirdek", 34.0).kategori(0),
                     GrafoDüğümü::yeni("Model", 22.0).kategori(1),

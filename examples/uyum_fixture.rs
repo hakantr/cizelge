@@ -4139,6 +4139,123 @@ fn calendar_effectscatter() -> GrafikSeçenekleri {
         .seri(üst_serisi(0))
 }
 
+fn calendar_graph() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let tarih = |ay, gün| {
+        takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay,
+            gün,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        })
+    };
+    let graph_verisi = [
+        (2, 1, 260.0),
+        (2, 4, 200.0),
+        (2, 9, 279.0),
+        (2, 13, 847.0),
+        (2, 18, 241.0),
+        (2, 23, 411.0),
+        (3, 14, 985.0),
+    ];
+    let düğümler = graph_verisi
+        .iter()
+        .map(|(ay, gün, değer)| {
+            let zaman = tarih(*ay, *gün);
+            GrafoDüğümü::yeni(format!("2017-{ay:02}-{gün:02}"), 15.0)
+                .değerli(*değer)
+                .takvim_tarihi(zaman)
+        })
+        .collect::<Vec<_>>();
+    let bağlar = düğümler
+        .windows(2)
+        .map(|çift| (çift[0].ad.clone(), çift[1].ad.clone()))
+        .collect::<Vec<_>>();
+
+    let başlangıç = tarih(1, 1);
+    let bitiş_sonrası = takvimden_ana(TakvimAnı {
+        yıl: 2018,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut tohum = 0x5eed_1234;
+    let mut ısı_verisi = Vec::with_capacity(365);
+    let mut zaman = başlangıç;
+    while zaman < bitiş_sonrası {
+        ısı_verisi.push(VeriÖğesi::from([
+            zaman,
+            (kanıt_rastgele(&mut tohum) * 1000.0).floor(),
+        ]));
+        zaman += 86_400_000.0;
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .ipucu(İpucu::yeni())
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(1000.0)
+                .bölme_sayısı(5)
+                .renkler(["#5291FF", "#C7DBFF"])
+                .seri_sırası(1)
+                .yön(Yön::Yatay)
+                .sol("center")
+                .alt(20),
+        )
+        .takvim(
+            TakvimKoordinatı::yeni(TakvimAralığı::yeni(tarih(2, 1), tarih(3, 31)))
+                .üst("middle")
+                .sol("center")
+                .yön(TakvimYönü::Dikey)
+                .ilk_gün(1)
+                .hücre_boyutu(Some(40.0), Some(40.0))
+                .yıl_etiketi(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().boyut(30.0).kalın(true)),
+                )
+                .yıl_etiketi_kenar_boşluğu(50.0)
+                .ay_etiketi(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().boyut(20.0).renk("#999")),
+                )
+                .ay_etiketi_kenar_boşluğu(15.0),
+        )
+        .seri(
+            GrafoSerisi::yeni()
+                .takvim_sırası(0)
+                .z(20)
+                .hedef_oku(true)
+                .öğe_stili(
+                    ÖğeStili::yeni()
+                        .renk("yellow")
+                        .gölge_bulanıklığı(9.0)
+                        .gölge_kayması(1.5, 3.0)
+                        .gölge_rengi("#555"),
+                )
+                .çizgi_stili(
+                    ÇizgiStili::yeni()
+                        .renk("#D10E00")
+                        .kalınlık(1.0)
+                        .opaklık(1.0),
+                )
+                .düğümler(düğümler)
+                .bağlar(bağlar),
+        )
+        .seri(TakvimSerisi::yeni(2017).takvim_sırası(0).veri(ısı_verisi))
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4867,6 +4984,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-vertical" => Ok(calendar_vertical()),
         "calendar-horizontal" => Ok(calendar_horizontal()),
         "calendar-effectscatter" => Ok(calendar_effectscatter()),
+        "calendar-graph" => Ok(calendar_graph()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

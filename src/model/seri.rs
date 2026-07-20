@@ -1887,6 +1887,8 @@ impl SankeySerisi {
 pub struct GrafoDüğümü {
     pub ad: String,
     pub değer: Option<f64>,
+    /// Takvim koordinatındaki tarih (`data[i][0]`, Unix milisaniyesi).
+    pub takvim_tarihi_ms: Option<f64>,
     /// Sembol çapı (`symbolSize`).
     pub boyut: f32,
     /// Renk grubu (palet sırası); `None` düğüm sırasını kullanır.
@@ -1898,6 +1900,7 @@ impl GrafoDüğümü {
         GrafoDüğümü {
             ad: ad.into(),
             değer: None,
+            takvim_tarihi_ms: None,
             boyut,
             kategori: None,
         }
@@ -1910,6 +1913,12 @@ impl GrafoDüğümü {
 
     pub fn değerli(mut self, değer: f64) -> Self {
         self.değer = Some(değer);
+        self
+    }
+
+    /// Düğümü takvim koordinatındaki bir güne bağlar.
+    pub fn takvim_tarihi(mut self, tarih_ms: f64) -> Self {
+        self.takvim_tarihi_ms = Some(tarih_ms);
         self
     }
 }
@@ -1940,6 +1949,19 @@ pub struct GrafoSerisi {
     pub kenar_uzunluğu: f32,
     /// Bu çaptan büyük düğümlerde ad etiketi gösterilir.
     pub etiket_eşiği: f32,
+    /// Normal durumda etiket çizilir mi (`label.show`).
+    pub etiket_göster: bool,
+    /// Takvim koordinatına bağlıysa `calendarIndex`.
+    pub takvim_sırası: Option<usize>,
+    /// Seri çizim sırası (`z`); CalendarView öntanımlı z=2'dir.
+    pub z: i32,
+    /// Düğüm `itemStyle`ı.
+    pub öğe_stili: ÖğeStili,
+    /// Kenar `lineStyle`ı.
+    pub çizgi_stili: ÇizgiStili,
+    /// Hedef uçta öntanımlı 10 px ok (`edgeSymbol: ['none', 'arrow']`).
+    pub hedef_oku: bool,
+    pub hedef_oku_boyutu: f32,
 }
 
 impl Default for GrafoSerisi {
@@ -1954,6 +1976,13 @@ impl Default for GrafoSerisi {
             itme: 1.0,
             kenar_uzunluğu: 1.0,
             etiket_eşiği: 12.0,
+            etiket_göster: false,
+            takvim_sırası: None,
+            z: 2,
+            öğe_stili: ÖğeStili::default(),
+            çizgi_stili: ÇizgiStili::yeni().kalınlık(1.0).opaklık(0.5),
+            hedef_oku: false,
+            hedef_oku_boyutu: 10.0,
         }
     }
 }
@@ -1983,6 +2012,46 @@ impl GrafoSerisi {
 
     pub fn yerleşim(mut self, yerleşim: GrafoYerleşimi) -> Self {
         self.yerleşim = yerleşim;
+        self
+    }
+
+    pub fn etiket_göster(mut self, göster: bool) -> Self {
+        self.etiket_göster = göster;
+        self
+    }
+
+    pub fn etiket_eşiği(mut self, eşik: f32) -> Self {
+        self.etiket_eşiği = eşik.max(0.0);
+        self
+    }
+
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = Some(sıra);
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.çizgi_stili = stil;
+        self
+    }
+
+    pub fn hedef_oku(mut self, açık: bool) -> Self {
+        self.hedef_oku = açık;
+        self
+    }
+
+    pub fn hedef_oku_boyutu(mut self, boyut: f32) -> Self {
+        self.hedef_oku_boyutu = boyut.max(0.0);
         self
     }
 }

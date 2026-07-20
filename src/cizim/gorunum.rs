@@ -55,7 +55,7 @@ use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
 use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
-use crate::model::seri::{EksenBağı, SaçılımSerisi, Seri, ÖzelBağlam};
+use crate::model::seri::{EksenBağı, GrafoSerisi, SaçılımSerisi, Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
@@ -337,6 +337,57 @@ fn takvim_saçılım_serisini_çiz(
             im_rengi: Some(seri_rengi),
             ad: binlik_ayır(nokta.x_değeri),
             değer: binlik_ayır(nokta.y_değeri),
+        }],
+        f,
+    ))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn grafo_serisini_çiz(
+    yüzey: &mut dyn ÇizimYüzeyi,
+    seri: &GrafoSerisi,
+    seri_sırası: usize,
+    tuval: Dikdörtgen,
+    seçenekler: &GrafikSeçenekleri,
+    ilerleme: f32,
+    görünüm: (f32, f32, f32),
+    kaymalar: &[(usize, f32, f32)],
+    takvim: Option<&TakvimYerleşimi>,
+    ipucu_seçeneği: Option<&İpucu>,
+    fare: Option<(f32, f32)>,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) -> Option<Bekleyenİpucu> {
+    let önce = isabetler.len();
+    let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+    grafo_çiz(
+        yüzey,
+        seri,
+        seri_sırası,
+        tuval,
+        &palet,
+        ilerleme,
+        görünüm,
+        kaymalar,
+        takvim,
+        isabetler,
+    );
+    let (Some(ipucu), Some(f)) = (ipucu_seçeneği, fare) else {
+        return None;
+    };
+    if ipucu.tetikleme == Tetikleme::Kapalı {
+        return None;
+    }
+    let b = isabetler
+        .iter()
+        .skip(önce)
+        .rev()
+        .find(|b| b.geometri.içeriyor_mu(f))?;
+    Some((
+        seri.ad.clone(),
+        vec![İpucuSatırı {
+            im_rengi: None,
+            ad: b.ad.clone().unwrap_or_default(),
+            değer: b.değer.map(binlik_ayır).unwrap_or_default(),
         }],
         f,
     ))
@@ -3565,37 +3616,33 @@ pub fn grafiği_boya(
                 );
             }
             Seri::Grafo(g) => {
-                if !ad_görünür(seri.ad(), kapalı) {
+                // Takvim bileşeninden daha yüksek z değerleri aşağıdaki üst
+                // katman geçişinde çizilir.
+                if (g.takvim_sırası.is_some() && g.z > 2) || !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
-                let önce = çıktı.isabetler.len();
-                let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
-                grafo_çiz(
+                let takvim = g
+                    .takvim_sırası
+                    .and_then(|sıra| takvim_yerleşimleri.get(sıra))
+                    .and_then(Option::as_ref);
+                if g.takvim_sırası.is_some() && takvim.is_none() {
+                    continue;
+                }
+                if let Some(ipucu) = grafo_serisini_çiz(
                     yüzey,
                     g,
                     i,
                     tüm_alan,
-                    &palet,
+                    seçenekler,
                     ilerleme,
                     girdi.grafo_görünümü,
                     &girdi.grafo_kaymaları,
+                    takvim,
+                    ipucu_seçeneği.as_ref(),
+                    fare,
                     &mut çıktı.isabetler,
-                );
-                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
-                    && ipucu.tetikleme != Tetikleme::Kapalı
-                    && let Some(b) = çıktı
-                        .isabetler
-                        .iter()
-                        .skip(önce)
-                        .rev()
-                        .find(|b| b.geometri.içeriyor_mu(f))
-                {
-                    let satır = İpucuSatırı {
-                        im_rengi: None,
-                        ad: b.ad.clone().unwrap_or_default(),
-                        değer: b.değer.map(binlik_ayır).unwrap_or_default(),
-                    };
-                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                ) {
+                    bekleyen_ipucu = Some(ipucu);
                 }
             }
             Seri::Sankey(s) => {
@@ -3760,6 +3807,39 @@ pub fn grafiği_boya(
     for (takvim, yerleşim) in seçenekler.takvimler.iter().zip(&takvim_yerleşimleri) {
         if let Some(yerleşim) = yerleşim {
             takvim_üst_katmanı_çiz(yüzey, takvim, yerleşim);
+        }
+    }
+
+    // CalendarView z=2'den yüksek takvim graph serileri ayırıcıların
+    // üstündedir (`calendar-graph` resmî örneğinde z=20).
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Grafo(grafo) = seri else {
+            continue;
+        };
+        if grafo.z <= 2 || !ad_görünür(seri.ad(), kapalı) {
+            continue;
+        }
+        let Some(takvim_sırası) = grafo.takvim_sırası else {
+            continue;
+        };
+        let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+            continue;
+        };
+        if let Some(ipucu) = grafo_serisini_çiz(
+            yüzey,
+            grafo,
+            seri_sırası,
+            tüm_alan,
+            seçenekler,
+            ilerleme,
+            girdi.grafo_görünümü,
+            &girdi.grafo_kaymaları,
+            Some(yerleşim),
+            ipucu_seçeneği.as_ref(),
+            fare,
+            &mut çıktı.isabetler,
+        ) {
+            bekleyen_ipucu = Some(ipucu);
         }
     }
 
