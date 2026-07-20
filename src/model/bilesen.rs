@@ -278,6 +278,24 @@ impl Gösterge {
         self
     }
 
+    /// Legend simgesinin genişliğini ayarlar (`itemWidth`).
+    pub fn simge_genişliği(mut self, genişlik: f32) -> Self {
+        self.simge_genişliği = genişlik.max(0.0);
+        self
+    }
+
+    /// Legend simgesinin yüksekliğini ayarlar (`itemHeight`).
+    pub fn simge_yüksekliği(mut self, yükseklik: f32) -> Self {
+        self.simge_yüksekliği = yükseklik.max(0.0);
+        self
+    }
+
+    /// Legend öğeleri arasındaki boşluğu ayarlar (`itemGap`).
+    pub fn öğe_boşluğu(mut self, boşluk: f32) -> Self {
+        self.öğe_boşluğu = boşluk.max(0.0);
+        self
+    }
+
     pub fn yazı(mut self, yazı: YazıStili) -> Self {
         self.yazı = yazı;
         self
