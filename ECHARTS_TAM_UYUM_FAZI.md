@@ -682,6 +682,70 @@ Gerçekleşen dilim — `candlestick-sh` (2026-07-20):
   kapıları ilgili ileri fazlarda kapanmadan kart nihai `tam_kanıtlı`
   sayılmaz.
 
+Gerçekleşen dilim — `candlestick-brush` (2026-07-20):
+
+- Resmî örnek ve veri akışı
+  `../echarts-examples/public/examples/ts/candlestick-brush.ts` ile
+  `../echarts-examples/public/data/asset/data/stock-DJI.json` dosyalarından
+  alındı. Brush model/görsel semantiği
+  `../echarts/src/component/brush/BrushModel.ts`, `selector.ts` ve
+  `visualEncoding.ts`; mumun görsel kanalları
+  `../echarts/src/chart/candlestick/candlestickVisual.ts`,
+  `CandlestickSeries.ts` ve `CandlestickView.ts`; hacim renk eşlemesi
+  `../echarts/src/component/visualMap/visualEncoding.ts` üzerinden sabit
+  kaynak commitlerinde doğrulandı.
+- DJI varlığındaki 3.141 `[date, open, close, lowest, highest, volume]`
+  satırı azaltılmadan kullanılır. `2004-01-02` ve `2016-06-22` uçları,
+  brush aralığının `2016-06-02` / `2016-06-20` ham sıraları ve hacim işaret
+  boyutu fixture testinde kilitlidir. MA5/10/20/30 hesapları JavaScript
+  örneğindeki ilk `dayCount` değeri boş bırakma, kapanışları aynı sırada
+  toplama ve üç basamağa yuvarlama davranışını korur.
+- Beş öğeli legend, eksen tetiklemeli çapraz tooltip/pointer bağlantısı,
+  yalnız x yönlü dataZoom ve `lineX`/`clear` brush araçları, iki grid, iki
+  kategori ve iki ölçekli değer ekseni, bağlı `inside` + `slider` dataZoom
+  (`%98..%100`), bir mum, dört yumuşak MA çizgisi ve hacim sütunu aynı
+  option anlamlarıyla kuruldu. Gizli parça tabanlı visualMap, hacmin
+  adlandırılmış `sign` boyutunu kırmızı/yeşil renge eşler.
+- Brush modeli `rect`, `polygon`, `lineX` ve `lineY` alanlarını; sayısal ya
+  da kategori `coordRange` uçlarını; `xAxisIndex`, `yAxisIndex`,
+  `seriesIndex`, `transformable`, çoklu seçim, resmî `brushStyle`,
+  `inBrush.colorAlpha`, `outOfBrush.colorAlpha` ve `brushLink` için
+  `none`/`all`/seri listesi biçimlerini taşır. Bu alanların Rust dışa
+  aktarımları ve akıcı kurucuları tek bir ECharts tarzı seçenek ağacında
+  kullanılabilir.
+- `dispatchAction({type: 'brush', areas})` kayıt defterine gerçek bir action
+  olarak eklendi. İç içe action yükü doğrulanarak tipli seçim alanlarına
+  çevrilir; eksik alan listesi mevcut seçimi korur, brush bileşeni yoksa
+  güvenli no-op olur ve sessiz olmayan güncelleme olay/yeniden çizim üretir.
+  Fixture, resmî örnekte `setOption(..., true)` sonrasında gönderilen tarih
+  aralığını bu çalışma zamanı yolundan gerçekten yeniden oynatır.
+- Ortak renderer programatik alanları veri koordinatından ilgili grid
+  pikseline çözer, alan birleşimini hesaplar ve seçili ham veri sıralarını
+  `brushLink` kapsamındaki mum, çizgi ve hacim serilerine yayar. İç/dış
+  maskeler öğe opaklığına dönüşür. ECharts `drawType` kuralına uygun olarak
+  mumda yalnız gövde dolgusu `colorAlpha` ile solar; fitil ve kenarlık opak
+  kalır. Sütun visualMap'i adlandırılmış boyutu okur ve dataZoom sonrasında
+  eşik altında kalan mum sayısı large yerine normal öğe yolunu seçer.
+- Legend için ECharts `itemWidth`, `itemHeight` ve `itemGap` karşılıkları
+  akıcı API'ye tamamlandı. Kanıt fixture'ındaki yalnız raster geometriye ait
+  kesirli simge ölçüleri, Cizelge SVG çıktısının ECharts Canvas çıktısıyla
+  600×450 küçültmede aynı piksel sınırlarına oturmasını sağlar; modelin
+  resmî öntanımlıları değiştirilmedi.
+- Birim kapısı 279/279, fixture kapısı 34/34 geçti;
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Yeni kart dahil tam görsel
+  regresyon 171/171 kareyi geçirdi ve önceden kilitli hiçbir resmî referans
+  yenilenmedi.
+- Yeni resmî referans iki ardışık üretimde piksel düzeyinde kararlıdır.
+  600×450 Cizelge sonucu 1.390 değişen piksel, `%0,5148` fark ve `0,990133`
+  SSIM ile `%1 / 0,99` kabul eşiğini geçti. Referans, gerçek, fark ve metrik
+  dosyaları ECharts tarzı galeri manifestine SHA-256 değerleriyle bağlandı.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 146/332, yani `%44,0`
+  oldu. Serbest pointer ile alan çizme/dönüştürme, animasyon,
+  erişilebilirlik ve ölçümlü performans kapıları ilgili ileri fazlarda
+  kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
