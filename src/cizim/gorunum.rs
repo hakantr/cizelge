@@ -3599,12 +3599,11 @@ pub fn grafiği_boya(
                             Seri::Saçılım(saçılım) if saçılım.düz_veri.is_some() => {
                                 saçılım.xy(sıra)
                             }
-                            // Candlestick/boxplot veri deposunda karşı
-                            // eksenin öntanımlı boyutu ilk çoklu değerdir
-                            // (`open` / `min`). SliderZoomView gölge serisi
-                            // için `data.mapDimension(otherAxis.dim)` ile
-                            // tam olarak bu boyutu seçer.
-                            Seri::Mum(_) | Seri::Kutu(_) => gölge_serisi
+                            // CandlestickSeries.getShadowDim() açıkça
+                            // `open` döndürür. Boxplot bu özel yolu taşımaz;
+                            // SliderZoomView'da genel mapDimension sonucu
+                            // geçerli olduğunda ayrıca ele alınmalıdır.
+                            Seri::Mum(_) => gölge_serisi
                                 .veri()
                                 .get(sıra)
                                 .and_then(|öğe| öğe.değer.dizi())
