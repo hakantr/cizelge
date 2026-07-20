@@ -60,20 +60,20 @@ pub(crate) fn saçılım_xy(değer: &VeriDeğeri, sıra: usize) -> Option<(f64, 
 
 #[derive(Clone, Copy)]
 struct TitremeÖğesi {
-    sabit: f32,
-    kayan: f32,
-    yarıçap: f32,
+    sabit: f64,
+    kayan: f64,
+    yarıçap: f64,
 }
 
 fn titreme_yönünde_yerleştir(
     öğeler: &[TitremeÖğesi],
-    sabit: f32,
-    kayan: f32,
-    yarıçap: f32,
-    titreme: f32,
-    boşluk: f32,
-    yön: f32,
-) -> f32 {
+    sabit: f64,
+    kayan: f64,
+    yarıçap: f64,
+    titreme: f64,
+    boşluk: f64,
+    yön: f64,
+) -> f64 {
     let mut yeni = kayan;
     let mut sıra = 0usize;
     while sıra < öğeler.len() {
@@ -85,7 +85,7 @@ fn titreme_yönünde_yerleştir(
             let kök = (toplam_yarıçap * toplam_yarıçap - dx * dx).max(0.0).sqrt();
             let gereken = öğe.kayan + kök * yön;
             if (gereken - kayan).abs() > titreme / 2.0 {
-                return f32::MAX;
+                return f64::MAX;
             }
             if (yön > 0.0 && gereken > yeni) || (yön < 0.0 && gereken < yeni) {
                 yeni = gereken;
@@ -98,11 +98,11 @@ fn titreme_yönünde_yerleştir(
     yeni
 }
 
-fn titreme_rastgelesi(durum: &mut u32) -> f32 {
+fn titreme_rastgelesi(durum: &mut u32) -> f64 {
     *durum = durum.wrapping_add(0x6d2b_79f5);
     let mut t = (*durum ^ (*durum >> 15)).wrapping_mul(1 | *durum);
     t = t.wrapping_add((t ^ (t >> 7)).wrapping_mul(61 | t)) ^ t;
-    (t ^ (t >> 14)) as f32 / 4_294_967_296.0
+    (t ^ (t >> 14)) as f64 / 4_294_967_296.0
 }
 
 fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B) {
@@ -115,18 +115,18 @@ fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B
         return;
     };
     let titreme = eksen.seçenek.titreme;
-    let bant = eksen.bant_genişliği();
+    let bant = eksen.bant_genişliği() as f64;
     let mut yerleşenler = Vec::with_capacity(noktalar.len());
     // Görsel kanıt hattı Math.random'ı aynı Mulberry32 tohumu ile sabitler;
     // çekirdekteki sabit akış, yeniden boyamalarda nokta sıçramasını önler.
     let mut rastgele = eksen.seçenek.titreme_tohumu;
     for nokta in noktalar {
         let (sabit, kayan) = if x_mi {
-            (nokta.konum.1, nokta.konum.0)
+            (nokta.konum.1 as f64, nokta.konum.0 as f64)
         } else {
-            (nokta.konum.0, nokta.konum.1)
+            (nokta.konum.0 as f64, nokta.konum.1 as f64)
         };
-        let yarıçap = nokta.boyut / 2.0;
+        let yarıçap = nokta.boyut as f64 / 2.0;
         let etkin_titreme = titreme.min((bant - yarıçap * 2.0).max(0.0));
         let mut rastgele_yer = || kayan + (titreme_rastgelesi(&mut rastgele) - 0.5) * etkin_titreme;
         let yeni = if eksen.seçenek.titreme_örtüşmesi {
@@ -169,9 +169,9 @@ fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B
             }
         };
         if x_mi {
-            nokta.konum.0 = yeni;
+            nokta.konum.0 = yeni as f32;
         } else {
-            nokta.konum.1 = yeni;
+            nokta.konum.1 = yeni as f32;
         }
     }
 }

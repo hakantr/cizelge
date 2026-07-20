@@ -541,12 +541,12 @@ pub struct Eksen {
     pub kenar_boşluğu: Option<bool>,
     /// Scatter noktalarını kategori merkezinin çevresine piksel cinsinden
     /// dağıtır (`jitter`, ECharts 6).
-    pub titreme: f32,
+    pub titreme: f64,
     /// `jitterOverlap`: `true` rastgele dağıtır; `false` mümkün olduğunda
     /// sembolleri çakışmadan yerleştirir.
     pub titreme_örtüşmesi: bool,
     /// Örtüşmesiz yerleşimde semboller arasındaki ek piksel payı.
-    pub titreme_boşluğu: f32,
+    pub titreme_boşluğu: f64,
     /// Yeniden boyamada kararlı jitter için sözde-rastgele akış tohumu.
     /// ECharts tarayıcıda `Math.random` kullanır; açık tohum SSR ve görsel
     /// doğrulamada aynı akışın yeniden üretilmesini sağlar.
@@ -702,7 +702,7 @@ impl Eksen {
         self
     }
 
-    pub fn titreme(mut self, piksel: f32) -> Self {
+    pub fn titreme(mut self, piksel: f64) -> Self {
         self.titreme = piksel.max(0.0);
         self
     }
@@ -712,7 +712,7 @@ impl Eksen {
         self
     }
 
-    pub fn titreme_boşluğu(mut self, piksel: f32) -> Self {
+    pub fn titreme_boşluğu(mut self, piksel: f64) -> Self {
         self.titreme_boşluğu = piksel.max(0.0);
         self
     }

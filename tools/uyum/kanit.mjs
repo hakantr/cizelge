@@ -115,6 +115,11 @@ const SENARYOLAR = [
   { id: 'scatter-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-anscombe-quartet', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-jitter', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'doc-example/scatter-jitter-avoidOverlap',
+    tür: 'statik',
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'scatter-punchCard', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'candlestick-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
@@ -188,6 +193,10 @@ function dizin(d) {
   fs.mkdirSync(d, { recursive: true });
 }
 
+function dosyaKimliği(id) {
+  return id.replaceAll('/', '__');
+}
+
 function pngOku(dosya) {
   return PNG.sync.read(fs.readFileSync(dosya));
 }
@@ -202,9 +211,10 @@ function aynıPiksellerMi(aDosyası, bDosyası) {
 
 async function referansıYenile(senaryo, kare, referans, sonek) {
   const adaylar = [];
+  const dosyaId = dosyaKimliği(senaryo.id);
   for (const geçiş of [1, 2]) {
-    const ham = path.join(REFERANS, `.ham-${senaryo.id}${sonek}-${geçiş}.png`);
-    const aday = path.join(REFERANS, `.aday-${senaryo.id}${sonek}-${geçiş}.png`);
+    const ham = path.join(REFERANS, `.ham-${dosyaId}${sonek}-${geçiş}.png`);
+    const aday = path.join(REFERANS, `.aday-${dosyaId}${sonek}-${geçiş}.png`);
     execFileSync('node', [
       path.join(ARAÇ, 'echarts_referans.mjs'),
       '--id', senaryo.id,
@@ -280,10 +290,11 @@ async function çalıştır() {
   for (const senaryo of senaryolar) {
     for (const kare of senaryo.kareler) {
       const sonek = senaryo.kareler.length === 1 ? '' : `-${kare.ad}`;
-      const referans = path.join(REFERANS, `${senaryo.id}${sonek}.png`);
-      const gerçek = path.join(GERÇEK, `${senaryo.id}${sonek}.png`);
-      const ham = path.join(GERÇEK, `.ham-${senaryo.id}${sonek}.png`);
-      const fark = path.join(FARK, `${senaryo.id}${sonek}.png`);
+      const dosyaId = dosyaKimliği(senaryo.id);
+      const referans = path.join(REFERANS, `${dosyaId}${sonek}.png`);
+      const gerçek = path.join(GERÇEK, `${dosyaId}${sonek}.png`);
+      const ham = path.join(GERÇEK, `.ham-${dosyaId}${sonek}.png`);
+      const fark = path.join(FARK, `${dosyaId}${sonek}.png`);
       if (REFERANS_YENİLE) {
         await referansıYenile(senaryo, kare, referans, sonek);
       } else if (!fs.existsSync(referans)) {
@@ -320,7 +331,10 @@ async function çalıştır() {
     }
   }
   for (const sonuç of sonuçlar) {
-    fs.writeFileSync(path.join(METRİK, `${sonuç.id}-${sonuç.kare}.json`), `${JSON.stringify(sonuç, null, 2)}\n`);
+    fs.writeFileSync(
+      path.join(METRİK, `${dosyaKimliği(sonuç.id)}-${sonuç.kare}.json`),
+      `${JSON.stringify(sonuç, null, 2)}\n`
+    );
   }
   const satırlar = sonuçlar.map((sonuç) => `<article class="${sonuç.geçti ? 'geçti' : 'kaldı'}"><h2>${htmlKaçır(sonuç.id)} · ${htmlKaçır(sonuç.kare)}</h2><p>${sonuç.geçti ? 'GEÇTİ' : 'KALDI'} · fark %${(sonuç.değişen_piksel_oranı * 100).toFixed(3)} · SSIM ${sonuç.ssim.toFixed(5)}</p><div><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.referans))}"><figcaption>ECharts</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.gerçek))}"><figcaption>Cizelge</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.fark))}"><figcaption>Fark</figcaption></figure></div></article>`).join('\n');
   fs.writeFileSync(path.join(RAPOR, 'index.html'), `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Uyum görsel kanıtı</title><style>body{font:14px system-ui;margin:24px;background:#f5f7fa;color:#1f2937}article{background:white;border:1px solid #ddd;border-left:6px solid #dc2626;border-radius:8px;margin:18px 0;padding:16px}.geçti{border-left-color:#16a34a}article>div{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}figure{margin:0}img{width:100%;border:1px solid #ddd}figcaption{text-align:center;padding:5px}</style></head><body><h1>Cizelge görsel kanıt raporu</h1><p>pixelmatch 0.1 · değişen piksel ≤ %1 · SSIM ≥ 0.99</p>${satırlar}</body></html>`);

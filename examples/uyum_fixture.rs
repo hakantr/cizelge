@@ -3781,6 +3781,41 @@ fn scatter_jitter() -> GrafikSeçenekleri {
         )
 }
 
+fn scatter_jitter_avoid_overlap() -> GrafikSeçenekleri {
+    let mut tohum = 0x5eed_1234_u32;
+    let mut veri = Vec::with_capacity(210);
+    for gün in 0..7 {
+        for sıra in 0..30 {
+            let y = (sıra as f64).tan() / 2.0 + 7.0;
+            veri.push([gün as f64, y, kanıt_rastgele(&mut tohum)]);
+        }
+    }
+    let titreme = (700.0 - 80.0 - 50.0) / 7.0 * 0.8;
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Scatter with Jittering")
+                .iç_boşluk(15.0),
+        )
+        .ızgara(Izgara::yeni().sol(80).sağ(50))
+        .x_ekseni(
+            Eksen::kategori()
+                .titreme(titreme)
+                .titreme_örtüşmesi(false)
+                .titreme_tohumu(tohum)
+                .veri(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]),
+        )
+        .y_ekseni(Eksen::değer().en_az(0.0).en_çok(10.0))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("Sleeping Hours")
+                .veriye_göre_renklendir(true)
+                .veri(veri),
+        )
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5975,6 +6010,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-simple" => Ok(scatter_simple()),
         "scatter-anscombe-quartet" => scatter_anscombe_quartet(),
         "scatter-jitter" => Ok(scatter_jitter()),
+        "doc-example/scatter-jitter-avoidOverlap" => Ok(scatter_jitter_avoid_overlap()),
         "scatter-punchCard" => scatter_punch_card(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
