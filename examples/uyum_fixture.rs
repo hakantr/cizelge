@@ -14,6 +14,8 @@ use serde::de::DeserializeOwned;
 
 #[path = "uyum_veri/area_rainfall.rs"]
 mod area_rainfall_verisi;
+#[path = "uyum_veri/perlin.rs"]
+mod perlin;
 
 struct Girdi {
     id: String,
@@ -3669,6 +3671,56 @@ fn heatmap_cartesian(seçili_aralık: bool) -> GrafikSeçenekleri {
         )
 }
 
+fn heatmap_large() -> GrafikSeçenekleri {
+    // Referans sayfası `Math.random`ı 0x5eed1234 Mulberry32 tohumu ile
+    // sabitler; resmî noisejs yardımcısına giden ilk değer burada aynıdır.
+    let mut rastgele_tohumu = 0x5eed_1234;
+    let gürültü = perlin::Perlin2::yeni(kanıt_rastgele(&mut rastgele_tohumu));
+    let mut veri = Vec::with_capacity(201 * 101);
+    for x in 0..=200 {
+        for y in 0..=100 {
+            veri.push(VeriÖğesi::from([
+                x as f64,
+                y as f64,
+                gürültü.değer(x as f64 / 40.0, y as f64 / 20.0) + 0.5,
+            ]));
+        }
+    }
+    let x_verisi = (0..=200).map(|değer| değer.to_string()).collect::<Vec<_>>();
+    // Kaynak örnek bilerek 100 kategoride durur; y=100 veri satırı eksen
+    // clip sınırını doğrulayan taşan son satırdır.
+    let y_verisi = (0..100).map(|değer| değer.to_string()).collect::<Vec<_>>();
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .x_ekseni(Eksen::kategori().veri(x_verisi))
+        .y_ekseni(Eksen::kategori().veri(y_verisi))
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(1.0)
+                .hesaplanabilir(true)
+                .sol(0.0_f32)
+                .alt(0.0_f32)
+                .renkler([
+                    "#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090",
+                    "#fdae61", "#f46d43", "#d73027", "#a50026",
+                ]),
+        )
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .ad("Gaussian")
+                .hücre_boşluğu(0.0)
+                .vurgu_öğe_stili(
+                    ÖğeStili::yeni()
+                        .kenarlık_rengi("#333")
+                        .kenarlık_kalınlığı(1.0),
+                )
+                .veri(veri),
+        )
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4390,6 +4442,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-simple" => Ok(scatter_simple()),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
+        "heatmap-large" => Ok(heatmap_large()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

@@ -209,6 +209,7 @@ pub struct SürekliGörselEşlemeBölgesi {
     pub üst_tutamaç: Dikdörtgen,
     pub kapsam: [f64; 2],
     pub seçili_aralık: [f64; 2],
+    pub dikey: bool,
 }
 
 impl SürekliGörselEşlemeBölgesi {
@@ -221,6 +222,7 @@ impl SürekliGörselEşlemeBölgesi {
             üst_tutamaç: kaydır(self.üst_tutamaç),
             kapsam: self.kapsam,
             seçili_aralık: self.seçili_aralık,
+            dikey: self.dikey,
         }
     }
 
@@ -236,6 +238,12 @@ impl SürekliGörselEşlemeBölgesi {
         }
     }
 
+    /// Fare noktasını değer artış yönündeki tek boyutlu sürükleme eksenine
+    /// çevirir. Dikey bileşende ekran y'si aşağı arttığından işaret tersidir.
+    pub fn sürükleme_ekseni(&self, nokta: (f32, f32)) -> f32 {
+        if self.dikey { -nokta.1 } else { nokta.0 }
+    }
+
     /// Bir sürükleme parçasını yatay piksel farkıyla taşıyıp yeni değer
     /// aralığını üretir. Tutamaçlar birbirini geçmez; aralık dolgusu kendi
     /// genişliğini koruyarak etkin kapsamın uçlarında durur.
@@ -245,7 +253,12 @@ impl SürekliGörselEşlemeBölgesi {
         piksel_farkı: f32,
     ) -> [f64; 2] {
         let açıklık = (self.kapsam[1] - self.kapsam[0]).max(f64::EPSILON);
-        let fark = f64::from(piksel_farkı / self.şerit.genişlik.max(1.0)) * açıklık;
+        let şerit_uzunluğu = if self.dikey {
+            self.şerit.yükseklik
+        } else {
+            self.şerit.genişlik
+        };
+        let fark = f64::from(piksel_farkı / şerit_uzunluğu.max(1.0)) * açıklık;
         let [ilk_alt, ilk_üst] = self.seçili_aralık;
         match parça {
             GörselEşlemeSürgüParçası::AltTutamaç => {
@@ -371,6 +384,131 @@ pub fn görsel_eşleme_çiz(
     if eşleme.renkler.is_empty() {
         return GörselEşlemeÇıktısı::default();
     }
+    if eşleme.yön == Yön::Dikey && eşleme.hesaplanabilir {
+        // ContinuousView dikey `calculable` öntanımlıları. Çubuk alttan
+        // düşüğe, üste yükseğe gider; handle icon yatay bir roundRect'tir.
+        const ŞERİT_GENİŞLİĞİ: f32 = 20.0;
+        const ŞERİT_YÜKSEKLİĞİ: f32 = 140.0;
+        const TUTAMAÇ_GENİŞLİĞİ: f32 = 26.0;
+        const TUTAMAÇ_YÜKSEKLİĞİ: f32 = 7.793_104;
+        const ETİKET_X: f32 = 34.0;
+        const ETİKET_YARI_YÜKSEKLİĞİ: f32 = 6.0;
+        const İÇ_BOŞLUK: f32 = 15.0;
+        let boyut = tema::YAZI_KÜÇÜK;
+        let seçili = eşleme.seçili_kapsam(kapsam);
+        let düşük = binlik_ayır(seçili[0]);
+        let yüksek = binlik_ayır(seçili[1]);
+        let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
+        let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
+        let yarım_tutamaç_yüksekliği = TUTAMAÇ_YÜKSEKLİĞİ / 2.0;
+        let tutamaç_taşması = (TUTAMAÇ_GENİŞLİĞİ - ŞERİT_GENİŞLİĞİ) / 2.0;
+
+        // Yerleşim, VisualMapView background sınırı dâhil hesaplanır.
+        // Etiketler çubuğun sağında olduğundan dış kutunun yerel solu -18,
+        // sağı ise en geniş uç etiketinin sonundan 15 px ileridedir.
+        let dış_solu = -tutamaç_taşması - İÇ_BOŞLUK;
+        let dış_sağı = (ETİKET_X + düşük_genişliği.max(yüksek_genişliği)) + İÇ_BOŞLUK;
+        let dış_genişlik = dış_sağı - dış_solu;
+        let şerit_x = if let Some(sağ) = eşleme.sağ {
+            çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_sağı
+        } else {
+            match eşleme.sol {
+                YatayKonum::Sol => -dış_solu,
+                YatayKonum::Orta => (çizici.genişlik() - dış_genişlik) / 2.0 - dış_solu,
+                YatayKonum::Sağ => çizici.genişlik() - dış_sağı,
+                YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) - dış_solu,
+            }
+        };
+
+        let uç_taşması = ETİKET_YARI_YÜKSEKLİĞİ.max(yarım_tutamaç_yüksekliği);
+        let grup_altı = if let Some(üst) = eşleme.üst {
+            üst.çöz(çizici.yükseklik()) + İÇ_BOŞLUK + uç_taşması + ŞERİT_YÜKSEKLİĞİ
+        } else {
+            çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - İÇ_BOŞLUK - uç_taşması
+        };
+        let şerit_y = grup_altı - ŞERİT_YÜKSEKLİĞİ;
+        let durak_sayısı = eşleme.renkler.len().saturating_sub(1).max(1) as f32;
+        let duraklar: Vec<crate::renk::RenkDurağı> = eşleme
+            .renkler
+            .iter()
+            .enumerate()
+            .map(|(sıra, renk)| crate::renk::RenkDurağı::yeni(sıra as f32 / durak_sayısı, *renk))
+            .collect();
+        let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, ŞERİT_GENİŞLİĞİ, ŞERİT_YÜKSEKLİĞİ);
+        çizici.dikdörtgen(şerit, &Dolgu::Düz(tema::devre_dışı()), [3.0; 4], None);
+
+        let açıklık = (kapsam[1] - kapsam[0]).max(f64::EPSILON);
+        let oran = |değer: f64| ((değer - kapsam[0]) / açıklık).clamp(0.0, 1.0) as f32;
+        let alt_oran = oran(seçili[0]);
+        let üst_oran = oran(seçili[1]);
+        let seçili_kutu = Dikdörtgen::yeni(
+            şerit.x,
+            şerit.alt() - üst_oran * şerit.yükseklik,
+            şerit.genişlik,
+            ((üst_oran - alt_oran) * şerit.yükseklik).max(0.1),
+        );
+        çizici.kırpılı(seçili_kutu, &mut |yüzey| {
+            yüzey.dikdörtgen(
+                şerit,
+                &crate::renk::Dolgu::doğrusal(0.0, 1.0, 0.0, 0.0, duraklar.clone()),
+                [3.0; 4],
+                None,
+            );
+        });
+
+        let alt_merkez_y = şerit.alt() - alt_oran * şerit.yükseklik;
+        let üst_merkez_y = şerit.alt() - üst_oran * şerit.yükseklik;
+        let alt_tutamaç = Dikdörtgen::yeni(
+            şerit.x - tutamaç_taşması,
+            alt_merkez_y - yarım_tutamaç_yüksekliği,
+            TUTAMAÇ_GENİŞLİĞİ,
+            TUTAMAÇ_YÜKSEKLİĞİ,
+        );
+        let üst_tutamaç = Dikdörtgen::yeni(
+            şerit.x - tutamaç_taşması,
+            üst_merkez_y - yarım_tutamaç_yüksekliği,
+            TUTAMAÇ_GENİŞLİĞİ,
+            TUTAMAÇ_YÜKSEKLİĞİ,
+        );
+        for (değer, tutamaç) in [(seçili[0], alt_tutamaç), (seçili[1], üst_tutamaç)] {
+            çizici.dikdörtgen(
+                tutamaç,
+                &Dolgu::Düz(eşleme.renk_çöz(değer, kapsam)),
+                [3.5; 4],
+                Some((2.0, tema::nötr_00())),
+            );
+        }
+        çizici.yazı(
+            &düşük,
+            (şerit.x + ETİKET_X, alt_merkez_y),
+            YatayHiza::Sol,
+            DikeyHiza::Orta,
+            boyut,
+            tema::ikincil_metin(),
+            false,
+        );
+        çizici.yazı(
+            &yüksek,
+            (şerit.x + ETİKET_X, üst_merkez_y),
+            YatayHiza::Sol,
+            DikeyHiza::Orta,
+            boyut,
+            tema::ikincil_metin(),
+            false,
+        );
+        return GörselEşlemeÇıktısı {
+            parça_kutuları: Vec::new(),
+            sürekli: Some(SürekliGörselEşlemeBölgesi {
+                şerit,
+                seçili_şerit: seçili_kutu,
+                alt_tutamaç,
+                üst_tutamaç,
+                kapsam,
+                seçili_aralık: seçili,
+                dikey: true,
+            }),
+        };
+    }
     if eşleme.yön == Yön::Yatay && eşleme.hesaplanabilir {
         // ContinuousView yatay `calculable` öntanımlıları: itemSize
         // 20×140, handleSize %120 ve bileşen padding'i 15 px. ECharts
@@ -486,6 +624,7 @@ pub fn görsel_eşleme_çiz(
                 üst_tutamaç,
                 kapsam,
                 seçili_aralık: seçili,
+                dikey: false,
             }),
         };
     }
@@ -647,6 +786,7 @@ pub fn görsel_eşleme_çiz(
 #[cfg(test)]
 mod sürekli_bölge_testleri {
     use super::*;
+    use crate::cizim::KayıtYüzeyi;
 
     fn bölge() -> SürekliGörselEşlemeBölgesi {
         SürekliGörselEşlemeBölgesi {
@@ -656,6 +796,7 @@ mod sürekli_bölge_testleri {
             üst_tutamaç: Dikdörtgen::yeni(66.0, 7.0, 8.0, 26.0),
             kapsam: [0.0, 10.0],
             seçili_aralık: [2.0, 6.0],
+            dikey: false,
         }
     }
 
@@ -694,5 +835,25 @@ mod sürekli_bölge_testleri {
             bölge.sürüklenmiş_aralık(GörselEşlemeSürgüParçası::Aralık, -80.0),
             [0.0, 4.0]
         );
+    }
+
+    #[test]
+    fn dikey_hesaplanabilir_geometri_resmi_yerlesimi_izler() {
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(1.0)
+            .hesaplanabilir(true)
+            .sol(0.0_f32)
+            .alt(0.0_f32);
+
+        let çıktı = görsel_eşleme_çiz(&mut yüzey, &eşleme, [0.0, 1.0]);
+        let bölge = çıktı.sürekli.expect("dikey isabet bölgesi");
+        assert!(bölge.dikey);
+        assert_eq!(bölge.şerit, Dikdörtgen::yeni(18.0, 364.0, 20.0, 140.0));
+        assert!((bölge.alt_tutamaç.x - 15.0).abs() < 1e-4);
+        assert!((bölge.alt_tutamaç.y - 500.103_45).abs() < 1e-4);
+        assert!((bölge.üst_tutamaç.y - 360.103_45).abs() < 1e-4);
+        assert_eq!(bölge.sürükleme_ekseni((20.0, 400.0)), -400.0);
     }
 }

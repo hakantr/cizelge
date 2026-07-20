@@ -153,7 +153,7 @@ enum Sürükleme {
     /// Sürekli `visualMap` tutamacı ya da seçili aralık sürükleme.
     GörselEşleme {
         parça: GörselEşlemeSürgüParçası,
-        başlangıç_x: f32,
+        başlangıç_ekseni: f32,
         bölge: SürekliGörselEşlemeBölgesi,
     },
 }
@@ -787,11 +787,12 @@ impl Render for GrafikGörünümü {
                         }
                         Some(Sürükleme::GörselEşleme {
                             parça,
-                            başlangıç_x,
+                            başlangıç_ekseni,
                             bölge,
                         }) => {
+                            let yeni_ekseni = bölge.sürükleme_ekseni(yeni);
                             let [alt, üst] =
-                                bölge.sürüklenmiş_aralık(parça, yeni.0 - başlangıç_x);
+                                bölge.sürüklenmiş_aralık(parça, yeni_ekseni - başlangıç_ekseni);
                             if let Some(eşleme) =
                                 Arc::make_mut(&mut bu.seçenekler).görsel_eşleme.as_mut()
                             {
@@ -1099,7 +1100,7 @@ impl Render for GrafikGörünümü {
                     if let Some((bölge, parça)) = sürekli_vuruş {
                         bu.sürükleme = Some(Sürükleme::GörselEşleme {
                             parça,
-                            başlangıç_x: konum.0,
+                            başlangıç_ekseni: bölge.sürükleme_ekseni(konum),
                             bölge,
                         });
                         return;
