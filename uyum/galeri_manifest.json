@@ -2795,7 +2795,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-clustering.ts",
     "kaynak_sha256": "67a8beda906605412d83e03f9055dc950c88a1dd8040ceedd33c8dca563c0bd6",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_clustering",
     "seriler": [
       "piecewise",
       "scatter"
@@ -2811,7 +2811,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2822,15 +2822,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 494,
+          "değişen_piksel_oranı": 0.0018296296296296296,
+          "ssim": 0.9986424850231681,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering.png",
+            "sha256": "5c1ee48b0390bee81c1ce418ce4cf222f0fbabd9ccc3bc45076f45485ac1f037"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering.png",
+            "sha256": "611423555e25aa6dd9013eef3a301e7e5d24438a44a0af957c8c26cb8b336ff8"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering.png",
+            "sha256": "5a799223c117a69226e897e3edef89e6e158bdaa2e341eb4c7e5727bc49e63b3"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-son.json",
+            "sha256": "1b36370be5302028a2e9f3ab8f358e419a4e0b43d7312b5a77e441fe8887149b"
+          }
+        }
+      ]
     }
   },
   {
