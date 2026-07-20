@@ -284,4 +284,27 @@ mod testler {
         assert_eq!(yerleşim.gövde_kutusu.yükseklik, 455.0);
         assert!((yerleşim.hücre_yüksekliği - 455.0 / 53.0).abs() < 1e-5);
     }
+
+    #[test]
+    fn yatay_otomatik_hücre_sol_ve_sağ_kutu_sınırlarını_izler() {
+        let varsayılan = TakvimKoordinatı::yıl(2017).hücre_boyutu(None, Some(20.0));
+        let yerleşim = TakvimYerleşimi::kur(&varsayılan, (700.0, 525.0)).unwrap();
+        assert_eq!(yerleşim.hafta_sayısı, 53);
+        assert_eq!(
+            yerleşim.gövde_kutusu,
+            Dikdörtgen::yeni(80.0, 60.0, 620.0, 140.0)
+        );
+        assert!((yerleşim.hücre_genişliği - 620.0 / 53.0).abs() < 1e-5);
+
+        let sağ_sınırlı = TakvimKoordinatı::yıl(2015)
+            .üst(450)
+            .sağ(5)
+            .hücre_boyutu(None, Some(20.0));
+        let yerleşim = TakvimYerleşimi::kur(&sağ_sınırlı, (700.0, 525.0)).unwrap();
+        assert_eq!(
+            yerleşim.gövde_kutusu,
+            Dikdörtgen::yeni(80.0, 450.0, 615.0, 140.0)
+        );
+        assert!((yerleşim.hücre_genişliği - 615.0 / 53.0).abs() < 1e-5);
+    }
 }

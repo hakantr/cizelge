@@ -686,11 +686,35 @@ pub fn görsel_eşleme_çiz(
                 YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) - dış_solu,
             }
         };
-        // Grup sınırının altı `bottom` değerine oturur. Tutamaç, çubuğun
-        // iki yanında üçer piksel taşar; üzerine 15 px padding eklenir.
-        let grup_altı = çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik());
-        let grup_y = grup_altı - (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0 - İÇ_BOŞLUK;
-        let şerit_y = grup_y - ŞERİT_YÜKSEKLİĞİ;
+        // `align: auto`, üst yarıdaki yatay denetimde etiketleri çubuğun
+        // altına; orta/alt yarıda ise üstüne koyar. Box konumu etiket,
+        // tutamaç ve 15 px padding'in oluşturduğu bütün dış kutuya uygulanır.
+        const ETİKET_BOŞLUĞU: f32 = 14.0;
+        const ETİKET_YARI_YÜKSEKLİĞİ: f32 = 6.0;
+        let tutamaç_taşması = (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0;
+        let dış_yükseklik = 2.0 * İÇ_BOŞLUK
+            + ŞERİT_YÜKSEKLİĞİ
+            + tutamaç_taşması
+            + ETİKET_BOŞLUĞU
+            + ETİKET_YARI_YÜKSEKLİĞİ;
+        let dış_y = match eşleme.dikey_konum {
+            Some(DikeyKonum::Üst) => 0.0,
+            Some(DikeyKonum::Orta) => (çizici.yükseklik() - dış_yükseklik) / 2.0,
+            Some(DikeyKonum::Alt) => çizici.yükseklik() - dış_yükseklik,
+            Some(DikeyKonum::Değer(uzunluk)) => uzunluk.çöz(çizici.yükseklik()),
+            None => eşleme.üst.map_or_else(
+                || çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - dış_yükseklik,
+                |üst| üst.çöz(çizici.yükseklik()),
+            ),
+        };
+        let etiket_altta = dış_y + dış_yükseklik / 2.0 < çizici.yükseklik() / 2.0;
+        let şerit_y = dış_y
+            + İÇ_BOŞLUK
+            + if etiket_altta {
+                tutamaç_taşması
+            } else {
+                ETİKET_YARI_YÜKSEKLİĞİ + ETİKET_BOŞLUĞU
+            };
         let durak_sayısı = eşleme.renkler.len().saturating_sub(1).max(1) as f32;
         let duraklar: Vec<crate::renk::RenkDurağı> = eşleme
             .renkler
@@ -740,7 +764,11 @@ pub fn görsel_eşleme_çiz(
                 Some((2.0, tema::nötr_00())),
             );
         }
-        let etiket_y = şerit_y - 14.0;
+        let etiket_y = if etiket_altta {
+            şerit_y + ŞERİT_YÜKSEKLİĞİ + ETİKET_BOŞLUĞU
+        } else {
+            şerit_y - ETİKET_BOŞLUĞU
+        };
         çizici.yazı(
             &düşük,
             (şerit.x + alt_oran * şerit.genişlik, etiket_y),
@@ -1039,5 +1067,28 @@ mod sürekli_bölge_testleri {
         let kayıt = yüzey.döküm();
         assert!(kayıt.contains("yazı \"1000\""));
         assert!(!kayıt.contains("1,000"));
+    }
+
+    #[test]
+    fn yatay_hesaplanabilir_üstte_etiketleri_çubuğun_altına_alır() {
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(1000.0)
+            .hesaplanabilir(true)
+            .yön(Yön::Yatay)
+            .sol("center")
+            .üst("top");
+
+        let çıktı = görsel_eşleme_çiz(&mut yüzey, &eşleme, [0.0, 1000.0]);
+        let bölge = çıktı.sürekli.expect("yatay isabet bölgesi");
+        assert!(!bölge.dikey);
+        assert_eq!(bölge.şerit.y, 18.0);
+        assert!(bölge.şerit.x > 270.0 && bölge.şerit.x < 280.0);
+        let kayıt = yüzey.döküm();
+        let düşük = kayıt.find("yazı \"0\"").expect("alt uç etiketi");
+        let yüksek = kayıt.find("yazı \"1000\"").expect("üst uç etiketi");
+        assert!(düşük < yüksek);
+        assert!(kayıt[düşük..].contains("(274.7,52.0)"));
     }
 }

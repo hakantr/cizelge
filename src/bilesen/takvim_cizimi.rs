@@ -450,13 +450,13 @@ fn yıl_etiketini_çiz(
             (gövde.x - pay, (gövde.y + gövde.alt()) / 2.0),
             YatayHiza::Orta,
             DikeyHiza::Alt,
-            Some(std::f32::consts::FRAC_PI_2),
+            Some(-std::f32::consts::FRAC_PI_2),
         ),
         TakvimYılEtiketiKonumu::Sağ => (
             (gövde.sağ() + pay, (gövde.y + gövde.alt()) / 2.0),
             YatayHiza::Orta,
             DikeyHiza::Üst,
-            Some(std::f32::consts::FRAC_PI_2),
+            Some(-std::f32::consts::FRAC_PI_2),
         ),
     };
     let yatay = yatay_hiza(seçenek.yıl_etiketi.yatay_hiza, doğal_yatay);
@@ -537,5 +537,18 @@ mod testler {
         let kayıt = yüzey.döküm();
         assert!(kayıt.contains("yazı \"S\""));
         assert!(kayıt.contains("yazı \"Jan\""));
+    }
+
+    #[test]
+    fn yatay_takvim_yılı_solda_saat_yönünün_tersine_döner() {
+        let seçenek = TakvimKoordinatı::yıl(2017);
+        let yerleşim = TakvimYerleşimi::kur(&seçenek, (700.0, 525.0)).unwrap();
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        yıl_etiketini_çiz(&mut yüzey, &seçenek, &yerleşim);
+
+        let kayıt = yüzey.döküm();
+        assert!(kayıt.contains("dönüşümlü-yazı \"2017\""));
+        assert!(kayıt.contains("m=[0.0 -1.0 1.0 0.0 50.0 130.0] Orta/Alt"));
     }
 }

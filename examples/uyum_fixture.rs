@@ -3897,6 +3897,74 @@ fn calendar_vertical() -> GrafikSeçenekleri {
         .seri(TakvimSerisi::yeni(2017).takvim_sırası(2).veri(veri_2017))
 }
 
+fn calendar_horizontal() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let veri = |yıl: i32, tohum: &mut u32| {
+        let başlangıç = takvimden_ana(TakvimAnı {
+            yıl,
+            ay: 1,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let bitiş = takvimden_ana(TakvimAnı {
+            yıl: yıl + 1,
+            ay: 1,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let mut sonuç = Vec::with_capacity(366);
+        let mut zaman = başlangıç;
+        while zaman < bitiş {
+            sonuç.push(VeriÖğesi::from([
+                zaman,
+                (kanıt_rastgele(tohum) * 1000.0).floor(),
+            ]));
+            zaman += 86_400_000.0;
+        }
+        sonuç
+    };
+    let mut tohum = 0x5eed_1234;
+    let veri_2017 = veri(2017, &mut tohum);
+    let veri_2016 = veri(2016, &mut tohum);
+    let veri_2015 = veri(2015, &mut tohum);
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .ipucu(İpucu::yeni().konum(İpucuKonumu::Üst))
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(1000.0)
+                .hesaplanabilir(true)
+                .yön(Yön::Yatay)
+                .sol("center")
+                .üst("top"),
+        )
+        .takvim(TakvimKoordinatı::yıl(2017).hücre_boyutu(None, Some(20.0)))
+        .takvim(
+            TakvimKoordinatı::yıl(2016)
+                .üst(260)
+                .hücre_boyutu(None, Some(20.0)),
+        )
+        .takvim(
+            TakvimKoordinatı::yıl(2015)
+                .üst(450)
+                .sağ(5)
+                .hücre_boyutu(None, Some(20.0)),
+        )
+        .seri(TakvimSerisi::yeni(2017).takvim_sırası(0).veri(veri_2017))
+        .seri(TakvimSerisi::yeni(2016).takvim_sırası(1).veri(veri_2016))
+        .seri(TakvimSerisi::yeni(2015).takvim_sırası(2).veri(veri_2015))
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4622,6 +4690,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
         "calendar-heatmap" => Ok(calendar_heatmap()),
         "calendar-vertical" => Ok(calendar_vertical()),
+        "calendar-horizontal" => Ok(calendar_horizontal()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),
