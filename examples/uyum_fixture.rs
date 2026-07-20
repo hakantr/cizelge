@@ -8,6 +8,7 @@
 //! ECharts referanslarıyla karşılaştırılacak kareleri bu ikili üzerinden
 //! üretir; boyama hattı gerçek `PikselYüzeyi` ve `grafiği_boya` yoludur.
 
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -7458,6 +7459,259 @@ fn candlestick_large_kaynak_akisi_resmi_mulberry32_sonucunu_korur() {
     );
 }
 
+type CandlestickBrushSatırı = (String, f64, f64, f64, f64, f64);
+
+/// Sabitlenmiş `echarts-examples` commitindeki 3141 DJI satırını okur.
+/// Tuple sırası resmî `stock-DJI.json` ile aynıdır:
+/// `[date, open, close, lowest, highest, volume]`.
+fn candlestick_brush_verisini_oku() -> Result<Vec<CandlestickBrushSatırı>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/stock-DJI.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))
+}
+
+fn candlestick_brush_hareketli_ortalama(
+    gün_sayısı: usize,
+    veri: &[CandlestickBrushSatırı],
+) -> Vec<VeriÖğesi> {
+    (0..veri.len())
+        .map(|sıra| {
+            if sıra < gün_sayısı {
+                VeriÖğesi::default()
+            } else {
+                let toplam = (0..gün_sayısı).map(|geri| veri[sıra - geri].2).sum::<f64>();
+                VeriÖğesi::yeni(cizelge::yardimci::sayi::yuvarla(
+                    toplam / gün_sayısı as f64,
+                    3,
+                ))
+            }
+        })
+        .collect()
+}
+
+fn candlestick_brush() -> Result<GrafikSeçenekleri, String> {
+    let veri = candlestick_brush_verisini_oku()?;
+    let kategoriler = veri
+        .iter()
+        .map(|(tarih, ..)| tarih.clone())
+        .collect::<Vec<_>>();
+    let mumlar = veri
+        .iter()
+        .map(|(tarih, açılış, kapanış, en_düşük, en_yüksek, _)| {
+            VeriÖğesi::adlı(tarih.clone(), [*açılış, *kapanış, *en_düşük, *en_yüksek])
+        })
+        .collect::<Vec<_>>();
+    let hacimler = veri
+        .iter()
+        .enumerate()
+        .map(|(sıra, (_, açılış, kapanış, _, _, hacim))| {
+            let işaret = if açılış > kapanış { 1.0 } else { -1.0 };
+            VeriÖğesi::adlı(kategoriler[sıra].clone(), *hacim).boyutlar([
+                ("x".to_owned(), (sıra as f64).into()),
+                ("volume".to_owned(), (*hacim).into()),
+                ("sign".to_owned(), işaret.into()),
+            ])
+        })
+        .collect::<Vec<_>>();
+    let hareketli_ortalama = |ad: &str, gün| {
+        ÇizgiSerisi::yeni()
+            .ad(ad)
+            .yumuşat(true)
+            .çizgi_stili(ÇizgiStili::yeni().opaklık(0.5))
+            .veri(candlestick_brush_hareketli_ortalama(gün, &veri))
+    };
+    let sıfırda_değil = EksenÇizgisi::yeni().sıfır(EksenSıfırKipi::Kapalı);
+
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .gösterge(Gösterge::yeni().alt(10).sol("center").veri([
+            "Dow-Jones index",
+            "MA5",
+            "MA10",
+            "MA20",
+            "MA30",
+        ]))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz)
+                .imleç_etiketi_arkaplanı(0x777777)
+                .yazı(YazıStili::yeni().renk(0x000000))
+                .bağlantılı(true),
+        )
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .veri_yakınlaştırma(true)
+                .fırça_türleri([FırçaAracıTürü::Yatay, FırçaAracıTürü::Temizle]),
+        )
+        .fırça(
+            Fırça::yeni()
+                .x_eksenleri([0, 1])
+                .bağlantı(FırçaBağı::Tümü)
+                .dış_renk_opaklığı(0.1),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .seri_sırası(5)
+                .boyut("sign")
+                .parçalar([
+                    EşlemeParçası::değer(1.0, 0xec0000),
+                    EşlemeParçası::değer(-1.0, 0x00da3c),
+                ]),
+        )
+        .ızgara_ekle(Izgara::yeni().sol("10%").sağ("8%").yükseklik("50%"))
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sol("10%")
+                .sağ("8%")
+                .üst("63%")
+                .yükseklik("16%"),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .veri(kategoriler.clone())
+                .kenar_boşluğu(false)
+                .çizgi(sıfırda_değil.clone())
+                .bölme_çizgisi_göster(false)
+                .en_az_veri()
+                .en_çok_veri(),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .ızgara_sırası(1)
+                .veri(kategoriler)
+                .kenar_boşluğu(false)
+                .çizgi(sıfırda_değil)
+                .çentik(EksenÇentiği::yeni().göster(false))
+                .etiket(EksenEtiketi::yeni().göster(false))
+                .bölme_çizgisi_göster(false)
+                .en_az_veri()
+                .en_çok_veri(),
+        )
+        .y_ekseni_ekle(Eksen::değer().ölçekli(true).bölme_alanı_göster(true))
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ızgara_sırası(1)
+                .ölçekli(true)
+                .bölme_sayısı(2)
+                .etiket(EksenEtiketi::yeni().göster(false))
+                .çizgi(EksenÇizgisi::yeni().göster(false))
+                .çentik(EksenÇentiği::yeni().göster(false))
+                .bölme_çizgisi_göster(false),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::iç()
+                .x_eksenleri([0, 1])
+                .aralık(98.0, 100.0),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .x_eksenleri([0, 1])
+                .üst("85%")
+                .aralık(98.0, 100.0),
+        )
+        .seri(
+            MumSerisi::yeni()
+                .ad("Dow-Jones index")
+                .yükselen_renk(0x00da3c)
+                .düşen_renk(0xec0000)
+                .yükselen_kenarlık_rengi(0x00da3c)
+                .düşen_kenarlık_rengi(0xec0000)
+                .veri(mumlar),
+        )
+        .seri(hareketli_ortalama("MA5", 5))
+        .seri(hareketli_ortalama("MA10", 10))
+        .seri(hareketli_ortalama("MA20", 20))
+        .seri(hareketli_ortalama("MA30", 30))
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Volume")
+                .eksenler(1, 1)
+                .veri(hacimler),
+        );
+
+    // Resmî örnekte `setOption(..., true)` sonrasında yapılan gerçek
+    // `dispatchAction({type: 'brush', areas: [...]})` yolunu yeniden oynat.
+    let mut çalışma =
+        GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler)
+            .map_err(|hata| hata.to_string())?;
+    let mut eylemler = EylemKayıtDefteri::yeni();
+    fırça_eylemini_kaydet(&mut eylemler).map_err(|hata| hata.to_string())?;
+    let alan = EylemDeğeri::Nesne(BTreeMap::from([
+        ("brushType".to_owned(), "lineX".into()),
+        (
+            "coordRange".to_owned(),
+            EylemDeğeri::Dizi(vec!["2016-06-02".into(), "2016-06-20".into()]),
+        ),
+        ("xAxisIndex".to_owned(), 0usize.into()),
+    ]));
+    eylemler
+        .gönder(
+            &mut çalışma,
+            &EylemYükü::yeni("brush").alan("areas", EylemDeğeri::Dizi(vec![alan])),
+        )
+        .map_err(|hata| hata.to_string())?;
+    çalışma.seçenekleri_al().map_err(|hata| hata.to_string())
+}
+
+#[cfg(test)]
+#[test]
+fn candlestick_brush_dji_kaynagi_ma_hacim_ve_action_araligini_korur() {
+    let veri = candlestick_brush_verisini_oku().expect("DJI kaynağı okunmalı");
+    assert_eq!(veri.len(), 3_141);
+    assert_eq!(
+        veri.first(),
+        Some(&(
+            "2004-01-02".to_owned(),
+            10_452.74,
+            10_409.85,
+            10_367.41,
+            10_554.96,
+            168_890_000.0,
+        ))
+    );
+    assert_eq!(
+        veri.last(),
+        Some(&(
+            "2016-06-22".to_owned(),
+            17_832.67,
+            17_780.83,
+            17_770.36,
+            17_920.16,
+            89_440_000.0,
+        ))
+    );
+    assert_eq!(veri[3_126].0, "2016-06-02");
+    assert_eq!(veri[3_138].0, "2016-06-20");
+
+    let ma5 = candlestick_brush_hareketli_ortalama(5, &veri);
+    assert!(ma5[..5].iter().all(|öğe| öğe.değer.boş_mu()));
+    let beklenen =
+        cizelge::yardimci::sayi::yuvarla((1..=5).map(|sıra| veri[sıra].2).sum::<f64>() / 5.0, 3);
+    assert_eq!(ma5[5].değer.sayı(), Some(beklenen));
+
+    let seçenekler = candlestick_brush().expect("fixture kurulmalı");
+    let hacimler = seçenekler.seriler[5].veri();
+    assert_eq!(hacimler.len(), 3_141);
+    assert_eq!(
+        hacimler[0].boyut("sign").and_then(VeriDeğeri::sayı),
+        Some(1.0)
+    );
+    assert_eq!(
+        hacimler[1].boyut("sign").and_then(VeriDeğeri::sayı),
+        Some(-1.0)
+    );
+    let alanlar = &seçenekler.fırça.as_ref().expect("fırça bileşeni").alanlar;
+    assert_eq!(
+        alanlar,
+        &[FırçaSeçimAlanı::yatay("2016-06-02", "2016-06-20").x_ekseni(0)]
+    );
+}
+
 fn heatmap_cartesian(seçili_aralık: bool) -> GrafikSeçenekleri {
     const SAATLER: [&str; 24] = [
         "12a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12p", "1p",
@@ -9668,6 +9922,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "candlestick-simple" => Ok(candlestick_simple()),
         "candlestick-sh" => Ok(candlestick_sh()),
         "candlestick-large" => Ok(candlestick_large()),
+        "candlestick-brush" => candlestick_brush(),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
