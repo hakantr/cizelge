@@ -98,6 +98,13 @@ const TÜM_ALANLAR: [SeçenekAlanı; 27] = [
 pub struct SeçenekYaması {
     değer: GrafikSeçenekleri,
     sağlanan: BTreeSet<SeçenekAlanı>,
+    seri_veri_yamaları: Vec<SeriVeriYaması>,
+}
+
+#[derive(Clone, Debug)]
+struct SeriVeriYaması {
+    seçici: SeriSeçici,
+    veri: Vec<VeriÖğesi>,
 }
 
 impl Default for SeçenekYaması {
@@ -112,6 +119,7 @@ impl SeçenekYaması {
         Self {
             değer: GrafikSeçenekleri::default(),
             sağlanan: BTreeSet::new(),
+            seri_veri_yamaları: Vec::new(),
         }
     }
 
@@ -120,6 +128,7 @@ impl SeçenekYaması {
         Self {
             değer,
             sağlanan: TÜM_ALANLAR.into_iter().collect(),
+            seri_veri_yamaları: Vec::new(),
         }
     }
 
@@ -241,6 +250,22 @@ impl SeçenekYaması {
         self.değer.seriler.clear();
         self.değer.seri_kimlikleri.clear();
         self.sağlanan.insert(SeçenekAlanı::Seriler);
+        self
+    }
+
+    /// ECharts'ın `setOption({ series: [{ data }] })` biçimindeki iç içe
+    /// yamasının tipli karşılığı. Hedef seri sıra, `id` veya `name` ile
+    /// çözülür; yalnız veri deposu değiştirilir, serinin türü ve diğer bütün
+    /// seçenekleri korunur.
+    pub fn seri_verisi<T: Into<VeriÖğesi>>(
+        mut self,
+        seçici: SeriSeçici,
+        veri: impl IntoIterator<Item = T>,
+    ) -> Self {
+        self.seri_veri_yamaları.push(SeriVeriYaması {
+            seçici,
+            veri: veri.into_iter().map(Into::into).collect(),
+        });
         self
     }
 
@@ -572,7 +597,7 @@ impl BileşikSeçenekler {
                     bileşen: "timeline.options",
                     sıra,
                 })?;
-            yamayı_uygula(&mut sonuç, kare, &kip);
+            yamayı_uygula(&mut sonuç, kare, &kip)?;
         }
 
         let eşleşenler: Vec<&MedyaKuralı> = self
@@ -588,11 +613,11 @@ impl BileşikSeçenekler {
             .collect();
         if eşleşenler.is_empty() {
             for kural in self.medya.iter().filter(|kural| kural.sorgu.is_none()) {
-                yamayı_uygula(&mut sonuç, &kural.seçenek, &kip);
+                yamayı_uygula(&mut sonuç, &kural.seçenek, &kip)?;
             }
         } else {
             for kural in eşleşenler {
-                yamayı_uygula(&mut sonuç, &kural.seçenek, &kip);
+                yamayı_uygula(&mut sonuç, &kural.seçenek, &kip)?;
             }
         }
         seçenekleri_doğrula(&sonuç)?;
@@ -775,7 +800,7 @@ impl GrafikÇalışmaZamanı {
             self.seçenekler.clone()
         };
 
-        yamayı_uygula(&mut aday, &yama, &kip);
+        yamayı_uygula(&mut aday, &yama, &kip)?;
         seçenekleri_doğrula(&aday)?;
         self.seçenekler = aday;
 
@@ -1305,8 +1330,10 @@ fn seçenekleri_doğrula(seçenekler: &GrafikSeçenekleri) -> Result<(), Bilesen
 }
 
 fn yamayı_uygula(
-    hedef: &mut GrafikSeçenekleri, yama: &SeçenekYaması, kip: &SeçenekAyarlamaKipi
-) {
+    hedef: &mut GrafikSeçenekleri,
+    yama: &SeçenekYaması,
+    kip: &SeçenekAyarlamaKipi,
+) -> Result<(), BilesenHatasi> {
     let öntanımlı = GrafikSeçenekleri::default();
 
     macro_rules! alanı_uygula {
@@ -1372,6 +1399,31 @@ fn yamayı_uygula(
         hedef.seriler.clear();
         hedef.seri_kimlikleri.clear();
     }
+
+    for veri_yaması in &yama.seri_veri_yamaları {
+        let sıra = seri_sırasını_bul(hedef, &veri_yaması.seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "setOption.series",
+                sıra: seçici_sıra_ipucu(&veri_yaması.seçici),
+            }
+        })?;
+        let seri = hedef
+            .seriler
+            .get_mut(sıra)
+            .ok_or(BilesenHatasi::EksikVeri {
+                bileşen: "setOption.series",
+                sıra,
+            })?;
+        let depo = seri
+            .veri_mut()
+            .ok_or_else(|| BilesenHatasi::Desteklenmeyen {
+                özellik: "setOption.series.data",
+                ayrıntı: format!("{sıra}. seri ayrı bir hiyerarşik/bağ veri modeli kullanıyor"),
+            })?;
+        *depo = veri_yaması.veri.clone();
+    }
+
+    Ok(())
 }
 
 fn serileri_birleştir(
@@ -1528,6 +1580,77 @@ mod testler {
         let sonuç = çalışma.seçenekleri_al().unwrap();
         assert_eq!(sonuç.seriler.len(), 2);
         assert_eq!(ilk_değer(&sonuç, 1), 2.0);
+    }
+
+    #[test]
+    fn seri_verisi_yaması_diger_seri_alanlarini_korur() {
+        let başlangıç = GrafikSeçenekleri::yeni().kimlikli_seri(
+            "akış",
+            ÇizgiSerisi::yeni()
+                .ad("Fake Data")
+                .sembol_göster(false)
+                .veri([1, 2, 3]),
+        );
+        let mut çalışma = çalışma(başlangıç);
+
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni().seri_verisi(SeriSeçici::kimlik("akış"), [7, 8, 9]),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .unwrap();
+
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        let Seri::Çizgi(çizgi) = &sonuç.seriler[0] else {
+            panic!("çizgi serisi bekleniyordu");
+        };
+        assert_eq!(çizgi.ad.as_deref(), Some("Fake Data"));
+        assert!(!çizgi.sembol_göster);
+        assert_eq!(
+            çizgi
+                .veri
+                .iter()
+                .filter_map(|öğe| öğe.değer.sayı())
+                .collect::<Vec<_>>(),
+            vec![7.0, 8.0, 9.0]
+        );
+        assert_eq!(sonuç.seri_kimliği(0), Some("akış"));
+        assert_eq!(
+            çalışma.olayları_al(),
+            vec![ÇalışmaOlayı::SeçenekDeğişti, ÇalışmaOlayı::YenidenÇizildi]
+        );
+    }
+
+    #[test]
+    fn seri_verisi_yaması_geçersiz_seçicide_atomiktir() {
+        let başlangıç = GrafikSeçenekleri::yeni()
+            .başlık(Başlık::yeni().metin("Korunacak"))
+            .seri(ÇizgiSerisi::yeni().veri([1, 2]));
+        let mut çalışma = çalışma(başlangıç);
+
+        let hata = çalışma.seçenekleri_ayarla(
+            SeçenekYaması::yeni()
+                .başlık(Başlık::yeni().metin("Uygulanmamalı"))
+                .seri_verisi(SeriSeçici::Sıra(4), [9]),
+            SeçenekAyarlamaKipi::default(),
+        );
+
+        assert!(matches!(
+            hata,
+            Err(BilesenHatasi::EksikVeri {
+                bileşen: "setOption.series",
+                sıra: 4
+            })
+        ));
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        assert_eq!(
+            sonuç
+                .başlık
+                .as_ref()
+                .and_then(|başlık| başlık.metin.as_deref()),
+            Some("Korunacak")
+        );
+        assert_eq!(ilk_değer(&sonuç, 0), 1.0);
     }
 
     #[test]

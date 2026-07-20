@@ -1,0 +1,19 @@
+{
+  "id": "dynamic-data2",
+  "senaryo": "etkileşim",
+  "kare": "ipucu",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1653,
+  "değişen_piksel_oranı": 0.0061222222222222225,
+  "ssim": 0.9926337685135619,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data2-ipucu.png",
+    "gerçek": "testler/gorsel/gerçek/default/dynamic-data2-ipucu.png",
+    "fark": "testler/gorsel/fark/default/dynamic-data2-ipucu.png"
+  }
+}

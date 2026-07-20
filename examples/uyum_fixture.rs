@@ -689,6 +689,96 @@ fn area_rainfall() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn dynamic_data2(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    const GÜN_MS: f64 = 86_400_000.0;
+    const SON_DURUM_TİKİ: usize = 20;
+    const TİK_BAŞINA_NOKTA: usize = 5;
+
+    let mut tohum = 0x5eed_1234;
+    let mut an = cizelge::yardimci::takvim::takvimden_ana(cizelge::yardimci::takvim::TakvimAnı {
+        yıl: 1997,
+        ay: 10,
+        gün: 3,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut değer = kanıt_rastgele(&mut tohum) * 1000.0;
+    let mut yeni_nokta = || {
+        an += GÜN_MS;
+        değer += kanıt_rastgele(&mut tohum) * 21.0 - 10.0;
+        VeriÖğesi::yeni([an, javascript_yuvarla(değer)])
+    };
+    let mut veri = (0..1000).map(|_| yeni_nokta()).collect::<Vec<_>>();
+
+    let seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .başlık(
+            Başlık::yeni()
+                .metin("Dynamic Data & Time Axis")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç_animasyonu(false)
+                .bağlamlı_biçimleyici(|parametreler| {
+                    let Some(parametre) = parametreler.first() else {
+                        return String::new();
+                    };
+                    let Some(zaman) = parametre.değer.x() else {
+                        return String::new();
+                    };
+                    let Some(değer) = parametre.değer.sayı() else {
+                        return String::new();
+                    };
+                    let tarih = cizelge::yardimci::takvim::andan_takvime(zaman);
+                    format!("{}/{}/{} : {değer}", tarih.gün, tarih.ay, tarih.yıl)
+                }),
+        )
+        .x_ekseni(Eksen::zaman().bölme_çizgisi_göster(false))
+        .y_ekseni(
+            Eksen::değer()
+                .sayısal_kenar_boşluğu(0.0, "100%")
+                .bölme_çizgisi_göster(false),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Fake Data")
+                .sembol_göster(false)
+                .veri(veri.clone()),
+        );
+
+    if durum != "son" {
+        return Ok(seçenekler);
+    }
+
+    // Resmî örneğin setInterval callback'ini yirmi kez yeniden oynat. Her
+    // tikteki data-only setOption yaması, seri türü/adı/sembol ayarlarını
+    // koruyan gerçek çalışma zamanı yolundan geçer.
+    let mut çalışma = GrafikÇalışmaZamanı::yeni(
+        ÖrnekBaşlatmaSeçenekleri {
+            yerel: &İNGİLİZCE,
+            ..ÖrnekBaşlatmaSeçenekleri::default()
+        },
+        seçenekler,
+    )
+    .map_err(|hata| hata.to_string())?;
+    for _ in 0..SON_DURUM_TİKİ {
+        veri.drain(..TİK_BAŞINA_NOKTA);
+        veri.extend((0..TİK_BAŞINA_NOKTA).map(|_| yeni_nokta()));
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni().seri_verisi(SeriSeçici::Sıra(0), veri.iter().cloned()),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .map_err(|hata| hata.to_string())?;
+    }
+    çalışma.seçenekleri_al().map_err(|hata| hata.to_string())
+}
+
 fn line_stack() -> GrafikSeçenekleri {
     let seri = |ad: &str, veri: [i32; 7]| ÇizgiSerisi::yeni().ad(ad).yığın("Total").veri(veri);
     GrafikSeçenekleri::yeni()
@@ -4043,6 +4133,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "area-simple" => Ok(area_simple()),
         "area-time-axis" => Ok(area_time_axis()),
         "area-rainfall" => area_rainfall(),
+        "dynamic-data2" => dynamic_data2(durum),
         "line-stack" => Ok(line_stack()),
         "line-style" => Ok(line_style()),
         "line-step" => Ok(line_step()),
@@ -4183,7 +4274,13 @@ fn çalıştır() -> Result<(), String> {
         // yalnız sürekli efekt saatini ilerletir.
         ilerleme: 1.0,
         zaman_sn: girdi.kare * 2.0,
-        fare: (girdi.id == "dataset-link" && girdi.durum == "son").then_some((323.75, 400.0)),
+        fare: if girdi.id == "dataset-link" && girdi.durum == "son" {
+            Some((323.75, 400.0))
+        } else if girdi.id == "dynamic-data2" && girdi.durum == "ipucu" {
+            Some((472.87, 250.0))
+        } else {
+            None
+        },
         ..BoyamaGirdisi::default()
     };
     let boyama_çıktısı = grafiği_boya(&mut yüzey, &seçenekler, &boyama);

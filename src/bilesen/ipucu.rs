@@ -17,7 +17,7 @@ pub struct İpucuSatırı {
 const İÇ_BOŞLUK: f32 = 10.0;
 const İM_ÇAPI: f32 = 10.0;
 const SÜTUN_ARASI: f32 = 20.0;
-const İMLEÇ_KAÇIĞI: f32 = 14.0;
+const İMLEÇ_KAÇIĞI: f32 = 21.2;
 
 /// İpucu penceresini çizer. `konum` grafik yerel fare noktasıdır; pencere
 /// tuval sınırları içinde kalacak biçimde konumlanır.
@@ -43,10 +43,12 @@ pub fn ipucu_çiz(
         } else {
             0.0
         };
-        let genişlik = im
-            + çizici.yazı_ölç(&satır.ad, boyut).0
-            + SÜTUN_ARASI
-            + çizici.yazı_ölç(&satır.değer, boyut).0;
+        let değer_genişliği = if satır.değer.is_empty() {
+            0.0
+        } else {
+            SÜTUN_ARASI + çizici.yazı_ölç(&satır.değer, boyut).0
+        };
+        let genişlik = im + çizici.yazı_ölç(&satır.ad, boyut).0 + değer_genişliği;
         içerik_genişliği = içerik_genişliği.max(genişlik);
     }
     let kutu_genişliği = içerik_genişliği + İÇ_BOŞLUK * 2.0;
@@ -119,15 +121,17 @@ pub fn ipucu_çiz(
             false,
         );
         // Değer sağa hizalı ve kalın (ECharts görünümü).
-        çizici.yazı(
-            &satır.değer,
-            (x + kutu_genişliği - İÇ_BOŞLUK, satır_y),
-            YatayHiza::Sağ,
-            DikeyHiza::Orta,
-            boyut,
-            metin_rengi,
-            true,
-        );
+        if !satır.değer.is_empty() {
+            çizici.yazı(
+                &satır.değer,
+                (x + kutu_genişliği - İÇ_BOŞLUK, satır_y),
+                YatayHiza::Sağ,
+                DikeyHiza::Orta,
+                boyut,
+                metin_rengi,
+                true,
+            );
+        }
         satır_y += satır_yüksekliği;
     }
 }

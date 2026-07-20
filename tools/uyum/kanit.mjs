@@ -39,6 +39,15 @@ const SENARYOLAR = [
   { id: 'area-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'area-time-axis', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'area-rainfall', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'dynamic-data2',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'ipucu', kare: 1, durum: 'ipucu' },
+      { ad: 'son', kare: 1, durum: 'son' }
+    ]
+  },
   { id: 'line-sections', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'area-pieces', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-gradient', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

@@ -2,7 +2,10 @@
 //! karşılığı.
 
 use std::collections::BTreeMap;
+use std::fmt;
+use std::sync::Arc;
 
+use crate::model::deger::VeriDeğeri;
 use crate::model::stil::{Biçimleyici, YazıStili};
 use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
 use crate::renk::Renk;
@@ -624,6 +627,47 @@ pub enum İmleçTürü {
     Yok,
 }
 
+/// `tooltip.formatter` işlevine iletilen seri/veri bağlamı. ECharts'ın
+/// `CallbackDataParams` dizisindeki görünür alanların tipli karşılığıdır.
+#[derive(Clone, PartialEq, Debug)]
+pub struct İpucuParametresi {
+    pub seri_sırası: usize,
+    pub seri_adı: String,
+    pub veri_sırası: usize,
+    pub ad: String,
+    pub değer: VeriDeğeri,
+}
+
+type İpucuBiçimleyiciİşlevi = dyn Fn(&[İpucuParametresi]) -> String + Send + Sync;
+
+/// Parametre dizisini alan işlev biçimli `tooltip.formatter`.
+#[derive(Clone)]
+pub struct İpucuBiçimleyicisi(Arc<İpucuBiçimleyiciİşlevi>);
+
+impl İpucuBiçimleyicisi {
+    pub fn yeni(
+        biçimleyici: impl Fn(&[İpucuParametresi]) -> String + Send + Sync + 'static,
+    ) -> Self {
+        Self(Arc::new(biçimleyici))
+    }
+
+    pub fn uygula(&self, parametreler: &[İpucuParametresi]) -> String {
+        (self.0)(parametreler)
+    }
+}
+
+impl fmt::Debug for İpucuBiçimleyicisi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("İpucuBiçimleyicisi(..)")
+    }
+}
+
+impl PartialEq for İpucuBiçimleyicisi {
+    fn eq(&self, diğer: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &diğer.0)
+    }
+}
+
 /// İpucu bileşeni (`tooltip`).
 #[derive(Clone, PartialEq, Debug)]
 pub struct İpucu {
@@ -633,6 +677,9 @@ pub struct İpucu {
     pub içerik_göster: bool,
     pub tetikleme: Tetikleme,
     pub imleç: İmleçTürü,
+    /// `tooltip.axisPointer.animation`; false canlı akışlarda imlecin veri
+    /// güncellemesinin gerisinde kalmasını önler.
+    pub imleç_animasyonu: bool,
     pub arkaplan: Option<Renk>,
     pub yazı: YazıStili,
     /// Değer biçimleyici (satırlardaki sayılar için).
@@ -640,6 +687,9 @@ pub struct İpucu {
     /// Satır biçimleyici (`tooltip.formatter`): `{a}` seri adı, `{b}` öğe/
     /// kategori adı, `{c}` değer. Verilirse satırlar bu şablonla yazılır.
     pub biçimleyici: Option<Biçimleyici>,
+    /// ECharts işlev biçimli formatter'ının tüm parametre dizisini alan
+    /// bağlamlı karşılığı.
+    pub bağlamlı_biçimleyici: Option<İpucuBiçimleyicisi>,
     /// Eksen imleci bağlantısı (`axisPointer.link: 'all'`): çoklu ızgarada
     /// imleç çizgisi aynı kategori sırasında tüm ızgaralarda çizilir.
     pub bağlantılı: bool,
@@ -652,10 +702,12 @@ impl Default for İpucu {
             içerik_göster: true,
             tetikleme: Tetikleme::Öğe,
             imleç: İmleçTürü::Çizgi,
+            imleç_animasyonu: true,
             arkaplan: None,
             yazı: YazıStili::default(),
             değer_biçimleyici: None,
             biçimleyici: None,
+            bağlamlı_biçimleyici: None,
             bağlantılı: false,
         }
     }
@@ -686,6 +738,11 @@ impl İpucu {
         self
     }
 
+    pub fn imleç_animasyonu(mut self, açık: bool) -> Self {
+        self.imleç_animasyonu = açık;
+        self
+    }
+
     pub fn arkaplan(mut self, renk: impl Into<Renk>) -> Self {
         self.arkaplan = Some(renk.into());
         self
@@ -705,6 +762,18 @@ impl İpucu {
     /// adı, `{c}` değer.
     pub fn biçimleyici(mut self, b: impl Into<Biçimleyici>) -> Self {
         self.biçimleyici = Some(b.into());
+        self.bağlamlı_biçimleyici = None;
+        self
+    }
+
+    /// İşlev biçimli `tooltip.formatter`; eksen tetiklemesinde aynı eksen
+    /// değerine karşılık gelen bütün görünür seriler parametre dizisindedir.
+    pub fn bağlamlı_biçimleyici(
+        mut self,
+        biçimleyici: impl Fn(&[İpucuParametresi]) -> String + Send + Sync + 'static,
+    ) -> Self {
+        self.bağlamlı_biçimleyici = Some(İpucuBiçimleyicisi::yeni(biçimleyici));
+        self.biçimleyici = None;
         self
     }
 

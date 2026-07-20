@@ -45,7 +45,7 @@ use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_çiz};
 use crate::grafik::tema_nehri::tema_nehri_çiz;
 use crate::koordinat::{Dikdörtgen, Kartezyen2B, TakvimYerleşimi, ÇalışmaEkseni};
 use crate::model::bilesen::{
-    AraçKutusuÖzelliği, GöstergeSimgesi, Tetikleme, Yön, İmleçTürü, İpucu,
+    AraçKutusuÖzelliği, GöstergeSimgesi, Tetikleme, Yön, İmleçTürü, İpucu, İpucuParametresi,
 };
 use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
@@ -1318,11 +1318,13 @@ fn kartezyen_kur(
 /// Eksen tetiklemeli ipucunun hazırlanmış içeriği.
 struct Eksenİpucu {
     ızgara: usize,
-    kategori_sırası: usize,
-    /// Bant ekseni x mi (dikey imleç) yoksa y mi (yatay imleç)?
+    /// İmleç ekseni x mi (dikey imleç) yoksa y mi (yatay imleç)?
     bant_x: bool,
+    kategorik: bool,
+    eksen_değeri: f64,
     başlık: String,
     satırlar: Vec<İpucuSatırı>,
+    parametreler: Vec<İpucuParametresi>,
 }
 
 /// `tooltip.formatter` uygulaması: `{a}` seri adı, `{b}` öğe/kategori adı,
@@ -1367,26 +1369,54 @@ fn eksen_ipucu_derle(
     ipucu: &İpucu,
 ) -> Option<Eksenİpucu> {
     let ızgara = kurulum.faredeki_ızgara(fare)?;
-    // Bant ekseni: o ızgaradaki ilk kategorik x (öncelik) ya da y ekseni.
-    let (bant_ekseni, bant_x, eksen_sırası) = kurulum
+    // ECharts eksen tetiklemesinde kategorik x/y önceliklidir. Böyle bir
+    // eksen yoksa zaman/sayısal x eksenindeki fare değerine en yakın veri
+    // noktası seçilir.
+    let (bant_ekseni, bant_x, eksen_sırası, kategorik) = kurulum
         .x_eksenler
         .iter()
         .enumerate()
         .find(|(_, e)| e.seçenek.ızgara_sırası == ızgara && e.ölçek.kategorik_mi())
-        .map(|(i, e)| (e, true, i))
+        .map(|(i, e)| (e, true, i, true))
         .or_else(|| {
             kurulum
                 .y_eksenler
                 .iter()
                 .enumerate()
                 .find(|(_, e)| e.seçenek.ızgara_sırası == ızgara && e.ölçek.kategorik_mi())
-                .map(|(i, e)| (e, false, i))
+                .map(|(i, e)| (e, false, i, true))
+        })
+        .or_else(|| {
+            kurulum
+                .x_eksenler
+                .iter()
+                .enumerate()
+                .find(|(_, e)| e.seçenek.ızgara_sırası == ızgara)
+                .map(|(i, e)| (e, true, i, false))
         })?;
     let fare_konumu = if bant_x { fare.0 } else { fare.1 };
-    let sıra = bant_ekseni.pikselden_veriye(fare_konumu) as usize;
-    let başlık = bant_ekseni.ölçek.etiket(sıra as f64);
+    let fare_değeri = bant_ekseni.pikselden_veriye(fare_konumu);
+    let (sıra, eksen_değeri) = if kategorik {
+        let sıra = fare_değeri.max(0.0) as usize;
+        (sıra, sıra as f64)
+    } else {
+        seçenekler
+            .seriler
+            .iter()
+            .enumerate()
+            .filter(|(i, seri)| {
+                seri.kartezyen_mi()
+                    && kurulum.görünürler.get(*i).copied().unwrap_or(false)
+                    && seri.eksen_bağı().x == eksen_sırası
+            })
+            .flat_map(|(_, seri)| seri.veri().iter().enumerate())
+            .filter_map(|(sıra, öğe)| öğe.değer.x().map(|x| (sıra, x)))
+            .min_by(|(_, a), (_, b)| (a - fare_değeri).abs().total_cmp(&(b - fare_değeri).abs()))?
+    };
+    let başlık = bant_ekseni.ölçek.etiket(eksen_değeri);
 
     let mut satırlar = Vec::new();
+    let mut parametreler = Vec::new();
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         if !seri.kartezyen_mi() || !kurulum.görünürler.get(i).copied().unwrap_or(false) {
             continue;
@@ -1396,7 +1426,24 @@ fn eksen_ipucu_derle(
         if (bant_x && bağ.x != eksen_sırası) || (!bant_x && bağ.y != eksen_sırası) {
             continue;
         }
-        let Some(öğe) = seri.veri().get(sıra) else {
+        let veri_sırası = if kategorik {
+            Some(sıra)
+        } else {
+            seri.veri()
+                .iter()
+                .enumerate()
+                .filter_map(|(sıra, öğe)| öğe.değer.x().map(|x| (sıra, x)))
+                .min_by(|(_, a), (_, b)| {
+                    (a - eksen_değeri)
+                        .abs()
+                        .total_cmp(&(b - eksen_değeri).abs())
+                })
+                .map(|(sıra, _)| sıra)
+        };
+        let Some(veri_sırası) = veri_sırası else {
+            continue;
+        };
+        let Some(öğe) = seri.veri().get(veri_sırası) else {
             continue;
         };
         let metin = if let Some(dizi) = öğe.değer.dizi() {
@@ -1419,16 +1466,25 @@ fn eksen_ipucu_derle(
             ad: seri.ad().unwrap_or("-").to_string(),
             değer: metin,
         });
+        parametreler.push(İpucuParametresi {
+            seri_sırası: i,
+            seri_adı: seri.ad().unwrap_or("").to_string(),
+            veri_sırası,
+            ad: öğe.ad.clone().unwrap_or_else(|| başlık.clone()),
+            değer: öğe.değer.clone(),
+        });
     }
     if satırlar.is_empty() {
         return None;
     }
     Some(Eksenİpucu {
         ızgara,
-        kategori_sırası: sıra,
         bant_x,
+        kategorik,
+        eksen_değeri,
         başlık,
         satırlar,
+        parametreler,
     })
 }
 
@@ -1882,6 +1938,7 @@ pub fn grafiği_boya(
             if let (Some(ipucu), Some(eksen_ip)) = (&ipucu_seçeneği, &eksen_ipucu)
                 && ipucu.imleç == İmleçTürü::Gölge
                 && eksen_ip.ızgara == g
+                && eksen_ip.kategorik
             {
                 let bant_ekseni = if eksen_ip.bant_x {
                     kurulum
@@ -1895,7 +1952,7 @@ pub fn grafiği_boya(
                         .find(|e| e.seçenek.ızgara_sırası == g && e.ölçek.kategorik_mi())
                 };
                 if let Some(bant_ekseni) = bant_ekseni {
-                    let merkez = bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64);
+                    let merkez = bant_ekseni.veriden_piksele(eksen_ip.eksen_değeri);
                     let bant = bant_ekseni.bant_genişliği();
                     let d = if eksen_ip.bant_x {
                         Dikdörtgen::yeni(merkez - bant / 2.0, alan.y, bant, alan.yükseklik)
@@ -2817,25 +2874,25 @@ pub fn grafiği_boya(
                         .get(ızgara)
                         .copied()
                         .unwrap_or_default();
-                    let bant_ekseni =
-                        if eksen_ip.bant_x {
-                            kurulum.x_eksenler.iter().find(|e| {
-                                e.seçenek.ızgara_sırası == ızgara && e.ölçek.kategorik_mi()
-                            })
-                        } else {
-                            kurulum.y_eksenler.iter().find(|e| {
-                                e.seçenek.ızgara_sırası == ızgara && e.ölçek.kategorik_mi()
-                            })
-                        };
+                    let bant_ekseni = if eksen_ip.bant_x {
+                        kurulum.x_eksenler.iter().find(|e| {
+                            e.seçenek.ızgara_sırası == ızgara
+                                && e.ölçek.kategorik_mi() == eksen_ip.kategorik
+                        })
+                    } else {
+                        kurulum.y_eksenler.iter().find(|e| {
+                            e.seçenek.ızgara_sırası == ızgara
+                                && e.ölçek.kategorik_mi() == eksen_ip.kategorik
+                        })
+                    };
                     let Some(bant_ekseni) = bant_ekseni else {
                         continue;
                     };
                     // Yakınlaştırma penceresi dışındaysa çizme.
-                    if !bant_ekseni.pencerede_mi(eksen_ip.kategori_sırası as f64) {
+                    if !bant_ekseni.pencerede_mi(eksen_ip.eksen_değeri) {
                         continue;
                     }
-                    let merkez =
-                        keskin(bant_ekseni.veriden_piksele(eksen_ip.kategori_sırası as f64));
+                    let merkez = keskin(bant_ekseni.veriden_piksele(eksen_ip.eksen_değeri));
                     if eksen_ip.bant_x {
                         yüzey.çizgi(
                             (merkez, alan.alt()),
@@ -2854,11 +2911,56 @@ pub fn grafiği_boya(
                         );
                     }
                 }
+
+                // `showSymbol: false` çizgilerinde ECharts, eksen imlecinin
+                // yakaladığı noktayı geçici vurgu sembolüyle görünür kılar.
+                if !eksen_ip.kategorik {
+                    for parametre in &eksen_ip.parametreler {
+                        let Some(seri) = seçenekler.seriler.get(parametre.seri_sırası) else {
+                            continue;
+                        };
+                        let Seri::Çizgi(çizgi) = seri else {
+                            continue;
+                        };
+                        if çizgi.sembol_göster {
+                            continue;
+                        }
+                        let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+                            continue;
+                        };
+                        let Some(x) = parametre.değer.x() else {
+                            continue;
+                        };
+                        let Some(y) = parametre.değer.sayı() else {
+                            continue;
+                        };
+                        let merkez = kartezyen.nokta(x, y);
+                        yüzey.daire(
+                            merkez,
+                            4.0,
+                            Some(&Dolgu::Düz(crate::renk::Renk::BEYAZ)),
+                            Some((2.0, seçenekler.seri_rengi(parametre.seri_sırası))),
+                        );
+                    }
+                }
             }
             if ipucu.içerik_göster
                 && let Some(f) = fare
             {
-                bekleyen_ipucu = Some((Some(eksen_ip.başlık), eksen_ip.satırlar, f));
+                let (başlık, satırlar) = if let Some(biçimleyici) = &ipucu.bağlamlı_biçimleyici
+                {
+                    (
+                        None,
+                        vec![İpucuSatırı {
+                            im_rengi: None,
+                            ad: biçimleyici.uygula(&eksen_ip.parametreler),
+                            değer: String::new(),
+                        }],
+                    )
+                } else {
+                    (Some(eksen_ip.başlık), eksen_ip.satırlar)
+                };
+                bekleyen_ipucu = Some((başlık, satırlar, f));
             }
         }
     }
@@ -3526,6 +3628,54 @@ mod yakınlaştırma_yönü_testleri {
         };
         assert_eq!(sürgü.eksen_uzunluğu(), 200.0);
         assert!(sürgü.eksen_konumu((20.0, 40.0)) > sürgü.eksen_konumu((20.0, 80.0)));
+    }
+
+    #[test]
+    fn zaman_ekseni_ipucu_en_yakin_noktayi_baglamli_bicimlendirir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .ipucu(
+                İpucu::yeni()
+                    .tetikleme(Tetikleme::Eksen)
+                    .imleç_animasyonu(false)
+                    .bağlamlı_biçimleyici(|parametreler| {
+                        let Some(parametre) = parametreler.first() else {
+                            return String::new();
+                        };
+                        format!(
+                            "{}:{}",
+                            parametre.veri_sırası,
+                            parametre.değer.sayı().unwrap_or_default()
+                        )
+                    }),
+            )
+            .x_ekseni(Eksen::zaman())
+            .y_ekseni(Eksen::değer())
+            .seri(
+                crate::model::seri::ÇizgiSerisi::yeni()
+                    .sembol_göster(false)
+                    .veri([
+                        crate::model::deger::VeriÖğesi::yeni([0.0, 10.0]),
+                        crate::model::deger::VeriÖğesi::yeni([86_400_000.0, 20.0]),
+                    ]),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        grafiği_boya(
+            &mut yüzey,
+            &seçenekler,
+            &BoyamaGirdisi {
+                fare: Some((629.0, 250.0)),
+                ..BoyamaGirdisi::default()
+            },
+        );
+
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("yazı \"1:20\""), "{döküm}");
+        assert!(
+            döküm.contains("Y(4.0 bS 626.0,65.0)"),
+            "showSymbol=false imleç vurgu sembolü eksik: {döküm}"
+        );
     }
 
     #[test]

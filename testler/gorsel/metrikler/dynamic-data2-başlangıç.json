@@ -1,0 +1,19 @@
+{
+  "id": "dynamic-data2",
+  "senaryo": "etkileşim",
+  "kare": "başlangıç",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1443,
+  "değişen_piksel_oranı": 0.005344444444444444,
+  "ssim": 0.994190412977231,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data2-başlangıç.png",
+    "gerçek": "testler/gorsel/gerçek/default/dynamic-data2-başlangıç.png",
+    "fark": "testler/gorsel/fark/default/dynamic-data2-başlangıç.png"
+  }
+}

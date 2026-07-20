@@ -77,7 +77,7 @@ pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::agac::AğaçDüğümü;
 pub use model::bilesen::{
     AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, Gösterge, GöstergeSeçimKipi,
-    Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
+    Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi, İpucuParametresi,
 };
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
@@ -169,7 +169,8 @@ pub mod hazir {
     pub use crate::model::agac::AğaçDüğümü;
     pub use crate::model::bilesen::{
         AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, Gösterge,
-        GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
+        GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi,
+        İpucuParametresi,
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{

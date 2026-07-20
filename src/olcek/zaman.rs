@@ -94,7 +94,24 @@ impl ZamanÖlçeği {
 
         let mut birim = ZamanBirimi::Milisaniye;
         let mut birim_adımı = hedef_adım.max(1.0);
-        if hedef_adım >= SANİYE {
+        if (31.0 * GÜN..=YIL_YAKLAŞIK).contains(&hedef_adım) {
+            // ECharts `TimeScale`, yaklaşık aralık ay düzeyine ulaştığında
+            // bir üst sabit milisaniye adayını doğrudan kullanmaz;
+            // `getMonthInterval` ile takvim ayı adımını 1/2/3/6 seçer. Bu
+            // özellikle 2–4 yıllık eksenlerde nice interval yarım yıl olsa
+            // bile çentiklerin çeyrek yıllık üretilmesini sağlar.
+            birim = ZamanBirimi::Ay;
+            let yaklaşık_ay = hedef_adım / (30.0 * GÜN);
+            birim_adımı = if yaklaşık_ay > 6.0 {
+                6.0
+            } else if yaklaşık_ay > 3.0 {
+                3.0
+            } else if yaklaşık_ay > 2.0 {
+                2.0
+            } else {
+                1.0
+            };
+        } else if hedef_adım >= SANİYE {
             let mut seçildi = false;
             for (b, ba, ms) in adaylar {
                 if ms >= hedef_adım {
@@ -287,5 +304,34 @@ mod testler {
         let ö = ZamanÖlçeği::kur([başlangıç, bitiş], 7);
         assert_eq!(ö.birim, ZamanBirimi::Gün);
         assert!(!ö.çentikler().is_empty());
+    }
+
+    #[test]
+    fn cok_yillik_kapsam_echarts_gibi_ceyrek_yil_centikleri_uretir() {
+        let başlangıç = takvimden_ana(TakvimAnı {
+            yıl: 1997,
+            ay: 10,
+            gün: 4,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let ölçek = ZamanÖlçeği::kur([başlangıç, başlangıç + 999.0 * GÜN], 6);
+
+        assert_eq!(ölçek.birim, ZamanBirimi::Ay);
+        assert_eq!(ölçek.birim_adımı, 3.0);
+        let tarihler = ölçek
+            .çentikler()
+            .into_iter()
+            .map(|çentik| {
+                let an = andan_takvime(çentik.değer);
+                (an.yıl, an.ay, an.gün)
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(tarihler.first(), Some(&(1998, 1, 1)));
+        assert!(tarihler.contains(&(1998, 4, 1)));
+        assert!(tarihler.contains(&(1999, 10, 1)));
+        assert_eq!(tarihler.last(), Some(&(2000, 4, 1)));
     }
 }

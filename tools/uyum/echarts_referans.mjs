@@ -91,8 +91,23 @@ function html(id, kaynak, frame, state) {
           const x = myChart.convertToPixel({xAxisIndex: 0}, '2014');
           myChart.dispatchAction({type:'updateAxisPointer', x, y:400});
         }`
+      : id === 'dynamic-data2' && state === 'ipucu'
+        ? `{
+            const x = myChart.convertToPixel({xAxisIndex: 0}, data[700].value[0]);
+            myChart.dispatchAction({type:'updateAxisPointer', x, y:250});
+          }`
+        : id === 'dynamic-data2' && state === 'son'
+        ? `{
+            const zamanlayıcı = window.__capturedIntervals[0];
+            if (!zamanlayıcı || zamanlayıcı.ms !== 1000) {
+              throw new Error('dynamic-data2 1000 ms zamanlayıcısı yakalanamadı');
+            }
+            // Resmî callback'i yirmi kez çalıştır: her çağrı beş noktayı
+            // kaydırır; son kare tam olarak 20 saniyelik canlı durumdur.
+            for (let tik = 0; tik < 20; tik += 1) zamanlayıcı.callback();
+          }`
       : '';
-  const zamanlayıcıyıBekle = id === 'dataset-link'
+  const zamanlayıcıyıBekle = id === 'dataset-link' || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
   const hedefMs = id === 'scatter-effect' ? frame * 2000 : 0;
@@ -185,6 +200,22 @@ echarts.registerPreprocessor((opt) => {
     for (const item of values) if (item.padding == null) item.padding = 15;
   }
 });
+${id === 'dynamic-data2' ? `
+// Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
+// ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
+// girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.
+window.__capturedIntervals = [];
+window.setInterval = (callback, ms) => {
+  window.__capturedIntervals.push({callback, ms});
+  return window.__capturedIntervals.length;
+};
+window.clearInterval = (timerId) => {
+  const sıra = Number(timerId) - 1;
+  if (sıra >= 0 && sıra < window.__capturedIntervals.length) {
+    window.__capturedIntervals[sıra] = null;
+  }
+};
+` : ''}
 ${kaynak}
 window.__sourceDone = true;
 (async () => {
