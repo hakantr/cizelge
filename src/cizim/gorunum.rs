@@ -696,6 +696,7 @@ fn gösterge_öğeleri(
                         kapalı: kapalı.contains(&ad),
                         ad,
                         renk: seçenekler.palet_rengi(j),
+                        opaklık: 1.0,
                         simge: GöstergeSimgesi::Çizgi,
                         çizgi_kalınlığı: None,
                         çizgi_sembolü: None,
@@ -713,6 +714,7 @@ fn gösterge_öğeleri(
                         kapalı: kapalı.contains(&ad),
                         ad,
                         renk: seçenekler.palet_rengi(j),
+                        opaklık: 1.0,
                         simge: GöstergeSimgesi::YuvarlakKöşeliKare,
                         çizgi_kalınlığı: None,
                         çizgi_sembolü: None,
@@ -743,6 +745,7 @@ fn gösterge_öğeleri(
                         kapalı: kapalı.contains(&ad),
                         ad,
                         renk,
+                        opaklık: 1.0,
                         simge: GöstergeSimgesi::YuvarlakKöşeliKare,
                         çizgi_kalınlığı: None,
                         çizgi_sembolü: None,
@@ -774,10 +777,18 @@ fn gösterge_öğeleri(
                     Seri::Çizgi(çizgi) => Some(çizgi.sembol),
                     _ => None,
                 };
+                let opaklık = match seri {
+                    Seri::Saçılım(saçılım) => saçılım
+                        .öğe_stili
+                        .opaklık
+                        .unwrap_or(if saçılım.efektli { 1.0 } else { 0.8 }),
+                    _ => 1.0,
+                };
                 öğeler.push(GöstergeÖğesi {
                     kapalı: kapalı.contains(&ad),
                     ad,
                     renk: seçenekler.seri_rengi(i),
+                    opaklık,
                     simge,
                     çizgi_kalınlığı,
                     çizgi_sembolü,
@@ -3604,7 +3615,7 @@ pub fn grafiği_boya(
                 &görünürler,
                 Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik()),
             );
-            kutupsal_ağ_çiz(yüzey, &düzen);
+            kutupsal_ağ_çiz(yüzey, koordinat, &düzen);
             kutupsal_serileri_çiz(
                 yüzey,
                 seçenekler,
@@ -4623,6 +4634,32 @@ mod yakınlaştırma_yönü_testleri {
         assert_eq!(
             öğeler.iter().map(|öğe| öğe.ad.as_str()).collect::<Vec<_>>(),
             ["Kek", "Tahıl"]
+        );
+    }
+
+    #[test]
+    fn saçılım_göstergesi_serinin_öntanımlı_ve_açık_opaklığını_miras_alır() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .gösterge(crate::model::bilesen::Gösterge::yeni())
+            .seri(crate::model::seri::SaçılımSerisi::yeni().ad("Saçılım"))
+            .seri(
+                crate::model::seri::SaçılımSerisi::yeni()
+                    .ad("Efekt")
+                    .efektli(true),
+            )
+            .seri(
+                crate::model::seri::SaçılımSerisi::yeni()
+                    .ad("Açık")
+                    .öğe_stili(crate::model::stil::ÖğeStili::yeni().opaklık(0.35)),
+            );
+
+        let öğeler = gösterge_öğeleri(&seçenekler, &HashSet::new());
+        assert_eq!(
+            öğeler
+                .iter()
+                .map(|öğe| (öğe.ad.as_str(), öğe.opaklık))
+                .collect::<Vec<_>>(),
+            [("Saçılım", 0.8), ("Efekt", 1.0), ("Açık", 0.35)]
         );
     }
 

@@ -16,6 +16,10 @@ use crate::tema;
 pub struct GöstergeÖğesi {
     pub ad: String,
     pub renk: Renk,
+    /// Seri görsel stilinden miras alınan simge opaklığı. ECharts scatter
+    /// serisinin öntanımlı `itemStyle.opacity: 0.8` değeri legend simgesine
+    /// de taşınır.
+    pub opaklık: f32,
     pub simge: GöstergeSimgesi,
     /// Çizgi serisinin `lineStyle.width` değeri. `None`, öntanımlı 2 px'dir;
     /// sıfır olduğunda legend simgesinde yalnız seri sembolü kalır.
@@ -455,7 +459,7 @@ fn öğe_çiz(
     let renk = if öğe.kapalı {
         seçenek.devre_dışı_rengi
     } else {
-        öğe.renk
+        öğe.renk.opaklık(öğe.opaklık)
     };
     let simge = seçenek.simge.unwrap_or(öğe.simge);
     // `kutu` zrender grubunun görünen sınırıdır. Çizgi vuruşu ve seri

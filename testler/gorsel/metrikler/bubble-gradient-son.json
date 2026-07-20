@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 846,
-  "değişen_piksel_oranı": 0.0031333333333333335,
-  "ssim": 0.9967250954512766,
+  "değişen_piksel": 888,
+  "değişen_piksel_oranı": 0.003288888888888889,
+  "ssim": 0.9964629144987965,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bubble-gradient.png",
     "gerçek": "testler/gorsel/gerçek/default/bubble-gradient.png",

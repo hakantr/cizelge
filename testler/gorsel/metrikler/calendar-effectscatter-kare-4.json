@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1071,
-  "değişen_piksel_oranı": 0.003966666666666667,
-  "ssim": 0.9973140915423242,
+  "değişen_piksel": 1051,
+  "değişen_piksel_oranı": 0.0038925925925925925,
+  "ssim": 0.9974039252146302,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-effectscatter-kare-4.png",
     "gerçek": "testler/gorsel/gerçek/default/calendar-effectscatter-kare-4.png",

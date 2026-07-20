@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1663,
-  "değişen_piksel_oranı": 0.006159259259259259,
-  "ssim": 0.9930586792415457,
+  "değişen_piksel": 1581,
+  "değişen_piksel_oranı": 0.005855555555555556,
+  "ssim": 0.9931524483553094,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-logarithmic-regression.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-logarithmic-regression.png",

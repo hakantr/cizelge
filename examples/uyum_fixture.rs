@@ -3611,14 +3611,22 @@ fn scatter_simple() -> GrafikSeçenekleri {
         ]))
 }
 
-fn scatter_punch_card() -> Result<GrafikSeçenekleri, String> {
+type PunchCardVerisi = (Vec<String>, Vec<String>, Vec<[f64; 3]>);
+
+fn punch_card_verisini_oku(dosya_adı: &str) -> Result<PunchCardVerisi, String> {
     let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../echarts-examples/public/examples/ts/scatter-punchCard.ts");
+        .join("../echarts-examples/public/examples/ts")
+        .join(dosya_adı);
     let kaynak = std::fs::read_to_string(&dosya)
         .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
     let saatler: Vec<String> = resmi_javascript_dizisi(&kaynak, "const hours")?;
     let günler: Vec<String> = resmi_javascript_dizisi(&kaynak, "const days")?;
     let ham_veri: Vec<[f64; 3]> = resmi_javascript_dizisi(&kaynak, "const data")?;
+    Ok((saatler, günler, ham_veri))
+}
+
+fn scatter_punch_card() -> Result<GrafikSeçenekleri, String> {
+    let (saatler, günler, ham_veri) = punch_card_verisini_oku("scatter-punchCard.ts")?;
     let veri = ham_veri
         .into_iter()
         // Resmî örnekteki `.map`: [gün, saat, değer] -> [saat, gün, değer].
@@ -3662,6 +3670,69 @@ fn scatter_punch_card() -> Result<GrafikSeçenekleri, String> {
                 })
                 .veri(veri),
         ))
+}
+
+fn scatter_polar_punch_card() -> Result<GrafikSeçenekleri, String> {
+    let (saatler, günler, veri) = punch_card_verisini_oku("scatter-polar-punchCard.ts")?;
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Punch Card of Github").iç_boşluk(15.0))
+        .gösterge(
+            Gösterge::yeni()
+                .veri(["Punch Card"])
+                .sol("right")
+                .iç_boşluk(15.0),
+        )
+        .kutupsal(
+            KutupsalKoordinat::yeni()
+                .açısal_eksen(
+                    Eksen::kategori()
+                        .veri(saatler)
+                        .kenar_boşluğu(false)
+                        .bölme_çizgisi_göster(true)
+                        .çizgi(EksenÇizgisi::yeni().göster(false)),
+                )
+                .radyal_eksen(
+                    Eksen::kategori()
+                        .veri(günler)
+                        .çizgi(EksenÇizgisi::yeni().göster(false))
+                        .etiket(EksenEtiketi::yeni().döndür(45.0)),
+                ),
+        )
+        .ipucu(İpucu::yeni())
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("Punch Card")
+                .kutupsal(true)
+                .sembol_boyutu_işlevi(|öğe| {
+                    öğe
+                        .değer
+                        .dizi()
+                        .and_then(|değerler| değerler.get(2))
+                        .copied()
+                        .unwrap_or_default() as f32
+                        * 2.0
+                })
+                .veri(veri),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_polar_punch_card_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_polar_punch_card_verisi_kayipsiz_okunur() {
+        let (saatler, günler, veri) = punch_card_verisini_oku("scatter-polar-punchCard.ts")
+            .expect("resmi polar punch card verisi okunmalı");
+        assert_eq!(saatler.len(), 24);
+        assert_eq!(günler.len(), 7);
+        assert_eq!(veri.len(), 168);
+        assert_eq!(veri.first(), Some(&[0.0, 0.0, 5.0]));
+        assert_eq!(veri.last(), Some(&[6.0, 23.0, 6.0]));
+    }
 }
 
 fn scatter_anscombe_quartet() -> Result<GrafikSeçenekleri, String> {
@@ -7271,6 +7342,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-jitter" => Ok(scatter_jitter()),
         "doc-example/scatter-jitter-avoidOverlap" => Ok(scatter_jitter_avoid_overlap()),
         "scatter-punchCard" => scatter_punch_card(),
+        "scatter-polar-punchCard" => scatter_polar_punch_card(),
         "bubble-gradient" => bubble_gradient(),
         "scatter-label-align-top" => scatter_label_align_top(),
         "scatter-label-align-right" => scatter_label_align_right(),

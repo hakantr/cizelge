@@ -11,7 +11,7 @@ pub struct KutupsalKoordinat {
     pub yarıçap: Uzunluk,
     /// Açısal eksen (`angleAxis`): verisi doluysa kategorik.
     pub açısal_eksen: Eksen,
-    /// Radyal eksen (`radiusAxis`): değer ekseni.
+    /// Radyal eksen (`radiusAxis`): değer/kategori/zaman/log ekseni.
     pub radyal_eksen: Eksen,
     /// Açısal eksenin başlangıcı, derece (`angleAxis.startAngle`).
     pub başlangıç_açısı: f32,
