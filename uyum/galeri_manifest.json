@@ -8253,14 +8253,14 @@
           "geçti": true,
           "değişen_piksel": 299,
           "değişen_piksel_oranı": 0.0011074074074074074,
-          "ssim": 0.9986663809656563,
+          "ssim": 0.9986663400243313,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-jitter.png",
             "sha256": "da668e34d9583b07615aae447fde0f2f6e82ba612cf2d27a0bd1403765beeb0f"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/scatter-jitter.png",
-            "sha256": "530550afd257d04552a7eeef1e34fcc9ad99ddcb9fcc642bb88f76cc21b48012"
+            "sha256": "c8428607c61f1e611668847053d5087e0cd8a62008da17fd4da9800c2ad33589"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/scatter-jitter.png",
@@ -8268,7 +8268,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/scatter-jitter-son.json",
-            "sha256": "2e958f7da9de1df7b865a4b30397796d6bb409aacba6be2985f6a50bf65615e2"
+            "sha256": "7e0f6b4f9a35f59bdf0f8a12762e897b28aee355caeaa02dd8ea1f544c47a381"
           }
         }
       ]
@@ -23043,7 +23043,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/doc-example/scatter-jitter-avoidOverlap.js",
     "kaynak_sha256": "f8139295ff28458c224c93989035f689bea2c8107e22b9751aaa63d2ba3045c4",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_jitter_avoid_overlap",
     "seriler": [
       "scatter"
     ],
@@ -23054,7 +23054,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -23065,15 +23065,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 403,
+          "değişen_piksel_oranı": 0.0014925925925925927,
+          "ssim": 0.9967159422882296,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/doc-example__scatter-jitter-avoidOverlap.png",
+            "sha256": "d93a7a21dc1eac360e19641616add12938633abb64802c12f3f9255447797b5e"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/doc-example__scatter-jitter-avoidOverlap.png",
+            "sha256": "213e6c3473e4f22a192e5b10295a467cef379dca6f266f31e8b5a274aaad350d"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/doc-example__scatter-jitter-avoidOverlap.png",
+            "sha256": "9b5d1ef58af04626bd613a0b22abbab15ce2c446f604c265c1165af5c4a1ac6e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/doc-example__scatter-jitter-avoidOverlap-son.json",
+            "sha256": "29147267690e6e0aa8966299b45d77ebb90274c476b7157a652ea2b8a798f448"
+          }
+        }
+      ]
     }
   },
   {
