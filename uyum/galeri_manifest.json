@@ -17584,7 +17584,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/candlestick-sh-2015.ts",
     "kaynak_sha256": "0342b142f719aff5c071bbfe17be3668b23e8f218e23774e78df4cfe7c9c1cd0",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#candlestick_sh_2015",
     "seriler": [
       "candlestick",
       "cross",
@@ -17602,7 +17602,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -17613,15 +17613,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1056,
+          "değişen_piksel_oranı": 0.003911111111111111,
+          "ssim": 0.9965514594408998,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/candlestick-sh-2015.png",
+            "sha256": "9ea8ba40a89dbafac92cb411e39c286d27cd04472c6aaff0f93d5232d4fea58d"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/candlestick-sh-2015.png",
+            "sha256": "a1fa81817e3aecb126b77e137ed7fe307aaf48b6bdba5a217449588fdbbea26e"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/candlestick-sh-2015.png",
+            "sha256": "2cdf797a1e4fc6af82dbaddd674eee5168f05ef89c125da7d4b1a5cebdeac6ca"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/candlestick-sh-2015-son.json",
+            "sha256": "bf5e9371831f3b10a03a545e9bdd3350acb5c28a1fc298ce9b514a57267946be"
+          }
+        }
+      ]
     }
   },
   {
