@@ -1511,7 +1511,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/calendar-vertical.ts",
     "kaynak_sha256": "e547cfd789970416aab148b8f8e7201b2c28d1cab6835be80a3ffab132d55223",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#calendar_vertical",
     "seriler": [
       "heatmap"
     ],
@@ -1527,7 +1527,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -1539,15 +1539,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 511,
+          "değişen_piksel_oranı": 0.0018925925925925926,
+          "ssim": 0.9983240294808597,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-vertical.png",
+            "sha256": "c9ea26cea3c2ee4b99238e5d8ce77bedb6a199c7259e160456292a5842acba5b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-vertical.png",
+            "sha256": "d5b361d34d9c750a2a91b1b085f3190d861d8fffe3ac74bceb547da749d58f10"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-vertical.png",
+            "sha256": "c32ac3474034c312e85fe39013652df61e8c69a0a2e5c99b50fb339a313022b0"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-vertical-son.json",
+            "sha256": "42f1c801c2d344107265c782845549054274065dfd11608387a3d13ee7b526ed"
+          }
+        }
+      ]
     }
   },
   {

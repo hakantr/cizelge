@@ -268,4 +268,20 @@ mod testler {
         // 1 Ocak 2016 Cuma; Pazar başlangıcında altıncı satırdır.
         assert!((ilk.y - 185.0).abs() < 1e-5);
     }
+
+    #[test]
+    fn dikey_otomatik_hücre_alt_kenara_kadar_sığar() {
+        let seçenek = TakvimKoordinatı::yıl(2017)
+            .sol(520.0)
+            .alt(10)
+            .hücre_boyutu(Some(20.0), None)
+            .yön(TakvimYönü::Dikey);
+        let yerleşim = TakvimYerleşimi::kur(&seçenek, (700.0, 525.0)).unwrap();
+        assert_eq!(yerleşim.hafta_sayısı, 53);
+        assert_eq!(yerleşim.gövde_kutusu.x, 520.0);
+        assert_eq!(yerleşim.gövde_kutusu.y, 60.0);
+        assert_eq!(yerleşim.gövde_kutusu.genişlik, 140.0);
+        assert_eq!(yerleşim.gövde_kutusu.yükseklik, 455.0);
+        assert!((yerleşim.hücre_yüksekliği - 455.0 / 53.0).abs() < 1e-5);
+    }
 }

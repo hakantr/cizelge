@@ -14,6 +14,14 @@ use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
 
+fn görsel_eşleme_değer_metni(değer: f64, hassasiyet: usize) -> String {
+    if değer.is_finite() {
+        format!("{:.*}", hassasiyet.min(20), değer)
+    } else {
+        değer.to_string()
+    }
+}
+
 /// Isı haritası serisinin değer kapsamı (görsel eşleme için).
 pub fn ısı_değer_kapsamı(seri: &IsıHaritasıSerisi) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
@@ -503,37 +511,61 @@ pub fn görsel_eşleme_çiz(
         const İÇ_BOŞLUK: f32 = 15.0;
         let boyut = tema::YAZI_KÜÇÜK;
         let seçili = eşleme.seçili_kapsam(kapsam);
-        let düşük = binlik_ayır(seçili[0]);
-        let yüksek = binlik_ayır(seçili[1]);
+        let düşük = görsel_eşleme_değer_metni(seçili[0], eşleme.hassasiyet);
+        let yüksek = görsel_eşleme_değer_metni(seçili[1], eşleme.hassasiyet);
         let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
         let yarım_tutamaç_yüksekliği = TUTAMAÇ_YÜKSEKLİĞİ / 2.0;
         let tutamaç_taşması = (TUTAMAÇ_GENİŞLİĞİ - ŞERİT_GENİŞLİĞİ) / 2.0;
 
-        // Yerleşim, VisualMapView background sınırı dâhil hesaplanır.
-        // Etiketler çubuğun sağında olduğundan dış kutunun yerel solu -18,
-        // sağı ise en geniş uç etiketinin sonundan 15 px ileridedir.
-        let dış_solu = -tutamaç_taşması - İÇ_BOŞLUK;
-        let dış_sağı = (ETİKET_X + düşük_genişliği.max(yüksek_genişliği)) + İÇ_BOŞLUK;
+        // `align: auto`, bileşen sağ yarıya yerleştirildiğinde uç
+        // etiketlerini çubuğun soluna alır. Box konumu, padding ve handle
+        // taşmaları dâhil dış sınır kutusuna uygulanır.
+        let sayısal_sol = match eşleme.sol {
+            YatayKonum::Değer(uzunluk) => Some(uzunluk.çöz(çizici.genişlik())),
+            _ => None,
+        };
+        let sağa_yaslı = eşleme.sağ.is_some()
+            || eşleme.sol == YatayKonum::Sağ
+            || sayısal_sol.is_some_and(|sol| sol > çizici.genişlik() / 2.0);
+        let en_geniş_etiket = düşük_genişliği.max(yüksek_genişliği);
+        let (dış_solu, dış_sağı) = if sağa_yaslı {
+            (
+                -(ETİKET_X - ŞERİT_GENİŞLİĞİ + en_geniş_etiket) - İÇ_BOŞLUK,
+                ŞERİT_GENİŞLİĞİ + tutamaç_taşması + İÇ_BOŞLUK,
+            )
+        } else {
+            (
+                -tutamaç_taşması - İÇ_BOŞLUK,
+                ETİKET_X + en_geniş_etiket + İÇ_BOŞLUK,
+            )
+        };
         let dış_genişlik = dış_sağı - dış_solu;
-        let şerit_x = if let Some(sağ) = eşleme.sağ {
-            çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_sağı
+        let dış_x = if let Some(sağ) = eşleme.sağ {
+            çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_genişlik
         } else {
             match eşleme.sol {
-                YatayKonum::Sol => -dış_solu,
-                YatayKonum::Orta => (çizici.genişlik() - dış_genişlik) / 2.0 - dış_solu,
-                YatayKonum::Sağ => çizici.genişlik() - dış_sağı,
-                YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) - dış_solu,
+                YatayKonum::Sol => 0.0,
+                YatayKonum::Orta => (çizici.genişlik() - dış_genişlik) / 2.0,
+                YatayKonum::Sağ => çizici.genişlik() - dış_genişlik,
+                YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
             }
         };
+        let şerit_x = dış_x - dış_solu;
 
         let uç_taşması = ETİKET_YARI_YÜKSEKLİĞİ.max(yarım_tutamaç_yüksekliği);
-        let grup_altı = if let Some(üst) = eşleme.üst {
-            üst.çöz(çizici.yükseklik()) + İÇ_BOŞLUK + uç_taşması + ŞERİT_YÜKSEKLİĞİ
-        } else {
-            çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - İÇ_BOŞLUK - uç_taşması
+        let dış_yükseklik = ŞERİT_YÜKSEKLİĞİ + 2.0 * (İÇ_BOŞLUK + uç_taşması);
+        let dış_y = match eşleme.dikey_konum {
+            Some(DikeyKonum::Üst) => 0.0,
+            Some(DikeyKonum::Orta) => (çizici.yükseklik() - dış_yükseklik) / 2.0,
+            Some(DikeyKonum::Alt) => çizici.yükseklik() - dış_yükseklik,
+            Some(DikeyKonum::Değer(uzunluk)) => uzunluk.çöz(çizici.yükseklik()),
+            None => eşleme.üst.map_or_else(
+                || çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik()) - dış_yükseklik,
+                |üst| üst.çöz(çizici.yükseklik()),
+            ),
         };
-        let şerit_y = grup_altı - ŞERİT_YÜKSEKLİĞİ;
+        let şerit_y = dış_y + İÇ_BOŞLUK + uç_taşması;
         let durak_sayısı = eşleme.renkler.len().saturating_sub(1).max(1) as f32;
         let duraklar: Vec<crate::renk::RenkDurağı> = eşleme
             .renkler
@@ -585,10 +617,15 @@ pub fn görsel_eşleme_çiz(
                 Some((2.0, tema::nötr_00())),
             );
         }
+        let (etiket_x, etiket_hizası) = if sağa_yaslı {
+            (şerit.x - (ETİKET_X - ŞERİT_GENİŞLİĞİ), YatayHiza::Sağ)
+        } else {
+            (şerit.x + ETİKET_X, YatayHiza::Sol)
+        };
         çizici.yazı(
             &düşük,
-            (şerit.x + ETİKET_X, alt_merkez_y),
-            YatayHiza::Sol,
+            (etiket_x, alt_merkez_y),
+            etiket_hizası,
             DikeyHiza::Orta,
             boyut,
             tema::ikincil_metin(),
@@ -596,8 +633,8 @@ pub fn görsel_eşleme_çiz(
         );
         çizici.yazı(
             &yüksek,
-            (şerit.x + ETİKET_X, üst_merkez_y),
-            YatayHiza::Sol,
+            (etiket_x, üst_merkez_y),
+            etiket_hizası,
             DikeyHiza::Orta,
             boyut,
             tema::ikincil_metin(),
@@ -628,8 +665,8 @@ pub fn görsel_eşleme_çiz(
         const İÇ_BOŞLUK: f32 = 15.0;
         let boyut = tema::YAZI_KÜÇÜK;
         let seçili = eşleme.seçili_kapsam(kapsam);
-        let düşük = binlik_ayır(seçili[0]);
-        let yüksek = binlik_ayır(seçili[1]);
+        let düşük = görsel_eşleme_değer_metni(seçili[0], eşleme.hassasiyet);
+        let yüksek = görsel_eşleme_değer_metni(seçili[1], eşleme.hassasiyet);
         let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
         let yarım_tutamaç = TUTAMAÇ_GENİŞLİĞİ / 2.0;
@@ -744,12 +781,12 @@ pub fn görsel_eşleme_çiz(
             .metin
             .as_ref()
             .map(|(yüksek, _)| yüksek.clone())
-            .unwrap_or_else(|| binlik_ayır(kapsam[1]));
+            .unwrap_or_else(|| görsel_eşleme_değer_metni(kapsam[1], eşleme.hassasiyet));
         let düşük = eşleme
             .metin
             .as_ref()
             .map(|(_, düşük)| düşük.clone())
-            .unwrap_or_else(|| binlik_ayır(kapsam[0]));
+            .unwrap_or_else(|| görsel_eşleme_değer_metni(kapsam[0], eşleme.hassasiyet));
         let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
         let toplam_genişlik =
@@ -863,12 +900,12 @@ pub fn görsel_eşleme_çiz(
         .metin
         .as_ref()
         .map(|(yüksek, _)| yüksek.clone())
-        .unwrap_or_else(|| binlik_ayır(kapsam[1]));
+        .unwrap_or_else(|| görsel_eşleme_değer_metni(kapsam[1], eşleme.hassasiyet));
     let düşük = eşleme
         .metin
         .as_ref()
         .map(|(_, düşük)| düşük.clone())
-        .unwrap_or_else(|| binlik_ayır(kapsam[0]));
+        .unwrap_or_else(|| görsel_eşleme_değer_metni(kapsam[0], eşleme.hassasiyet));
     çizici.yazı(
         &yüksek,
         (x + GENİŞLİK / 2.0, y - 4.0),
@@ -983,5 +1020,24 @@ mod sürekli_bölge_testleri {
         assert!(çıktı.parça_kutuları[0].0.x < çıktı.parça_kutuları[4].0.x);
         let kayıt = yüzey.döküm();
         assert!(kayıt.find("0 - 2000").unwrap() < kayıt.find("8000 - 10000").unwrap());
+    }
+
+    #[test]
+    fn dikey_hesaplanabilir_sağda_etiketleri_sola_alıp_ortalanır() {
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(1000.0)
+            .hesaplanabilir(true)
+            .sol("670")
+            .üst("center");
+
+        let çıktı = görsel_eşleme_çiz(&mut yüzey, &eşleme, [0.0, 1000.0]);
+        let bölge = çıktı.sürekli.expect("dikey isabet bölgesi");
+        assert_eq!(bölge.şerit.y, 192.5);
+        assert!(bölge.şerit.x > 700.0);
+        let kayıt = yüzey.döküm();
+        assert!(kayıt.contains("yazı \"1000\""));
+        assert!(!kayıt.contains("1,000"));
     }
 }

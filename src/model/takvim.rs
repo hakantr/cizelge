@@ -140,7 +140,7 @@ impl Default for TakvimKoordinatı {
                 .göster(true)
                 .yazı(YazıStili::yeni().boyut(20.0).kalın(true)),
             yıl_etiketi_konumu: TakvimYılEtiketiKonumu::Otomatik,
-            yıl_etiketi_kenar_boşluğu: 40.0,
+            yıl_etiketi_kenar_boşluğu: 30.0,
             // Renkler çizim anında tema belirteçlerinden çözülür.
             öğe_stili: ÖğeStili::yeni().kenarlık_kalınlığı(1.0),
             ayırıcı: ÇizgiStili::yeni().kalınlık(1.0),
