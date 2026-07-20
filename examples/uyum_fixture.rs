@@ -4579,6 +4579,135 @@ mod scatter_kümeleme_verisi_testleri {
     }
 }
 
+fn scatter_üstel_regresyon_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-exponential-regression.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    resmi_javascript_dizisi(&kaynak, "source:")
+}
+
+fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_üstel_regresyon_verisini_oku()?;
+    let kaynak = veri
+        .into_iter()
+        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+            küme.satır([x.into(), y.into()])
+        });
+    let dönüşüm = RegresyonDönüşümü::yeni(RegresyonYöntemi::Üstel);
+    let çözülmüş = veri_kümelerini_çöz(&[
+        VeriKümesiTanımı::kaynak(kaynak.clone()),
+        VeriKümesiTanımı::regresyon(dönüşüm.clone()),
+    ])
+    .map_err(|hata| hata.to_string())?;
+    let son_satır = çözülmüş[1]
+        .satırlar
+        .last()
+        .ok_or_else(|| "üstel regresyon çıktı satırı üretmedi".to_owned())?;
+    let son_değer = son_satır
+        .get(1)
+        .and_then(VeriDeğeri::sayı)
+        .ok_or_else(|| "üstel regresyon son y değerini üretmedi".to_owned())?;
+    let formül = son_satır
+        .get(2)
+        .and_then(|değer| match değer {
+            VeriDeğeri::Metin(metin) => Some(metin.as_str()),
+            _ => None,
+        })
+        .ok_or_else(|| "üstel regresyon formülünü üretmedi".to_owned())?
+        .to_owned();
+    let etiket_formülü = formül.clone();
+    let kesikli = BölmeÇizgisi {
+        tür: ÇizgiTürü::Kesikli,
+        ..Default::default()
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .veri_kümeleri([
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::regresyon(dönüşüm),
+        ])
+        .başlık(
+            Başlık::yeni()
+                .metin("1981 - 1998 gross domestic product GDP (trillion yuan)")
+                .alt_metin("By ecStat.regression")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .x_ekseni(Eksen::değer().bölme_çizgisi(kesikli.clone()))
+        .y_ekseni(Eksen::değer().bölme_çizgisi(kesikli))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("scatter")
+                .veri_kümesi_sırası(0)
+                .eşle("x", "y"),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("line")
+                .yumuşat(true)
+                .veri_kümesi_sırası(1)
+                .eşle("x", "y")
+                .sembol_boyutu(0.1)
+                .sembol(Sembol::Daire)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .kayma(-20.0, 0.0)
+                        .yazı(YazıStili::yeni().boyut(16.0))
+                        .biçimleyici(Biçimleyici::İşlev(Arc::new(move |değer, _| {
+                            if (değer - son_değer).abs() <= son_değer.abs().max(1.0) * 1e-12 {
+                                etiket_formülü.clone()
+                            } else {
+                                String::new()
+                            }
+                        }))),
+                ),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_üstel_regresyon_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_üstel_regresyon_verisi_ve_formülü_ecstat_ile_uyuşur() {
+        let veri = scatter_üstel_regresyon_verisini_oku().expect("resmi regresyon verisi okunmalı");
+        assert_eq!(veri.len(), 18);
+        assert_eq!(veri.first(), Some(&[1.0, 4862.4]));
+        assert_eq!(veri.last(), Some(&[18.0, 79395.7]));
+        let kaynak = veri
+            .into_iter()
+            .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+                küme.satır([x.into(), y.into()])
+            });
+        let sonuç = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::regresyon(RegresyonDönüşümü::yeni(RegresyonYöntemi::Üstel)),
+        ])
+        .expect("ecStat üstel regresyon dönüşümü çalışmalı");
+        assert_eq!(
+            sonuç[1].satırlar.last().and_then(|satır| match &satır[2] {
+                VeriDeğeri::Metin(metin) => Some(metin.as_str()),
+                _ => None,
+            }),
+            Some("y = 3477.32e^(0.18x)")
+        );
+        let son_tahmin = sonuç[1].satırlar.last().unwrap()[1].sayı().unwrap();
+        assert!(
+            (son_tahmin - 88_532.242_213_869_63).abs() < 1e-9,
+            "ecStat son tahmini uyuşmuyor: {son_tahmin}"
+        );
+    }
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6783,6 +6912,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-stream-visual" => scatter_stream_visual(),
         "scatter-painter-choice" => scatter_painter_choice(),
         "scatter-clustering" => scatter_clustering(),
+        "scatter-exponential-regression" => scatter_exponential_regression(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

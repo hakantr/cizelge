@@ -157,6 +157,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-stream-visual': 'examples/uyum_fixture.rs#scatter_stream_visual',
   'scatter-painter-choice': 'examples/uyum_fixture.rs#scatter_painter_choice',
   'scatter-clustering': 'examples/uyum_fixture.rs#scatter_clustering',
+  'scatter-exponential-regression': 'examples/uyum_fixture.rs#scatter_exponential_regression',
   'scatter-effect': 'examples/uyum_fixture.rs#scatter_effect',
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
   'heatmap-cartesian': 'examples/uyum_fixture.rs#heatmap_cartesian',

@@ -658,6 +658,10 @@ pub enum VeriKümesiTanımı {
         kaynak: Option<usize>,
         dönüşüm: KümelemeDönüşümü,
     },
+    Regresyon {
+        kaynak: Option<usize>,
+        dönüşüm: RegresyonDönüşümü,
+    },
 }
 
 impl VeriKümesiTanımı {
@@ -707,6 +711,22 @@ impl VeriKümesiTanımı {
     /// `ecStat:clustering` dönüşümünü açık upstream dataset'e uygular.
     pub fn kaynaktan_kümele(kaynak: usize, dönüşüm: KümelemeDönüşümü) -> Self {
         Self::Kümele {
+            kaynak: Some(kaynak),
+            dönüşüm,
+        }
+    }
+
+    /// `ecStat:regression` dönüşümünü varsayılan ilk dataset'e uygular.
+    pub fn regresyon(dönüşüm: RegresyonDönüşümü) -> Self {
+        Self::Regresyon {
+            kaynak: None,
+            dönüşüm,
+        }
+    }
+
+    /// `ecStat:regression` dönüşümünü açık upstream dataset'e uygular.
+    pub fn kaynaktan_regresyon(kaynak: usize, dönüşüm: RegresyonDönüşümü) -> Self {
+        Self::Regresyon {
             kaynak: Some(kaynak),
             dönüşüm,
         }
@@ -769,6 +789,26 @@ pub fn veri_kümelerini_çöz(
                     .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
                         alan: "transform.result",
                         ayrıntı: "ecStat:clustering veri sonucu üretmedi".to_owned(),
+                    })?;
+                VeriKümesi::depodan(ilk)
+            }
+            VeriKümesiTanımı::Regresyon {
+                kaynak, dönüşüm
+            } => {
+                let kaynak_sırası = kaynak.unwrap_or(0);
+                let upstream = sonuçlar
+                    .get(kaynak_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "dataset.fromDatasetIndex",
+                        sıra: kaynak_sırası,
+                    })?;
+                let depo = upstream.depoya()?;
+                let çıktılar = dönüşüm.uygula(&[depo])?;
+                let ilk = çıktılar
+                    .first()
+                    .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                        alan: "transform.result",
+                        ayrıntı: "ecStat:regression veri sonucu üretmedi".to_owned(),
                     })?;
                 VeriKümesi::depodan(ilk)
             }
@@ -1245,6 +1285,399 @@ impl VeriDönüşümü for KümelemeDönüşümü {
             VeriDeposu::satırlardan(çıktı_boyutları, ham_satırlar)?,
             VeriDeposu::satırlardan(merkez_boyutları, merkez_satırları)?,
         ])
+    }
+}
+
+/// `echarts-stat` regresyon yöntemleri (`config.method`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum RegresyonYöntemi {
+    /// En küçük kareler doğrusu; ecStat öntanımlısı.
+    #[default]
+    Doğrusal,
+    /// Sabit terimi sıfıra kilitli doğru (`linearThroughOrigin`).
+    OrijindenDoğrusal,
+    Üstel,
+    Logaritmik,
+    Polinom,
+}
+
+/// Regresyon formülünün üçüncü çıktı boyutuna yazılacağı satırlar
+/// (`config.formulaOn`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum RegresyonFormülKonumu {
+    Başlangıç,
+    #[default]
+    Son,
+    Tümü,
+    Yok,
+}
+
+/// `echarts-stat` paketinin `ecStat:regression` dönüşümü.
+///
+/// Dönüşüm kaynak satırları değiştirmeden seçilen x/y boyutlarında tahmin
+/// değerleri üretir, x'e göre sıralar ve ecStat gibi formülü üçüncü boyuta
+/// yerleştirir. Bu sayede çıktı doğrudan `datasetIndex` ile çizgi serisine
+/// bağlanabilir.
+#[derive(Clone, PartialEq, Debug)]
+pub struct RegresyonDönüşümü {
+    pub yöntem: RegresyonYöntemi,
+    /// Polinom derecesi (`config.order`); öntanımlı 2.
+    pub derece: usize,
+    /// `[x, y]` kaynak boyutları; boşsa ilk iki boyut.
+    pub boyutlar: Vec<BoyutSeçici>,
+    pub formül_konumu: RegresyonFormülKonumu,
+}
+
+impl RegresyonDönüşümü {
+    pub fn yeni(yöntem: RegresyonYöntemi) -> Self {
+        Self {
+            yöntem,
+            derece: 2,
+            boyutlar: Vec::new(),
+            formül_konumu: RegresyonFormülKonumu::Son,
+        }
+    }
+
+    pub fn derece(mut self, derece: usize) -> Self {
+        self.derece = derece;
+        self
+    }
+
+    pub fn boyutlar(mut self, boyutlar: impl IntoIterator<Item = impl Into<BoyutSeçici>>) -> Self {
+        self.boyutlar = boyutlar.into_iter().map(Into::into).collect();
+        self
+    }
+
+    pub fn formül_konumu(mut self, konum: RegresyonFormülKonumu) -> Self {
+        self.formül_konumu = konum;
+        self
+    }
+}
+
+impl Default for RegresyonDönüşümü {
+    fn default() -> Self {
+        Self::yeni(RegresyonYöntemi::Doğrusal)
+    }
+}
+
+#[derive(Clone, Debug)]
+struct RegresyonSonucu {
+    satırlar: Vec<Vec<VeriDeğeri>>,
+    ifade: String,
+}
+
+fn ecstat_katsayı_metni(değer: f64, basamak: usize) -> String {
+    let ölçek = 10_f64.powi(basamak as i32);
+    // JavaScript Math.round, negatif yarımlarda da +∞ yönüne gider.
+    let yuvarlanmış = (değer.mul_add(ölçek, 0.5)).floor() / ölçek;
+    if yuvarlanmış == 0.0 {
+        return "0".to_owned();
+    }
+    let metin = format!("{yuvarlanmış:.basamak$}");
+    metin.trim_end_matches('0').trim_end_matches('.').to_owned()
+}
+
+fn ecstat_gauss(mut matris: Vec<Vec<f64>>, bilinmeyen_sayısı: usize) -> Vec<f64> {
+    // echarts-stat `gaussianElimination` matrisi transpoze düzende tutar:
+    // son satır sağ taraf, önceki satırlar katsayı sütunlarıdır.
+    let uzunluk = matris.len();
+    for sıra in 0..uzunluk.saturating_sub(1) {
+        let mut en_büyük = sıra;
+        for aday in sıra + 1..uzunluk - 1 {
+            if matris[sıra][aday].abs() > matris[sıra][en_büyük].abs() {
+                en_büyük = aday;
+            }
+        }
+        for satır in sıra..uzunluk {
+            matris[satır].swap(sıra, en_büyük);
+        }
+        for sütun in sıra + 1..uzunluk - 1 {
+            for satır in (sıra..uzunluk).rev() {
+                let düşülecek = matris[satır][sıra] / matris[sıra][sıra] * matris[sıra][sütun];
+                matris[satır][sütun] -= düşülecek;
+            }
+        }
+    }
+
+    let mut sonuç = vec![0.0; bilinmeyen_sayısı];
+    let sağ_taraf = uzunluk - 1;
+    for sıra in (0..uzunluk - 1).rev() {
+        let toplam = (sıra + 1..uzunluk - 1)
+            .map(|sütun| matris[sütun][sıra] * sonuç[sütun])
+            .sum::<f64>();
+        sonuç[sıra] = (matris[sağ_taraf][sıra] - toplam) / matris[sıra][sıra];
+    }
+    sonuç
+}
+
+fn regresyonu_hesapla(
+    ham_satırlar: &[Vec<VeriDeğeri>],
+    sayısal_veri: &[[f64; 2]],
+    x_boyutu: usize,
+    y_boyutu: usize,
+    yöntem: RegresyonYöntemi,
+    derece: usize,
+) -> RegresyonSonucu {
+    let satır_sayısı = sayısal_veri.len() as f64;
+    let (tahminler, ifade) = match yöntem {
+        RegresyonYöntemi::Doğrusal => {
+            let x_toplamı = sayısal_veri.iter().map(|[x, _]| x).sum::<f64>();
+            let y_toplamı = sayısal_veri.iter().map(|[_, y]| y).sum::<f64>();
+            let xy_toplamı = sayısal_veri.iter().map(|[x, y]| x * y).sum::<f64>();
+            let xx_toplamı = sayısal_veri.iter().map(|[x, _]| x * x).sum::<f64>();
+            let eğim = (satır_sayısı * xy_toplamı - x_toplamı * y_toplamı)
+                / (satır_sayısı * xx_toplamı - x_toplamı * x_toplamı);
+            let kesişim = y_toplamı / satır_sayısı - eğim * x_toplamı / satır_sayısı;
+            (
+                sayısal_veri
+                    .iter()
+                    .map(|[x, _]| [*x, eğim.mul_add(*x, kesişim)])
+                    .collect::<Vec<_>>(),
+                format!(
+                    "y = {}x + {}",
+                    ecstat_katsayı_metni(eğim, 2),
+                    ecstat_katsayı_metni(kesişim, 2)
+                ),
+            )
+        }
+        RegresyonYöntemi::OrijindenDoğrusal => {
+            let xx_toplamı = sayısal_veri.iter().map(|[x, _]| x * x).sum::<f64>();
+            let xy_toplamı = sayısal_veri.iter().map(|[x, y]| x * y).sum::<f64>();
+            let eğim = xy_toplamı / xx_toplamı;
+            (
+                sayısal_veri
+                    .iter()
+                    .map(|[x, _]| [*x, x * eğim])
+                    .collect::<Vec<_>>(),
+                format!("y = {}x", ecstat_katsayı_metni(eğim, 2)),
+            )
+        }
+        RegresyonYöntemi::Üstel => {
+            let mut x_toplamı = 0.0;
+            let mut y_toplamı = 0.0;
+            let mut xxy_toplamı = 0.0;
+            let mut xy_toplamı = 0.0;
+            let mut y_lny_toplamı = 0.0;
+            let mut xy_lny_toplamı = 0.0;
+            for [x, y] in sayısal_veri {
+                x_toplamı += x;
+                y_toplamı += y;
+                xy_toplamı += x * y;
+                xxy_toplamı += x * x * y;
+                y_lny_toplamı += y * y.ln();
+                xy_lny_toplamı += x * y * y.ln();
+            }
+            let payda = y_toplamı * xxy_toplamı - xy_toplamı * xy_toplamı;
+            let katsayı =
+                ((xxy_toplamı * y_lny_toplamı - xy_toplamı * xy_lny_toplamı) / payda).exp();
+            let indis = (y_toplamı * xy_lny_toplamı - xy_toplamı * y_lny_toplamı) / payda;
+            (
+                sayısal_veri
+                    .iter()
+                    .map(|[x, _]| [*x, katsayı * (indis * x).exp()])
+                    .collect::<Vec<_>>(),
+                format!(
+                    "y = {}e^({}x)",
+                    ecstat_katsayı_metni(katsayı, 2),
+                    ecstat_katsayı_metni(indis, 2)
+                ),
+            )
+        }
+        RegresyonYöntemi::Logaritmik => {
+            let ln_x_toplamı = sayısal_veri.iter().map(|[x, _]| x.ln()).sum::<f64>();
+            let y_ln_x_toplamı = sayısal_veri.iter().map(|[x, y]| y * x.ln()).sum::<f64>();
+            let y_toplamı = sayısal_veri.iter().map(|[_, y]| y).sum::<f64>();
+            let ln_x_kare_toplamı = sayısal_veri
+                .iter()
+                .map(|[x, _]| x.ln().powi(2))
+                .sum::<f64>();
+            let eğim = (satır_sayısı * y_ln_x_toplamı - y_toplamı * ln_x_toplamı)
+                / (satır_sayısı * ln_x_kare_toplamı - ln_x_toplamı * ln_x_toplamı);
+            let kesişim = (y_toplamı - eğim * ln_x_toplamı) / satır_sayısı;
+            (
+                sayısal_veri
+                    .iter()
+                    .map(|[x, _]| [*x, eğim.mul_add(x.ln(), kesişim)])
+                    .collect::<Vec<_>>(),
+                format!(
+                    "y = {} + {}ln(x)",
+                    ecstat_katsayı_metni(kesişim, 2),
+                    ecstat_katsayı_metni(eğim, 2)
+                ),
+            )
+        }
+        RegresyonYöntemi::Polinom => {
+            let katsayı_sayısı = derece + 1;
+            let mut matris = Vec::with_capacity(katsayı_sayısı + 1);
+            let mut sağ_taraf = Vec::with_capacity(katsayı_sayısı);
+            for satır in 0..katsayı_sayısı {
+                sağ_taraf.push(
+                    sayısal_veri
+                        .iter()
+                        .map(|[x, y]| y * x.powi(satır as i32))
+                        .sum::<f64>(),
+                );
+                matris.push(
+                    (0..katsayı_sayısı)
+                        .map(|sütun| {
+                            sayısal_veri
+                                .iter()
+                                .map(|[x, _]| x.powi((satır + sütun) as i32))
+                                .sum::<f64>()
+                        })
+                        .collect::<Vec<_>>(),
+                );
+            }
+            matris.push(sağ_taraf);
+            let katsayılar = ecstat_gauss(matris, katsayı_sayısı);
+            let tahminler = sayısal_veri
+                .iter()
+                .map(|[x, _]| {
+                    let y = katsayılar
+                        .iter()
+                        .enumerate()
+                        .map(|(üs, katsayı)| katsayı * x.powi(üs as i32))
+                        .sum::<f64>();
+                    [*x, y]
+                })
+                .collect::<Vec<_>>();
+            let mut ifade = String::from("y = ");
+            for üs in (0..katsayılar.len()).rev() {
+                let katsayı = ecstat_katsayı_metni(katsayılar[üs], üs.saturating_add(1).max(2));
+                if üs > 1 {
+                    ifade.push_str(&format!("{katsayı}x^{üs} + "));
+                } else if üs == 1 {
+                    ifade.push_str(&format!("{katsayı}x + "));
+                } else {
+                    ifade.push_str(&katsayı);
+                }
+            }
+            (tahminler, ifade)
+        }
+    };
+
+    let mut satırlar = ham_satırlar
+        .iter()
+        .zip(tahminler)
+        .map(|(ham, [x, y])| {
+            let mut satır = ham.clone();
+            let gerekli = x_boyutu.max(y_boyutu) + 1;
+            satır.resize(gerekli, VeriDeğeri::Boş);
+            satır[x_boyutu] = x.into();
+            satır[y_boyutu] = y.into();
+            satır
+        })
+        .collect::<Vec<_>>();
+    satırlar.sort_by(|a, b| {
+        let a = a.get(x_boyutu).and_then(VeriDeğeri::sayı);
+        let b = b.get(x_boyutu).and_then(VeriDeğeri::sayı);
+        a.partial_cmp(&b).unwrap_or(Ordering::Equal)
+    });
+    RegresyonSonucu { satırlar, ifade }
+}
+
+impl VeriDönüşümü for RegresyonDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "ecStat:regression"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, self.tür_adı())?;
+        let boyutlar = if self.boyutlar.is_empty() {
+            vec![BoyutSeçici::Sıra(0), BoyutSeçici::Sıra(1)]
+        } else {
+            self.boyutlar.clone()
+        };
+        if boyutlar.len() != 2 {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.dimensions",
+                ayrıntı: "regresyon tam olarak x ve y olmak üzere iki boyut gerektirir"
+                    .to_owned(),
+            });
+        }
+        if self.yöntem == RegresyonYöntemi::Polinom && self.derece == 0 {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.order",
+                ayrıntı: "polinom derecesi sıfırdan büyük olmalı".to_owned(),
+            });
+        }
+        let x_boyutu = kaynak
+            .boyut_sırası(&boyutlar[0])
+            .ok_or_else(|| boyut_hatası(&boyutlar[0]))?;
+        let y_boyutu = kaynak
+            .boyut_sırası(&boyutlar[1])
+            .ok_or_else(|| boyut_hatası(&boyutlar[1]))?;
+
+        // ecStat `dataPreprocess`, seçili iki boyutu sayı olmayan satırları
+        // dönüşümden çıkarır ve kalan kaynak hücrelerini aynen korur.
+        let mut ham_satırlar = Vec::new();
+        let mut sayısal_veri = Vec::new();
+        for satır in kaynak.satırları_kopyala() {
+            let x = satır.get(x_boyutu).and_then(VeriDeğeri::sayı);
+            let y = satır.get(y_boyutu).and_then(VeriDeğeri::sayı);
+            if let (Some(x), Some(y)) = (x, y)
+                && !x.is_nan()
+                && !y.is_nan()
+            {
+                ham_satırlar.push(satır);
+                sayısal_veri.push([x, y]);
+            }
+        }
+        if sayısal_veri.is_empty() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.dimensions",
+                ayrıntı: "regresyon için geçerli sayısal satır yok".to_owned(),
+            });
+        }
+        if self.yöntem == RegresyonYöntemi::Polinom && self.derece >= sayısal_veri.len() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.order",
+                ayrıntı: format!(
+                    "{} nokta {}. derece polinomu belirleyemez",
+                    sayısal_veri.len(),
+                    self.derece
+                ),
+            });
+        }
+
+        let mut sonuç = regresyonu_hesapla(
+            &ham_satırlar,
+            &sayısal_veri,
+            x_boyutu,
+            y_boyutu,
+            self.yöntem,
+            self.derece,
+        );
+        let mut çıktı_boyutları = kaynak.boyutlar.clone();
+        if self.formül_konumu != RegresyonFormülKonumu::Yok {
+            while çıktı_boyutları.len() <= 2 {
+                let sıra = çıktı_boyutları.len();
+                çıktı_boyutları
+                    .push(BoyutTanımı::yeni(format!("boyut{sıra}")).tür(BoyutTürü::Bilinmeyen));
+            }
+            // ecStat dönüşüm sarmalayıcısı üçüncü dimensionInfo'yu boş bir
+            // tanımla değiştirir; adlandırılmış Rust depoda kararlı karşılığı.
+            çıktı_boyutları[2] = BoyutTanımı::yeni("boyut2");
+            let son = sonuç.satırlar.len().saturating_sub(1);
+            for (sıra, satır) in sonuç.satırlar.iter_mut().enumerate() {
+                satır.resize(çıktı_boyutları.len(), VeriDeğeri::Boş);
+                let göster = match self.formül_konumu {
+                    RegresyonFormülKonumu::Başlangıç => sıra == 0,
+                    RegresyonFormülKonumu::Son => sıra == son,
+                    RegresyonFormülKonumu::Tümü => true,
+                    RegresyonFormülKonumu::Yok => false,
+                };
+                satır[2] = if göster {
+                    sonuç.ifade.clone().into()
+                } else {
+                    String::new().into()
+                };
+            }
+        }
+        Ok(vec![VeriDeposu::satırlardan(
+            çıktı_boyutları,
+            sonuç.satırlar,
+        )?])
     }
 }
 
@@ -2252,6 +2685,69 @@ mod testler {
         assert_eq!(
             zincir[1].boyutlar,
             ["x", "y", "cluster", "boyut3", "boyut4"]
+        );
+    }
+
+    #[test]
+    fn ecstat_regresyon_yontemleri_sirali_nokta_ve_formul_uretir() {
+        let doğrusal = VeriKümesi::yeni(["x", "y"])
+            .satır([2.0.into(), 5.0.into()])
+            .satır([0.0.into(), 1.0.into()])
+            .satır([1.0.into(), 3.0.into()]);
+        let çıktı = RegresyonDönüşümü::yeni(RegresyonYöntemi::Doğrusal)
+            .uygula(&[doğrusal.depoya().unwrap()])
+            .unwrap();
+        assert_eq!(
+            çıktı[0].satırları_kopyala(),
+            vec![
+                vec![0.0.into(), 1.0.into(), "".into()],
+                vec![1.0.into(), 3.0.into(), "".into()],
+                vec![2.0.into(), 5.0.into(), "y = 2x + 1".into()],
+            ]
+        );
+
+        let üstel = VeriKümesi::yeni(["x", "y"])
+            .satır([1.0.into(), (2.0 * 0.5_f64.exp()).into()])
+            .satır([2.0.into(), (2.0 * 1.0_f64.exp()).into()])
+            .satır([3.0.into(), (2.0 * 1.5_f64.exp()).into()])
+            .satır([4.0.into(), (2.0 * 2.0_f64.exp()).into()]);
+        let çıktı = RegresyonDönüşümü::yeni(RegresyonYöntemi::Üstel)
+            .formül_konumu(RegresyonFormülKonumu::Başlangıç)
+            .uygula(&[üstel.depoya().unwrap()])
+            .unwrap();
+        assert_eq!(
+            çıktı[0].satırları_kopyala()[0][2],
+            VeriDeğeri::from("y = 2e^(0.5x)")
+        );
+
+        let logaritmik = VeriKümesi::yeni(["x", "y"])
+            .satır([1.0.into(), 4.0.into()])
+            .satır([2.0.into(), (4.0 + 3.0 * 2.0_f64.ln()).into()])
+            .satır([4.0.into(), (4.0 + 3.0 * 4.0_f64.ln()).into()]);
+        let çıktı = RegresyonDönüşümü::yeni(RegresyonYöntemi::Logaritmik)
+            .uygula(&[logaritmik.depoya().unwrap()])
+            .unwrap();
+        assert_eq!(
+            çıktı[0].satırları_kopyala()[2][2],
+            VeriDeğeri::from("y = 4 + 3ln(x)")
+        );
+
+        let polinom = VeriKümesi::yeni(["x", "y"])
+            .satır([0.0.into(), 1.0.into()])
+            .satır([1.0.into(), 6.0.into()])
+            .satır([2.0.into(), 17.0.into()])
+            .satır([3.0.into(), 34.0.into()]);
+        let zincir = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(polinom),
+            VeriKümesiTanımı::regresyon(
+                RegresyonDönüşümü::yeni(RegresyonYöntemi::Polinom).derece(2),
+            ),
+        ])
+        .unwrap();
+        assert_eq!(zincir[1].boyutlar, ["x", "y", "boyut2"]);
+        assert_eq!(
+            zincir[1].satırlar[3][2],
+            VeriDeğeri::from("y = 3x^2 + 2x + 1")
         );
     }
 

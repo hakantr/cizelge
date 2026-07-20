@@ -121,10 +121,11 @@ pub use model::takvim::{
 };
 pub use model::veri_kumesi::{
     BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi, KaynakBaşlığı,
-    KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü, SeriYerleşimi,
-    SüzmeDönüşümü, SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni, ToplamaBoyutu,
-    ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü, VeriKaynağı,
-    VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
+    KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü, RegresyonDönüşümü,
+    RegresyonFormülKonumu, RegresyonYöntemi, SeriYerleşimi, SüzmeDönüşümü, SüzmeKoşulu,
+    SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni, ToplamaBoyutu, ToplamaDönüşümü,
+    ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü, VeriKaynağı, VeriKümesi,
+    VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
 };
 pub use model::yakinlastirma::{
     VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,
@@ -221,10 +222,10 @@ pub mod hazir {
     pub use crate::model::veri_kumesi::{
         BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi,
         KaynakBaşlığı, KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü,
-        SeriYerleşimi, SüzmeDönüşümü, SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü,
-        SıralamaDüzeni, ToplamaBoyutu, ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi,
-        VeriDeposu, VeriDönüşümü, VeriKaynağı, VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri,
-        veri_kümelerini_çöz,
+        RegresyonDönüşümü, RegresyonFormülKonumu, RegresyonYöntemi, SeriYerleşimi, SüzmeDönüşümü,
+        SüzmeKoşulu, SıralamaAnahtarı, SıralamaDönüşümü, SıralamaDüzeni, ToplamaBoyutu,
+        ToplamaDönüşümü, ToplamaYöntemi, TürlüSayıDizisi, VeriDeposu, VeriDönüşümü, VeriKaynağı,
+        VeriKümesi, VeriKümesiTanımı, VeriKümesiZinciri, veri_kümelerini_çöz,
     };
     pub use crate::model::yakinlastirma::{
         VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,

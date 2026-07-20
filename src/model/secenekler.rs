@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
 use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
-use crate::model::eksen::Eksen;
+use crate::model::eksen::{Eksen, EksenTürü};
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::matris::MatrisKoordinatı;
@@ -358,35 +358,44 @@ impl GrafikSeçenekleri {
             }
         };
         let mut sonuç = self.clone();
+        let x_eksenleri = self.etkin_x_eksenleri();
         // Açık `encode` yoksa ECharts aynı dataset/layout grubundaki boş
         // serilere kategori boyutundan sonraki değer boyutlarını sırayla
         // tahsis eder. Satır ve sütun görünümleri birbirinden bağımsızdır.
         let mut otomatik_sıralar: BTreeMap<(usize, SeriYerleşimi), usize> = BTreeMap::new();
         for (seri_sırası, seri) in sonuç.seriler.iter_mut().enumerate() {
-            let (açık_eşleme, küme_sırası, yerleşim, veri_boş) = match &*seri {
+            let (açık_eşleme, küme_sırası, yerleşim, veri_boş, sayısal_x) = match &*seri {
                 Seri::Çizgi(s) => (
                     s.eşleme.clone(),
                     s.veri_kümesi_sırası,
                     s.seri_yerleşimi,
                     s.veri.is_empty(),
+                    x_eksenleri
+                        .get(s.eksen_bağı.x)
+                        .is_some_and(|eksen| eksen.tür != EksenTürü::Kategori),
                 ),
                 Seri::Sütun(s) => (
                     s.eşleme.clone(),
                     s.veri_kümesi_sırası,
                     s.seri_yerleşimi,
                     s.veri.is_empty(),
+                    false,
                 ),
                 Seri::Saçılım(s) => (
                     s.eşleme.clone(),
                     s.veri_kümesi_sırası,
                     s.seri_yerleşimi,
                     s.veri.is_empty(),
+                    x_eksenleri
+                        .get(s.eksen_bağı.x)
+                        .is_some_and(|eksen| eksen.tür != EksenTürü::Kategori),
                 ),
                 Seri::Pasta(s) => (
                     s.eşleme.clone(),
                     s.veri_kümesi_sırası,
                     s.seri_yerleşimi,
                     s.veri.is_empty(),
+                    false,
                 ),
                 _ => continue,
             };
@@ -469,6 +478,7 @@ impl GrafikSeçenekleri {
                     eşleme.kapsam_çöz(kapsam)
                 })
             });
+            let ad_boyut_sırası = küme.boyut_sırası(&ad_boyutu);
             let veri: Vec<crate::model::deger::VeriÖğesi> = adlar
                 .iter()
                 .zip(değerler.iter())
@@ -489,8 +499,18 @@ impl GrafikSeçenekleri {
                             )
                         })
                         .collect();
+                    let koordinat_değeri = if sayısal_x {
+                        ad_boyut_sırası
+                            .and_then(|boyut_sırası| kaynak_satır?.get(boyut_sırası))
+                            .and_then(crate::model::deger::VeriDeğeri::sayı)
+                            .map(|x| crate::model::deger::VeriDeğeri::Çift([x, *değer]))
+                            .unwrap_or_else(|| (*değer).into())
+                    } else {
+                        (*değer).into()
+                    };
                     let mut öğe =
-                        crate::model::deger::VeriÖğesi::adlı(ad.clone(), *değer).boyutlar(boyutlar);
+                        crate::model::deger::VeriÖğesi::adlı(ad.clone(), koordinat_değeri)
+                            .boyutlar(boyutlar);
                     if let (Some(eşleme), Some(boyut_sırası), Some(kapsam)) =
                         (görsel_eşleme, görsel_boyut_sırası, görsel_kapsam)
                         && let Some(görsel_değer) = kaynak_satır
@@ -1086,6 +1106,30 @@ mod testler {
             .filter_map(|öğe| öğe.ad.as_deref())
             .collect();
         assert_eq!(adlar, vec!["B", "A", "C"]);
+    }
+
+    #[test]
+    fn dataset_deger_eksenindeki_cizginin_x_koordinatini_korur() {
+        let küme = VeriKümesi::yeni(["x", "y"])
+            .satır([1.0.into(), 10.0.into()])
+            .satır([3.0.into(), 30.0.into()]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .x_ekseni(Eksen::değer())
+            .y_ekseni(Eksen::değer())
+            .seri(ÇizgiSerisi::yeni().eşle("x", "y"));
+
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+
+        assert!(hatalar.is_empty());
+        assert_eq!(
+            çözülmüş.seriler[0]
+                .veri()
+                .iter()
+                .map(|öğe| öğe.değer.clone())
+                .collect::<Vec<_>>(),
+            vec![VeriDeğeri::Çift([1.0, 10.0]), VeriDeğeri::Çift([3.0, 30.0]),]
+        );
     }
 
     #[test]

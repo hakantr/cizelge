@@ -668,9 +668,38 @@ pub fn çizgi_serisi_çiz(
                 };
                 ç.yazı(
                     &metin,
-                    (*x, *y + kaydırma),
-                    crate::cizim::YatayHiza::Orta,
-                    hiza,
+                    (
+                        *x + seri.etiket.kayma.0,
+                        *y + kaydırma + seri.etiket.kayma.1,
+                    ),
+                    seri.etiket
+                        .yatay_hiza
+                        .map(|hiza| match hiza {
+                            crate::model::stil::YazıYatayHizası::Sol => {
+                                crate::cizim::YatayHiza::Sol
+                            }
+                            crate::model::stil::YazıYatayHizası::Orta => {
+                                crate::cizim::YatayHiza::Orta
+                            }
+                            crate::model::stil::YazıYatayHizası::Sağ => {
+                                crate::cizim::YatayHiza::Sağ
+                            }
+                        })
+                        .unwrap_or(crate::cizim::YatayHiza::Orta),
+                    seri.etiket
+                        .dikey_hiza
+                        .map(|hiza| match hiza {
+                            crate::model::stil::YazıDikeyHizası::Üst => {
+                                crate::cizim::DikeyHiza::Üst
+                            }
+                            crate::model::stil::YazıDikeyHizası::Orta => {
+                                crate::cizim::DikeyHiza::Orta
+                            }
+                            crate::model::stil::YazıDikeyHizası::Alt => {
+                                crate::cizim::DikeyHiza::Alt
+                            }
+                        })
+                        .unwrap_or(hiza),
                     boyut,
                     renk,
                     false,
