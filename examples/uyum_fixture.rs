@@ -518,6 +518,12 @@ fn javascript_onda_bir(değer: f64) -> f64 {
     (değer * 10.0).round() / 10.0
 }
 
+/// Pozitif örnek verilerinde JavaScript `toFixed(2)` sonucunu yeniden
+/// sayıya çevirir.
+fn javascript_yüzde_bir(değer: f64) -> f64 {
+    (değer * 100.0).round() / 100.0
+}
+
 fn area_simple() -> GrafikSeçenekleri {
     const GÜN_MS: f64 = 86_400_000.0;
     let mut tohum = 0x5eed_1234;
@@ -2721,6 +2727,246 @@ fn bar_stack_normalization() -> GrafikSeçenekleri {
         );
     }
     seçenekler
+}
+
+fn bar_brush(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    if !matches!(durum, "başlangıç" | "seçim") {
+        return Err(format!(
+            "bar-brush durumu başlangıç veya seçim olmalı: {durum}"
+        ));
+    }
+
+    // Referans koşucusunun Math.random için kullandığı aynı Mulberry32
+    // akışı; resmî kaynak her kategori başına dört değer tüketir.
+    let mut tohum = 0x5eed_1234;
+    let mut veriler: [Vec<f64>; 4] = std::array::from_fn(|_| Vec::with_capacity(10));
+    let kategoriler = (0..10)
+        .map(|sıra| format!("Class{sıra}"))
+        .collect::<Vec<_>>();
+    for _ in 0..10 {
+        veriler[0].push(javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 2.0));
+        veriler[1].push(javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 5.0));
+        veriler[2].push(javascript_yüzde_bir(kanıt_rastgele(&mut tohum) + 0.3));
+        veriler[3].push(javascript_yüzde_bir(kanıt_rastgele(&mut tohum)));
+    }
+
+    let vurgu = ÖğeStili::yeni()
+        .gölge_bulanıklığı(10.0)
+        .gölge_rengi("rgba(0,0,0,0.3)");
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .gösterge(
+            Gösterge::yeni()
+                .sol("10%")
+                .iç_boşluk(15.0)
+                .veri(["bar", "bar2", "bar3", "bar4"]),
+        )
+        .fırça(Fırça::default().x_eksenleri([0]))
+        .araç_kutusu(
+            // Brush preprocessor, kaynakta önce var olan magicType ve
+            // dataView özelliklerinden sonra brush düğmelerini ekler.
+            AraçKutusu::yeni()
+                .sihirli_yığın(true)
+                .veri_görünümü(true)
+                .fırça_türleri([
+                    FırçaAracıTürü::Dikdörtgen,
+                    FırçaAracıTürü::Çokgen,
+                    FırçaAracıTürü::Yatay,
+                    FırçaAracıTürü::Dikey,
+                    FırçaAracıTürü::Koru,
+                    FırçaAracıTürü::Temizle,
+                ]),
+        )
+        .ipucu(İpucu::yeni())
+        .ızgara(Izgara::yeni().alt(100))
+        .x_ekseni(
+            Eksen::kategori()
+                .ad("X Axis")
+                .veri(kategoriler)
+                .bölme_çizgisi_göster(false)
+                .bölme_alanı_göster(false),
+        )
+        .y_ekseni(Eksen::değer())
+        .seri(
+            SütunSerisi::yeni()
+                .ad("bar")
+                .yığın("one")
+                .vurgu_öğe_stili(vurgu.clone())
+                .veri(veriler[0].clone()),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("bar2")
+                .yığın("one")
+                .vurgu_öğe_stili(vurgu.clone())
+                .veri(veriler[1].clone()),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("bar3")
+                .yığın("two")
+                .vurgu_öğe_stili(vurgu.clone())
+                .veri(veriler[2].clone()),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("bar4")
+                .yığın("two")
+                .vurgu_öğe_stili(vurgu)
+                .veri(veriler[3].clone()),
+        );
+
+    if durum == "seçim" {
+        // Resmî etkileşim karesinde aynı dispatchAction hattını çalıştır;
+        // lineX aralığı dört seride de Class2..Class5 ham sıralarını seçer.
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler)
+                .map_err(|hata| hata.to_string())?;
+        let mut eylemler = EylemKayıtDefteri::yeni();
+        fırça_eylemini_kaydet(&mut eylemler).map_err(|hata| hata.to_string())?;
+        let alan = EylemDeğeri::Nesne(BTreeMap::from([
+            ("brushType".to_owned(), "lineX".into()),
+            (
+                "coordRange".to_owned(),
+                EylemDeğeri::Dizi(vec!["Class2".into(), "Class5".into()]),
+            ),
+            ("xAxisIndex".to_owned(), 0usize.into()),
+        ]));
+        eylemler
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("brush").alan("areas", EylemDeğeri::Dizi(vec![alan])),
+            )
+            .map_err(|hata| hata.to_string())?;
+        seçenekler = çalışma.seçenekleri_al().map_err(|hata| hata.to_string())?;
+
+        // Boyama çıktısı ECharts brushSelected.selected[*].dataIndex ile aynı
+        // ham sıra gruplarını verir; kaynak dinleyicisinin setOption başlığını
+        // doğrudan bu sonuçtan üret.
+        let mut seçim_yüzeyi = KayıtYüzeyi::yeni(700.0, 525.0);
+        let seçim =
+            grafiği_boya(&mut seçim_yüzeyi, &seçenekler, &BoyamaGirdisi::default()).fırça_seçimleri;
+        let satırlar = seçim
+            .iter()
+            .enumerate()
+            .map(|(seri_sırası, sıralar)| {
+                format!(
+                    "[Series {seri_sırası}] {}",
+                    sıralar
+                        .iter()
+                        .map(usize::to_string)
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+            })
+            .collect::<Vec<_>>();
+        seçenekler = seçenekler.başlık(
+            Başlık::yeni()
+                .metin(format!("SELECTED DATA INDICES: \n{}", satırlar.join("\n")))
+                .sağ("10%")
+                .alt(0)
+                .genişlik(100)
+                .iç_boşluk(15.0)
+                .arkaplan("#333")
+                .yazı(YazıStili::yeni().boyut(12.0).renk("#fff")),
+        );
+    }
+
+    Ok(seçenekler)
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::expect_used, clippy::panic)]
+mod bar_brush_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_rastgele_veri_yiginlar_ve_arac_sirasi_kayipsizdir() {
+        let seçenekler = bar_brush("başlangıç").expect("başlangıç fixture'ı");
+        let beklenen = [
+            [0.82, 0.04, 1.68, 0.82, 0.52, 1.85, 1.92, 1.94, 1.47, 0.65],
+            [4.21, 4.01, 1.88, 0.91, 0.99, 1.32, 3.56, 1.77, 3.53, 1.99],
+            [0.52, 0.38, 1.18, 0.68, 0.85, 1.13, 1.19, 0.4, 0.42, 0.78],
+            [0.98, 0.7, 0.21, 0.6, 0.52, 0.36, 0.11, 0.55, 0.67, 0.44],
+        ];
+        for (seri, değerler) in seçenekler.seriler.iter().zip(beklenen) {
+            let Seri::Sütun(seri) = seri else {
+                panic!("bar serisi bekleniyordu");
+            };
+            assert_eq!(
+                seri.veri
+                    .iter()
+                    .filter_map(|öğe| öğe.değer.sayı())
+                    .collect::<Vec<_>>(),
+                değerler
+            );
+            assert_eq!(seri.vurgu_öğe_stili.gölge_bulanıklığı, 10.0);
+            assert_eq!(
+                seri.vurgu_öğe_stili.gölge_rengi,
+                Some(Renk::kyma(0.0, 0.0, 0.0, 0.3))
+            );
+        }
+        assert_eq!(
+            seçenekler
+                .seriler
+                .iter()
+                .map(|seri| match seri {
+                    Seri::Sütun(seri) => seri.yığın.as_deref(),
+                    _ => None,
+                })
+                .collect::<Vec<_>>(),
+            [Some("one"), Some("one"), Some("two"), Some("two")]
+        );
+        let araçlar = seçenekler.araç_kutusu.as_ref().expect("araç kutusu");
+        assert_eq!(
+            araçlar.özellik_sırası,
+            [
+                AraçKutusuÖzelliği::SihirliYığın,
+                AraçKutusuÖzelliği::VeriGörünümü,
+                AraçKutusuÖzelliği::Fırça,
+            ]
+        );
+        assert_eq!(araçlar.fırça_türleri.len(), 6);
+        assert_eq!(
+            seçenekler.fırça.as_ref().expect("brush").x_ekseni_sıraları,
+            [0]
+        );
+        assert_eq!(seçenekler.ızgara.alt, Uzunluk::Piksel(100.0));
+        assert_eq!(
+            seçenekler
+                .x_ekseni
+                .as_ref()
+                .and_then(|eksen| eksen.ad.as_deref()),
+            Some("X Axis")
+        );
+    }
+
+    #[test]
+    fn dispatch_action_brushselected_indekslerini_dinamik_basliga_tasir() {
+        let seçenekler = bar_brush("seçim").expect("seçim fixture'ı");
+        let başlık = seçenekler.başlık.as_ref().expect("seçim başlığı");
+        assert_eq!(
+            başlık.metin.as_deref(),
+            Some(
+                "SELECTED DATA INDICES: \n[Series 0] 3, 4, 5\n[Series 1] 3, 4, 5\n[Series 2] 2, 3, 4\n[Series 3] 2, 3, 4"
+            )
+        );
+        assert_eq!(başlık.sağ, Some(Uzunluk::Yüzde(10.0)));
+        assert_eq!(başlık.alt, Some(Uzunluk::Piksel(0.0)));
+        assert_eq!(başlık.genişlik, Some(Uzunluk::Piksel(100.0)));
+        assert_eq!(başlık.arkaplan, Some(Renk::onaltılık(0x333333)));
+
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+        assert_eq!(
+            çıktı.fırça_seçimleri,
+            vec![vec![3, 4, 5], vec![3, 4, 5], vec![2, 3, 4], vec![2, 3, 4],]
+        );
+        assert!(
+            yüzey.döküm().contains("#cfd2d7@1.0"),
+            "outOfBrush disabled rengi boyanmalı"
+        );
+    }
 }
 
 fn bar_label_rotation() -> GrafikSeçenekleri {
@@ -10047,6 +10293,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-waterfall" => Ok(bar_waterfall()),
         "bar-waterfall2" => Ok(bar_waterfall2()),
         "bar-stack-normalization" => Ok(bar_stack_normalization()),
+        "bar-brush" => bar_brush(durum),
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),

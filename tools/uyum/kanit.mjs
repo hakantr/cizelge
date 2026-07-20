@@ -90,6 +90,14 @@ const SENARYOLAR = [
   { id: 'bar-waterfall', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'bar-waterfall2', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'bar-stack-normalization', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'bar-brush',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'seçim', kare: 1, durum: 'seçim' }
+    ]
+  },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'bar-breaks-simple',

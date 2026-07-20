@@ -127,6 +127,26 @@ function html(id, kaynak, frame, state, width, height) {
         }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
+    : id === 'bar-brush' && state === 'seçim'
+      ? `{
+          myChart.dispatchAction({
+            type:'brush',
+            areas:[{
+              brushType:'lineX',
+              coordRange:['Class2', 'Class5'],
+              xAxisIndex:0
+            }]
+          });
+          const metin = myChart.getOption().title?.[0]?.text;
+          const beklenen = 'SELECTED DATA INDICES: \\n'
+            + '[Series 0] 3, 4, 5\\n'
+            + '[Series 1] 3, 4, 5\\n'
+            + '[Series 2] 2, 3, 4\\n'
+            + '[Series 3] 2, 3, 4';
+          if (metin !== beklenen) {
+            throw new Error('bar-brush brushSelected başlığı üretilmedi: ' + metin);
+          }
+        }`
     : id === 'scatter-nutrients-matrix' && state === 'zoom-left'
       ? `myChart.dispatchAction({type:'dataZoom', dataZoomIndex:0, start:20, end:80});`
     : id === 'bar-breaks-simple' && state === 'genişlet'
@@ -279,6 +299,7 @@ function html(id, kaynak, frame, state, width, height) {
             }`
       : '';
   const zamanlayıcıyıBekle = id === 'dataset-link'
+    || (id === 'bar-brush' && state === 'seçim')
     || id === 'bar-breaks-brush'
     || id === 'bar-breaks-simple'
     || (id === 'dynamic-data2' && state === 'ipucu')
