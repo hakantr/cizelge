@@ -565,6 +565,58 @@ Gerçekleşen dilim — `bar-gradient` (2026-07-20):
   erişilebilirlik ve performans kapıları tamamlanmadan kart yapay biçimde
   `tam_kanıtlı` sayılmaz.
 
+Gerçekleşen dilim — `candlestick-large` (2026-07-20):
+
+- Resmî örnek kaynağı
+  `../echarts-examples/public/examples/ts/candlestick-large.ts`; seri
+  öntanımları ve large çizim semantiği ise
+  `../echarts/src/chart/candlestick/CandlestickSeries.ts`,
+  `CandlestickView.ts`, `candlestickLayout.ts`,
+  `../echarts/src/chart/bar/BaseBarSeries.ts`, `BarView.ts`,
+  `../echarts/src/layout/barGrid.ts` ve
+  `../echarts/src/component/dataZoom/SliderZoomView.ts` üzerinden
+  doğrulandı. Kaynaklar Faz 0'daki sabit commitlerden okunmuştur.
+- Örnekteki 200.000 satır azaltılmadan taşındı. Referans koşucusunun
+  Mulberry32 tohumu, JavaScript yuvarlama sırası ve Europe/Istanbul yerel
+  zaman akışı korunur; 28 Mart 2011 yaz saati geçişi fixture'da açıkça
+  modellenir. İlk iki ve son satırın zaman, OHLC ve hacim değerleri ayrı
+  testte kilitlenir; böylece yalnız benzer biçimli sahte bir veri seti kanıt
+  sayılmaz.
+- Mum dataset eşlemesi `x` ile `[open, close, lowest, highest]` boyutlarını,
+  dataset sırasını ve `seriesLayoutBy` yönünü taşır; koordinat dışındaki
+  `volume` ve `sign` boyutları visualMap/tooltip için korunur. Mum için
+  yükselen/düşen dolgu ile kenarlık renkleri ayrı API yollarıdır.
+- `MumSerisi` öntanımları resmî `large: true`, `largeThreshold: 600`,
+  `progressive: 3000`, `progressiveThreshold: 10000` değerlerini taşır.
+  Large renderer öğe başına 200.000 geometri/isabet bölgesi kurmak yerine
+  yükselen ve düşen mumları toplu high-low yollarına böler. `SütunSerisi`
+  için `large`, `largeThreshold: 400`, progressive alanları ve resmî large
+  kipteki `barMinWidth: 0.5` davranışı eklendi; hacim sütunları tek toplu
+  dolgu yoluyla çizilir.
+- İki bağlı grid, iki kategori ekseni, `scale: true` değer eksenleri,
+  `inside` + `slider` dataZoom (`xAxisIndex: [0, 1]`, `%10..%100`), yalnız x
+  yönlü toolbox dataZoom ve gizli parça tabanlı visualMap aynı option
+  semantiğiyle kuruldu. `scale: true` bar ekseni geometrik sıfır tabanını
+  veri kapsamına katmaz; resmî hacim kapsamı `[3.000.000, 15.000.000]`
+  korunur ve grid dışındaki taban kırpılır.
+- `SliderZoomView.getShadowDim()` karşılığı olarak candlestick veri gölgesi
+  ilk çoklu boyut olan `open` üzerinden üretilir. Büyük veri gölgesi yaklaşık
+  bir örnek/piksel adımıyla çizilir; ilk seri seçimi, seçili/seçili-dışı
+  gölge parçaları ve bağlı eksen penceresi mevcut dataZoom hattında kalır.
+- Large mum ve large sütun yolları, dataset OHLC sırası, ölçekli bar kapsamı,
+  candlestick dataZoom gölgesi ve 200.000 satırlık deterministik akış birim
+  testleriyle kapatıldı. Bu testler görsel eşiği gevşetmeden gerçek çekirdek
+  davranışını korur.
+- Kilitli ECharts `74e9e09…` referansı iki ardışık üretimde piksel düzeyinde
+  aynı çıktı verdi. 600×450 Cizelge sonucu `%0,610` değişen piksel oranı ve
+  `0,99533` SSIM ile `%1 / 0,99` kabul eşiğini geçti; referans, gerçek, fark
+  ve metrik dosyaları galeri manifestine hashleriyle bağlandı.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 144/332, yani `%43,4`
+  oldu. Gerçek scheduler progressive parçalama, etkileşim,
+  erişilebilirlik ve ölçümlü performans Faz 7/8 kapıları tamamlanmadan kart
+  nihai `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
