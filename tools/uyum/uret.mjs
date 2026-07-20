@@ -168,6 +168,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-weight': 'examples/uyum_fixture.rs#scatter_weight',
   'scatter-aggregate-bar': 'examples/uyum_fixture.rs#scatter_aggregate_bar',
   'scatter-symbol-morph': 'examples/uyum_fixture.rs#scatter_symbol_morph',
+  'scatter-large': 'examples/uyum_fixture.rs#scatter_large',
   'scatter-stream-visual': 'examples/uyum_fixture.rs#scatter_stream_visual',
   'scatter-painter-choice': 'examples/uyum_fixture.rs#scatter_painter_choice',
   'scatter-clustering': 'examples/uyum_fixture.rs#scatter_clustering',
@@ -515,6 +516,18 @@ function varsayılanlarıTopla(kaynakDosya) {
 }
 
 function rustKarşılığı(kök, özellik) {
+  if (kök === 'series.large' && özellik === 'large') {
+    return { api: 'src/model/seri.rs (SaçılımSerisi::büyük)', durum: 'kısmi' };
+  }
+  if (kök === 'series.large' && özellik === 'largeThreshold') {
+    return { api: 'src/model/seri.rs (SaçılımSerisi::büyük_eşiği)', durum: 'kısmi' };
+  }
+  if (kök === 'core' && özellik === 'progressive') {
+    return { api: 'src/model/seri.rs (SaçılımSerisi::aşamalı)', durum: 'kısmi' };
+  }
+  if (kök === 'core' && özellik === 'progressiveThreshold') {
+    return { api: 'src/model/seri.rs (SaçılımSerisi::aşamalı_eşiği)', durum: 'kısmi' };
+  }
   const seri = kök.match(/^series\.([^.]+)/)?.[1];
   if (seri && RUST_SERİLERİ.has(seri)) {
     return { api: `src/model/seri.rs (${seri}.${özellik})`, durum: 'kısmi' };

@@ -145,6 +145,7 @@ const SENARYOLAR = [
       'shocked', 'pie', 'users', 'mug', 'plane'
     ].map((ad, sıra) => ({ ad, kare: 1, durum: `shape-${sıra}` }))
   },
+  { id: 'scatter-large', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-stream-visual', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-painter-choice', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-clustering', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

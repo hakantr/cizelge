@@ -5041,6 +5041,52 @@ fn scatter_symbol_morph(durum: &str) -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn scatter_large_veri_üret(uzunluk: usize, kayma: f64, tohum: &mut u32) -> Vec<f32> {
+    let mut veri = Vec::with_capacity(uzunluk.saturating_mul(2));
+    for _ in 0..uzunluk {
+        let x = kanıt_rastgele(tohum) * 10.0;
+        // Resmî `genData` bu örnekte 500_000 (çift) uzunluk aldığı için
+        // `len % 2 ? 0.1 : -0.1` dalı -0.1'dir. Float32Array ataması her
+        // bileşeni tam burada f32'ye yuvarlar.
+        let y = x.sin() + x * 0.1 * kanıt_rastgele(tohum) + kayma / 10.0;
+        veri.extend_from_slice(&[x as f32, y as f32]);
+    }
+    veri
+}
+
+fn scatter_large() -> GrafikSeçenekleri {
+    let mut tohum = 0x5eed_1234_u32;
+    let a = scatter_large_veri_üret(500_000, 0.0, &mut tohum);
+    let b = scatter_large_veri_üret(500_000, 10.0, &mut tohum);
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("1,000,000 Points").iç_boşluk(15.0))
+        .ipucu(İpucu::yeni())
+        .araç_kutusu(AraçKutusu::yeni().sol("center").veri_yakınlaştırma(true))
+        .gösterge(Gösterge::yeni().yön(Yön::Dikey).sağ(10).iç_boşluk(15.0))
+        .x_ekseni(Eksen::değer())
+        .y_ekseni(Eksen::değer())
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç())
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü())
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("A")
+                .düz_veri(a)
+                .sembol_boyutu(3.0)
+                .öğe_stili(ÖğeStili::yeni().opaklık(0.4))
+                .büyük(true),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("B")
+                .düz_veri(b)
+                .sembol_boyutu(3.0)
+                .öğe_stili(ÖğeStili::yeni().opaklık(0.4))
+                .büyük(true),
+        )
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_kümeleme_verisi_testleri {
@@ -5208,6 +5254,50 @@ mod scatter_symbol_morph_testleri {
         );
         assert!(ilk.x_ekseni.as_ref().is_some_and(|eksen| !eksen.göster));
         assert!(ilk.y_ekseni.as_ref().is_some_and(|eksen| !eksen.göster));
+    }
+}
+
+#[cfg(test)]
+mod scatter_large_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_milyon_nokta_float32_akisini_ve_large_seceneklerini_korur() {
+        let seçenekler = scatter_large();
+        assert_eq!(seçenekler.seriler.len(), 2);
+        let beklenen_uçlar = [
+            (
+                4.115_799_4_f32,
+                -0.480_780_54_f32,
+                5.389_253_6_f32,
+                -0.331_192_94_f32,
+            ),
+            (
+                6.755_797_f32,
+                1.766_418_1_f32,
+                5.239_413_3_f32,
+                0.436_989_67_f32,
+            ),
+        ];
+        for (seri, beklenen) in seçenekler.seriler.iter().zip(beklenen_uçlar) {
+            let Seri::Saçılım(seri) = seri else {
+                panic!("scatter serisi bekleniyordu");
+            };
+            let veri = seri.düz_veri.as_ref().expect("Float32 deposu olmalı");
+            assert_eq!(veri.len(), 500_000);
+            assert!(seri.veri.is_empty());
+            assert!(seri.büyük_etkin_mi());
+            assert_eq!(seri.büyük_eşiği, 2_000);
+            assert_eq!(seri.aşamalı, 5_000);
+            assert_eq!(
+                veri.xy(0),
+                Some((f64::from(beklenen.0), f64::from(beklenen.1)))
+            );
+            assert_eq!(
+                veri.xy(499_999),
+                Some((f64::from(beklenen.2), f64::from(beklenen.3)))
+            );
+        }
     }
 }
 
@@ -7916,6 +8006,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-clustering-process" => scatter_clustering_process(durum),
         "scatter-aggregate-bar" => scatter_aggregate_bar(durum),
         "scatter-symbol-morph" => scatter_symbol_morph(durum),
+        "scatter-large" => Ok(scatter_large()),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),
