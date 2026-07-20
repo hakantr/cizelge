@@ -1,0 +1,19 @@
+{
+  "id": "area-rainfall",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1853,
+  "değişen_piksel_oranı": 0.006862962962962963,
+  "ssim": 0.9929595299850131,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/area-rainfall.png",
+    "gerçek": "testler/gorsel/gerçek/default/area-rainfall.png",
+    "fark": "testler/gorsel/fark/default/area-rainfall.png"
+  }
+}

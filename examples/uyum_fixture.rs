@@ -12,6 +12,9 @@ use cizelge::hazir::*;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 
+#[path = "uyum_veri/area_rainfall.rs"]
+mod area_rainfall_verisi;
+
 struct Girdi {
     id: String,
     çıktı: PathBuf,
@@ -588,6 +591,102 @@ fn area_time_axis() -> GrafikSeçenekleri {
                 .alan_stili(AlanStili::default())
                 .veri(veri),
         )
+}
+
+fn area_rainfall() -> Result<GrafikSeçenekleri, String> {
+    const SAAT_MS: f64 = 3_600_000.0;
+    let (akış, yağış) = area_rainfall_verisi::verileri_çöz()?;
+    let başlangıç =
+        cizelge::yardimci::takvim::takvimden_ana(cizelge::yardimci::takvim::TakvimAnı {
+            yıl: 2009,
+            ay: 6,
+            gün: 12,
+            saat: 2,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+    let mut kategoriler = (0..akış.len())
+        .map(|sıra| {
+            let an = cizelge::yardimci::takvim::andan_takvime(başlangıç + sıra as f64 * SAAT_MS);
+            format!("{}/{}/{}\n{}:00", an.yıl, an.ay, an.gün, an.saat)
+        })
+        .collect::<Vec<_>>();
+
+    // Resmî fixture'ın ilk haftasındaki üç tarih yazım hatası görünür
+    // pencerenin dışında olsa da kategori dizisini kaynakla birebir korur.
+    for sıra in [94_usize, 118, 166] {
+        let kategori = kategoriler
+            .get_mut(sıra)
+            .ok_or_else(|| format!("area-rainfall kategori {sıra} eksik"))?;
+        *kategori = "2009/6/15\n0:00".to_owned();
+    }
+
+    let im_alanı = |başlangıç: f64, bitiş: f64| {
+        İmAlanı::yeni()
+            .x_aralığı("", başlangıç, bitiş)
+            .stil(ÖğeStili::yeni().opaklık(0.3))
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Rainfall and Flow Relationship")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ızgara(Izgara::yeni().alt(80))
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .veri_yakınlaştırma(true)
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .sol(10.0)
+                .iç_boşluk(15.0)
+                .veri(["Flow", "Rainfall"]),
+        )
+        .veri_yakınlaştırma(VeriYakınlaştırma::sürgü().aralık(65.0, 85.0))
+        .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(65.0, 85.0))
+        .x_ekseni(
+            Eksen::kategori()
+                .kenar_boşluğu(false)
+                .çizgi(EksenÇizgisi::yeni().sıfır(EksenSıfırKipi::Kapalı))
+                .veri(kategoriler),
+        )
+        .y_ekseni_ekle(Eksen::değer().ad("Flow(m³/s)"))
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ad("Rainfall(mm)")
+                .ad_konumu(EksenAdKonumu::Başlangıç)
+                .çentik_hizala(true)
+                .ters(true),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Flow")
+                .alan_stili(AlanStili::default())
+                .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0))
+                .im_alanı(im_alanı(2_213.0, 2_453.0))
+                .veri(akış),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Rainfall")
+                .eksenler(0, 1)
+                .alan_stili(AlanStili::default())
+                .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0))
+                .im_alanı(im_alanı(2_165.0, 2_405.0))
+                .veri(yağış),
+        ))
 }
 
 fn line_stack() -> GrafikSeçenekleri {
@@ -3943,6 +4042,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "area-basic" => Ok(area_basic()),
         "area-simple" => Ok(area_simple()),
         "area-time-axis" => Ok(area_time_axis()),
+        "area-rainfall" => area_rainfall(),
         "line-stack" => Ok(line_stack()),
         "line-style" => Ok(line_style()),
         "line-step" => Ok(line_step()),

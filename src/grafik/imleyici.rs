@@ -439,11 +439,7 @@ pub fn im_alanlarını_çiz(
         return;
     };
     let alan = kartezyen.alan;
-    let dolgu = alan_imi
-        .stil
-        .renk
-        .clone()
-        .unwrap_or(Dolgu::Düz(seri_rengi.opaklık(0.15)));
+    let dolgu = im_alanı_dolgusu(alan_imi, seri_rengi);
     let _ = seri;
 
     for (ad, tanım) in &alan_imi.veri {
@@ -486,6 +482,18 @@ pub fn im_alanlarını_çiz(
             );
         }
     }
+}
+
+/// ECharts `MarkAreaView` otomatik dolgu rengini seri renginin %40
+/// opaklığıyla kurar; `itemStyle.opacity` bu dolgunun tamamına ayrıca
+/// uygulanır. Açık bir renk verilmişse yalnız genel opaklık çarpanı işler.
+fn im_alanı_dolgusu(alan_imi: &crate::model::imleyici::İmAlanı, seri_rengi: Renk) -> Dolgu {
+    alan_imi
+        .stil
+        .renk
+        .clone()
+        .unwrap_or(Dolgu::Düz(seri_rengi.opaklık(0.4)))
+        .opaklık(alan_imi.stil.opaklık.unwrap_or(1.0).clamp(0.0, 1.0))
 }
 
 /// İm çizgilerini ve raptiyeleri çizer (serilerin üstüne).
@@ -751,10 +759,27 @@ fn raptiye_çiz(
 #[allow(clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
-    use crate::model::stil::YazıStili;
+    use crate::model::imleyici::İmAlanı;
+    use crate::model::stil::{YazıStili, ÖğeStili};
 
     fn yakın(sol: f32, sağ: f32) {
         assert!((sol - sağ).abs() < 1e-3, "{sol} != {sağ}");
+    }
+
+    #[test]
+    fn markarea_otomatik_rengi_ve_itemstyle_opakligini_birlestirir() {
+        let seri_rengi = Renk::onaltılık(0x5470c6);
+        let otomatik = İmAlanı::yeni().stil(ÖğeStili::yeni().opaklık(0.3));
+        let Dolgu::Düz(otomatik_renk) = im_alanı_dolgusu(&otomatik, seri_rengi) else {
+            panic!("otomatik markArea dolgusu düz renk olmalı");
+        };
+        yakın(otomatik_renk.alfa, 0.12);
+
+        let açık = İmAlanı::yeni().stil(ÖğeStili::yeni().renk("rgba(1, 2, 3, 0.5)").opaklık(0.2));
+        let Dolgu::Düz(açık_renk) = im_alanı_dolgusu(&açık, seri_rengi) else {
+            panic!("açık markArea dolgusu düz renk olmalı");
+        };
+        yakın(açık_renk.alfa, 0.1);
     }
 
     #[test]

@@ -441,7 +441,7 @@ pub struct İmAlanıTanımı {
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct İmAlanı {
     pub veri: Vec<(Option<String>, İmAlanıTanımı)>,
-    /// Öntanımlı: seri renginin %15 opaklısı.
+    /// Öntanımlı: ECharts gibi seri renginin %40 opaklısı.
     pub stil: ÖğeStili,
     pub etiket: Etiket,
 }
