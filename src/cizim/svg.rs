@@ -8,7 +8,9 @@
 use std::fmt::Write as _;
 
 use crate::cizim::donusum::AfinMatris;
-use crate::cizim::yuzey::{DikeyHiza, SATIR_ORANI, YatayHiza, Yol, YolKomutu, ÇizimYüzeyi};
+use crate::cizim::yuzey::{
+    DikeyHiza, SATIR_ORANI, YatayHiza, Yol, YolKomutu, daire_yolu, ÇizimYüzeyi,
+};
 use crate::koordinat::Dikdörtgen;
 use crate::model::stil::ÇizgiTürü;
 use crate::renk::{Dolgu, Renk};
@@ -285,6 +287,27 @@ impl ÇizimYüzeyi for SvgYüzeyi {
             yol_svg(yol),
             boya
         );
+    }
+
+    fn daire(
+        &mut self,
+        merkez: (f32, f32),
+        yarıçap: f32,
+        dolgu: Option<&Dolgu>,
+        kenarlık: Option<(f32, Renk)>,
+    ) {
+        if yarıçap <= 0.0 {
+            return;
+        }
+        let yol = daire_yolu(merkez, yarıçap);
+        if let Some(dolgu) = dolgu {
+            self.yol_doldur(&yol, dolgu);
+        }
+        if let Some((kalınlık, renk)) = kenarlık
+            && kalınlık > 0.0
+        {
+            self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
+        }
     }
 
     fn yol_çiz(&mut self, yol: &Yol, kalınlık: f32, renk: Renk, tür: ÇizgiTürü) {
@@ -588,5 +611,24 @@ mod testler {
         assert!(belge.contains(r#"<linearGradient id="grd1""#));
         assert!(belge.contains(r#"stroke="url(#grd1)""#));
         assert!(belge.contains(r#"stroke-width="2""#));
+    }
+
+    #[test]
+    fn radyal_gradyanlı_daire_tek_boya_referansı_üretir() {
+        let mut yüzey = SvgYüzeyi::yeni(40.0, 40.0);
+        let gradyan = Dolgu::radyal(
+            0.4,
+            0.3,
+            1.0,
+            vec![
+                RenkDurağı::yeni(0.0, 0xff767bu32),
+                RenkDurağı::yeni(1.0, 0xcc2e48u32),
+            ],
+        );
+
+        yüzey.daire((20.0, 20.0), 10.0, Some(&gradyan), None);
+        let belge = yüzey.belge();
+        assert_eq!(belge.matches("<radialGradient ").count(), 1);
+        assert_eq!(belge.matches(r#"fill="url(#grd1)""#).count(), 1);
     }
 }

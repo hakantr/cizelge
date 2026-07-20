@@ -149,6 +149,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-jitter': 'examples/uyum_fixture.rs#scatter_jitter',
   'doc-example/scatter-jitter-avoidOverlap': 'examples/uyum_fixture.rs#scatter_jitter_avoid_overlap',
   'scatter-punchCard': 'examples/uyum_fixture.rs#scatter_punch_card',
+  'bubble-gradient': 'examples/uyum_fixture.rs#bubble_gradient',
   'scatter-effect': 'examples/uyum_fixture.rs#scatter_effect',
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
   'heatmap-cartesian': 'examples/uyum_fixture.rs#heatmap_cartesian',

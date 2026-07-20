@@ -12,7 +12,7 @@ use ab_glyph::{Font, FontVec, OutlineCurve, ScaleFont};
 use tiny_skia as ts;
 
 use crate::cizim::donusum::AfinMatris;
-use crate::cizim::yuzey::{DikeyHiza, YatayHiza, Yol, YolKomutu, ÇizimYüzeyi};
+use crate::cizim::yuzey::{DikeyHiza, YatayHiza, Yol, YolKomutu, daire_yolu, ÇizimYüzeyi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::secenekler::GrafikSeçenekleri;
@@ -740,7 +740,7 @@ fn boya_çevir<'a>(dolgu: &'a Dolgu, sınır: Option<Dikdörtgen>) -> Option<ts:
             boya.shader = ts::RadialGradient::new(
                 merkez,
                 merkez,
-                yarıçap * s.genişlik.max(s.yükseklik),
+                yarıçap * s.genişlik.min(s.yükseklik),
                 duraklar,
                 ts::SpreadMode::Pad,
                 ts::Transform::identity(),
@@ -976,6 +976,38 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             return;
         };
         self.doldur(&ts_yolu, &boya);
+    }
+
+    fn daire(
+        &mut self,
+        merkez: (f32, f32),
+        yarıçap: f32,
+        dolgu: Option<&Dolgu>,
+        kenarlık: Option<(f32, Renk)>,
+    ) {
+        if yarıçap <= 0.0 {
+            return;
+        }
+        let yol = daire_yolu(merkez, yarıçap);
+        if let Some(dolgu) = dolgu {
+            // Canvas/zrender radyal gradyanı sembolün sınır kutusunda tek
+            // shader ile örnekler; halka yaklaşımı rasterde bant üretir.
+            let sınır = Dikdörtgen::yeni(
+                merkez.0 - yarıçap,
+                merkez.1 - yarıçap,
+                yarıçap * 2.0,
+                yarıçap * 2.0,
+            );
+            if let (Some(ts_yolu), Some(boya)) = (yol_çevir(&yol), boya_çevir(dolgu, Some(sınır)))
+            {
+                self.doldur(&ts_yolu, &boya);
+            }
+        }
+        if let Some((kalınlık, renk)) = kenarlık
+            && kalınlık > 0.0
+        {
+            self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
+        }
     }
 
     fn yol_çiz(&mut self, yol: &Yol, kalınlık: f32, renk: Renk, tür: ÇizgiTürü) {
@@ -1823,6 +1855,46 @@ pub fn png_dışa_aktar(
 #[allow(clippy::unwrap_used, clippy::indexing_slicing)]
 mod testler {
     use super::*;
+    use crate::renk::RenkDurağı;
+
+    fn kırmızı_mavi_radyal(yarıçap: f32) -> Dolgu {
+        Dolgu::radyal(
+            0.5,
+            0.5,
+            yarıçap,
+            vec![
+                RenkDurağı::yeni(0.0, 0xff0000u32),
+                RenkDurağı::yeni(1.0, 0x0000ffu32),
+            ],
+        )
+    }
+
+    #[test]
+    fn radyal_gradyan_kısa_kenarı_yarıçap_ölçeği_olarak_kullanır() {
+        let mut yüzey = PikselYüzeyi::yeni(40.0, 20.0, 1.0).unwrap();
+        yüzey.dikdörtgen(
+            Dikdörtgen::yeni(0.0, 0.0, 40.0, 20.0),
+            &kırmızı_mavi_radyal(0.5),
+            [0.0; 4],
+            None,
+        );
+
+        let merkez = yüzey.harita.pixel(20, 10).unwrap();
+        let yarıçap_dışı = yüzey.harita.pixel(35, 10).unwrap();
+        assert!(merkez.red() > 220 && merkez.blue() < 35);
+        assert!(yarıçap_dışı.red() < 15 && yarıçap_dışı.blue() > 240);
+    }
+
+    #[test]
+    fn radyal_gradyanlı_daire_tek_shader_ile_doldurulur() {
+        let mut yüzey = PikselYüzeyi::yeni(40.0, 40.0, 1.0).unwrap();
+        yüzey.daire((20.0, 20.0), 10.0, Some(&kırmızı_mavi_radyal(1.0)), None);
+
+        let merkez = yüzey.harita.pixel(20, 20).unwrap();
+        let dış = yüzey.harita.pixel(5, 20).unwrap();
+        assert!(merkez.red() > merkez.blue());
+        assert_eq!((dış.red(), dış.green(), dış.blue()), (255, 255, 255));
+    }
 
     #[test]
     fn dönüşümlü_yazı_rasterde_gerçekten_döner() {

@@ -121,6 +121,7 @@ const SENARYOLAR = [
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
   { id: 'scatter-punchCard', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'bubble-gradient', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'candlestick-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'heatmap-cartesian',

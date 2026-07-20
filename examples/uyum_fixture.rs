@@ -3816,6 +3816,155 @@ fn scatter_jitter_avoid_overlap() -> GrafikSeçenekleri {
         )
 }
 
+fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/bubble-gradient.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let ham: Vec<Vec<Vec<serde_json::Value>>> = resmi_javascript_dizisi(&kaynak, "const data")?;
+    if ham.len() != 2 {
+        return Err(format!(
+            "{} iki resmi kabarcık veri grubu içermiyor",
+            dosya.display()
+        ));
+    }
+    let veri_grupları = ham
+        .into_iter()
+        .enumerate()
+        .map(|(grup_sırası, grup)| {
+            grup
+                .into_iter()
+                .enumerate()
+                .map(|(satır_sırası, satır)| {
+                    let sayı = |sıra: usize| {
+                        satır.get(sıra).and_then(serde_json::Value::as_f64).ok_or_else(|| {
+                            format!(
+                                "bubble-gradient grup {grup_sırası} satır {satır_sırası} boyut {sıra} sayısal değil"
+                            )
+                        })
+                    };
+                    let ülke = satır
+                        .get(3)
+                        .and_then(serde_json::Value::as_str)
+                        .ok_or_else(|| {
+                            format!(
+                                "bubble-gradient grup {grup_sırası} satır {satır_sırası} ülke adı değil"
+                            )
+                        })?;
+                    let yıl = sayı(4)?;
+                    Ok(VeriÖğesi::adlı(ülke, vec![sayı(0)?, sayı(1)?, sayı(2)?])
+                        .boyutlar([("year".to_owned(), VeriDeğeri::Sayı(yıl))]))
+                })
+                .collect::<Result<Vec<_>, String>>()
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+
+    let bölme = BölmeÇizgisi {
+        göster: Some(true),
+        renk: None,
+        tür: ÇizgiTürü::Kesikli,
+    };
+    let kabarcık = |ad: &str, veri: Vec<VeriÖğesi>, dolgu: Dolgu, gölge: Renk| {
+        SaçılımSerisi::yeni()
+            .ad(ad)
+            .veri(veri)
+            .sembol_boyutu_işlevi(|öğe| {
+                öğe
+                    .değer
+                    .dizi()
+                    .and_then(|değerler| değerler.get(2))
+                    .copied()
+                    .unwrap_or_default()
+                    .sqrt() as f32
+                    / 500.0
+            })
+            .öğe_stili(
+                ÖğeStili::yeni()
+                    .renk(dolgu)
+                    .gölge_bulanıklığı(10.0)
+                    .gölge_rengi(gölge)
+                    .gölge_kayması(0.0, 5.0),
+            )
+    };
+    let kırmızı = Dolgu::radyal(
+        0.4,
+        0.3,
+        1.0,
+        vec![
+            RenkDurağı {
+                konum: 0.0,
+                renk: Renk::from("rgb(251, 118, 123)"),
+            },
+            RenkDurağı {
+                konum: 1.0,
+                renk: Renk::from("rgb(204, 46, 72)"),
+            },
+        ],
+    );
+    let mavi = Dolgu::radyal(
+        0.4,
+        0.3,
+        1.0,
+        vec![
+            RenkDurağı {
+                konum: 0.0,
+                renk: Renk::from("rgb(129, 227, 238)"),
+            },
+            RenkDurağı {
+                konum: 1.0,
+                renk: Renk::from("rgb(25, 183, 207)"),
+            },
+        ],
+    );
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .arkaplan(Dolgu::radyal(
+            0.3,
+            0.3,
+            0.8,
+            vec![
+                RenkDurağı {
+                    konum: 0.0,
+                    renk: Renk::from("#f7f8fa"),
+                },
+                RenkDurağı {
+                    konum: 1.0,
+                    renk: Renk::from("#cdd0d5"),
+                },
+            ],
+        ))
+        .başlık(
+            Başlık::yeni()
+                .metin("Life Expectancy and GDP by Country")
+                .sol("5%")
+                .üst("3%")
+                .iç_boşluk(15.0),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .sağ("10%")
+                .üst("3%")
+                .iç_boşluk(15.0)
+                .veri(["1990", "2015"]),
+        )
+        .ızgara(Izgara::yeni().sol("8%").üst("10%"))
+        .x_ekseni(Eksen::değer().bölme_çizgisi(bölme.clone()))
+        .y_ekseni(Eksen::değer().ölçekli(true).bölme_çizgisi(bölme))
+        .seri(kabarcık(
+            "1990",
+            veri_grupları[0].clone(),
+            kırmızı,
+            Renk::from("rgba(120, 36, 50, 0.5)"),
+        ))
+        .seri(kabarcık(
+            "2015",
+            veri_grupları[1].clone(),
+            mavi,
+            Renk::from("rgba(25, 100, 150, 0.5)"),
+        )))
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6012,6 +6161,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-jitter" => Ok(scatter_jitter()),
         "doc-example/scatter-jitter-avoidOverlap" => Ok(scatter_jitter_avoid_overlap()),
         "scatter-punchCard" => scatter_punch_card(),
+        "bubble-gradient" => bubble_gradient(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
