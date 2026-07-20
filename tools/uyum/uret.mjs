@@ -145,7 +145,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-simple': 'examples/uyum_fixture.rs#scatter_simple',
   'scatter-effect': 'examples/uyum_fixture.rs#scatter_effect',
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
-  'heatmap-cartesian': 'examples/isi.rs',
+  'heatmap-cartesian': 'examples/uyum_fixture.rs#heatmap_cartesian',
   'line-marker': 'examples/uyum_fixture.rs#line_marker',
   'grid-multiple': 'examples/uyum_fixture.rs#grid_multiple',
   'intraday-breaks-1': 'examples/uyum_fixture.rs#intraday_breaks_1',

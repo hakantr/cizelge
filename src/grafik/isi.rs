@@ -3,12 +3,13 @@
 //! renkleri görsel eşlemeden çözülür.
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
+use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
 use crate::model::YatayKonum;
 use crate::model::bilesen::Yön;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::IsıHaritasıSerisi;
+use crate::model::stil::ÖğeStili;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
@@ -41,12 +42,37 @@ pub fn ısı_haritası_çiz(
     eşleme: &GörselEşleme,
     eşleme_kapsamı: [f64; 2],
     ilerleme: f32,
+    fare: Option<(f32, f32)>,
     isabetler: &mut Vec<İsabetBölgesi>,
-) {
+) -> Option<usize> {
     let x_bant = kartezyen.x.bant_genişliği();
     let y_bant = kartezyen.y.bant_genişliği();
     let boşluk = seri.hücre_boşluğu.max(0.0);
     let opaklık = ilerleme.clamp(0.0, 1.0);
+
+    let hücre = |x_sırası: f64, y_sırası: f64| {
+        let merkez_x = kartezyen.x.veriden_piksele(x_sırası);
+        let merkez_y = kartezyen.y.veriden_piksele(y_sırası);
+        // HeatmapView, komşu hücreler arasında alt-piksel yarığı
+        // oluşmaması için layout bandını her yönde 0,25 px genişletir.
+        // `cellGap` bu örtünün içinden düşülür.
+        Dikdörtgen::yeni(
+            merkez_x - x_bant / 2.0 - 0.25 + boşluk / 2.0,
+            merkez_y - y_bant / 2.0 - 0.25 + boşluk / 2.0,
+            (x_bant + 0.5 - boşluk).max(1.0),
+            (y_bant + 0.5 - boşluk).max(1.0),
+        )
+    };
+    let vurgulu = fare.and_then(|fare| {
+        seri.veri.iter().enumerate().find_map(|(sıra, öğe)| {
+            let dizi = öğe.değer.dizi()?;
+            let (&x, &y, &değer) = (dizi.first()?, dizi.get(1)?, dizi.get(2)?);
+            (değer.is_finite()
+                && eşleme.seçili_mi(değer, eşleme_kapsamı)
+                && hücre(x, y).içeriyor_mu(fare))
+            .then_some(sıra)
+        })
+    });
 
     for (i, öğe) in seri.veri.iter().enumerate() {
         let Some(dizi) = öğe.değer.dizi() else {
@@ -60,6 +86,9 @@ pub fn ısı_haritası_çiz(
         if !değer.is_finite() {
             continue;
         }
+        if !eşleme.seçili_mi(değer, eşleme_kapsamı) {
+            continue;
+        }
         // Parçalı eşlemede kapalı dilime düşen hücre çizilmez.
         if eşleme.parçalı_mı() {
             match eşleme.parça_bul(değer) {
@@ -67,43 +96,87 @@ pub fn ısı_haritası_çiz(
                 _ => continue,
             }
         }
-        let merkez_x = kartezyen.x.veriden_piksele(x_sırası);
-        let merkez_y = kartezyen.y.veriden_piksele(y_sırası);
-        let d = Dikdörtgen::yeni(
-            merkez_x - x_bant / 2.0 + boşluk / 2.0,
-            merkez_y - y_bant / 2.0 + boşluk / 2.0,
-            (x_bant - boşluk).max(1.0),
-            (y_bant - boşluk).max(1.0),
-        );
-        let renk = eşleme.renk_çöz(değer, eşleme_kapsamı).opaklık(opaklık);
-        let kenarlık = seri
-            .öğe_stili
-            .kenarlık_rengi
-            .map(|r| (seri.öğe_stili.kenarlık_kalınlığı.max(1.0), r));
-        çizici.dikdörtgen(
-            d,
-            &Dolgu::Düz(renk),
-            seri.öğe_stili.kenarlık_yarıçapı,
-            kenarlık,
-        );
+        let d = hücre(x_sırası, y_sırası);
+        let vurgu = vurgulu == Some(i);
+        let normal = &seri.öğe_stili;
+        let vurgu_stili = &seri.vurgu_öğe_stili;
+        let stil_opaklığı = if vurgu {
+            vurgu_stili.opaklık.or(normal.opaklık)
+        } else {
+            normal.opaklık
+        }
+        .unwrap_or(1.0);
+        let renk = eşleme
+            .renk_çöz(değer, eşleme_kapsamı)
+            .opaklık(opaklık * stil_opaklığı);
+        let kenarlık_rengi = if vurgu {
+            vurgu_stili.kenarlık_rengi.or(normal.kenarlık_rengi)
+        } else {
+            normal.kenarlık_rengi
+        };
+        let kenarlık_kalınlığı = if vurgu && vurgu_stili.kenarlık_kalınlığı > 0.0 {
+            vurgu_stili.kenarlık_kalınlığı
+        } else {
+            normal.kenarlık_kalınlığı
+        };
+        let kenarlık = kenarlık_rengi.map(|r| (kenarlık_kalınlığı.max(1.0), r));
+        let yarıçap = if vurgu && vurgu_stili.kenarlık_yarıçapı.iter().any(|r| *r > 0.0) {
+            vurgu_stili.kenarlık_yarıçapı
+        } else {
+            normal.kenarlık_yarıçapı
+        };
+        let gölge_stili: &ÖğeStili = if vurgu
+            && (vurgu_stili.gölge_bulanıklığı > 0.0
+                || vurgu_stili.gölge_rengi.is_some()
+                || vurgu_stili.gölge_kayması != (0.0, 0.0))
+        {
+            vurgu_stili
+        } else {
+            normal
+        };
+        if gölge_stili.gölge_bulanıklığı > 0.0
+            && let Some(gölge_rengi) = gölge_stili.gölge_rengi
+        {
+            let mut yol = Yol::yeni();
+            yol.taşı((d.x, d.y));
+            yol.çiz((d.sağ(), d.y));
+            yol.çiz((d.sağ(), d.alt()));
+            yol.çiz((d.x, d.alt()));
+            yol.kapat();
+            çizici.yol_gölgesi(
+                &yol,
+                gölge_rengi,
+                gölge_stili.gölge_bulanıklığı,
+                gölge_stili.gölge_kayması,
+            );
+        }
+        çizici.dikdörtgen(d, &Dolgu::Düz(renk), yarıçap, kenarlık);
 
         if seri.etiket.göster {
             let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            // Koyu hücrede beyaz, açık hücrede koyu metin.
+            // HeatmapView'in görsel renge göre otomatik iç etiket karşıtı:
+            // açık hücrede legacy `#333`, koyu hücrede `#eee`.
             let parlaklık = 0.299 * renk.kırmızı + 0.587 * renk.yeşil + 0.114 * renk.mavi;
             let yazı_rengi = seri.etiket.yazı.renk.unwrap_or(if parlaklık < 0.55 {
-                Renk::BEYAZ
+                Renk::onaltılık(0xeeeeee)
             } else {
-                tema::birincil_metin()
+                Renk::onaltılık(0x333333)
             });
-            çizici.yazı(
+            // HeatmapView, otomatik etiket dolgusunun altına hücrenin
+            // görsel rengiyle 2 px `textBorder` koyar. Bu, rakamın
+            // kenarındaki alt-piksel örtüşmenin komşu hücre/eksen
+            // rengine karışmasını engeller.
+            çizici.dönüşümlü_konturlu_yazı(
                 &binlik_ayır(değer),
-                d.merkez(),
+                (0.0, 0.0),
                 YatayHiza::Orta,
                 DikeyHiza::Orta,
                 boyut,
                 yazı_rengi,
                 false,
+                renk,
+                2.0,
+                AfinMatris::ötele(d.merkez().0, d.merkez().1 + 0.5),
             );
         }
 
@@ -116,6 +189,7 @@ pub fn ısı_haritası_çiz(
             geometri: İsabetGeometrisi::Dikdörtgen(d),
         });
     }
+    vurgulu
 }
 
 /// Görsel eşleme bileşenini seçeneklerdeki kutu yerleşimine göre çizer:
@@ -212,6 +286,107 @@ pub fn görsel_eşleme_çiz(
         return kutular;
     }
     if eşleme.renkler.is_empty() {
+        return Vec::new();
+    }
+    if eşleme.yön == Yön::Yatay && eşleme.hesaplanabilir {
+        // ContinuousView yatay `calculable` öntanımlıları: itemSize
+        // 20×140, handleSize %120 ve bileşen padding'i 15 px. ECharts
+        // çubuğu içeride 90° döndürür; burada aynı dünya geometrisini
+        // doğrudan yatay koordinatlarda kuruyoruz.
+        const ŞERİT_GENİŞLİĞİ: f32 = 140.0;
+        const ŞERİT_YÜKSEKLİĞİ: f32 = 20.0;
+        const TUTAMAÇ_GENİŞLİĞİ: f32 = 7.793_104;
+        const TUTAMAÇ_YÜKSEKLİĞİ: f32 = 26.0;
+        const İÇ_BOŞLUK: f32 = 15.0;
+        let boyut = tema::YAZI_KÜÇÜK;
+        let seçili = eşleme.seçili_kapsam(kapsam);
+        let düşük = binlik_ayır(seçili[0]);
+        let yüksek = binlik_ayır(seçili[1]);
+        let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
+        let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
+        let yarım_tutamaç = TUTAMAÇ_GENİŞLİĞİ / 2.0;
+        let içerik_solu = (-düşük_genişliği / 2.0).min(-yarım_tutamaç);
+        let içerik_sağı =
+            (ŞERİT_GENİŞLİĞİ + yüksek_genişliği / 2.0).max(ŞERİT_GENİŞLİĞİ + yarım_tutamaç);
+        let dış_solu = içerik_solu - İÇ_BOŞLUK;
+        let dış_sağı = içerik_sağı + İÇ_BOŞLUK;
+        let dış_genişlik = dış_sağı - dış_solu;
+        let şerit_x = if let Some(sağ) = eşleme.sağ {
+            çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_genişlik - dış_solu
+        } else {
+            match eşleme.sol {
+                YatayKonum::Sol => 10.0 - dış_solu,
+                YatayKonum::Orta => (çizici.genişlik() - dış_genişlik) / 2.0 - dış_solu,
+                YatayKonum::Sağ => çizici.genişlik() - 10.0 - dış_genişlik - dış_solu,
+                YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) - dış_solu,
+            }
+        };
+        // Grup sınırının altı `bottom` değerine oturur. Tutamaç, çubuğun
+        // iki yanında üçer piksel taşar; üzerine 15 px padding eklenir.
+        let grup_altı = çizici.yükseklik() - eşleme.alt.çöz(çizici.yükseklik());
+        let grup_y = grup_altı - (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0 - İÇ_BOŞLUK;
+        let şerit_y = grup_y - ŞERİT_YÜKSEKLİĞİ;
+        let durak_sayısı = eşleme.renkler.len().saturating_sub(1).max(1) as f32;
+        let duraklar: Vec<crate::renk::RenkDurağı> = eşleme
+            .renkler
+            .iter()
+            .enumerate()
+            .map(|(sıra, renk)| crate::renk::RenkDurağı::yeni(sıra as f32 / durak_sayısı, *renk))
+            .collect();
+        let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, ŞERİT_GENİŞLİĞİ, ŞERİT_YÜKSEKLİĞİ);
+        çizici.dikdörtgen(şerit, &Dolgu::Düz(tema::devre_dışı()), [3.0; 4], None);
+        let açıklık = (kapsam[1] - kapsam[0]).max(f64::EPSILON);
+        let oran = |değer: f64| ((değer - kapsam[0]) / açıklık).clamp(0.0, 1.0) as f32;
+        let alt_oran = oran(seçili[0]);
+        let üst_oran = oran(seçili[1]);
+        let seçili_kutu = Dikdörtgen::yeni(
+            şerit.x + alt_oran * şerit.genişlik,
+            şerit.y,
+            ((üst_oran - alt_oran) * şerit.genişlik).max(0.1),
+            şerit.yükseklik,
+        );
+        çizici.kırpılı(seçili_kutu, &mut |yüzey| {
+            yüzey.dikdörtgen(
+                şerit,
+                &crate::renk::Dolgu::doğrusal(0.0, 0.0, 1.0, 0.0, duraklar.clone()),
+                [3.0; 4],
+                None,
+            );
+        });
+
+        let tutamaç_y = şerit_y - (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0;
+        for (değer, oran) in [(seçili[0], alt_oran), (seçili[1], üst_oran)] {
+            çizici.dikdörtgen(
+                Dikdörtgen::yeni(
+                    şerit.x + oran * şerit.genişlik - yarım_tutamaç,
+                    tutamaç_y,
+                    TUTAMAÇ_GENİŞLİĞİ,
+                    TUTAMAÇ_YÜKSEKLİĞİ,
+                ),
+                &Dolgu::Düz(eşleme.renk_çöz(değer, kapsam)),
+                [3.5; 4],
+                Some((2.0, tema::nötr_00())),
+            );
+        }
+        let etiket_y = şerit_y - 14.0;
+        çizici.yazı(
+            &düşük,
+            (şerit.x + alt_oran * şerit.genişlik, etiket_y),
+            YatayHiza::Orta,
+            DikeyHiza::Orta,
+            boyut,
+            tema::ikincil_metin(),
+            false,
+        );
+        çizici.yazı(
+            &yüksek,
+            (şerit.x + üst_oran * şerit.genişlik, etiket_y),
+            YatayHiza::Orta,
+            DikeyHiza::Orta,
+            boyut,
+            tema::ikincil_metin(),
+            false,
+        );
         return Vec::new();
     }
     if eşleme.yön == Yön::Yatay {

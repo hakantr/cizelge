@@ -557,6 +557,7 @@ impl Render for GrafikGörünümü {
                             ilerleme,
                             zaman_sn,
                             fare: yerel_fare,
+                            ipucu_öğesi: None,
                             kapalı: kapalı.clone(),
                             gösterge_sayfası,
                             fırça: fırça.map(|[x0, y0, x1, y1]| {

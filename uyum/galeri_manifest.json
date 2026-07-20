@@ -530,7 +530,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/heatmap-cartesian.ts",
     "kaynak_sha256": "1c619166b81658bd1acae106f2971399fc927cd31a08faadf55f1ed32839e559",
-    "cizelge_fixture": "examples/isi.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#heatmap_cartesian",
     "seriler": [
       "heatmap"
     ],
@@ -544,7 +544,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -556,14 +556,63 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
-      "etkileşim": "kısmi",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "başlangıç",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 1534,
+          "değişen_piksel_oranı": 0.005681481481481482,
+          "ssim": 0.9907036005441423,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-cartesian-başlangıç.png",
+            "sha256": "2aaae1a4dc644161c78a14fe996574a6ed3a3b949407268736fc47248aee5eff"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/heatmap-cartesian-başlangıç.png",
+            "sha256": "4a61d69f46cab029fa1519563acfdda95a9778044cf6a9464b8bdf44548599fc"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/heatmap-cartesian-başlangıç.png",
+            "sha256": "178dff3fe50cd7b2f875fd3771e3bcb76d635f6d0e2a43af5f59a8eb657c6408"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/heatmap-cartesian-başlangıç.json",
+            "sha256": "a17d9e406ab997ffaa87ba66ee20e4fcc66c9d4adc21112fa44c71ac51931e0b"
+          }
+        },
+        {
+          "ad": "ipucu",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 1534,
+          "değişen_piksel_oranı": 0.005681481481481482,
+          "ssim": 0.9906864990217437,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-cartesian-ipucu.png",
+            "sha256": "8b2606b1969aaa158d5e21b4a8cd9c28d1a5dc163ce31361d5339e5acb608cca"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/heatmap-cartesian-ipucu.png",
+            "sha256": "270146e0be3ddf37dff739bf7e959698686031d672af235a63733721ad7cc57f"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/heatmap-cartesian-ipucu.png",
+            "sha256": "a73f4cf5875a4fc325c1bdd86ec46f27af9a18ef4d3de8ef35eb08aed09c1b56"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/heatmap-cartesian-ipucu.json",
+            "sha256": "a943a858e8dd7e9f114cf06fe1c038da28fed22157c1af396d4e37fa22098637"
+          }
+        }
+      ]
     }
   },
   {
@@ -11536,24 +11585,24 @@
           "ad": "ipucu",
           "senaryo": "etkileşim",
           "geçti": true,
-          "değişen_piksel": 1522,
-          "değişen_piksel_oranı": 0.005637037037037037,
-          "ssim": 0.9942764106358164,
+          "değişen_piksel": 1560,
+          "değişen_piksel_oranı": 0.0057777777777777775,
+          "ssim": 0.9937273446446017,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data2-ipucu.png",
             "sha256": "7891a39055098b71ab12dfbd7b54da98933c3e95a3ef38caefc17653ab71bc59"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dynamic-data2-ipucu.png",
-            "sha256": "adea17e4c6e82204da4b67a215abd70cd6968beabe15bdd30a44e4e1a256f41d"
+            "sha256": "76952c1eaf28968a5dad691719310dc8838033948daca6ef9807972de7265fd4"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dynamic-data2-ipucu.png",
-            "sha256": "3af60721e50c63f660fb02f60da94055e0f74f96d123726e6e01674e06db9ad5"
+            "sha256": "30069ecec636ecd436fdd8d72ee8de3a3f7dd6a4afc803d7f2675b2db0f088fa"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dynamic-data2-ipucu.json",
-            "sha256": "558a0e8727ad244311c3c2227b65fe109b628631ef572f911324b18614075184"
+            "sha256": "43634af5f204198a5ff1f348f1961e15b2b4960295726beac34594b66ee7555e"
           }
         },
         {
@@ -12963,24 +13012,24 @@
           "ad": "ipucu",
           "senaryo": "etkileşim",
           "geçti": true,
-          "değişen_piksel": 2105,
-          "değişen_piksel_oranı": 0.007796296296296296,
-          "ssim": 0.9951230448979621,
+          "değişen_piksel": 2204,
+          "değişen_piksel_oranı": 0.008162962962962962,
+          "ssim": 0.9950411033371034,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data-ipucu.png",
             "sha256": "49ee66623d5debb63e6ac07b363c04d0342e12b926ea998e1441ccb0eeef0ce4"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dynamic-data-ipucu.png",
-            "sha256": "d25af6e6026e52ddad7c15df0871a8ef9aae1fa00eb174e62c8373a9362d6eaa"
+            "sha256": "47a8cb715708cd98d16b5ef6b03d23b62e1aa1b8b5020dc51ebc3d8064fbcba5"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dynamic-data-ipucu.png",
-            "sha256": "4d795d8ea6699bddbe4f92387615437647a92ad69fc0d72b48692281c13de78b"
+            "sha256": "337c3798c3412bd44a12225841a9fa55797cc746947f4d7f4e34e665b3b88dd0"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dynamic-data-ipucu.json",
-            "sha256": "5e2b88adf88d0cfcba43ea6b0c922541bf08180fcee0812cb9d0b34b2ec0ce35"
+            "sha256": "cdfbd5410ce8f95d7ea35ee7bce45851fc9caee55ad4f1f2e6df5b9fc9a0cf42"
           }
         },
         {

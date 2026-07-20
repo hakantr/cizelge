@@ -617,6 +617,16 @@ pub enum Tetikleme {
     Kapalı,
 }
 
+/// Tooltip kutusunun veri öğesine göre yerleşimi (`tooltip.position`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum İpucuKonumu {
+    /// Kutuyu imlecin sağ altına yerleştirir (ECharts öntanımlısı).
+    #[default]
+    İmleç,
+    /// Kutuyu veri öğesinin üst orta noktasına yerleştirir (`'top'`).
+    Üst,
+}
+
 /// Eksen imleci türü (`tooltip.axisPointer.type`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum İmleçTürü {
@@ -676,6 +686,7 @@ pub struct İpucu {
     /// bağımsız olarak etkin kalabilir.
     pub içerik_göster: bool,
     pub tetikleme: Tetikleme,
+    pub konum: İpucuKonumu,
     pub imleç: İmleçTürü,
     /// `tooltip.axisPointer.animation`; false canlı akışlarda imlecin veri
     /// güncellemesinin gerisinde kalmasını önler.
@@ -703,6 +714,7 @@ impl Default for İpucu {
             göster: true,
             içerik_göster: true,
             tetikleme: Tetikleme::Öğe,
+            konum: İpucuKonumu::İmleç,
             imleç: İmleçTürü::Çizgi,
             imleç_animasyonu: true,
             imleç_etiketi_arkaplanı: None,
@@ -733,6 +745,11 @@ impl İpucu {
 
     pub fn tetikleme(mut self, tetikleme: Tetikleme) -> Self {
         self.tetikleme = tetikleme;
+        self
+    }
+
+    pub fn konum(mut self, konum: İpucuKonumu) -> Self {
+        self.konum = konum;
         self
     }
 

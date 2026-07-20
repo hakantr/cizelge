@@ -174,6 +174,12 @@ pub struct GörselEşleme {
     pub metin: Option<(String, String)>,
     /// Bileşen (gradyan çubuğu) çizilsin mi?
     pub göster: bool,
+    /// Sürekli eşlemede iki tutamaçlı değer aralığı denetimi
+    /// (`visualMap.calculable`).
+    pub hesaplanabilir: bool,
+    /// Sürekli eşlemenin seçili veri aralığı (`visualMap.range`). `None`,
+    /// bütün etkin kapsamın seçili olduğu otomatik durumdur.
+    pub seçili_aralık: Option<[f64; 2]>,
     /// Parçalı kip (`visualMap: piecewise`): boş değilse renkler
     /// parçalardan çözülür ve bileşen tıklanabilir bir listedir.
     pub parçalar: Vec<EşlemeParçası>,
@@ -204,6 +210,8 @@ impl Default for GörselEşleme {
             alt: Uzunluk::Piksel(10.0),
             metin: None,
             göster: true,
+            hesaplanabilir: false,
+            seçili_aralık: None,
             parçalar: Vec::new(),
             kapalı_parçalar: Vec::new(),
         }
@@ -297,6 +305,21 @@ impl GörselEşleme {
         self
     }
 
+    pub fn hesaplanabilir(mut self, hesaplanabilir: bool) -> Self {
+        self.hesaplanabilir = hesaplanabilir;
+        self
+    }
+
+    pub fn seçili_aralık(mut self, en_az: f64, en_çok: f64) -> Self {
+        self.seçili_aralık = Some([en_az.min(en_çok), en_az.max(en_çok)]);
+        self
+    }
+
+    pub fn seçili_aralığı_temizle(mut self) -> Self {
+        self.seçili_aralık = None;
+        self
+    }
+
     /// Parçalı kip: dilim listesi.
     pub fn parçalar(mut self, parçalar: impl IntoIterator<Item = EşlemeParçası>) -> Self {
         self.parçalar = parçalar.into_iter().collect();
@@ -327,6 +350,25 @@ impl GörselEşleme {
         } else {
             [en_az, en_az + 1.0]
         }
+    }
+
+    /// `range` değerini etkin min/max kapsamına sıralayıp kıstırır.
+    pub fn seçili_kapsam(&self, kapsam: [f64; 2]) -> [f64; 2] {
+        let [mut alt, mut üst] = self.seçili_aralık.unwrap_or(kapsam);
+        if alt > üst {
+            std::mem::swap(&mut alt, &mut üst);
+        }
+        [
+            alt.clamp(kapsam[0], kapsam[1]),
+            üst.clamp(kapsam[0], kapsam[1]),
+        ]
+    }
+
+    pub fn seçili_mi(&self, değer: f64, kapsam: [f64; 2]) -> bool {
+        let [alt, üst] = self.seçili_kapsam(kapsam);
+        // ECharts `unboundedRange: true` öntanımlısı: tutamaç kapsamın bir
+        // ucundaysa o yöndeki min/max dışı değerler de seçili kalır.
+        (alt <= kapsam[0] || değer >= alt) && (üst >= kapsam[1] || değer <= üst)
     }
 
     /// Değeri renge çözer: parçalı kipte ilgili dilimin rengi, sürekli
@@ -440,5 +482,22 @@ mod testler {
         assert!(!seçili.seriye_uygulanır_mı(0));
         assert!(seçili.seriye_uygulanır_mı(1));
         assert!(seçili.seriye_uygulanır_mı(3));
+    }
+
+    #[test]
+    fn sürekli_seçili_aralık_sıralanır_ve_kapsama_kıstırılır() {
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(10.0)
+            .hesaplanabilir(true)
+            .seçili_aralık(12.0, -2.0);
+
+        assert_eq!(eşleme.seçili_kapsam([0.0, 10.0]), [0.0, 10.0]);
+        assert!(eşleme.seçili_mi(5.0, [0.0, 10.0]));
+        assert!(
+            !GörselEşleme::yeni()
+                .seçili_aralık(2.0, 4.0)
+                .seçili_mi(5.0, [0.0, 10.0])
+        );
     }
 }

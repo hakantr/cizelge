@@ -101,6 +101,8 @@ function html(id, kaynak, frame, state) {
               const x = myChart.convertToPixel({xAxisIndex: 0}, categories[6]);
               myChart.dispatchAction({type:'updateAxisPointer', x, y:250});
             }`
+        : id === 'heatmap-cartesian' && state === 'ipucu'
+          ? `myChart.dispatchAction({type:'showTip', seriesIndex:0, dataIndex:${3 * 24 + 13}});`
         : id === 'dynamic-data2' && state === 'son'
         ? `{
             const zamanlayıcı = window.__capturedIntervals[0];
@@ -376,7 +378,8 @@ async function çalıştır() {
         const chart = window.__chart;
         const sonuç = [];
         const tooltipAdayları = [...document.querySelectorAll('div')]
-          .filter((öğe) => öğe.textContent?.includes('Dynamic Bar') && getComputedStyle(öğe).position === 'absolute');
+          .filter((öğe) => (öğe.textContent?.includes('Dynamic Bar') || öğe.textContent?.includes('Punch Card'))
+            && getComputedStyle(öğe).position === 'absolute');
         if (tooltipAdayları.length) {
           const kök = tooltipAdayları.sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width).at(-1);
           const özetle = (öğe) => {
@@ -446,6 +449,100 @@ async function çalıştır() {
             filler: özetle(görüntüler?.filler),
             tutamaçlar: görüntüler?.handles?.map(özetle),
             taşıma: özetle(görüntüler?.moveHandle)
+          });
+        });
+        chart.getModel().eachComponent('visualMap', (model) => {
+          const view = chart.getViewOfComponentModel(model);
+          const öğeler = [];
+          view?.group?.traverse?.((öğe) => {
+            const yerel = öğe?.getBoundingRect?.();
+            if (!yerel) return;
+            const dünya = yerel.clone();
+            const dönüşüm = öğe.getComputedTransform?.();
+            if (dönüşüm) dünya.applyTransform(dönüşüm);
+            öğeler.push({
+              tür: öğe.type,
+              metin: öğe.style?.text,
+              şekil: öğe.shape,
+              stil: öğe.style ? {
+                fill: öğe.style.fill,
+                stroke: öğe.style.stroke,
+                lineWidth: öğe.style.lineWidth,
+                opacity: öğe.style.opacity
+              } : null,
+              x: öğe.x,
+              y: öğe.y,
+              rotation: öğe.rotation,
+              yerel: {x: yerel.x, y: yerel.y, width: yerel.width, height: yerel.height},
+              dünya: {x: dünya.x, y: dünya.y, width: dünya.width, height: dünya.height},
+              dönüşüm
+            });
+          });
+          const sınır = view?.group?.getBoundingRect?.();
+          sonuç.push({
+            bileşen: 'visualMap',
+            sıra: model.componentIndex,
+            seçenek: model.option,
+            itemSize: model.itemSize,
+            seçili: model.getSelected?.(),
+            uçlar: view?._handleEnds,
+            grup: view?.group ? {x: view.group.x, y: view.group.y} : null,
+            sınır: sınır ? {x: sınır.x, y: sınır.y, width: sınır.width, height: sınır.height} : null,
+            öğeler
+          });
+        });
+        chart.getModel().eachSeries((model) => {
+          if (model.subType !== 'heatmap') return;
+          const view = chart.getViewOfSeriesModel(model);
+          const öğeler = [];
+          view?.group?.traverse?.((öğe) => {
+            const yerel = öğe?.getBoundingRect?.();
+            if (!yerel) return;
+            const dünya = yerel.clone();
+            const dönüşüm = öğe.getComputedTransform?.();
+            if (dönüşüm) dünya.applyTransform(dönüşüm);
+            const bağlıMetin = öğe.getTextContent?.();
+            const bağlıYerel = bağlıMetin?.getBoundingRect?.();
+            const bağlıDünya = bağlıYerel?.clone?.();
+            const bağlıDönüşüm = bağlıMetin?.getComputedTransform?.();
+            if (bağlıDünya && bağlıDönüşüm) bağlıDünya.applyTransform(bağlıDönüşüm);
+            öğeler.push({
+              tür: öğe.type,
+              şekil: öğe.shape,
+              metin: öğe.style?.text,
+              stil: öğe.style ? {
+                fill: öğe.style.fill,
+                stroke: öğe.style.stroke,
+                lineWidth: öğe.style.lineWidth,
+                shadowBlur: öğe.style.shadowBlur,
+                shadowColor: öğe.style.shadowColor
+              } : null,
+              etiket: bağlıMetin ? {
+                metin: bağlıMetin.style?.text,
+                yapılandırma: öğe.textConfig,
+                stil: {
+                  fill: bağlıMetin.style?.fill,
+                  stroke: bağlıMetin.style?.stroke,
+                  opacity: bağlıMetin.style?.opacity,
+                  font: bağlıMetin.style?.font,
+                  align: bağlıMetin.style?.align,
+                  verticalAlign: bağlıMetin.style?.verticalAlign
+                },
+                dünya: bağlıDünya ? {
+                  x: bağlıDünya.x,
+                  y: bağlıDünya.y,
+                  width: bağlıDünya.width,
+                  height: bağlıDünya.height
+                } : null
+              } : null,
+              dünya: {x: dünya.x, y: dünya.y, width: dünya.width, height: dünya.height}
+            });
+          });
+          sonuç.push({
+            bileşen: 'series',
+            tür: model.subType,
+            sıra: model.seriesIndex,
+            öğeler
           });
         });
         chart.getModel().eachComponent('grid', (model) => {

@@ -1074,6 +1074,9 @@ pub struct IsıHaritasıSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
     pub öğe_stili: ÖğeStili,
+    /// `emphasis.itemStyle`; yalnız sağlanan vurgu alanları normal stili
+    /// örter. Kartezyen hover ve tooltip vurgusunda uygulanır.
+    pub vurgu_öğe_stili: ÖğeStili,
     /// Hücreler arası boşluk, piksel.
     pub hücre_boşluğu: f32,
     pub etiket: Etiket,
@@ -1087,6 +1090,7 @@ impl Default for IsıHaritasıSerisi {
             ad: None,
             veri: Vec::new(),
             öğe_stili: ÖğeStili::default(),
+            vurgu_öğe_stili: ÖğeStili::default(),
             hücre_boşluğu: 1.0,
             etiket: Etiket::default(),
             eksen_bağı: EksenBağı::default(),
@@ -1118,6 +1122,11 @@ impl IsıHaritasıSerisi {
 
     pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
         self.öğe_stili = stil;
+        self
+    }
+
+    pub fn vurgu_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.vurgu_öğe_stili = stil;
         self
     }
 

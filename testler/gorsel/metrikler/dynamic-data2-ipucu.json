@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1522,
-  "değişen_piksel_oranı": 0.005637037037037037,
-  "ssim": 0.9942764106358164,
+  "değişen_piksel": 1560,
+  "değişen_piksel_oranı": 0.0057777777777777775,
+  "ssim": 0.9937273446446017,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data2-ipucu.png",
     "gerçek": "testler/gorsel/gerçek/default/dynamic-data2-ipucu.png",

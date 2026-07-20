@@ -172,7 +172,23 @@ pub fn bölme_çizgilerini_çiz(
         } else {
             &eksen.seçenek.bölme_alanı.renkler
         };
-        let konumlar = eksen.çizgi_çentikleri(false);
+        let bütün_konumlar = eksen.çizgi_çentikleri(false);
+        // Category splitArea kendi `interval: 'auto'` öntanımlısında
+        // axisLabel ile aynı ordinal adımı kullanır. Sık x ekseninde bu,
+        // tek hücrelik dama deseni yerine görünür etiketler arasındaki
+        // (ör. ikişer hücrelik) bantları üretir. Son dış sınır daima
+        // korunur (`fixOnBandTicksCoords`).
+        let konumlar = if eksen.ölçek.kategorik_mi() {
+            let adım = kategori_etiket_adımı(çizici, eksen).max(1);
+            let son = bütün_konumlar.len().saturating_sub(1);
+            bütün_konumlar
+                .into_iter()
+                .enumerate()
+                .filter_map(|(sıra, konum)| (sıra % adım == 0 || sıra == son).then_some(konum))
+                .collect::<Vec<_>>()
+        } else {
+            bütün_konumlar
+        };
         for (i, çift) in konumlar.windows(2).enumerate() {
             let [a, b] = çift else { continue };
             let Some(renk) = renkler.get(i % renkler.len()) else {
@@ -351,7 +367,10 @@ pub fn eksenleri_çiz(
         // yalnız dik eksen interval veya log ölçeğiyse otomatik görünür.
         // Time ölçeği kategori gibi davranır; time×value grafiğinde x
         // çizgisi görünürken y çizgisi gizlenir.
-        let otomatik_çizgi = dik_değer_veya_log_var;
+        // Kategori ekseni `axisDefault.categoryAxis` içinde doğrudan
+        // `axisLine.show: true` devralır. Yalnız değer/zaman/log eksenleri
+        // kartezyendeki dik eksen türüne göre `auto` çözülür.
+        let otomatik_çizgi = eksen.seçenek.tür == EksenTürü::Kategori || dik_değer_veya_log_var;
         // `axisTick.show: 'auto'`, dik eksen sürekli değilse kapanır. Ayrıca
         // kategori ekseni bantlıysa (`boundaryGap: true`) tikler kategori
         // merkezlerine değil bant sınırlarına düşeceğinden ECharts tarafından

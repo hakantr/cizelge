@@ -3597,6 +3597,75 @@ fn candlestick_simple() -> GrafikSeçenekleri {
         ]))
 }
 
+fn heatmap_cartesian() -> GrafikSeçenekleri {
+    const SAATLER: [&str; 24] = [
+        "12a", "1a", "2a", "3a", "4a", "5a", "6a", "7a", "8a", "9a", "10a", "11a", "12p", "1p",
+        "2p", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p", "11p",
+    ];
+    const GÜNLER: [&str; 7] = [
+        "Saturday",
+        "Friday",
+        "Thursday",
+        "Wednesday",
+        "Tuesday",
+        "Monday",
+        "Sunday",
+    ];
+    #[rustfmt::skip]
+    const DEĞERLER: [[f64; 24]; 7] = [
+        [5.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 4.0, 1.0, 1.0, 3.0, 4.0, 6.0, 4.0, 4.0, 3.0, 3.0, 2.0, 5.0],
+        [7.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0, 2.0, 2.0, 6.0, 9.0, 11.0, 6.0, 7.0, 8.0, 12.0, 5.0, 5.0, 7.0, 2.0],
+        [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 2.0, 1.0, 9.0, 8.0, 10.0, 6.0, 5.0, 5.0, 5.0, 7.0, 4.0, 2.0, 4.0],
+        [7.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 5.0, 4.0, 7.0, 14.0, 13.0, 12.0, 9.0, 5.0, 5.0, 10.0, 6.0, 4.0, 4.0, 1.0],
+        [1.0, 3.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 2.0, 4.0, 4.0, 2.0, 4.0, 4.0, 14.0, 12.0, 1.0, 8.0, 5.0, 3.0, 7.0, 3.0, 0.0],
+        [2.0, 1.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 4.0, 1.0, 5.0, 10.0, 5.0, 7.0, 11.0, 6.0, 0.0, 5.0, 3.0, 4.0, 2.0, 0.0],
+        [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 1.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 6.0],
+    ];
+    let veri = DEĞERLER
+        .iter()
+        .enumerate()
+        .flat_map(|(y, satır)| {
+            satır.iter().enumerate().map(move |(x, değer)| {
+                // Resmî kaynak `item[2] || '-'` kullanır; sayısal olmayan
+                // boş hücreyi heatmap çizicisinin atladığı NaN ile taşırız.
+                VeriÖğesi::from([
+                    x as f64,
+                    y as f64,
+                    if *değer == 0.0 { f64::NAN } else { *değer },
+                ])
+            })
+        })
+        .collect::<Vec<_>>();
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni().konum(İpucuKonumu::Üst))
+        .ızgara(Izgara::yeni().üst("10%").yükseklik("50%"))
+        .x_ekseni(Eksen::kategori().veri(SAATLER).bölme_alanı_göster(true))
+        .y_ekseni(Eksen::kategori().veri(GÜNLER).bölme_alanı_göster(true))
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(10.0)
+                .hesaplanabilir(true)
+                .yön(Yön::Yatay)
+                .sol("center")
+                .alt("15%"),
+        )
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .ad("Punch Card")
+                .hücre_boşluğu(0.0)
+                .etiket(Etiket::yeni().göster(true))
+                .vurgu_öğe_stili(
+                    ÖğeStili::yeni()
+                        .gölge_bulanıklığı(10.0)
+                        .gölge_rengi("rgba(0, 0, 0, 0.5)"),
+                )
+                .veri(veri),
+        )
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -4317,6 +4386,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "boxplot-light-velocity2" => boxplot_light_velocity(true),
         "scatter-simple" => Ok(scatter_simple()),
         "candlestick-simple" => Ok(candlestick_simple()),
+        "heatmap-cartesian" => Ok(heatmap_cartesian()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),
@@ -4347,6 +4417,8 @@ fn çalıştır() -> Result<(), String> {
     } else {
         None
     };
+    let kanıt_ipucu_öğesi =
+        (girdi.id == "heatmap-cartesian" && girdi.durum == "ipucu").then_some((0, 85));
     if std::env::var_os("UYUM_DEBUG_LAYOUT").is_some() {
         // Referans üreticisinin aynı adlı tanı kipiyle birlikte kullanılır;
         // kayıt yüzeyi gerçek boyama hattındaki kesin geometriyi verir.
@@ -4382,6 +4454,7 @@ fn çalıştır() -> Result<(), String> {
             &seçenekler,
             &BoyamaGirdisi {
                 fare: kanıt_faresi,
+                ipucu_öğesi: kanıt_ipucu_öğesi,
                 ..BoyamaGirdisi::default()
             },
         );
@@ -4424,6 +4497,7 @@ fn çalıştır() -> Result<(), String> {
         ilerleme: 1.0,
         zaman_sn: girdi.kare * 2.0,
         fare: kanıt_faresi,
+        ipucu_öğesi: kanıt_ipucu_öğesi,
         ..BoyamaGirdisi::default()
     };
     let boyama_çıktısı = grafiği_boya(&mut yüzey, &seçenekler, &boyama);

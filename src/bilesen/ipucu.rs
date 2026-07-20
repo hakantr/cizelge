@@ -1,8 +1,9 @@
 //! İpucu (tooltip) penceresi — `echarts/src/component/tooltip` karşılığı.
 
-use crate::cizim::{DikeyHiza, SATIR_ORANI, YatayHiza, ÇizimYüzeyi};
+use crate::cizim::{DikeyHiza, SATIR_ORANI, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
-use crate::model::bilesen::İpucu;
+use crate::model::bilesen::{Tetikleme, İpucu, İpucuKonumu};
+use crate::model::stil::ÇizgiTürü;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
@@ -39,6 +40,7 @@ pub fn ipucu_çiz(
             .iter()
             .enumerate()
             .any(|(sıra, satır)| sıra > 0 && grup_başlığı_mı(satır));
+    let tek_html_grubu = başlık.is_some() && !çoklu_eksen_grubu;
 
     // Ölçüm.
     let başlık_genişliği = başlık.map(|b| çizici.yazı_ölç(b, boyut).0).unwrap_or(0.0);
@@ -57,8 +59,17 @@ pub fn ipucu_çiz(
         let genişlik = im + çizici.yazı_ölç(&satır.ad, boyut).0 + değer_genişliği;
         içerik_genişliği = içerik_genişliği.max(genişlik);
     }
-    let kutu_genişliği =
-        içerik_genişliği + İÇ_BOŞLUK * 2.0 + if çoklu_eksen_grubu { 1.3 } else { 0.0 };
+    let kutu_genişliği = içerik_genişliği
+        + İÇ_BOŞLUK * 2.0
+        + if tek_html_grubu {
+            // HTML tooltip'in `box-sizing: content-box` kutusunda iki adet
+            // 1 px kenarlık, içeriğin ve 10 px dolguların dışındadır.
+            2.0
+        } else if çoklu_eksen_grubu {
+            1.3
+        } else {
+            0.0
+        };
     let başlık_yüksekliği = if başlık.is_some() {
         satır_yüksekliği
     } else {
@@ -78,6 +89,10 @@ pub fn ipucu_çiz(
             };
         }
         son_merkez + 17.0
+    } else if tek_html_grubu {
+        // 14 px başlık, her satırdan önce 10 px boşluk, 14 px
+        // satır ve iki yanda 10 px dolgu + 1 px kenarlık.
+        36.0 + satırlar.len() as f32 * 24.0
     } else {
         başlık_yüksekliği + satırlar.len() as f32 * satır_yüksekliği + İÇ_BOŞLUK * 2.0
     };
@@ -88,12 +103,22 @@ pub fn ipucu_çiz(
     } else {
         (İMLEÇ_KAÇIĞI, İMLEÇ_KAÇIĞI)
     };
-    let mut x = konum.0 + imleç_kaçığı_x;
-    let mut y = konum.1 + imleç_kaçığı_y;
-    if x + kutu_genişliği > çizici.genişlik() {
+    let üstte = seçenek.konum == İpucuKonumu::Üst;
+    let (mut x, mut y) = if üstte {
+        // TooltipHTMLContent CSS dönüşümü konumu tam piksele indirger.
+        // Ok da veri noktasına değil bu yerleştirilmiş kutunun merkezine
+        // bağlanır.
+        (
+            (konum.0 - kutu_genişliği / 2.0).floor(),
+            (konum.1 - kutu_yüksekliği - 10.0).floor(),
+        )
+    } else {
+        (konum.0 + imleç_kaçığı_x, konum.1 + imleç_kaçığı_y)
+    };
+    if !üstte && x + kutu_genişliği > çizici.genişlik() {
         x = konum.0 - imleç_kaçığı_x - kutu_genişliği;
     }
-    if y + kutu_yüksekliği > çizici.yükseklik() {
+    if !üstte && y + kutu_yüksekliği > çizici.yükseklik() {
         y = konum.1 - imleç_kaçığı_y - kutu_yüksekliği;
     }
     x = x.clamp(0.0, (çizici.genişlik() - kutu_genişliği).max(0.0));
@@ -107,18 +132,50 @@ pub fn ipucu_çiz(
     } else {
         tema::ipucu_gölgesi()
     };
-    çizici.gölge(kutu, 4.0, gölge, 10.0);
+    çizici.gölge(kutu, 4.0, gölge, if üstte { 8.0 } else { 10.0 });
     let arkaplan = seçenek.arkaplan.unwrap_or(tema::ipucu_arkaplanı());
+    // TooltipHTMLContent, kutunun ve okun kenarlığını en yakın
+    // veri öğesinin görsel rengiyle çözer (`nearPointColor`).
+    let kenarlık_rengi = (seçenek.tetikleme == Tetikleme::Öğe)
+        .then(|| satırlar.iter().find_map(|satır| satır.im_rengi))
+        .flatten()
+        .unwrap_or_else(tema::ipucu_kenarlığı);
+    if üstte {
+        // TooltipHTMLContent'in aşağı bakan 10×10 px döndürülmüş oku.
+        // Üst yarısı kutunun altında kaldığı için kutu daha sonra çizilir.
+        let merkez_x = (x + kutu_genişliği / 2.0).clamp(x + 8.0, x + kutu_genişliği - 8.0);
+        let merkez_y = kutu.alt() - 0.25;
+        let mut ok = Yol::yeni();
+        ok.taşı((merkez_x, merkez_y - 5.0));
+        ok.çiz((merkez_x + 5.0, merkez_y));
+        ok.çiz((merkez_x, merkez_y + 5.0));
+        ok.çiz((merkez_x - 5.0, merkez_y));
+        ok.kapat();
+        çizici.yol_doldur(&ok, &Dolgu::Düz(arkaplan));
+        çizici.yol_çiz(&ok, 1.0, kenarlık_rengi, ÇizgiTürü::Düz);
+    }
+    // CSS 1 px kenarlığı kutunun içine yerleşir ve tam piksel
+    // merkezlerinden geçer. Yüzeyin merkezli vuruşunu yarım piksel içe
+    // almak, kenarın %50 alfa ile incelmesini önler.
+    let kutu_yolu = Dikdörtgen::yeni(
+        kutu.x + 0.5,
+        kutu.y + 0.5,
+        (kutu.genişlik - 1.0).max(0.1),
+        (kutu.yükseklik - 1.0).max(0.1),
+    );
     çizici.dikdörtgen(
-        kutu,
+        kutu_yolu,
         &Dolgu::Düz(arkaplan),
-        [4.0; 4],
-        Some((1.0, tema::ipucu_kenarlığı())),
+        [3.5; 4],
+        Some((1.0, kenarlık_rengi)),
     );
 
     let metin_rengi = seçenek.yazı.renk.unwrap_or(tema::ipucu_metni());
+    let yatay_iç_başlangıç = x + İÇ_BOŞLUK + if tek_html_grubu { 1.0 } else { 0.0 };
     let mut satır_y = if çoklu_eksen_grubu {
         y + 19.0
+    } else if tek_html_grubu {
+        y + 18.0
     } else {
         y + İÇ_BOŞLUK + satır_yüksekliği / 2.0
     };
@@ -126,7 +183,10 @@ pub fn ipucu_çiz(
     if let Some(b) = başlık {
         çizici.yazı(
             b,
-            (x + İÇ_BOŞLUK, satır_y),
+            (
+                yatay_iç_başlangıç,
+                satır_y + if tek_html_grubu { 1.0 } else { 0.0 },
+            ),
             YatayHiza::Sol,
             DikeyHiza::Orta,
             boyut,
@@ -134,7 +194,11 @@ pub fn ipucu_çiz(
             false,
         );
         if !çoklu_eksen_grubu {
-            satır_y += satır_yüksekliği;
+            satır_y += if tek_html_grubu {
+                24.0
+            } else {
+                satır_yüksekliği
+            };
         }
     }
 
@@ -146,11 +210,15 @@ pub fn ipucu_çiz(
                 24.0
             };
         }
-        let mut metin_x = x + İÇ_BOŞLUK;
+        let mut metin_x = yatay_iç_başlangıç;
         if let Some(renk) = satır.im_rengi {
             çizici.daire(
                 (metin_x + İM_ÇAPI / 2.0, satır_y),
-                İM_ÇAPI / 2.0,
+                if tek_html_grubu {
+                    (İM_ÇAPI - 1.0) / 2.0
+                } else {
+                    İM_ÇAPI / 2.0
+                },
                 Some(&Dolgu::Düz(renk)),
                 None,
             );
@@ -158,7 +226,7 @@ pub fn ipucu_çiz(
         }
         çizici.yazı(
             &satır.ad,
-            (metin_x, satır_y),
+            (metin_x, satır_y + if tek_html_grubu { 1.0 } else { 0.0 }),
             YatayHiza::Sol,
             DikeyHiza::Orta,
             boyut,
@@ -167,11 +235,16 @@ pub fn ipucu_çiz(
         );
         // Değer sağa hizalı ve kalın (ECharts görünümü).
         if !satır.değer.is_empty() {
-            let değer_sağı =
-                x + kutu_genişliği - İÇ_BOŞLUK - if çoklu_eksen_grubu { 1.0 } else { 0.0 };
+            let değer_sağı = x + kutu_genişliği
+                - İÇ_BOŞLUK
+                - if çoklu_eksen_grubu || tek_html_grubu {
+                    1.0
+                } else {
+                    0.0
+                };
             çizici.yazı(
                 &satır.değer,
-                (değer_sağı, satır_y),
+                (değer_sağı, satır_y + if tek_html_grubu { 1.0 } else { 0.0 }),
                 YatayHiza::Sağ,
                 DikeyHiza::Orta,
                 boyut,

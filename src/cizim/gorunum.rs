@@ -120,6 +120,9 @@ pub struct BoyamaGirdisi {
     pub zaman_sn: f32,
     /// Yüzey yerel fare konumu.
     pub fare: Option<(f32, f32)>,
+    /// `showTip` benzeri programatik öğe ipucunun `(seri, veri)` sırası.
+    /// Fare vurgusu oluşturmadan aynı tooltip içeriğini açar.
+    pub ipucu_öğesi: Option<(usize, usize)>,
     /// Gösterge ile kapatılmış adlar.
     pub kapalı: HashSet<String>,
     /// Kaydırmalı göstergenin geçerli sayfası.
@@ -143,6 +146,7 @@ impl Default for BoyamaGirdisi {
             ilerleme: 1.0,
             zaman_sn: 0.0,
             fare: None,
+            ipucu_öğesi: None,
             kapalı: HashSet::new(),
             gösterge_sayfası: 0,
             fırça: None,
@@ -2320,9 +2324,51 @@ pub fn grafiği_boya(
                         Seri::Isı(s) => {
                             let eşleme = seçenekler.görsel_eşleme.clone().unwrap_or_default();
                             let kapsam = eşleme.kapsam_çöz(ısı_değer_kapsamı(s));
-                            ısı_haritası_çiz(
-                                yüzey, s, i, &kartezyen, &eşleme, kapsam, ilerleme, isabetler,
+                            let vurgulu = ısı_haritası_çiz(
+                                yüzey, s, i, &kartezyen, &eşleme, kapsam, ilerleme, fare, isabetler,
                             );
+                            let programatik = girdi
+                                .ipucu_öğesi
+                                .filter(|(seri_sırası, _)| *seri_sırası == i)
+                                .map(|(_, veri_sırası)| veri_sırası);
+                            if let (Some(veri_sırası), Some(ipucu)) =
+                                (vurgulu.or(programatik), ipucu_seçeneği.as_ref())
+                                && ipucu.tetikleme == Tetikleme::Öğe
+                                && let Some(öğe) = s.veri.get(veri_sırası)
+                                && let Some(dizi) = öğe.değer.dizi()
+                                && let (Some(&x), Some(&değer)) = (dizi.first(), dizi.get(2))
+                            {
+                                let renk = eşleme.renk_çöz(değer, kapsam);
+                                let hücre = isabetler
+                                    .iter()
+                                    .rev()
+                                    .find(|b| b.seri_sırası == i && b.veri_sırası == veri_sırası)
+                                    .and_then(|b| match &b.geometri {
+                                        İsabetGeometrisi::Dikdörtgen(d) => Some(*d),
+                                        _ => None,
+                                    });
+                                let konum = match (ipucu.konum, hücre, fare) {
+                                    (crate::model::bilesen::İpucuKonumu::Üst, Some(d), _) => {
+                                        // Heatmap hücresi kaynak rect'in kenar
+                                        // saçaklanması için her yönde 0,25 px
+                                        // büyütülür; tooltip ise asıl bandın
+                                        // tam üst sınırına bağlanır.
+                                        (d.merkez().0, d.y + 0.25)
+                                    }
+                                    (_, _, Some(f)) => f,
+                                    (_, Some(d), None) => d.merkez(),
+                                    (_, None, None) => kartezyen.nokta(x, dizi[1]),
+                                };
+                                *bekleyen = Some((
+                                    s.ad.clone(),
+                                    vec![İpucuSatırı {
+                                        im_rengi: Some(renk),
+                                        ad: kartezyen.x.ölçek.etiket(x),
+                                        değer: binlik_ayır(değer),
+                                    }],
+                                    konum,
+                                ));
+                            }
                         }
                         Seri::Özel(s) => {
                             if let Some(çizim) = &s.çizim {
