@@ -156,6 +156,23 @@ pub struct GörselEşleme {
     /// HSL açıklık şeridi (`inRange.colorLightness`). Bu kanal renk
     /// kanalından farklı olarak öğenin/paletin mevcut rengini değiştirir.
     pub renk_açıklığı: Option<[f32; 2]>,
+    /// Tam renk kanalı etkin mi? ECharts, açık bir `inRange` nesnesinde
+    /// yalnız `symbolSize`/`opacity` gibi kısmi kanallar verildiğinde
+    /// öntanımlı renk şeridini hedef veriye eklemez.
+    pub renk_kanalı: bool,
+    /// Renk kanalının kurucu üzerinden açıkça seçilip seçilmediği. Bu bilgi,
+    /// kurucu çağrı sırasından bağımsız olarak `renkler(...).sembol_boyutu(...)`
+    /// ile birleşik kanal tanımlamayı mümkün kılar.
+    pub renk_kanalı_açıkça_ayarlandı: bool,
+    /// Sembol çapı şeridi (`inRange.symbolSize`).
+    pub sembol_boyutu: Option<[f32; 2]>,
+    /// Seçili kapsam dışındaki sembol çapı şeridi
+    /// (`outOfRange.symbolSize`). `None`, mevcut seri boyutunu korur.
+    pub aralık_dışı_sembol_boyutu: Option<[f32; 2]>,
+    /// `outOfRange.color` açıkça verilmiş mi? Yalnız sembol boyutu kullanan
+    /// eşlemelerde seçimsiz öğenin taban rengini yanlışlıkla saydamlaştırmayı
+    /// önler.
+    pub aralık_dışı_renk_kanalı: bool,
     /// Opaklık şeridi (`inRange.opacity`). Tek değer iki uca aynı değer
     /// yazılarak sabit opaklık olarak temsil edilir.
     pub opaklık: Option<[f32; 2]>,
@@ -172,6 +189,14 @@ pub struct GörselEşleme {
     pub seri_sıraları: Vec<usize>,
     /// Bileşen yönü (`orient`).
     pub yön: Yön,
+    /// Denetleyici öğesinin kısa kenarı (`itemWidth`). `None`, sürekli
+    /// visualMap öntanımlısı olan 20 pikseli kullanır.
+    pub öğe_genişliği: Option<f32>,
+    /// Denetleyici öğesinin uzun kenarı (`itemHeight`). `None`, sürekli
+    /// visualMap öntanımlısı olan 140 pikseli kullanır.
+    pub öğe_yüksekliği: Option<f32>,
+    /// Uç metni ile denetleyici arasındaki boşluk (`textGap`).
+    pub metin_boşluğu: f32,
     pub sol: YatayKonum,
     /// Sağ kenardan uzaklık (`right`). Verildiğinde `left` yerleşiminin
     /// önüne geçer.
@@ -226,6 +251,11 @@ impl Default for GörselEşleme {
             ],
             aralık_dışı_renk: Renk::SAYDAM,
             renk_açıklığı: None,
+            renk_kanalı: true,
+            renk_kanalı_açıkça_ayarlandı: false,
+            sembol_boyutu: None,
+            aralık_dışı_sembol_boyutu: None,
+            aralık_dışı_renk_kanalı: false,
             opaklık: None,
             denetleyici_renkleri: None,
             denetleyici_opaklığı: None,
@@ -233,6 +263,9 @@ impl Default for GörselEşleme {
             boyut: None,
             seri_sıraları: Vec::new(),
             yön: Yön::Dikey,
+            öğe_genişliği: None,
+            öğe_yüksekliği: None,
+            metin_boşluğu: 10.0,
             sol: YatayKonum::Değer(Uzunluk::Piksel(10.0)),
             sağ: None,
             üst: None,
@@ -269,17 +302,48 @@ impl GörselEşleme {
 
     pub fn renkler<R: Into<Renk>>(mut self, renkler: impl IntoIterator<Item = R>) -> Self {
         self.renkler = renkler.into_iter().map(Into::into).collect();
+        self.renk_kanalı = true;
+        self.renk_kanalı_açıkça_ayarlandı = true;
         self
     }
 
     pub fn aralık_dışı_renk(mut self, renk: impl Into<Renk>) -> Self {
         self.aralık_dışı_renk = renk.into();
+        self.aralık_dışı_renk_kanalı = true;
         self
     }
 
     /// `inRange.colorLightness: [düşük, yüksek]`.
     pub fn renk_açıklığı(mut self, düşük: f32, yüksek: f32) -> Self {
         self.renk_açıklığı = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
+        if !self.renk_kanalı_açıkça_ayarlandı {
+            self.renk_kanalı = false;
+        }
+        self
+    }
+
+    /// `inRange.symbolSize: [düşük, yüksek]`. Açık bir renk şeridi ayrıca
+    /// isteniyorsa aynı zincirde [`Self::renkler`] de çağrılabilir.
+    pub fn sembol_boyutu(mut self, düşük: f32, yüksek: f32) -> Self {
+        self.sembol_boyutu = Some([düşük.max(0.0), yüksek.max(0.0)]);
+        if !self.renk_kanalı_açıkça_ayarlandı {
+            self.renk_kanalı = false;
+        }
+        self
+    }
+
+    /// `outOfRange.symbolSize: [düşük, yüksek]`.
+    pub fn aralık_dışı_sembol_boyutu(mut self, düşük: f32, yüksek: f32) -> Self {
+        self.aralık_dışı_sembol_boyutu = Some([düşük.max(0.0), yüksek.max(0.0)]);
+        self
+    }
+
+    /// Tam `inRange.color` kanalını açıkça açar ya da kapatır. Çoğu kullanım
+    /// için [`Self::renkler`] ve kısmi kanal kurucuları bunu kendiliğinden
+    /// yönetir.
+    pub fn renk_kanalı(mut self, açık: bool) -> Self {
+        self.renk_kanalı = açık;
+        self.renk_kanalı_açıkça_ayarlandı = true;
         self
     }
 
@@ -287,12 +351,18 @@ impl GörselEşleme {
     pub fn opaklık(mut self, opaklık: f32) -> Self {
         let opaklık = opaklık.clamp(0.0, 1.0);
         self.opaklık = Some([opaklık, opaklık]);
+        if !self.renk_kanalı_açıkça_ayarlandı {
+            self.renk_kanalı = false;
+        }
         self
     }
 
     /// `inRange.opacity: [düşük, yüksek]`.
     pub fn opaklık_aralığı(mut self, düşük: f32, yüksek: f32) -> Self {
         self.opaklık = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
+        if !self.renk_kanalı_açıkça_ayarlandı {
+            self.renk_kanalı = false;
+        }
         self
     }
 
@@ -335,6 +405,25 @@ impl GörselEşleme {
 
     pub fn yön(mut self, yön: Yön) -> Self {
         self.yön = yön;
+        self
+    }
+
+    pub fn öğe_genişliği(mut self, genişlik: f32) -> Self {
+        self.öğe_genişliği = genişlik.is_finite().then_some(genişlik.max(0.0));
+        self
+    }
+
+    pub fn öğe_yüksekliği(mut self, yükseklik: f32) -> Self {
+        self.öğe_yüksekliği = yükseklik.is_finite().then_some(yükseklik.max(0.0));
+        self
+    }
+
+    pub fn metin_boşluğu(mut self, boşluk: f32) -> Self {
+        self.metin_boşluğu = if boşluk.is_finite() {
+            boşluk.max(0.0)
+        } else {
+            10.0
+        };
         self
     }
 
@@ -571,6 +660,29 @@ impl GörselEşleme {
         (alt <= kapsam[0] || değer >= alt) && (üst >= kapsam[1] || değer <= üst)
     }
 
+    fn doğrusal_oran(&self, değer: f64, kapsam: [f64; 2]) -> f32 {
+        if kapsam[1] > kapsam[0] {
+            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
+        } else {
+            0.0
+        }
+    }
+
+    /// `symbolSize` kanalını seri tarafından hesaplanan taban çapa uygular.
+    /// Seçili aralık dışında açık `outOfRange.symbolSize` yoksa taban çap
+    /// korunur.
+    pub fn sembol_boyutu_çöz(&self, değer: f64, kapsam: [f64; 2], taban: f32) -> f32 {
+        let aralık = if self.seçili_mi(değer, kapsam) {
+            self.sembol_boyutu
+        } else {
+            self.aralık_dışı_sembol_boyutu
+        };
+        let Some([düşük, yüksek]) = aralık else {
+            return taban;
+        };
+        düşük + (yüksek - düşük) * self.doğrusal_oran(değer, kapsam)
+    }
+
     /// Değeri renge çözer: parçalı kipte ilgili dilimin rengi, sürekli
     /// kipte şeritte çok duraklı doğrusal ara değerleme.
     pub fn renk_çöz(&self, değer: f64, kapsam: [f64; 2]) -> Renk {
@@ -596,11 +708,7 @@ impl GörselEşleme {
             };
             return self.opaklığı_uygula(self.şerit_rengi(oran), değer, kapsam);
         }
-        let oran = if kapsam[1] > kapsam[0] {
-            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
-        } else {
-            0.0
-        };
+        let oran = self.doğrusal_oran(değer, kapsam);
         self.opaklığı_uygula(self.şerit_rengi(oran), değer, kapsam)
     }
 
@@ -615,7 +723,10 @@ impl GörselEşleme {
             .denetleyici_renkleri
             .as_deref()
             .unwrap_or(&self.renkler);
-        let renk = renk_dizisi_karıştır(renkler, oran);
+        let mut renk = renk_dizisi_karıştır(renkler, oran);
+        if let Some([düşük, yüksek]) = self.renk_açıklığı {
+            renk = renk.açıklık_ile(düşük + (yüksek - düşük) * oran.clamp(0.0, 1.0));
+        }
         let opaklık = self.denetleyici_opaklığı.or(self.opaklık);
         match opaklık {
             Some([düşük, yüksek]) => {
@@ -638,7 +749,15 @@ impl GörselEşleme {
         } else {
             1
         };
-        renk_durakları.max(opaklık_durakları).max(1)
+        let açıklık_durakları = if self.renk_açıklığı.is_some() {
+            2
+        } else {
+            1
+        };
+        renk_durakları
+            .max(opaklık_durakları)
+            .max(açıklık_durakları)
+            .max(1)
     }
 
     fn otomatik_bölme(
@@ -660,34 +779,46 @@ impl GörselEşleme {
         Some((kapsam, sayı, adım, hassasiyet, alt_farkı, toplam))
     }
 
-    /// Görsel eşlemeyi mevcut öğe rengine uygular. `colorLightness`,
-    /// ECharts'ta bağımsız bir kısmi renk kanalıdır ve seri `itemStyle.color`
-    /// değerinin ton/doygunluğunu korur.
-    pub fn renk_çöz_tabanla(&self, değer: f64, kapsam: [f64; 2], taban: Renk) -> Renk {
-        let Some([düşük, yüksek]) = self.renk_açıklığı else {
-            return self.renk_çöz(değer, kapsam);
-        };
-        let oran = if kapsam[1] > kapsam[0] {
-            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
+    /// Görsel kanalları mevcut öğe rengine ECharts sırasıyla uygular. Tam
+    /// `color` kanalı taban rengi değiştirir; `colorLightness` ve `opacity`
+    /// ise sonuç üzerindeki kısmi kanallardır.
+    pub fn rengi_uygula(&self, değer: f64, kapsam: [f64; 2], taban: Renk) -> Renk {
+        let etkin = self.seçili_mi(değer, kapsam)
+            && (!self.parçalı_mı()
+                || self
+                    .parça_bul_kapsamda(değer, kapsam)
+                    .is_some_and(|sıra| self.parça_açık_mı(sıra)));
+        if !etkin {
+            return if self.aralık_dışı_renk_kanalı {
+                self.aralık_dışı_renk
+            } else if self.renk_kanalı {
+                self.aralık_dışı_renk
+            } else {
+                taban
+            };
+        }
+        let oran = self.doğrusal_oran(değer, kapsam);
+        let mut renk = if self.renk_kanalı {
+            self.renk_çöz(değer, kapsam)
         } else {
-            0.0
+            taban
         };
-        self.opaklığı_uygula(
-            taban.açıklık_ile(düşük + (yüksek - düşük) * oran),
-            değer,
-            kapsam,
-        )
+        if let Some([düşük, yüksek]) = self.renk_açıklığı {
+            renk = renk.açıklık_ile(düşük + (yüksek - düşük) * oran);
+        }
+        self.opaklığı_uygula(renk, değer, kapsam)
+    }
+
+    /// Geriye uyumlu ad; yeni kodda [`Self::rengi_uygula`] tercih edilir.
+    pub fn renk_çöz_tabanla(&self, değer: f64, kapsam: [f64; 2], taban: Renk) -> Renk {
+        self.rengi_uygula(değer, kapsam, taban)
     }
 
     fn opaklığı_uygula(&self, renk: Renk, değer: f64, kapsam: [f64; 2]) -> Renk {
         let Some([düşük, yüksek]) = self.opaklık else {
             return renk;
         };
-        let oran = if kapsam[1] > kapsam[0] {
-            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
-        } else {
-            0.0
-        };
+        let oran = self.doğrusal_oran(değer, kapsam);
         renk.opaklık(düşük + (yüksek - düşük) * oran)
     }
 }
@@ -749,6 +880,32 @@ mod testler {
         assert_eq!(e.renk_çöz_tabanla(10.0, [0.0, 10.0], taban), Renk::BEYAZ);
         let orta = e.renk_çöz_tabanla(5.0, [0.0, 10.0], taban);
         assert!(orta.kırmızı > orta.yeşil && orta.yeşil > orta.mavi);
+    }
+
+    #[test]
+    fn sembol_boyutu_kanalı_renk_şeridini_kendiliğinden_eklemez() {
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(100.0)
+            .sembol_boyutu(10.0, 70.0);
+        let taban = Renk::onaltılık(0xdd4444);
+
+        assert!(!eşleme.renk_kanalı);
+        assert_eq!(eşleme.rengi_uygula(50.0, [0.0, 100.0], taban), taban);
+        assert!((eşleme.sembol_boyutu_çöz(50.0, [0.0, 100.0], 4.0) - 40.0).abs() < 1e-6);
+        assert_eq!(eşleme.sembol_boyutu_çöz(200.0, [0.0, 100.0], 4.0), 70.0);
+    }
+
+    #[test]
+    fn açık_renk_ve_sembol_boyutu_kanalları_birlikte_kalır() {
+        let eşleme = GörselEşleme::yeni()
+            .renkler([0x000000u32, 0xffffffu32])
+            .sembol_boyutu(10.0, 70.0);
+
+        assert!(eşleme.renk_kanalı);
+        let orta = eşleme.rengi_uygula(5.0, [0.0, 10.0], Renk::onaltılık(0xdd4444));
+        assert!((orta.kırmızı - 0.5).abs() < 1e-4);
+        assert!((eşleme.sembol_boyutu_çöz(5.0, [0.0, 10.0], 4.0) - 40.0).abs() < 1e-6);
     }
 
     #[test]

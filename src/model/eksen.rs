@@ -534,6 +534,8 @@ pub struct Eksen {
     pub ad_konumu: EksenAdKonumu,
     /// Eksen çizgisi ile eksen adı arasındaki boşluk (`nameGap`).
     pub ad_boşluğu: f32,
+    /// Eksen adı yazı stili (`nameTextStyle`).
+    pub ad_yazı: YazıStili,
     /// Kategori ekseni verisi.
     pub veri: Vec<String>,
     /// Kategori ekseninde uçlarda yarım bant boşluğu bırakılsın mı
@@ -600,6 +602,7 @@ impl Default for Eksen {
             ad: None,
             ad_konumu: EksenAdKonumu::Bitiş,
             ad_boşluğu: 15.0,
+            ad_yazı: YazıStili::default(),
             veri: Vec::new(),
             kenar_boşluğu: None,
             titreme: 0.0,
@@ -689,6 +692,11 @@ impl Eksen {
 
     pub fn ad_boşluğu(mut self, boşluk: f32) -> Self {
         self.ad_boşluğu = if boşluk.is_finite() { boşluk } else { 15.0 };
+        self
+    }
+
+    pub fn ad_yazı(mut self, yazı: YazıStili) -> Self {
+        self.ad_yazı = yazı;
         self
     }
 

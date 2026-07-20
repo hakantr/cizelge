@@ -4048,6 +4048,134 @@ fn scatter_label_align_right() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn resmi_aqi_saçılım_verisi() -> Result<Vec<Vec<VeriÖğesi>>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-aqi-color.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let boyut_adları = ["date", "AQIindex", "PM25", "PM10", "CO", "NO2", "SO2"];
+
+    ["const dataBJ", "const dataSH", "const dataGZ"]
+        .into_iter()
+        .map(|belirteç| {
+            let satırlar: Vec<Vec<serde_json::Value>> =
+                resmi_javascript_dizisi(&kaynak, belirteç)?;
+            satırlar
+                .into_iter()
+                .enumerate()
+                .map(|(satır_sırası, satır)| {
+                    let sayılar = (0..7)
+                        .map(|boyut_sırası| {
+                            satır
+                                .get(boyut_sırası)
+                                .and_then(serde_json::Value::as_f64)
+                                .ok_or_else(|| {
+                                    format!(
+                                        "{belirteç} satır {satır_sırası} boyut {boyut_sırası} sayısal değil"
+                                    )
+                                })
+                        })
+                        .collect::<Result<Vec<_>, String>>()?;
+                    let durum = satır
+                        .get(7)
+                        .and_then(serde_json::Value::as_str)
+                        .ok_or_else(|| {
+                            format!("{belirteç} satır {satır_sırası} hava durumu metin değil")
+                        })?;
+                    let mut boyutlar = boyut_adları
+                        .iter()
+                        .zip(&sayılar)
+                        .map(|(ad, değer)| ((*ad).to_owned(), VeriDeğeri::Sayı(*değer)))
+                        .collect::<Vec<_>>();
+                    boyutlar.push(("status".to_owned(), VeriDeğeri::Metin(durum.to_owned())));
+                    Ok(VeriÖğesi::yeni(sayılar).boyutlar(boyutlar))
+                })
+                .collect::<Result<Vec<_>, String>>()
+        })
+        .collect()
+}
+
+fn scatter_aqi_color() -> Result<GrafikSeçenekleri, String> {
+    let veri = resmi_aqi_saçılım_verisi()?;
+    let bölme_çizgisi = BölmeÇizgisi {
+        göster: Some(false),
+        renk: None,
+        tür: ÇizgiTürü::Düz,
+    };
+    let öğe_stili = ÖğeStili::yeni()
+        .opaklık(0.8)
+        .gölge_bulanıklığı(10.0)
+        .gölge_rengi("rgba(0,0,0,0.3)");
+    let seri = |ad: &str, veri: Vec<VeriÖğesi>| {
+        SaçılımSerisi::yeni()
+            .ad(ad)
+            .öğe_stili(öğe_stili.clone())
+            .veri(veri)
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .palet(["#dd4444", "#fec42c", "#80F1BE"])
+        .gösterge(
+            Gösterge::yeni()
+                .üst(10)
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(16.0))
+                .veri(["北京", "上海", "广州"]),
+        )
+        .ızgara(Izgara::yeni().sol("10%").sağ(150).üst("18%").alt("10%"))
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .x_ekseni(
+            Eksen::değer()
+                .ad("日期")
+                .ad_boşluğu(16.0)
+                .ad_yazı(YazıStili::yeni().boyut(16.0))
+                .en_çok(31.0)
+                .bölme_çizgisi(bölme_çizgisi.clone()),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .ad("AQI指数")
+                .ad_boşluğu(20.0)
+                .ad_yazı(YazıStili::yeni().boyut(16.0))
+                .bölme_çizgisi(bölme_çizgisi),
+        )
+        .görsel_eşlemeler([
+            GörselEşleme::yeni()
+                .sol("right")
+                .üst("10%")
+                .boyut(2usize)
+                .en_az(0.0)
+                .en_çok(250.0)
+                .öğe_genişliği(30.0)
+                .öğe_yüksekliği(120.0)
+                .hesaplanabilir(true)
+                .metin("圆形大小：PM2.5", "")
+                .metin_boşluğu(30.0)
+                .sembol_boyutu(10.0, 70.0)
+                .aralık_dışı_sembol_boyutu(10.0, 70.0)
+                .aralık_dışı_renk("rgba(255,255,255,0.4)")
+                .denetleyici_renkleri(["#c23531"])
+                .denetleyici_aralık_dışı_renk("#999"),
+            GörselEşleme::yeni()
+                .sol("right")
+                .alt("5%")
+                .boyut(6usize)
+                .en_az(0.0)
+                .en_çok(50.0)
+                .öğe_yüksekliği(120.0)
+                .metin("明暗：二氧化硫", "")
+                .metin_boşluğu(30.0)
+                .renk_açıklığı(0.9, 0.5)
+                .aralık_dışı_renk("rgba(255,255,255,0.4)")
+                .denetleyici_renkleri(["#c23531"])
+                .denetleyici_aralık_dışı_renk("#999"),
+        ])
+        .seri(seri("北京", veri[0].clone()))
+        .seri(seri("上海", veri[1].clone()))
+        .seri(seri("广州", veri[2].clone())))
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6247,6 +6375,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bubble-gradient" => bubble_gradient(),
         "scatter-label-align-top" => scatter_label_align_top(),
         "scatter-label-align-right" => scatter_label_align_right(),
+        "scatter-aqi-color" => scatter_aqi_color(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

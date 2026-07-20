@@ -288,6 +288,17 @@ impl GrafikSeçenekleri {
             .find(|eşleme| eşleme.seriye_uygulanır_mı(seri_sırası))
     }
 
+    /// Seriyi hedefleyen bütün `visualMap` bileşenlerini seçenek sırasıyla
+    /// dolaşır. Scatter gibi bağımsız görsel kanalları birleştiren seriler,
+    /// tekil geriye uyumlu seçici yerine bu görünümü kullanır.
+    pub fn seri_görsel_eşlemeleri(
+        &self,
+        seri_sırası: usize,
+    ) -> impl Iterator<Item = &GörselEşleme> {
+        self.tüm_görsel_eşlemeler()
+            .filter(move |eşleme| eşleme.seriye_uygulanır_mı(seri_sırası))
+    }
+
     pub fn radar(mut self, koordinat: RadarKoordinatı) -> Self {
         self.radar = Some(koordinat);
         self

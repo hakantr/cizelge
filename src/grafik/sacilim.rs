@@ -10,6 +10,7 @@ use crate::model::seri::{
     Sembol,
 };
 use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
+use crate::model::veri_kumesi::BoyutSeçici;
 use crate::renk::Renk;
 use crate::tema;
 use crate::yardimci::bicim::ondalık_kırp;
@@ -46,6 +47,11 @@ pub struct SaçılımNoktası {
     /// iki sayısal eksende `None` (ham veri sırası kullanılır).
     pub palet_sırası: Option<usize>,
 }
+
+/// Bir scatter serisine uygulanacak, kapsamı çözülmüş `visualMap` girdisi.
+/// ECharts görsel kodlama aşaması aynı seride birden çok bileşenin farklı
+/// kanallarını sırayla birleştirir.
+pub type SaçılımGörselEşlemesi<'a> = (&'a GörselEşleme, [f64; 2]);
 
 /// ECharts scatter verisinin ilk iki boyutunu kartezyen koordinata çözer.
 /// `[x, y, ...]` biçimindeki ek boyutlar sembol boyutu, etiket, tooltip ve
@@ -269,6 +275,76 @@ pub fn saçılım_değer_kapsamı(seri: &SaçılımSerisi) -> [f64; 2] {
         kapsam
     } else {
         [0.0, 1.0]
+    }
+}
+
+fn saçılım_görsel_değeri(
+    seri: &SaçılımSerisi,
+    eşleme: &GörselEşleme,
+    sıra: usize,
+) -> Option<f64> {
+    let öğe = seri.veri.get(sıra)?;
+    match eşleme.boyut.as_ref() {
+        None => saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y),
+        Some(BoyutSeçici::Sıra(boyut)) => {
+            if !öğe.boyutlar.is_empty() {
+                return öğe.boyutlar.get(*boyut).and_then(|(_, değer)| değer.sayı());
+            }
+            match &öğe.değer {
+                VeriDeğeri::Dizi(değerler) => değerler.get(*boyut).copied(),
+                VeriDeğeri::Çift(değerler) => değerler.get(*boyut).copied(),
+                _ if *boyut == 0 => öğe.değer.x().or(Some(sıra as f64)),
+                _ if *boyut == 1 => öğe.değer.sayı(),
+                _ => None,
+            }
+        }
+        Some(BoyutSeçici::Ad(ad)) if ad == "x" => seri
+            .eşleme
+            .as_ref()
+            .and_then(|(x, _)| öğe.boyut(x))
+            .and_then(VeriDeğeri::sayı)
+            .or_else(|| saçılım_xy(&öğe.değer, sıra).map(|(x, _)| x)),
+        Some(BoyutSeçici::Ad(ad)) if ad == "y" => seri
+            .eşleme
+            .as_ref()
+            .and_then(|(_, y)| öğe.boyut(y))
+            .and_then(VeriDeğeri::sayı)
+            .or_else(|| saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y)),
+        Some(BoyutSeçici::Ad(ad)) => öğe.boyut(ad).and_then(VeriDeğeri::sayı),
+    }
+}
+
+/// Seçilen `visualMap.dimension` için scatter veri kapsamı.
+pub fn saçılım_görsel_kapsamı(seri: &SaçılımSerisi, eşleme: &GörselEşleme) -> [f64; 2] {
+    let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+    for sıra in 0..seri.veri.len() {
+        if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, sıra)
+            && değer.is_finite()
+        {
+            kapsam[0] = kapsam[0].min(değer);
+            kapsam[1] = kapsam[1].max(değer);
+        }
+    }
+    if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
+        kapsam = [0.0, 1.0];
+    }
+    eşleme.kapsam_çöz(kapsam)
+}
+
+/// `visualMap.inRange.symbolSize` kanallarını yerleşmiş scatter noktalarına
+/// uygular. Boyut, isabet alanları ve etiket önceliği tarafından da görülsün
+/// diye çizimden önce nokta geometrisine yazılır.
+pub fn saçılım_nokta_boyutlarını_eşle(
+    seri: &SaçılımSerisi,
+    noktalar: &mut [SaçılımNoktası],
+    eşlemeler: &[SaçılımGörselEşlemesi<'_>],
+) {
+    for nokta in noktalar {
+        for (eşleme, kapsam) in eşlemeler {
+            if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, nokta.sıra) {
+                nokta.boyut = eşleme.sembol_boyutu_çöz(değer, *kapsam, nokta.boyut);
+            }
+        }
     }
 }
 
@@ -1070,6 +1146,34 @@ pub fn saçılım_çiz_eşlemeli(
     görsel_eşleme: Option<(&GörselEşleme, [f64; 2])>,
     palet: &[Renk],
 ) {
+    let eşlemeler = görsel_eşleme.into_iter().collect::<Vec<_>>();
+    saçılım_çiz_çoklu_eşlemeli(
+        çizici,
+        seri,
+        noktalar,
+        seri_rengi,
+        ilerleme,
+        zaman_sn,
+        vurgulu,
+        &eşlemeler,
+        palet,
+    );
+}
+
+/// Birden çok `visualMap` bileşeninin bağımsız renk, açıklık, opaklık ve
+/// sembol boyutu kanallarını ECharts görsel kodlama sırasıyla birleştirir.
+#[allow(clippy::too_many_arguments)]
+pub fn saçılım_çiz_çoklu_eşlemeli(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    noktalar: &[SaçılımNoktası],
+    seri_rengi: Renk,
+    ilerleme: f32,
+    zaman_sn: f32,
+    vurgulu: Option<usize>,
+    görsel_eşlemeler: &[SaçılımGörselEşlemesi<'_>],
+    palet: &[Renk],
+) {
     // `scatter` öntanımlı 0.8, `effectScatter` ise 1.0 opaklıktadır.
     let opaklık = seri
         .öğe_stili
@@ -1082,7 +1186,7 @@ pub fn saçılım_çiz_eşlemeli(
         .map(|d| d.temsilî())
         .unwrap_or(seri_rengi);
     let nokta_rengi = |nokta: &SaçılımNoktası| {
-        if let Some(renk) = seri
+        let mut renk = if let Some(renk) = seri
             .veri
             .get(nokta.sıra)
             .and_then(|öğe| öğe.stil.as_ref())
@@ -1091,8 +1195,6 @@ pub fn saçılım_çiz_eşlemeli(
             renk.temsilî()
         } else if seri.öğe_stili.renk.is_some() {
             taban_rengi
-        } else if let Some((eşleme, kapsam)) = görsel_eşleme {
-            eşleme.renk_çöz(nokta.y_değeri, kapsam)
         } else if seri.veriye_göre_renk {
             let palet_sırası = nokta.palet_sırası.unwrap_or(nokta.sıra);
             palet
@@ -1101,8 +1203,20 @@ pub fn saçılım_çiz_eşlemeli(
                 .unwrap_or_else(|| tema::palet_rengi(palet_sırası))
         } else {
             taban_rengi
+        };
+        for (eşleme, kapsam) in görsel_eşlemeler {
+            if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, nokta.sıra) {
+                renk = eşleme.rengi_uygula(değer, *kapsam, renk);
+            }
         }
+        renk
     };
+    let görsel_renk_kanalı = görsel_eşlemeler.iter().any(|(eşleme, _)| {
+        eşleme.renk_kanalı
+            || eşleme.renk_açıklığı.is_some()
+            || eşleme.opaklık.is_some()
+            || eşleme.aralık_dışı_renk_kanalı
+    });
     // EffectSymbol çekirdeği önce, z2=99 dalgaları sonra boyar.
     for nokta in noktalar {
         let renk = nokta_rengi(nokta);
@@ -1132,15 +1246,19 @@ pub fn saçılım_çiz_eşlemeli(
                 seri.öğe_stili.kenarlık_rengi.unwrap_or(renk),
             )
         });
+        let eşlenmiş_dolgu = görsel_renk_kanalı.then_some(crate::renk::Dolgu::Düz(renk));
+        let dolgu = eşlenmiş_dolgu.as_ref().or_else(|| {
+            öğe_stili
+                .and_then(|stil| stil.renk.as_ref())
+                .or(seri.öğe_stili.renk.as_ref())
+        });
         sembol_stilli_çiz(
             çizici,
             seri.sembol,
             nokta.konum,
             boyut,
             renk,
-            öğe_stili
-                .and_then(|stil| stil.renk.as_ref())
-                .or(seri.öğe_stili.renk.as_ref()),
+            dolgu,
             kenarlık,
             nokta_opaklığı,
         );
@@ -1477,6 +1595,57 @@ mod testler {
         assert_eq!(noktalar[0].y_değeri, 2.0);
         assert_eq!(noktalar[0].boyut, 14.0);
         assert_eq!(saçılım_değer_kapsamı(&seri), [2.0, 2.0]);
+    }
+
+    #[test]
+    fn visual_map_sayısal_boyutu_scatter_sembol_çapına_uygulanır() {
+        let seri =
+            SaçılımSerisi::yeni().veri([[1.0, 20.0, 0.0], [2.0, 40.0, 125.0], [3.0, 60.0, 250.0]]);
+        let kartezyen = Kartezyen2B {
+            x: değer_ekseni([0.0, 4.0], [0.0, 100.0], EksenKonumu::Alt),
+            y: değer_ekseni([0.0, 80.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+        let eşleme = GörselEşleme::yeni()
+            .boyut(2usize)
+            .en_az(0.0)
+            .en_çok(250.0)
+            .sembol_boyutu(10.0, 70.0);
+        let mut noktalar = saçılım_noktaları(&seri, &kartezyen);
+        let kapsam = saçılım_görsel_kapsamı(&seri, &eşleme);
+
+        saçılım_nokta_boyutlarını_eşle(&seri, &mut noktalar, &[(&eşleme, kapsam)]);
+
+        assert_eq!(kapsam, [0.0, 250.0]);
+        assert_eq!(noktalar[0].boyut, 10.0);
+        assert_eq!(noktalar[1].boyut, 40.0);
+        assert_eq!(noktalar[2].boyut, 70.0);
+    }
+
+    #[test]
+    fn çoklu_visual_map_boyut_ve_açıklık_kanallarını_ayrı_boyutlardan_okur() {
+        let seri = SaçılımSerisi::yeni().veri([vec![1.0, 20.0, 125.0, 0.0, 0.0, 0.0, 25.0]]);
+        let boyut = GörselEşleme::yeni()
+            .boyut(2usize)
+            .en_az(0.0)
+            .en_çok(250.0)
+            .sembol_boyutu(10.0, 70.0);
+        let açıklık = GörselEşleme::yeni()
+            .boyut(6usize)
+            .en_az(0.0)
+            .en_çok(50.0)
+            .renk_açıklığı(0.9, 0.5);
+        let taban = Renk::onaltılık(0xdd4444);
+
+        let boyut_değeri = saçılım_görsel_değeri(&seri, &boyut, 0).unwrap();
+        let açıklık_değeri = saçılım_görsel_değeri(&seri, &açıklık, 0).unwrap();
+        let renk = açıklık.rengi_uygula(açıklık_değeri, [0.0, 50.0], taban);
+
+        assert_eq!(boyut_değeri, 125.0);
+        assert_eq!(açıklık_değeri, 25.0);
+        assert!((boyut.sembol_boyutu_çöz(boyut_değeri, [0.0, 250.0], 10.0) - 40.0).abs() < 1e-6);
+        assert_ne!(renk, taban);
+        assert!(renk.kırmızı > renk.yeşil && renk.yeşil >= renk.mavi);
     }
 
     #[test]

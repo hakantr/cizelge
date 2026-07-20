@@ -666,7 +666,13 @@ pub fn eksenleri_çiz(
 
         // 4) Eksen adı.
         if let Some(ad) = &eksen.seçenek.ad {
-            let boyut = tema::YAZI_KÜÇÜK;
+            let boyut = eksen.seçenek.ad_yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+            let renk = eksen
+                .seçenek
+                .ad_yazı
+                .renk
+                .unwrap_or_else(tema::eksen_etiketi);
+            let kalın = eksen.seçenek.ad_yazı.kalın;
             // AxisBuilder başlangıç/bitişi fiziksel tuval kenarına değil,
             // eksenin veri yönüne göre yorumlar. `inverse: true` bu yönü
             // çevirdiğinden ad çapaları da yer değiştirir.
@@ -710,8 +716,8 @@ pub fn eksenleri_çiz(
                     yatay,
                     dikey,
                     boyut,
-                    tema::eksen_etiketi(),
-                    false,
+                    renk,
+                    kalın,
                 );
             } else {
                 let (çapa, dikey) = match ad_konumu {
@@ -736,8 +742,8 @@ pub fn eksenleri_çiz(
                     YatayHiza::Orta,
                     dikey,
                     boyut,
-                    tema::eksen_etiketi(),
-                    false,
+                    renk,
+                    kalın,
                 );
             }
         }

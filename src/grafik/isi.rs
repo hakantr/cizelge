@@ -521,23 +521,30 @@ pub fn görsel_eşleme_çiz(
         return GörselEşlemeÇıktısı::default();
     }
     if eşleme.yön == Yön::Dikey && eşleme.hesaplanabilir {
-        // ContinuousView dikey `calculable` öntanımlıları. Çubuk alttan
-        // düşüğe, üste yükseğe gider; handle icon yatay bir roundRect'tir.
-        const ŞERİT_GENİŞLİĞİ: f32 = 20.0;
-        const ŞERİT_YÜKSEKLİĞİ: f32 = 140.0;
-        const TUTAMAÇ_GENİŞLİĞİ: f32 = 26.0;
-        const TUTAMAÇ_YÜKSEKLİĞİ: f32 = 7.793_104;
-        const ETİKET_X: f32 = 34.0;
+        // ContinuousView dikey `calculable` geometrisi. `symbolSize`
+        // denetlenen görselse çubuk, alt ve üst uçtaki sembol çaplarını
+        // izleyen bir yamuktur; aksi halde klasik 20×140 dikdörtgendir.
+        const ETİKET_KENAR_BOŞLUĞU: f32 = 14.0;
         const ETİKET_YARI_YÜKSEKLİĞİ: f32 = 6.0;
         const İÇ_BOŞLUK: f32 = 15.0;
         let boyut = tema::YAZI_KÜÇÜK;
+        let şerit_genişliği = eşleme.öğe_genişliği.unwrap_or(20.0).max(0.1);
+        let şerit_yüksekliği = eşleme.öğe_yüksekliği.unwrap_or(140.0).max(0.1);
+        let (yüksek_metin, düşük_metin) = eşleme
+            .metin
+            .as_ref()
+            .map(|(yüksek, düşük)| {
+                (
+                    (!yüksek.is_empty()).then_some(yüksek.as_str()),
+                    (!düşük.is_empty()).then_some(düşük.as_str()),
+                )
+            })
+            .unwrap_or((None, None));
         let seçili = eşleme.seçili_kapsam(kapsam);
         let düşük = görsel_eşleme_değer_metni(seçili[0], eşleme.hassasiyet);
         let yüksek = görsel_eşleme_değer_metni(seçili[1], eşleme.hassasiyet);
         let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
-        let yarım_tutamaç_yüksekliği = TUTAMAÇ_YÜKSEKLİĞİ / 2.0;
-        let tutamaç_taşması = (TUTAMAÇ_GENİŞLİĞİ - ŞERİT_GENİŞLİĞİ) / 2.0;
 
         // `align: auto`, bileşen sağ yarıya yerleştirildiğinde uç
         // etiketlerini çubuğun soluna alır. Box konumu, padding ve handle
@@ -549,19 +556,67 @@ pub fn görsel_eşleme_çiz(
         let sağa_yaslı = eşleme.sağ.is_some()
             || eşleme.sol == YatayKonum::Sağ
             || sayısal_sol.is_some_and(|sol| sol > çizici.genişlik() / 2.0);
-        let en_geniş_etiket = düşük_genişliği.max(yüksek_genişliği);
-        let (dış_solu, dış_sağı) = if sağa_yaslı {
+
+        // ControllerModel, değişken hedef symbolSize kanalını itemWidth'e
+        // normalleştirir ve okunaklı bir yamuğa ulaşmak için küçük ucu büyük
+        // ucun üçte birine tamamlar.
+        let değişken_sembol = eşleme
+            .sembol_boyutu
+            .is_some_and(|[düşük, yüksek]| (düşük - yüksek).abs() > f32::EPSILON);
+        let denetleyici_boyutu = |oran: f32| {
+            if değişken_sembol {
+                şerit_genişliği / 3.0 + şerit_genişliği * (2.0 / 3.0) * oran
+            } else {
+                şerit_genişliği
+            }
+        };
+        let alt_uç_boyutu = denetleyici_boyutu(0.0);
+        let üst_uç_boyutu = denetleyici_boyutu(1.0);
+        let yerel_başlangıç = |uç_boyutu: f32| {
+            if sağa_yaslı {
+                0.0
+            } else {
+                şerit_genişliği - uç_boyutu
+            }
+        };
+        let tutamaç_taban_genişliği = şerit_genişliği * (26.0 / 20.0);
+        let tutamaç_taban_yüksekliği = şerit_genişliği * (7.793_104 / 20.0);
+        let tutamaç_boyutu = |uç_boyutu: f32| {
+            let ölçek = uç_boyutu / şerit_genişliği;
             (
-                -(ETİKET_X - ŞERİT_GENİŞLİĞİ + en_geniş_etiket) - İÇ_BOŞLUK,
-                ŞERİT_GENİŞLİĞİ + tutamaç_taşması + İÇ_BOŞLUK,
-            )
-        } else {
-            (
-                -tutamaç_taşması - İÇ_BOŞLUK,
-                ETİKET_X + en_geniş_etiket + İÇ_BOŞLUK,
+                tutamaç_taban_genişliği * ölçek,
+                tutamaç_taban_yüksekliği * ölçek,
             )
         };
-        let dış_genişlik = dış_sağı - dış_solu;
+
+        // ECharts önce tam kapsamla bir "sketch" kurup bileşen kutusunu
+        // hesaplar; seçili aralık değiştiğinde grup konumu sıçramaz.
+        let (alt_tutamaç_genişliği, alt_tutamaç_yüksekliği) = tutamaç_boyutu(alt_uç_boyutu);
+        let (üst_tutamaç_genişliği, üst_tutamaç_yüksekliği) = tutamaç_boyutu(üst_uç_boyutu);
+        let alt_tutamaç_merkezi_x = yerel_başlangıç(alt_uç_boyutu) + alt_uç_boyutu / 2.0;
+        let üst_tutamaç_merkezi_x = yerel_başlangıç(üst_uç_boyutu) + üst_uç_boyutu / 2.0;
+        let etiket_x = if sağa_yaslı {
+            -ETİKET_KENAR_BOŞLUĞU
+        } else {
+            şerit_genişliği + ETİKET_KENAR_BOŞLUĞU
+        };
+        let mut içerik_solu = (alt_tutamaç_merkezi_x - alt_tutamaç_genişliği / 2.0)
+            .min(üst_tutamaç_merkezi_x - üst_tutamaç_genişliği / 2.0)
+            .min(0.0);
+        let mut içerik_sağı = (alt_tutamaç_merkezi_x + alt_tutamaç_genişliği / 2.0)
+            .max(üst_tutamaç_merkezi_x + üst_tutamaç_genişliği / 2.0)
+            .max(şerit_genişliği);
+        if sağa_yaslı {
+            içerik_solu = içerik_solu.min(etiket_x - düşük_genişliği.max(yüksek_genişliği));
+        } else {
+            içerik_sağı = içerik_sağı.max(etiket_x + düşük_genişliği.max(yüksek_genişliği));
+        }
+        for metin in yüksek_metin.into_iter().chain(düşük_metin) {
+            let metin_genişliği = çizici.yazı_ölç(metin, boyut).0;
+            içerik_solu = içerik_solu.min(şerit_genişliği / 2.0 - metin_genişliği / 2.0);
+            içerik_sağı = içerik_sağı.max(şerit_genişliği / 2.0 + metin_genişliği / 2.0);
+        }
+        let dış_genişlik = içerik_sağı - içerik_solu + 2.0 * İÇ_BOŞLUK;
         let dış_x = if let Some(sağ) = eşleme.sağ {
             çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_genişlik
         } else {
@@ -572,10 +627,18 @@ pub fn görsel_eşleme_çiz(
                 YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
             }
         };
-        let şerit_x = dış_x - dış_solu;
+        let şerit_x = dış_x + İÇ_BOŞLUK - içerik_solu;
 
-        let uç_taşması = ETİKET_YARI_YÜKSEKLİĞİ.max(yarım_tutamaç_yüksekliği);
-        let dış_yükseklik = ŞERİT_YÜKSEKLİĞİ + 2.0 * (İÇ_BOŞLUK + uç_taşması);
+        let mut içerik_üstü = (-ETİKET_YARI_YÜKSEKLİĞİ).min(-üst_tutamaç_yüksekliği / 2.0);
+        let mut içerik_altı = (şerit_yüksekliği + ETİKET_YARI_YÜKSEKLİĞİ)
+            .max(şerit_yüksekliği + alt_tutamaç_yüksekliği / 2.0);
+        if yüksek_metin.is_some() {
+            içerik_üstü = içerik_üstü.min(-eşleme.metin_boşluğu - boyut);
+        }
+        if düşük_metin.is_some() {
+            içerik_altı = içerik_altı.max(şerit_yüksekliği + eşleme.metin_boşluğu + boyut);
+        }
+        let dış_yükseklik = içerik_altı - içerik_üstü + 2.0 * İÇ_BOŞLUK;
         let dış_y = match eşleme.dikey_konum {
             Some(DikeyKonum::Üst) => 0.0,
             Some(DikeyKonum::Orta) => (çizici.yükseklik() - dış_yükseklik) / 2.0,
@@ -586,48 +649,56 @@ pub fn görsel_eşleme_çiz(
                 |üst| üst.çöz(çizici.yükseklik()),
             ),
         };
-        let şerit_y = dış_y + İÇ_BOŞLUK + uç_taşması;
+        let şerit_y = dış_y + İÇ_BOŞLUK - içerik_üstü;
         let duraklar = denetleyici_durakları(eşleme);
-        let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, ŞERİT_GENİŞLİĞİ, ŞERİT_YÜKSEKLİĞİ);
-        çizici.dikdörtgen(
-            şerit,
-            &Dolgu::Düz(denetleyici_zemini(eşleme)),
-            [3.0; 4],
-            None,
-        );
+        let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, şerit_genişliği, şerit_yüksekliği);
+        let yamuk = |alt_y: f32, alt_boyut: f32, üst_y: f32, üst_boyut: f32| {
+            let mut yol = Yol::yeni();
+            yol.taşı((şerit.x + yerel_başlangıç(üst_boyut), üst_y));
+            yol.çiz((şerit.x + yerel_başlangıç(üst_boyut) + üst_boyut, üst_y));
+            yol.çiz((şerit.x + yerel_başlangıç(alt_boyut) + alt_boyut, alt_y));
+            yol.çiz((şerit.x + yerel_başlangıç(alt_boyut), alt_y));
+            yol.kapat();
+            yol
+        };
+        let dış_yamuk = yamuk(şerit.alt(), alt_uç_boyutu, şerit.y, üst_uç_boyutu);
+        çizici.yol_doldur(&dış_yamuk, &Dolgu::Düz(denetleyici_zemini(eşleme)));
 
         let açıklık = (kapsam[1] - kapsam[0]).max(f64::EPSILON);
         let oran = |değer: f64| ((değer - kapsam[0]) / açıklık).clamp(0.0, 1.0) as f32;
         let alt_oran = oran(seçili[0]);
         let üst_oran = oran(seçili[1]);
+        let alt_boyut = denetleyici_boyutu(alt_oran);
+        let üst_boyut = denetleyici_boyutu(üst_oran);
         let seçili_kutu = Dikdörtgen::yeni(
             şerit.x,
             şerit.alt() - üst_oran * şerit.yükseklik,
             şerit.genişlik,
             ((üst_oran - alt_oran) * şerit.yükseklik).max(0.1),
         );
-        çizici.kırpılı(seçili_kutu, &mut |yüzey| {
-            yüzey.dikdörtgen(
-                şerit,
-                &crate::renk::Dolgu::doğrusal(0.0, 1.0, 0.0, 0.0, duraklar.clone()),
-                [3.0; 4],
-                None,
-            );
-        });
+        let seçili_yamuk = yamuk(seçili_kutu.alt(), alt_boyut, seçili_kutu.y, üst_boyut);
+        çizici.yol_doldur(
+            &seçili_yamuk,
+            &crate::renk::Dolgu::doğrusal(0.0, 1.0, 0.0, 0.0, duraklar),
+        );
 
         let alt_merkez_y = şerit.alt() - alt_oran * şerit.yükseklik;
         let üst_merkez_y = şerit.alt() - üst_oran * şerit.yükseklik;
+        let (alt_tutamaç_genişliği, alt_tutamaç_yüksekliği) = tutamaç_boyutu(alt_boyut);
+        let (üst_tutamaç_genişliği, üst_tutamaç_yüksekliği) = tutamaç_boyutu(üst_boyut);
+        let alt_tutamaç_merkezi_x = şerit.x + yerel_başlangıç(alt_boyut) + alt_boyut / 2.0;
+        let üst_tutamaç_merkezi_x = şerit.x + yerel_başlangıç(üst_boyut) + üst_boyut / 2.0;
         let alt_tutamaç = Dikdörtgen::yeni(
-            şerit.x - tutamaç_taşması,
-            alt_merkez_y - yarım_tutamaç_yüksekliği,
-            TUTAMAÇ_GENİŞLİĞİ,
-            TUTAMAÇ_YÜKSEKLİĞİ,
+            alt_tutamaç_merkezi_x - alt_tutamaç_genişliği / 2.0,
+            alt_merkez_y - alt_tutamaç_yüksekliği / 2.0,
+            alt_tutamaç_genişliği,
+            alt_tutamaç_yüksekliği,
         );
         let üst_tutamaç = Dikdörtgen::yeni(
-            şerit.x - tutamaç_taşması,
-            üst_merkez_y - yarım_tutamaç_yüksekliği,
-            TUTAMAÇ_GENİŞLİĞİ,
-            TUTAMAÇ_YÜKSEKLİĞİ,
+            üst_tutamaç_merkezi_x - üst_tutamaç_genişliği / 2.0,
+            üst_merkez_y - üst_tutamaç_yüksekliği / 2.0,
+            üst_tutamaç_genişliği,
+            üst_tutamaç_yüksekliği,
         );
         for (oran, tutamaç) in [(alt_oran, alt_tutamaç), (üst_oran, üst_tutamaç)] {
             çizici.dikdörtgen(
@@ -638,9 +709,12 @@ pub fn görsel_eşleme_çiz(
             );
         }
         let (etiket_x, etiket_hizası) = if sağa_yaslı {
-            (şerit.x - (ETİKET_X - ŞERİT_GENİŞLİĞİ), YatayHiza::Sağ)
+            (şerit.x - ETİKET_KENAR_BOŞLUĞU, YatayHiza::Sağ)
         } else {
-            (şerit.x + ETİKET_X, YatayHiza::Sol)
+            (
+                şerit.x + şerit_genişliği + ETİKET_KENAR_BOŞLUĞU,
+                YatayHiza::Sol,
+            )
         };
         çizici.yazı(
             &düşük,
@@ -660,6 +734,34 @@ pub fn görsel_eşleme_çiz(
             tema::ikincil_metin(),
             false,
         );
+        if let Some(metin) = yüksek_metin {
+            çizici.yazı(
+                metin,
+                (
+                    şerit.x + şerit_genişliği / 2.0,
+                    şerit.y - eşleme.metin_boşluğu,
+                ),
+                YatayHiza::Orta,
+                DikeyHiza::Alt,
+                boyut,
+                tema::ikincil_metin(),
+                false,
+            );
+        }
+        if let Some(metin) = düşük_metin {
+            çizici.yazı(
+                metin,
+                (
+                    şerit.x + şerit_genişliği / 2.0,
+                    şerit.alt() + eşleme.metin_boşluğu,
+                ),
+                YatayHiza::Orta,
+                DikeyHiza::Üst,
+                boyut,
+                tema::ikincil_metin(),
+                false,
+            );
+        }
         return GörselEşlemeÇıktısı {
             parça_kutuları: Vec::new(),
             sürekli: Some(SürekliGörselEşlemeBölgesi {
@@ -678,21 +780,21 @@ pub fn görsel_eşleme_çiz(
         // 20×140, handleSize %120 ve bileşen padding'i 15 px. ECharts
         // çubuğu içeride 90° döndürür; burada aynı dünya geometrisini
         // doğrudan yatay koordinatlarda kuruyoruz.
-        const ŞERİT_GENİŞLİĞİ: f32 = 140.0;
-        const ŞERİT_YÜKSEKLİĞİ: f32 = 20.0;
-        const TUTAMAÇ_GENİŞLİĞİ: f32 = 7.793_104;
-        const TUTAMAÇ_YÜKSEKLİĞİ: f32 = 26.0;
         const İÇ_BOŞLUK: f32 = 15.0;
+        let şerit_genişliği = eşleme.öğe_yüksekliği.unwrap_or(140.0).max(0.1);
+        let şerit_yüksekliği = eşleme.öğe_genişliği.unwrap_or(20.0).max(0.1);
+        let tutamaç_genişliği = şerit_yüksekliği * (7.793_104 / 20.0);
+        let tutamaç_yüksekliği = şerit_yüksekliği * (26.0 / 20.0);
         let boyut = tema::YAZI_KÜÇÜK;
         let seçili = eşleme.seçili_kapsam(kapsam);
         let düşük = görsel_eşleme_değer_metni(seçili[0], eşleme.hassasiyet);
         let yüksek = görsel_eşleme_değer_metni(seçili[1], eşleme.hassasiyet);
         let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
-        let yarım_tutamaç = TUTAMAÇ_GENİŞLİĞİ / 2.0;
+        let yarım_tutamaç = tutamaç_genişliği / 2.0;
         let içerik_solu = (-düşük_genişliği / 2.0).min(-yarım_tutamaç);
         let içerik_sağı =
-            (ŞERİT_GENİŞLİĞİ + yüksek_genişliği / 2.0).max(ŞERİT_GENİŞLİĞİ + yarım_tutamaç);
+            (şerit_genişliği + yüksek_genişliği / 2.0).max(şerit_genişliği + yarım_tutamaç);
         let dış_solu = içerik_solu - İÇ_BOŞLUK;
         let dış_sağı = içerik_sağı + İÇ_BOŞLUK;
         let dış_genişlik = dış_sağı - dış_solu;
@@ -711,9 +813,9 @@ pub fn görsel_eşleme_çiz(
         // tutamaç ve 15 px padding'in oluşturduğu bütün dış kutuya uygulanır.
         const ETİKET_BOŞLUĞU: f32 = 14.0;
         const ETİKET_YARI_YÜKSEKLİĞİ: f32 = 6.0;
-        let tutamaç_taşması = (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0;
+        let tutamaç_taşması = (tutamaç_yüksekliği - şerit_yüksekliği) / 2.0;
         let dış_yükseklik = 2.0 * İÇ_BOŞLUK
-            + ŞERİT_YÜKSEKLİĞİ
+            + şerit_yüksekliği
             + tutamaç_taşması
             + ETİKET_BOŞLUĞU
             + ETİKET_YARI_YÜKSEKLİĞİ;
@@ -736,7 +838,7 @@ pub fn görsel_eşleme_çiz(
                 ETİKET_YARI_YÜKSEKLİĞİ + ETİKET_BOŞLUĞU
             };
         let duraklar = denetleyici_durakları(eşleme);
-        let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, ŞERİT_GENİŞLİĞİ, ŞERİT_YÜKSEKLİĞİ);
+        let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, şerit_genişliği, şerit_yüksekliği);
         çizici.dikdörtgen(
             şerit,
             &Dolgu::Düz(denetleyici_zemini(eşleme)),
@@ -762,18 +864,18 @@ pub fn görsel_eşleme_çiz(
             );
         });
 
-        let tutamaç_y = şerit_y - (TUTAMAÇ_YÜKSEKLİĞİ - ŞERİT_YÜKSEKLİĞİ) / 2.0;
+        let tutamaç_y = şerit_y - (tutamaç_yüksekliği - şerit_yüksekliği) / 2.0;
         let alt_tutamaç = Dikdörtgen::yeni(
             şerit.x + alt_oran * şerit.genişlik - yarım_tutamaç,
             tutamaç_y,
-            TUTAMAÇ_GENİŞLİĞİ,
-            TUTAMAÇ_YÜKSEKLİĞİ,
+            tutamaç_genişliği,
+            tutamaç_yüksekliği,
         );
         let üst_tutamaç = Dikdörtgen::yeni(
             şerit.x + üst_oran * şerit.genişlik - yarım_tutamaç,
             tutamaç_y,
-            TUTAMAÇ_GENİŞLİĞİ,
-            TUTAMAÇ_YÜKSEKLİĞİ,
+            tutamaç_genişliği,
+            tutamaç_yüksekliği,
         );
         for (oran, tutamaç) in [(alt_oran, alt_tutamaç), (üst_oran, üst_tutamaç)] {
             çizici.dikdörtgen(
@@ -784,7 +886,7 @@ pub fn görsel_eşleme_çiz(
             );
         }
         let etiket_y = if etiket_altta {
-            şerit_y + ŞERİT_YÜKSEKLİĞİ + ETİKET_BOŞLUĞU
+            şerit_y + şerit_yüksekliği + ETİKET_BOŞLUĞU
         } else {
             şerit_y - ETİKET_BOŞLUĞU
         };
@@ -820,21 +922,25 @@ pub fn görsel_eşleme_çiz(
         };
     }
     if eşleme.yön == Yön::Yatay {
-        const ŞERİT_GENİŞLİĞİ: f32 = 140.0;
-        const ŞERİT_YÜKSEKLİĞİ: f32 = 20.0;
-        const METİN_BOŞLUĞU: f32 = 10.0;
         const İÇ_BOŞLUK: f32 = 15.0;
+        let şerit_genişliği = eşleme.öğe_yüksekliği.unwrap_or(140.0).max(0.1);
+        let şerit_yüksekliği = eşleme.öğe_genişliği.unwrap_or(20.0).max(0.1);
         let boyut = tema::YAZI_KÜÇÜK;
         let (yüksek, düşük) = eşleme
             .metin
             .as_ref()
-            .map(|(yüksek, düşük)| (Some(yüksek.as_str()), Some(düşük.as_str())))
+            .map(|(yüksek, düşük)| {
+                (
+                    (!yüksek.is_empty()).then_some(yüksek.as_str()),
+                    (!düşük.is_empty()).then_some(düşük.as_str()),
+                )
+            })
             .unwrap_or((None, None));
         let düşük_genişliği = düşük.map_or(0.0, |metin| çizici.yazı_ölç(metin, boyut).0);
         let yüksek_genişliği = yüksek.map_or(0.0, |metin| çizici.yazı_ölç(metin, boyut).0);
-        let düşük_bölümü = düşük.map_or(0.0, |_| düşük_genişliği + METİN_BOŞLUĞU);
-        let yüksek_bölümü = yüksek.map_or(0.0, |_| METİN_BOŞLUĞU + yüksek_genişliği);
-        let içerik_genişliği = düşük_bölümü + ŞERİT_GENİŞLİĞİ + yüksek_bölümü;
+        let düşük_bölümü = düşük.map_or(0.0, |_| düşük_genişliği + eşleme.metin_boşluğu);
+        let yüksek_bölümü = yüksek.map_or(0.0, |_| eşleme.metin_boşluğu + yüksek_genişliği);
+        let içerik_genişliği = düşük_bölümü + şerit_genişliği + yüksek_bölümü;
         let dış_genişlik = içerik_genişliği + 2.0 * İÇ_BOŞLUK;
         let dış_x = if let Some(sağ) = eşleme.sağ {
             çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_genişlik
@@ -846,7 +952,7 @@ pub fn görsel_eşleme_çiz(
                 YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
             }
         };
-        let dış_yükseklik = ŞERİT_YÜKSEKLİĞİ + 2.0 * İÇ_BOŞLUK;
+        let dış_yükseklik = şerit_yüksekliği + 2.0 * İÇ_BOŞLUK;
         let dış_y = match eşleme.dikey_konum {
             Some(DikeyKonum::Üst) => 0.0,
             Some(DikeyKonum::Orta) => (çizici.yükseklik() - dış_yükseklik) / 2.0,
@@ -859,7 +965,7 @@ pub fn görsel_eşleme_çiz(
         };
         let y = dış_y + İÇ_BOŞLUK;
         let şerit_x = dış_x + İÇ_BOŞLUK + düşük_bölümü;
-        let şerit = Dikdörtgen::yeni(şerit_x, y, ŞERİT_GENİŞLİĞİ, ŞERİT_YÜKSEKLİĞİ);
+        let şerit = Dikdörtgen::yeni(şerit_x, y, şerit_genişliği, şerit_yüksekliği);
         çizici.dikdörtgen(
             şerit,
             &Dolgu::Düz(denetleyici_zemini(eşleme)),
@@ -875,7 +981,7 @@ pub fn görsel_eşleme_çiz(
         if let Some(düşük) = düşük {
             çizici.yazı(
                 düşük,
-                (şerit_x - METİN_BOŞLUĞU, y + ŞERİT_YÜKSEKLİĞİ / 2.0),
+                (şerit_x - eşleme.metin_boşluğu, y + şerit_yüksekliği / 2.0),
                 YatayHiza::Sağ,
                 DikeyHiza::Orta,
                 boyut,
@@ -887,8 +993,8 @@ pub fn görsel_eşleme_çiz(
             çizici.yazı(
                 yüksek,
                 (
-                    şerit_x + ŞERİT_GENİŞLİĞİ + METİN_BOŞLUĞU,
-                    y + ŞERİT_YÜKSEKLİĞİ / 2.0,
+                    şerit_x + şerit_genişliği + eşleme.metin_boşluğu,
+                    y + şerit_yüksekliği / 2.0,
                 ),
                 YatayHiza::Sol,
                 DikeyHiza::Orta,
@@ -899,26 +1005,30 @@ pub fn görsel_eşleme_çiz(
         }
         return GörselEşlemeÇıktısı::default();
     }
-    const GENİŞLİK: f32 = 20.0;
-    const YÜKSEKLİK: f32 = 140.0;
-    const METİN_BOŞLUĞU: f32 = 10.0;
     const İÇ_BOŞLUK: f32 = 15.0;
+    let genişlik = eşleme.öğe_genişliği.unwrap_or(20.0).max(0.1);
+    let yükseklik = eşleme.öğe_yüksekliği.unwrap_or(140.0).max(0.1);
     let boyut = tema::YAZI_KÜÇÜK;
     let (yüksek, düşük) = eşleme
         .metin
         .as_ref()
-        .map(|(yüksek, düşük)| (Some(yüksek.as_str()), Some(düşük.as_str())))
+        .map(|(yüksek, düşük)| {
+            (
+                (!yüksek.is_empty()).then_some(yüksek.as_str()),
+                (!düşük.is_empty()).then_some(düşük.as_str()),
+            )
+        })
         .unwrap_or((None, None));
     let yüksek_yüksekliği = yüksek.map_or(0.0, |_| boyut);
     let düşük_yüksekliği = düşük.map_or(0.0, |_| boyut);
-    let üst_bölümü = yüksek.map_or(0.0, |_| yüksek_yüksekliği + METİN_BOŞLUĞU);
-    let alt_bölümü = düşük.map_or(0.0, |_| METİN_BOŞLUĞU + düşük_yüksekliği);
+    let üst_bölümü = yüksek.map_or(0.0, |_| yüksek_yüksekliği + eşleme.metin_boşluğu);
+    let alt_bölümü = düşük.map_or(0.0, |_| eşleme.metin_boşluğu + düşük_yüksekliği);
     let metin_genişliği = yüksek
         .into_iter()
         .chain(düşük)
         .map(|metin| çizici.yazı_ölç(metin, boyut).0)
         .fold(0.0_f32, f32::max);
-    let içerik_genişliği = GENİŞLİK.max(metin_genişliği);
+    let içerik_genişliği = genişlik.max(metin_genişliği);
     let dış_genişlik = içerik_genişliği + 2.0 * İÇ_BOŞLUK;
     let dış_x = if let Some(sağ) = eşleme.sağ {
         çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_genişlik
@@ -930,7 +1040,7 @@ pub fn görsel_eşleme_çiz(
             YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()),
         }
     };
-    let içerik_yüksekliği = üst_bölümü + YÜKSEKLİK + alt_bölümü;
+    let içerik_yüksekliği = üst_bölümü + yükseklik + alt_bölümü;
     let dış_yükseklik = içerik_yüksekliği + 2.0 * İÇ_BOŞLUK;
     let dış_y = match eşleme.dikey_konum {
         Some(DikeyKonum::Üst) => 0.0,
@@ -942,9 +1052,9 @@ pub fn görsel_eşleme_çiz(
             |üst| üst.çöz(çizici.yükseklik()),
         ),
     };
-    let x = dış_x + İÇ_BOŞLUK + (içerik_genişliği - GENİŞLİK) / 2.0;
+    let x = dış_x + İÇ_BOŞLUK + (içerik_genişliği - genişlik) / 2.0;
     let y = dış_y + İÇ_BOŞLUK + üst_bölümü;
-    let şerit = Dikdörtgen::yeni(x, y, GENİŞLİK, YÜKSEKLİK);
+    let şerit = Dikdörtgen::yeni(x, y, genişlik, yükseklik);
     çizici.dikdörtgen(
         şerit,
         &Dolgu::Düz(denetleyici_zemini(eşleme)),
@@ -960,7 +1070,7 @@ pub fn görsel_eşleme_çiz(
     if let Some(yüksek) = yüksek {
         çizici.yazı(
             yüksek,
-            (dış_x + dış_genişlik / 2.0, y - METİN_BOŞLUĞU),
+            (dış_x + dış_genişlik / 2.0, y - eşleme.metin_boşluğu),
             YatayHiza::Orta,
             DikeyHiza::Alt,
             boyut,
@@ -971,7 +1081,10 @@ pub fn görsel_eşleme_çiz(
     if let Some(düşük) = düşük {
         çizici.yazı(
             düşük,
-            (dış_x + dış_genişlik / 2.0, y + YÜKSEKLİK + METİN_BOŞLUĞU),
+            (
+                dış_x + dış_genişlik / 2.0,
+                y + yükseklik + eşleme.metin_boşluğu,
+            ),
             YatayHiza::Orta,
             DikeyHiza::Üst,
             boyut,
@@ -1094,6 +1207,38 @@ mod sürekli_bölge_testleri {
         let kayıt = yüzey.döküm();
         assert!(kayıt.contains("yazı \"1000\""));
         assert!(!kayıt.contains("1,000"));
+    }
+
+    #[test]
+    fn dikey_sembol_boyutu_denetcisi_item_size_ve_ust_metni_uygular() {
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(250.0)
+            .boyut(2usize)
+            .sembol_boyutu(10.0, 70.0)
+            .aralık_dışı_sembol_boyutu(10.0, 70.0)
+            .hesaplanabilir(true)
+            .sol("right")
+            .üst("10%")
+            .öğe_genişliği(30.0)
+            .öğe_yüksekliği(120.0)
+            .metin("圆形大小：PM2.5", "")
+            .metin_boşluğu(30.0);
+
+        let çıktı = görsel_eşleme_çiz(&mut yüzey, &eşleme, [0.0, 250.0]);
+        let bölge = çıktı.sürekli.expect("dikey isabet bölgesi");
+
+        assert_eq!(bölge.şerit.y, 109.5);
+        assert_eq!(bölge.şerit.genişlik, 30.0);
+        assert_eq!(bölge.şerit.yükseklik, 120.0);
+        assert!(
+            bölge.şerit.x > 630.0 && bölge.şerit.x < 640.0,
+            "şerit x={}",
+            bölge.şerit.x
+        );
+        assert!(bölge.üst_tutamaç.genişlik > bölge.alt_tutamaç.genişlik * 2.9);
+        assert!(yüzey.döküm().contains("圆形大小：PM2.5"));
     }
 
     #[test]

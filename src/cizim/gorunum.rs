@@ -41,8 +41,8 @@ use crate::grafik::radar::{
     radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
 };
 use crate::grafik::sacilim::{
-    SaçılımNoktası, saçılım_değer_kapsamı, saçılım_noktaları, saçılım_xy, saçılım_çiz_eşlemeli,
-    takvim_saçılım_noktaları,
+    SaçılımNoktası, saçılım_görsel_kapsamı, saçılım_nokta_boyutlarını_eşle, saçılım_noktaları,
+    saçılım_xy, saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
@@ -289,16 +289,19 @@ fn takvim_saçılım_serisini_çiz(
     yerleşim: &TakvimYerleşimi,
     seri_rengi: Renk,
     palet: &[Renk],
-    görsel_eşleme: Option<&crate::model::gorsel_esleme::GörselEşleme>,
+    görsel_eşlemeler: &[&crate::model::gorsel_esleme::GörselEşleme],
     ilerleme: f32,
     zaman_sn: f32,
     ipucu_seçeneği: Option<&İpucu>,
     fare: Option<(f32, f32)>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) -> Option<Bekleyenİpucu> {
-    let noktalar = takvim_saçılım_noktaları(seri, yerleşim);
-    let eşleme_kapsamı =
-        görsel_eşleme.map(|eşleme| eşleme.kapsam_çöz(saçılım_değer_kapsamı(seri)));
+    let eşlemeler = görsel_eşlemeler
+        .iter()
+        .map(|eşleme| (*eşleme, saçılım_görsel_kapsamı(seri, eşleme)))
+        .collect::<Vec<_>>();
+    let mut noktalar = takvim_saçılım_noktaları(seri, yerleşim);
+    saçılım_nokta_boyutlarını_eşle(seri, &mut noktalar, &eşlemeler);
     let vurgu = match (seri.sessiz, ipucu_seçeneği, fare) {
         (true, _, _) => None,
         (false, Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => noktalar
@@ -317,7 +320,7 @@ fn takvim_saçılım_serisini_çiz(
             .map(|nokta| nokta.sıra),
         _ => None,
     };
-    saçılım_çiz_eşlemeli(
+    saçılım_çiz_çoklu_eşlemeli(
         yüzey,
         seri,
         &noktalar,
@@ -325,7 +328,7 @@ fn takvim_saçılım_serisini_çiz(
         ilerleme,
         zaman_sn,
         vurgu,
-        görsel_eşleme.zip(eşleme_kapsamı),
+        &eşlemeler,
         palet,
     );
     if !seri.sessiz {
@@ -2262,7 +2265,12 @@ pub fn grafiği_boya(
                 let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
                     continue;
                 };
-                let noktalar = saçılım_noktaları(s, &kartezyen);
+                let görsel_eşlemeler = seçenekler
+                    .seri_görsel_eşlemeleri(i)
+                    .map(|eşleme| (eşleme, saçılım_görsel_kapsamı(s, eşleme)))
+                    .collect::<Vec<_>>();
+                let mut noktalar = saçılım_noktaları(s, &kartezyen);
+                saçılım_nokta_boyutlarını_eşle(s, &mut noktalar, &görsel_eşlemeler);
                 let vurgu = match (s.sessiz, &ipucu_seçeneği, fare) {
                     (false, Some(ipucu), Some(f)) if ipucu.tetikleme == Tetikleme::Öğe => {
                         noktalar
@@ -2416,10 +2424,11 @@ pub fn grafiği_boya(
                         Seri::Saçılım(s) => {
                             let kayıt = saçılım_vurguları.iter().find(|(sıra, ..)| *sıra == i);
                             if let Some((_, vurgu, noktalar)) = kayıt {
-                                let görsel_eşleme = seçenekler.seri_görsel_eşlemesi(i);
-                                let eşleme_kapsamı = görsel_eşleme
-                                    .map(|eşleme| eşleme.kapsam_çöz(saçılım_değer_kapsamı(s)));
-                                saçılım_çiz_eşlemeli(
+                                let görsel_eşlemeler = seçenekler
+                                    .seri_görsel_eşlemeleri(i)
+                                    .map(|eşleme| (eşleme, saçılım_görsel_kapsamı(s, eşleme)))
+                                    .collect::<Vec<_>>();
+                                saçılım_çiz_çoklu_eşlemeli(
                                     yüzey,
                                     s,
                                     noktalar,
@@ -2427,7 +2436,7 @@ pub fn grafiği_boya(
                                     ilerleme,
                                     zaman_sn,
                                     *vurgu,
-                                    görsel_eşleme.zip(eşleme_kapsamı),
+                                    &görsel_eşlemeler,
                                     &seçenekler.palet,
                                 );
                                 if !s.sessiz {
@@ -3273,7 +3282,7 @@ pub fn grafiği_boya(
             .find_map(|(_, s)| match s {
                 Seri::Isı(ısı) => Some(ısı_değer_kapsamı(ısı)),
                 Seri::Takvim(takvim) => Some(takvim_değer_kapsamı(takvim)),
-                Seri::Saçılım(saçılım) => Some(saçılım_değer_kapsamı(saçılım)),
+                Seri::Saçılım(saçılım) => Some(saçılım_görsel_kapsamı(saçılım, eşleme)),
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
@@ -3904,6 +3913,9 @@ pub fn grafiği_boya(
         let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
             continue;
         };
+        let görsel_eşlemeler = seçenekler
+            .seri_görsel_eşlemeleri(seri_sırası)
+            .collect::<Vec<_>>();
         if let Some(ipucu) = takvim_saçılım_serisini_çiz(
             yüzey,
             saçılım,
@@ -3911,7 +3923,7 @@ pub fn grafiği_boya(
             yerleşim,
             seçenekler.seri_rengi(seri_sırası),
             &seçenekler.palet,
-            seçenekler.seri_görsel_eşlemesi(seri_sırası),
+            &görsel_eşlemeler,
             ilerleme,
             zaman_sn,
             ipucu_seçeneği.as_ref(),
@@ -3972,6 +3984,9 @@ pub fn grafiği_boya(
         let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
             continue;
         };
+        let görsel_eşlemeler = seçenekler
+            .seri_görsel_eşlemeleri(seri_sırası)
+            .collect::<Vec<_>>();
         if let Some(ipucu) = takvim_saçılım_serisini_çiz(
             yüzey,
             saçılım,
@@ -3979,7 +3994,7 @@ pub fn grafiği_boya(
             yerleşim,
             seçenekler.seri_rengi(seri_sırası),
             &seçenekler.palet,
-            seçenekler.seri_görsel_eşlemesi(seri_sırası),
+            &görsel_eşlemeler,
             ilerleme,
             zaman_sn,
             ipucu_seçeneği.as_ref(),

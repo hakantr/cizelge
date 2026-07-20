@@ -152,6 +152,7 @@ const YEREL_FIXTURE = Object.freeze({
   'bubble-gradient': 'examples/uyum_fixture.rs#bubble_gradient',
   'scatter-label-align-top': 'examples/uyum_fixture.rs#scatter_label_align_top',
   'scatter-label-align-right': 'examples/uyum_fixture.rs#scatter_label_align_right',
+  'scatter-aqi-color': 'examples/uyum_fixture.rs#scatter_aqi_color',
   'scatter-effect': 'examples/uyum_fixture.rs#scatter_effect',
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',
   'heatmap-cartesian': 'examples/uyum_fixture.rs#heatmap_cartesian',
