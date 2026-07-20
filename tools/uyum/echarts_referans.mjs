@@ -121,6 +121,12 @@ function html(id, kaynak, frame, state, width, height) {
         }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
+    : id === 'scatter-nutrients' && state === 'axes-fat-fiber'
+      ? `{
+          app.config.xAxis = 'fat';
+          app.config.yAxis = 'fiber';
+          app.config.onChange();
+        }`
     : id === 'dataset-link' && state === 'son'
       ? `{
           const x = myChart.convertToPixel({xAxisIndex: 0}, '2014');

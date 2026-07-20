@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use base64::Engine as _;
+use cizelge::animasyon::Yumuşatma;
 use cizelge::hazir::*;
 use cizelge::yardimci::bicim::ondalık_kırp;
 use serde::Deserialize;
@@ -5158,6 +5159,162 @@ fn scatter_nebula() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+const BESIN_ALANLARI: [&str; 17] = [
+    "name",
+    "group",
+    "protein",
+    "calcium",
+    "sodium",
+    "fiber",
+    "vitaminc",
+    "potassium",
+    "carbohydrate",
+    "sugars",
+    "fat",
+    "water",
+    "calories",
+    "saturated",
+    "monounsat",
+    "polyunsat",
+    "id",
+];
+
+#[derive(Debug)]
+struct BesinSatırı {
+    grup: String,
+    değerler: [f64; 17],
+}
+
+fn scatter_nutrients_verisini_oku() -> Result<(Vec<BesinSatırı>, Vec<String>), String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/nutrients.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let ham: Vec<Vec<serde_json::Value>> = serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))?;
+    let mut kategoriler = Vec::new();
+    for (sıra, satır) in ham.iter().enumerate() {
+        let grup = satır
+            .get(1)
+            .and_then(serde_json::Value::as_str)
+            .ok_or_else(|| format!("{} satır {sıra}: group metni eksik", dosya.display()))?;
+        if !kategoriler.iter().any(|kategori| kategori == grup) {
+            kategoriler.push(grup.to_owned());
+        }
+    }
+
+    let mut satırlar = Vec::with_capacity(ham.len().min(1_000));
+    for (sıra, satır) in ham.into_iter().take(1_000).enumerate() {
+        let grup = satır
+            .get(1)
+            .and_then(serde_json::Value::as_str)
+            .ok_or_else(|| format!("{} satır {sıra}: group metni eksik", dosya.display()))?
+            .to_owned();
+        let mut değerler = [0.0; 17];
+        for (boyut, hedef) in değerler.iter_mut().enumerate().skip(2) {
+            let değer = satır
+                .get(boyut)
+                .ok_or_else(|| format!("{} satır {sıra}: {boyut}. boyut eksik", dosya.display()))?;
+            *hedef = değer
+                .as_f64()
+                .or_else(|| değer.as_str().and_then(|metin| metin.parse().ok()))
+                // Resmî normalizeData yalnız besin boyutlarında
+                // `parseFloat(item) || 0` uygular. Kimlikler sayısaldır;
+                // bozuk bir kimliği de güvenli biçimde aynı sıfıra düşürürüz.
+                .unwrap_or(0.0);
+        }
+        satırlar.push(BesinSatırı { grup, değerler });
+    }
+    Ok((satırlar, kategoriler))
+}
+
+fn scatter_nutrients(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let (satırlar, kategoriler) = scatter_nutrients_verisini_oku()?;
+    let (x_adı, y_adı) = durum
+        .strip_prefix("axes-")
+        .and_then(|eksenler| eksenler.split_once('-'))
+        .unwrap_or(("protein", "calcium"));
+    let x_sırası = BESIN_ALANLARI
+        .iter()
+        .position(|alan| *alan == x_adı)
+        .filter(|sıra| *sıra >= 2)
+        .ok_or_else(|| format!("scatter-nutrients xAxis alanı geçersiz: {x_adı}"))?;
+    let y_sırası = BESIN_ALANLARI
+        .iter()
+        .position(|alan| *alan == y_adı)
+        .filter(|sıra| *sıra >= 2)
+        .ok_or_else(|| format!("scatter-nutrients yAxis alanı geçersiz: {y_adı}"))?;
+    let öğe =
+        |sıra: usize, satır: &BesinSatırı, x_sırası: usize, y_sırası: usize, y_ölçeği: f64| {
+            let x = satır.değerler[x_sırası];
+            let y = satır.değerler[y_sırası] * y_ölçeği;
+            VeriÖğesi::yeni([x, y]).boyutlar([
+                ("x".to_owned(), x.into()),
+                ("y".to_owned(), y.into()),
+                ("group".to_owned(), satır.grup.clone().into()),
+                ("index".to_owned(), (sıra as f64).into()),
+            ])
+        };
+    let veri = satırlar
+        .iter()
+        .enumerate()
+        .map(|(sıra, satır)| öğe(sıra, satır, x_sırası, y_sırası, 1.0))
+        .collect::<Vec<_>>();
+    let grup_renkleri = (0..kategoriler.len())
+        .map(|sıra| Renk::onaltılık(0x5a94df).ton_ile((13 * sıra) as f32))
+        .collect::<Vec<_>>();
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .animasyon_eğrisi(Yumuşatma::KübikGirişÇıkış)
+        .animasyon_süresi_güncelleme(2_000.0)
+        .x_ekseni(Eksen::değer().ad(x_adı).bölme_çizgisi_göster(false))
+        .y_ekseni(Eksen::değer().ad(y_adı).bölme_çizgisi_göster(false))
+        .görsel_eşlemeler([
+            GörselEşleme::yeni()
+                .göster(false)
+                .gerçek_zamanlı(false)
+                .üst(20)
+                .boyut(2usize)
+                .kategoriler(kategoriler)
+                .renkler(grup_renkleri)
+                .aralık_dışı_renk("#ccc"),
+            GörselEşleme::yeni()
+                .göster(false)
+                .boyut(3usize)
+                .en_çok(100.0)
+                .renk_açıklığı(0.15, 0.6),
+        ]);
+    if durum == "axes-fat-fiber" {
+        // `getZr().configLayer(1, {motionBlur:true})`, eksen güncellemesi
+        // öncesindeki scatter katmanını varsayılan `lastFrameAlpha=0.7` ile
+        // korur. İlk eksenlerin [0,100]×[0,2.5] piksel konumları yeni
+        // [0,100]×[0,60] kapsamına çevrilince calcium değeri 24 ile ölçeklenir.
+        // Eski sembolün 0.8 opaklığı × katman 0.7 = 0.56'dır.
+        let önceki_katman = satırlar
+            .iter()
+            .enumerate()
+            .map(|(sıra, satır)| öğe(sıra, satır, 2, 3, 24.0));
+        seçenekler = seçenekler.seri(
+            SaçılımSerisi::yeni()
+                .ad("nutrients-motion-blur-history")
+                .z_seviyesi(1)
+                .öğe_stili(ÖğeStili::yeni().opaklık(0.56))
+                .animasyon_eşiği(5_000)
+                .aşamalı_eşiği(5_000)
+                .veri(önceki_katman),
+        );
+    }
+    Ok(seçenekler.seri(
+        SaçılımSerisi::yeni()
+            .ad("nutrients")
+            .z_seviyesi(1)
+            .animasyon_eşiği(5_000)
+            .aşamalı_eşiği(5_000)
+            .veri(veri),
+    ))
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_kümeleme_verisi_testleri {
@@ -5418,6 +5575,98 @@ mod scatter_nebula_testleri {
         assert_eq!(dikey.tutamaç_boyutu, Uzunluk::Yüzde(80.0));
         assert!(matches!(yatay.tutamaç_simgesi, Some(Sembol::SvgYolu(_))));
         assert!(matches!(dikey.tutamaç_simgesi, Some(Sembol::SvgYolu(_))));
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_nutrients_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_varlik_tum_kategorilerden_ilk_bin_normalize_satiri_uretir() {
+        let (satırlar, kategoriler) =
+            scatter_nutrients_verisini_oku().expect("nutrients verisi okunmalı");
+        assert_eq!(satırlar.len(), 1_000);
+        assert_eq!(kategoriler.len(), 25);
+        assert_eq!(
+            kategoriler.first().map(String::as_str),
+            Some("Dairy and Egg Products")
+        );
+        assert_eq!(
+            kategoriler.last().map(String::as_str),
+            Some("Restaurant Foods")
+        );
+        assert_eq!(satırlar[0].değerler[2], 19.9);
+        assert_eq!(satırlar[0].değerler[3], 0.285);
+        assert_eq!(satırlar[999].değerler[2], 25.73);
+        assert_eq!(satırlar[999].değerler[5], 0.0);
+        assert_eq!(satırlar[999].değerler[16], 28_480.0);
+    }
+
+    #[test]
+    fn kategorik_visual_map_ve_eksen_degistirme_durumu_kayipsizdir() {
+        let başlangıç = scatter_nutrients("başlangıç").expect("fixture kurulmalı");
+        let değişmiş = scatter_nutrients("axes-fat-fiber").expect("eksen durumu kurulmalı");
+        assert_eq!(
+            başlangıç
+                .x_ekseni
+                .as_ref()
+                .and_then(|eksen| eksen.ad.as_deref()),
+            Some("protein")
+        );
+        assert_eq!(
+            başlangıç
+                .y_ekseni
+                .as_ref()
+                .and_then(|eksen| eksen.ad.as_deref()),
+            Some("calcium")
+        );
+        assert_eq!(
+            değişmiş
+                .x_ekseni
+                .as_ref()
+                .and_then(|eksen| eksen.ad.as_deref()),
+            Some("fat")
+        );
+        assert_eq!(
+            değişmiş
+                .y_ekseni
+                .as_ref()
+                .and_then(|eksen| eksen.ad.as_deref()),
+            Some("fiber")
+        );
+        assert_eq!(başlangıç.görsel_eşlemeler.len(), 2);
+        assert_eq!(başlangıç.görsel_eşlemeler[0].kategoriler.len(), 25);
+        assert!(!başlangıç.görsel_eşlemeler[0].gerçek_zamanlı);
+        assert_eq!(
+            başlangıç.görsel_eşlemeler[0].renkler[0],
+            Renk::onaltılık(0xdf5a5a)
+        );
+        assert_eq!(
+            başlangıç.görsel_eşlemeler[0].renkler[24],
+            Renk::onaltılık(0xdf5ac4)
+        );
+        let Some(Seri::Saçılım(seri)) = başlangıç.seriler.first() else {
+            panic!("scatter serisi bekleniyordu");
+        };
+        assert_eq!(seri.veri.len(), 1_000);
+        assert_eq!(seri.animasyon_eşiği, 5_000);
+        assert_eq!(seri.aşamalı_eşiği, 5_000);
+        assert_eq!(seri.z_seviyesi, 1);
+        assert_eq!(
+            seri.veri[0].boyut("group"),
+            Some(&"Dairy and Egg Products".into())
+        );
+        assert_eq!(
+            seri.veri[0].boyut("index").and_then(VeriDeğeri::sayı),
+            Some(0.0)
+        );
+        assert_eq!(değişmiş.seriler.len(), 2);
+        assert_eq!(
+            değişmiş.seriler[1].veri()[0].değer,
+            VeriDeğeri::Çift([1.4, 0.4])
+        );
     }
 }
 
@@ -8128,6 +8377,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-symbol-morph" => scatter_symbol_morph(durum),
         "scatter-large" => Ok(scatter_large()),
         "scatter-nebula" => scatter_nebula(),
+        "scatter-nutrients" => scatter_nutrients(durum),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),

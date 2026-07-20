@@ -170,6 +170,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-symbol-morph': 'examples/uyum_fixture.rs#scatter_symbol_morph',
   'scatter-large': 'examples/uyum_fixture.rs#scatter_large',
   'scatter-nebula': 'examples/uyum_fixture.rs#scatter_nebula',
+  'scatter-nutrients': 'examples/uyum_fixture.rs#scatter_nutrients',
   'scatter-stream-visual': 'examples/uyum_fixture.rs#scatter_stream_visual',
   'scatter-painter-choice': 'examples/uyum_fixture.rs#scatter_painter_choice',
   'scatter-clustering': 'examples/uyum_fixture.rs#scatter_clustering',
@@ -517,6 +518,18 @@ function varsayılanlarıTopla(kaynakDosya) {
 }
 
 function rustKarşılığı(kök, özellik) {
+  if (kök.toLowerCase() === 'visualmap' && özellik === 'categories') {
+    return { api: 'src/model/gorsel_esleme.rs (GörselEşleme::kategoriler)', durum: 'kısmi' };
+  }
+  if (kök.toLowerCase() === 'visualmap' && özellik === 'dimension') {
+    return { api: 'src/model/gorsel_esleme.rs (GörselEşleme::boyut)', durum: 'kısmi' };
+  }
+  if (kök.toLowerCase() === 'visualmap' && özellik === 'realtime') {
+    return { api: 'src/model/gorsel_esleme.rs (GörselEşleme::gerçek_zamanlı)', durum: 'kısmi' };
+  }
+  if (kök === 'animation' && özellik === 'animationThreshold') {
+    return { api: 'src/model/seri.rs (SaçılımSerisi::animasyon_eşiği)', durum: 'kısmi' };
+  }
   if (kök.toLowerCase() === 'datazoom' && özellik === 'handleIcon') {
     return { api: 'src/model/yakinlastirma.rs (VeriYakınlaştırma::tutamaç_simgesi)', durum: 'kısmi' };
   }
