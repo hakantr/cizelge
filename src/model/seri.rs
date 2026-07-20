@@ -1266,6 +1266,11 @@ impl MumSerisi {
         self.imleyiciler.çizgi = Some(im);
         self
     }
+
+    pub fn im_noktası(mut self, im: İmNoktası) -> Self {
+        self.imleyiciler.nokta = Some(im);
+        self
+    }
 }
 
 /// Kutu serisi (`series-boxplot`). Veri öğeleri

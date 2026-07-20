@@ -11,6 +11,7 @@ use crate::model::imleyici::{
 };
 use crate::model::seri::Seri;
 use crate::model::stil::{Etiket, YazıDikeyHizası, YazıYatayHizası};
+use crate::model::veri_kumesi::BoyutSeçici;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::{binlik_ayır, ondalık_kırp};
@@ -68,53 +69,180 @@ fn im_alanı_değeri_çöz(değer: İmAlanıDeğeri, kapsam: [f64; 2]) -> f64 {
     }
 }
 
-/// Serinin sonlu sayısal değerleri.
-fn değerler(seri: &Seri) -> Vec<f64> {
+/// Bir veri öğesinden marker `valueDim` değerini çözer. Mum ve kutu
+/// serilerinin adlandırılmış yerleşik boyutları, dataset kullanılmadan
+/// doğrudan çoklu dizi verisi verildiğinde de erişilebilir kalır.
+fn marker_boyut_değeri(
+    seri: &Seri,
+    öğe: &crate::model::deger::VeriÖğesi,
+    boyut: Option<&BoyutSeçici>,
+) -> Option<f64> {
+    let Some(boyut) = boyut else {
+        return öğe.değer.sayı();
+    };
+    match boyut {
+        BoyutSeçici::Sıra(sıra) => match &öğe.değer {
+            VeriDeğeri::Dizi(değerler) => değerler.get(*sıra).copied(),
+            VeriDeğeri::Çift(değerler) => değerler.get(*sıra).copied(),
+            _ if *sıra == 0 => öğe.değer.sayı(),
+            _ => None,
+        },
+        BoyutSeçici::Ad(ad) => {
+            if let Some(değer) = öğe.boyut(ad).and_then(VeriDeğeri::sayı) {
+                return Some(değer);
+            }
+            let sıra = match seri {
+                Seri::Mum(_) => match ad.as_str() {
+                    "open" => Some(0),
+                    "close" => Some(1),
+                    "lowest" | "low" => Some(2),
+                    "highest" | "high" => Some(3),
+                    _ => None,
+                },
+                Seri::Kutu(_) => match ad.to_ascii_lowercase().as_str() {
+                    "min" | "lowest" => Some(0),
+                    "q1" => Some(1),
+                    "median" => Some(2),
+                    "q3" => Some(3),
+                    "max" | "highest" => Some(4),
+                    _ => None,
+                },
+                _ => match ad.as_str() {
+                    "x" => Some(0),
+                    "y" => Some(1),
+                    _ => None,
+                },
+            }?;
+            match &öğe.değer {
+                VeriDeğeri::Dizi(değerler) => değerler.get(sıra).copied(),
+                VeriDeğeri::Çift(değerler) => değerler.get(sıra).copied(),
+                _ => None,
+            }
+        }
+    }
+}
+
+/// dataZoom `filter` sonrasında marker istatistiğinde kalan veri öğeleri.
+fn marker_değerleri(
+    seri: &Seri,
+    boyut: Option<&BoyutSeçici>,
+    kartezyen: &Kartezyen2B,
+) -> Vec<(usize, f64)> {
     seri.veri()
         .iter()
-        .filter_map(|ö| ö.değer.sayı())
-        .filter(|d| d.is_finite())
+        .enumerate()
+        .filter(|(sıra, öğe)| {
+            if kartezyen.x.ölçek.kategorik_mi() {
+                kartezyen.x.veri_penceresinde_mi(*sıra as f64)
+            } else if kartezyen.y.ölçek.kategorik_mi() {
+                kartezyen.y.veri_penceresinde_mi(*sıra as f64)
+            } else {
+                öğe
+                    .değer
+                    .x()
+                    .is_none_or(|x| kartezyen.x.veri_penceresinde_mi(x))
+            }
+        })
+        .filter_map(|(sıra, öğe)| {
+            marker_boyut_değeri(seri, öğe, boyut)
+                .filter(|değer| değer.is_finite())
+                .map(|değer| (sıra, değer))
+        })
         .collect()
 }
 
-/// İm değerini seriye göre çözer; veri yoksa `None`.
-fn değer_çöz(değer: İmDeğeri, seri: &Seri) -> Option<f64> {
+/// İm değerini seriye ve seçili boyuta göre çözer; veri yoksa `None`.
+fn değer_çöz(
+    değer: İmDeğeri,
+    seri: &Seri,
+    boyut: Option<&BoyutSeçici>,
+    kartezyen: &Kartezyen2B,
+) -> Option<f64> {
     match değer {
         İmDeğeri::Değer(d) => d.is_finite().then_some(d),
         İmDeğeri::Ortalama => {
-            let d = değerler(seri);
-            if d.is_empty() {
+            let değerler = marker_değerleri(seri, boyut, kartezyen);
+            if değerler.is_empty() {
                 None
             } else {
-                Some(d.iter().sum::<f64>() / d.len() as f64)
+                Some(değerler.iter().map(|(_, değer)| değer).sum::<f64>() / değerler.len() as f64)
             }
         }
-        İmDeğeri::EnKüçük => değerler(seri).into_iter().reduce(f64::min),
-        İmDeğeri::EnBüyük => değerler(seri).into_iter().reduce(f64::max),
+        İmDeğeri::EnKüçük => marker_değerleri(seri, boyut, kartezyen)
+            .into_iter()
+            .map(|(_, değer)| değer)
+            .reduce(f64::min),
+        İmDeğeri::EnBüyük => marker_değerleri(seri, boyut, kartezyen)
+            .into_iter()
+            .map(|(_, değer)| değer)
+            .reduce(f64::max),
     }
 }
 
 /// İstatistiğin denk geldiği veri sırası (im noktası x konumu için).
-fn değer_sırası(değer: İmDeğeri, seri: &Seri) -> Option<usize> {
-    let hedef = değer_çöz(değer, seri)?;
+fn değer_sırası(
+    değer: İmDeğeri,
+    seri: &Seri,
+    boyut: Option<&BoyutSeçici>,
+    kartezyen: &Kartezyen2B,
+) -> Option<usize> {
+    let değerler = marker_değerleri(seri, boyut, kartezyen);
+    let hedef = değer_çöz(değer, seri, boyut, kartezyen)?;
     match değer {
+        // `SeriesModel.indicesOfNearest`, ortalama hedefini değer ekseninin
+        // piksel uzayında en yakın gerçek veri öğesine oturtur. Eşit
+        // uzaklıkta `targetCoord - dataCoord >= 0` olan tarafı seçer.
         İmDeğeri::Ortalama => {
-            let sayaç = seri
-                .veri()
-                .iter()
-                .filter(|ö| ö.değer.sayı().is_some())
-                .count();
-            (sayaç > 0).then_some(sayaç / 2)
+            let değer_ekseni = if kartezyen.x.ölçek.kategorik_mi() {
+                &kartezyen.y
+            } else if kartezyen.y.ölçek.kategorik_mi() {
+                &kartezyen.x
+            } else {
+                match boyut {
+                    Some(BoyutSeçici::Ad(ad)) if ad == "x" => &kartezyen.x,
+                    _ => &kartezyen.y,
+                }
+            };
+            let hedef_koordinatı = değer_ekseni.veriden_piksele(hedef);
+            let mut en_yakın = None::<(usize, f32, f32)>;
+            for (sıra, aday) in değerler {
+                let fark = hedef_koordinatı - değer_ekseni.veriden_piksele(aday);
+                let uzaklık = fark.abs();
+                let daha_yakın = en_yakın.is_none_or(|(_, en_az, eski_fark)| {
+                    uzaklık < en_az - 1e-4
+                        || ((uzaklık - en_az).abs() <= 1e-4 && fark >= 0.0 && eski_fark < 0.0)
+                });
+                if daha_yakın {
+                    en_yakın = Some((sıra, uzaklık, fark));
+                }
+            }
+            en_yakın.map(|(sıra, _, _)| sıra)
         }
-        _ => seri
-            .veri()
-            .iter()
-            .position(|ö| ö.değer.sayı().map(|d| d == hedef).unwrap_or(false)),
+        _ => değerler
+            .into_iter()
+            .find_map(|(sıra, değer)| (değer == hedef).then_some(sıra)),
     }
+}
+
+/// `markPoint` ve istatistik uçlu `markLine`, hesaplanan ortalama yerine
+/// bu ortalamaya en yakın gerçek öğenin koordinatını ve değerini taşır.
+fn istatistik_noktası_çöz(
+    değer: İmDeğeri,
+    seri: &Seri,
+    boyut: Option<&BoyutSeçici>,
+    kartezyen: &Kartezyen2B,
+) -> Option<(usize, f64)> {
+    let sıra = değer_sırası(değer, seri, boyut, kartezyen)?;
+    let nokta_değeri = match değer {
+        İmDeğeri::Değer(değer) => değer,
+        _ => marker_boyut_değeri(seri, seri.veri().get(sıra)?, boyut)?,
+    };
+    Some((sıra, nokta_değeri))
 }
 
 fn çizgi_ucu_çöz(
     uç: İmÇizgisiUcu,
+    boyut: Option<&BoyutSeçici>,
     seri: &Seri,
     kartezyen: &Kartezyen2B,
     kategori_kaydırması: f32,
@@ -130,8 +258,7 @@ fn çizgi_ucu_çöz(
             Some((nokta, y))
         }
         İmÇizgisiUcu::İstatistik(istatistik) => {
-            let sıra = değer_sırası(istatistik, seri)?;
-            let değer = değer_çöz(istatistik, seri)?;
+            let (sıra, değer) = istatistik_noktası_çöz(istatistik, seri, boyut, kartezyen)?;
             let nokta = if kartezyen.x.ölçek.kategorik_mi() {
                 let mut nokta = kartezyen.nokta(sıra as f64, değer);
                 nokta.0 += kategori_kaydırması;
@@ -190,6 +317,7 @@ fn im_okunu_çiz(
 fn im_uç_simgesini_çiz(
     yüzey: &mut dyn ÇizimYüzeyi,
     simge: İmÇizgisiUçSimgesi,
+    boyut: f32,
     uç: (f32, f32),
     karşı_uç: (f32, f32),
     renk: Renk,
@@ -197,7 +325,7 @@ fn im_uç_simgesini_çiz(
     match simge {
         İmÇizgisiUçSimgesi::Yok => {}
         İmÇizgisiUçSimgesi::Daire => {
-            yüzey.daire(uç, 4.0, Some(&Dolgu::Düz(renk)), None);
+            yüzey.daire(uç, boyut / 2.0, Some(&Dolgu::Düz(renk)), None);
         }
         İmÇizgisiUçSimgesi::Ok => im_okunu_çiz(yüzey, karşı_uç, uç, renk),
     }
@@ -590,14 +718,22 @@ pub fn im_çizgi_ve_noktalarını_çiz(
     if let Some(çizgi_imi) = &imleyiciler.çizgi {
         let renk = çizgi_imi.stil.renk.unwrap_or(seri_rengi);
         for parça in &çizgi_imi.parçalar {
-            let Some((başlangıç, başlangıç_değeri)) =
-                çizgi_ucu_çöz(parça.başlangıç, seri, kartezyen, kategori_kaydırması)
-            else {
+            let Some((başlangıç, başlangıç_değeri)) = çizgi_ucu_çöz(
+                parça.başlangıç,
+                parça.başlangıç_değer_boyutu.as_ref(),
+                seri,
+                kartezyen,
+                kategori_kaydırması,
+            ) else {
                 continue;
             };
-            let Some((bitiş, _)) =
-                çizgi_ucu_çöz(parça.bitiş, seri, kartezyen, kategori_kaydırması)
-            else {
+            let Some((bitiş, _)) = çizgi_ucu_çöz(
+                parça.bitiş,
+                parça.bitiş_değer_boyutu.as_ref(),
+                seri,
+                kartezyen,
+                kategori_kaydırması,
+            ) else {
                 continue;
             };
             let renk = renk.opaklık(çizgi_imi.stil.opaklık);
@@ -608,8 +744,22 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                 renk,
                 çizgi_imi.stil.tür,
             );
-            im_uç_simgesini_çiz(yüzey, parça.başlangıç_simgesi, başlangıç, bitiş, renk);
-            im_uç_simgesini_çiz(yüzey, parça.bitiş_simgesi, bitiş, başlangıç, renk);
+            im_uç_simgesini_çiz(
+                yüzey,
+                parça.başlangıç_simgesi,
+                parça.başlangıç_simge_boyutu,
+                başlangıç,
+                bitiş,
+                renk,
+            );
+            im_uç_simgesini_çiz(
+                yüzey,
+                parça.bitiş_simgesi,
+                parça.bitiş_simge_boyutu,
+                bitiş,
+                başlangıç,
+                renk,
+            );
             let etiket = im_çizgisi_etiketini_çöz(çizgi_imi, parça.etiket.as_ref());
             let ham = ondalık_kırp(başlangıç_değeri);
             let metin = im_çizgisi_etiket_metni(
@@ -623,7 +773,9 @@ pub fn im_çizgi_ve_noktalarını_çiz(
             im_çizgisi_etiketini_çiz(yüzey, başlangıç, bitiş, &metin, &etiket);
         }
         for tanım in &çizgi_imi.veri {
-            let Some(değer) = değer_çöz(tanım.değer, seri) else {
+            let Some(değer) =
+                değer_çöz(tanım.değer, seri, tanım.değer_boyutu.as_ref(), kartezyen)
+            else {
                 continue;
             };
             let biçimli_değer = binlik_ayır(yuvarla(değer, 2));
@@ -655,6 +807,7 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.başlangıç_simgesi,
+                        8.0,
                         im_başlangıcı,
                         im_bitişi,
                         uç_rengi,
@@ -662,6 +815,7 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.bitiş_simgesi,
+                        8.0,
                         im_bitişi,
                         im_başlangıcı,
                         uç_rengi,
@@ -692,6 +846,7 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.başlangıç_simgesi,
+                        8.0,
                         im_başlangıcı,
                         im_bitişi,
                         uç_rengi,
@@ -699,6 +854,7 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                     im_uç_simgesini_çiz(
                         yüzey,
                         çizgi_imi.bitiş_simgesi,
+                        8.0,
                         im_bitişi,
                         im_başlangıcı,
                         uç_rengi,
@@ -722,13 +878,19 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                 (Some((x, y)), değer) => (
                     x,
                     y,
-                    değer.and_then(|değer| değer_çöz(değer, seri)).unwrap_or(y),
+                    değer
+                        .and_then(|değer| {
+                            değer_çöz(değer, seri, tanım.değer_boyutu.as_ref(), kartezyen)
+                        })
+                        .unwrap_or(y),
                 ),
                 (None, Some(değer)) => {
-                    let Some(sıra) = değer_sırası(değer, seri) else {
-                        continue;
-                    };
-                    let Some(y) = değer_çöz(değer, seri) else {
+                    let Some((sıra, y)) = istatistik_noktası_çöz(
+                        değer,
+                        seri,
+                        tanım.değer_boyutu.as_ref(),
+                        kartezyen,
+                    ) else {
                         continue;
                     };
                     let x = seri
@@ -749,12 +911,39 @@ pub fn im_çizgi_ve_noktalarını_çiz(
             } else if kartezyen.y.ölçek.kategorik_mi() {
                 y += kategori_kaydırması;
             }
+            let renk = tanım
+                .stil
+                .as_ref()
+                .and_then(|stil| stil.renk.as_ref())
+                .map(Dolgu::temsilî)
+                .unwrap_or(seri_rengi)
+                .opaklık(
+                    tanım
+                        .stil
+                        .as_ref()
+                        .and_then(|stil| stil.opaklık)
+                        .unwrap_or(1.0),
+                );
+            let ham_metin = binlik_ayır(etiket_değeri);
+            let metin = nokta_imi
+                .etiket
+                .biçimleyici
+                .as_ref()
+                .map(|biçimleyici| {
+                    biçimleyici.uygula_bağlamla(
+                        etiket_değeri,
+                        &ham_metin,
+                        seri.ad().unwrap_or_default(),
+                        tanım.ad.as_deref().unwrap_or_default(),
+                    )
+                })
+                .unwrap_or(ham_metin);
             raptiye_çiz(
                 yüzey,
                 (x, y),
-                nokta_imi.boyut,
-                seri_rengi,
-                &binlik_ayır(etiket_değeri),
+                tanım.boyut.unwrap_or(nokta_imi.boyut),
+                renk,
+                &metin,
                 nokta_imi,
             );
         }
@@ -845,9 +1034,10 @@ mod testler {
     use crate::koordinat::ÇalışmaEkseni;
     use crate::model::eksen::{Eksen, EksenKonumu};
     use crate::model::imleyici::{İmAlanı, İmÇizgisiTanımı};
-    use crate::model::seri::SaçılımSerisi;
+    use crate::model::seri::{MumSerisi, SaçılımSerisi};
     use crate::model::stil::{YazıStili, ÇizgiTürü, ÖğeStili};
-    use crate::olcek::{AralıkÖlçeği, Ölçek};
+    use crate::model::yakinlastirma::YakınlaştırmaSüzmeKipi;
+    use crate::olcek::{AralıkÖlçeği, KategorikÖlçek, Ölçek};
 
     fn yakın(sol: f32, sağ: f32) {
         assert!((sol - sağ).abs() < 1e-3, "{sol} != {sağ}");
@@ -876,6 +1066,59 @@ mod testler {
             y: değer_ekseni([0.0, 100.0], [100.0, 0.0], EksenKonumu::Sol),
             alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
         }
+    }
+
+    #[test]
+    fn mum_marker_value_dim_istatistigi_datazoom_penceresini_izler() {
+        let mut x = ÇalışmaEkseni::yeni(
+            Eksen::kategori(),
+            Ölçek::Kategorik(KategorikÖlçek::yeni(
+                ["A", "B", "C", "D"].map(str::to_owned).to_vec(),
+            )),
+            [0.0, 100.0],
+            EksenKonumu::Alt,
+        );
+        x.değer_penceresi_uygula(2.0, 3.0);
+        x.yakınlaştırma_süzme_kipi = YakınlaştırmaSüzmeKipi::Süz;
+        let kartezyen = Kartezyen2B {
+            x,
+            y: değer_ekseni([0.0, 120.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+        let seri = Seri::Mum(MumSerisi::yeni().veri([
+            [8.0, 10.0, 5.0, 100.0],
+            [18.0, 20.0, 4.0, 90.0],
+            [28.0, 30.0, 2.0, 40.0],
+            [38.0, 40.0, 1.0, 50.0],
+        ]));
+        let highest = BoyutSeçici::ad("highest");
+        let lowest = BoyutSeçici::ad("lowest");
+        let close = BoyutSeçici::ad("close");
+
+        assert_eq!(
+            değer_çöz(İmDeğeri::EnBüyük, &seri, Some(&highest), &kartezyen),
+            Some(50.0)
+        );
+        assert_eq!(
+            değer_sırası(İmDeğeri::EnBüyük, &seri, Some(&highest), &kartezyen),
+            Some(3)
+        );
+        assert_eq!(
+            değer_çöz(İmDeğeri::EnKüçük, &seri, Some(&lowest), &kartezyen),
+            Some(1.0)
+        );
+        assert_eq!(
+            değer_çöz(İmDeğeri::Ortalama, &seri, Some(&close), &kartezyen),
+            Some(35.0)
+        );
+        assert_eq!(
+            değer_sırası(İmDeğeri::Ortalama, &seri, Some(&close), &kartezyen),
+            Some(3)
+        );
+        assert_eq!(
+            istatistik_noktası_çöz(İmDeğeri::Ortalama, &seri, Some(&close), &kartezyen),
+            Some((3, 40.0))
+        );
     }
 
     #[test]

@@ -977,6 +977,12 @@ fn gösterge_öğeleri(
                         .unwrap_or(if saçılım.efektli { 1.0 } else { 0.8 }),
                     _ => 1.0,
                 };
+                let kenarlık = match seri {
+                    Seri::Mum(mum) if mum.kenarlık_kalınlığı > 0.0 => {
+                        Some((mum.kenarlık_kalınlığı, mum.yükselen_kenarlık_rengi))
+                    }
+                    _ => None,
+                };
                 öğeler.push(GöstergeÖğesi {
                     kapalı: kapalı.contains(&ad),
                     ad,
@@ -985,7 +991,7 @@ fn gösterge_öğeleri(
                     simge,
                     çizgi_kalınlığı,
                     çizgi_sembolü,
-                    kenarlık: None,
+                    kenarlık,
                 });
             }
         }
@@ -1861,6 +1867,26 @@ fn kartezyen_kur(
 
     // Çalışma eksenleri: piksel aralıkları kendi ızgarasından; konum, aynı
     // ızgaradaki sırasına göre (x: Alt→Üst, y: Sol→Sağ).
+    // ECharts 6 `createBandWidthBasedAxisContainShapeHandler`, boundaryGap
+    // kapalı kategori ekseninde sütun/kutu/mum gövdesinin kırpılmaması için
+    // eşleme kapsamını iki uçta yarım veri bandı genişletir.
+    let bant_şeklini_kapsar = |x_ekseni_mi: bool, eksen_sırası: usize| {
+        seçenekler
+            .seriler
+            .iter()
+            .zip(&görünürler)
+            .any(|(seri, görünür)| {
+                if !*görünür || !matches!(seri, Seri::Sütun(_) | Seri::Mum(_) | Seri::Kutu(_)) {
+                    return false;
+                }
+                let bağ = seri.eksen_bağı();
+                if x_ekseni_mi {
+                    bağ.x == eksen_sırası
+                } else {
+                    bağ.y == eksen_sırası
+                }
+            })
+    };
     let mut ızgara_x_sayaç = vec![0usize; ızgara_sayısı];
     let x_eksenler: Vec<ÇalışmaEkseni> = x_seçenekler
         .iter()
@@ -1922,7 +1948,16 @@ fn kartezyen_kur(
                     eksen.yakınlaştırma_süzme_kipi = yakınlaştırma.süzme_kipi;
                 }
                 if seçenek.tür == EksenTürü::Kategori {
-                    eksen.değer_penceresi_uygula(p0.round(), p1.round());
+                    let kapsama_payı = if !seçenek.bantlı_mı() && bant_şeklini_kapsar(true, xi)
+                    {
+                        0.5
+                    } else {
+                        0.0
+                    };
+                    eksen.değer_penceresi_uygula(
+                        p0.round() - kapsama_payı,
+                        p1.round() + kapsama_payı,
+                    );
                 } else {
                     let ölçek_kapsamı = eksen.ölçek.kapsam();
                     eksen.değer_penceresi_uygula(ölçek_kapsamı[0], ölçek_kapsamı[1]);
@@ -1986,7 +2021,16 @@ fn kartezyen_kur(
                     eksen.yakınlaştırma_süzme_kipi = yakınlaştırma.süzme_kipi;
                 }
                 if seçenek.tür == EksenTürü::Kategori {
-                    eksen.değer_penceresi_uygula(p0.round(), p1.round());
+                    let kapsama_payı = if !seçenek.bantlı_mı() && bant_şeklini_kapsar(false, yi)
+                    {
+                        0.5
+                    } else {
+                        0.0
+                    };
+                    eksen.değer_penceresi_uygula(
+                        p0.round() - kapsama_payı,
+                        p1.round() + kapsama_payı,
+                    );
                 } else {
                     let ölçek_kapsamı = eksen.ölçek.kapsam();
                     eksen.değer_penceresi_uygula(ölçek_kapsamı[0], ölçek_kapsamı[1]);
@@ -5283,6 +5327,52 @@ mod yakınlaştırma_yönü_testleri {
                 .contains("çiz #8292cc@1.0 k=0.5 düz | T(22.8,190.9) Ç(82.8,172.1) Ç(142.8,190.9)"),
             "{döküm}"
         );
+    }
+
+    #[test]
+    fn boundary_gap_kapali_mum_datazoom_eslemesini_yarim_bant_genisletir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni(
+                Eksen::kategori()
+                    .veri(["A", "B", "C", "D"])
+                    .kenar_boşluğu(false),
+            )
+            .y_ekseni(Eksen::değer())
+            .veri_yakınlaştırma(
+                crate::model::yakinlastirma::VeriYakınlaştırma::iç().aralık(50.0, 100.0),
+            )
+            .seri(crate::model::seri::MumSerisi::yeni().veri([
+                [1.0, 2.0, 0.0, 3.0],
+                [2.0, 3.0, 1.0, 4.0],
+                [3.0, 4.0, 2.0, 5.0],
+                [4.0, 5.0, 3.0, 6.0],
+            ]));
+        let yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let kurulum = kartezyen_kur(&yüzey, &seçenekler, &HashSet::new())
+            .expect("kartezyen kurulum üretilmeli");
+        let eksen = &kurulum.x_eksenler[0];
+
+        assert_eq!(eksen.pencere, Some((1.5, 3.5)));
+        assert!(!eksen.veri_penceresinde_mi(1.0));
+        assert!(eksen.veri_penceresinde_mi(2.0));
+    }
+
+    #[test]
+    fn mum_gosterge_simgesi_yukselen_kenarligini_tasir() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(
+            crate::model::seri::MumSerisi::yeni()
+                .ad("日K")
+                .yükselen_renk(0xec0000)
+                .yükselen_kenarlık_rengi(0x8a0000)
+                .veri([[1.0, 2.0, 0.0, 3.0]]),
+        );
+
+        let öğeler = gösterge_öğeleri(&seçenekler, &HashSet::new());
+
+        assert_eq!(öğeler.len(), 1);
+        assert_eq!(öğeler[0].renk, Renk::onaltılık(0xec0000));
+        assert_eq!(öğeler[0].kenarlık, Some((1.0, Renk::onaltılık(0x8a0000))));
     }
 
     #[test]

@@ -68,6 +68,13 @@ pub fn gösterge_çiz(
     } else {
         seçenek.simge_yüksekliği.max(boyut)
     };
+    // Box layout, aynı satırdaki öğeleri en fazla itemStyle kenarlık
+    // taşmasının oluşturduğu ortak görünen sınıra göre hizalar. Mum
+    // ile çizgi birlikteyken bu değer öntanımlı 1 px kenarlığın yarısıdır.
+    let satır_dikey_taşması = öğeler
+        .iter()
+        .filter_map(|öğe| öğe.kenarlık.map(|(kalınlık, _)| kalınlık / 2.0))
+        .fold(0.0_f32, f32::max);
     let görünen_adlar: Vec<String> = öğeler
         .iter()
         .map(|öğe| {
@@ -207,7 +214,15 @@ pub fn gösterge_çiz(
             .take(s_uzunluk)
         {
             let kutu = Dikdörtgen::yeni(x, üst, *genişlik, satır_yüksekliği);
-            öğe_çiz(çizici, seçenek, öğe, görünen_ad, kutu, boyut);
+            öğe_çiz(
+                çizici,
+                seçenek,
+                öğe,
+                görünen_ad,
+                kutu,
+                boyut,
+                satır_dikey_taşması,
+            );
             kutular.push((kutu, öğe.ad.clone()));
             x += genişlik + seçenek.öğe_boşluğu;
         }
@@ -291,7 +306,15 @@ pub fn gösterge_çiz(
             {
                 let y = üst + yerel_sıra as f32 * adım;
                 let kutu = Dikdörtgen::yeni(x, y, *genişlik, satır_yüksekliği);
-                öğe_çiz(yüzey, seçenek, öğe, görünen_ad, kutu, boyut);
+                öğe_çiz(
+                    yüzey,
+                    seçenek,
+                    öğe,
+                    görünen_ad,
+                    kutu,
+                    boyut,
+                    satır_dikey_taşması,
+                );
                 kutular.push((kutu, öğe.ad.clone()));
             }
         });
@@ -382,7 +405,15 @@ pub fn gösterge_çiz(
                         continue;
                     };
                     let kutu = Dikdörtgen::yeni(x, y, *genişlik, satır_yüksekliği);
-                    öğe_çiz(çizici, seçenek, öğe, görünen_ad, kutu, boyut);
+                    öğe_çiz(
+                        çizici,
+                        seçenek,
+                        öğe,
+                        görünen_ad,
+                        kutu,
+                        boyut,
+                        satır_dikey_taşması,
+                    );
                     kutular.push((kutu, öğe.ad.clone()));
                     x += genişlik + seçenek.öğe_boşluğu;
                 }
@@ -395,7 +426,15 @@ pub fn gösterge_çiz(
             for ((öğe, görünen_ad), genişlik) in öğeler.iter().zip(&görünen_adlar).zip(&genişlikler)
             {
                 let kutu = Dikdörtgen::yeni(x, y, *genişlik, satır_yüksekliği);
-                öğe_çiz(çizici, seçenek, öğe, görünen_ad, kutu, boyut);
+                öğe_çiz(
+                    çizici,
+                    seçenek,
+                    öğe,
+                    görünen_ad,
+                    kutu,
+                    boyut,
+                    satır_dikey_taşması,
+                );
                 kutular.push((kutu, öğe.ad.clone()));
                 y += satır_yüksekliği + seçenek.öğe_boşluğu;
             }
@@ -455,6 +494,7 @@ fn öğe_çiz(
     görünen_ad: &str,
     kutu: Dikdörtgen,
     yazı_boyutu: f32,
+    satır_dikey_taşması: f32,
 ) {
     let renk = if öğe.kapalı {
         seçenek.devre_dışı_rengi
@@ -485,7 +525,7 @@ fn öğe_çiz(
     let simge_x = içerik_x - daire_iç_boşluğu;
     // Line legend'in sınır kutusu yerel y=0.4'ten başlasa da sembol ve
     // metin tabanının ortak merkezi item koordinatında daima y=7'dir.
-    let orta_y = kutu.y + kenar_taşması + seçenek.simge_yüksekliği / 2.0;
+    let orta_y = kutu.y + satır_dikey_taşması + seçenek.simge_yüksekliği / 2.0;
 
     match simge {
         GöstergeSimgesi::YuvarlakKöşeliKare => {

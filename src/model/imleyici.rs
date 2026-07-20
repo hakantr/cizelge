@@ -5,6 +5,7 @@ use crate::model::stil::{
     Biçimleyici, Etiket, YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü,
     ÖğeStili,
 };
+use crate::model::veri_kumesi::BoyutSeçici;
 
 /// İm değeri: sabit sayı ya da seri verisinden türetilen istatistik
 /// (`markLine.data[i].type: 'average' | 'min' | 'max'`).
@@ -107,6 +108,8 @@ pub struct İmÇizgisiTanımı {
     pub ad: Option<String>,
     pub yön: İmYönü,
     pub değer: İmDeğeri,
+    /// İstatistiğin okunacağı veri boyutu (`valueDim`).
+    pub değer_boyutu: Option<BoyutSeçici>,
     pub etiket: Option<İmÇizgisiEtiketYaması>,
 }
 
@@ -116,6 +119,7 @@ impl İmÇizgisiTanımı {
             ad: None,
             yön,
             değer,
+            değer_boyutu: None,
             etiket: None,
         }
     }
@@ -127,6 +131,11 @@ impl İmÇizgisiTanımı {
 
     pub fn etiket(mut self, etiket: İmÇizgisiEtiketYaması) -> Self {
         self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn değer_boyutu(mut self, boyut: impl Into<BoyutSeçici>) -> Self {
+        self.değer_boyutu = Some(boyut.into());
         self
     }
 }
@@ -155,6 +164,10 @@ pub struct İmÇizgisiParçası {
     pub bitiş: İmÇizgisiUcu,
     pub başlangıç_simgesi: İmÇizgisiUçSimgesi,
     pub bitiş_simgesi: İmÇizgisiUçSimgesi,
+    pub başlangıç_simge_boyutu: f32,
+    pub bitiş_simge_boyutu: f32,
+    pub başlangıç_değer_boyutu: Option<BoyutSeçici>,
+    pub bitiş_değer_boyutu: Option<BoyutSeçici>,
     pub etiket: Option<İmÇizgisiEtiketYaması>,
 }
 
@@ -166,6 +179,10 @@ impl İmÇizgisiParçası {
             bitiş,
             başlangıç_simgesi: İmÇizgisiUçSimgesi::Daire,
             bitiş_simgesi: İmÇizgisiUçSimgesi::Ok,
+            başlangıç_simge_boyutu: 8.0,
+            bitiş_simge_boyutu: 8.0,
+            başlangıç_değer_boyutu: None,
+            bitiş_değer_boyutu: None,
             etiket: None,
         }
     }
@@ -194,6 +211,22 @@ impl İmÇizgisiParçası {
 
     pub fn etiket(mut self, etiket: İmÇizgisiEtiketYaması) -> Self {
         self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn uç_simge_boyutları(mut self, başlangıç: f32, bitiş: f32) -> Self {
+        self.başlangıç_simge_boyutu = başlangıç.max(0.0);
+        self.bitiş_simge_boyutu = bitiş.max(0.0);
+        self
+    }
+
+    pub fn değer_boyutları(
+        mut self,
+        başlangıç: impl Into<BoyutSeçici>,
+        bitiş: impl Into<BoyutSeçici>,
+    ) -> Self {
+        self.başlangıç_değer_boyutu = Some(başlangıç.into());
+        self.bitiş_değer_boyutu = Some(bitiş.into());
         self
     }
 }
@@ -336,6 +369,61 @@ pub struct İmNoktasıTanımı {
     /// `koordinat` ile doğrudan `(x, y)`.
     pub değer: Option<İmDeğeri>,
     pub koordinat: Option<(f64, f64)>,
+    /// İstatistiğin okunacağı veri boyutu (`valueDim`).
+    pub değer_boyutu: Option<BoyutSeçici>,
+    /// Öğeye özgü `itemStyle`.
+    pub stil: Option<ÖğeStili>,
+    /// Öğeye özgü `symbolSize`.
+    pub boyut: Option<f32>,
+}
+
+impl İmNoktasıTanımı {
+    pub fn istatistik(değer: İmDeğeri) -> Self {
+        Self {
+            ad: None,
+            değer: Some(değer),
+            koordinat: None,
+            değer_boyutu: None,
+            stil: None,
+            boyut: None,
+        }
+    }
+
+    pub fn koordinat(x: f64, y: f64) -> Self {
+        Self {
+            ad: None,
+            değer: None,
+            koordinat: Some((x, y)),
+            değer_boyutu: None,
+            stil: None,
+            boyut: None,
+        }
+    }
+
+    pub fn ad(mut self, ad: impl Into<String>) -> Self {
+        self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn gösterilen_değer(mut self, değer: f64) -> Self {
+        self.değer = Some(İmDeğeri::Değer(değer));
+        self
+    }
+
+    pub fn değer_boyutu(mut self, boyut: impl Into<BoyutSeçici>) -> Self {
+        self.değer_boyutu = Some(boyut.into());
+        self
+    }
+
+    pub fn stil(mut self, stil: ÖğeStili) -> Self {
+        self.stil = Some(stil);
+        self
+    }
+
+    pub fn boyut(mut self, boyut: f32) -> Self {
+        self.boyut = Some(boyut.max(0.0));
+        self
+    }
 }
 
 /// İm noktası (`markPoint`): raptiye biçimli değer vurguları.
@@ -375,6 +463,9 @@ impl İmNoktası {
             ad: Some("En Büyük".to_string()),
             değer: Some(İmDeğeri::EnBüyük),
             koordinat: None,
+            değer_boyutu: None,
+            stil: None,
+            boyut: None,
         });
         self
     }
@@ -385,6 +476,9 @@ impl İmNoktası {
             ad: Some("En Küçük".to_string()),
             değer: Some(İmDeğeri::EnKüçük),
             koordinat: None,
+            değer_boyutu: None,
+            stil: None,
+            boyut: None,
         });
         self
     }
@@ -395,6 +489,9 @@ impl İmNoktası {
             ad: None,
             değer: None,
             koordinat: Some((x, y)),
+            değer_boyutu: None,
+            stil: None,
+            boyut: None,
         });
         self
     }
@@ -412,7 +509,21 @@ impl İmNoktası {
             ad: Some(ad.into()),
             değer: Some(İmDeğeri::Değer(değer)),
             koordinat: Some((x, y)),
+            değer_boyutu: None,
+            stil: None,
+            boyut: None,
         });
+        self
+    }
+
+    pub fn tanım(mut self, tanım: İmNoktasıTanımı) -> Self {
+        self.veri.push(tanım);
+        self
+    }
+
+    pub fn istatistik(mut self, değer: İmDeğeri, boyut: impl Into<BoyutSeçici>) -> Self {
+        self.veri
+            .push(İmNoktasıTanımı::istatistik(değer).değer_boyutu(boyut));
         self
     }
 

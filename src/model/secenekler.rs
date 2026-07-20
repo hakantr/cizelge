@@ -778,6 +778,13 @@ impl GrafikSeçenekleri {
 
     /// Serinin paletten çözülen rengi (`itemStyle.color` öncelikli).
     pub fn seri_rengi(&self, sıra: usize) -> Renk {
+        // Candlestick'in iki yönlü itemStyle'ı tek bir `Dolgu` alanında
+        // tutulmaz; ECharts palette görevi yine de açık `color`ı seri
+        // rengi sayar. Legend/marker rengi yükselen renk olur ve bu seri
+        // sonraki çizgi serilerinin palet sırasını tüketmez.
+        if let Some(Seri::Mum(mum)) = self.seriler.get(sıra) {
+            return mum.yükselen_renk;
+        }
         if let Some(renk) = self.seriler.get(sıra).and_then(|seri| seri.açık_renk()) {
             return renk.temsilî();
         }
@@ -789,7 +796,7 @@ impl GrafikSeçenekleri {
             .seriler
             .iter()
             .take(sıra.saturating_add(1))
-            .filter(|seri| seri.açık_renk().is_none())
+            .filter(|seri| seri.açık_renk().is_none() && !matches!(seri, Seri::Mum(_)))
             .count()
             .saturating_sub(1);
         self.palet_rengi(palet_sırası)
@@ -1255,6 +1262,20 @@ mod testler {
             )
             .seri(SütunSerisi::yeni().veri([2]));
         assert_eq!(seçenekler.seri_rengi(0), Renk::SAYDAM);
+        assert_eq!(seçenekler.seri_rengi(1), seçenekler.palet_rengi(0));
+    }
+
+    #[test]
+    fn mum_yukselen_rengi_marker_ve_sonraki_seri_paletini_belirler() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .seri(
+                MumSerisi::yeni()
+                    .yükselen_renk(0xec0000)
+                    .veri([[10.0, 20.0, 5.0, 25.0]]),
+            )
+            .seri(ÇizgiSerisi::yeni().veri([20.0]));
+
+        assert_eq!(seçenekler.seri_rengi(0), Renk::onaltılık(0xec0000));
         assert_eq!(seçenekler.seri_rengi(1), seçenekler.palet_rengi(0));
     }
 
