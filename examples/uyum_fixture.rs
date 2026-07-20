@@ -3816,19 +3816,20 @@ fn scatter_jitter_avoid_overlap() -> GrafikSeçenekleri {
         )
 }
 
-fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
-    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../echarts-examples/public/examples/ts/bubble-gradient.ts");
+fn resmi_ülke_saçılım_verisi(kimlik: &str) -> Result<Vec<Vec<VeriÖğesi>>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!(
+        "../echarts-examples/public/examples/ts/{kimlik}.ts"
+    ));
     let kaynak = std::fs::read_to_string(&dosya)
         .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
     let ham: Vec<Vec<Vec<serde_json::Value>>> = resmi_javascript_dizisi(&kaynak, "const data")?;
     if ham.len() != 2 {
         return Err(format!(
-            "{} iki resmi kabarcık veri grubu içermiyor",
+            "{} iki resmi ülke veri grubu içermiyor",
             dosya.display()
         ));
     }
-    let veri_grupları = ham
+    ham
         .into_iter()
         .enumerate()
         .map(|(grup_sırası, grup)| {
@@ -3839,7 +3840,7 @@ fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
                     let sayı = |sıra: usize| {
                         satır.get(sıra).and_then(serde_json::Value::as_f64).ok_or_else(|| {
                             format!(
-                                "bubble-gradient grup {grup_sırası} satır {satır_sırası} boyut {sıra} sayısal değil"
+                                "{kimlik} grup {grup_sırası} satır {satır_sırası} boyut {sıra} sayısal değil"
                             )
                         })
                     };
@@ -3848,7 +3849,7 @@ fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
                         .and_then(serde_json::Value::as_str)
                         .ok_or_else(|| {
                             format!(
-                                "bubble-gradient grup {grup_sırası} satır {satır_sırası} ülke adı değil"
+                                "{kimlik} grup {grup_sırası} satır {satır_sırası} ülke adı değil"
                             )
                         })?;
                     let yıl = sayı(4)?;
@@ -3857,7 +3858,22 @@ fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
                 })
                 .collect::<Result<Vec<_>, String>>()
         })
-        .collect::<Result<Vec<_>, String>>()?;
+        .collect::<Result<Vec<_>, String>>()
+}
+
+fn ülke_kabarcık_boyutu(öğe: &VeriÖğesi) -> f32 {
+    öğe
+        .değer
+        .dizi()
+        .and_then(|değerler| değerler.get(2))
+        .copied()
+        .unwrap_or_default()
+        .sqrt() as f32
+        / 500.0
+}
+
+fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
+    let veri_grupları = resmi_ülke_saçılım_verisi("bubble-gradient")?;
 
     let bölme = BölmeÇizgisi {
         göster: Some(true),
@@ -3868,16 +3884,7 @@ fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
         SaçılımSerisi::yeni()
             .ad(ad)
             .veri(veri)
-            .sembol_boyutu_işlevi(|öğe| {
-                öğe
-                    .değer
-                    .dizi()
-                    .and_then(|değerler| değerler.get(2))
-                    .copied()
-                    .unwrap_or_default()
-                    .sqrt() as f32
-                    / 500.0
-            })
+            .sembol_boyutu_işlevi(ülke_kabarcık_boyutu)
             .öğe_stili(
                 ÖğeStili::yeni()
                     .renk(dolgu)
@@ -3963,6 +3970,82 @@ fn bubble_gradient() -> Result<GrafikSeçenekleri, String> {
             mavi,
             Renk::from("rgba(25, 100, 150, 0.5)"),
         )))
+}
+
+fn scatter_label_align_top() -> Result<GrafikSeçenekleri, String> {
+    let veri = resmi_ülke_saçılım_verisi("scatter-label-align-top")?
+        .into_iter()
+        .next()
+        .ok_or_else(|| "scatter-label-align-top 1990 verisi yok".to_owned())?;
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .x_ekseni(Eksen::değer())
+        .y_ekseni(Eksen::değer().ölçekli(true))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("1990")
+                .veri(veri)
+                .sembol_boyutu_işlevi(ülke_kabarcık_boyutu)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .biçimleyici("{b}")
+                        .en_küçük_boşluk(10.0)
+                        .konum(EtiketKonumu::Üst),
+                )
+                .etiket_çizgisi(
+                    EtiketÇizgisi::yeni()
+                        .uzunluk2(5.0)
+                        .stil(ÇizgiStili::yeni().kalınlık(1.0).renk("#bbb")),
+                )
+                .etiket_yerleşimi(|_| {
+                    EtiketYerleşimSonucu::yeni()
+                        .y(20.0)
+                        .yatay_hiza(YazıYatayHizası::Orta)
+                        .örtüşme_kaydırması(EtiketÖrtüşmeKaydırması::X)
+                        .çakışanı_gizle(true)
+                }),
+        ))
+}
+
+fn scatter_label_align_right() -> Result<GrafikSeçenekleri, String> {
+    let veri = resmi_ülke_saçılım_verisi("scatter-label-align-right")?
+        .into_iter()
+        .next()
+        .ok_or_else(|| "scatter-label-align-right 1990 verisi yok".to_owned())?;
+    let gizli_bölme = BölmeÇizgisi {
+        göster: Some(false),
+        renk: None,
+        tür: ÇizgiTürü::Düz,
+    };
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ızgara(Izgara::yeni().sol(40).sağ(130))
+        .x_ekseni(Eksen::değer().bölme_çizgisi(gizli_bölme.clone()))
+        .y_ekseni(Eksen::değer().ölçekli(true).bölme_çizgisi(gizli_bölme))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("1990")
+                .veri(veri)
+                .sembol_boyutu_işlevi(ülke_kabarcık_boyutu)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .biçimleyici("{b}")
+                        .en_küçük_boşluk(2.0)
+                        .konum(EtiketKonumu::Sağ),
+                )
+                .etiket_çizgisi(
+                    EtiketÇizgisi::yeni()
+                        .uzunluk2(5.0)
+                        .stil(ÇizgiStili::yeni().kalınlık(1.0).renk("#bbb")),
+                )
+                .etiket_yerleşimi(|_| {
+                    EtiketYerleşimSonucu::yeni()
+                        .x(600.0)
+                        .örtüşme_kaydırması(EtiketÖrtüşmeKaydırması::Y)
+                }),
+        ))
 }
 
 fn candlestick_simple() -> GrafikSeçenekleri {
@@ -6162,6 +6245,8 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "doc-example/scatter-jitter-avoidOverlap" => Ok(scatter_jitter_avoid_overlap()),
         "scatter-punchCard" => scatter_punch_card(),
         "bubble-gradient" => bubble_gradient(),
+        "scatter-label-align-top" => scatter_label_align_top(),
+        "scatter-label-align-right" => scatter_label_align_right(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

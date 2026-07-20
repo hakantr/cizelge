@@ -2,10 +2,13 @@
 
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::sembol_stilli_çiz;
-use crate::koordinat::{Kartezyen2B, TakvimYerleşimi};
+use crate::koordinat::{Dikdörtgen, Kartezyen2B, TakvimYerleşimi};
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::gorsel_esleme::GörselEşleme;
-use crate::model::seri::{SaçılımSerisi, Sembol};
+use crate::model::seri::{
+    EtiketYerleşimParametreleri, EtiketYerleşimSonucu, EtiketÖrtüşmeKaydırması, SaçılımSerisi,
+    Sembol,
+};
 use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
 use crate::renk::Renk;
 use crate::tema;
@@ -357,6 +360,679 @@ fn saçılım_etiketini_yaz(
     }
 }
 
+#[derive(Clone, Debug)]
+struct YerleşimliSaçılımEtiketi {
+    nokta: (f32, f32),
+    sembol_boyutu: f32,
+    metin: String,
+    çapa: (f32, f32),
+    yatay: YatayHiza,
+    dikey: DikeyHiza,
+    boyut: f32,
+    renk: Renk,
+    kalın: bool,
+    kontur: Option<Renk>,
+    döndürme: EtiketDöndürme,
+    metin_kutusu: Dikdörtgen,
+    çakışma_kutusu: Dikdörtgen,
+    yerleşim: EtiketYerleşimSonucu,
+    gizli: bool,
+    öncelik: f32,
+}
+
+fn saçılım_metin_kutusu(
+    çizici: &dyn ÇizimYüzeyi,
+    metin: &str,
+    çapa: (f32, f32),
+    yatay: YatayHiza,
+    dikey: DikeyHiza,
+    boyut: f32,
+) -> Dikdörtgen {
+    let satırlar = metin.split('\n').collect::<Vec<_>>();
+    let genişlik = satırlar
+        .iter()
+        .map(|satır| çizici.yazı_ölç(satır, boyut).0)
+        .fold(0.0_f32, f32::max);
+    let yükseklik = if satırlar.len() == 1 {
+        çizici.yazı_ölç(metin, boyut).1
+    } else {
+        boyut * satırlar.len() as f32
+    };
+    let x = match yatay {
+        YatayHiza::Sol => çapa.0,
+        YatayHiza::Orta => çapa.0 - genişlik / 2.0,
+        YatayHiza::Sağ => çapa.0 - genişlik,
+    };
+    let y = match dikey {
+        DikeyHiza::Üst => çapa.1,
+        DikeyHiza::Orta => çapa.1 - yükseklik / 2.0,
+        DikeyHiza::Alt => çapa.1 - yükseklik,
+    };
+    Dikdörtgen::yeni(x, y, genişlik, yükseklik)
+}
+
+fn saçılım_çakışma_kutusu(kutu: Dikdörtgen, en_küçük_boşluk: f32) -> Dikdörtgen {
+    let pay = en_küçük_boşluk.max(0.0) / 2.0;
+    Dikdörtgen::yeni(
+        kutu.x - pay,
+        kutu.y - pay,
+        kutu.genişlik + pay * 2.0,
+        kutu.yükseklik + pay * 2.0,
+    )
+}
+
+fn saçılım_etiketini_eksende_taşı(
+    etiket: &mut YerleşimliSaçılımEtiketi,
+    eksen: usize,
+    fark: f32,
+) {
+    if fark.abs() <= f32::EPSILON {
+        return;
+    }
+    if eksen == 0 {
+        etiket.çapa.0 += fark;
+        etiket.metin_kutusu.x += fark;
+        etiket.çakışma_kutusu.x += fark;
+    } else {
+        etiket.çapa.1 += fark;
+        etiket.metin_kutusu.y += fark;
+        etiket.çakışma_kutusu.y += fark;
+    }
+}
+
+fn saçılım_etiket_aralığını_taşı(
+    etiketler: &mut [YerleşimliSaçılımEtiketi],
+    sıra: &[usize],
+    eksen: usize,
+    başlangıç: usize,
+    bitiş: usize,
+    fark: f32,
+) {
+    for yer in başlangıç..bitiş {
+        if let Some(&etiket_sırası) = sıra.get(yer)
+            && let Some(etiket) = etiketler.get_mut(etiket_sırası)
+        {
+            saçılım_etiketini_eksende_taşı(etiket, eksen, fark);
+        }
+    }
+}
+
+// `sıra`, aynı etiket diliminden üretilen geçerli indekslerin sıralı
+// görünümüdür; resmi algoritmanın aralık kaydırmalarını indeksle taşımak
+// burada dilim eşzamanlı ödünçlerinden daha açıktır.
+#[allow(clippy::indexing_slicing, clippy::needless_range_loop)]
+fn saçılım_etiket_boşluklarını_sıkıştır(
+    etiketler: &mut [YerleşimliSaçılımEtiketi],
+    sıra: &[usize],
+    eksen: usize,
+    fark: f32,
+    en_büyük_oran: f32,
+) {
+    let uzunluk = sıra.len();
+    if uzunluk < 2 {
+        return;
+    }
+    let konum = |kutu: Dikdörtgen| if eksen == 0 { kutu.x } else { kutu.y };
+    let boyut = |kutu: Dikdörtgen| {
+        if eksen == 0 {
+            kutu.genişlik
+        } else {
+            kutu.yükseklik
+        }
+    };
+    let boşluklar = (1..uzunluk)
+        .map(|yer| {
+            let önceki = etiketler[sıra[yer - 1]].çakışma_kutusu;
+            let şimdiki = etiketler[sıra[yer]].çakışma_kutusu;
+            (konum(şimdiki) - konum(önceki) - boyut(önceki)).max(0.0)
+        })
+        .collect::<Vec<_>>();
+    let toplam = boşluklar.iter().sum::<f32>();
+    if toplam <= f32::EPSILON {
+        return;
+    }
+    let oran = (fark.abs() / toplam).min(en_büyük_oran);
+    if fark > 0.0 {
+        for yer in 0..uzunluk - 1 {
+            saçılım_etiket_aralığını_taşı(
+                etiketler,
+                sıra,
+                eksen,
+                0,
+                yer + 1,
+                boşluklar[yer] * oran,
+            );
+        }
+    } else {
+        for yer in (1..uzunluk).rev() {
+            saçılım_etiket_aralığını_taşı(
+                etiketler,
+                sıra,
+                eksen,
+                yer,
+                uzunluk,
+                -boşluklar[yer - 1] * oran,
+            );
+        }
+    }
+}
+
+/// ECharts `shiftLayoutOnXY`: etiket sırasını korur, önce çakışmaları ileri
+/// iter, ardından boşlukları tuval sınırlarına sığacak kadar sıkar.
+#[allow(clippy::indexing_slicing)]
+fn saçılım_etiketlerini_eksende_kaydır(
+    etiketler: &mut [YerleşimliSaçılımEtiketi],
+    eksen: usize,
+    sınır: f32,
+) {
+    let kip = if eksen == 0 {
+        EtiketÖrtüşmeKaydırması::X
+    } else {
+        EtiketÖrtüşmeKaydırması::Y
+    };
+    let mut sıra = etiketler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, etiket)| (etiket.yerleşim.örtüşme_kaydırması == kip).then_some(sıra))
+        .collect::<Vec<_>>();
+    if sıra.len() < 2 {
+        return;
+    }
+    sıra.sort_by(|a, b| {
+        let a = etiketler[*a].çakışma_kutusu;
+        let b = etiketler[*b].çakışma_kutusu;
+        let ak = if eksen == 0 { a.x } else { a.y };
+        let bk = if eksen == 0 { b.x } else { b.y };
+        ak.partial_cmp(&bk).unwrap_or(std::cmp::Ordering::Equal)
+    });
+    let konum = |kutu: Dikdörtgen| if eksen == 0 { kutu.x } else { kutu.y };
+    let boyut = |kutu: Dikdörtgen| {
+        if eksen == 0 {
+            kutu.genişlik
+        } else {
+            kutu.yükseklik
+        }
+    };
+
+    let mut önceki_bitiş = 0.0_f32;
+    for &etiket_sırası in &sıra {
+        let kutu = etiketler[etiket_sırası].çakışma_kutusu;
+        let fark = konum(kutu) - önceki_bitiş;
+        if fark < 0.0 {
+            saçılım_etiketini_eksende_taşı(&mut etiketler[etiket_sırası], eksen, -fark);
+        }
+        let kutu = etiketler[etiket_sırası].çakışma_kutusu;
+        önceki_bitiş = konum(kutu) + boyut(kutu);
+    }
+
+    let sınır_boşlukları = |etiketler: &[YerleşimliSaçılımEtiketi]| {
+        let ilk = etiketler[sıra[0]].çakışma_kutusu;
+        let son = etiketler[*sıra.last().unwrap_or(&sıra[0])].çakışma_kutusu;
+        (konum(ilk), sınır - konum(son) - boyut(son))
+    };
+    let (sol_boşluk, sağ_boşluk) = sınır_boşlukları(etiketler);
+    if sol_boşluk < 0.0 {
+        saçılım_etiket_boşluklarını_sıkıştır(etiketler, &sıra, eksen, -sol_boşluk, 0.8);
+    }
+    if sağ_boşluk < 0.0 {
+        saçılım_etiket_boşluklarını_sıkıştır(etiketler, &sıra, eksen, sağ_boşluk, 0.8);
+    }
+
+    for yön in [1.0_f32, -1.0] {
+        let (sol_boşluk, sağ_boşluk) = sınır_boşlukları(etiketler);
+        let (bu, öteki) = if yön > 0.0 {
+            (sol_boşluk, sağ_boşluk)
+        } else {
+            (sağ_boşluk, sol_boşluk)
+        };
+        if bu < 0.0 {
+            let ötekinden = öteki.min(-bu).max(0.0);
+            if ötekinden > 0.0 {
+                saçılım_etiket_aralığını_taşı(
+                    etiketler,
+                    &sıra,
+                    eksen,
+                    0,
+                    sıra.len(),
+                    ötekinden * yön,
+                );
+                let kalan = ötekinden + bu;
+                if kalan < 0.0 {
+                    saçılım_etiket_boşluklarını_sıkıştır(
+                        etiketler,
+                        &sıra,
+                        eksen,
+                        -kalan * yön,
+                        1.0,
+                    );
+                }
+            } else {
+                saçılım_etiket_boşluklarını_sıkıştır(
+                    etiketler,
+                    &sıra,
+                    eksen,
+                    -bu * yön,
+                    1.0,
+                );
+            }
+        }
+    }
+
+    let (sol_boşluk, sağ_boşluk) = sınır_boşlukları(etiketler);
+    for (sınır_sırası, taşma) in [sol_boşluk.min(0.0), sağ_boşluk.min(0.0)]
+        .into_iter()
+        .enumerate()
+    {
+        if taşma >= 0.0 {
+            continue;
+        }
+        let yön = if sınır_sırası == 0 { 1.0 } else { -1.0 };
+        let mut kalan = -taşma;
+        let her_biri = (kalan / (sıra.len() - 1) as f32).ceil();
+        for yer in 0..sıra.len() - 1 {
+            if yön > 0.0 {
+                saçılım_etiket_aralığını_taşı(
+                    etiketler,
+                    &sıra,
+                    eksen,
+                    0,
+                    yer + 1,
+                    her_biri,
+                );
+            } else {
+                saçılım_etiket_aralığını_taşı(
+                    etiketler,
+                    &sıra,
+                    eksen,
+                    sıra.len() - yer - 1,
+                    sıra.len(),
+                    -her_biri,
+                );
+            }
+            kalan -= her_biri;
+            if kalan <= 0.0 {
+                break;
+            }
+        }
+    }
+}
+
+fn saçılım_etiket_kutuları_örtüşüyor(a: Dikdörtgen, b: Dikdörtgen) -> bool {
+    const DOKUNMA_EŞİĞİ: f32 = 0.05;
+    a.x < b.sağ() - DOKUNMA_EŞİĞİ
+        && b.x < a.sağ() - DOKUNMA_EŞİĞİ
+        && a.y < b.alt() - DOKUNMA_EŞİĞİ
+        && b.y < a.alt() - DOKUNMA_EŞİĞİ
+}
+
+#[allow(clippy::indexing_slicing)]
+fn çakışan_saçılım_etiketlerini_gizle(etiketler: &mut [YerleşimliSaçılımEtiketi]) {
+    let mut sıra = etiketler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, etiket)| etiket.yerleşim.çakışanı_gizle.then_some(sıra))
+        .collect::<Vec<_>>();
+    sıra.sort_by(|a, b| {
+        etiketler[*b]
+            .öncelik
+            .partial_cmp(&etiketler[*a].öncelik)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then_with(|| a.cmp(b))
+    });
+    let mut görünen = Vec::new();
+    for sıra in sıra {
+        let kutu = etiketler[sıra].çakışma_kutusu;
+        if görünen
+            .iter()
+            .any(|kutu2| saçılım_etiket_kutuları_örtüşüyor(*kutu2, kutu))
+        {
+            etiketler[sıra].gizli = true;
+        } else {
+            görünen.push(kutu);
+        }
+    }
+}
+
+fn saçılım_etiket_çizgisi_noktaları(
+    etiket: &YerleşimliSaçılımEtiketi,
+    uzunluk2: f32,
+) -> [(f32, f32); 3] {
+    let kutu = etiket.metin_kutusu;
+    let adaylar = [
+        ((kutu.x + kutu.genişlik / 2.0, kutu.y), (0.0_f32, -1.0_f32)),
+        ((kutu.sağ(), kutu.y + kutu.yükseklik / 2.0), (1.0, 0.0)),
+        ((kutu.x + kutu.genişlik / 2.0, kutu.alt()), (0.0, 1.0)),
+        ((kutu.x, kutu.y + kutu.yükseklik / 2.0), (-1.0, 0.0)),
+    ];
+    let mut en_iyi = [(etiket.nokta.0, etiket.nokta.1); 3];
+    let mut en_kısa = f32::INFINITY;
+    for (etiket_ucu, yön) in adaylar {
+        let dirsek = (
+            etiket_ucu.0 + yön.0 * uzunluk2,
+            etiket_ucu.1 + yön.1 * uzunluk2,
+        );
+        let dx = dirsek.0 - etiket.nokta.0;
+        let dy = dirsek.1 - etiket.nokta.1;
+        let uzaklık = (dx * dx + dy * dy).sqrt();
+        let yarıçap = etiket.sembol_boyutu / 2.0;
+        let sembol_ucu = if uzaklık > f32::EPSILON {
+            (
+                etiket.nokta.0 + dx / uzaklık * yarıçap,
+                etiket.nokta.1 + dy / uzaklık * yarıçap,
+            )
+        } else {
+            etiket.nokta
+        };
+        let açıklık = (uzaklık - yarıçap).max(0.0);
+        if açıklık < en_kısa {
+            en_kısa = açıklık;
+            en_iyi = [sembol_ucu, dirsek, etiket_ucu];
+        }
+    }
+    en_iyi
+}
+
+fn yerleşimli_saçılım_etiketini_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    etiket: &YerleşimliSaçılımEtiketi,
+) {
+    let satırlar = etiket.metin.split('\n').collect::<Vec<_>>();
+    if satırlar.len() == 1 {
+        match etiket.döndürme {
+            EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => {
+                saçılım_etiketini_yaz(
+                    çizici,
+                    &etiket.metin,
+                    (0.0, 0.0),
+                    etiket.yatay,
+                    etiket.dikey,
+                    etiket.boyut,
+                    etiket.renk,
+                    etiket.kalın,
+                    etiket.kontur,
+                    Some(
+                        AfinMatris::ötele(etiket.çapa.0, etiket.çapa.1)
+                            .çarp(AfinMatris::döndür(-derece.to_radians())),
+                    ),
+                );
+            }
+            _ => saçılım_etiketini_yaz(
+                çizici,
+                &etiket.metin,
+                etiket.çapa,
+                etiket.yatay,
+                etiket.dikey,
+                etiket.boyut,
+                etiket.renk,
+                etiket.kalın,
+                etiket.kontur,
+                None,
+            ),
+        }
+        return;
+    }
+
+    let toplam_yükseklik = etiket.boyut * satırlar.len() as f32;
+    let ilk_satır_y = match etiket.dikey {
+        DikeyHiza::Üst => etiket.boyut / 2.0,
+        DikeyHiza::Orta => -toplam_yükseklik / 2.0 + etiket.boyut / 2.0,
+        DikeyHiza::Alt => -toplam_yükseklik + etiket.boyut / 2.0,
+    };
+    let dönüşüm = match etiket.döndürme {
+        EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => Some(
+            AfinMatris::ötele(etiket.çapa.0, etiket.çapa.1)
+                .çarp(AfinMatris::döndür(-derece.to_radians())),
+        ),
+        _ => None,
+    };
+    for (satır_sırası, satır) in satırlar.into_iter().enumerate() {
+        if satır.is_empty() {
+            continue;
+        }
+        let y = ilk_satır_y + satır_sırası as f32 * etiket.boyut;
+        if let Some(dönüşüm) = dönüşüm {
+            saçılım_etiketini_yaz(
+                çizici,
+                satır,
+                (0.0, y),
+                etiket.yatay,
+                DikeyHiza::Orta,
+                etiket.boyut,
+                etiket.renk,
+                etiket.kalın,
+                etiket.kontur,
+                Some(dönüşüm),
+            );
+        } else {
+            saçılım_etiketini_yaz(
+                çizici,
+                satır,
+                (etiket.çapa.0, etiket.çapa.1 + y),
+                etiket.yatay,
+                DikeyHiza::Orta,
+                etiket.boyut,
+                etiket.renk,
+                etiket.kalın,
+                etiket.kontur,
+                None,
+            );
+        }
+    }
+}
+
+fn yerleşimli_saçılım_etiketlerini_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    noktalar: &[SaçılımNoktası],
+    opaklık: f32,
+    nokta_rengi: &dyn Fn(&SaçılımNoktası) -> Renk,
+) {
+    let mut etiketler = Vec::new();
+    for nokta in noktalar {
+        let renk = nokta_rengi(nokta);
+        let Some(öğe) = seri.veri.get(nokta.sıra) else {
+            continue;
+        };
+        let öğe_etiketi = öğe.etiket.as_ref().map(|yama| yama.uygula(&seri.etiket));
+        let etiket = öğe_etiketi.as_ref().unwrap_or(&seri.etiket);
+        if !etiket.göster {
+            continue;
+        }
+        let etiket_değeri = seri
+            .etiket_boyutu
+            .as_deref()
+            .and_then(|boyut| öğe.boyut(boyut))
+            .unwrap_or(&öğe.değer);
+        let ham = match etiket_değeri {
+            VeriDeğeri::Sayı(değer) => ondalık_kırp(*değer),
+            VeriDeğeri::Metin(metin) => metin.clone(),
+            VeriDeğeri::Zaman(ms) => ms.to_string(),
+            VeriDeğeri::Mantıksal(değer) => değer.to_string(),
+            VeriDeğeri::Çift([x, y]) => format!("{},{}", ondalık_kırp(*x), ondalık_kırp(*y)),
+            VeriDeğeri::Dizi(değerler) => değerler
+                .iter()
+                .map(|değer| ondalık_kırp(*değer))
+                .collect::<Vec<_>>()
+                .join(","),
+            VeriDeğeri::Boş => continue,
+        };
+        let biçim_değeri = etiket_değeri.sayı().unwrap_or(nokta.y_değeri);
+        let metin = etiket
+            .biçimleyici
+            .as_ref()
+            .map(|biçimleyici| {
+                biçimleyici.uygula_bağlamla(
+                    biçim_değeri,
+                    &ham,
+                    seri.ad.as_deref().unwrap_or(""),
+                    öğe.ad.as_deref().unwrap_or(""),
+                )
+            })
+            .unwrap_or(ham);
+        let uzaklık = etiket.uzaklık + nokta.boyut / 2.0;
+        let (mut çapa, doğal_yatay, doğal_dikey) = match etiket.konum {
+            EtiketKonumu::Üst => (
+                (nokta.konum.0, nokta.konum.1 - uzaklık),
+                YatayHiza::Orta,
+                DikeyHiza::Alt,
+            ),
+            EtiketKonumu::Alt => (
+                (nokta.konum.0, nokta.konum.1 + uzaklık),
+                YatayHiza::Orta,
+                DikeyHiza::Üst,
+            ),
+            EtiketKonumu::Sol => (
+                (nokta.konum.0 - uzaklık, nokta.konum.1),
+                YatayHiza::Sağ,
+                DikeyHiza::Orta,
+            ),
+            EtiketKonumu::Sağ => (
+                (nokta.konum.0 + uzaklık, nokta.konum.1),
+                YatayHiza::Sol,
+                DikeyHiza::Orta,
+            ),
+            _ => (nokta.konum, YatayHiza::Orta, DikeyHiza::Orta),
+        };
+        çapa.0 += etiket.kayma.0;
+        çapa.1 += etiket.kayma.1;
+        let yatay = etiket
+            .yatay_hiza
+            .map(|hiza| match hiza {
+                YazıYatayHizası::Sol => YatayHiza::Sol,
+                YazıYatayHizası::Orta => YatayHiza::Orta,
+                YazıYatayHizası::Sağ => YatayHiza::Sağ,
+            })
+            .unwrap_or(doğal_yatay);
+        let dikey = etiket
+            .dikey_hiza
+            .map(|hiza| match hiza {
+                YazıDikeyHizası::Üst => DikeyHiza::Üst,
+                YazıDikeyHizası::Orta => DikeyHiza::Orta,
+                YazıDikeyHizası::Alt => DikeyHiza::Alt,
+            })
+            .unwrap_or(doğal_dikey);
+        let boyut = etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+        let (etiket_rengi, etiket_konturu) = match etiket.yazı.renk {
+            Some(renk) => (renk, None),
+            None if etiket.konum == EtiketKonumu::İç => {
+                let (metin, kontur) = seri
+                    .öğe_stili
+                    .renk
+                    .as_ref()
+                    .map(|dolgu| dolgu.zrender_iç_etiket_stili(tema::koyu_mu()))
+                    .unwrap_or_else(|| renk.zrender_iç_etiket_stili(tema::koyu_mu()));
+                (
+                    metin.opaklık(opaklık),
+                    kontur.map(|kontur| kontur.opaklık(opaklık)),
+                )
+            }
+            None => (tema::birincil_metin().opaklık(opaklık), None),
+        };
+        let metin_kutusu = saçılım_metin_kutusu(çizici, &metin, çapa, yatay, dikey, boyut);
+        let çakışma_kutusu = saçılım_çakışma_kutusu(metin_kutusu, etiket.en_küçük_boşluk);
+        let mut aday = YerleşimliSaçılımEtiketi {
+            nokta: nokta.konum,
+            sembol_boyutu: nokta.boyut,
+            metin,
+            çapa,
+            yatay,
+            dikey,
+            boyut,
+            renk: etiket_rengi,
+            kalın: etiket.yazı.kalın,
+            kontur: etiket_konturu,
+            döndürme: etiket.döndürme,
+            metin_kutusu,
+            çakışma_kutusu,
+            yerleşim: EtiketYerleşimSonucu::default(),
+            gizli: false,
+            öncelik: nokta.boyut * nokta.boyut,
+        };
+        if let Some(işlev) = &seri.etiket_yerleşimi {
+            let doğal_çizgi = seri
+                .etiket_çizgisi
+                .as_ref()
+                .filter(|çizgi| çizgi.göster)
+                .map(|çizgi| saçılım_etiket_çizgisi_noktaları(&aday, çizgi.uzunluk2));
+            let sonuç = işlev.uygula(&EtiketYerleşimParametreleri {
+                veri_sırası: nokta.sıra,
+                veri_adı: öğe.ad.clone().unwrap_or_default(),
+                değer: biçim_değeri,
+                etiket_kutusu: metin_kutusu,
+                etiket_çizgisi_noktaları: doğal_çizgi,
+            });
+            if let Some(x) = sonuç.x {
+                aday.çapa.0 = x;
+            }
+            if let Some(y) = sonuç.y {
+                aday.çapa.1 = y;
+            }
+            // LabelManager mutlak x/y verildiğinde etiketi sembolün bağlı
+            // `textConfig.position`ından ayırır; zrender'ın serbest metin
+            // kutusu açık verticalAlign yoksa verilen y'den aşağı akar.
+            if (sonuç.x.is_some() || sonuç.y.is_some()) && sonuç.dikey_hiza.is_none() {
+                aday.dikey = DikeyHiza::Üst;
+            }
+            if let Some(hiza) = sonuç.yatay_hiza {
+                aday.yatay = match hiza {
+                    YazıYatayHizası::Sol => YatayHiza::Sol,
+                    YazıYatayHizası::Orta => YatayHiza::Orta,
+                    YazıYatayHizası::Sağ => YatayHiza::Sağ,
+                };
+            }
+            if let Some(hiza) = sonuç.dikey_hiza {
+                aday.dikey = match hiza {
+                    YazıDikeyHizası::Üst => DikeyHiza::Üst,
+                    YazıDikeyHizası::Orta => DikeyHiza::Orta,
+                    YazıDikeyHizası::Alt => DikeyHiza::Alt,
+                };
+            }
+            aday.metin_kutusu = saçılım_metin_kutusu(
+                çizici,
+                &aday.metin,
+                aday.çapa,
+                aday.yatay,
+                aday.dikey,
+                aday.boyut,
+            );
+            aday.çakışma_kutusu =
+                saçılım_çakışma_kutusu(aday.metin_kutusu, etiket.en_küçük_boşluk);
+            aday.yerleşim = sonuç;
+        }
+        etiketler.push(aday);
+    }
+
+    saçılım_etiketlerini_eksende_kaydır(etiketler.as_mut_slice(), 0, çizici.genişlik());
+    saçılım_etiketlerini_eksende_kaydır(etiketler.as_mut_slice(), 1, çizici.yükseklik());
+    çakışan_saçılım_etiketlerini_gizle(&mut etiketler);
+
+    if let Some(çizgi) = seri.etiket_çizgisi.as_ref().filter(|çizgi| çizgi.göster) {
+        for etiket in etiketler.iter().filter(|etiket| !etiket.gizli) {
+            let noktalar = etiket
+                .yerleşim
+                .etiket_çizgisi_noktaları
+                .unwrap_or_else(|| saçılım_etiket_çizgisi_noktaları(etiket, çizgi.uzunluk2));
+            let mut yol = Yol::yeni();
+            yol.taşı(noktalar[0]);
+            yol.çiz(noktalar[1]);
+            yol.çiz(noktalar[2]);
+            çizici.yol_çiz(
+                &yol,
+                çizgi.stil.kalınlık,
+                çizgi
+                    .stil
+                    .renk
+                    .unwrap_or(etiket.renk)
+                    .opaklık(çizgi.stil.opaklık),
+                çizgi.stil.tür,
+            );
+        }
+    }
+    for etiket in etiketler.iter().filter(|etiket| !etiket.gizli) {
+        yerleşimli_saçılım_etiketini_çiz(çizici, etiket);
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn saçılım_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
@@ -473,135 +1149,189 @@ pub fn saçılım_çiz_eşlemeli(
     // Dataset `encode.label` dâhil saçılım etiketleri. Öğe yaması seri
     // etiketini miras alır; açık align/verticalAlign/rotate değerleri
     // zrender bağlı metin yerleşimine aktarılır.
-    for nokta in noktalar {
-        let renk = nokta_rengi(nokta);
-        let Some(öğe) = seri.veri.get(nokta.sıra) else {
-            continue;
-        };
-        let öğe_etiketi = öğe.etiket.as_ref().map(|yama| yama.uygula(&seri.etiket));
-        let etiket = öğe_etiketi.as_ref().unwrap_or(&seri.etiket);
-        if !etiket.göster {
-            continue;
-        }
-        let etiket_değeri = seri
-            .etiket_boyutu
-            .as_deref()
-            .and_then(|boyut| öğe.boyut(boyut))
-            .unwrap_or(&öğe.değer);
-        let ham = match etiket_değeri {
-            VeriDeğeri::Sayı(değer) => ondalık_kırp(*değer),
-            VeriDeğeri::Metin(metin) => metin.clone(),
-            VeriDeğeri::Zaman(ms) => ms.to_string(),
-            VeriDeğeri::Mantıksal(değer) => değer.to_string(),
-            VeriDeğeri::Çift([x, y]) => format!("{},{}", ondalık_kırp(*x), ondalık_kırp(*y)),
-            VeriDeğeri::Dizi(değerler) => değerler
-                .iter()
-                .map(|değer| ondalık_kırp(*değer))
-                .collect::<Vec<_>>()
-                .join(","),
-            VeriDeğeri::Boş => continue,
-        };
-        let biçim_değeri = etiket_değeri.sayı().unwrap_or(nokta.y_değeri);
-        let metin = etiket
-            .biçimleyici
-            .as_ref()
-            .map(|biçimleyici| {
-                biçimleyici.uygula_bağlamla(
-                    biçim_değeri,
-                    &ham,
-                    seri.ad.as_deref().unwrap_or(""),
-                    öğe.ad.as_deref().unwrap_or(""),
-                )
-            })
-            .unwrap_or(ham);
-        let uzaklık = etiket.uzaklık + nokta.boyut / 2.0;
-        let (mut çapa, doğal_yatay, doğal_dikey) = match etiket.konum {
-            EtiketKonumu::Üst => (
-                (nokta.konum.0, nokta.konum.1 - uzaklık),
-                YatayHiza::Orta,
-                DikeyHiza::Alt,
-            ),
-            EtiketKonumu::Alt => (
-                (nokta.konum.0, nokta.konum.1 + uzaklık),
-                YatayHiza::Orta,
-                DikeyHiza::Üst,
-            ),
-            EtiketKonumu::Sol => (
-                (nokta.konum.0 - uzaklık, nokta.konum.1),
-                YatayHiza::Sağ,
-                DikeyHiza::Orta,
-            ),
-            EtiketKonumu::Sağ => (
-                (nokta.konum.0 + uzaklık, nokta.konum.1),
-                YatayHiza::Sol,
-                DikeyHiza::Orta,
-            ),
-            _ => (nokta.konum, YatayHiza::Orta, DikeyHiza::Orta),
-        };
-        çapa.0 += etiket.kayma.0;
-        çapa.1 += etiket.kayma.1;
-        let yatay = etiket
-            .yatay_hiza
-            .map(|hiza| match hiza {
-                YazıYatayHizası::Sol => YatayHiza::Sol,
-                YazıYatayHizası::Orta => YatayHiza::Orta,
-                YazıYatayHizası::Sağ => YatayHiza::Sağ,
-            })
-            .unwrap_or(doğal_yatay);
-        let dikey = etiket
-            .dikey_hiza
-            .map(|hiza| match hiza {
-                YazıDikeyHizası::Üst => DikeyHiza::Üst,
-                YazıDikeyHizası::Orta => DikeyHiza::Orta,
-                YazıDikeyHizası::Alt => DikeyHiza::Alt,
-            })
-            .unwrap_or(doğal_dikey);
-        let boyut = etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-        // SymbolDraw, iç etikette açık renk yokken path dolgusuna göre
-        // otomatik karşıt renk ve gerektiğinde 2 px kontur kullanır.
-        let (etiket_rengi, etiket_konturu) = match etiket.yazı.renk {
-            Some(renk) => (renk, None),
-            None if etiket.konum == EtiketKonumu::İç => {
-                let (metin, kontur) = seri
-                    .öğe_stili
-                    .renk
-                    .as_ref()
-                    .map(|dolgu| dolgu.zrender_iç_etiket_stili(tema::koyu_mu()))
-                    .unwrap_or_else(|| renk.zrender_iç_etiket_stili(tema::koyu_mu()));
-                (
-                    metin.opaklık(opaklık),
-                    kontur.map(|kontur| kontur.opaklık(opaklık)),
-                )
+    if seri.etiket_yerleşimi.is_some() || seri.etiket_çizgisi.is_some() {
+        yerleşimli_saçılım_etiketlerini_çiz(çizici, seri, noktalar, opaklık, &nokta_rengi);
+    } else {
+        for nokta in noktalar {
+            let renk = nokta_rengi(nokta);
+            let Some(öğe) = seri.veri.get(nokta.sıra) else {
+                continue;
+            };
+            let öğe_etiketi = öğe.etiket.as_ref().map(|yama| yama.uygula(&seri.etiket));
+            let etiket = öğe_etiketi.as_ref().unwrap_or(&seri.etiket);
+            if !etiket.göster {
+                continue;
             }
-            None => (tema::birincil_metin().opaklık(opaklık), None),
-        };
-        let satırlar = metin.split('\n').collect::<Vec<_>>();
-        if satırlar.len() == 1 {
-            match etiket.döndürme {
-                EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => {
+            let etiket_değeri = seri
+                .etiket_boyutu
+                .as_deref()
+                .and_then(|boyut| öğe.boyut(boyut))
+                .unwrap_or(&öğe.değer);
+            let ham = match etiket_değeri {
+                VeriDeğeri::Sayı(değer) => ondalık_kırp(*değer),
+                VeriDeğeri::Metin(metin) => metin.clone(),
+                VeriDeğeri::Zaman(ms) => ms.to_string(),
+                VeriDeğeri::Mantıksal(değer) => değer.to_string(),
+                VeriDeğeri::Çift([x, y]) => format!("{},{}", ondalık_kırp(*x), ondalık_kırp(*y)),
+                VeriDeğeri::Dizi(değerler) => değerler
+                    .iter()
+                    .map(|değer| ondalık_kırp(*değer))
+                    .collect::<Vec<_>>()
+                    .join(","),
+                VeriDeğeri::Boş => continue,
+            };
+            let biçim_değeri = etiket_değeri.sayı().unwrap_or(nokta.y_değeri);
+            let metin = etiket
+                .biçimleyici
+                .as_ref()
+                .map(|biçimleyici| {
+                    biçimleyici.uygula_bağlamla(
+                        biçim_değeri,
+                        &ham,
+                        seri.ad.as_deref().unwrap_or(""),
+                        öğe.ad.as_deref().unwrap_or(""),
+                    )
+                })
+                .unwrap_or(ham);
+            let uzaklık = etiket.uzaklık + nokta.boyut / 2.0;
+            let (mut çapa, doğal_yatay, doğal_dikey) = match etiket.konum {
+                EtiketKonumu::Üst => (
+                    (nokta.konum.0, nokta.konum.1 - uzaklık),
+                    YatayHiza::Orta,
+                    DikeyHiza::Alt,
+                ),
+                EtiketKonumu::Alt => (
+                    (nokta.konum.0, nokta.konum.1 + uzaklık),
+                    YatayHiza::Orta,
+                    DikeyHiza::Üst,
+                ),
+                EtiketKonumu::Sol => (
+                    (nokta.konum.0 - uzaklık, nokta.konum.1),
+                    YatayHiza::Sağ,
+                    DikeyHiza::Orta,
+                ),
+                EtiketKonumu::Sağ => (
+                    (nokta.konum.0 + uzaklık, nokta.konum.1),
+                    YatayHiza::Sol,
+                    DikeyHiza::Orta,
+                ),
+                _ => (nokta.konum, YatayHiza::Orta, DikeyHiza::Orta),
+            };
+            çapa.0 += etiket.kayma.0;
+            çapa.1 += etiket.kayma.1;
+            let yatay = etiket
+                .yatay_hiza
+                .map(|hiza| match hiza {
+                    YazıYatayHizası::Sol => YatayHiza::Sol,
+                    YazıYatayHizası::Orta => YatayHiza::Orta,
+                    YazıYatayHizası::Sağ => YatayHiza::Sağ,
+                })
+                .unwrap_or(doğal_yatay);
+            let dikey = etiket
+                .dikey_hiza
+                .map(|hiza| match hiza {
+                    YazıDikeyHizası::Üst => DikeyHiza::Üst,
+                    YazıDikeyHizası::Orta => DikeyHiza::Orta,
+                    YazıDikeyHizası::Alt => DikeyHiza::Alt,
+                })
+                .unwrap_or(doğal_dikey);
+            let boyut = etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+            // SymbolDraw, iç etikette açık renk yokken path dolgusuna göre
+            // otomatik karşıt renk ve gerektiğinde 2 px kontur kullanır.
+            let (etiket_rengi, etiket_konturu) = match etiket.yazı.renk {
+                Some(renk) => (renk, None),
+                None if etiket.konum == EtiketKonumu::İç => {
+                    let (metin, kontur) = seri
+                        .öğe_stili
+                        .renk
+                        .as_ref()
+                        .map(|dolgu| dolgu.zrender_iç_etiket_stili(tema::koyu_mu()))
+                        .unwrap_or_else(|| renk.zrender_iç_etiket_stili(tema::koyu_mu()));
+                    (
+                        metin.opaklık(opaklık),
+                        kontur.map(|kontur| kontur.opaklık(opaklık)),
+                    )
+                }
+                None => (tema::birincil_metin().opaklık(opaklık), None),
+            };
+            let satırlar = metin.split('\n').collect::<Vec<_>>();
+            if satırlar.len() == 1 {
+                match etiket.döndürme {
+                    EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => {
+                        saçılım_etiketini_yaz(
+                            çizici,
+                            &metin,
+                            (0.0, 0.0),
+                            yatay,
+                            dikey,
+                            boyut,
+                            etiket_rengi,
+                            etiket.yazı.kalın,
+                            etiket_konturu,
+                            Some(
+                                AfinMatris::ötele(çapa.0, çapa.1)
+                                    .çarp(AfinMatris::döndür(-derece.to_radians())),
+                            ),
+                        );
+                    }
+                    _ => {
+                        saçılım_etiketini_yaz(
+                            çizici,
+                            &metin,
+                            çapa,
+                            yatay,
+                            dikey,
+                            boyut,
+                            etiket_rengi,
+                            etiket.yazı.kalın,
+                            etiket_konturu,
+                            None,
+                        );
+                    }
+                }
+                continue;
+            }
+
+            // zrender düz metinde öntanımlı lineHeight olarak font boyutunu
+            // kullanır ve sondaki boş satırları da blok yüksekliğine katar.
+            let toplam_yükseklik = boyut * satırlar.len() as f32;
+            let ilk_satır_y = match dikey {
+                DikeyHiza::Üst => boyut / 2.0,
+                DikeyHiza::Orta => -toplam_yükseklik / 2.0 + boyut / 2.0,
+                DikeyHiza::Alt => -toplam_yükseklik + boyut / 2.0,
+            };
+            let dönüşüm = match etiket.döndürme {
+                EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => Some(
+                    AfinMatris::ötele(çapa.0, çapa.1)
+                        .çarp(AfinMatris::döndür(-derece.to_radians())),
+                ),
+                _ => None,
+            };
+            for (satır_sırası, satır) in satırlar.into_iter().enumerate() {
+                if satır.is_empty() {
+                    continue;
+                }
+                let y = ilk_satır_y + satır_sırası as f32 * boyut;
+                if let Some(dönüşüm) = dönüşüm {
                     saçılım_etiketini_yaz(
                         çizici,
-                        &metin,
-                        (0.0, 0.0),
+                        satır,
+                        (0.0, y),
                         yatay,
-                        dikey,
+                        DikeyHiza::Orta,
                         boyut,
                         etiket_rengi,
                         etiket.yazı.kalın,
                         etiket_konturu,
-                        Some(
-                            AfinMatris::ötele(çapa.0, çapa.1)
-                                .çarp(AfinMatris::döndür(-derece.to_radians())),
-                        ),
+                        Some(dönüşüm),
                     );
-                }
-                _ => {
+                } else {
                     saçılım_etiketini_yaz(
                         çizici,
-                        &metin,
-                        çapa,
+                        satır,
+                        (çapa.0, çapa.1 + y),
                         yatay,
-                        dikey,
+                        DikeyHiza::Orta,
                         boyut,
                         etiket_rengi,
                         etiket.yazı.kalın,
@@ -609,55 +1339,6 @@ pub fn saçılım_çiz_eşlemeli(
                         None,
                     );
                 }
-            }
-            continue;
-        }
-
-        // zrender düz metinde öntanımlı lineHeight olarak font boyutunu
-        // kullanır ve sondaki boş satırları da blok yüksekliğine katar.
-        let toplam_yükseklik = boyut * satırlar.len() as f32;
-        let ilk_satır_y = match dikey {
-            DikeyHiza::Üst => boyut / 2.0,
-            DikeyHiza::Orta => -toplam_yükseklik / 2.0 + boyut / 2.0,
-            DikeyHiza::Alt => -toplam_yükseklik + boyut / 2.0,
-        };
-        let dönüşüm = match etiket.döndürme {
-            EtiketDöndürme::Derece(derece) if derece.abs() > f32::EPSILON => Some(
-                AfinMatris::ötele(çapa.0, çapa.1).çarp(AfinMatris::döndür(-derece.to_radians())),
-            ),
-            _ => None,
-        };
-        for (satır_sırası, satır) in satırlar.into_iter().enumerate() {
-            if satır.is_empty() {
-                continue;
-            }
-            let y = ilk_satır_y + satır_sırası as f32 * boyut;
-            if let Some(dönüşüm) = dönüşüm {
-                saçılım_etiketini_yaz(
-                    çizici,
-                    satır,
-                    (0.0, y),
-                    yatay,
-                    DikeyHiza::Orta,
-                    boyut,
-                    etiket_rengi,
-                    etiket.yazı.kalın,
-                    etiket_konturu,
-                    Some(dönüşüm),
-                );
-            } else {
-                saçılım_etiketini_yaz(
-                    çizici,
-                    satır,
-                    (çapa.0, çapa.1 + y),
-                    yatay,
-                    DikeyHiza::Orta,
-                    boyut,
-                    etiket_rengi,
-                    etiket.yazı.kalın,
-                    etiket_konturu,
-                    None,
-                );
             }
         }
     }
@@ -953,5 +1634,100 @@ mod testler {
             döküm.contains("yazı \"0,1\" (20.0,20.0) orta/orta"),
             "{döküm}"
         );
+    }
+
+    fn yerleşimli_test_etiketi(
+        kutu: Dikdörtgen,
+        öncelik: f32,
+        kaydırma: EtiketÖrtüşmeKaydırması,
+        gizle: bool,
+    ) -> YerleşimliSaçılımEtiketi {
+        YerleşimliSaçılımEtiketi {
+            nokta: (10.0, 50.0),
+            sembol_boyutu: 10.0,
+            metin: "etiket".to_owned(),
+            çapa: (kutu.x, kutu.y),
+            yatay: YatayHiza::Sol,
+            dikey: DikeyHiza::Üst,
+            boyut: 12.0,
+            renk: Renk::SİYAH,
+            kalın: false,
+            kontur: None,
+            döndürme: EtiketDöndürme::Yok,
+            metin_kutusu: kutu,
+            çakışma_kutusu: kutu,
+            yerleşim: EtiketYerleşimSonucu::yeni()
+                .örtüşme_kaydırması(kaydırma)
+                .çakışanı_gizle(gizle),
+            gizli: false,
+            öncelik,
+        }
+    }
+
+    #[test]
+    fn label_layout_shift_y_sırayı_koruyup_çakışmayı_ileri_iter() {
+        let mut etiketler = vec![
+            yerleşimli_test_etiketi(
+                Dikdörtgen::yeni(10.0, 10.0, 20.0, 10.0),
+                1.0,
+                EtiketÖrtüşmeKaydırması::Y,
+                false,
+            ),
+            yerleşimli_test_etiketi(
+                Dikdörtgen::yeni(10.0, 14.0, 20.0, 10.0),
+                1.0,
+                EtiketÖrtüşmeKaydırması::Y,
+                false,
+            ),
+            yerleşimli_test_etiketi(
+                Dikdörtgen::yeni(10.0, 18.0, 20.0, 10.0),
+                1.0,
+                EtiketÖrtüşmeKaydırması::Y,
+                false,
+            ),
+        ];
+
+        saçılım_etiketlerini_eksende_kaydır(&mut etiketler, 1, 100.0);
+
+        assert_eq!(etiketler[0].çakışma_kutusu.y, 10.0);
+        assert_eq!(etiketler[1].çakışma_kutusu.y, 20.0);
+        assert_eq!(etiketler[2].çakışma_kutusu.y, 30.0);
+    }
+
+    #[test]
+    fn label_layout_hide_overlap_büyük_sembolün_etiketini_korur() {
+        let mut etiketler = vec![
+            yerleşimli_test_etiketi(
+                Dikdörtgen::yeni(10.0, 10.0, 30.0, 12.0),
+                4.0,
+                EtiketÖrtüşmeKaydırması::Yok,
+                true,
+            ),
+            yerleşimli_test_etiketi(
+                Dikdörtgen::yeni(20.0, 10.0, 30.0, 12.0),
+                16.0,
+                EtiketÖrtüşmeKaydırması::Yok,
+                true,
+            ),
+        ];
+
+        çakışan_saçılım_etiketlerini_gizle(&mut etiketler);
+
+        assert!(etiketler[0].gizli);
+        assert!(!etiketler[1].gizli);
+    }
+
+    #[test]
+    fn scatter_label_line_sembol_ve_metin_kutusunun_en_yakın_kenarlarına_bağlanır() {
+        let etiket = yerleşimli_test_etiketi(
+            Dikdörtgen::yeni(60.0, 45.0, 20.0, 10.0),
+            1.0,
+            EtiketÖrtüşmeKaydırması::Yok,
+            false,
+        );
+
+        let noktalar = saçılım_etiket_çizgisi_noktaları(&etiket, 5.0);
+
+        assert_eq!(noktalar, [(15.0, 50.0), (55.0, 50.0), (60.0, 50.0)]);
     }
 }

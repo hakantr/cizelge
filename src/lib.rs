@@ -104,11 +104,12 @@ pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
-    EtiketÇizgisi, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, GöstergeSaatiSerisi, GülTürü,
-    GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
-    MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarSerisi, SankeyBağı,
-    SankeySerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi,
-    ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
+    EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi,
+    GöstergeSaatiSerisi, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
+    IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
+    PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol, Seri,
+    SütunSerisi, TakvimSerisi, TemaNehriSerisi, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri,
+    ÖzelÇizim,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -200,11 +201,12 @@ pub mod hazir {
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
-        EtiketÇizgisi, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi, GöstergeSaatiSerisi, GülTürü,
-        GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması, IsıHaritasıSerisi, KirişSerisi,
-        KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarSerisi,
-        SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol, Seri, SütunSerisi, TakvimSerisi,
-        TemaNehriSerisi, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
+        EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi,
+        GöstergeSaatiSerisi, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
+        IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
+        PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol, Seri,
+        SütunSerisi, TakvimSerisi, TemaNehriSerisi, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri,
+        ÖzelÇizim,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

@@ -527,7 +527,8 @@ impl SütunSerisi {
     }
 }
 
-/// Pasta dilimi etiket çizgisi (`labelLine`).
+/// Etiket kılavuz çizgisi (`labelLine`). Pasta dış etiketleri ve taşınmış
+/// scatter etiketleri aynı ECharts çizgi modeliyle çizilir.
 #[derive(Clone, PartialEq, Debug)]
 pub struct EtiketÇizgisi {
     pub göster: bool,
@@ -612,12 +613,72 @@ pub struct EtiketYerleşimParametreleri {
     pub etiket_çizgisi_noktaları: Option<[(f32, f32); 3]>,
 }
 
+/// `series.labelLayout.moveOverlap` ekseni.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum EtiketÖrtüşmeKaydırması {
+    /// Etiketleri taşıma.
+    #[default]
+    Yok,
+    /// Yatay sırayı koruyarak çakışmaları gider (`shiftX`).
+    X,
+    /// Dikey sırayı koruyarak çakışmaları gider (`shiftY`).
+    Y,
+}
+
 /// `series.labelLayout` geri çağrısının değiştirebildiği değerler.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct EtiketYerleşimSonucu {
+    /// Tuval piksel uzayında mutlak etiket x konumu.
     pub x: Option<f32>,
+    /// Tuval piksel uzayında mutlak etiket y konumu.
     pub y: Option<f32>,
+    pub yatay_hiza: Option<crate::model::stil::YazıYatayHizası>,
+    pub dikey_hiza: Option<crate::model::stil::YazıDikeyHizası>,
+    pub örtüşme_kaydırması: EtiketÖrtüşmeKaydırması,
+    /// Taşımadan sonra kalan çakışmalarda düşük öncelikli etiketi gizler.
+    pub çakışanı_gizle: bool,
     pub etiket_çizgisi_noktaları: Option<[(f32, f32); 3]>,
+}
+
+impl EtiketYerleşimSonucu {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn x(mut self, x: f32) -> Self {
+        self.x = Some(x);
+        self
+    }
+
+    pub fn y(mut self, y: f32) -> Self {
+        self.y = Some(y);
+        self
+    }
+
+    pub fn yatay_hiza(mut self, hiza: crate::model::stil::YazıYatayHizası) -> Self {
+        self.yatay_hiza = Some(hiza);
+        self
+    }
+
+    pub fn dikey_hiza(mut self, hiza: crate::model::stil::YazıDikeyHizası) -> Self {
+        self.dikey_hiza = Some(hiza);
+        self
+    }
+
+    pub fn örtüşme_kaydırması(mut self, kaydırma: EtiketÖrtüşmeKaydırması) -> Self {
+        self.örtüşme_kaydırması = kaydırma;
+        self
+    }
+
+    pub fn çakışanı_gizle(mut self, gizle: bool) -> Self {
+        self.çakışanı_gizle = gizle;
+        self
+    }
+
+    pub fn etiket_çizgisi_noktaları(mut self, noktalar: [(f32, f32); 3]) -> Self {
+        self.etiket_çizgisi_noktaları = Some(noktalar);
+        self
+    }
 }
 
 type EtiketYerleşimGeriÇağrısı =
@@ -1171,6 +1232,12 @@ pub struct SaçılımSerisi {
     pub sembol_boyutu: SembolBoyutu,
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
+    /// Sembol ile `labelLayout` tarafından taşınan etiket arasındaki kılavuz
+    /// çizgisi (`labelLine`). `None`, scatter öntanımlısı olan gizli durumdur.
+    pub etiket_çizgisi: Option<EtiketÇizgisi>,
+    /// Etiketi tuval piksel uzayında taşıyan ve örtüşme politikasını seçen
+    /// `labelLayout` geri çağrısı.
+    pub etiket_yerleşimi: Option<EtiketYerleşimİşlevi>,
     /// Dataset `encode.label` için kullanılan boyut adı.
     pub etiket_boyutu: Option<String>,
     pub imleyiciler: İmleyiciler,
@@ -1213,6 +1280,8 @@ impl Default for SaçılımSerisi {
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
             öğe_stili: ÖğeStili::default(),
             etiket: Etiket::default(),
+            etiket_çizgisi: None,
+            etiket_yerleşimi: None,
             etiket_boyutu: None,
             imleyiciler: İmleyiciler::default(),
             efektli: false,
@@ -1354,6 +1423,19 @@ impl SaçılımSerisi {
 
     pub fn etiket(mut self, etiket: Etiket) -> Self {
         self.etiket = etiket;
+        self
+    }
+
+    pub fn etiket_çizgisi(mut self, çizgi: EtiketÇizgisi) -> Self {
+        self.etiket_çizgisi = Some(çizgi);
+        self
+    }
+
+    pub fn etiket_yerleşimi(
+        mut self,
+        işlev: impl Fn(&EtiketYerleşimParametreleri) -> EtiketYerleşimSonucu + Send + Sync + 'static,
+    ) -> Self {
+        self.etiket_yerleşimi = Some(EtiketYerleşimİşlevi::yeni(işlev));
         self
     }
 
