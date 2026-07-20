@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 150,
   "değişen_piksel_oranı": 0.0005555555555555556,
-  "ssim": 0.9989065948799009,
+  "ssim": 0.9989065666387779,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-large.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-large.png",

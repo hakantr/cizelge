@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 403,
-  "değişen_piksel_oranı": 0.0014925925925925927,
-  "ssim": 0.997855489457206,
+  "değişen_piksel": 528,
+  "değişen_piksel_oranı": 0.0019555555555555554,
+  "ssim": 0.9964472211011268,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-nebula.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-nebula.png",

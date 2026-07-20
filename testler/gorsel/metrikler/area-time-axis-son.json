@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 439,
   "değişen_piksel_oranı": 0.0016259259259259258,
-  "ssim": 0.99849467470593,
+  "ssim": 0.9984946378552004,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/area-time-axis.png",
     "gerçek": "testler/gorsel/gerçek/default/area-time-axis.png",
