@@ -189,12 +189,12 @@ fn kutupsal_sütun_etiketi_çiz(
             {
                 açı -= std::f32::consts::PI;
             }
-            açı
+            -açı
         }
         EtiketDöndürme::Derece(derece) => -derece.to_radians(),
         EtiketDöndürme::Radyal => orta_açı,
         EtiketDöndürme::TeğetselÇevirmesiz => {
-            (std::f32::consts::PI * 1.5 - orta_açı).rem_euclid(std::f32::consts::TAU)
+            -(std::f32::consts::PI * 1.5 - orta_açı).rem_euclid(std::f32::consts::TAU)
         }
     };
     çizici.dönüşümlü_yazı(
