@@ -128,6 +128,15 @@ const SENARYOLAR = [
   { id: 'scatter-label-align-right', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-aqi-color', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-weight', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'scatter-aggregate-bar',
+    tür: 'animasyon',
+    kareler: [
+      { ad: 'scatter', kare: 1, durum: 'başlangıç' },
+      { ad: 'bar', kare: 1, durum: 'bar' },
+      { ad: 'scatter-dönüş', kare: 1, durum: 'scatter-return' }
+    ]
+  },
   { id: 'scatter-stream-visual', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-painter-choice', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-clustering', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

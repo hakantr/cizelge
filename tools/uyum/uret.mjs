@@ -156,6 +156,7 @@ const YEREL_FIXTURE = Object.freeze({
   'scatter-label-align-right': 'examples/uyum_fixture.rs#scatter_label_align_right',
   'scatter-aqi-color': 'examples/uyum_fixture.rs#scatter_aqi_color',
   'scatter-weight': 'examples/uyum_fixture.rs#scatter_weight',
+  'scatter-aggregate-bar': 'examples/uyum_fixture.rs#scatter_aggregate_bar',
   'scatter-stream-visual': 'examples/uyum_fixture.rs#scatter_stream_visual',
   'scatter-painter-choice': 'examples/uyum_fixture.rs#scatter_painter_choice',
   'scatter-clustering': 'examples/uyum_fixture.rs#scatter_clustering',

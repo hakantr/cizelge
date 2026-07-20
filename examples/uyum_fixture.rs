@@ -4941,6 +4941,44 @@ fn scatter_clustering_process(durum: &str) -> Result<GrafikSeçenekleri, String>
         .map_err(|hata| hata.to_string())
 }
 
+fn scatter_aggregate_bar_verisini_oku() -> Result<(Vec<[f64; 2]>, Vec<[f64; 2]>), String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-aggregate-bar.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let kadın = resmi_javascript_dizisi(&kaynak, "const femaleData")?;
+    // Resmî kaynak değişken adındaki `Deta` yazımını bilinçli
+    // olarak koruyor; veri otoritesi sabitlenmiş kaynak dosyasıdır.
+    let erkek = resmi_javascript_dizisi(&kaynak, "const maleDeta")?;
+    Ok((kadın, erkek))
+}
+
+fn scatter_aggregate_bar(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let (kadın, erkek) = scatter_aggregate_bar_verisini_oku()?;
+    if durum == "bar" {
+        let ortalama = |veri: &[[f64; 2]]| {
+            veri.iter().map(|değer| değer[0]).sum::<f64>() / veri.len().max(1) as f64
+        };
+        return Ok(GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["Female", "Male"]))
+            .y_ekseni(Eksen::değer())
+            // Kaynak barOption, kategori adlarına karşılık veri grubu
+            // ortalamalarını bu (erkek, kadın) sırasıyla verir.
+            .kimlikli_seri(
+                "total",
+                SütunSerisi::yeni().veri([ortalama(&erkek), ortalama(&kadın)]),
+            ));
+    }
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .x_ekseni(Eksen::değer().ölçekli(true))
+        .y_ekseni(Eksen::değer().ölçekli(true))
+        .kimlikli_seri("female", SaçılımSerisi::yeni().veri(kadın))
+        .kimlikli_seri("male", SaçılımSerisi::yeni().veri(erkek)))
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_kümeleme_verisi_testleri {
@@ -5017,6 +5055,49 @@ mod scatter_kümeleme_süreç_testleri {
         seçenekler
             .doğrula()
             .expect("timeline seçeneği geçerli olmalı");
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_aggregate_bar_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_iki_veri_grubu_kayipsiz_okunur() {
+        let (kadın, erkek) = scatter_aggregate_bar_verisini_oku().expect("resmi veri okunmalı");
+        assert_eq!(kadın.len(), 260);
+        assert_eq!(erkek.len(), 247);
+        assert_eq!(kadın.first(), Some(&[161.2, 51.6]));
+        assert_eq!(kadın.last(), Some(&[163.8, 67.3]));
+        assert_eq!(erkek.first(), Some(&[174.0, 65.6]));
+        assert_eq!(erkek.last(), Some(&[180.3, 83.2]));
+    }
+
+    #[test]
+    fn set_option_döngüsü_iki_scatter_ve_tek_bar_durumunu_kuruyor() {
+        let scatter = scatter_aggregate_bar("başlangıç").expect("scatter kurulmalı");
+        assert_eq!(scatter.seriler.len(), 2);
+        assert!(
+            scatter
+                .seriler
+                .iter()
+                .all(|seri| matches!(seri, Seri::Saçılım(_)))
+        );
+        assert_eq!(scatter.seri_kimliği(0), Some("female"));
+        assert_eq!(scatter.seri_kimliği(1), Some("male"));
+
+        let bar = scatter_aggregate_bar("bar").expect("bar kurulmalı");
+        assert_eq!(bar.seriler.len(), 1);
+        assert!(matches!(bar.seriler.first(), Some(Seri::Sütun(_))));
+        assert_eq!(bar.seri_kimliği(0), Some("total"));
+        let değerler = bar.seriler[0]
+            .veri()
+            .iter()
+            .filter_map(|öğe| öğe.değer.sayı())
+            .collect::<Vec<_>>();
+        assert!((değerler[0] - 177.745).abs() < 0.001);
+        assert!((değerler[1] - 164.872).abs() < 0.001);
     }
 }
 
@@ -7723,6 +7804,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-painter-choice" => scatter_painter_choice(),
         "scatter-clustering" => scatter_clustering(),
         "scatter-clustering-process" => scatter_clustering_process(durum),
+        "scatter-aggregate-bar" => scatter_aggregate_bar(durum),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),

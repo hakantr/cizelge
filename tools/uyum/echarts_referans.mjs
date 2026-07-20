@@ -95,8 +95,19 @@ function html(id, kaynak, frame, state, width, height) {
   const kümelemeSırası = id === 'scatter-clustering-process' && state.startsWith('step-')
     ? Number(state.slice('step-'.length))
     : null;
+  const aggregateTikleri = id === 'scatter-aggregate-bar'
+    ? state === 'bar' ? 1 : state === 'scatter-return' ? 2 : 0
+    : null;
   const sonEylem = Number.isInteger(kümelemeSırası)
     ? `myChart.dispatchAction({type:'timelineChange', currentIndex:${kümelemeSırası}});`
+    : Number.isInteger(aggregateTikleri) && aggregateTikleri > 0
+      ? `{
+          const zamanlayıcı = window.__capturedIntervals[0];
+          if (!zamanlayıcı || zamanlayıcı.ms !== 2000) {
+            throw new Error('scatter-aggregate-bar 2000 ms zamanlayıcısı yakalanamadı');
+          }
+          for (let tik = 0; tik < ${aggregateTikleri}; tik += 1) zamanlayıcı.callback();
+        }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'dataset-link' && state === 'son'
@@ -286,7 +297,7 @@ echarts.registerPreprocessor((opt) => {
     for (const item of values) if (item.padding == null) item.padding = 15;
   }
 });
-${id === 'dynamic-data2' || id === 'dynamic-data' ? `
+${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' ? `
 // Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
 // ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
 // girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.
