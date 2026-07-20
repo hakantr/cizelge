@@ -15912,7 +15912,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-breaks-brush.ts",
     "kaynak_sha256": "19f8963bae9c7f0d02b8ba45cf40ea4441830b0ff5a98797568b5446e8238959",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_breaks_brush",
     "seriler": [
       "bar",
       "shadow"
@@ -15932,7 +15932,7 @@
       "mousemove"
     ],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15943,15 +15943,88 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "başlangıç",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 2603,
+          "değişen_piksel_oranı": 0.009640740740740741,
+          "ssim": 0.990369959956886,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-başlangıç.png",
+            "sha256": "4db0a766831b97da494050a246619570510557013084e074fe3120a9b9aaf119"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-breaks-brush-başlangıç.png",
+            "sha256": "8ef40af5350d1bab26998ffac3d1ff4672f2e683a5366cc98b74e4db3aa15be7"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-breaks-brush-başlangıç.png",
+            "sha256": "6f2b40ba67c8dc87a6fef48d59455afb39570db2945beb0ddb13c09c4f6ffcad"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-breaks-brush-başlangıç.json",
+            "sha256": "f3265d0f835e066afdee6fee5843dcb5092abd1f273054dfd5f1f7a3ec74cb2d"
+          }
+        },
+        {
+          "ad": "fırça",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 2509,
+          "değişen_piksel_oranı": 0.009292592592592592,
+          "ssim": 0.9922594495783387,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-fırça.png",
+            "sha256": "7eae03ecdcce27df3a950933d2d9c54edc4dae832c3b9948a62c3694c4a78cb8"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-breaks-brush-fırça.png",
+            "sha256": "6818b6969f97394676c1a9e1999d21a6477078af5cf21734db2e40fe8466d005"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-breaks-brush-fırça.png",
+            "sha256": "8a242f4f6bcdd9fcfb6f16ad85683fd5da7f1a7bbc59414dfbf18bbc95c92688"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-breaks-brush-fırça.json",
+            "sha256": "56c8aa01cb6fe8e091577efac8d5674c2f8c80635d61905edb294c4503ad9414"
+          }
+        },
+        {
+          "ad": "sıfırla",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 2182,
+          "değişen_piksel_oranı": 0.008081481481481481,
+          "ssim": 0.996896392455523,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-sıfırla.png",
+            "sha256": "03bebed2b43563f173715a3d9e7f14a3c1008ccd6bea67389e34d64ab822dd29"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-breaks-brush-sıfırla.png",
+            "sha256": "7a5b666b6d3a6cd79504a643939c3e20ad76a09a353e124cdecc16866bd4cef3"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-breaks-brush-sıfırla.png",
+            "sha256": "24351784fe17ca45cfe7e4febdc663ad143ed3434bc0eebc1272dcfbd846e087"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-breaks-brush-sıfırla.json",
+            "sha256": "c11efb5cb555ffb5f03a1e7237d6be8a0c2b58121e074439dad00a5747047a27"
+          }
+        }
+      ]
     }
   },
   {
