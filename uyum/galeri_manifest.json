@@ -20237,7 +20237,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-logarithmic-regression.ts",
     "kaynak_sha256": "de78cfa7c1403f768f8417cf74729f0d31f000664c35db7bc8f6c78316432955",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_logarithmic_regression",
     "seriler": [
       "cross",
       "dashed",
@@ -20257,7 +20257,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -20268,15 +20268,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1663,
+          "değişen_piksel_oranı": 0.006159259259259259,
+          "ssim": 0.9930586792415457,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-logarithmic-regression.png",
+            "sha256": "620c3d41ad09d86727fa01053e026b02cbc7f31ecd852efe747d81b2fe6d5449"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-logarithmic-regression.png",
+            "sha256": "73968f0375910555b35a7fa6d7421655169bfa80a41d8186ed082fd2e43d57a3"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-logarithmic-regression.png",
+            "sha256": "8622d5df5d230ac73f40e78e16bc7dd531cb54a3791687e5949cb74ea50ff186"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-logarithmic-regression-son.json",
+            "sha256": "846ab69308f29de0b25d6175bfed03fc9db44e87ef1b1a2a409b20fed6e437ee"
+          }
+        }
+      ]
     }
   },
   {
