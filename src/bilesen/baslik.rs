@@ -12,6 +12,7 @@ fn metin_ölç(
     metin: Option<&str>,
     boyut: f32,
     satır_yüksekliği: f32,
+    kalın: bool,
 ) -> (f32, f32) {
     let Some(metin) = metin else {
         return (0.0, 0.0);
@@ -19,7 +20,7 @@ fn metin_ölç(
     let satırlar: Vec<&str> = metin.split('\n').collect();
     let genişlik = satırlar
         .iter()
-        .map(|satır| çizici.yazı_ölç(satır, boyut).0)
+        .map(|satır| çizici.stilli_yazı_ölç(satır, boyut, kalın).0)
         .fold(0.0_f32, f32::max);
     (genişlik, satır_yüksekliği * satırlar.len() as f32)
 }
@@ -61,11 +62,26 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
     let alt_boyut = başlık.alt_yazı.boyut.unwrap_or(tema::ALT_BAŞLIK_BOYUTU);
     let metin_satırı = başlık.yazı.satır_yüksekliği.unwrap_or(metin_boyutu);
     let alt_satırı = başlık.alt_yazı.satır_yüksekliği.unwrap_or(alt_boyut);
+    let ana_kalın = if başlık.yazı.kalınlık_belirtildi {
+        başlık.yazı.kalın
+    } else {
+        true
+    };
 
-    let (ana_genişlik, ana_yükseklik) =
-        metin_ölç(çizici, başlık.metin.as_deref(), metin_boyutu, metin_satırı);
-    let (alt_genişlik, alt_yükseklik) =
-        metin_ölç(çizici, başlık.alt_metin.as_deref(), alt_boyut, alt_satırı);
+    let (ana_genişlik, ana_yükseklik) = metin_ölç(
+        çizici,
+        başlık.metin.as_deref(),
+        metin_boyutu,
+        metin_satırı,
+        ana_kalın,
+    );
+    let (alt_genişlik, alt_yükseklik) = metin_ölç(
+        çizici,
+        başlık.alt_metin.as_deref(),
+        alt_boyut,
+        alt_satırı,
+        başlık.alt_yazı.kalın,
+    );
     let blok_genişliği = ana_genişlik.max(alt_genişlik);
     let blok_yüksekliği = ana_yükseklik
         + if başlık.alt_metin.is_some() {
@@ -157,11 +173,7 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
             metin_boyutu,
             metin_satırı,
             renk,
-            if başlık.yazı.kalınlık_belirtildi {
-                başlık.yazı.kalın
-            } else {
-                true
-            },
+            ana_kalın,
         );
         y += ana_yükseklik + başlık.öğe_boşluğu;
     } else if başlık.alt_metin.is_some() {

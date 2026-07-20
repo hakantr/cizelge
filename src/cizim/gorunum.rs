@@ -7,7 +7,7 @@
 //! yapıştırma (tuval, fare, animasyon karesi, olay yayını) yalnızca
 //! [`crate::cizim::pencere::GrafikGörünümü`]dedir.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::bilesen::baslik::başlık_çiz;
 use crate::bilesen::eksen_cizimi::{
@@ -508,6 +508,7 @@ fn seri_fırça_noktası(
     seri: &Seri,
     veri_sırası: usize,
     kartezyen: &Kartezyen2B,
+    sütun_merkez_kayması: f32,
 ) -> Option<(f32, f32)> {
     let öğe = seri.veri().get(veri_sırası)?;
     let x_kategorik = kartezyen.x.ölçek.kategorik_mi();
@@ -541,7 +542,89 @@ fn seri_fırça_noktası(
             }
         }
     };
-    Some(kartezyen.nokta(x, y))
+    let mut nokta = kartezyen.nokta(x, y);
+    if matches!(seri, Seri::Sütun(_)) {
+        if y_kategorik && !x_kategorik {
+            nokta.1 += sütun_merkez_kayması;
+        } else {
+            nokta.0 += sütun_merkez_kayması;
+        }
+    }
+    Some(nokta)
+}
+
+fn sütun_grup_anahtarı(seri: &Seri, kurulum: &KartezyenKurulum) -> (bool, usize) {
+    let bağ = seri.eksen_bağı();
+    let y_kategorik = kurulum
+        .y_eksenler
+        .get(bağ.y)
+        .map(|eksen| eksen.ölçek.kategorik_mi())
+        .unwrap_or(false);
+    if y_kategorik {
+        (false, bağ.y)
+    } else {
+        (true, bağ.x)
+    }
+}
+
+/// Bar brushSelector veri noktasını kategori merkezinde değil, gerçek sütun
+/// dikdörtgeninin merkezinde sınar. Yığınlar aynı kaymayı paylaşır; yan yana
+/// yığınlar kategori bandının iki tarafına ayrılır.
+fn sütun_fırça_merkez_kaymaları(
+    seçenekler: &GrafikSeçenekleri,
+    kurulum: &KartezyenKurulum,
+) -> HashMap<usize, f32> {
+    let mut gruplar: Vec<((bool, usize), Vec<SütunGirdisi>)> = Vec::new();
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        if !kurulum
+            .görünürler
+            .get(seri_sırası)
+            .copied()
+            .unwrap_or(false)
+        {
+            continue;
+        }
+        let Seri::Sütun(sütun) = seri else {
+            continue;
+        };
+        let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
+            continue;
+        };
+        let girdi = SütunGirdisi {
+            seri: sütun,
+            kartezyen,
+            genel_sıra: seri_sırası,
+            aralıklar: kurulum
+                .aralıklar
+                .get(seri_sırası)
+                .map(Vec::as_slice)
+                .unwrap_or(&[]),
+            renk: seçenekler.seri_rengi(seri_sırası),
+            görsel_eşlemeler: Vec::new(),
+            öğe_opaklıkları: None,
+            öğe_renkleri: None,
+        };
+        let anahtar = sütun_grup_anahtarı(seri, kurulum);
+        match gruplar.iter_mut().find(|(aday, _)| *aday == anahtar) {
+            Some((_, grup)) => grup.push(girdi),
+            None => gruplar.push((anahtar, vec![girdi])),
+        }
+    }
+
+    let mut kaymalar = HashMap::new();
+    for (_, grup) in gruplar {
+        let Some(ilk) = grup.first() else { continue };
+        let yatay = ilk.kartezyen.y.ölçek.kategorik_mi() && !ilk.kartezyen.x.ölçek.kategorik_mi();
+        let bant = if yatay {
+            ilk.kartezyen.y.bant_genişliği()
+        } else {
+            ilk.kartezyen.x.bant_genişliği()
+        };
+        for (girdi, konum) in grup.iter().zip(yerleşim_hesapla(&grup, bant)) {
+            kaymalar.insert(girdi.genel_sıra, konum.kaydırma + konum.genişlik / 2.0);
+        }
+    }
+    kaymalar
 }
 
 fn fırçayı_hazırla(
@@ -556,6 +639,7 @@ fn fırçayı_hazırla(
         .iter()
         .filter_map(|alan| fırça_alanını_hazırla(alan, kurulum))
         .collect::<Vec<_>>();
+    let sütun_merkez_kaymaları = sütun_fırça_merkez_kaymaları(seçenekler, kurulum);
     let mut doğrudan = seçenekler
         .seriler
         .iter()
@@ -589,8 +673,16 @@ fn fırçayı_hazırla(
                 continue;
             };
             for (veri_sırası, seçili) in seçimler.iter_mut().enumerate() {
-                if seri_fırça_noktası(seri, veri_sırası, &kartezyen)
-                    .is_some_and(|nokta| alan.piksel.içeriyor_mu(nokta))
+                if seri_fırça_noktası(
+                    seri,
+                    veri_sırası,
+                    &kartezyen,
+                    sütun_merkez_kaymaları
+                        .get(&seri_sırası)
+                        .copied()
+                        .unwrap_or(0.0),
+                )
+                .is_some_and(|nokta| alan.piksel.içeriyor_mu(nokta))
                 {
                     *seçili = true;
                 }
@@ -3179,19 +3271,6 @@ pub fn grafiği_boya(
         // Sütunlar değer eksenine göre değil ortak kategori (taban) eksenine
         // göre gruplanır. ECharts böylece iki ayrı yAxis'e bağlı sütunları da
         // aynı kategoride yan yana yerleştirir.
-        let sütun_grup_anahtarı = |seri: &Seri| {
-            let bağ = seri.eksen_bağı();
-            let y_kategorik = kurulum
-                .y_eksenler
-                .get(bağ.y)
-                .map(|eksen| eksen.ölçek.kategorik_mi())
-                .unwrap_or(false);
-            if y_kategorik {
-                (false, bağ.y)
-            } else {
-                (true, bağ.x)
-            }
-        };
         let mut sütun_grupları: Vec<((bool, usize), Vec<SütunGirdisi>)> = Vec::new();
         for (i, s) in seçenekler.seriler.iter().enumerate() {
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
@@ -3201,7 +3280,7 @@ pub fn grafiği_boya(
                 let Some(seri_kartezyeni) = kurulum.seri_kartezyeni(s) else {
                     continue;
                 };
-                let anahtar = sütun_grup_anahtarı(s);
+                let anahtar = sütun_grup_anahtarı(s, kurulum);
                 let girdi = SütunGirdisi {
                     seri: sütun,
                     kartezyen: seri_kartezyeni,
@@ -3430,7 +3509,7 @@ pub fn grafiği_boya(
                             }
                         }
                         Seri::Sütun(_) => {
-                            let anahtar = sütun_grup_anahtarı(seri);
+                            let anahtar = sütun_grup_anahtarı(seri, kurulum);
                             if çizilen_sütun_grupları.insert(anahtar)
                                 && let Some((_, girdiler)) =
                                     sütun_grupları.iter().find(|(aday, _)| *aday == anahtar)
@@ -3708,7 +3787,7 @@ pub fn grafiği_boya(
                 && (imleyiciler.çizgi.is_some() || imleyiciler.nokta.is_some())
             {
                 let kategori_kaydırması = if matches!(seri, Seri::Sütun(_)) {
-                    let anahtar = sütun_grup_anahtarı(seri);
+                    let anahtar = sütun_grup_anahtarı(seri, kurulum);
                     sütun_grupları
                         .iter()
                         .find(|(aday, _)| *aday == anahtar)
