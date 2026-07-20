@@ -119,6 +119,7 @@ pub use model::stil::{
 pub use model::takvim::{
     TakvimAralığı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
 };
+pub use model::tek_eksen::{TekEksen, TekEksenKonumu, TekEksenYönü};
 pub use model::veri_kumesi::{
     BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi, KaynakBaşlığı,
     KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü, RegresyonDönüşümü,
@@ -219,6 +220,7 @@ pub mod hazir {
     pub use crate::model::takvim::{
         TakvimAralığı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
     };
+    pub use crate::model::tek_eksen::{TekEksen, TekEksenKonumu, TekEksenYönü};
     pub use crate::model::veri_kumesi::{
         BoyutSeçici, BoyutTanımı, BoyutTürü, DönüşümKayıtDefteri, Karşılaştırmaİşlemi,
         KaynakBaşlığı, KaynakSeçenekleri, Kodlama, KutuDönüşümü, KutuSınırı, KümelemeDönüşümü,

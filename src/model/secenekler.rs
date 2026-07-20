@@ -11,6 +11,7 @@ use crate::model::matris::MatrisKoordinatı;
 use crate::model::radar::RadarKoordinatı;
 use crate::model::seri::Seri;
 use crate::model::takvim::TakvimKoordinatı;
+use crate::model::tek_eksen::TekEksen;
 use crate::model::veri_kumesi::{
     BoyutSeçici, SeriYerleşimi, VeriKümesi, VeriKümesiTanımı, veri_kümelerini_çöz,
 };
@@ -59,6 +60,8 @@ pub struct GrafikSeçenekleri {
     pub matris: Option<MatrisKoordinatı>,
     /// Birden çok ECharts `calendar` koordinat bileşeni.
     pub takvimler: Vec<TakvimKoordinatı>,
+    /// Birden çok ECharts `singleAxis` koordinat bileşeni.
+    pub tek_eksenler: Vec<TekEksen>,
     /// Ortak veri tablosu (`dataset`); seriler `eşle(...)` ile beslenir.
     pub veri_kümesi: Option<VeriKümesi>,
     /// Çoklu kaynak ve built-in dönüşüm zinciri (`dataset: []`). Boşsa
@@ -108,6 +111,7 @@ impl Default for GrafikSeçenekleri {
             kutupsal: None,
             matris: None,
             takvimler: Vec::new(),
+            tek_eksenler: Vec::new(),
             veri_kümesi: None,
             veri_kümeleri: Vec::new(),
             veri_yakınlaştırmaları: Vec::new(),
@@ -316,6 +320,12 @@ impl GrafikSeçenekleri {
 
     pub fn takvim(mut self, koordinat: TakvimKoordinatı) -> Self {
         self.takvimler.push(koordinat);
+        self
+    }
+
+    /// `singleAxis: []` dizisine tek eksenli koordinat ekler.
+    pub fn tek_eksen(mut self, koordinat: TekEksen) -> Self {
+        self.tek_eksenler.push(koordinat);
         self
     }
 
@@ -747,7 +757,11 @@ impl GrafikSeçenekleri {
                 }
             }
         }
-        for eksen in x_eksenler.iter().chain(y_eksenler.iter()) {
+        for eksen in x_eksenler
+            .iter()
+            .chain(y_eksenler.iter())
+            .chain(self.tek_eksenler.iter().map(|tek| &tek.eksen))
+        {
             if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
                 && en_az >= en_çok
             {
@@ -809,6 +823,15 @@ impl GrafikSeçenekleri {
             }
         }
         for seri in &self.seriler {
+            if let Seri::Saçılım(saçılım) = seri
+                && let Some(tek_eksen_sırası) = saçılım.tek_eksen_sırası
+                && self.tek_eksenler.get(tek_eksen_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "singleAxis",
+                    sıra: tek_eksen_sırası,
+                });
+            }
             if let Seri::Saçılım(saçılım) = seri
                 && let Some(takvim_sırası) = saçılım.takvim_sırası
                 && self.takvimler.get(takvim_sırası).is_none()

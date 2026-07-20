@@ -1300,8 +1300,10 @@ pub struct SaçılımSerisi {
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
     /// Takvim koordinatına bağlıysa `calendarIndex`; `None`, kartezyen ya da
-    /// kutupsal saçılım demektir.
+    /// başka bir koordinat sistemindeki saçılım demektir.
     pub takvim_sırası: Option<usize>,
+    /// Tek eksenli koordinata bağlıysa `singleAxisIndex`.
+    pub tek_eksen_sırası: Option<usize>,
     /// ZRender tuval katmanı (`zlevel`). Takvim bileşeninde pozitif değer,
     /// seriyi ay/etiket üst katmanının da üzerine taşır.
     pub z_seviyesi: i32,
@@ -1338,6 +1340,7 @@ impl Default for SaçılımSerisi {
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
             takvim_sırası: None,
+            tek_eksen_sırası: None,
             z_seviyesi: 0,
             sessiz: false,
             veriye_göre_renk: false,
@@ -1378,6 +1381,7 @@ impl SaçılımSerisi {
         self.kutupsal = açık;
         if açık {
             self.takvim_sırası = None;
+            self.tek_eksen_sırası = None;
         }
         self
     }
@@ -1386,6 +1390,16 @@ impl SaçılımSerisi {
     /// `calendarIndex`).
     pub fn takvim_sırası(mut self, sıra: usize) -> Self {
         self.takvim_sırası = Some(sıra);
+        self.tek_eksen_sırası = None;
+        self.kutupsal = false;
+        self
+    }
+
+    /// Seriyi tek eksenli koordinata bağlar (`coordinateSystem:
+    /// 'singleAxis'`, `singleAxisIndex`).
+    pub fn tek_eksen_sırası(mut self, sıra: usize) -> Self {
+        self.tek_eksen_sırası = Some(sıra);
+        self.takvim_sırası = None;
         self.kutupsal = false;
         self
     }
@@ -1409,6 +1423,7 @@ impl SaçılımSerisi {
     pub fn eksenler(mut self, x: usize, y: usize) -> Self {
         self.eksen_bağı = EksenBağı { x, y };
         self.takvim_sırası = None;
+        self.tek_eksen_sırası = None;
         self.kutupsal = false;
         self
     }
@@ -2547,7 +2562,9 @@ impl Seri {
         match self {
             Seri::Çizgi(s) => s.kutupsal,
             Seri::Sütun(s) => s.kutupsal,
-            Seri::Saçılım(s) => s.kutupsal && s.takvim_sırası.is_none(),
+            Seri::Saçılım(s) => {
+                s.kutupsal && s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none()
+            }
             Seri::Hatlar(s) => s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal,
             _ => false,
         }
@@ -2562,10 +2579,6 @@ impl Seri {
             self,
             Seri::Çizgi(_)
                 | Seri::Sütun(_)
-                | Seri::Saçılım(SaçılımSerisi {
-                    takvim_sırası: None,
-                    ..
-                })
                 | Seri::Mum(_)
                 | Seri::Kutu(_)
                 | Seri::Isı(_)
@@ -2573,7 +2586,13 @@ impl Seri {
                     koordinat_sistemi: HatKoordinatSistemi::Kartezyen2B,
                     ..
                 })
-        ) || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
+        ) || matches!(self, Seri::Saçılım(s) if s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none())
+            || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
+    }
+
+    /// Tek eksenli koordinat sisteminde mi çizilir?
+    pub fn tek_eksen_mi(&self) -> bool {
+        matches!(self, Seri::Saçılım(s) if s.tek_eksen_sırası.is_some())
     }
 
     pub fn veri(&self) -> &[VeriÖğesi] {

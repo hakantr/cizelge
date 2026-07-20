@@ -23,6 +23,7 @@ use crate::model::radar::RadarKoordinatı;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::Seri;
 use crate::model::takvim::TakvimKoordinatı;
+use crate::model::tek_eksen::TekEksen;
 use crate::model::veri_kumesi::{VeriKümesi, VeriKümesiTanımı};
 use crate::model::yakinlastirma::VeriYakınlaştırma;
 use crate::renk::{Dolgu, Renk};
@@ -46,6 +47,7 @@ pub enum SeçenekAlanı {
     Kutupsal,
     Matris,
     Takvimler,
+    TekEksenler,
     VeriKümesi,
     VeriYakınlaştırmaları,
     AraçKutusu,
@@ -60,7 +62,7 @@ pub enum SeçenekAlanı {
     AnimasyonEğrisi,
 }
 
-const TÜM_ALANLAR: [SeçenekAlanı; 27] = [
+const TÜM_ALANLAR: [SeçenekAlanı; 28] = [
     SeçenekAlanı::Başlık,
     SeçenekAlanı::Gösterge,
     SeçenekAlanı::Izgara,
@@ -76,6 +78,7 @@ const TÜM_ALANLAR: [SeçenekAlanı; 27] = [
     SeçenekAlanı::Kutupsal,
     SeçenekAlanı::Matris,
     SeçenekAlanı::Takvimler,
+    SeçenekAlanı::TekEksenler,
     SeçenekAlanı::VeriKümesi,
     SeçenekAlanı::VeriYakınlaştırmaları,
     SeçenekAlanı::AraçKutusu,
@@ -384,6 +387,12 @@ impl SeçenekYaması {
     pub fn takvimler(mut self, takvimler: impl IntoIterator<Item = TakvimKoordinatı>) -> Self {
         self.değer.takvimler = takvimler.into_iter().collect();
         self.sağlanan.insert(SeçenekAlanı::Takvimler);
+        self
+    }
+
+    pub fn tek_eksenler(mut self, eksenler: impl IntoIterator<Item = TekEksen>) -> Self {
+        self.değer.tek_eksenler = eksenler.into_iter().collect();
+        self.sağlanan.insert(SeçenekAlanı::TekEksenler);
         self
     }
 
@@ -1508,6 +1517,7 @@ fn yamayı_uygula(
     alanı_uygula!(kutupsal, SeçenekAlanı::Kutupsal);
     alanı_uygula!(matris, SeçenekAlanı::Matris);
     alanı_uygula!(takvimler, SeçenekAlanı::Takvimler);
+    alanı_uygula!(tek_eksenler, SeçenekAlanı::TekEksenler);
     alanı_uygula!(veri_kümesi, SeçenekAlanı::VeriKümesi);
     alanı_uygula!(veri_kümeleri, SeçenekAlanı::VeriKümesi);
     alanı_uygula!(veri_yakınlaştırmaları, SeçenekAlanı::VeriYakınlaştırmaları);

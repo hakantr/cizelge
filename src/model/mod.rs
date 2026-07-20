@@ -15,6 +15,7 @@ pub mod secenekler;
 pub mod seri;
 pub mod stil;
 pub mod takvim;
+pub mod tek_eksen;
 pub mod veri_kumesi;
 pub mod yakinlastirma;
 

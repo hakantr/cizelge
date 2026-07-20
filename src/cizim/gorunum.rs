@@ -43,13 +43,15 @@ use crate::grafik::radar::{
 };
 use crate::grafik::sacilim::{
     SaçılımNoktası, saçılım_görsel_kapsamı, saçılım_nokta_boyutlarını_eşle, saçılım_noktaları,
-    saçılım_xy, saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları,
+    saçılım_xy, saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları, tek_eksen_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
 use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_koordinatında_çiz, takvim_çiz};
 use crate::grafik::tema_nehri::tema_nehri_çiz;
-use crate::koordinat::{Dikdörtgen, Kartezyen2B, TakvimYerleşimi, ÇalışmaEkseni};
+use crate::koordinat::{
+    Dikdörtgen, Kartezyen2B, TakvimYerleşimi, TekEksenYerleşimi, ÇalışmaEkseni,
+};
 use crate::model::bilesen::{
     AraçKutusuÖzelliği, FırçaAracıTürü, GöstergeSimgesi, Tetikleme, Yön, İmleçTürü, İpucu,
     İpucuParametresi,
@@ -619,6 +621,188 @@ fn takvim_saçılım_serisini_çiz(
         }],
         f,
     ))
+}
+
+/// `singleAxis` bileşenlerini ve bunlara bağlı scatter/effectScatter
+/// serilerini ECharts katman sırasıyla boyar: bölme çizgileri, eksen, seri.
+/// Başlıklar daha yüksek `z` değerinde olduğundan çağıran bu katmanı başlık
+/// bileşeninden önce geçirir.
+#[allow(clippy::too_many_arguments)]
+fn tek_eksenleri_çiz(
+    yüzey: &mut dyn ÇizimYüzeyi,
+    seçenekler: &GrafikSeçenekleri,
+    kapalı: &HashSet<String>,
+    ilerleme: f32,
+    zaman_sn: f32,
+    ipucu_seçeneği: Option<&İpucu>,
+    fare: Option<(f32, f32)>,
+    programatik_ipucu: Option<(usize, usize)>,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) -> Option<Bekleyenİpucu> {
+    if seçenekler.tek_eksenler.is_empty() {
+        return None;
+    }
+
+    let mut yerleşimler = Vec::with_capacity(seçenekler.tek_eksenler.len());
+    for (tek_sırası, tek) in seçenekler.tek_eksenler.iter().enumerate() {
+        let bağlı_seriler = seçenekler
+            .seriler
+            .iter()
+            .filter_map(|seri| match seri {
+                Seri::Saçılım(saçılım)
+                    if saçılım.tek_eksen_sırası == Some(tek_sırası)
+                        && ad_görünür(seri.ad(), kapalı) =>
+                {
+                    Some(saçılım)
+                }
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+
+        let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+        let mut en_büyük_kategori = None::<usize>;
+        for seri in &bağlı_seriler {
+            for (veri_sırası, öğe) in seri.veri.iter().enumerate() {
+                let Some((değer, _)) = saçılım_xy(&öğe.değer, veri_sırası) else {
+                    continue;
+                };
+                if değer.is_finite() {
+                    kapsam[0] = kapsam[0].min(değer);
+                    kapsam[1] = kapsam[1].max(değer);
+                    if değer >= 0.0 && değer.fract().abs() <= 1e-9 {
+                        en_büyük_kategori =
+                            Some(en_büyük_kategori.unwrap_or_default().max(değer as usize));
+                    }
+                }
+            }
+        }
+        if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
+            kapsam = [0.0, 1.0];
+        }
+        let kategoriler = if tek.eksen.veri.is_empty() {
+            en_büyük_kategori
+                .map(|son| (0..=son).map(|sıra| sıra.to_string()).collect())
+                .unwrap_or_default()
+        } else {
+            tek.eksen.veri.clone()
+        };
+        let ölçek = ölçek_kur(&tek.eksen, kategoriler, kapsam);
+        let mut çizim_modeli = tek.clone();
+        let bölme_rengi = çizim_modeli
+            .eksen
+            .bölme_çizgisi
+            .renk
+            .unwrap_or_else(tema::bölme_çizgisi)
+            .opaklık(çizim_modeli.bölme_çizgisi_opaklığı);
+        çizim_modeli.eksen.bölme_çizgisi.renk = Some(bölme_rengi);
+        yerleşimler.push(TekEksenYerleşimi::kur(
+            &çizim_modeli,
+            (yüzey.genişlik(), yüzey.yükseklik()),
+            ölçek,
+        ));
+    }
+
+    // Bütün bileşen çizgileri seri simgelerinin altında kalır.
+    for yerleşim in &yerleşimler {
+        let eksenler = [&yerleşim.eksen];
+        bölme_çizgilerini_çiz(yüzey, yerleşim.alan, &eksenler);
+        eksenleri_çiz(yüzey, yerleşim.alan, &eksenler);
+    }
+
+    let mut bekleyen = None;
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Saçılım(saçılım) = seri else {
+            continue;
+        };
+        let Some(tek_sırası) = saçılım.tek_eksen_sırası else {
+            continue;
+        };
+        if !ad_görünür(seri.ad(), kapalı) {
+            continue;
+        }
+        let Some(yerleşim) = yerleşimler.get(tek_sırası) else {
+            continue;
+        };
+        let görsel_eşlemeler = seçenekler
+            .seri_görsel_eşlemeleri(seri_sırası)
+            .map(|eşleme| (eşleme, saçılım_görsel_kapsamı(saçılım, eşleme)))
+            .collect::<Vec<_>>();
+        let mut noktalar = tek_eksen_saçılım_noktaları(saçılım, yerleşim);
+        saçılım_nokta_boyutlarını_eşle(saçılım, &mut noktalar, &görsel_eşlemeler);
+        let fare_vurgusu = match (saçılım.sessiz, ipucu_seçeneği, fare) {
+            (false, Some(ipucu), Some(f))
+                if ipucu.tetikleme != Tetikleme::Kapalı
+                    && seçenekler
+                        .tek_eksenler
+                        .get(tek_sırası)
+                        .is_some_and(|tek| tek.ipucu_göster) =>
+            {
+                noktalar
+                    .iter()
+                    .filter(|nokta| {
+                        let dx = nokta.konum.0 - f.0;
+                        let dy = nokta.konum.1 - f.1;
+                        let yarıçap = (nokta.boyut / 2.0 + 3.0).max(8.0);
+                        dx * dx + dy * dy <= yarıçap * yarıçap
+                    })
+                    .min_by(|a, b| {
+                        let da = (a.konum.0 - f.0).powi(2) + (a.konum.1 - f.1).powi(2);
+                        let db = (b.konum.0 - f.0).powi(2) + (b.konum.1 - f.1).powi(2);
+                        da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+                    })
+                    .map(|nokta| nokta.sıra)
+            }
+            _ => None,
+        };
+        let vurgu = fare_vurgusu.or_else(|| {
+            programatik_ipucu
+                .filter(|(hedef_seri, _)| *hedef_seri == seri_sırası)
+                .map(|(_, veri_sırası)| veri_sırası)
+        });
+        saçılım_çiz_çoklu_eşlemeli(
+            yüzey,
+            saçılım,
+            &noktalar,
+            seçenekler.seri_rengi(seri_sırası),
+            ilerleme,
+            zaman_sn,
+            vurgu,
+            &görsel_eşlemeler,
+            &seçenekler.palet,
+        );
+        if !saçılım.sessiz {
+            for nokta in &noktalar {
+                isabetler.push(İsabetBölgesi {
+                    seri_sırası,
+                    veri_sırası: nokta.sıra,
+                    seri_adı: saçılım.ad.clone(),
+                    ad: saçılım.veri.get(nokta.sıra).and_then(|öğe| öğe.ad.clone()),
+                    değer: Some(nokta.y_değeri),
+                    geometri: İsabetGeometrisi::Daire {
+                        merkez: nokta.konum,
+                        yarıçap: (nokta.boyut / 2.0 + 3.0).max(8.0),
+                    },
+                });
+            }
+        }
+        let Some(veri_sırası) = vurgu else {
+            continue;
+        };
+        let Some(nokta) = noktalar.iter().find(|nokta| nokta.sıra == veri_sırası) else {
+            continue;
+        };
+        let konum = fare.unwrap_or(nokta.konum);
+        bekleyen = Some((
+            saçılım.ad.clone(),
+            vec![İpucuSatırı {
+                im_rengi: Some(seçenekler.seri_rengi(seri_sırası)),
+                ad: binlik_ayır(nokta.x_değeri),
+                değer: binlik_ayır(nokta.y_değeri),
+            }],
+            konum,
+        ));
+    }
+    bekleyen
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -2041,6 +2225,10 @@ pub fn grafiği_boya(
         );
     }
     let kapalı = &etkili_kapalı;
+    let ipucu_seçeneği = seçenekler.ipucu.clone().filter(|i| i.göster);
+    // `(başlık, satırlar, konum)`; bütün koordinat sistemleri aynı üst
+    // katmandaki tooltip penceresine veri bırakır.
+    let mut bekleyen_ipucu: Option<Bekleyenİpucu> = None;
 
     // 1) Arka plan (koyu temada zemin, açıkça verilmemişse de doldurulur).
     let zemin = seçenekler
@@ -2074,6 +2262,23 @@ pub fn grafiği_boya(
         if let Some(yerleşim) = yerleşim {
             takvim_arka_planı_çiz(yüzey, takvim, yerleşim);
         }
+    }
+
+    // `singleAxis` bileşenleri z=0/seri z=2 katmanındadır. TitleView z=6
+    // olduğundan resmî çoklu satır örneğindeki gün başlıkları bunların
+    // üzerinde boyanır.
+    if let Some(ipucu) = tek_eksenleri_çiz(
+        yüzey,
+        seçenekler,
+        kapalı,
+        ilerleme,
+        zaman_sn,
+        ipucu_seçeneği.as_ref(),
+        fare,
+        girdi.ipucu_öğesi,
+        &mut çıktı.isabetler,
+    ) {
+        bekleyen_ipucu = Some(ipucu);
     }
 
     // 2) Başlık.
@@ -2429,16 +2634,11 @@ pub fn grafiği_boya(
         }
     }
 
-    let ipucu_seçeneği = seçenekler.ipucu.clone().filter(|i| i.göster);
-
     // 4) Kartezyen bölüm (çoklu ızgara/eksen).
     let kurulum = kartezyen_kur(yüzey, seçenekler, kapalı);
     if let Some(kurulum) = &kurulum {
         çıktı.ızgara_alanları.clone_from(&kurulum.ızgara_alanları);
     }
-    // `(başlık, satırlar, konum)`.
-    let mut bekleyen_ipucu: Option<Bekleyenİpucu> = None;
-
     if let Some(kurulum) = &kurulum {
         // Eksen imleci içeriği (gölge serilerin altına, çizgi üstüne çizilir).
         let eksen_ipucu = match (&ipucu_seçeneği, fare) {

@@ -2,7 +2,9 @@
 
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::sembol_stilli_çiz;
-use crate::koordinat::{Dikdörtgen, Kartezyen2B, TakvimYerleşimi};
+use crate::koordinat::{
+    Dikdörtgen, Kartezyen2B, TakvimYerleşimi, TekEksenYerleşimi, ÇalışmaEkseni,
+};
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::{
@@ -114,15 +116,12 @@ fn titreme_rastgelesi(durum: &mut u32) -> f64 {
     (t ^ (t >> 14)) as f64 / 4_294_967_296.0
 }
 
-fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B) {
-    let (x_mi, eksen) = if kartezyen.x.ölçek.kategorik_mi() && kartezyen.x.seçenek.titreme > 0.0
-    {
-        (true, &kartezyen.x)
-    } else if kartezyen.y.ölçek.kategorik_mi() && kartezyen.y.seçenek.titreme > 0.0 {
-        (false, &kartezyen.y)
-    } else {
+fn titremeyi_eksende_uygula(
+    noktalar: &mut [SaçılımNoktası], eksen: &ÇalışmaEkseni, x_mi: bool
+) {
+    if !eksen.ölçek.kategorik_mi() || eksen.seçenek.titreme <= 0.0 {
         return;
-    };
+    }
     let titreme = eksen.seçenek.titreme;
     let bant = eksen.bant_genişliği() as f64;
     let mut yerleşenler = Vec::with_capacity(noktalar.len());
@@ -182,6 +181,14 @@ fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B
         } else {
             nokta.konum.1 = yeni as f32;
         }
+    }
+}
+
+fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B) {
+    if kartezyen.x.ölçek.kategorik_mi() && kartezyen.x.seçenek.titreme > 0.0 {
+        titremeyi_eksende_uygula(noktalar, &kartezyen.x, true);
+    } else if kartezyen.y.ölçek.kategorik_mi() && kartezyen.y.seçenek.titreme > 0.0 {
+        titremeyi_eksende_uygula(noktalar, &kartezyen.y, false);
     }
 }
 
@@ -255,6 +262,38 @@ pub fn takvim_saçılım_noktaları(
             })
         })
         .collect()
+}
+
+/// `singleAxis`e bağlı scatter/effectScatter noktalarını üretir. Veri
+/// ECharts'taki gibi `[eksenDeğeri, görselDeğer, ...]` biçimindedir; ikinci
+/// boyut sembol boyutu, etiket, tooltip ve visualMap için korunur.
+pub fn tek_eksen_saçılım_noktaları(
+    seri: &SaçılımSerisi,
+    yerleşim: &TekEksenYerleşimi,
+) -> Vec<SaçılımNoktası> {
+    let mut noktalar = seri
+        .veri
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, öğe)| {
+            let (eksen_değeri, görsel_değer) = saçılım_xy(&öğe.değer, sıra)?;
+            let konum = yerleşim.veriden_noktaya(eksen_değeri);
+            yerleşim.içeriyor_mu(konum).then_some(SaçılımNoktası {
+                sıra,
+                konum,
+                boyut: seri.sembol_boyutu.bağlamla_çöz(öğe, sıra),
+                x_değeri: eksen_değeri,
+                y_değeri: görsel_değer,
+                palet_sırası: None,
+            })
+        })
+        .collect::<Vec<_>>();
+    titremeyi_eksende_uygula(
+        &mut noktalar,
+        &yerleşim.eksen,
+        yerleşim.yön == crate::model::tek_eksen::TekEksenYönü::Yatay,
+    );
+    noktalar
 }
 
 /// Scatter/effectScatter ikinci koordinat boyutunun görsel eşleme kapsamı.
