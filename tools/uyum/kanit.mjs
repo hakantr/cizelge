@@ -153,6 +153,7 @@ const SENARYOLAR = [
     kareler: [0, 0.25, 0.5, 0.75, 1].map((kare, sıra) => ({ ad: `kare-${sıra}`, kare, durum: 'başlangıç' }))
   },
   { id: 'pie-nest', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'pie-rich-text', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-doughnut', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-roseType-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

@@ -45,6 +45,8 @@ pub struct Dilim {
     pub renk: Renk,
     pub merkez: (f32, f32),
     pub görünüm_alanı: Dikdörtgen,
+    /// Seri etiketi ile `data[i].label` yamasının birleştirilmiş modeli.
+    pub etiket: Etiket,
     pub etiket_göster: bool,
     pub yüzde_hassasiyeti: u8,
 }
@@ -254,6 +256,14 @@ pub fn pasta_yerleşimi_merkezle(
             })
             .unwrap_or((taban_dolgu, taban_renk));
 
+        let etiket = öğe
+            .etiket
+            .as_ref()
+            .map(|yama| yama.uygula(&seri.etiket))
+            .unwrap_or_else(|| seri.etiket.clone());
+        let etiket_göster = etiket.göster
+            && (gerçek_bitiş - gerçek_başlangıç).abs().to_degrees()
+                >= seri.en_küçük_etiket_açısı as f64;
         dilimler.push(Dilim {
             sıra,
             ad: öğe.ad.clone().unwrap_or_else(|| format!("{sıra}")),
@@ -270,8 +280,8 @@ pub fn pasta_yerleşimi_merkezle(
             renk,
             merkez,
             görünüm_alanı: alan,
-            etiket_göster: (gerçek_bitiş - gerçek_başlangıç).abs().to_degrees()
-                >= seri.en_küçük_etiket_açısı as f64,
+            etiket,
+            etiket_göster,
             yüzde_hassasiyeti: seri.yüzde_hassasiyeti,
         });
         açı = geometrik_bitiş;
@@ -455,11 +465,8 @@ pub fn pasta_çiz(
         );
     }
 
-    // 2) Etiketler ve etiket çizgileri.
-    if !seri.etiket.göster {
-        return;
-    }
-    let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+    // 2) Etiketler ve etiket çizgileri. Seri etiketi kapalı olsa bile bir
+    // veri öğesi `data[i].label.show: true` ile kendi etiketini açabilir.
     // `pie/labelLayout.ts`: roseType dilimlerinin gerçek dış yarıçapları
     // farklı olsa da kırık çizginin dirseği seri `r + length` elipsine
     // taşınır. Böylece bütün dış etiketler aynı sanal çemberi paylaşır.
@@ -472,22 +479,23 @@ pub fn pasta_çiz(
         if !dilim.etiket_göster {
             continue;
         }
+        let etiket = &dilim.etiket;
         let orta_açı = dilim.orta_açı;
         let orta_kosinüs = orta_açı.cos() as f32;
         let orta_sinüs = orta_açı.sin() as f32;
         let ham_metin = pasta_etiket_zengin_metni(seri, dilim);
         let metin = zengin_metin_içeriği(ham_metin.clone());
-        match seri.etiket.konum {
+        match etiket.konum {
             EtiketKonumu::Merkez => {
-                let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
+                let renk = etiket.yazı.renk.unwrap_or(tema::birincil_metin());
                 zengin_etiketi_yaz(
                     çizici,
                     &ham_metin,
-                    &seri.etiket,
+                    etiket,
                     dilim.merkez,
                     YatayHiza::Orta,
                     renk,
-                    etiket_dönüş_açısı(seri.etiket.döndürme, orta_açı as f32, false),
+                    etiket_dönüş_açısı(etiket.döndürme, orta_açı as f32, false),
                 );
             }
             EtiketKonumu::İç => {
@@ -499,7 +507,7 @@ pub fn pasta_çiz(
                     dilim.merkez.1 + yarıçap * orta_sinüs,
                 );
                 let opaklık = seri.öğe_stili.opaklık.unwrap_or(1.0);
-                let (renk, kontur) = match seri.etiket.yazı.renk {
+                let (renk, kontur) = match etiket.yazı.renk {
                     Some(renk) => (renk, None),
                     None => {
                         let (metin, kontur) = dilim.dolgu.zrender_iç_etiket_stili(tema::koyu_mu());
@@ -512,12 +520,12 @@ pub fn pasta_çiz(
                 zengin_etiketi_konturlu_yaz(
                     çizici,
                     &ham_metin,
-                    &seri.etiket,
+                    etiket,
                     konum,
                     YatayHiza::Orta,
                     renk,
                     kontur,
-                    etiket_dönüş_açısı(seri.etiket.döndürme, orta_açı as f32, true),
+                    etiket_dönüş_açısı(etiket.döndürme, orta_açı as f32, true),
                 );
             }
             _ => {
@@ -535,20 +543,21 @@ pub fn pasta_çiz(
                 );
                 let b2 = (b1.0 + if sağda { u2 } else { -u2 }, b1.1);
                 let görünüm = dilim.görünüm_alanı;
-                let kenar = kenar_uzaklığını_çöz(seri, görünüm);
-                let (konum, hiza) = match seri.etiket.dış_hiza {
+                let kenar = kenar_uzaklığını_çöz(etiket, görünüm);
+                let (konum, hiza) = match etiket.dış_hiza {
                     DışEtiketHizası::Kenar if sağda => {
                         ((görünüm.sağ() - kenar, b2.1), YatayHiza::Sağ)
                     }
                     DışEtiketHizası::Kenar => ((görünüm.x + kenar, b2.1), YatayHiza::Sol),
-                    _ if sağda => ((b2.0 + seri.etiket.çizgi_uzaklığı, b2.1), YatayHiza::Sol),
-                    _ => ((b2.0 - seri.etiket.çizgi_uzaklığı, b2.1), YatayHiza::Sağ),
+                    _ if sağda => ((b2.0 + etiket.çizgi_uzaklığı, b2.1), YatayHiza::Sol),
+                    _ => ((b2.0 - etiket.çizgi_uzaklığı, b2.1), YatayHiza::Sağ),
                 };
-                let metin_ölçüsü = zengin_metin_ölç(çizici, &ham_metin, &seri.etiket);
-                let kenarlık_payını = etiket_kenarlık_payını(&seri.etiket);
-                let yarım_boşluk = (seri.etiket.en_küçük_boşluk + kenarlık_payını) / 2.0;
+                let metin_ölçüsü = zengin_metin_ölç(çizici, &ham_metin, etiket);
+                let kenarlık_payını = etiket_kenarlık_payını(etiket);
+                let yarım_boşluk = (etiket.en_küçük_boşluk + kenarlık_payını) / 2.0;
                 dış_etiketler.push(DışEtiketYerleşimi {
                     dilim_sırası,
+                    etiket: etiket.clone(),
                     tam_ham_metin: ham_metin.clone(),
                     ham_metin,
                     tam_metin: metin.clone(),
@@ -562,7 +571,7 @@ pub fn pasta_çiz(
                     kısıtlı_genişlik: None,
                     dikdörtgen_y: konum.1 - metin_ölçüsü.1 / 2.0 - yarım_boşluk,
                     dikdörtgen_yüksekliği: metin_ölçüsü.1
-                        + seri.etiket.en_küçük_boşluk
+                        + etiket.en_küçük_boşluk
                         + kenarlık_payını,
                 });
             }
@@ -574,7 +583,6 @@ pub fn pasta_çiz(
         dilimler,
         &mut dış_etiketler,
         seri_dış_yarıçapı,
-        boyut,
         genel_etiket_kutuları,
     );
 }
@@ -585,7 +593,7 @@ fn pasta_etiket_metni(seri: &PastaSerisi, dilim: &Dilim) -> String {
 }
 
 fn pasta_etiket_zengin_metni(seri: &PastaSerisi, dilim: &Dilim) -> String {
-    let Some(biçimleyici) = &seri.etiket.biçimleyici else {
+    let Some(biçimleyici) = &dilim.etiket.biçimleyici else {
         return dilim.ad.clone();
     };
     let Biçimleyici::Şablon(şablon) = biçimleyici else {
@@ -880,10 +888,16 @@ fn zengin_metin_yerleşimi(
         if matches!(etiket.yazı.genişlik, Some(Uzunluk::Piksel(_))) {
             zengin_satırı_genişliğe_sığdır(çizici, satır, içerik_genişliği);
         }
+        // zrender `line.width`i yüzde genişlikli token'lar çözülmeden önce
+        // sabitler. `{title|...}{abg|}` satırında `%100` başlık şeridinin
+        // ortadaki başlığı sola itmemesi bu ayrıntıya bağlıdır.
+        zengin_satır_ölçülerini_güncelle(satır);
+        let yerleşim_genişliği = satır.genişlik;
         for koşu in &mut satır.koşular {
             zengin_koşuyu_ölç(çizici, koşu, Some(içerik_genişliği));
         }
         zengin_satır_ölçülerini_güncelle(satır);
+        satır.genişlik = yerleşim_genişliği;
     }
     let içerik_yüksekliği: f32 = satırlar.iter().map(|satır| satır.yükseklik).sum();
     let iç_boşluk = yazı_iç_boşluğu(&etiket.yazı);
@@ -1094,32 +1108,45 @@ fn zengin_koşu_xleri(
     varsayılan_hiza: YazıYatayHizası,
 ) -> Vec<f32> {
     let mut sonuç = vec![0.0; satır.koşular.len()];
-    let mut sol = 0.0_f32;
-    for (sıra, koşu) in satır.koşular.iter().enumerate() {
-        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Sol {
-            sonuç[sıra] = sol;
-            sol += koşu.dış_genişlik;
+    let mut kalan_genişlik = satır.genişlik;
+    let mut sol_sıra = 0_usize;
+    let mut sol_x = 0.0_f32;
+    while let Some(koşu) = satır.koşular.get(sol_sıra) {
+        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) != YazıYatayHizası::Sol {
+            break;
         }
+        sonuç[sol_sıra] = sol_x;
+        sol_x += koşu.dış_genişlik;
+        kalan_genişlik -= koşu.dış_genişlik;
+        sol_sıra += 1;
     }
-    let mut sağ = içerik_genişliği;
-    for (sıra, koşu) in satır.koşular.iter().enumerate().rev() {
-        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Sağ {
-            sağ -= koşu.dış_genişlik;
-            sonuç[sıra] = sağ;
+
+    let mut sağ_sıra = satır.koşular.len();
+    let mut sağ_x = içerik_genişliği;
+    while sağ_sıra > sol_sıra {
+        let sıra = sağ_sıra - 1;
+        let Some(koşu) = satır.koşular.get(sıra) else {
+            break;
+        };
+        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) != YazıYatayHizası::Sağ {
+            break;
         }
+        sağ_x -= koşu.dış_genişlik;
+        sonuç[sıra] = sağ_x;
+        kalan_genişlik -= koşu.dış_genişlik;
+        sağ_sıra = sıra;
     }
-    let orta_genişliği: f32 = satır
-        .koşular
-        .iter()
-        .filter(|koşu| koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Orta)
-        .map(|koşu| koşu.dış_genişlik)
-        .sum();
-    let mut orta = (içerik_genişliği - orta_genişliği) / 2.0;
-    for (sıra, koşu) in satır.koşular.iter().enumerate() {
-        if koşu.yazı.yatay_hiza.unwrap_or(varsayılan_hiza) == YazıYatayHizası::Orta {
-            sonuç[sıra] = orta;
-            orta += koşu.dış_genişlik;
-        }
+
+    // zrender `_updateRichTexts`: kenarlara yerleştirilen ön/son koşuların
+    // arasında kalan grup, yalnız kendi genişliğine göre değil iki kenarın
+    // tükettiği alan da hesaba katılarak ortalanır.
+    sol_x += (içerik_genişliği - sol_x - (içerik_genişliği - sağ_x) - kalan_genişlik) / 2.0;
+    for sıra in sol_sıra..sağ_sıra {
+        let Some(koşu) = satır.koşular.get(sıra) else {
+            continue;
+        };
+        sonuç[sıra] = sol_x;
+        sol_x += koşu.dış_genişlik;
     }
     sonuç
 }
@@ -1320,6 +1347,7 @@ fn veri_değeri_metni(değer: &VeriDeğeri) -> String {
 #[derive(Clone, Debug)]
 struct DışEtiketYerleşimi {
     dilim_sırası: usize,
+    etiket: Etiket,
     tam_ham_metin: String,
     ham_metin: String,
     tam_metin: String,
@@ -1337,11 +1365,11 @@ struct DışEtiketYerleşimi {
     dikdörtgen_yüksekliği: f32,
 }
 
-fn kenar_uzaklığını_çöz(seri: &PastaSerisi, görünüm: Dikdörtgen) -> f32 {
-    if seri.etiket.dış_hiza == DışEtiketHizası::Kenar && seri.etiket.kenar_boşluğu > 0.0 {
-        seri.etiket.kenar_boşluğu
+fn kenar_uzaklığını_çöz(etiket: &Etiket, görünüm: Dikdörtgen) -> f32 {
+    if etiket.dış_hiza == DışEtiketHizası::Kenar && etiket.kenar_boşluğu > 0.0 {
+        etiket.kenar_boşluğu
     } else {
-        seri.etiket.kenar_uzaklığı.çöz(görünüm.genişlik)
+        etiket.kenar_uzaklığı.çöz(görünüm.genişlik)
     }
 }
 
@@ -1384,7 +1412,6 @@ fn dış_etiketleri_yerleştir_ve_çiz(
     dilimler: &[Dilim],
     etiketler: &mut [DışEtiketYerleşimi],
     seri_yarıçapı: f32,
-    boyut: f32,
     genel_etiket_kutuları: &mut Vec<Dikdörtgen>,
 ) {
     if etiketler.is_empty() {
@@ -1399,22 +1426,28 @@ fn dış_etiketleri_yerleştir_ve_çiz(
     // `pie/labelLayout.ts::constrainTextWidth`: varsayılan
     // `overflow: 'truncate'` görünüm kutusuna sığmayan dış etiketleri üç
     // noktayla kısaltır. Hedef genişlik hizalama stratejisine göre değişir.
-    etiket_metinlerini_sınırla(çizici, seri, etiketler, merkez, görünüm, boyut, false);
+    etiket_metinlerini_sınırla(çizici, etiketler, merkez, görünüm, false);
 
     // `alignTo: 'labelLine'`: aynı taraftaki bütün metin çapalarını en
     // uzaktaki label-line ucuna taşır; dirsek aynı miktarda ötelenir.
-    if seri.etiket.dış_hiza == DışEtiketHizası::EtiketÇizgisi {
-        for sağda in [false, true] {
+    for sağda in [false, true] {
+        if etiketler.iter().any(|etiket| {
+            etiket.etiket.dış_hiza == DışEtiketHizası::EtiketÇizgisi
+                && (etiket.konum.0 >= merkez.0) == sağda
+        }) {
             let uç = etiketler
                 .iter()
-                .filter(|e| (e.konum.0 >= merkez.0) == sağda)
+                .filter(|e| {
+                    e.etiket.dış_hiza == DışEtiketHizası::EtiketÇizgisi
+                        && (e.konum.0 >= merkez.0) == sağda
+                })
                 .map(|e| e.konum.0)
                 .reduce(if sağda { f32::max } else { f32::min });
             if let Some(uç) = uç {
-                for etiket in etiketler
-                    .iter_mut()
-                    .filter(|e| (e.konum.0 >= merkez.0) == sağda)
-                {
+                for etiket in etiketler.iter_mut().filter(|e| {
+                    e.etiket.dış_hiza == DışEtiketHizası::EtiketÇizgisi
+                        && (e.konum.0 >= merkez.0) == sağda
+                }) {
                     let fark = etiket.konum.0 - uç;
                     etiket.noktalar[1].0 += fark;
                     etiket.konum.0 = uç;
@@ -1423,10 +1456,12 @@ fn dış_etiketleri_yerleştir_ve_çiz(
         }
     }
 
-    let döndürülmüş = !matches!(
-        seri.etiket.döndürme,
-        EtiketDöndürme::Yok | EtiketDöndürme::Derece(0.0)
-    );
+    let döndürülmüş = etiketler.iter().any(|etiket| {
+        !matches!(
+            etiket.etiket.döndürme,
+            EtiketDöndürme::Yok | EtiketDöndürme::Derece(0.0)
+        )
+    });
     if seri.etiket_çakışmasını_önle && !döndürülmüş {
         for sağda in [false, true] {
             let mut sıralar: Vec<usize> = etiketler
@@ -1436,20 +1471,27 @@ fn dış_etiketleri_yerleştir_ve_çiz(
                 .collect();
             let değişti =
                 etiketleri_dikey_kaydır(etiketler, &mut sıralar, görünüm.y, görünüm.alt());
-            if değişti && seri.etiket.dış_hiza == DışEtiketHizası::Yok {
-                etiket_xlerini_elipse_uyarla(
-                    etiketler,
-                    &sıralar,
-                    merkez,
-                    seri_yarıçapı,
-                    if sağda { 1.0 } else { -1.0 },
-                    seri.etiket_çizgisi.uzunluk1,
-                    seri.etiket_çizgisi.uzunluk2,
-                );
+            if değişti {
+                let yok_sıraları = sıralar
+                    .iter()
+                    .copied()
+                    .filter(|sıra| etiketler[*sıra].etiket.dış_hiza == DışEtiketHizası::Yok)
+                    .collect::<Vec<_>>();
+                if !yok_sıraları.is_empty() {
+                    etiket_xlerini_elipse_uyarla(
+                        etiketler,
+                        &yok_sıraları,
+                        merkez,
+                        seri_yarıçapı,
+                        if sağda { 1.0 } else { -1.0 },
+                        seri.etiket_çizgisi.uzunluk1,
+                        seri.etiket_çizgisi.uzunluk2,
+                    );
+                }
                 // Elips üzerinde x değişince kenara kalan metin genişliği de
                 // değişir; resmî kod `forceRecalculate` ile tam metinden
                 // yeniden hesaplar.
-                etiket_metinlerini_sınırla(çizici, seri, etiketler, merkez, görünüm, boyut, true);
+                etiket_metinlerini_sınırla(çizici, etiketler, merkez, görünüm, true);
             }
         }
     }
@@ -1458,27 +1500,28 @@ fn dış_etiketleri_yerleştir_ve_çiz(
         let Some(dilim) = dilimler.get(etiket.dilim_sırası) else {
             continue;
         };
+        let etiket_stili = &etiket.etiket;
         let sağda = etiket.konum.0 >= merkez.0;
         let eski_fark = etiket.noktalar[1].0 - etiket.noktalar[2].0;
-        match seri.etiket.dış_hiza {
+        match etiket_stili.dış_hiza {
             DışEtiketHizası::Kenar if sağda => {
                 etiket.noktalar[2].0 = görünüm.sağ()
-                    - kenar_uzaklığını_çöz(seri, görünüm)
+                    - kenar_uzaklığını_çöz(etiket_stili, görünüm)
                     - etiket.metin_genişliği
-                    - seri.etiket.çizgi_uzaklığı;
+                    - etiket_stili.çizgi_uzaklığı;
             }
             DışEtiketHizası::Kenar => {
                 etiket.noktalar[2].0 = görünüm.x
-                    + kenar_uzaklığını_çöz(seri, görünüm)
+                    + kenar_uzaklığını_çöz(etiket_stili, görünüm)
                     + etiket.metin_genişliği
-                    + seri.etiket.çizgi_uzaklığı;
+                    + etiket_stili.çizgi_uzaklığı;
             }
             _ if sağda => {
-                etiket.noktalar[2].0 = etiket.konum.0 - seri.etiket.çizgi_uzaklığı;
+                etiket.noktalar[2].0 = etiket.konum.0 - etiket_stili.çizgi_uzaklığı;
                 etiket.noktalar[1].0 = etiket.noktalar[2].0 + eski_fark;
             }
             _ => {
-                etiket.noktalar[2].0 = etiket.konum.0 + seri.etiket.çizgi_uzaklığı;
+                etiket.noktalar[2].0 = etiket.konum.0 + etiket_stili.çizgi_uzaklığı;
                 etiket.noktalar[1].0 = etiket.noktalar[2].0 + eski_fark;
             }
         }
@@ -1491,7 +1534,7 @@ fn dış_etiketleri_yerleştir_ve_çiz(
             seri.etiket_çizgisi.en_büyük_yüzey_açısı,
         );
         let etiket_kutusu = |etiket: &DışEtiketYerleşimi| {
-            let kenarlık_payını = etiket_kenarlık_payını(&seri.etiket);
+            let kenarlık_payını = etiket_kenarlık_payını(&etiket.etiket);
             let x = match etiket.hiza {
                 YatayHiza::Sol => etiket.konum.0,
                 YatayHiza::Orta => etiket.konum.0 - etiket.metin_genişliği / 2.0,
@@ -1573,13 +1616,13 @@ fn dış_etiketleri_yerleştir_ve_çiz(
                 .opaklık(çizgi_stili.opaklık);
             çizici.yol_çiz(&yol, çizgi_stili.kalınlık, renk, çizgi_stili.tür);
         }
-        let renk = seri.etiket.yazı.renk.unwrap_or(tema::birincil_metin());
+        let renk = etiket_stili.yazı.renk.unwrap_or(tema::birincil_metin());
         let çizilecek_metin = if etiket.metin == etiket.tam_metin {
             &etiket.ham_metin
         } else {
             &etiket.metin
         };
-        let mut çizim_etiketi = seri.etiket.clone();
+        let mut çizim_etiketi = etiket_stili.clone();
         if let Some(genişlik) = etiket.kısıtlı_genişlik {
             çizim_etiketi.yazı.genişlik = Some(Uzunluk::Piksel(genişlik));
         }
@@ -1590,7 +1633,7 @@ fn dış_etiketleri_yerleştir_ve_çiz(
             etiket.konum,
             etiket.hiza,
             renk,
-            etiket_dönüş_açısı(seri.etiket.döndürme, etiket.orta_açı as f32, false),
+            etiket_dönüş_açısı(etiket_stili.döndürme, etiket.orta_açı as f32, false),
         );
     }
 }
@@ -1605,11 +1648,9 @@ fn etiket_kutuları_örtüşüyor(a: Dikdörtgen, b: Dikdörtgen) -> bool {
 
 fn etiket_metinlerini_sınırla(
     çizici: &dyn ÇizimYüzeyi,
-    seri: &PastaSerisi,
     etiketler: &mut [DışEtiketYerleşimi],
     merkez: (f32, f32),
     görünüm: Dikdörtgen,
-    boyut: f32,
     yalnız_yok: bool,
 ) {
     let sol_uç = etiketler
@@ -1624,25 +1665,26 @@ fn etiket_metinlerini_sınırla(
         .map(|etiket| etiket.konum.0)
         .reduce(f32::max)
         .unwrap_or(merkez.0);
-    let taşma = seri.etiket.taşma_payını.unwrap_or_else(|| {
-        if görünüm.genişlik.min(görünüm.yükseklik) > 200.0 {
-            10.0
-        } else {
-            2.0
-        }
-    });
-    let kenar = kenar_uzaklığını_çöz(seri, görünüm);
     for etiket in etiketler {
-        if yalnız_yok && seri.etiket.dış_hiza != DışEtiketHizası::Yok {
+        let etiket_stili = &etiket.etiket;
+        if yalnız_yok && etiket_stili.dış_hiza != DışEtiketHizası::Yok {
             continue;
         }
+        let taşma = etiket_stili.taşma_payını.unwrap_or_else(|| {
+            if görünüm.genişlik.min(görünüm.yükseklik) > 200.0 {
+                10.0
+            } else {
+                2.0
+            }
+        });
+        let kenar = kenar_uzaklığını_çöz(etiket_stili, görünüm);
         let solda = etiket.konum.0 < merkez.0;
-        let hedef = match seri.etiket.dış_hiza {
+        let hedef = match etiket_stili.dış_hiza {
             DışEtiketHizası::Kenar if solda => {
-                etiket.noktalar[2].0 - seri.etiket.çizgi_uzaklığı - görünüm.x - kenar
+                etiket.noktalar[2].0 - etiket_stili.çizgi_uzaklığı - görünüm.x - kenar
             }
             DışEtiketHizası::Kenar => {
-                görünüm.sağ() - kenar - etiket.noktalar[2].0 - seri.etiket.çizgi_uzaklığı
+                görünüm.sağ() - kenar - etiket.noktalar[2].0 - etiket_stili.çizgi_uzaklığı
             }
             DışEtiketHizası::EtiketÇizgisi if solda => sol_uç - görünüm.x - taşma,
             DışEtiketHizası::EtiketÇizgisi => görünüm.sağ() - sağ_uç - taşma,
@@ -1650,7 +1692,7 @@ fn etiket_metinlerini_sınırla(
             DışEtiketHizası::Yok => görünüm.sağ() - etiket.konum.0 - taşma,
         }
         .max(0.0);
-        let tam_ölçü = zengin_metin_ölç(çizici, &etiket.tam_ham_metin, &seri.etiket);
+        let tam_ölçü = zengin_metin_ölç(çizici, &etiket.tam_ham_metin, etiket_stili);
         if tam_ölçü.0 <= hedef {
             etiket.metin.clone_from(&etiket.tam_metin);
             etiket.ham_metin.clone_from(&etiket.tam_ham_metin);
@@ -1658,7 +1700,8 @@ fn etiket_metinlerini_sınırla(
             etiket.metin_yüksekliği = tam_ölçü.1;
             etiket.kısıtlı_genişlik = None;
         } else {
-            if seri.etiket.zengin.is_empty() {
+            if etiket_stili.zengin.is_empty() {
+                let boyut = etiket_stili.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
                 etiket.metin = etiket
                     .tam_metin
                     .split('\n')
@@ -1666,7 +1709,7 @@ fn etiket_metinlerini_sınırla(
                     .collect::<Vec<_>>()
                     .join("\n");
                 etiket.ham_metin.clone_from(&etiket.metin);
-                let ölçü = zengin_metin_ölç(çizici, &etiket.ham_metin, &seri.etiket);
+                let ölçü = zengin_metin_ölç(çizici, &etiket.ham_metin, etiket_stili);
                 etiket.metin_genişliği = ölçü.0;
                 etiket.metin_yüksekliği = ölçü.1;
                 etiket.kısıtlı_genişlik = None;
@@ -1681,11 +1724,11 @@ fn etiket_metinlerini_sınırla(
                 etiket.kısıtlı_genişlik = Some(hedef);
             }
         }
-        let kenarlık_payını = etiket_kenarlık_payını(&seri.etiket);
-        let yarım_boşluk = (seri.etiket.en_küçük_boşluk + kenarlık_payını) / 2.0;
+        let kenarlık_payını = etiket_kenarlık_payını(etiket_stili);
+        let yarım_boşluk = (etiket_stili.en_küçük_boşluk + kenarlık_payını) / 2.0;
         etiket.dikdörtgen_y = etiket.konum.1 - etiket.metin_yüksekliği / 2.0 - yarım_boşluk;
         etiket.dikdörtgen_yüksekliği =
-            etiket.metin_yüksekliği + seri.etiket.en_küçük_boşluk + kenarlık_payını;
+            etiket.metin_yüksekliği + etiket_stili.en_küçük_boşluk + kenarlık_payını;
     }
 }
 
@@ -2186,6 +2229,46 @@ mod testler {
     }
 
     #[test]
+    fn veri_öğesi_etiketi_seri_etiketini_miras_alıp_geçersiz_kılar() {
+        let seri = PastaSerisi::yeni()
+            .etiket(
+                crate::model::stil::Etiket::yeni()
+                    .göster(false)
+                    .biçimleyici("seri: {b}")
+                    .yazı(
+                        crate::model::stil::YazıStili::yeni()
+                            .boyut(18.0)
+                            .renk("#123456"),
+                    ),
+            )
+            .veri([
+                VeriÖğesi::adlı("Özel", 2.0).etiket(
+                    crate::model::stil::EtiketYaması::yeni()
+                        .göster(true)
+                        .biçimleyici("öğe: {b}")
+                        .yazı(crate::model::stil::YazıStili::yeni().arkaplan("#eeeeee"))
+                        .zengin_stil(
+                            "başlık",
+                            crate::model::stil::YazıStili::yeni().renk("#ffffff"),
+                        ),
+                ),
+                VeriÖğesi::adlı("Seri", 1.0),
+            ]);
+
+        let dilimler = yerleşim(&seri);
+        assert!(dilimler[0].etiket_göster);
+        assert!(!dilimler[1].etiket_göster);
+        assert_eq!(dilimler[0].etiket.yazı.boyut, Some(18.0));
+        assert_eq!(
+            dilimler[0].etiket.yazı.renk,
+            Some(Renk::onaltılık(0x123456))
+        );
+        assert!(dilimler[0].etiket.yazı.arkaplan.is_some());
+        assert!(dilimler[0].etiket.zengin.contains_key("başlık"));
+        assert_eq!(pasta_etiket_metni(&seri, &dilimler[0]), "öğe: Özel");
+    }
+
+    #[test]
     fn geçerli_veri_yokken_boş_daire_çizilir() {
         let seri = PastaSerisi::yeni();
         let mut yüzey = KayıtYüzeyi::yeni(400.0, 300.0);
@@ -2344,6 +2427,34 @@ mod testler {
         let sol = zengin_koşu_xleri(satır, yerleşim.içerik_genişliği, YazıYatayHizası::Sol);
         assert_eq!(sol[0], 0.0);
         assert!((sol[1] - satır.koşular[0].dış_genişlik).abs() < 1e-4);
+
+        let karma_etiket = crate::model::stil::Etiket::yeni()
+            .yazı(crate::model::stil::YazıStili::yeni().genişlik(100.0))
+            .zengin_stil(
+                "sol",
+                crate::model::stil::YazıStili::yeni()
+                    .genişlik(10.0)
+                    .yatay_hiza(YazıYatayHizası::Sol),
+            )
+            .zengin_stil(
+                "orta1",
+                crate::model::stil::YazıStili::yeni()
+                    .genişlik(20.0)
+                    .yatay_hiza(YazıYatayHizası::Orta),
+            )
+            .zengin_stil(
+                "orta2",
+                crate::model::stil::YazıStili::yeni()
+                    .genişlik(30.0)
+                    .yatay_hiza(YazıYatayHizası::Orta),
+            );
+        let karma = zengin_metin_yerleşimi(&yüzey, "{sol|L}{orta1|A}{orta2|B}", &karma_etiket);
+        let karma_x = zengin_koşu_xleri(
+            &karma.satırlar[0],
+            karma.içerik_genişliği,
+            YazıYatayHizası::Sol,
+        );
+        assert_eq!(karma_x, [0.0, 30.0, 50.0]);
     }
 
     #[test]

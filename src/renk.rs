@@ -247,6 +247,9 @@ pub enum DesenTekrarı {
     Yatay,
     Dikey,
     Tek,
+    /// ECharts/zrender rich-text `backgroundColor: { image }` davranışı:
+    /// görüntüyü hedef kutunun tamamına esnetir.
+    Sığdır,
 }
 
 /// Renderer'lardan bağımsız, önden çarpılmış RGBA8 görüntü deseni.

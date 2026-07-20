@@ -4960,6 +4960,150 @@ fn pie_nest() -> GrafikSeçenekleri {
         )
 }
 
+fn hava_ikonu(ad: &str) -> Result<GörüntüDeseni, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/img/weather")
+        .join(format!("{ad}_128.png"));
+    let rgba = image::open(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?
+        .to_rgba8();
+    let (genişlik, yükseklik) = (rgba.width(), rgba.height());
+    GörüntüDeseni::rgba(genişlik, yükseklik, rgba.into_raw(), DesenTekrarı::Sığdır)
+        .ok_or_else(|| format!("{} RGBA boyutları geçersiz", dosya.display()))
+}
+
+fn pie_rich_text() -> Result<GrafikSeçenekleri, String> {
+    let güneşli = hava_ikonu("sunny")?;
+    let bulutlu = hava_ikonu("cloudy")?;
+    let sağanak = hava_ikonu("showers")?;
+    let şehir_e_etiketi = EtiketYaması::yeni()
+        .biçimleyici(
+            "{title|{b}}{abg|}\n  {weatherHead|Weather}{valueHead|Days}{rateHead|Percent}\n{hr|}\n  {Sunny|}{value|202}{rate|55.3%}\n  {Cloudy|}{value|142}{rate|38.9%}\n  {Showers|}{value|21}{rate|5.8%}",
+        )
+        .yazı(
+            YazıStili::yeni()
+                .arkaplan("#eee")
+                .kenarlık_rengi("#777")
+                .kenarlık_kalınlığı(1.0)
+                .kenarlık_yarıçapı(4.0),
+        )
+        .zengin_stil(
+            "title",
+            YazıStili::yeni()
+                .renk("#eee")
+                .yatay_hiza(YazıYatayHizası::Orta),
+        )
+        .zengin_stil(
+            "abg",
+            YazıStili::yeni()
+                .arkaplan("#333")
+                .genişlik("100%")
+                .yatay_hiza(YazıYatayHizası::Sağ)
+                .yükseklik(25.0)
+                .kenarlık_yarıçapları([4.0, 4.0, 0.0, 0.0]),
+        )
+        .zengin_stil(
+            "Sunny",
+            YazıStili::yeni()
+                .yükseklik(30.0)
+                .yatay_hiza(YazıYatayHizası::Sol)
+                .arkaplan(Dolgu::Desen(güneşli)),
+        )
+        .zengin_stil(
+            "Cloudy",
+            YazıStili::yeni()
+                .yükseklik(30.0)
+                .yatay_hiza(YazıYatayHizası::Sol)
+                .arkaplan(Dolgu::Desen(bulutlu)),
+        )
+        .zengin_stil(
+            "Showers",
+            YazıStili::yeni()
+                .yükseklik(30.0)
+                .yatay_hiza(YazıYatayHizası::Sol)
+                .arkaplan(Dolgu::Desen(sağanak)),
+        )
+        .zengin_stil(
+            "weatherHead",
+            YazıStili::yeni()
+                .renk("#333")
+                .yükseklik(24.0)
+                .yatay_hiza(YazıYatayHizası::Sol),
+        )
+        .zengin_stil(
+            "hr",
+            YazıStili::yeni()
+                .kenarlık_rengi("#777")
+                .kenarlık_kalınlığı(0.5)
+                .genişlik("100%")
+                .yükseklik(0.0),
+        )
+        .zengin_stil(
+            "value",
+            YazıStili::yeni()
+                .genişlik(20.0)
+                .iç_boşluk([0.0, 20.0, 0.0, 30.0])
+                .yatay_hiza(YazıYatayHizası::Sol),
+        )
+        .zengin_stil(
+            "valueHead",
+            YazıStili::yeni()
+                .renk("#333")
+                .genişlik(20.0)
+                .iç_boşluk([0.0, 20.0, 0.0, 30.0])
+                .yatay_hiza(YazıYatayHizası::Orta),
+        )
+        .zengin_stil(
+            "rate",
+            YazıStili::yeni()
+                .genişlik(40.0)
+                .yatay_hiza(YazıYatayHizası::Sağ)
+                .iç_boşluk([0.0, 10.0, 0.0, 0.0]),
+        )
+        .zengin_stil(
+            "rateHead",
+            YazıStili::yeni()
+                .renk("#333")
+                .genişlik(40.0)
+                .yatay_hiza(YazıYatayHizası::Orta)
+                .iç_boşluk([0.0, 10.0, 0.0, 0.0]),
+        );
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Weather Statistics")
+                .alt_metin("Fake Data")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .biçimleyici("{a} <br/>{b} : {c} ({d}%)"),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .alt(10)
+                .sol("center")
+                .iç_boşluk(15.0)
+                .veri(["CityA", "CityB", "CityD", "CityC", "CityE"]),
+        )
+        .seri(
+            PastaSerisi::yeni()
+                .yarıçap("65%")
+                .merkez("50%", "50%")
+                .veri([
+                    VeriÖğesi::adlı("CityE", 1548).etiket(şehir_e_etiketi),
+                    VeriÖğesi::adlı("CityC", 735),
+                    VeriÖğesi::adlı("CityD", 510),
+                    VeriÖğesi::adlı("CityB", 434),
+                    VeriÖğesi::adlı("CityA", 335),
+                ]),
+        ))
+}
+
 fn pie_doughnut() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5673,6 +5817,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "custom-calendar-icon" => custom_calendar_icon(),
         "calendar-charts" => Ok(calendar_charts()),
         "pie-nest" => Ok(pie_nest()),
+        "pie-rich-text" => pie_rich_text(),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

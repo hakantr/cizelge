@@ -131,6 +131,7 @@ const YEREL_FIXTURE = Object.freeze({
   'boxplot-light-velocity': 'examples/uyum_fixture.rs#boxplot_light_velocity',
   'boxplot-light-velocity2': 'examples/uyum_fixture.rs#boxplot_light_velocity',
   'pie-nest': 'examples/uyum_fixture.rs#pie_nest',
+  'pie-rich-text': 'examples/uyum_fixture.rs#pie_rich_text',
   'pie-simple': 'examples/uyum_fixture.rs#pie_simple',
   'pie-doughnut': 'examples/uyum_fixture.rs#pie_doughnut',
   'pie-roseType-simple': 'examples/uyum_fixture.rs#pie_rose_type_simple',

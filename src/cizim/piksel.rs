@@ -672,13 +672,32 @@ fn boya_çevir<'a>(dolgu: &'a Dolgu, sınır: Option<Dikdörtgen>) -> Option<ts:
         Dolgu::Desen(desen) => {
             let piksel =
                 ts::PixmapRef::from_bytes(&desen.pikseller, desen.genişlik, desen.yükseklik)?;
-            boya.shader = ts::Pattern::new(
-                piksel,
-                ts::SpreadMode::Repeat,
-                ts::FilterQuality::Nearest,
-                desen.opaklık,
-                ts::Transform::identity(),
-            );
+            let (yayılma, süzme, dönüşüm) = if desen.tekrar == crate::renk::DesenTekrarı::Sığdır
+            {
+                let sınır = sınır?;
+                if sınır.genişlik <= 0.0 || sınır.yükseklik <= 0.0 {
+                    return None;
+                }
+                (
+                    ts::SpreadMode::Pad,
+                    ts::FilterQuality::Bilinear,
+                    ts::Transform::from_row(
+                        sınır.genişlik / desen.genişlik as f32,
+                        0.0,
+                        0.0,
+                        sınır.yükseklik / desen.yükseklik as f32,
+                        sınır.x,
+                        sınır.y,
+                    ),
+                )
+            } else {
+                (
+                    ts::SpreadMode::Repeat,
+                    ts::FilterQuality::Nearest,
+                    ts::Transform::identity(),
+                )
+            };
+            boya.shader = ts::Pattern::new(piksel, yayılma, süzme, desen.opaklık, dönüşüm);
             Some(boya)
         }
         Dolgu::DoğrusalGradyan {

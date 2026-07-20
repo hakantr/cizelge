@@ -179,11 +179,23 @@ impl SvgYüzeyi {
                 let veri = desen_bmp(desen)
                     .map(|bmp| taban64(&bmp))
                     .unwrap_or_default();
-                let _ = write!(
-                    self.tanımlar,
-                    r#"<pattern id="{kimlik}" patternUnits="userSpaceOnUse" width="{}" height="{}"><image width="{}" height="{}" opacity="{}" href="data:image/bmp;base64,{veri}"/></pattern>"#,
-                    desen.genişlik, desen.yükseklik, desen.genişlik, desen.yükseklik, desen.opaklık
-                );
+                if desen.tekrar == crate::renk::DesenTekrarı::Sığdır {
+                    let _ = write!(
+                        self.tanımlar,
+                        r#"<pattern id="{kimlik}" patternUnits="objectBoundingBox" patternContentUnits="objectBoundingBox" width="1" height="1"><image width="1" height="1" preserveAspectRatio="none" opacity="{}" href="data:image/bmp;base64,{veri}"/></pattern>"#,
+                        desen.opaklık
+                    );
+                } else {
+                    let _ = write!(
+                        self.tanımlar,
+                        r#"<pattern id="{kimlik}" patternUnits="userSpaceOnUse" width="{}" height="{}"><image width="{}" height="{}" opacity="{}" href="data:image/bmp;base64,{veri}"/></pattern>"#,
+                        desen.genişlik,
+                        desen.yükseklik,
+                        desen.genişlik,
+                        desen.yükseklik,
+                        desen.opaklık
+                    );
+                }
                 format!("url(#{kimlik})")
             }
             Dolgu::DoğrusalGradyan {
