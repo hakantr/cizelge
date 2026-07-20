@@ -11341,7 +11341,7 @@
     "videoEnd": 8000,
     "kaynak": "public/examples/ts/scatter-symbol-morph.ts",
     "kaynak_sha256": "d214ccb7922cc54c066dbd2aa4d1fa02444f94457f24e88a4a1bf2f15d0eeca4",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_symbol_morph",
     "seriler": [
       "scatter"
     ],
@@ -11353,7 +11353,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -11364,15 +11364,280 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "circle",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9995305957476694,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-circle.png",
+            "sha256": "1a5f69c37c6ada02857552fe724d9575733b254f4e807bffc348c67b4e903e90"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-circle.png",
+            "sha256": "5cd89c7ac4a89ba6827c716d3eb3ae2ca1c5596815107684908a1c5e7df09d08"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-circle.png",
+            "sha256": "6ad0f9160d7bb5f7de6dd7cae1ceb875d048eee464057cc081c5201f931944b2"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-circle.json",
+            "sha256": "49567aa348e091d62983c916f7ee9fd9b1525c1ce842a8e053b8835d35a63df0"
+          }
+        },
+        {
+          "ad": "evil",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9996608815806852,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-evil.png",
+            "sha256": "035bd0cdca7e08430d77eb1c334a56700f671ce13da3bc43284db07d26dd9e1a"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-evil.png",
+            "sha256": "ad55544b8472b90074d8841182a7e6ffdd67dd74dba8777384eea675a9ff7825"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-evil.png",
+            "sha256": "7078b6a5af3725f2f658e1ce635f47b38bfa97529bfa6a9cee3ddc650570ec97"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-evil.json",
+            "sha256": "eed9c698eff6ebd7123b401535f85132ef9e9156058609f5038ebcf2ccc76e69"
+          }
+        },
+        {
+          "ad": "happy",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9995957731188854,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-happy.png",
+            "sha256": "b28c8e95f3c9215ed231bb372d37d85d61ed461c44e71eb83e3cc3e292db4522"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-happy.png",
+            "sha256": "0854eb4acae9390c7615ef933d533336738c5a22c0beba542d0327971fe14646"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-happy.png",
+            "sha256": "3657371abd2afd9a590f4473db69620d32b121cc981af8062b7ad1cc38b3ddd5"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-happy.json",
+            "sha256": "c756befc1733b535e1f54489524cf0a66d9048486f53392748644afb45cf1c39"
+          }
+        },
+        {
+          "ad": "heart",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9993374036149033,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-heart.png",
+            "sha256": "5d05695ceaa91cd193b62eda30a42613969459e3bfcf5d3f0c4464907c4addc2"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-heart.png",
+            "sha256": "0a38a4b9ce261e710a56ab1cda0db20186cc6d3913a0f3d1f66d20375fcdd1d6"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-heart.png",
+            "sha256": "7a8dc1b66757289a5f671a56018e8c4a9f653a36f64cc68fda9993e4a112eb53"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-heart.json",
+            "sha256": "bd18c34cfcb8ec8cb54bd90d55a86be586f1261735439267326697b00816b79c"
+          }
+        },
+        {
+          "ad": "hipster",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9994262705099433,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-hipster.png",
+            "sha256": "70f8f2449387e70de0cb0da3a6b27ec3139305c1de65bcb2bdb28e20d10db10a"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-hipster.png",
+            "sha256": "b0681ed5e525e15e26acde1d7c2ca8537a7ec278b456892d0e39b2e150dcfca2"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-hipster.png",
+            "sha256": "7bf704b62905bcd3fdd516aeed0db109c4a6269f553796a3dbb0b27e8520f50b"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-hipster.json",
+            "sha256": "f1b98ea6023df520ddab58f4990ea550e66729a1988f6374984b8ba8b1179776"
+          }
+        },
+        {
+          "ad": "mug",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 50,
+          "değişen_piksel_oranı": 0.00018518518518518518,
+          "ssim": 0.9993036170509787,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-mug.png",
+            "sha256": "3cb4fbbd56c45385db284fd2923adbaeb75971b5917f988125aab6037c3178b6"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-mug.png",
+            "sha256": "a91448af64e4097b4c1ac6c14ad6bb4bd3610e69a95a79f748c7b17d2b25b36a"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-mug.png",
+            "sha256": "be5f9865c2609cd40063b047275e0d2e52eb43cab8e2de462c91fe0bb68c5d3a"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-mug.json",
+            "sha256": "fae70b20869fdd6f8120d44e0cf12e9429527bb506dbbe92b59ecc72520233a8"
+          }
+        },
+        {
+          "ad": "pie",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.999280104879942,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-pie.png",
+            "sha256": "3d97c1b3603198b7d37868e766b2f53742a4e91da05042a246a5ed80f6197acb"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-pie.png",
+            "sha256": "ae049ff905a42605bd4a19c45a12200cd633645fb866abbc363b76fd1cd6b919"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-pie.png",
+            "sha256": "fd37d6a70d00ba6d04735e43697196a311d8594debfb5c1d7852a28daff86641"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-pie.json",
+            "sha256": "bfac7c374fecd06b13c2bd740e36a76bbd92af31ca09de357f42cf97f4bbfcd9"
+          }
+        },
+        {
+          "ad": "plane",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9997429497415501,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-plane.png",
+            "sha256": "8638b9d0bc7ecb155e36a3be43ffb6a987d2277200b9b16761dcc2431b85c88e"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-plane.png",
+            "sha256": "5c9417ef9d6a072e72151d4c520776f1bc8c3d07280696e80fc9de99be8c68f9"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-plane.png",
+            "sha256": "de02bc1670b7eb38184ccf5789237343136331a983880b367985edd2d592e5cd"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-plane.json",
+            "sha256": "d85163a4b9f2f4b10cb0fe7d45c548d4fc0ea434d6c2a3275c008025b05819b1"
+          }
+        },
+        {
+          "ad": "round-rect",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9998270889006351,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-round-rect.png",
+            "sha256": "eb4faa615872a5cb7bb6c492d81b74e6de2a70e1c7154e912c0a4f4aa7b2dc7e"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-round-rect.png",
+            "sha256": "19317119c6fb142d8b168df8eb467d3614ea917f7051446ede67b50a441e55a5"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-round-rect.png",
+            "sha256": "1ffbb0349031b462bb155ae2fa3521782f092c19b4842c6a491e24fd4ea4a87b"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-round-rect.json",
+            "sha256": "6f44e2ef84f22550c4a5193d331dcee8461570a7a67cf04883236a8bc39ec13b"
+          }
+        },
+        {
+          "ad": "shocked",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9995149508500407,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-shocked.png",
+            "sha256": "828d867ed0105f82f6d42034ed156aa984d8d44180d4826155640556e8441bac"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-shocked.png",
+            "sha256": "bdcebeecdc13331dd0dd654cd26a90f93fa3221e04e477849fca505db81d2e87"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-shocked.png",
+            "sha256": "c5f01c558945b07562a623cf63aa9262de4a0cfbed956bfdb8bcb554cf2289ec"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-shocked.json",
+            "sha256": "637ef616656f60d080f9acc8af84cb672e73134414c1b11b61f5728cc38b7027"
+          }
+        },
+        {
+          "ad": "users",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9997285908711745,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-users.png",
+            "sha256": "d396af8d2ab9ea49ad31ae2d6a21501e7a5d520daef13dd57d6e98bd2ce381ec"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-symbol-morph-users.png",
+            "sha256": "3988547db5db85d91f64d892d35f23e9ae7cbf55b0b6fa07ed2f980c9f8b49d8"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-symbol-morph-users.png",
+            "sha256": "fa96741fe8e229dd6f23820bf332c5c4914976e1ecbab45abce6aad4a2a3c14c"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-symbol-morph-users.json",
+            "sha256": "f173e4ff6066b385e886ae45cae4c799d1326c37a8c6ab2a5f22a75cb58418c1"
+          }
+        }
+      ]
     }
   },
   {

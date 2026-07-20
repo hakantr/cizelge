@@ -1,0 +1,19 @@
+{
+  "id": "scatter-symbol-morph",
+  "senaryo": "animasyon",
+  "kare": "mug",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 50,
+  "değişen_piksel_oranı": 0.00018518518518518518,
+  "ssim": 0.9993036170509787,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-symbol-morph-mug.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-symbol-morph-mug.png",
+    "fark": "testler/gorsel/fark/default/scatter-symbol-morph-mug.png"
+  }
+}

@@ -70,6 +70,16 @@ const RUST_SERİLERİ = new Set([
   'chord', 'sankey', 'parallel', 'funnel', 'gauge', 'themeRiver', 'custom'
 ]);
 
+// Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
+// animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
+// scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
+// kanıtlamaz.
+const ARA_KARE_ANIMASYON_KANITI = new Set([
+  'scatter-effect',
+  'calendar-effectscatter',
+  'calendar-charts'
+]);
+
 const YEREL_FIXTURE = Object.freeze({
   'line-simple': 'examples/uyum_fixture.rs#line_simple',
   'line-smooth': 'examples/uyum_fixture.rs#line_smooth',
@@ -392,7 +402,7 @@ function manifestKaydı(kayıt, gl = false, görselKanıtlar = new Map()) {
   if (görselTam) {
     kayıtKanıtı['statik_görsel'] = 'tam_kanıtlı';
     const senaryoTürleri = new Set(kareler.map((kare) => kare.senaryo));
-    if (senaryoTürleri.has('animasyon') && kareler.length >= 5) {
+    if (senaryoTürleri.has('animasyon') && ARA_KARE_ANIMASYON_KANITI.has(kayıt.id)) {
       kayıtKanıtı.animasyon = 'tam_kanıtlı';
     }
     // Durum kareleri davranışın görsel bölümünü kanıtlar; olay yükü ve
