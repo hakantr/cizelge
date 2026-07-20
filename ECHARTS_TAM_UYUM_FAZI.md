@@ -843,6 +843,62 @@ Gerçekleşen dilim — `bar-brush` (2026-07-20):
   döngüsü, animasyon, erişilebilirlik ve ölçümlü performans kapıları Faz
   5/6/7/8'de kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
+Gerçekleşen dilim — `bar-polar-label-radial` (2026-07-20):
+
+- Resmî örnek
+  `../echarts-examples/public/examples/ts/bar-polar-label-radial.ts`
+  dosyasından kayıpsız fixture'a taşındı. Polar oluşturma ve yarıçap
+  çözümü `../echarts/src/coord/polar/PolarModel.ts` ile `polarCreator.ts`;
+  bar sektör yerleşimi `../echarts/src/layout/barPolar.ts`; sektör metni
+  konum/dönüşü `../echarts/src/chart/bar/BarView.ts` ile
+  `../echarts/src/label/sectorLabel.ts`; eksen katmanları ise
+  `../echarts/src/component/axis/AngleAxisView.ts` ve
+  `RadiusAxisView.ts` üzerinden sabit ECharts commitinde doğrulandı.
+- `polar.radius: [30, '80%']` tek dış yarıçap modeline indirgenmedi.
+  `KutupsalKoordinat::yarıçap_aralığı(30, "80%")` iç ve dış uçları ayrı
+  taşır; 700×525 görünümde 30 px iç, 210 px dış yarıçap üretir. Radyal
+  değer ölçeği bu fiziksel aralığa eşlenir; bölme halkaları, radiusAxis
+  çizgisi, angleAxis ışınları, çentik ve isabet geometrileri iç halkayı
+  doğru başlangıç kabul eder.
+- `radiusAxis.max: 4`, `angleAxis.type: 'category'`, `a/b/c/d` verisi ve
+  `startAngle: 75` aynı option anlamlarıyla kuruldu. İlk kategori merkezi
+  ekran uzayında −30°'ye düşer. Polar barın açık `barWidth` olmadığı
+  durumdaki resmî `%20` kategori boşluğu uygulanarak dört 90° bandın her
+  birinde 72° sektör oluşturulur; açık `barWidth`, `barMinWidth`,
+  `barMaxWidth` ve `barCategoryGap` değerleri de açı biriminde çözülür.
+- Polar bar etiketleri ortak renderer'a eklendi. `start`, `insideStart`,
+  `middle`, `end` ve `insideEnd` option yolları sırasıyla
+  `EtiketKonumu::Başlangıç`, `İçBaşlangıç`, `Merkez`, `Bitiş` ve
+  `İçBitiş` olarak tiplenir. Resmî `{b}: {c}` formatter'ı kategori adı ve
+  ham değeri kullanır; varsayılan iç yazı rengi sektör dolgusunun
+  parlaklığından gelir. Açık `rotate` yokken zrender'ın sektör açısına göre
+  teğetsel döndürme ve `middle` için okunabilir yarım tur çevirme kuralı
+  ekran koordinatı işaretiyle korunur.
+- Polar çizim iki z-katmanına ayrıldı: splitLine halkaları/ışınları barın
+  altında; axisLine, axisTick ve axisLabel barın üstündedir. Veri öğesine
+  özgü dolgu, opaklık ve kenarlık da sektör çizimine taşınır. Bu ortak
+  düzeltme mevcut `line-polar`, `line-polar2` ve
+  `scatter-polar-punchCard` referanslarını değiştirmeden SSIM değerlerini
+  sırasıyla `0,997485`, `0,997568` ve `0,997093` düzeyine yükseltti.
+- Fixture, resmî başlığı, boş tooltip'i, dört değeri
+  `[2, 1.2, 2.4, 3.6]`, eksen kapsamını, yarıçap uçlarını ve formatter
+  bağlamını ayrı testte kilitler. Çekirdek birim kapısı 282/282, fixture
+  kapısı 38/38 geçti; `cargo check --all-targets`,
+  `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Önceden kilitli hiçbir resmî
+  referans yenilenmeden tam görsel regresyon 175/175 kareyi geçti.
+- Yeni 600×450 kanıt 942 değişen piksel, `%0,3489` fark ve `0,997158`
+  SSIM üretir. Resmî referans iki ardışık üretimde piksel düzeyinde aynı
+  çıktı verdikten sonra yalnız bu yeni kart için bir kez oluşturuldu;
+  referans, gerçek, fark ve metrik dosyaları hashleriyle galeri manifestine
+  bağlandı.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 149/332, yani `%44,9`
+  oldu. Teğetsel polar bar, çoklu stack/grup yerleşimi, `roundCap`,
+  `barMinAngle`, polar tooltip/hover davranışının bütün kombinasyonları,
+  animasyon, erişilebilirlik ve ölçümlü performans izleyen Faz 3/4/6/7/8
+  kartlarıyla kapanmadan bu kart nihai `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
