@@ -277,93 +277,131 @@ pub fn kırılma_alanlarını_çiz(
         for (ilk, ikinci, _) in eksen.kırılma_piksel_aralıkları() {
             let başlangıç = ilk.min(ikinci);
             let bitiş = ilk.max(ikinci);
-            if bitiş > başlangıç + f32::EPSILON && seçenek.opaklık > 0.0 {
-                let dikdörtgen = if eksen.yatay_mı() {
-                    Dikdörtgen::yeni(başlangıç, alan.y, bitiş - başlangıç, alan.yükseklik)
-                } else {
-                    Dikdörtgen::yeni(alan.x, başlangıç, alan.genişlik, bitiş - başlangıç)
-                };
-                let renk = seçenek
-                    .renk
-                    .unwrap_or_else(tema::nötr_00)
-                    .opaklık(seçenek.opaklık);
-                çizici.dikdörtgen(dikdörtgen, &crate::renk::Dolgu::Düz(renk), [0.0; 4], None);
-            }
-            if !seçenek.kenarlık_göster || seçenek.kenarlık_kalınlığı <= 0.0 {
-                continue;
-            }
-            let renk = seçenek.kenarlık_rengi.unwrap_or_else(tema::nötr_30);
-            kırılma_zikzağını_çiz(
-                çizici,
+            let başlangıç_noktaları = kırılma_zikzak_noktaları(
                 alan,
                 eksen.yatay_mı(),
                 başlangıç,
                 seçenek.zikzak_genliği,
                 seçenek.zikzak_en_küçük_açıklık,
                 seçenek.zikzak_en_büyük_açıklık,
-                seçenek.kenarlık_kalınlığı,
-                renk,
-                seçenek.kenarlık_türü,
             );
-            if bitiş > başlangıç + 1e-3 {
-                kırılma_zikzağını_çiz(
-                    çizici,
+            let bitiş_noktaları = (bitiş > başlangıç + f32::EPSILON).then(|| {
+                kırılma_zikzak_noktaları(
                     alan,
                     eksen.yatay_mı(),
                     bitiş,
-                    -seçenek.zikzak_genliği,
+                    seçenek.zikzak_genliği,
                     seçenek.zikzak_en_küçük_açıklık,
                     seçenek.zikzak_en_büyük_açıklık,
+                )
+            });
+            // ECharts, iki Polyline'ı önce; aralarındaki Polygon'u ise aynı z
+            // katmanında sonra ekler. Kararlı ekleme sırası nedeniyle beyaz
+            // dolgu kenarlıkların iç yarısını örter ve çizgiler daha ince
+            // görünür. Aynı sırayı korumak piksel eşitliği için önemlidir.
+            if seçenek.kenarlık_göster && seçenek.kenarlık_kalınlığı > 0.0 {
+                let renk = seçenek.kenarlık_rengi.unwrap_or_else(tema::nötr_30);
+                kırılma_zikzağını_çiz(
+                    çizici,
+                    &başlangıç_noktaları,
                     seçenek.kenarlık_kalınlığı,
                     renk,
                     seçenek.kenarlık_türü,
                 );
+                if let Some(bitiş_noktaları) = &bitiş_noktaları {
+                    kırılma_zikzağını_çiz(
+                        çizici,
+                        bitiş_noktaları,
+                        seçenek.kenarlık_kalınlığı,
+                        renk,
+                        seçenek.kenarlık_türü,
+                    );
+                }
+            }
+            if bitiş > başlangıç + f32::EPSILON && seçenek.opaklık > 0.0 {
+                let renk = seçenek
+                    .renk
+                    .unwrap_or_else(tema::nötr_00)
+                    .opaklık(seçenek.opaklık);
+                let mut dolgu_yolu = crate::cizim::Yol::yeni();
+                if let Some(&ilk) = başlangıç_noktaları.first() {
+                    dolgu_yolu.taşı(ilk);
+                    for &nokta in başlangıç_noktaları.iter().skip(1) {
+                        dolgu_yolu.çiz(nokta);
+                    }
+                    if let Some(bitiş_noktaları) = &bitiş_noktaları {
+                        for &nokta in bitiş_noktaları.iter().rev() {
+                            dolgu_yolu.çiz(nokta);
+                        }
+                    }
+                    dolgu_yolu.kapat();
+                    çizici.yol_doldur(&dolgu_yolu, &crate::renk::Dolgu::Düz(renk));
+                }
             }
         }
     }
 }
 
 #[allow(clippy::too_many_arguments)]
-fn kırılma_zikzağını_çiz(
-    çizici: &mut dyn ÇizimYüzeyi,
+fn kırılma_zikzak_noktaları(
     alan: Dikdörtgen,
     yatay_eksen: bool,
     sabit: f32,
     genlik: f32,
     en_küçük_açıklık: f32,
     en_büyük_açıklık: f32,
+) -> Vec<(f32, f32)> {
+    let başlangıç = if yatay_eksen { alan.y } else { alan.x };
+    let bitiş = if yatay_eksen { alan.alt() } else { alan.sağ() };
+    let adım = ((en_küçük_açıklık.max(2.0) + en_büyük_açıklık.max(2.0)) / 2.0).max(2.0);
+    let sabit = keskin(sabit);
+    let mut noktalar = vec![if yatay_eksen {
+        (sabit, başlangıç)
+    } else {
+        (başlangıç, sabit)
+    }];
+    let mut ilerleme = başlangıç + adım;
+    // ECharts ilk uç noktayı yazdıktan sonra `isSwap` değerini çevirir;
+    // bu nedenle ilk iç nokta pozitif genlik yönünde başlar.
+    let mut yön = 1.0_f32;
+    while ilerleme < bitiş {
+        noktalar.push(if yatay_eksen {
+            (sabit + genlik * yön, ilerleme)
+        } else {
+            (ilerleme, sabit + genlik * yön)
+        });
+        ilerleme += adım;
+        yön = -yön;
+    }
+    noktalar.push(if yatay_eksen {
+        (sabit, bitiş)
+    } else {
+        (bitiş, sabit)
+    });
+    noktalar
+}
+
+fn kırılma_zikzağını_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    noktalar: &[(f32, f32)],
     kalınlık: f32,
     renk: crate::renk::Renk,
     tür: ÇizgiTürü,
 ) {
-    let başlangıç = if yatay_eksen { alan.y } else { alan.x };
-    let bitiş = if yatay_eksen { alan.alt() } else { alan.sağ() };
-    let adım = ((en_küçük_açıklık.max(2.0) + en_büyük_açıklık.max(2.0)) / 2.0).max(2.0);
     let mut yol = crate::cizim::Yol::yeni();
-    let ilk = if yatay_eksen {
-        (keskin(sabit), başlangıç)
-    } else {
-        (başlangıç, keskin(sabit))
+    let Some(&ilk) = noktalar.first() else {
+        return;
     };
     yol.taşı(ilk);
-    let mut ilerleme = başlangıç + adım;
-    let mut yön = 1.0_f32;
-    while ilerleme < bitiş {
-        let nokta = if yatay_eksen {
-            (sabit + genlik * yön, ilerleme)
-        } else {
-            (ilerleme, sabit + genlik * yön)
-        };
+    for &nokta in noktalar.iter().skip(1) {
         yol.çiz(nokta);
-        ilerleme += adım;
-        yön = -yön;
     }
-    yol.çiz(if yatay_eksen {
-        (keskin(sabit), bitiş)
+    if tür == ÇizgiTürü::Kesikli {
+        // `axisDefault.breakArea.itemStyle.borderType: [3, 3]`.
+        çizici.yol_çizgi_deseni(&yol, kalınlık, renk, &[3.0, 3.0], 0.0);
     } else {
-        (bitiş, keskin(sabit))
-    });
-    çizici.yol_çiz(&yol, kalınlık, renk, tür);
+        çizici.yol_çiz(&yol, kalınlık, renk, tür);
+    }
 }
 
 /// Eksen çizgisi, çentikler ve etiketleri çizer.
@@ -768,6 +806,28 @@ pub fn eksenleri_çiz(
                     kalın,
                 );
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+
+    #[test]
+    fn kirilma_zikzaklari_zrender_fazini_ve_sabit_araligi_izler() {
+        let alan = Dikdörtgen::yeni(105.0, 120.0, 525.0, 325.0);
+        let alt = kırılma_zikzak_noktaları(alan, false, 320.2, 2.0, 4.0, 15.0);
+        let üst = kırılma_zikzak_noktaları(alan, false, 313.2, 2.0, 4.0, 15.0);
+
+        assert_eq!(alt[0], (105.0, 320.5));
+        assert_eq!(alt[1], (114.5, 322.5));
+        assert_eq!(alt[2], (124.0, 318.5));
+        assert_eq!(alt.last(), Some(&(630.0, 320.5)));
+        assert_eq!(alt.len(), üst.len());
+        for (alt, üst) in alt.iter().zip(üst) {
+            assert_eq!(alt.0, üst.0);
+            assert_eq!(alt.1 - üst.1, 7.0);
         }
     }
 }
