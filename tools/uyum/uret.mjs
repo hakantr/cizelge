@@ -174,8 +174,7 @@ const YEREL_FIXTURE = Object.freeze({
   'graph-simple': 'examples/grafo.rs',
   'chord-simple': 'examples/kiris.rs',
   'themeRiver-basic': 'examples/tema_nehri.rs',
-  'parallel-simple': 'examples/paralel.rs',
-  'calendar-simple': 'examples/takvim.rs'
+  'parallel-simple': 'examples/paralel.rs'
 });
 
 function hata(mesaj) {

@@ -247,7 +247,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/calendar-simple.ts",
     "kaynak_sha256": "8eee80d696878e64cdec6648227c140a428b64d1e8dc89fbc4bd06b8db0ce922",
-    "cizelge_fixture": "examples/takvim.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#calendar_simple",
     "seriler": [
       "heatmap"
     ],
@@ -1850,24 +1850,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 995,
-          "değişen_piksel_oranı": 0.003685185185185185,
-          "ssim": 0.9976539273061091,
+          "değişen_piksel": 1005,
+          "değişen_piksel_oranı": 0.0037222222222222223,
+          "ssim": 0.9976472003821123,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-encode0.png",
             "sha256": "a6afd1b4b3cbe648ade626ed05463a556185d8a63dc52dd34493ccda11e6c82c"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dataset-encode0.png",
-            "sha256": "6aa58300cb2f7ba04df0b6bacbabe259938edd7402dcd557ce4563a322b9ef82"
+            "sha256": "95d6621e086f025e1db0d1f7a55c3e342fc51275357b56c553deb8496b5a9f1c"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dataset-encode0.png",
-            "sha256": "9987f694c3c74dab8c1e3dd317a55736f31099af421d8db1858e58b991224bd5"
+            "sha256": "93dbd99399e91acc6262e5c9bbf639cd69450cd42111baf95345b44833fe0927"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dataset-encode0-son.json",
-            "sha256": "30f130e34d289a6ffb58c2c062e2fdd7856745362330b6b2231c9aca89fb41cb"
+            "sha256": "28e046e2da44c0db7848aefd093e21042d786d7da46e4c6987df4dd1fc7585c0"
           }
         }
       ]
@@ -14122,7 +14122,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/custom-calendar-icon.ts",
     "kaynak_sha256": "85b6f2115983dda04139f5bdbc1c6421dfd0bfd7396f01fe609b02db9a4fbf42",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#custom_calendar_icon",
     "seriler": [
       "custom",
       "group",
@@ -14141,7 +14141,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -14155,15 +14155,40 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 304,
+          "değişen_piksel_oranı": 0.0011259259259259258,
+          "ssim": 0.9987665492335819,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-calendar-icon.png",
+            "sha256": "f825aa35d87356677483a6167ddf6fc739ea770741e7c8c1945e4d1e8fd2aa25"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/custom-calendar-icon.png",
+            "sha256": "c45ca686a26f253f0dd2870b76f82f11cb2e288176666b12c9f1a052747321a9"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/custom-calendar-icon.png",
+            "sha256": "6a7b84372045e85f78c51b9d15e9602558d50e6550849df8de1b5a4f53533048"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/custom-calendar-icon-son.json",
+            "sha256": "e101fff8251923392ab70a04c1c9ee16a7f5cd0b70a550f71b0783cd829758e1"
+          }
+        }
+      ]
     }
   },
   {
@@ -19353,7 +19378,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/calendar-charts.ts",
     "kaynak_sha256": "d69499279605c2c43471109c07c6e0d181dee353d7cb4c1462e8263279b55073",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#calendar_charts",
     "seriler": [
       "effectScatter",
       "graph",
@@ -19372,7 +19397,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -19385,15 +19410,136 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "tam_kanıtlı",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "kare-0",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 55,
+          "değişen_piksel_oranı": 0.0002037037037037037,
+          "ssim": 0.9996270263935212,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-charts-kare-0.png",
+            "sha256": "d0f40880405c1a500bdc4988face491d285fb8db1d74506c9f093e810276375b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-charts-kare-0.png",
+            "sha256": "64e51349b051f4d3c3dd5de80596a9bff6b458a8bcfdd1e04633a1cf5e998c84"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-charts-kare-0.png",
+            "sha256": "4d64532aeafe079ae89ae9d3a427b19dd510383f19d897b19ad15300d2fcea42"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-charts-kare-0.json",
+            "sha256": "cf0adfd7b3747f4320fffb15423ca67e72f7f675a3295b6ee3eb80847675cb09"
+          }
+        },
+        {
+          "ad": "kare-1",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 55,
+          "değişen_piksel_oranı": 0.0002037037037037037,
+          "ssim": 0.9996262658469992,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-charts-kare-1.png",
+            "sha256": "f99b0274151170f2617b47d64aa50c3ca99a75816b8250a66788c62c9aa06c97"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-charts-kare-1.png",
+            "sha256": "650df26967c7eeb9cef6d2026ee41af753439a0cfe3315bab303d7beb2df506c"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-charts-kare-1.png",
+            "sha256": "1a09611dbf62c5a8ae9ad39571252792ef2c577a18d88574f20ed6f62bda1217"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-charts-kare-1.json",
+            "sha256": "204dc7b8519b5632cda048e300cf7ca475e58098656c13ba66b2f268ce796218"
+          }
+        },
+        {
+          "ad": "kare-2",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 55,
+          "değişen_piksel_oranı": 0.0002037037037037037,
+          "ssim": 0.9996211345064808,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-charts-kare-2.png",
+            "sha256": "c5864ca90dd5c40b4e728c37fdb9c8a90fad0724bacee46fd96900740c662d4f"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-charts-kare-2.png",
+            "sha256": "63822a3a34c3ab6f961348c22b59ecfe8c0efc1f827c420f55ee17c73e27927e"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-charts-kare-2.png",
+            "sha256": "c69c983910d3ca200afb91397d5fe1ff7a962170d76a0821534f6cb5a644762a"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-charts-kare-2.json",
+            "sha256": "b648079e57a72cc7fe52ba0a02d3db8585e5cf9a6cf54cd1184230ed25d40a45"
+          }
+        },
+        {
+          "ad": "kare-3",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 55,
+          "değişen_piksel_oranı": 0.0002037037037037037,
+          "ssim": 0.9996240025341938,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-charts-kare-3.png",
+            "sha256": "e2688497c63c33908f68a67ab7f6c117f9e4a2d2135a9113a631279fd4a66f03"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-charts-kare-3.png",
+            "sha256": "0d71510ae929f5def96ea531e6c201392187fd3762e4a1b09db25cdc0ac75577"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-charts-kare-3.png",
+            "sha256": "9d961af6961a4db0418946c54b2c5a2d448daaf288a3da47f185bea32fb136e6"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-charts-kare-3.json",
+            "sha256": "b13bb4d7e5243bb39d1ef43507853b989246ecd1a6401ebade9dbd49ef790cc6"
+          }
+        },
+        {
+          "ad": "kare-4",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 55,
+          "değişen_piksel_oranı": 0.0002037037037037037,
+          "ssim": 0.9996202062904044,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-charts-kare-4.png",
+            "sha256": "68b0c9d7d9fbc87148431060008ed6b172a39e883238c6150dc5421eb7acb091"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/calendar-charts-kare-4.png",
+            "sha256": "726cb5b1acfb151e7c4d79aedaf5ef0b7e024eb49ef47468c76709b39b088fe4"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/calendar-charts-kare-4.png",
+            "sha256": "42b55c8bbe2a1f0f241df401160b3f03dc4a7bbb2877d7b926a63c9914d0a8ae"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/calendar-charts-kare-4.json",
+            "sha256": "a637930b624e3f4952fafb0c1176e3f4002e639e3d913fbf67b9c32ac0ae9a57"
+          }
+        }
+      ]
     }
   },
   {
