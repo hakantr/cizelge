@@ -513,6 +513,7 @@ impl GrafikSeçenekleri {
                             .boyutlar(boyutlar);
                     if let (Some(eşleme), Some(boyut_sırası), Some(kapsam)) =
                         (görsel_eşleme, görsel_boyut_sırası, görsel_kapsam)
+                        && eşleme.renk_kanalı
                         && let Some(görsel_değer) = kaynak_satır
                             .and_then(|satır| satır.get(boyut_sırası))
                             .and_then(crate::model::deger::VeriDeğeri::sayı)
@@ -1036,7 +1037,7 @@ mod testler {
     use super::*;
     use crate::model::deger::VeriDeğeri;
     use crate::model::eksen::EksenKırılması;
-    use crate::model::seri::{SütunSerisi, ÇizgiSerisi};
+    use crate::model::seri::{SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::ÖğeStili;
     use crate::renk::{Dolgu, Renk};
 
@@ -1208,6 +1209,39 @@ mod testler {
                     .renkler([0x000000u32, 0xffffffu32])
                     .renk_çöz(89.3, [10.0, 90.0])
             )
+        );
+    }
+
+    #[test]
+    fn yalnız_sembol_boyutu_eşleyen_visual_map_dataset_rengini_değiştirmez() {
+        let küme = VeriKümesi::yeni(["x", "y", "population"])
+            .satır([1.into(), 2.into(), 20_000.into()])
+            .satır([3.into(), 4.into(), 1_500_000_000.into()]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .görsel_eşleme(
+                GörselEşleme::yeni()
+                    .boyut("population")
+                    .en_az(20_000.0)
+                    .en_çok(1_500_000_000.0)
+                    .sembol_boyutu(10.0, 70.0),
+            )
+            .seri(SaçılımSerisi::yeni().eşle("x", "y"));
+
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+
+        assert!(hatalar.is_empty());
+        assert!(
+            çözülmüş.seriler[0]
+                .veri()
+                .iter()
+                .all(|öğe| öğe.stil.is_none())
+        );
+        assert_eq!(
+            çözülmüş.seriler[0].veri()[1]
+                .boyut("population")
+                .and_then(VeriDeğeri::sayı),
+            Some(1_500_000_000.0)
         );
     }
 

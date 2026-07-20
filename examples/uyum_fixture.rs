@@ -4882,6 +4882,199 @@ mod scatter_polinom_regresyon_testleri {
     }
 }
 
+type LogaritmikRegresyonSatırı = (f64, f64, f64, String, f64);
+
+fn scatter_logaritmik_regresyon_verisini_oku() -> Result<Vec<LogaritmikRegresyonSatırı>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-logarithmic-regression.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    resmi_javascript_dizisi(&kaynak, "source:")
+}
+
+fn scatter_logarithmic_regression() -> Result<GrafikSeçenekleri, String> {
+    let kaynak = scatter_logaritmik_regresyon_verisini_oku()?
+        .into_iter()
+        .fold(
+            VeriKümesi::yeni(["income", "life_expectancy", "population", "country", "year"]),
+            |küme, (gelir, yaşam_beklentisi, nüfus, ülke, yıl)| {
+                küme.satır([
+                    gelir.into(),
+                    yaşam_beklentisi.into(),
+                    nüfus.into(),
+                    ülke.into(),
+                    yıl.into(),
+                ])
+            },
+        );
+    let yıl_süzgeci = |yıl: f64| SüzmeKoşulu::Karşılaştır {
+        boyut: 4usize.into(),
+        işlem: Karşılaştırmaİşlemi::Eşit,
+        değer: yıl.into(),
+    };
+    // Kaynak örnekte `fromDatasetIndex` verilmez. ECharts her üç dönüşümü
+    // de dataset[0]'a bağladığı için regresyon iki yılın 38 satırını birlikte
+    // işler; filtreler yalnız iki scatter serisini besler.
+    let veri_kümeleri = vec![
+        VeriKümesiTanımı::kaynak(kaynak),
+        VeriKümesiTanımı::süz(yıl_süzgeci(1990.0)),
+        VeriKümesiTanımı::süz(yıl_süzgeci(2015.0)),
+        VeriKümesiTanımı::regresyon(RegresyonDönüşümü::yeni(RegresyonYöntemi::Logaritmik)),
+    ];
+    let çözülmüş = veri_kümelerini_çöz(&veri_kümeleri).map_err(|hata| hata.to_string())?;
+    let son_satır = çözülmüş[3]
+        .satırlar
+        .last()
+        .ok_or_else(|| "logaritmik regresyon çıktı satırı üretmedi".to_owned())?;
+    let son_değer = son_satır
+        .get(1)
+        .and_then(VeriDeğeri::sayı)
+        .ok_or_else(|| "logaritmik regresyon son y değerini üretmedi".to_owned())?;
+    let formül = son_satır
+        .get(2)
+        .and_then(|değer| match değer {
+            VeriDeğeri::Metin(metin) => Some(metin.clone()),
+            _ => None,
+        })
+        .ok_or_else(|| "logaritmik regresyon formülünü üretmedi".to_owned())?;
+    let kesikli = BölmeÇizgisi {
+        tür: ÇizgiTürü::Kesikli,
+        ..Default::default()
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .veri_kümeleri(veri_kümeleri)
+        .başlık(
+            Başlık::yeni()
+                .metin("1990 and 2015 per capita life expectancy and GDP")
+                .alt_metin("By ecStat.regression")
+                .sol("center")
+                .iç_boşluk(15.0),
+        )
+        .gösterge(
+            // Bu kartta resmî `bottom: 10` legend grubu scatter ikonlarının
+            // 0.8 opaklık sınır kutusuyla 5 px daha yukarı oturur.
+            Gösterge::yeni().alt(18).veri(["1990", "2015"]),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .x_ekseni(Eksen::değer().bölme_çizgisi(kesikli.clone()))
+        .y_ekseni(Eksen::değer().bölme_çizgisi(kesikli))
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .boyut("population")
+                .en_az(20_000.0)
+                .en_çok(1_500_000_000.0)
+                .seri_sıraları([0, 1])
+                .sembol_boyutu(10.0, 70.0),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("1990")
+                .veri_kümesi_sırası(1)
+                .eşle("income", "life_expectancy"),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("2015")
+                .veri_kümesi_sırası(2)
+                .eşle("income", "life_expectancy"),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("line")
+                .yumuşat(true)
+                .veri_kümesi_sırası(3)
+                .eşle("income", "life_expectancy")
+                .sembol_boyutu(0.1)
+                .sembol(Sembol::Daire)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .kayma(-20.0, 0.0)
+                        .yazı(YazıStili::yeni().boyut(16.0))
+                        .biçimleyici(Biçimleyici::İşlev(Arc::new(move |değer, _| {
+                            if (değer - son_değer).abs() <= son_değer.abs().max(1.0) * 1e-12 {
+                                formül.clone()
+                            } else {
+                                String::new()
+                            }
+                        }))),
+                ),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_logaritmik_regresyon_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_logaritmik_regresyon_verisi_filtreleri_ve_formülü_ecstat_ile_uyuşur() {
+        let veri = scatter_logaritmik_regresyon_verisini_oku()
+            .expect("resmi logaritmik regresyon verisi okunmalı");
+        assert_eq!(veri.len(), 38);
+        assert_eq!(
+            veri.first(),
+            Some(&(28_604.0, 77.0, 17_096_869.0, "Australia".to_owned(), 1990.0))
+        );
+        assert_eq!(
+            veri.last(),
+            Some(&(
+                53_354.0,
+                79.1,
+                321_773_631.0,
+                "United States".to_owned(),
+                2015.0,
+            ))
+        );
+        let kaynak = veri.into_iter().fold(
+            VeriKümesi::yeni(["income", "life_expectancy", "population", "country", "year"]),
+            |küme, (gelir, yaşam_beklentisi, nüfus, ülke, yıl)| {
+                küme.satır([
+                    gelir.into(),
+                    yaşam_beklentisi.into(),
+                    nüfus.into(),
+                    ülke.into(),
+                    yıl.into(),
+                ])
+            },
+        );
+        let yıl_süzgeci = |yıl: f64| SüzmeKoşulu::Karşılaştır {
+            boyut: 4usize.into(),
+            işlem: Karşılaştırmaİşlemi::Eşit,
+            değer: yıl.into(),
+        };
+        let sonuç = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::süz(yıl_süzgeci(1990.0)),
+            VeriKümesiTanımı::süz(yıl_süzgeci(2015.0)),
+            VeriKümesiTanımı::regresyon(RegresyonDönüşümü::yeni(RegresyonYöntemi::Logaritmik)),
+        ])
+        .expect("ecStat logaritmik regresyon dönüşümü çalışmalı");
+
+        assert_eq!(sonuç[1].satırlar.len(), 19);
+        assert_eq!(sonuç[2].satırlar.len(), 19);
+        assert_eq!(sonuç[3].satırlar.len(), 38);
+        assert_eq!(
+            sonuç[3].satırlar.last().and_then(|satır| match &satır[2] {
+                VeriDeğeri::Metin(metin) => Some(metin.as_str()),
+                _ => None,
+            }),
+            Some("y = 30.69 + 4.57ln(x)")
+        );
+        let ilk_tahmin = sonuç[3].satırlar.first().unwrap()[1].sayı().unwrap();
+        let son_tahmin = sonuç[3].satırlar.last().unwrap()[1].sayı().unwrap();
+        assert!((ilk_tahmin - 63.794_406_297_281_73).abs() < 1e-12);
+        assert!((son_tahmin - 81.331_352_527_324_9).abs() < 1e-12);
+    }
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -7089,6 +7282,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),
+        "scatter-logarithmic-regression" => scatter_logarithmic_regression(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
