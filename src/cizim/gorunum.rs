@@ -52,7 +52,9 @@ use crate::grafik::sacilim::{
     saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları, tek_eksen_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
-use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
+use crate::grafik::sutun::{
+    SütunGirdisi, sütun_görsel_kapsamı, sütunları_çiz, yerleşim_hesapla
+};
 use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_koordinatında_çiz, takvim_çiz};
 use crate::grafik::tema_nehri::tema_nehri_çiz;
 use crate::koordinat::{
@@ -3145,6 +3147,10 @@ pub fn grafiği_boya(
                     genel_sıra: i,
                     aralıklar: kurulum.aralıklar.get(i).map(Vec::as_slice).unwrap_or(&[]),
                     renk: seçenekler.seri_rengi(i),
+                    görsel_eşlemeler: seçenekler
+                        .seri_görsel_eşlemeleri(i)
+                        .map(|eşleme| (eşleme, sütun_görsel_kapsamı(sütun, eşleme)))
+                        .collect(),
                     öğe_opaklıkları: hazır_fırça
                         .öğe_opaklıkları
                         .get(i)
@@ -3468,18 +3474,11 @@ pub fn grafiği_boya(
                                 }
                             }
                         }
-                        Seri::Mum(s) => mum_çiz(
-                            yüzey,
-                            s,
-                            i,
-                            &kartezyen,
-                            ilerleme,
-                            hazır_fırça
-                                .öğe_opaklıkları
-                                .get(i)
-                                .and_then(Option::as_deref),
-                            isabetler,
-                        ),
+                        // ECharts candlestickVisual, brush görsel aşamasından
+                        // sonra öğe stilini yeniden kurar; bu yüzden bağlı
+                        // seçim indeksi yayılsa da mum gövdesi `colorAlpha`
+                        // ile solmaz (`candlestick-brush` resmî davranışı).
+                        Seri::Mum(s) => mum_çiz(yüzey, s, i, &kartezyen, ilerleme, isabetler),
                         Seri::Kutu(s) => {
                             // ECharts kutu serilerini aynı kategorik taban
                             // ekseni üzerinde yan yana yerleştirir. Değer

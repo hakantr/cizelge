@@ -29,10 +29,18 @@ pub fn mum_çiz(
     genel_sıra: usize,
     kartezyen: &Kartezyen2B,
     ilerleme: f32,
-    öğe_opaklıkları: Option<&[f32]>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
-    if seri.büyük && seri.veri.len() >= seri.büyük_eşiği && öğe_opaklıkları.is_none() {
+    // ECharts scheduler `dataZoom: filter` sonucundaki etkin veri sayısını
+    // pipelineContext.large eşiğine sokar. Model ham diziyi koruduğu için
+    // aynı sayımı burada görünür pencere üzerinden yaparız.
+    let görünür_veri_sayısı = seri
+        .veri
+        .iter()
+        .enumerate()
+        .filter(|(sıra, _)| kartezyen.x.pencerede_mi(*sıra as f64))
+        .count();
+    if seri.büyük && görünür_veri_sayısı >= seri.büyük_eşiği {
         mum_büyük_çiz(çizici, seri, kartezyen);
         return;
     }
@@ -59,14 +67,6 @@ pub fn mum_çiz(
             } else {
                 (seri.düşen_renk, seri.düşen_kenarlık_rengi)
             };
-            let opaklık = öğe_opaklıkları
-                .and_then(|opaklıklar| opaklıklar.get(i))
-                .copied()
-                .unwrap_or(1.0)
-                .clamp(0.0, 1.0);
-            let dolgu_rengi = dolgu_rengi.opaklık(opaklık);
-            let kenarlık_rengi = kenarlık_rengi.opaklık(opaklık);
-
             let ham_x = kartezyen.x.veriden_piksele(i as f64);
             let x = mum_alt_pikseli(ham_x, false);
             let gövde_üst = kartezyen.y.veriden_piksele(açılış.max(kapanış));
@@ -425,5 +425,32 @@ mod testler {
         assert!(döküm.contains("çiz #654321@1.0 k=1.0 düz |"));
         assert!(!döküm.contains("dikdörtgen #eb5454"));
         assert!(çıktı.isabetler.is_empty());
+    }
+
+    #[test]
+    fn datazoom_sonrasi_esik_altindaki_mumlar_normal_yolda_cizilir() {
+        use crate::model::yakinlastirma::VeriYakınlaştırma;
+
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C", "D"]))
+            .y_ekseni(Eksen::değer())
+            .veri_yakınlaştırma(VeriYakınlaştırma::iç().aralık(75.0, 100.0))
+            .seri(MumSerisi::yeni().büyük_eşiği(3).veri([
+                [10.0, 12.0, 8.0, 14.0],
+                [12.0, 9.0, 7.0, 13.0],
+                [9.0, 11.0, 8.0, 12.0],
+                [11.0, 13.0, 10.0, 14.0],
+            ]));
+        let mut yüzey = KayıtYüzeyi::yeni(300.0, 200.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+        let döküm = yüzey.döküm();
+
+        assert!(
+            döküm.contains("dikdörtgen (") && döküm.contains("#eb5454@1.0"),
+            "{döküm}"
+        );
+        assert!(!çıktı.isabetler.is_empty());
     }
 }

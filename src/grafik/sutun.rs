@@ -5,10 +5,12 @@ use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::pasta::zengin_etiketi_yaz;
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
+use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::SütunSerisi;
 use crate::model::stil::{
     Etiket, EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası
 };
+use crate::model::veri_kumesi::BoyutSeçici;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::ondalık_kırp;
@@ -26,8 +28,47 @@ pub struct SütunGirdisi<'s> {
     pub genel_sıra: usize,
     pub aralıklar: &'s [YığınAralığı],
     pub renk: Renk,
+    /// Bu seriyi hedefleyen `visualMap` bileşenleri ve çözülmüş kapsamları.
+    pub görsel_eşlemeler: Vec<(&'s GörselEşleme, [f64; 2])>,
     /// Brush visual aşamasının ham veri sırasına göre renk alfa çarpanları.
     pub öğe_opaklıkları: Option<&'s [f32]>,
+}
+
+fn sütun_görsel_değeri(
+    seri: &SütunSerisi, eşleme: &GörselEşleme, sıra: usize
+) -> Option<f64> {
+    let öğe = seri.veri.get(sıra)?;
+    match eşleme.boyut.as_ref() {
+        Some(BoyutSeçici::Ad(ad)) => öğe.boyut(ad).and_then(|değer| değer.sayı()),
+        Some(BoyutSeçici::Sıra(boyut)) => öğe
+            .değer
+            .dizi()
+            .and_then(|değerler| değerler.get(*boyut).copied())
+            .or_else(|| (*boyut == 0).then(|| öğe.değer.sayı()).flatten()),
+        None => öğe.değer.sayı().or_else(|| {
+            öğe
+                .değer
+                .dizi()
+                .and_then(|değerler| değerler.last().copied())
+        }),
+    }
+}
+
+/// Sütun serisinin `visualMap.dimension` veri kapsamı.
+pub fn sütun_görsel_kapsamı(seri: &SütunSerisi, eşleme: &GörselEşleme) -> [f64; 2] {
+    let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+    for sıra in 0..seri.veri.len() {
+        if let Some(değer) = sütun_görsel_değeri(seri, eşleme, sıra)
+            && değer.is_finite()
+        {
+            kapsam[0] = kapsam[0].min(değer);
+            kapsam[1] = kapsam[1].max(değer);
+        }
+    }
+    if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
+        kapsam = [0.0, 1.0];
+    }
+    eşleme.kapsam_çöz(kapsam)
 }
 
 fn yığın_kimliği(seri: &SütunSerisi, genel_sıra: usize) -> String {
@@ -392,10 +433,25 @@ pub fn sütunları_çiz(
             };
 
             let öğe_stili = veri_öğesi.stil.as_ref();
-            let normal_dolgu = öğe_stili
+            let mut normal_dolgu = öğe_stili
                 .and_then(|s| s.renk.clone())
                 .or_else(|| seri.öğe_stili.renk.clone())
                 .unwrap_or(Dolgu::Düz(girdi.renk));
+            let mut görsel_renk = normal_dolgu.temsilî();
+            let mut görsel_renk_uygulandı = false;
+            for (eşleme, kapsam) in &girdi.görsel_eşlemeler {
+                let renk_kanalı = eşleme.renk_kanalı
+                    || eşleme.renk_açıklığı.is_some()
+                    || eşleme.opaklık.is_some()
+                    || eşleme.aralık_dışı_renk_kanalı;
+                if renk_kanalı && let Some(değer) = sütun_görsel_değeri(seri, eşleme, i) {
+                    görsel_renk = eşleme.rengi_uygula(değer, *kapsam, görsel_renk);
+                    görsel_renk_uygulandı = true;
+                }
+            }
+            if görsel_renk_uygulandı {
+                normal_dolgu = Dolgu::Düz(görsel_renk);
+            }
             let normal_yarıçap = öğe_stili
                 .filter(|stil| stil.kenarlık_yarıçapı.iter().any(|yarıçap| *yarıçap > 0.0))
                 .map(|stil| stil.kenarlık_yarıçapı)
@@ -706,5 +762,31 @@ mod testler {
         );
         assert!(!döküm.contains("dikdörtgen #123456"));
         assert!(çıktı.isabetler.is_empty());
+    }
+
+    #[test]
+    fn sutun_visual_map_adlandirilmis_boyuttan_oge_rengini_cozer() {
+        use crate::model::deger::VeriÖğesi;
+        use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
+
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer())
+            .görsel_eşleme(GörselEşleme::yeni().göster(false).boyut("sign").parçalar([
+                EşlemeParçası::değer(1.0, 0xec0000),
+                EşlemeParçası::değer(-1.0, 0x00da3c),
+            ]))
+            .seri(SütunSerisi::yeni().veri([
+                VeriÖğesi::yeni(10.0).boyutlar([("sign".to_owned(), 1.0.into())]),
+                VeriÖğesi::yeni(20.0).boyutlar([("sign".to_owned(), (-1.0).into())]),
+            ]));
+        let mut yüzey = KayıtYüzeyi::yeni(300.0, 200.0);
+
+        grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("#ec0000@1.0"), "{döküm}");
+        assert!(döküm.contains("#00da3c@1.0"), "{döküm}");
     }
 }
