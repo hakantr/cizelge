@@ -175,6 +175,55 @@ impl AralıkÖlçeği {
         en_küçük_adım: Option<f64>,
         en_büyük_adım: Option<f64>,
     ) -> Self {
+        Self::kur_iç(
+            veri_kapsamı,
+            sabit_en_az,
+            sabit_en_çok,
+            sıfırı_içer,
+            bölme_sayısı,
+            en_küçük_adım,
+            en_büyük_adım,
+            None,
+        )
+    }
+
+    /// Kırık eksenlerde ECharts `getScaleLinearSpanEffective` ham veri
+    /// açıklığı yerine kırılmalar düşüldükten sonraki doğrusal açıklığı nice
+    /// interval hesabına verir. Kapsam yine özgün veri uzayında genişletilir.
+    #[allow(clippy::too_many_arguments)]
+    pub fn kur_etkin_açıklıkla(
+        veri_kapsamı: [f64; 2],
+        sabit_en_az: Option<f64>,
+        sabit_en_çok: Option<f64>,
+        sıfırı_içer: bool,
+        bölme_sayısı: usize,
+        en_küçük_adım: Option<f64>,
+        en_büyük_adım: Option<f64>,
+        etkin_açıklık: f64,
+    ) -> Self {
+        Self::kur_iç(
+            veri_kapsamı,
+            sabit_en_az,
+            sabit_en_çok,
+            sıfırı_içer,
+            bölme_sayısı,
+            en_küçük_adım,
+            en_büyük_adım,
+            Some(etkin_açıklık),
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn kur_iç(
+        veri_kapsamı: [f64; 2],
+        sabit_en_az: Option<f64>,
+        sabit_en_çok: Option<f64>,
+        sıfırı_içer: bool,
+        bölme_sayısı: usize,
+        en_küçük_adım: Option<f64>,
+        en_büyük_adım: Option<f64>,
+        etkin_açıklık: Option<f64>,
+    ) -> Self {
         let mut kapsam = veri_kapsamı;
         if !geçerli_kapsam_sayısı(kapsam[0]) {
             kapsam[0] = 0.0;
@@ -195,7 +244,16 @@ impl AralıkÖlçeği {
         let sabit_uçlar = [sabit_en_az.is_some(), sabit_en_çok.is_some()];
         let mut kapsam = kapsamı_geçerle(kapsam, sabit_uçlar);
 
-        let sonuç = güzel_çentikler(kapsam, bölme_sayısı, en_küçük_adım, en_büyük_adım);
+        let güzel_hesap_kapsamı = etkin_açıklık
+            .filter(|açıklık| açıklık.is_finite() && *açıklık > 0.0)
+            .map(|açıklık| [0.0, açıklık])
+            .unwrap_or(kapsam);
+        let sonuç = güzel_çentikler(
+            güzel_hesap_kapsamı,
+            bölme_sayısı,
+            en_küçük_adım,
+            en_büyük_adım,
+        );
 
         // `Interval.ts` içindeki `calcNiceExtent`: sabitlenmemiş uçlar en
         // yakın adım katına genişletilir.

@@ -1043,15 +1043,44 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
     }
     match seçenek.tür {
         EksenTürü::Kategori => Ölçek::Kategorik(KategorikÖlçek::yeni(kategoriler)),
-        EksenTürü::Değer => Ölçek::Aralık(AralıkÖlçeği::kur(
-            kapsam,
-            en_az,
-            en_çok,
-            seçenek.sıfırı_içer,
-            seçenek.bölme_sayısı,
-            seçenek.aralık.or(seçenek.en_küçük_adım),
-            seçenek.aralık.or(seçenek.en_büyük_adım),
-        )),
+        EksenTürü::Değer => {
+            let mut kırılma_kapsamı = kapsam;
+            if seçenek.sıfırı_içer {
+                kırılma_kapsamı[0] = kırılma_kapsamı[0].min(0.0);
+                kırılma_kapsamı[1] = kırılma_kapsamı[1].max(0.0);
+            }
+            if let Some(en_az) = en_az {
+                kırılma_kapsamı[0] = en_az;
+            }
+            if let Some(en_çok) = en_çok {
+                kırılma_kapsamı[1] = en_çok;
+            }
+            let etkin_açıklık = KırılmaEşleyici::kur(&seçenek.kırılmalar, kırılma_kapsamı)
+                .map(|eşleyici| eşleyici.etkin_açıklık());
+            let ölçek = if let Some(etkin_açıklık) = etkin_açıklık {
+                AralıkÖlçeği::kur_etkin_açıklıkla(
+                    kapsam,
+                    en_az,
+                    en_çok,
+                    seçenek.sıfırı_içer,
+                    seçenek.bölme_sayısı,
+                    seçenek.aralık.or(seçenek.en_küçük_adım),
+                    seçenek.aralık.or(seçenek.en_büyük_adım),
+                    etkin_açıklık,
+                )
+            } else {
+                AralıkÖlçeği::kur(
+                    kapsam,
+                    en_az,
+                    en_çok,
+                    seçenek.sıfırı_içer,
+                    seçenek.bölme_sayısı,
+                    seçenek.aralık.or(seçenek.en_küçük_adım),
+                    seçenek.aralık.or(seçenek.en_büyük_adım),
+                )
+            };
+            Ölçek::Aralık(ölçek)
+        }
         EksenTürü::Zaman => {
             let mut kapsam = kapsam;
             if let Some(ea) = en_az {
@@ -4976,6 +5005,23 @@ mod yakınlaştırma_yönü_testleri {
         );
 
         assert_eq!(veri_sınırlı.kapsam(), [1007.0, 1925.0]);
+    }
+
+    #[test]
+    fn kirik_deger_ekseni_nice_adimini_etkin_acikliktan_hesaplar() {
+        let ölçek = ölçek_kur(
+            &Eksen::değer().kırılma(
+                crate::model::eksen::EksenKırılması::yeni(5_000.0, 100_000.0).boşluk("2%"),
+            ),
+            Vec::new(),
+            [900.0, 107_022.0],
+        );
+        let Ölçek::Aralık(ölçek) = ölçek else {
+            panic!("aralık ölçeği bekleniyordu");
+        };
+
+        assert_eq!(ölçek.adım, 2_000.0);
+        assert_eq!(ölçek.kapsam, [0.0, 108_000.0]);
     }
 
     #[test]
