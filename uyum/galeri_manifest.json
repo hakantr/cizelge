@@ -2943,7 +2943,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-exponential-regression.ts",
     "kaynak_sha256": "44e4a046e550d3fb96e816ff8077a6875356354476d51088abee882cfd376549",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_exponential_regression",
     "seriler": [
       "cross",
       "dashed",
@@ -2960,7 +2960,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2971,15 +2971,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1075,
+          "değişen_piksel_oranı": 0.003981481481481482,
+          "ssim": 0.9983991742638173,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-exponential-regression.png",
+            "sha256": "01391d648e08ddd4cb13eb54596bc3bb1ac5fd366761f38ed84cf670d2e14424"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-exponential-regression.png",
+            "sha256": "7f2821c0193e126878f106ca6b45eb11417e4bc3ebd237398d2caf79e378e17c"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-exponential-regression.png",
+            "sha256": "74bdbecefb37a77bd20780c3aae7d65f66270879d0937062926e26b31ab6818c"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-exponential-regression-son.json",
+            "sha256": "91118b0852be3b8a63e295f79fcdc796d244d1586204702e847b0aecce30bed6"
+          }
+        }
+      ]
     }
   },
   {
