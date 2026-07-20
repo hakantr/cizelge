@@ -29,6 +29,7 @@ pub fn mum_çiz(
     genel_sıra: usize,
     kartezyen: &Kartezyen2B,
     ilerleme: f32,
+    öğe_opaklıkları: Option<&[f32]>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
     // ECharts scheduler `dataZoom: filter` sonucundaki etkin veri sayısını
@@ -40,7 +41,8 @@ pub fn mum_çiz(
         .enumerate()
         .filter(|(sıra, _)| kartezyen.x.pencerede_mi(*sıra as f64))
         .count();
-    if seri.büyük && görünür_veri_sayısı >= seri.büyük_eşiği {
+    if seri.büyük && görünür_veri_sayısı >= seri.büyük_eşiği && öğe_opaklıkları.is_none()
+    {
         mum_büyük_çiz(çizici, seri, kartezyen);
         return;
     }
@@ -67,6 +69,15 @@ pub fn mum_çiz(
             } else {
                 (seri.düşen_renk, seri.düşen_kenarlık_rengi)
             };
+            // Brush `colorAlpha`, veri görselindeki `drawType` olan fill'i
+            // değiştirir; candlestick stroke ayrı görsel olarak opak kalır.
+            let dolgu_rengi = dolgu_rengi.opaklık(
+                öğe_opaklıkları
+                    .and_then(|opaklıklar| opaklıklar.get(i))
+                    .copied()
+                    .unwrap_or(1.0)
+                    .clamp(0.0, 1.0),
+            );
             let ham_x = kartezyen.x.veriden_piksele(i as f64);
             let x = mum_alt_pikseli(ham_x, false);
             let gövde_üst = kartezyen.y.veriden_piksele(açılış.max(kapanış));
@@ -452,5 +463,34 @@ mod testler {
             "{döküm}"
         );
         assert!(!çıktı.isabetler.is_empty());
+    }
+
+    #[test]
+    fn brush_color_alpha_mum_dolgusunu_soldurur_kenarligi_korur() {
+        use crate::model::bilesen::{Fırça, FırçaSeçimAlanı};
+
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B"]))
+            .y_ekseni(Eksen::değer())
+            .fırça(
+                Fırça::yeni()
+                    .dış_renk_opaklığı(0.1)
+                    .alan(FırçaSeçimAlanı::yatay("B", "B").x_ekseni(0)),
+            )
+            .seri(MumSerisi::yeni().veri([[10.0, 12.0, 8.0, 14.0], [11.0, 13.0, 9.0, 15.0]]));
+        let mut yüzey = KayıtYüzeyi::yeni(300.0, 200.0);
+
+        grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("#eb5454@0.1 r=[0.0,0.0,0.0,0.0] kenarlık=1.0:#eb5454@1.0"),
+            "{döküm}"
+        );
+        assert!(
+            döküm.contains("#eb5454@1.0 r=[0.0,0.0,0.0,0.0] kenarlık=1.0:#eb5454@1.0"),
+            "{döküm}"
+        );
     }
 }

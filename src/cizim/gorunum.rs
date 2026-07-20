@@ -3474,11 +3474,21 @@ pub fn grafiği_boya(
                                 }
                             }
                         }
-                        // ECharts candlestickVisual, brush görsel aşamasından
-                        // sonra öğe stilini yeniden kurar; bu yüzden bağlı
-                        // seçim indeksi yayılsa da mum gövdesi `colorAlpha`
-                        // ile solmaz (`candlestick-brush` resmî davranışı).
-                        Seri::Mum(s) => mum_çiz(yüzey, s, i, &kartezyen, ilerleme, isabetler),
+                        // Brush `colorAlpha`, candlestick `drawType` olan
+                        // gövde dolgusuna uygulanır; fitil ve kenarlık rengi
+                        // ayrı stroke kanalında opak kalır.
+                        Seri::Mum(s) => mum_çiz(
+                            yüzey,
+                            s,
+                            i,
+                            &kartezyen,
+                            ilerleme,
+                            hazır_fırça
+                                .öğe_opaklıkları
+                                .get(i)
+                                .and_then(Option::as_deref),
+                            isabetler,
+                        ),
                         Seri::Kutu(s) => {
                             // ECharts kutu serilerini aynı kategorik taban
                             // ekseni üzerinde yan yana yerleştirir. Değer
