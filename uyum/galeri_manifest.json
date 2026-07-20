@@ -8479,7 +8479,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-single-axis.ts",
     "kaynak_sha256": "108436f2a640f20ffb01a3202951c08d4c743156dd6d0520d445698c17e9e58c",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_single_axis",
     "seriler": [
       "scatter"
     ],
@@ -8494,7 +8494,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -8505,15 +8505,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1413,
+          "değişen_piksel_oranı": 0.005233333333333334,
+          "ssim": 0.9972193303754315,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-single-axis.png",
+            "sha256": "7509f2101a4101763d98d358ad0968bc951c29db9470e04358b060595f760d5d"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-single-axis.png",
+            "sha256": "661e5b5ceb9425d349e4254c81dc4d219e31c30832c526ac436f3f3ec282f4d7"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-single-axis.png",
+            "sha256": "187d64f2dde0a040afc5297a448e0b96e8fc31368a678523c199282da3697e8f"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-single-axis-son.json",
+            "sha256": "340a30d315e550bb13e944065eac62b0ce47f801d498e21ad8480d3038ec48cf"
+          }
+        }
+      ]
     }
   },
   {
