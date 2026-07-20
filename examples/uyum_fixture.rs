@@ -4800,6 +4800,88 @@ mod scatter_doğrusal_regresyon_testleri {
     }
 }
 
+fn scatter_polinom_regresyon_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-polynomial-regression.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    resmi_javascript_dizisi(&kaynak, "const data")
+}
+
+fn scatter_polynomial_regression() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_polinom_regresyon_verisini_oku()?;
+    let kaynak = veri
+        .into_iter()
+        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+            küme.satır([x.into(), y.into()])
+        });
+    let kesikli = BölmeÇizgisi {
+        tür: ÇizgiTürü::Kesikli,
+        ..Default::default()
+    };
+    let mut seçenekler = scatter_regresyon_grafiği(
+        kaynak,
+        RegresyonDönüşümü::yeni(RegresyonYöntemi::Polinom).derece(3),
+        "18 companies net profit and main business income (million)",
+        true,
+        false,
+        Eksen::değer()
+            .bölme_sayısı(20)
+            .bölme_çizgisi(kesikli.clone()),
+        Eksen::değer().en_az(-40.0).bölme_çizgisi(kesikli),
+    )?;
+    if let Some(başlık) = seçenekler.başlık.as_mut() {
+        // Resmî örnek `title.top: 16` verir; diğer regresyon kartlarında
+        // kullanılan başlık öntanımlısından bir piksel aşağıdadır.
+        başlık.üst = Some(Uzunluk::Piksel(16.0));
+    }
+    if let Some(Seri::Çizgi(çizgi)) = seçenekler.seriler.get_mut(1) {
+        // Zrender labelLayout dx=-20 dönüşümünde 3. derece eğrinin son
+        // sembol sınır kutusu yarım pikselde kalır; raster çapası sola/yukarı
+        // en yakın tam piksele yuvarlanır.
+        çizgi.etiket.kayma = (-21.0, -1.0);
+    }
+    Ok(seçenekler)
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_polinom_regresyon_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_polinom_regresyon_verisi_ve_formülü_ecstat_ile_uyuşur() {
+        let veri =
+            scatter_polinom_regresyon_verisini_oku().expect("resmi regresyon verisi okunmalı");
+        assert_eq!(veri.len(), 18);
+        assert_eq!(veri.first(), Some(&[96.24, 11.35]));
+        assert_eq!(veri.last(), Some(&[81.31, 108.68]));
+        let kaynak = veri
+            .into_iter()
+            .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+                küme.satır([x.into(), y.into()])
+            });
+        let sonuç = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::regresyon(
+                RegresyonDönüşümü::yeni(RegresyonYöntemi::Polinom).derece(3),
+            ),
+        ])
+        .expect("ecStat polinom regresyon dönüşümü çalışmalı");
+        assert_eq!(
+            sonuç[1].satırlar.last().and_then(|satır| match &satır[2] {
+                VeriDeğeri::Metin(metin) => Some(metin.as_str()),
+                _ => None,
+            }),
+            Some("y = 0.0003x^3 + -0.066x^2 + 4.73x + -40.63")
+        );
+        let ilk_tahmin = sonuç[1].satırlar.first().unwrap()[1].sayı().unwrap();
+        let son_tahmin = sonuç[1].satırlar.last().unwrap()[1].sayı().unwrap();
+        assert!((ilk_tahmin - (-36.659_517_204_716_78)).abs() < 1e-9);
+        assert!((son_tahmin - 638.345_434_754_715_4).abs() < 1e-9);
+    }
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -7006,6 +7088,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-clustering" => scatter_clustering(),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
+        "scatter-polynomial-regression" => scatter_polynomial_regression(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

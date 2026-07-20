@@ -1,0 +1,19 @@
+{
+  "id": "scatter-polynomial-regression",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2222,
+  "değişen_piksel_oranı": 0.00822962962962963,
+  "ssim": 0.9902885867961626,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-polynomial-regression.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-polynomial-regression.png",
+    "fark": "testler/gorsel/fark/default/scatter-polynomial-regression.png"
+  }
+}
