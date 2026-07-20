@@ -14899,7 +14899,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-aqi-color.ts",
     "kaynak_sha256": "77cdec44c92328dbc54e5ced3210bc99e0224ad89acade70bd74dde23a02bfa6",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_aqi_color",
     "seriler": [
       "scatter"
     ],
@@ -14914,7 +14914,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -14925,15 +14925,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 909,
+          "değişen_piksel_oranı": 0.0033666666666666667,
+          "ssim": 0.9930883959948056,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aqi-color.png",
+            "sha256": "1a0c1236b1d2335f0dbcfddb07c31800039475bd1077ea50b7c4555d663e8497"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-aqi-color.png",
+            "sha256": "bd7f6dd47f0ca144afe327b357871e43f4a3196575c16a54859a29f70ca131d2"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-aqi-color.png",
+            "sha256": "9c95d589371b42ef7692626b14be83fb0bd5bedcd0a79b112dcdb1068bbd41ad"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-aqi-color-son.json",
+            "sha256": "fde8f91d5c5abea031d1a33ffe059e142ec71c570b293325633517a5f1dbad09"
+          }
+        }
+      ]
     }
   },
   {
