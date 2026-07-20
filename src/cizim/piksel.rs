@@ -12,7 +12,9 @@ use ab_glyph::{Font, FontVec, OutlineCurve, ScaleFont};
 use tiny_skia as ts;
 
 use crate::cizim::donusum::AfinMatris;
-use crate::cizim::yuzey::{DikeyHiza, YatayHiza, Yol, YolKomutu, daire_yolu, ÇizimYüzeyi};
+use crate::cizim::yuzey::{
+    DikeyHiza, YatayHiza, Yol, YolKomutu, daire_yolu, ÇizimYüzeyi, çizgi_deseni_normalleştir,
+};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::secenekler::GrafikSeçenekleri;
@@ -1023,6 +1025,39 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         };
         boya.set_color(renk_çevir(renk));
         let vuruş = vuruş_yap(kalınlık, tür);
+        self.harita.stroke_path(
+            &ts_yolu,
+            &boya,
+            &vuruş,
+            self.dönüşüm(),
+            self.kırpma.as_ref(),
+        );
+    }
+
+    fn yol_çizgi_deseni(
+        &mut self,
+        yol: &Yol,
+        kalınlık: f32,
+        renk: Renk,
+        desen: &[f32],
+        kayma: f32,
+    ) {
+        if yol.boş_mu() || kalınlık <= 0.0 || renk.alfa <= 0.0 {
+            return;
+        }
+        let Some(ts_yolu) = yol_çevir(yol) else {
+            return;
+        };
+        let mut boya = ts::Paint {
+            anti_alias: true,
+            ..ts::Paint::default()
+        };
+        boya.set_color(renk_çevir(renk));
+        let mut vuruş = vuruş_yap(kalınlık, ÇizgiTürü::Düz);
+        let geçerli = çizgi_deseni_normalleştir(desen);
+        if !geçerli.is_empty() {
+            vuruş.dash = ts::StrokeDash::new(geçerli, if kayma.is_finite() { kayma } else { 0.0 });
+        }
         self.harita.stroke_path(
             &ts_yolu,
             &boya,

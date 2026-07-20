@@ -229,6 +229,65 @@ pub fn nötr_90() -> Renk {
     renkler().nötr_90
 }
 
+/// Timeline ve benzeri vurgu bileşenlerinin ECharts `accent*` belirteçleri.
+/// Koyu karşılıklar `tokens.ts` içindeki doygunluk/aydınlık dönüşümünün
+/// sabitlenmiş sonuçlarıdır.
+pub fn aksan_10() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0x4e5777)
+    } else {
+        Renk::onaltılık(0xe0e4f2)
+    }
+}
+
+pub fn aksan_20() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0x5e6b93)
+    } else {
+        Renk::onaltılık(0xc0c9e6)
+    }
+}
+
+pub fn aksan_30() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0x7782a6)
+    } else {
+        Renk::onaltılık(0xa1aed9)
+    }
+}
+
+pub fn aksan_40() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0x919ab8)
+    } else {
+        Renk::onaltılık(0x8292cc)
+    }
+}
+
+pub fn aksan_50() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0xafb5c9)
+    } else {
+        Renk::onaltılık(0x6578ba)
+    }
+}
+
+pub fn aksan_60() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0xd0d3dc)
+    } else {
+        Renk::onaltılık(0x536298)
+    }
+}
+
+pub fn aksan_70() -> Renk {
+    if koyu_mu() {
+        Renk::onaltılık(0xeeeff3)
+    } else {
+        Renk::onaltılık(0x404c76)
+    }
+}
+
 pub fn birincil_metin() -> Renk {
     renkler().birincil_metin
 }

@@ -28,6 +28,23 @@ pub fn keskin(v: f32) -> f32 {
     }
 }
 
+/// Canvas `setLineDash` normalleştirmesi: negatif/sonlu olmayan ya da
+/// toplamı sıfır diziler düz çizgiye döner; tek uzunluktaki desen,
+/// Canvas standardındaki gibi kendisiyle yinelenerek çiftlenir.
+pub(crate) fn çizgi_deseni_normalleştir(desen: &[f32]) -> Vec<f32> {
+    if desen.is_empty()
+        || desen.iter().any(|değer| !değer.is_finite() || *değer < 0.0)
+        || desen.iter().all(|değer| *değer == 0.0)
+    {
+        return Vec::new();
+    }
+    let mut sonuç = desen.to_vec();
+    if sonuç.len() % 2 == 1 {
+        sonuç.extend_from_slice(desen);
+    }
+    sonuç
+}
+
 /// Yatay yazı hizası.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum YatayHiza {
@@ -154,6 +171,27 @@ pub trait ÇizimYüzeyi {
 
     /// Yolu verilen kalınlık ve türde çizgiler.
     fn yol_çiz(&mut self, yol: &Yol, kalınlık: f32, renk: Renk, tür: ÇizgiTürü);
+
+    /// Canvas `setLineDash` / SVG `stroke-dasharray` karşılığı. Değerler
+    /// çizgi kalınlığından bağımsız piksel uzunluklarıdır; boş/geçersiz dizi
+    /// düz çizgiye düşer. Özel seri `renderItem.style.lineDash` bu yüzeyi
+    /// kullanır.
+    fn yol_çizgi_deseni(
+        &mut self,
+        yol: &Yol,
+        kalınlık: f32,
+        renk: Renk,
+        desen: &[f32],
+        kayma: f32,
+    ) {
+        let tür = if çizgi_deseni_normalleştir(desen).is_empty() {
+            ÇizgiTürü::Düz
+        } else {
+            ÇizgiTürü::Kesikli
+        };
+        let _ = kayma;
+        self.yol_çiz(yol, kalınlık, renk, tür);
+    }
 
     /// Yolu düz renk yerine desen/gradyan boyasıyla çizgiler. Basit yüzeyler
     /// temsilî renge düşebilir; yerleşik GPUI, PNG ve SVG yüzeyleri doğrusal

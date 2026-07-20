@@ -18,6 +18,7 @@ pub mod takvim;
 pub mod tek_eksen;
 pub mod veri_kumesi;
 pub mod yakinlastirma;
+pub mod zaman_seridi;
 
 use crate::yardimci::sayi::yüzde_çöz;
 

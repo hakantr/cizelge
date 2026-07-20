@@ -26,6 +26,7 @@ use crate::model::takvim::TakvimKoordinatı;
 use crate::model::tek_eksen::TekEksen;
 use crate::model::veri_kumesi::{VeriKümesi, VeriKümesiTanımı};
 use crate::model::yakinlastirma::VeriYakınlaştırma;
+use crate::model::zaman_seridi::ZamanŞeridi;
 use crate::renk::{Dolgu, Renk};
 use crate::yerel::{TÜRKÇE, Yerel};
 
@@ -52,6 +53,7 @@ pub enum SeçenekAlanı {
     VeriYakınlaştırmaları,
     AraçKutusu,
     Fırça,
+    ZamanŞeridi,
     Palet,
     Arkaplan,
     Koyu,
@@ -62,7 +64,7 @@ pub enum SeçenekAlanı {
     AnimasyonEğrisi,
 }
 
-const TÜM_ALANLAR: [SeçenekAlanı; 28] = [
+const TÜM_ALANLAR: [SeçenekAlanı; 29] = [
     SeçenekAlanı::Başlık,
     SeçenekAlanı::Gösterge,
     SeçenekAlanı::Izgara,
@@ -83,6 +85,7 @@ const TÜM_ALANLAR: [SeçenekAlanı; 28] = [
     SeçenekAlanı::VeriYakınlaştırmaları,
     SeçenekAlanı::AraçKutusu,
     SeçenekAlanı::Fırça,
+    SeçenekAlanı::ZamanŞeridi,
     SeçenekAlanı::Palet,
     SeçenekAlanı::Arkaplan,
     SeçenekAlanı::Koyu,
@@ -452,6 +455,18 @@ impl SeçenekYaması {
         self
     }
 
+    pub fn zaman_şeridi(mut self, zaman_şeridi: ZamanŞeridi) -> Self {
+        self.değer.zaman_şeridi = Some(zaman_şeridi);
+        self.sağlanan.insert(SeçenekAlanı::ZamanŞeridi);
+        self
+    }
+
+    pub fn zaman_şeridini_kaldır(mut self) -> Self {
+        self.değer.zaman_şeridi = None;
+        self.sağlanan.insert(SeçenekAlanı::ZamanŞeridi);
+        self
+    }
+
     pub fn palet<R: Into<Renk>>(mut self, renkler: impl IntoIterator<Item = R>) -> Self {
         self.değer.palet = renkler.into_iter().map(Into::into).collect();
         self.sağlanan.insert(SeçenekAlanı::Palet);
@@ -648,6 +663,16 @@ impl BileşikSeçenekler {
                     sıra,
                 })?;
             yamayı_uygula(&mut sonuç, kare, &kip)?;
+            if let Some(zaman_şeridi) = sonuç.zaman_şeridi.as_mut() {
+                let toplam = zaman_şeridi.veri.len();
+                zaman_şeridi.geçerli_sıra = if toplam == 0 {
+                    0
+                } else if zaman_şeridi.döngü {
+                    sıra % toplam
+                } else {
+                    sıra.min(toplam - 1)
+                };
+            }
         }
 
         let eşleşenler: Vec<&MedyaKuralı> = self
@@ -1523,6 +1548,7 @@ fn yamayı_uygula(
     alanı_uygula!(veri_yakınlaştırmaları, SeçenekAlanı::VeriYakınlaştırmaları);
     alanı_uygula!(araç_kutusu, SeçenekAlanı::AraçKutusu);
     alanı_uygula!(fırça, SeçenekAlanı::Fırça);
+    alanı_uygula!(zaman_şeridi, SeçenekAlanı::ZamanŞeridi);
     alanı_uygula!(palet, SeçenekAlanı::Palet);
     alanı_uygula!(arkaplan, SeçenekAlanı::Arkaplan);
     alanı_uygula!(koyu, SeçenekAlanı::Koyu);
@@ -2113,6 +2139,26 @@ mod testler {
         assert!(geniş.koyu);
         assert!(geniş.animasyon);
         assert!(paket.çöz(800.0, 600.0, Some(9)).is_err());
+    }
+
+    #[test]
+    fn timeline_karesi_modelin_geçerli_sırasını_da_günceller() {
+        let paket = BileşikSeçenekler::yeni(
+            GrafikSeçenekleri::yeni()
+                .zaman_şeridi(ZamanŞeridi::yeni().veri(["ilk", "orta", "son"]))
+                .kimlikli_seri("temel", ÇizgiSerisi::yeni().veri([0])),
+        )
+        .zaman_karesi(SeçenekYaması::yeni().kimlikli_seri("kare", ÇizgiSerisi::yeni().veri([1])))
+        .zaman_karesi(SeçenekYaması::yeni().kimlikli_seri("kare", ÇizgiSerisi::yeni().veri([2])))
+        .zaman_karesi(SeçenekYaması::yeni().kimlikli_seri("kare", ÇizgiSerisi::yeni().veri([3])));
+
+        let sonuç = paket.çöz(800.0, 600.0, Some(2)).unwrap();
+        assert_eq!(
+            sonuç.zaman_şeridi.as_ref().map(|şerit| şerit.geçerli_sıra),
+            Some(2)
+        );
+        assert_eq!(sonuç.seriler.len(), 2, "timeline normal merge uygular");
+        assert_eq!(ilk_değer(&sonuç, 1), 3.0);
     }
 
     #[test]

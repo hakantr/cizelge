@@ -131,6 +131,11 @@ pub use model::veri_kumesi::{
 pub use model::yakinlastirma::{
     VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,
 };
+pub use model::zaman_seridi::{
+    ZamanŞeridi, ZamanŞeridiEksenTürü, ZamanŞeridiEtiketKonumu, ZamanŞeridiEtiketi,
+    ZamanŞeridiKontrolKonumu, ZamanŞeridiKontrolNoktasıStili, ZamanŞeridiKontrolStili,
+    ZamanŞeridiSimgesi,
+};
 pub use model::{DikeyKonum, Uzunluk, YatayKonum};
 pub use renk::{DesenTekrarı, Dolgu, GörüntüDeseni, Renk, RenkDurağı};
 pub use yerel::{TÜRKÇE, Yerel, İNGİLİZCE};
@@ -231,6 +236,11 @@ pub mod hazir {
     };
     pub use crate::model::yakinlastirma::{
         VeriYakınlaştırma, YakınlaştırmaDeğeri, YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü,
+    };
+    pub use crate::model::zaman_seridi::{
+        ZamanŞeridi, ZamanŞeridiEksenTürü, ZamanŞeridiEtiketKonumu, ZamanŞeridiEtiketi,
+        ZamanŞeridiKontrolKonumu, ZamanŞeridiKontrolNoktasıStili, ZamanŞeridiKontrolStili,
+        ZamanŞeridiSimgesi,
     };
     pub use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
     pub use crate::renk::{DesenTekrarı, Dolgu, GörüntüDeseni, Renk, RenkDurağı};

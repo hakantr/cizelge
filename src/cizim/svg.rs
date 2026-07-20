@@ -10,6 +10,7 @@ use std::fmt::Write as _;
 use crate::cizim::donusum::AfinMatris;
 use crate::cizim::yuzey::{
     DikeyHiza, SATIR_ORANI, YatayHiza, Yol, YolKomutu, daire_yolu, ÇizimYüzeyi,
+    çizgi_deseni_normalleştir,
 };
 use crate::koordinat::Dikdörtgen;
 use crate::model::stil::ÇizgiTürü;
@@ -337,6 +338,39 @@ impl ÇizimYüzeyi for SvgYüzeyi {
         );
     }
 
+    fn yol_çizgi_deseni(
+        &mut self,
+        yol: &Yol,
+        kalınlık: f32,
+        renk: Renk,
+        desen: &[f32],
+        kayma: f32,
+    ) {
+        if yol.boş_mu() || kalınlık <= 0.0 || renk.alfa <= 0.0 {
+            return;
+        }
+        let geçerli = çizgi_deseni_normalleştir(desen);
+        let desen_özniteliği = if geçerli.is_empty() {
+            String::new()
+        } else {
+            let değerler = geçerli
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join(" ");
+            let kayma = if kayma.is_finite() { kayma } else { 0.0 };
+            format!(r#" stroke-dasharray="{değerler}" stroke-dashoffset="{kayma}""#)
+        };
+        let _ = write!(
+            self.gövde,
+            r#"<path d="{}" fill="none" stroke="{}" stroke-width="{}" stroke-linecap="butt" stroke-linejoin="bevel"{}/>"#,
+            yol_svg(yol),
+            renk_svg(renk),
+            kalınlık,
+            desen_özniteliği
+        );
+    }
+
     fn yol_dolgulu_çiz(&mut self, yol: &Yol, kalınlık: f32, dolgu: &Dolgu, tür: ÇizgiTürü) {
         if yol.boş_mu() || kalınlık <= 0.0 {
             return;
@@ -630,5 +664,21 @@ mod testler {
         let belge = yüzey.belge();
         assert_eq!(belge.matches("<radialGradient ").count(), 1);
         assert_eq!(belge.matches(r#"fill="url(#grd1)""#).count(), 1);
+    }
+
+    #[test]
+    fn özel_çizgi_deseni_svg_değerlerini_ve_fazını_korur() {
+        let mut yüzey = SvgYüzeyi::yeni(80.0, 40.0);
+        let mut yol = Yol::yeni();
+        yol.taşı((5.0, 20.0));
+        yol.çiz((75.0, 20.0));
+
+        yüzey.yol_çizgi_deseni(&yol, 3.0, 0x334455u32.into(), &[4.0, 4.0], 2.0);
+        let belge = yüzey.belge();
+
+        assert!(belge.contains(r#"stroke-dasharray="4 4""#));
+        assert!(belge.contains(r#"stroke-dashoffset="2""#));
+        assert!(belge.contains(r#"stroke-linecap="butt""#));
+        assert!(belge.contains(r#"stroke-linejoin="bevel""#));
     }
 }

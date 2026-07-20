@@ -16,6 +16,7 @@ use crate::model::veri_kumesi::{
     BoyutSeçici, SeriYerleşimi, VeriKümesi, VeriKümesiTanımı, veri_kümelerini_çöz,
 };
 use crate::model::yakinlastirma::VeriYakınlaştırma;
+use crate::model::zaman_seridi::ZamanŞeridi;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
@@ -73,6 +74,9 @@ pub struct GrafikSeçenekleri {
     pub araç_kutusu: Option<AraçKutusu>,
     /// Fırça (`brush`): dikdörtgen seçim.
     pub fırça: Option<Fırça>,
+    /// Zaman şeridi (`timeline`). `BileşikSeçenekler`, seçilen `options`
+    /// karesini bu bileşenin `geçerli_sıra` değeriyle birleştirir.
+    pub zaman_şeridi: Option<ZamanŞeridi>,
     /// Seri renk paleti (`color`).
     pub palet: Vec<Renk>,
     pub arkaplan: Option<Dolgu>,
@@ -117,6 +121,7 @@ impl Default for GrafikSeçenekleri {
             veri_yakınlaştırmaları: Vec::new(),
             araç_kutusu: None,
             fırça: None,
+            zaman_şeridi: None,
             palet: tema::PALET.to_vec(),
             arkaplan: None,
             koyu: false,
@@ -326,6 +331,11 @@ impl GrafikSeçenekleri {
     /// `singleAxis: []` dizisine tek eksenli koordinat ekler.
     pub fn tek_eksen(mut self, koordinat: TekEksen) -> Self {
         self.tek_eksenler.push(koordinat);
+        self
+    }
+
+    pub fn zaman_şeridi(mut self, zaman_şeridi: ZamanŞeridi) -> Self {
+        self.zaman_şeridi = Some(zaman_şeridi);
         self
     }
 
@@ -701,6 +711,31 @@ impl GrafikSeçenekleri {
                     self.animasyon_süresi_güncelleme
                 ),
             });
+        }
+        if let Some(zaman_şeridi) = &self.zaman_şeridi {
+            if !zaman_şeridi.oynatma_aralığı.is_finite() || zaman_şeridi.oynatma_aralığı < 0.0
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "timeline.playInterval",
+                    ayrıntı: format!(
+                        "{} geçerli bir oynatma aralığı değil",
+                        zaman_şeridi.oynatma_aralığı
+                    ),
+                });
+            }
+            if !zaman_şeridi.veri.is_empty()
+                && zaman_şeridi.geçerli_sıra >= zaman_şeridi.veri.len()
+                && !zaman_şeridi.döngü
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "timeline.currentIndex",
+                    ayrıntı: format!(
+                        "{} sırası {} zaman verisinin dışında",
+                        zaman_şeridi.geçerli_sıra,
+                        zaman_şeridi.veri.len()
+                    ),
+                });
+            }
         }
         let x_eksenler = self.etkin_x_eksenleri();
         let y_eksenler = self.etkin_y_eksenleri();

@@ -15,7 +15,9 @@ use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::bilesen::matris_cizimi::matris_çiz;
 use crate::bilesen::takvim_cizimi::{takvim_arka_planı_çiz, takvim_üst_katmanı_çiz};
-use crate::bilesen::zaman_seridi::{ZamanŞeridiEylemi, zaman_şeridi_çiz};
+use crate::bilesen::zaman_seridi::{
+    ZamanŞeridiEylemi, seçenekli_zaman_şeridi_çiz, zaman_şeridi_çiz,
+};
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::cizim::{AfinMatris, Yol, yolu_dönüştür};
@@ -4513,8 +4515,13 @@ pub fn grafiği_boya(
         çıktı.gösterge_okları = gösterge_çıktısı.oklar;
     }
 
-    // 5c) Zaman şeridi (timeline) — kare noktaları + oynat/durdur.
-    if let Some((geçerli, toplam, oynuyor)) = girdi.zaman_şeridi {
+    // 5c) Zaman şeridi (timeline) — option modeli varsa ECharts slider
+    // yerleşimi; yalnız `GrafikGörünümü::film` kullanılmışsa geriye uyumlu
+    // yalın alt şerit.
+    if let Some(zaman_şeridi) = &seçenekler.zaman_şeridi {
+        çıktı.zaman_düğmeleri =
+            seçenekli_zaman_şeridi_çiz(yüzey, zaman_şeridi, girdi.zaman_şeridi);
+    } else if let Some((geçerli, toplam, oynuyor)) = girdi.zaman_şeridi {
         çıktı.zaman_düğmeleri = zaman_şeridi_çiz(yüzey, geçerli, toplam, oynuyor);
     }
 
