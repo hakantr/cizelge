@@ -92,6 +92,12 @@ function html(id, kaynak, frame, state, width, height) {
   const ecStatBetigi = kaynak.includes('ecStat')
     ? '<script src="/ecStat.min.js"></script>'
     : '';
+  const erkenRastgele = id === 'bar-breaks-brush'
+    // Kırık zikzağı, global rastgele akışta kendinden önce kaç tüketim
+    // yapıldığından etkilenmemeli. 0.5 resmî algoritmanın geçerli ve sabit
+    // bir girdisidir; hem modül yükleme hem görünüm kurma evresini kilitler.
+    ? '<script>Math.random = () => 0.5;</script>'
+    : '';
   const kümelemeSırası = id === 'scatter-clustering-process' && state.startsWith('step-')
     ? Number(state.slice('step-'.length))
     : null;
@@ -123,6 +129,55 @@ function html(id, kaynak, frame, state, width, height) {
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'scatter-nutrients-matrix' && state === 'zoom-left'
       ? `myChart.dispatchAction({type:'dataZoom', dataZoomIndex:0, start:20, end:80});`
+    : id === 'bar-breaks-brush' && state === 'fırça'
+      ? `{
+          const x = myChart.getWidth() / 2;
+          const y0 = myChart.convertToPixel({yAxisIndex:0}, 2000);
+          const y1 = myChart.convertToPixel({yAxisIndex:0}, 3000);
+          const zr = myChart.getZr();
+          zr.trigger('mousedown', {offsetX:x, offsetY:y0});
+          zr.trigger('mousemove', {offsetX:x, offsetY:y1});
+          const mouseup = new MouseEvent('mouseup', {clientX:x, clientY:y1, bubbles:true});
+          Object.defineProperties(mouseup, {
+            offsetX: {value:x},
+            offsetY: {value:y1}
+          });
+          document.dispatchEvent(mouseup);
+          // Kaynağın tam açıklıktan %2 boşluğa indirdiği sıfır gecikmeli
+          // ikinci setOption çağrısını tamamla.
+          await new Promise((resolve) => setTimeout(resolve, 0));
+          const breaks = myChart.getOption().yAxis[0].breaks || [];
+          if (!breaks.some((item) => item.start === 2000 && item.end === 3000 && item.gap === '2%')) {
+            throw new Error('bar-breaks-brush fırça etkileşimi ikinci kırığı üretmedi');
+          }
+          myChart.dispatchAction({
+            type:'expandAxisBreak',
+            yAxisIndex:0,
+            breaks:[{start:5000, end:100000}]
+          });
+          const expanded = (myChart.getOption().yAxis[0].breaks || [])
+            .find((item) => item.start === 5000 && item.end === 100000);
+          if (!expanded || expanded.isExpanded !== true) {
+            throw new Error('bar-breaks-brush eski kırığı genişletme eylemi uygulanmadı');
+          }
+          // Mousemove tooltip'i yeni kırığı örter. Kanıt karesi, gerçek
+          // fırçanın eklediği 2000–3000 kırığını tek başına ve bütünüyle
+          // karşılaştırır; eski kırık yerleşik action ile genişletilmiştir.
+          myChart.dispatchAction({type:'hideTip'});
+          zr.trigger('globalout', {});
+        }`
+    : id === 'bar-breaks-brush' && state === 'sıfırla'
+      ? `{
+          myChart.dispatchAction({
+            type:'expandAxisBreak',
+            yAxisIndex:0,
+            breaks:[{start:5000, end:100000}]
+          });
+          const item = (myChart.getOption().yAxis[0].breaks || [])[0];
+          if (!item || item.isExpanded !== true) {
+            throw new Error('bar-breaks-brush expandAxisBreak sıfırlama durumunu üretmedi');
+          }
+        }`
     : id === 'scatter-nutrients' && state === 'axes-fat-fiber'
       ? `{
           app.config.xAxis = 'fat';
@@ -178,7 +233,9 @@ function html(id, kaynak, frame, state, width, height) {
               }
             }`
       : '';
-  const zamanlayıcıyıBekle = id === 'dataset-link' || (id === 'dynamic-data2' && state === 'ipucu')
+  const zamanlayıcıyıBekle = id === 'dataset-link'
+    || id === 'bar-breaks-brush'
+    || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
   const zamanŞeridiAnimasyonunuTamamla = id === 'scatter-clustering-process'
@@ -196,7 +253,7 @@ function html(id, kaynak, frame, state, width, height) {
       : 0;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
 html,body,#viewport{margin:0;width:${width}px;height:${height}px;overflow:hidden}
-</style><script src="/echarts.js"></script>${ecStatBetigi}</head><body><div id="viewport"></div><script>
+</style>${erkenRastgele}<script src="/echarts.js"></script>${ecStatBetigi}</head><body><div id="viewport"></div><script>
 (() => {
   let now = 0;
   let nextId = 1;
@@ -237,12 +294,12 @@ html,body,#viewport{margin:0;width:${width}px;height:${height}px;overflow:hidden
   };
 })();
 let seed = 0x5eed1234;
-Math.random = () => {
+Math.random = ${id === 'bar-breaks-brush' ? '() => 0.5' : `() => {
   seed |= 0; seed = seed + 0x6D2B79F5 | 0;
   let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
   return ((t ^ t >>> 14) >>> 0) / 4294967296;
-};
+}`};
 window.ROOT_PATH = location.origin;
 window.CDN_PATH = location.origin + '/';
 window.app = {};

@@ -91,6 +91,15 @@ const SENARYOLAR = [
   { id: 'bar-waterfall2', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'bar-stack-normalization', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'bar-breaks-brush',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'fırça', kare: 1, durum: 'fırça' },
+      { ad: 'sıfırla', kare: 1, durum: 'sıfırla' }
+    ]
+  },
   { id: 'data-transform-sort-bar', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'dataset-simple0', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'dataset-simple1', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

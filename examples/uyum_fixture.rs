@@ -2763,6 +2763,172 @@ fn bar_label_rotation() -> GrafikSeçenekleri {
         .seri(seri("Wetland", [98, 77, 101, 99, 40]))
 }
 
+fn bar_breaks_brush(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let ana_kırılma = EksenKırılması::yeni(5_000.0, 100_000.0).boşluk("2%");
+    let kırılmalar = match durum {
+        "başlangıç" => vec![ana_kırılma],
+        // Resmî `initAxisBreakInteraction` içinde 2000–3000 veri aralığına
+        // yapılan fırça, ilk kırıkla kesişmediği için ikinci kırığı ekler ve
+        // sıfır gecikmeli geçişin sonunda `gap: '2%'` değerine daraltır.
+        // Görsel kanıtta yeni kırığı örtüsüz karşılaştırmak için eski kırık
+        // ardından resmî `expandAxisBreak` action'ıyla genişletilir.
+        "fırça" => vec![
+            ana_kırılma.genişletilmiş(true),
+            EksenKırılması::yeni(2_000.0, 3_000.0).boşluk("2%"),
+        ],
+        // Kırılma alanına tıklanınca yerleşik `expandAxisBreak` action'ı
+        // `isExpanded` değerini açar; kaynak `axisbreakchanged` dinleyicisi
+        // aynı kaydı bir sonraki fırça option'ından da çıkarır.
+        "sıfırla" => vec![ana_kırılma.genişletilmiş(true)],
+        _ => {
+            return Err(format!(
+                "bar-breaks-brush durumu başlangıç, fırça veya sıfırla olmalı: {durum}"
+            ));
+        }
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Bar Chart with Axis Break (Brush-enabled)")
+                .alt_metin("Brush to create a new axis break.\nClick on the break area to reset.")
+                .sol("center")
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(20.0))
+                .alt_yazı(YazıStili::yeni().renk("#175ce5").boyut(15.0).kalın(true)),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Gölge),
+        )
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0))
+        .ızgara(Izgara::yeni().üst(120).alt(80))
+        .x_ekseni(Eksen::kategori().veri(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
+        .y_ekseni(
+            Eksen::değer().kırılmalar(kırılmalar).kırılma_alanı(
+                EksenKırılmaAlanı::yeni()
+                    .opaklık(1.0)
+                    .zikzak_en_büyük_açıklık(15.0)
+                    .zikzak_genliği(2.0)
+                    .zikzak_z(200),
+            ),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data A")
+                .veri([1500, 2032, 2001, 3154, 2190, 4330, 2410]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data B")
+                .veri([1200, 1320, 1010, 1340, 900, 2300, 2100]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data C")
+                .veri([103200, 100320, 103010, 102340, 103900, 103300, 103200]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data D")
+                .veri([106212, 102118, 102643, 104631, 106679, 100130, 107022]),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::expect_used, clippy::panic)]
+mod bar_breaks_brush_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_option_ve_dort_serinin_verisi_kayipsizdir() {
+        let seçenekler = bar_breaks_brush("başlangıç").expect("fixture kurulmalı");
+        let başlık = seçenekler.başlık.as_ref().expect("başlık olmalı");
+        assert_eq!(
+            başlık.metin.as_deref(),
+            Some("Bar Chart with Axis Break (Brush-enabled)")
+        );
+        assert_eq!(
+            başlık.alt_metin.as_deref(),
+            Some("Brush to create a new axis break.\nClick on the break area to reset.")
+        );
+        assert_eq!(başlık.yazı.boyut, Some(20.0));
+        assert_eq!(başlık.alt_yazı.boyut, Some(15.0));
+        assert!(başlık.alt_yazı.kalın);
+        assert_eq!(başlık.alt_yazı.renk, Some(Renk::onaltılık(0x175ce5)));
+        assert_eq!(seçenekler.ızgara.üst, Uzunluk::Piksel(120.0));
+        assert_eq!(seçenekler.ızgara.alt, Uzunluk::Piksel(80.0));
+        assert_eq!(seçenekler.seriler.len(), 4);
+
+        let beklenen = [
+            (
+                "Data A",
+                vec![1500.0, 2032.0, 2001.0, 3154.0, 2190.0, 4330.0, 2410.0],
+            ),
+            (
+                "Data B",
+                vec![1200.0, 1320.0, 1010.0, 1340.0, 900.0, 2300.0, 2100.0],
+            ),
+            (
+                "Data C",
+                vec![
+                    103200.0, 100320.0, 103010.0, 102340.0, 103900.0, 103300.0, 103200.0,
+                ],
+            ),
+            (
+                "Data D",
+                vec![
+                    106212.0, 102118.0, 102643.0, 104631.0, 106679.0, 100130.0, 107022.0,
+                ],
+            ),
+        ];
+        for (seri, (ad, değerler)) in seçenekler.seriler.iter().zip(beklenen) {
+            let Seri::Sütun(seri) = seri else {
+                panic!("bar serisi bekleniyordu");
+            };
+            assert_eq!(seri.ad.as_deref(), Some(ad));
+            assert_eq!(
+                seri.veri
+                    .iter()
+                    .map(|öğe| öğe.değer.sayı().expect("sayısal sütun"))
+                    .collect::<Vec<_>>(),
+                değerler
+            );
+        }
+    }
+
+    #[test]
+    fn firca_ve_sifirlama_kirilma_durumlarini_tasir() {
+        let başlangıç = bar_breaks_brush("başlangıç").expect("başlangıç kurulmalı");
+        let fırça = bar_breaks_brush("fırça").expect("fırça durumu kurulmalı");
+        let sıfırla = bar_breaks_brush("sıfırla").expect("sıfırlama durumu kurulmalı");
+
+        let ilk = başlangıç.y_ekseni.as_ref().expect("y ekseni olmalı");
+        assert_eq!(ilk.kırılmalar.len(), 1);
+        assert_eq!(ilk.kırılmalar[0].başlangıç, 5_000.0);
+        assert_eq!(ilk.kırılmalar[0].bitiş, 100_000.0);
+        assert_eq!(ilk.kırılmalar[0].boşluk, EksenKırılmaBoşluğu::Yüzde(0.02));
+        assert_eq!(ilk.kırılma_alanı.opaklık, 1.0);
+        assert_eq!(ilk.kırılma_alanı.zikzak_en_büyük_açıklık, 15.0);
+        assert_eq!(ilk.kırılma_alanı.zikzak_genliği, 2.0);
+        assert_eq!(ilk.kırılma_alanı.zikzak_z, 200);
+
+        let fırça_kırılmaları = &fırça.y_ekseni.as_ref().unwrap().kırılmalar;
+        assert_eq!(fırça_kırılmaları.len(), 2);
+        assert!(fırça_kırılmaları[0].genişletilmiş);
+        assert_eq!(fırça_kırılmaları[1].başlangıç, 2_000.0);
+        assert_eq!(fırça_kırılmaları[1].bitiş, 3_000.0);
+        assert_eq!(
+            fırça_kırılmaları[1].boşluk,
+            EksenKırılmaBoşluğu::Yüzde(0.02)
+        );
+        assert!(sıfırla.y_ekseni.unwrap().kırılmalar[0].genişletilmiş);
+        assert!(bar_breaks_brush("bilinmeyen").is_err());
+    }
+}
+
 fn data_transform_sort_bar() -> Result<GrafikSeçenekleri, String> {
     let kaynak = VeriKümesi::yeni(["name", "age", "profession", "score", "date"])
         .satır([
@@ -8676,6 +8842,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-waterfall2" => Ok(bar_waterfall2()),
         "bar-stack-normalization" => Ok(bar_stack_normalization()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
+        "bar-breaks-brush" => bar_breaks_brush(durum),
         "data-transform-sort-bar" => data_transform_sort_bar(),
         "dataset-simple0" => Ok(dataset_simple0()),
         "dataset-simple1" => dataset_simple1(),
