@@ -74,21 +74,35 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
             0.0
         };
 
-    let x = match başlık.sol {
-        YatayKonum::Sol => başlık.iç_boşluk,
-        YatayKonum::Orta => (tuval_genişliği - blok_genişliği) / 2.0,
-        YatayKonum::Sağ => tuval_genişliği - blok_genişliği - başlık.iç_boşluk,
-        YatayKonum::Değer(u) => u.çöz(tuval_genişliği) + başlık.iç_boşluk,
-    };
+    // `TitleView`, açık width seçeneğini `groupRect.width` ile değiştirir;
+    // sağ/alt çözümü bu ölçülen içerik boyutuna ve padding'e göre yapılır.
+    let sağdan = başlık.sağ.map(|u| u.çöz(tuval_genişliği));
+    let x = sağdan.map_or_else(
+        || match başlık.sol {
+            YatayKonum::Sol => başlık.iç_boşluk,
+            YatayKonum::Orta => (tuval_genişliği - blok_genişliği) / 2.0,
+            YatayKonum::Sağ => tuval_genişliği - blok_genişliği - başlık.iç_boşluk,
+            YatayKonum::Değer(u) => u.çöz(tuval_genişliği) + başlık.iç_boşluk,
+        },
+        |sağ| tuval_genişliği - sağ - başlık.iç_boşluk - blok_genişliği,
+    );
     let açık_hiza = başlık.metin_hizası.map(|hiza| match hiza {
         BaşlıkMetinHizası::Sol => YatayHiza::Sol,
         BaşlıkMetinHizası::Orta => YatayHiza::Orta,
         BaşlıkMetinHizası::Sağ => YatayHiza::Sağ,
     });
-    let hiza = açık_hiza.unwrap_or(match başlık.sol {
-        YatayKonum::Orta => YatayHiza::Orta,
-        YatayKonum::Sağ => YatayHiza::Sağ,
-        _ => YatayHiza::Sol,
+    let hiza = açık_hiza.unwrap_or_else(|| {
+        // Sayısal/yüzdeli `right`, ECharts'ta geçerli bir textAlign anahtarına
+        // dönüşmez ve zrender'in sol hizasına düşer.
+        if başlık.sağ.is_some() {
+            YatayHiza::Sol
+        } else {
+            match başlık.sol {
+                YatayKonum::Orta => YatayHiza::Orta,
+                YatayKonum::Sağ => YatayHiza::Sağ,
+                _ => YatayHiza::Sol,
+            }
+        }
     });
     // ECharts `TitleView`: açık `textAlign` verildiğinde layoutRect.x
     // değiştirilmez ve `left` doğrudan yazı çapası olur. Otomatik hizadaysa
@@ -103,7 +117,11 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
         }
     };
 
-    let mut y = başlık.üst.map(|u| u.çöz(çizici.yükseklik())).unwrap_or(0.0) + başlık.iç_boşluk;
+    let mut y = if let Some(alt) = başlık.alt {
+        çizici.yükseklik() - alt.çöz(çizici.yükseklik()) - başlık.iç_boşluk - blok_yüksekliği
+    } else {
+        başlık.üst.map(|u| u.çöz(çizici.yükseklik())).unwrap_or(0.0) + başlık.iç_boşluk
+    };
 
     let kutu_solu = match hiza {
         YatayHiza::Sol => çapa_x - başlık.iç_boşluk,
@@ -163,6 +181,43 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
             alt_satırı,
             renk,
             başlık.alt_yazı.kalın,
+        );
+    }
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+    use crate::cizim::KayıtYüzeyi;
+    use crate::model::stil::YazıStili;
+
+    #[test]
+    fn sag_alt_baslik_olculen_metni_kenarlara_yerlestirir() {
+        let başlık = Başlık::yeni()
+            .metin("SELECTED DATA INDICES: \n[Series 0] 2, 3, 4, 5")
+            .sağ("10%")
+            .alt(0)
+            // Pinned ECharts TitleView bunu metin ölçüsüyle değiştirir.
+            .genişlik(100)
+            .iç_boşluk(15.0)
+            .arkaplan("#333")
+            .yazı(YazıStili::yeni().boyut(12.0).renk("#fff").kalın(false));
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        başlık_çiz(&mut yüzey, &başlık);
+
+        assert_eq!(başlık.genişlik, Some(crate::model::Uzunluk::Piksel(100.0)));
+        assert_eq!(
+            yüzey.komutlar[0],
+            "dikdörtgen (434.4,471.0 195.6x54.0) #333333@1.0 r=[0.0,0.0,0.0,0.0]"
+        );
+        assert_eq!(
+            yüzey.komutlar[1],
+            "yazı \"SELECTED DATA INDICES: \" (449.4,486.0) sol/üst b=12.0 #ffffff@1.0"
+        );
+        assert_eq!(
+            yüzey.komutlar[2],
+            "yazı \"[Series 0] 2, 3, 4, 5\" (449.4,498.0) sol/üst b=12.0 #ffffff@1.0"
         );
     }
 }

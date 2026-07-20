@@ -8,7 +8,7 @@ use std::sync::Arc;
 use crate::model::deger::VeriDeğeri;
 use crate::model::stil::{Biçimleyici, YazıStili};
 use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
-use crate::renk::Renk;
+use crate::renk::{Dolgu, Renk};
 
 /// Başlık metninin açık yatay hizası (`title.textAlign`).
 ///
@@ -29,9 +29,19 @@ pub struct Başlık {
     pub metin: Option<String>,
     pub alt_metin: Option<String>,
     pub sol: YatayKonum,
+    /// Sağ kenardan uzaklık (`right`). Açık olduğunda `left` yerleşiminin
+    /// yerini alır.
+    pub sağ: Option<Uzunluk>,
     pub metin_hizası: Option<BaşlıkMetinHizası>,
     /// Üst kenardan uzaklık; öntanımlı iç boşluk kadar.
     pub üst: Option<Uzunluk>,
+    /// Alt kenardan uzaklık (`bottom`). Açık olduğunda `top` yerleşiminin
+    /// yerini alır.
+    pub alt: Option<Uzunluk>,
+    /// ECharts `title.width`. Pinned ECharts `TitleView`, yerleşimden önce
+    /// bunu ölçülen metin genişliğiyle değiştirir; seçenek API uyumu için
+    /// özgün değer yine de modelde korunur.
+    pub genişlik: Option<Uzunluk>,
     /// Başlık kutusunun CSS sıralı eş boşluğu (`padding`).
     pub iç_boşluk: f32,
     /// Ana ve alt başlık arasındaki boşluk (`itemGap`).
@@ -52,8 +62,11 @@ impl Default for Başlık {
             metin: None,
             alt_metin: None,
             sol: YatayKonum::Orta,
+            sağ: None,
             metin_hizası: None,
             üst: Some(Uzunluk::Piksel(15.0)),
+            alt: None,
+            genişlik: None,
             iç_boşluk: 5.0,
             öğe_boşluğu: 10.0,
             arkaplan: None,
@@ -88,6 +101,12 @@ impl Başlık {
 
     pub fn sol(mut self, sol: impl Into<YatayKonum>) -> Self {
         self.sol = sol.into();
+        self.sağ = None;
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
         self
     }
 
@@ -98,6 +117,18 @@ impl Başlık {
 
     pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
         self.üst = Some(üst.into());
+        self.alt = None;
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = Some(alt.into());
+        self.üst = None;
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(genişlik.into());
         self
     }
 
@@ -774,6 +805,11 @@ pub struct Fırça {
     /// `seriesIndex`; boş = tüm seriler.
     pub seri_sıraları: Vec<usize>,
     pub bağlantı: FırçaBağı,
+    /// `inBrush.color`; `None` özgün seri rengini korur.
+    pub iç_renk: Option<Dolgu>,
+    /// `outOfBrush.color`. Hem bu hem `dış_renk_opaklığı` belirtilmezse
+    /// ECharts varsayılan `disabled` rengi (`#cfd2d7`) uygulanır.
+    pub dış_renk: Option<Dolgu>,
     /// `inBrush.colorAlpha`; belirtilmezse özgün alfa korunur.
     pub iç_renk_opaklığı: Option<f32>,
     /// `outOfBrush.colorAlpha`; belirtilmezse özgün alfa korunur.
@@ -795,6 +831,8 @@ impl Default for Fırça {
             y_ekseni_sıraları: Vec::new(),
             seri_sıraları: Vec::new(),
             bağlantı: FırçaBağı::Yok,
+            iç_renk: None,
+            dış_renk: None,
             iç_renk_opaklığı: None,
             dış_renk_opaklığı: None,
             dönüştürülebilir: true,
@@ -840,6 +878,16 @@ impl Fırça {
 
     pub fn bağlantı(mut self, bağlantı: FırçaBağı) -> Self {
         self.bağlantı = bağlantı;
+        self
+    }
+
+    pub fn iç_renk(mut self, renk: impl Into<Dolgu>) -> Self {
+        self.iç_renk = Some(renk.into());
+        self
+    }
+
+    pub fn dış_renk(mut self, renk: impl Into<Dolgu>) -> Self {
+        self.dış_renk = Some(renk.into());
         self
     }
 

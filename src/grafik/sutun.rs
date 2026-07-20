@@ -32,6 +32,8 @@ pub struct SütunGirdisi<'s> {
     pub görsel_eşlemeler: Vec<(&'s GörselEşleme, [f64; 2])>,
     /// Brush visual aşamasının ham veri sırasına göre renk alfa çarpanları.
     pub öğe_opaklıkları: Option<&'s [f32]>,
+    /// Brush `inBrush.color` / `outOfBrush.color` sabit görselleri.
+    pub öğe_renkleri: Option<&'s [Option<Dolgu>]>,
 }
 
 fn sütun_görsel_değeri(
@@ -392,6 +394,7 @@ pub fn sütunları_çiz(
             && seri.veri.len() >= seri.büyük_eşiği
             && seri.piktogram.is_none()
             && girdi.öğe_opaklıkları.is_none()
+            && girdi.öğe_renkleri.is_none()
         {
             büyük_sütun_çiz(çizici, girdi, *konum, yatay, ilerleme, fare, isabetler);
             continue;
@@ -451,6 +454,10 @@ pub fn sütunları_çiz(
             }
             if görsel_renk_uygulandı {
                 normal_dolgu = Dolgu::Düz(görsel_renk);
+            }
+            if let Some(Some(fırça_rengi)) = girdi.öğe_renkleri.and_then(|renkler| renkler.get(i))
+            {
+                normal_dolgu = fırça_rengi.clone();
             }
             let normal_yarıçap = öğe_stili
                 .filter(|stil| stil.kenarlık_yarıçapı.iter().any(|yarıçap| *yarıçap > 0.0))

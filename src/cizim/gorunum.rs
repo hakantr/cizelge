@@ -396,6 +396,11 @@ struct HazırFırça {
     alanlar: Vec<FırçaAlanı>,
     /// Seri başına ham veri sırasıyla aynı uzunlukta alfa çarpanları.
     öğe_opaklıkları: Vec<Option<Vec<f32>>>,
+    /// Seri başına ham veri sırasıyla aynı uzunlukta sabit renk görselleri.
+    öğe_renkleri: Vec<Option<Vec<Option<Dolgu>>>>,
+    /// `brushSelected.batch[0].selected[*].dataIndex` karşılığı. Dış dizi
+    /// genel seri sırasını, iç diziler ham veri sıralarını korur.
+    seçili_ham_sıralar: Vec<Vec<usize>>,
 }
 
 struct HazırFırçaAlanı {
@@ -609,25 +614,48 @@ fn fırçayı_hazırla(
             }
         }
     }
-    let görsel_var = fırça.iç_renk_opaklığı.is_some() || fırça.dış_renk_opaklığı.is_some();
-    let öğe_opaklıkları = doğrudan
+    let son_seçimler = doğrudan
         .into_iter()
         .enumerate()
         .map(|(seri_sırası, seçimler)| {
-            let seçimler = if bağlı_mı(seri_sırası) && !alanlar.is_empty() {
-                (0..seçimler.len())
-                    .map(|sıra| bağlı_seçimler.get(sıra).copied().unwrap_or(false))
-                    .collect::<Vec<_>>()
+            if bağlı_mı(seri_sırası) && !alanlar.is_empty() {
+                Some(
+                    (0..seçimler.len())
+                        .map(|sıra| bağlı_seçimler.get(sıra).copied().unwrap_or(false))
+                        .collect::<Vec<_>>(),
+                )
             } else if denetlendi.get(seri_sırası) == Some(&true) {
-                seçimler
+                Some(seçimler)
             } else {
-                return None;
-            };
-            görsel_var.then(|| {
+                None
+            }
+        })
+        .collect::<Vec<Option<Vec<bool>>>>();
+    let seçili_ham_sıralar = son_seçimler
+        .iter()
+        .map(|seçimler| {
+            seçimler
+                .as_ref()
+                .map(|seçimler| {
+                    seçimler
+                        .iter()
+                        .enumerate()
+                        .filter_map(|(sıra, seçili)| seçili.then_some(sıra))
+                        .collect()
+                })
+                .unwrap_or_default()
+        })
+        .collect();
+    let opaklık_görseli_var = fırça.iç_renk_opaklığı.is_some() || fırça.dış_renk_opaklığı.is_some();
+    let öğe_opaklıkları = son_seçimler
+        .iter()
+        .map(|seçimler| {
+            let seçimler = seçimler.as_ref()?;
+            opaklık_görseli_var.then(|| {
                 seçimler
-                    .into_iter()
+                    .iter()
                     .map(|seçili| {
-                        if seçili {
+                        if *seçili {
                             fırça.iç_renk_opaklığı.unwrap_or(1.0)
                         } else {
                             fırça.dış_renk_opaklığı.unwrap_or(1.0)
@@ -637,9 +665,36 @@ fn fırçayı_hazırla(
             })
         })
         .collect();
+    // BrushModel, açık bir `outOfBrush` nesnesi yoksa disabled rengini
+    // enjekte eder. Yalnız colorAlpha verilmişse nesne zaten vardır ve bu
+    // varsayılan renk uygulanmaz.
+    let varsayılan_dış_renk = (fırça.dış_renk.is_none() && fırça.dış_renk_opaklığı.is_none())
+        .then(|| Dolgu::Düz(Renk::onaltılık(0xcfd2d7)));
+    let dış_renk = fırça.dış_renk.clone().or(varsayılan_dış_renk);
+    let renk_görseli_var = fırça.iç_renk.is_some() || dış_renk.is_some();
+    let öğe_renkleri = son_seçimler
+        .iter()
+        .map(|seçimler| {
+            let seçimler = seçimler.as_ref()?;
+            renk_görseli_var.then(|| {
+                seçimler
+                    .iter()
+                    .map(|seçili| {
+                        if *seçili {
+                            fırça.iç_renk.clone()
+                        } else {
+                            dış_renk.clone()
+                        }
+                    })
+                    .collect()
+            })
+        })
+        .collect();
     HazırFırça {
         alanlar: alanlar.into_iter().map(|alan| alan.piksel).collect(),
         öğe_opaklıkları,
+        öğe_renkleri,
+        seçili_ham_sıralar,
     }
 }
 
@@ -769,6 +824,9 @@ impl İçYakınlaştırmaAlanı {
 pub struct BoyamaÇıktısı {
     pub gösterge_kutuları: Vec<(Dikdörtgen, String)>,
     pub isabetler: Vec<İsabetBölgesi>,
+    /// Programatik brush alanlarının ham veri seçimi. Dış sıra
+    /// `seriesIndex`, iç değerler `dataIndex` karşılığıdır.
+    pub fırça_seçimleri: Vec<Vec<usize>>,
     /// Kartezyen ızgara alanları; lineX/lineY brush örtülerini sınırlar.
     pub ızgara_alanları: Vec<Dikdörtgen>,
     pub sürgüler: Vec<SürgüBölgesi>,
@@ -3033,6 +3091,9 @@ pub fn grafiği_boya(
         .as_ref()
         .map(|kurulum| fırçayı_hazırla(seçenekler, kurulum))
         .unwrap_or_default();
+    çıktı
+        .fırça_seçimleri
+        .clone_from(&hazır_fırça.seçili_ham_sıralar);
     if let Some(kurulum) = &kurulum {
         çıktı.ızgara_alanları.clone_from(&kurulum.ızgara_alanları);
     }
@@ -3155,6 +3216,7 @@ pub fn grafiği_boya(
                         .öğe_opaklıkları
                         .get(i)
                         .and_then(Option::as_deref),
+                    öğe_renkleri: hazır_fırça.öğe_renkleri.get(i).and_then(Option::as_deref),
                 };
                 match sütun_grupları.iter_mut().find(|(aday, _)| *aday == anahtar) {
                     Some((_, grup)) => grup.push(girdi),
@@ -6045,6 +6107,40 @@ mod yakınlaştırma_yönü_testleri {
                 Some(vec![0.1, 1.0, 1.0, 0.1]),
                 Some(vec![0.1, 1.0, 1.0, 0.1]),
             ]
+        );
+        assert_eq!(hazır.öğe_renkleri, vec![None, None, None]);
+        assert_eq!(
+            hazır.seçili_ham_sıralar,
+            vec![vec![1, 2], vec![1, 2], vec![1, 2]]
+        );
+    }
+
+    #[test]
+    fn varsayilan_dis_firca_rengi_ve_brushselected_ham_siralari_uretilir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C", "D"]))
+            .y_ekseni(Eksen::değer())
+            .fırça(
+                crate::model::bilesen::Fırça::default()
+                    .alan(FırçaSeçimAlanı::yatay("B", "C").x_ekseni(0)),
+            )
+            .seri(crate::model::seri::SütunSerisi::yeni().veri([1, 2, 3, 4]));
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.fırça_seçimleri, vec![vec![1, 2]]);
+        let kurulum = kartezyen_kur(&yüzey, &seçenekler, &HashSet::new())
+            .expect("kartezyen kurulum üretilmeli");
+        let hazır = fırçayı_hazırla(&seçenekler, &kurulum);
+        assert_eq!(
+            hazır.öğe_renkleri,
+            vec![Some(vec![
+                Some(Dolgu::Düz(Renk::onaltılık(0xcfd2d7))),
+                None,
+                None,
+                Some(Dolgu::Düz(Renk::onaltılık(0xcfd2d7))),
+            ])]
         );
     }
 }
