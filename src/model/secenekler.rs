@@ -795,6 +795,15 @@ impl GrafikSeçenekleri {
                     sıra: takvim_sırası,
                 });
             }
+            if let Seri::Özel(özel) = seri
+                && let Some(takvim_sırası) = özel.takvim_sırası
+                && self.takvimler.get(takvim_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "calendar",
+                    sıra: takvim_sırası,
+                });
+            }
             if let Seri::Pasta(p) = seri {
                 if let Some(takvim_sırası) = p.takvim_sırası {
                     if self.takvimler.get(takvim_sırası).is_none() {
@@ -1264,6 +1273,22 @@ mod testler {
         let seçenekler = GrafikSeçenekleri::yeni()
             .seri(crate::model::seri::GrafoSerisi::yeni().takvim_sırası(2));
 
+        assert!(matches!(
+            seçenekler.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "calendar",
+                sıra: 2
+            })
+        ));
+    }
+
+    #[test]
+    fn takvime_bağlı_custom_eksik_calendar_index_değerini_reddeder() {
+        let özel = crate::model::seri::ÖzelSeri::yeni().takvim_sırası(2);
+        assert!(!özel.kartezyen_gerekli);
+        assert_eq!(özel.takvim_sırası, Some(2));
+
+        let seçenekler = GrafikSeçenekleri::yeni().seri(özel);
         assert!(matches!(
             seçenekler.doğrula(),
             Err(crate::hata::BilesenHatasi::EksikVeri {

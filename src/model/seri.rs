@@ -1616,10 +1616,12 @@ impl RadarSerisi {
 
 /// Özel seri çizim bağlamı: kullanıcının çizim işlevine geçirilir.
 pub struct ÖzelBağlam<'a> {
-    /// Izgara alanı (kartezyen yoksa tuvalin tamamı).
+    /// Etkin koordinat sisteminin çizim alanı (koordinat yoksa tuvalin tamamı).
     pub alan: crate::koordinat::Dikdörtgen,
     /// Kartezyen koordinat sistemi (eksenler kuruluysa).
     pub kartezyen: Option<&'a crate::koordinat::Kartezyen2B>,
+    /// Takvim koordinat sistemi (`coordinateSystem: 'calendar'` ise).
+    pub takvim: Option<&'a crate::koordinat::TakvimYerleşimi>,
     pub veri: &'a [VeriÖğesi],
     /// Paletten çözülen seri rengi.
     pub renk: crate::renk::Renk,
@@ -1639,6 +1641,8 @@ pub struct ÖzelSeri {
     pub çizim: Option<ÖzelÇizim>,
     /// Eksen/ızgara kurulumu gerekli mi? `false` ise tuvalin tamamı verilir.
     pub kartezyen_gerekli: bool,
+    /// Bağlı takvim (`calendarIndex`); doluysa kartezyen kurulmaz.
+    pub takvim_sırası: Option<usize>,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
 }
@@ -1649,6 +1653,7 @@ impl fmt::Debug for ÖzelSeri {
             .field("ad", &self.ad)
             .field("veri", &self.veri.len())
             .field("kartezyen_gerekli", &self.kartezyen_gerekli)
+            .field("takvim_sırası", &self.takvim_sırası)
             .finish()
     }
 }
@@ -1660,6 +1665,7 @@ impl Default for ÖzelSeri {
             veri: Vec::new(),
             çizim: None,
             kartezyen_gerekli: true,
+            takvim_sırası: None,
             eksen_bağı: EksenBağı::default(),
         }
     }
@@ -1673,6 +1679,8 @@ impl ÖzelSeri {
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
     pub fn eksenler(mut self, x: usize, y: usize) -> Self {
         self.eksen_bağı = EksenBağı { x, y };
+        self.kartezyen_gerekli = true;
+        self.takvim_sırası = None;
         self
     }
 
@@ -1697,6 +1705,18 @@ impl ÖzelSeri {
 
     pub fn kartezyen_gerekli(mut self, gerekli: bool) -> Self {
         self.kartezyen_gerekli = gerekli;
+        if gerekli {
+            self.takvim_sırası = None;
+        }
+        self
+    }
+
+    /// Seriyi bir takvim koordinatına bağlar (`coordinateSystem: 'calendar'`
+    /// ve `calendarIndex`). Çizim bağlamındaki `takvim` alanı bu yerleşimi
+    /// taşır; tarihleri piksele çevirmek için `veriden_noktaya` kullanılabilir.
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = Some(sıra);
+        self.kartezyen_gerekli = false;
         self
     }
 }

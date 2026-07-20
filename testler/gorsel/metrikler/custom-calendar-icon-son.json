@@ -1,0 +1,19 @@
+{
+  "id": "custom-calendar-icon",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 304,
+  "değişen_piksel_oranı": 0.0011259259259259258,
+  "ssim": 0.9987665492335819,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-calendar-icon.png",
+    "gerçek": "testler/gorsel/gerçek/default/custom-calendar-icon.png",
+    "fark": "testler/gorsel/fark/default/custom-calendar-icon.png"
+  }
+}

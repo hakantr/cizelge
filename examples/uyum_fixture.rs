@@ -14,6 +14,8 @@ use serde::de::DeserializeOwned;
 
 #[path = "uyum_veri/area_rainfall.rs"]
 mod area_rainfall_verisi;
+#[path = "uyum_veri/custom_calendar_icon.rs"]
+mod custom_calendar_icon_verisi;
 #[path = "uyum_veri/perlin.rs"]
 mod perlin;
 
@@ -4502,6 +4504,174 @@ fn calendar_pie() -> GrafikSeçenekleri {
     seçenekler
 }
 
+fn custom_calendar_icon() -> Result<GrafikSeçenekleri, String> {
+    use cizelge::cizim::{DikeyHiza, YatayHiza};
+    use cizelge::yardimci::takvim::{TakvimAnı, andan_takvime, takvimden_ana};
+    use custom_calendar_icon_verisi::{RENKLER, YERLEŞİMLER, YOLLAR};
+
+    // zrender `makePath(..., layout: 'center')`: kaynak yolun gerçek sınır
+    // kutusunu oranı bozmadan 16×16 hedefe sığdırıp merkezler.
+    let ikon_yolları = YOLLAR
+        .iter()
+        .map(|path_data| {
+            let yol = Yol::svg_path_data(path_data).map_err(|hata| hata.to_string())?;
+            let kutu = yol
+                .kesin_sınır_kutusu()
+                .ok_or_else(|| "custom calendar SVG yolu boş".to_owned())?;
+            if kutu.genişlik <= 0.0 || kutu.yükseklik <= 0.0 {
+                return Err("custom calendar SVG yolunun boyutu geçersiz".to_owned());
+            }
+            let ölçek = (16.0 / kutu.genişlik).min(16.0 / kutu.yükseklik);
+            let genişlik = kutu.genişlik * ölçek;
+            let yükseklik = kutu.yükseklik * ölçek;
+            let hedef_x = -8.0 + (16.0 - genişlik) / 2.0;
+            let hedef_y = -8.0 + (16.0 - yükseklik) / 2.0;
+            let dönüşüm = AfinMatris::ötele(hedef_x, hedef_y)
+                .çarp(AfinMatris::ölçekle(ölçek, ölçek))
+                .çarp(AfinMatris::ötele(-kutu.x, -kutu.y));
+            Ok(yolu_dönüştür(&yol, dönüşüm))
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    let ikon_yolları = Arc::new(ikon_yolları);
+
+    let başlangıç = takvimden_ana(TakvimAnı {
+        yıl: 2017,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let bitiş = takvimden_ana(TakvimAnı {
+        yıl: 2018,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mart_başı = takvimden_ana(TakvimAnı {
+        yıl: 2017,
+        ay: 3,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mart_sonu = takvimden_ana(TakvimAnı {
+        yıl: 2017,
+        ay: 3,
+        gün: 31,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+
+    // Resmî getVirtulData bütün 2017 boyunca aynı Math.random akışını
+    // tüketir; Calendar yalnız Mart hücrelerini görünür kılar.
+    let mut tohum = 0x5eed_1234;
+    let mut veri = Vec::with_capacity(365);
+    let mut zaman = başlangıç;
+    while zaman < bitiş {
+        let etkinlik_sayısı = (kanıt_rastgele(&mut tohum) * 4.0).round() as usize;
+        let etkinlikler = (0..etkinlik_sayısı)
+            .map(|_| (kanıt_rastgele(&mut tohum) * 3.0).round() as usize)
+            .map(|sıra| sıra.to_string())
+            .collect::<Vec<_>>()
+            .join("|");
+        let gün = andan_takvime(zaman).gün;
+        veri.push(VeriÖğesi::from([zaman, 0.0]).boyutlar([
+            ("etkinlikler".to_owned(), etkinlikler.into()),
+            ("gün".to_owned(), format!("{gün:02}").into()),
+        ]));
+        zaman += 86_400_000.0;
+    }
+
+    let çizim_yolları = Arc::clone(&ikon_yolları);
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .ipucu(İpucu::yeni())
+        .takvim(
+            TakvimKoordinatı::yeni(TakvimAralığı::yeni(mart_başı, mart_sonu))
+                .sol("center")
+                .üst("middle")
+                .hücre_boyutu(Some(70.0), Some(70.0))
+                .yön(TakvimYönü::Dikey)
+                .ilk_gün(1)
+                .gün_adları(["S", "M", "T", "W", "T", "F", "S"])
+                .yıl_etiketi(Etiket::yeni().göster(false))
+                .ay_etiketi(Etiket::yeni().göster(false)),
+        )
+        .seri(
+            ÖzelSeri::yeni()
+                .takvim_sırası(0)
+                .veri(veri)
+                .çizim(move |yüzey, bağlam| {
+                    let Some(takvim) = bağlam.takvim else {
+                        return;
+                    };
+                    for öğe in bağlam.veri {
+                        let Some(zaman) = öğe.değer.x() else {
+                            continue;
+                        };
+                        let Some(hücre) = takvim.hücre(zaman) else {
+                            continue;
+                        };
+                        let merkez = hücre.merkez();
+                        let etkinlikler = match öğe.boyut("etkinlikler") {
+                            Some(VeriDeğeri::Metin(metin)) if !metin.is_empty() => metin
+                                .split('|')
+                                .filter_map(|ham| ham.parse::<usize>().ok())
+                                .collect::<Vec<_>>(),
+                            _ => Vec::new(),
+                        };
+                        if let Some(yerleşim) = etkinlikler
+                            .len()
+                            .checked_sub(1)
+                            .and_then(|sıra| YERLEŞİMLER.get(sıra))
+                        {
+                            for ((x_oranı, y_oranı), ikon_sırası) in
+                                yerleşim.iter().zip(&etkinlikler)
+                            {
+                                let x = merkez.0 + x_oranı * takvim.hücre_genişliği;
+                                let alt = -takvim.hücre_yüksekliği / 2.0 + 20.0;
+                                let üst = takvim.hücre_yüksekliği / 2.0;
+                                let y = merkez.1 + alt + (y_oranı + 0.5) * (üst - alt);
+                                let Some(ikon) = çizim_yolları.get(*ikon_sırası) else {
+                                    continue;
+                                };
+                                let yol = yolu_dönüştür(ikon, AfinMatris::ötele(x, y));
+                                yüzey.yol_doldur(
+                                    &yol,
+                                    &Dolgu::Düz(Renk::from(
+                                        RENKLER.get(*ikon_sırası).copied().unwrap_or("#000"),
+                                    )),
+                                );
+                            }
+                        }
+                        let gün = match öğe.boyut("gün") {
+                            Some(VeriDeğeri::Metin(gün)) => gün.as_str(),
+                            _ => "",
+                        };
+                        yüzey.yazı(
+                            gün,
+                            (merkez.0, merkez.1 - takvim.hücre_yüksekliği / 2.0 + 15.0),
+                            YatayHiza::Sol,
+                            DikeyHiza::Üst,
+                            14.0,
+                            Renk::from("#777"),
+                            false,
+                        );
+                    }
+                }),
+        ))
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5233,6 +5403,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-graph" => Ok(calendar_graph()),
         "calendar-lunar" => Ok(calendar_lunar()),
         "calendar-pie" => Ok(calendar_pie()),
+        "custom-calendar-icon" => custom_calendar_icon(),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

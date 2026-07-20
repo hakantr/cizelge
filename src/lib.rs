@@ -59,8 +59,8 @@ pub use cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use cizim::{
     AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, OdakKapsamı, Sahne, SahneDüğümü,
     SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti,
-    SahneŞekli, SihirliSeriTürü, SvgYüzeyi, YerelDönüşüm, svg_dışa_aktar, yolu_dönüştür,
-    ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
+    SahneŞekli, SihirliSeriTürü, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar,
+    yolu_dönüştür, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
 };
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
@@ -153,8 +153,8 @@ pub mod hazir {
     pub use crate::cizim::{
         AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, OdakKapsamı, Sahne,
         SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
-        Sahneİsabeti, SahneŞekli, SvgYüzeyi, YerelDönüşüm, svg_dışa_aktar, yolu_dönüştür,
-        ÇizimYüzeyi,
+        Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar,
+        yolu_dönüştür, ÇizimYüzeyi,
     };
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,

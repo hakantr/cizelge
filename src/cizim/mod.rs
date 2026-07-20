@@ -15,6 +15,7 @@ pub mod pencere;
 pub mod piksel;
 pub mod sahne;
 pub mod svg;
+pub mod svg_yol;
 pub mod yuzey;
 
 #[cfg(feature = "gpui")]
@@ -29,4 +30,5 @@ pub use sahne::{
     SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, YerelDönüşüm, yolu_dönüştür,
 };
 pub use svg::{SvgYüzeyi, svg_dışa_aktar};
+pub use svg_yol::SvgYolHatası;
 pub use yuzey::{DikeyHiza, SATIR_ORANI, YatayHiza, Yol, keskin, ÇizimYüzeyi};

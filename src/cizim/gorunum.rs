@@ -2505,6 +2505,7 @@ pub fn grafiği_boya(
                                 let bağlam = ÖzelBağlam {
                                     alan: kartezyen.alan,
                                     kartezyen: Some(&kartezyen),
+                                    takvim: None,
                                     veri: &s.veri,
                                     renk: seçenekler.seri_rengi(i),
                                     ilerleme,
@@ -3791,9 +3792,19 @@ pub fn grafiği_boya(
                     continue;
                 }
                 if let Some(çizim) = &s.çizim {
+                    let (alan, takvim) = if let Some(takvim_sırası) = s.takvim_sırası {
+                        let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası)
+                        else {
+                            continue;
+                        };
+                        (yerleşim.gövde_kutusu, Some(yerleşim))
+                    } else {
+                        (tüm_alan, None)
+                    };
                     let bağlam = ÖzelBağlam {
-                        alan: tüm_alan,
+                        alan,
                         kartezyen: None,
+                        takvim,
                         veri: &s.veri,
                         renk: seçenekler.seri_rengi(i),
                         ilerleme,
