@@ -4587,14 +4587,15 @@ fn scatter_üstel_regresyon_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
     resmi_javascript_dizisi(&kaynak, "source:")
 }
 
-fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
-    let veri = scatter_üstel_regresyon_verisini_oku()?;
-    let kaynak = veri
-        .into_iter()
-        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
-            küme.satır([x.into(), y.into()])
-        });
-    let dönüşüm = RegresyonDönüşümü::yeni(RegresyonYöntemi::Üstel);
+fn scatter_regresyon_grafiği(
+    kaynak: VeriKümesi,
+    dönüşüm: RegresyonDönüşümü,
+    başlık: &str,
+    yumuşat: bool,
+    gösterge: bool,
+    x_ekseni: Eksen,
+    y_ekseni: Eksen,
+) -> Result<GrafikSeçenekleri, String> {
     let çözülmüş = veri_kümelerini_çöz(&[
         VeriKümesiTanımı::kaynak(kaynak.clone()),
         VeriKümesiTanımı::regresyon(dönüşüm.clone()),
@@ -4603,26 +4604,22 @@ fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
     let son_satır = çözülmüş[1]
         .satırlar
         .last()
-        .ok_or_else(|| "üstel regresyon çıktı satırı üretmedi".to_owned())?;
+        .ok_or_else(|| "regresyon çıktı satırı üretmedi".to_owned())?;
     let son_değer = son_satır
         .get(1)
         .and_then(VeriDeğeri::sayı)
-        .ok_or_else(|| "üstel regresyon son y değerini üretmedi".to_owned())?;
+        .ok_or_else(|| "regresyon son y değerini üretmedi".to_owned())?;
     let formül = son_satır
         .get(2)
         .and_then(|değer| match değer {
             VeriDeğeri::Metin(metin) => Some(metin.as_str()),
             _ => None,
         })
-        .ok_or_else(|| "üstel regresyon formülünü üretmedi".to_owned())?
+        .ok_or_else(|| "regresyon formülünü üretmedi".to_owned())?
         .to_owned();
     let etiket_formülü = formül.clone();
-    let kesikli = BölmeÇizgisi {
-        tür: ÇizgiTürü::Kesikli,
-        ..Default::default()
-    };
 
-    Ok(GrafikSeçenekleri::yeni()
+    let mut seçenekler = GrafikSeçenekleri::yeni()
         .animasyon(false)
         .veri_kümeleri([
             VeriKümesiTanımı::kaynak(kaynak),
@@ -4630,7 +4627,7 @@ fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
         ])
         .başlık(
             Başlık::yeni()
-                .metin("1981 - 1998 gross domestic product GDP (trillion yuan)")
+                .metin(başlık)
                 .alt_metin("By ecStat.regression")
                 .sol("center")
                 .iç_boşluk(15.0),
@@ -4640,8 +4637,8 @@ fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
                 .tetikleme(Tetikleme::Eksen)
                 .imleç(İmleçTürü::Çapraz),
         )
-        .x_ekseni(Eksen::değer().bölme_çizgisi(kesikli.clone()))
-        .y_ekseni(Eksen::değer().bölme_çizgisi(kesikli))
+        .x_ekseni(x_ekseni)
+        .y_ekseni(y_ekseni)
         .seri(
             SaçılımSerisi::yeni()
                 .ad("scatter")
@@ -4651,7 +4648,7 @@ fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
         .seri(
             ÇizgiSerisi::yeni()
                 .ad("line")
-                .yumuşat(true)
+                .yumuşat(yumuşat)
                 .veri_kümesi_sırası(1)
                 .eşle("x", "y")
                 .sembol_boyutu(0.1)
@@ -4669,7 +4666,36 @@ fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
                             }
                         }))),
                 ),
-        ))
+        );
+    if gösterge {
+        // ECharts LegendView, içerik grubunun zrender sınır kutusundaki
+        // metin yükselişini `bottom` yerleşimine dahil eder. Raster metin
+        // çapasındaki karşılığı 8 px ek alt paydır.
+        seçenekler = seçenekler.gösterge(Gösterge::yeni().alt(13).veri(["scatter", "line"]));
+    }
+    Ok(seçenekler)
+}
+
+fn scatter_exponential_regression() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_üstel_regresyon_verisini_oku()?;
+    let kaynak = veri
+        .into_iter()
+        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+            küme.satır([x.into(), y.into()])
+        });
+    let kesikli = BölmeÇizgisi {
+        tür: ÇizgiTürü::Kesikli,
+        ..Default::default()
+    };
+    scatter_regresyon_grafiği(
+        kaynak,
+        RegresyonDönüşümü::yeni(RegresyonYöntemi::Üstel),
+        "1981 - 1998 gross domestic product GDP (trillion yuan)",
+        true,
+        false,
+        Eksen::değer().bölme_çizgisi(kesikli.clone()),
+        Eksen::değer().bölme_çizgisi(kesikli),
+    )
 }
 
 #[cfg(test)]
@@ -4705,6 +4731,72 @@ mod scatter_üstel_regresyon_testleri {
             (son_tahmin - 88_532.242_213_869_63).abs() < 1e-9,
             "ecStat son tahmini uyuşmuyor: {son_tahmin}"
         );
+    }
+}
+
+fn scatter_doğrusal_regresyon_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-linear-regression.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    resmi_javascript_dizisi(&kaynak, "const data")
+}
+
+fn scatter_linear_regression() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_doğrusal_regresyon_verisini_oku()?;
+    let kaynak = veri
+        .into_iter()
+        .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+            küme.satır([x.into(), y.into()])
+        });
+    let kesikli = BölmeÇizgisi {
+        tür: ÇizgiTürü::Kesikli,
+        ..Default::default()
+    };
+    scatter_regresyon_grafiği(
+        kaynak,
+        RegresyonDönüşümü::default(),
+        "Linear Regression",
+        false,
+        true,
+        Eksen::değer().bölme_çizgisi(kesikli.clone()),
+        Eksen::değer().bölme_çizgisi(kesikli),
+    )
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_doğrusal_regresyon_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_doğrusal_regresyon_verisi_ve_formülü_ecstat_ile_uyuşur() {
+        let veri =
+            scatter_doğrusal_regresyon_verisini_oku().expect("resmi regresyon verisi okunmalı");
+        assert_eq!(veri.len(), 200);
+        assert_eq!(veri.first(), Some(&[0.067732, 3.176513]));
+        assert_eq!(veri.last(), Some(&[0.116163, 3.129283]));
+        let kaynak = veri
+            .into_iter()
+            .fold(VeriKümesi::yeni(["x", "y"]), |küme, [x, y]| {
+                küme.satır([x.into(), y.into()])
+            });
+        let sonuç = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::regresyon(RegresyonDönüşümü::default()),
+        ])
+        .expect("ecStat doğrusal regresyon dönüşümü çalışmalı");
+        assert_eq!(
+            sonuç[1].satırlar.last().and_then(|satır| match &satır[2] {
+                VeriDeğeri::Metin(metin) => Some(metin.as_str()),
+                _ => None,
+            }),
+            Some("y = 1.7x + 3.01")
+        );
+        let ilk_tahmin = sonuç[1].satırlar.first().unwrap()[1].sayı().unwrap();
+        let son_tahmin = sonuç[1].satırlar.last().unwrap()[1].sayı().unwrap();
+        assert!((ilk_tahmin - 3.032_927_260_547_04).abs() < 1e-12);
+        assert!((son_tahmin - 4.695_828_552_509_385).abs() < 1e-12);
     }
 }
 
@@ -6913,6 +7005,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-painter-choice" => scatter_painter_choice(),
         "scatter-clustering" => scatter_clustering(),
         "scatter-exponential-regression" => scatter_exponential_regression(),
+        "scatter-linear-regression" => scatter_linear_regression(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

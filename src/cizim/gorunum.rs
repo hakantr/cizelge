@@ -698,6 +698,7 @@ fn gösterge_öğeleri(
                         renk: seçenekler.palet_rengi(j),
                         simge: GöstergeSimgesi::Çizgi,
                         çizgi_kalınlığı: None,
+                        çizgi_sembolü: None,
                         kenarlık: None,
                     });
                 }
@@ -714,6 +715,7 @@ fn gösterge_öğeleri(
                         renk: seçenekler.palet_rengi(j),
                         simge: GöstergeSimgesi::YuvarlakKöşeliKare,
                         çizgi_kalınlığı: None,
+                        çizgi_sembolü: None,
                         kenarlık: None,
                     });
                 }
@@ -743,6 +745,7 @@ fn gösterge_öğeleri(
                         renk,
                         simge: GöstergeSimgesi::YuvarlakKöşeliKare,
                         çizgi_kalınlığı: None,
+                        çizgi_sembolü: None,
                         kenarlık: p
                             .öğe_stili
                             .kenarlık_rengi
@@ -767,12 +770,17 @@ fn gösterge_öğeleri(
                     Seri::Çizgi(çizgi) => Some(çizgi.çizgi_stili.kalınlık),
                     _ => None,
                 };
+                let çizgi_sembolü = match seri {
+                    Seri::Çizgi(çizgi) => Some(çizgi.sembol),
+                    _ => None,
+                };
                 öğeler.push(GöstergeÖğesi {
                     kapalı: kapalı.contains(&ad),
                     ad,
                     renk: seçenekler.seri_rengi(i),
                     simge,
                     çizgi_kalınlığı,
+                    çizgi_sembolü,
                     kenarlık: None,
                 });
             }

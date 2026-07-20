@@ -7,6 +7,7 @@ use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
 use crate::model::YatayKonum;
 use crate::model::bilesen::{Gösterge, GöstergeSimgesi, Yön};
+use crate::model::seri::Sembol;
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
@@ -19,6 +20,9 @@ pub struct GöstergeÖğesi {
     /// Çizgi serisinin `lineStyle.width` değeri. `None`, öntanımlı 2 px'dir;
     /// sıfır olduğunda legend simgesinde yalnız seri sembolü kalır.
     pub çizgi_kalınlığı: Option<f32>,
+    /// Çizgi serisinin merkez legend sembolü. `None`, eski içi boş daire
+    /// davranışını korur; açık değer `series.symbol`ı taşır.
+    pub çizgi_sembolü: Option<Sembol>,
     /// Seri/veri `itemStyle`ından miras alınan legend simgesi kenarlığı.
     pub kenarlık: Option<(f32, Renk)>,
     pub kapalı: bool,
@@ -499,7 +503,7 @@ fn öğe_çiz(
             );
         }
         GöstergeSimgesi::Çizgi => {
-            // ECharts çizgi serisi simgesi: yatay çizgi + ortada içi boş nokta.
+            // ECharts çizgi serisi simgesi: yatay çizgi + `series.symbol`.
             let çizgi_kalınlığı = öğe.çizgi_kalınlığı.unwrap_or(2.0);
             if çizgi_kalınlığı > 0.0 {
                 çizici.çizgi(
@@ -510,14 +514,45 @@ fn öğe_çiz(
                     crate::model::stil::ÇizgiTürü::Düz,
                 );
             }
-            çizici.daire(
-                (içerik_x + seçenek.simge_genişliği / 2.0, orta_y),
-                // LegendView, seri sembolünü `itemHeight * 0.8`
-                // boyutunda ölçekler (14px öntanımlıda çap 11.2px).
-                seçenek.simge_yüksekliği * 0.4,
-                Some(&Dolgu::Düz(Renk::BEYAZ)),
-                Some((2.0, renk)),
-            );
+            let merkez = (içerik_x + seçenek.simge_genişliği / 2.0, orta_y);
+            // LegendView, seri sembolünü `itemHeight * 0.8` boyutunda
+            // ölçekler (14px öntanımlıda çap/kenar 11.2px).
+            let yarı = seçenek.simge_yüksekliği * 0.4;
+            match öğe.çizgi_sembolü.unwrap_or(Sembol::İçiBoşDaire) {
+                Sembol::İçiBoşDaire => çizici.daire(
+                    merkez,
+                    yarı,
+                    Some(&Dolgu::Düz(Renk::BEYAZ)),
+                    Some((2.0, renk)),
+                ),
+                Sembol::Daire => {
+                    çizici.daire(merkez, yarı, Some(&Dolgu::Düz(renk)), None);
+                }
+                Sembol::Kare => çizici.dikdörtgen(
+                    Dikdörtgen::yeni(merkez.0 - yarı, merkez.1 - yarı, yarı * 2.0, yarı * 2.0),
+                    &Dolgu::Düz(renk),
+                    [0.0; 4],
+                    None,
+                ),
+                Sembol::Üçgen => {
+                    let mut yol = Yol::yeni();
+                    yol.taşı((merkez.0, merkez.1 - yarı));
+                    yol.çiz((merkez.0 + yarı, merkez.1 + yarı));
+                    yol.çiz((merkez.0 - yarı, merkez.1 + yarı));
+                    yol.kapat();
+                    çizici.yol_doldur(&yol, &Dolgu::Düz(renk));
+                }
+                Sembol::Elmas => {
+                    let mut yol = Yol::yeni();
+                    yol.taşı((merkez.0, merkez.1 - yarı));
+                    yol.çiz((merkez.0 + yarı, merkez.1));
+                    yol.çiz((merkez.0, merkez.1 + yarı));
+                    yol.çiz((merkez.0 - yarı, merkez.1));
+                    yol.kapat();
+                    çizici.yol_doldur(&yol, &Dolgu::Düz(renk));
+                }
+                Sembol::Yok => {}
+            }
         }
     }
 
