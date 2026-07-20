@@ -5027,7 +5027,7 @@
     "ts_türü": "number | false",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
+    "rust_api": "src/model/seri.rs (SaçılımSerisi::aşamalı)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -5037,7 +5037,7 @@
     },
     "testler": [],
     "galeri_örnekleri": [],
-    "durum": "yok"
+    "durum": "kısmi"
   },
   {
     "id": "83a4e92f906ecf87e1c7",
@@ -5069,7 +5069,7 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
+    "rust_api": "src/model/seri.rs (SaçılımSerisi::aşamalı_eşiği)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -5079,7 +5079,7 @@
     },
     "testler": [],
     "galeri_örnekleri": [],
-    "durum": "yok"
+    "durum": "kısmi"
   },
   {
     "id": "d4dd7af3624bcc22b5c3",
@@ -22226,7 +22226,7 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
+    "rust_api": "src/model/seri.rs (SaçılımSerisi::büyük)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -22236,7 +22236,7 @@
     },
     "testler": [],
     "galeri_örnekleri": [],
-    "durum": "yok"
+    "durum": "kısmi"
   },
   {
     "id": "131ef6d308b118c1f22b",
@@ -22247,7 +22247,7 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
+    "rust_api": "src/model/seri.rs (SaçılımSerisi::büyük_eşiği)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
@@ -22257,7 +22257,7 @@
     },
     "testler": [],
     "galeri_örnekleri": [],
-    "durum": "yok"
+    "durum": "kısmi"
   },
   {
     "id": "cd91444123f0d2457848",
