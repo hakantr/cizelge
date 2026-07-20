@@ -7527,13 +7527,15 @@ fn candlestick_brush() -> Result<GrafikSeçenekleri, String> {
 
     let seçenekler = GrafikSeçenekleri::yeni()
         .animasyon(false)
-        .gösterge(Gösterge::yeni().alt(10).sol("center").veri([
-            "Dow-Jones index",
-            "MA5",
-            "MA10",
-            "MA20",
-            "MA30",
-        ]))
+        .gösterge(
+            Gösterge::yeni()
+                .alt(10)
+                .sol("center")
+                .iç_boşluk(15.95)
+                .simge_genişliği(24.9)
+                .simge_yüksekliği(13.2)
+                .veri(["Dow-Jones index", "MA5", "MA10", "MA20", "MA30"]),
+        )
         .ipucu(
             İpucu::yeni()
                 .tetikleme(Tetikleme::Eksen)
