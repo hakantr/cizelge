@@ -887,17 +887,76 @@ Gerçekleşen dilim — `bar-polar-label-radial` (2026-07-20):
   `cargo check --no-default-features` ve
   `node tools/uyum/uret.mjs --check` temizdir. Önceden kilitli hiçbir resmî
   referans yenilenmeden tam görsel regresyon 175/175 kareyi geçti.
-- Yeni 600×450 kanıt 942 değişen piksel, `%0,3489` fark ve `0,997158`
-  SSIM üretir. Resmî referans iki ardışık üretimde piksel düzeyinde aynı
-  çıktı verdikten sonra yalnız bu yeni kart için bir kez oluşturuldu;
+- İlk 600×450 kilitli kanıt 942 değişen piksel, `%0,3489` fark ve
+  `0,997158` SSIM üretti. İzleyen teğetsel polar bar diliminde AngleAxis'in
+  iki uçlu radius için iç halkası da tamamlanınca aynı kilitli referans
+  yenilenmeden güncel sonuç 782 piksel, `%0,2896` fark ve `0,997534` SSIM'e
+  iyileşti. Resmî referans iki ardışık üretimde piksel düzeyinde aynı çıktı
+  verdikten sonra yalnız bu kart ilk açılırken bir kez oluşturuldu;
   referans, gerçek, fark ve metrik dosyaları hashleriyle galeri manifestine
-  bağlandı.
+  bağlıdır.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
   `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 149/332, yani `%44,9`
   oldu. Teğetsel polar bar, çoklu stack/grup yerleşimi, `roundCap`,
   `barMinAngle`, polar tooltip/hover davranışının bütün kombinasyonları,
   animasyon, erişilebilirlik ve ölçümlü performans izleyen Faz 3/4/6/7/8
   kartlarıyla kapanmadan bu kart nihai `tam_kanıtlı` sayılmaz.
+
+Gerçekleşen dilim — `bar-polar-label-tangential` (2026-07-20):
+
+- Resmî örnek
+  `../echarts-examples/public/examples/ts/bar-polar-label-tangential.ts`
+  dosyasından kayıpsız fixture'a taşındı. Kategorik taban eksenini seçen
+  kutupsal bar yerleşimi `../echarts/src/layout/barPolar.ts`; barın sektör
+  görünümü ve radial/tangential konum eşlemesi
+  `../echarts/src/chart/bar/BarView.ts`; sektör metninin
+  `startAngle`/`insideStartAngle`/`middle`/`endAngle`/`insideEndAngle`
+  geometrisi ve otomatik dönüşü `../echarts/src/label/sectorLabel.ts`
+  üzerinden sabit ECharts commitinde doğrulandı. AngleAxis'in iki yarıçaplı
+  çizgisi de resmî `AngleAxisView` Ring davranışıyla karşılaştırıldı.
+- Polar tek değerli bar kapsamı artık eksen rollerine göre çözülür.
+  `radiusAxis` kategorik, `angleAxis` değer olduğunda yığın aralığının
+  taban/tepe değerleri açısal kapsama; veri sırası radyal kategori kapsamına
+  gider. Böylece `[2, 1.2, 2.4, 3.6]` verisi yarıçap uzunluğu gibi değil,
+  sırasıyla 180°, 108°, 216° ve 324° saat yönlü sektör süpürmesi olarak
+  çizilir.
+- `polar.radius: [30, '80%']` 700×525 görünümde yine 30..210 px aralığı
+  üretir. Dört kategorinin her biri 45 px radyal banttır;
+  `barCategoryGap` verilmediğinde resmî `%20` boşluk uygulanıp 36 px sektör
+  kalınlığı elde edilir. Açık `barWidth`, `barMinWidth`, `barMaxWidth` ve
+  `barCategoryGap` yüzdeleri banda göre, sayısal değerleri radiusAxis
+  tabanında piksel olarak çözülür.
+- Teğetsel sektör animasyonu bitiş açısını başlangıçtan hedefe büyütür;
+  normal ve veri öğesine özgü dolgu, opaklık, kenarlık ile halka isabet
+  geometrisi aynı gerçek `r0/r/startAngle/endAngle` şekline bağlanır.
+  `outside` pozitif/negatif süpürmeye göre doğru uç kenarını seçer;
+  `start`, `insideStart`, `middle`, `end`, `insideEnd` konumları sektörün
+  açısal kenarlarına, varsayılan iç/dış yazı rengine ve zrender'ın okunabilir
+  teğetsel dönüşüne karşılık gelir. `{b}: {c}` formatter'ı bu yönelimde
+  kategori adını `radiusAxis` ölçeğinden alır.
+- `angleAxis.max: 4`, varsayılan on iki açısal bölme, `startAngle: 75`,
+  kategorik `radiusAxis` içindeki `a/b/c/d`, boş tooltip, `middle` etiketi
+  ve resmî kaynağın kapatmadığı animation varsayılanı fixture testinde
+  ayrı ayrı kilitlendi. AngleAxis axisLine dış çembere ek olarak 30 px iç
+  çemberi de çizer; bu düzeltme önceki radyal polar kanıtın SSIM değerini
+  eski referansa dokunmadan yükseltti.
+- Çekirdek birim kapısı 283/283, fixture kapısı 39/39 geçti;
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Yeni kart kilitli referansla
+  bağımsız 1/1 tekrar koşusunu, tüm depo ise önceden kilitli hiçbir resmî
+  referans yenilenmeden 176/176 görsel regresyonu geçti.
+- Yeni 600×450 kanıt 1.174 değişen piksel, `%0,4348` fark ve `0,997553`
+  SSIM üretir. Resmî referans iki ardışık üretimde piksel düzeyinde aynı
+  çıktı verdikten sonra yalnız bu yeni kart için bir kez oluşturuldu;
+  referans, gerçek, fark ve metrik dosyaları hashleriyle galeri manifestine
+  bağlandı.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 150/332, yani `%45,2`
+  oldu. Birden fazla bağımsız polar stack/grubun bant paylaşımı,
+  `roundCap`, `barMinAngle`, tüm negatif/ters/saat yönü kombinasyonları,
+  tooltip/hover yaşam döngüsü, animasyon, erişilebilirlik ve ölçümlü
+  performans izleyen Faz 3/4/6/7/8 kartları kapanmadan bu kart nihai
+  `tam_kanıtlı` sayılmaz.
 
 Kabul:
 
