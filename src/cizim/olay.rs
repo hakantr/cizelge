@@ -3,6 +3,8 @@
 //! toplanır; fare olayları bu bölgelerle eşlenip [`GrafikOlayı`] olarak
 //! gpui `EventEmitter` üzerinden yayımlanır.
 
+use std::collections::BTreeMap;
+
 use crate::koordinat::Dikdörtgen;
 
 /// Bir veri öğesinin tıklama/isabet geometrisi.
@@ -201,6 +203,13 @@ pub enum GrafikOlayı {
         sıra: usize,
         alt: f64,
         üst: f64,
+    },
+    /// Parçalı görsel eşleme seçimi değişti (`'dataRangeSelected'`).
+    GörselParçalarDeğişti {
+        /// `visualMap` bileşen sırası.
+        sıra: usize,
+        /// Düşükten yükseğe parça sırası → seçili durumu.
+        seçili: BTreeMap<usize, bool>,
     },
     /// Fırça seçimi tamamlandı (`'brushselected'`): kapsanan öğeler.
     FırçaSeçildi {

@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1540,
-  "değişen_piksel_oranı": 0.005703703703703704,
-  "ssim": 0.9925429312879516,
+  "değişen_piksel": 908,
+  "değişen_piksel_oranı": 0.003362962962962963,
+  "ssim": 0.9978237972291758,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-large.png",
     "gerçek": "testler/gorsel/gerçek/default/heatmap-large.png",

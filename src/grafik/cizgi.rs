@@ -396,7 +396,7 @@ fn görsel_gradyan(
     let kapsam = görsel_kapsam(seri, eşleme);
     let mut kırılmalar = vec![piksel0, piksel1];
     if eşleme.parçalı_mı() {
-        for parça in &eşleme.parçalar {
+        for parça in eşleme.parçaları_çöz(kapsam) {
             if let Some(değer) = parça.değer {
                 kırılmalar.push(eksen.veriden_piksele(değer));
             }

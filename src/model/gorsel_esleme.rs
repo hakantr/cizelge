@@ -4,8 +4,9 @@
 
 use crate::model::bilesen::Yön;
 use crate::model::veri_kumesi::BoyutSeçici;
-use crate::model::{Uzunluk, YatayKonum};
+use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
 use crate::renk::Renk;
+use crate::yardimci::sayi::yuvarla;
 
 /// Parçalı eşlemenin tek dilimi (`visualMap-piecewise` `pieces` öğesi).
 #[derive(Clone, PartialEq, Debug)]
@@ -169,6 +170,9 @@ pub struct GörselEşleme {
     /// Üst kenardan uzaklık (`top`). Verildiğinde `bottom` yerleşiminin
     /// önüne geçer.
     pub üst: Option<Uzunluk>,
+    /// `top: 'top' | 'center' | 'bottom'` anahtar sözcüklerinden biri.
+    /// Sayısal/yüzde `top` değerleri geriye dönük uyum için `üst`te tutulur.
+    pub dikey_konum: Option<DikeyKonum>,
     pub alt: Uzunluk,
     /// `(yüksek, düşük)` uç metinleri (`text`). Boşsa sayısal kapsam yazılır.
     pub metin: Option<(String, String)>,
@@ -183,6 +187,17 @@ pub struct GörselEşleme {
     /// Parçalı kip (`visualMap: piecewise`): boş değilse renkler
     /// parçalardan çözülür ve bileşen tıklanabilir bir listedir.
     pub parçalar: Vec<EşlemeParçası>,
+    /// `visualMap-piecewise.splitNumber`: eşit aralıklı otomatik parça
+    /// sayısı. `Some` olması parçalı kipi etkinleştirir.
+    pub bölme_sayısı: Option<usize>,
+    /// Parça sınırı etiketlerinin en az ondalık basamak sayısı
+    /// (`visualMap.precision`). Bölme adımı gerekirse ECharts gibi en çok
+    /// beş basamağa kadar otomatik artırılır.
+    pub hassasiyet: usize,
+    /// `minOpen`: `min` altındaki değerler için açık uçlu ek parça.
+    pub en_az_açık: bool,
+    /// `maxOpen`: `max` üstündeki değerler için açık uçlu ek parça.
+    pub en_çok_açık: bool,
     /// Parça seçim durumu (kapalı parçaların verisi çizilmez); boşsa hepsi
     /// açıktır. Çalışma zamanında bileşen tıklamalarıyla değişir.
     pub kapalı_parçalar: Vec<usize>,
@@ -207,12 +222,17 @@ impl Default for GörselEşleme {
             sol: YatayKonum::Değer(Uzunluk::Piksel(10.0)),
             sağ: None,
             üst: None,
+            dikey_konum: None,
             alt: Uzunluk::Piksel(10.0),
             metin: None,
             göster: true,
             hesaplanabilir: false,
             seçili_aralık: None,
             parçalar: Vec::new(),
+            bölme_sayısı: None,
+            hassasiyet: 0,
+            en_az_açık: false,
+            en_çok_açık: false,
             kapalı_parçalar: Vec::new(),
         }
     }
@@ -287,11 +307,21 @@ impl GörselEşleme {
     pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
         self.alt = alt.into();
         self.üst = None;
+        self.dikey_konum = None;
         self
     }
 
-    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
-        self.üst = Some(üst.into());
+    pub fn üst(mut self, üst: impl Into<DikeyKonum>) -> Self {
+        match üst.into() {
+            DikeyKonum::Değer(uzunluk) => {
+                self.üst = Some(uzunluk);
+                self.dikey_konum = None;
+            }
+            konum => {
+                self.üst = None;
+                self.dikey_konum = Some(konum);
+            }
+        }
         self
     }
 
@@ -323,12 +353,45 @@ impl GörselEşleme {
     /// Parçalı kip: dilim listesi.
     pub fn parçalar(mut self, parçalar: impl IntoIterator<Item = EşlemeParçası>) -> Self {
         self.parçalar = parçalar.into_iter().collect();
+        self.bölme_sayısı = None;
+        self
+    }
+
+    /// Eşit aralıklı otomatik parçalı kip (`splitNumber`).
+    pub fn bölme_sayısı(mut self, sayı: usize) -> Self {
+        self.bölme_sayısı = Some(sayı.max(1));
+        self.parçalar.clear();
+        self
+    }
+
+    pub fn hassasiyet(mut self, basamak: usize) -> Self {
+        self.hassasiyet = basamak.min(20);
+        self
+    }
+
+    pub fn en_az_açık(mut self, açık: bool) -> Self {
+        self.en_az_açık = açık;
+        self
+    }
+
+    pub fn en_çok_açık(mut self, açık: bool) -> Self {
+        self.en_çok_açık = açık;
+        self
+    }
+
+    /// `visualMap-piecewise.selected[index]` karşılığı.
+    pub fn parça_seçimi(mut self, sıra: usize, seçili: bool) -> Self {
+        if seçili {
+            self.kapalı_parçalar.retain(|parça| *parça != sıra);
+        } else if !self.kapalı_parçalar.contains(&sıra) {
+            self.kapalı_parçalar.push(sıra);
+        }
         self
     }
 
     /// Parçalı kip mi?
     pub fn parçalı_mı(&self) -> bool {
-        !self.parçalar.is_empty()
+        !self.parçalar.is_empty() || self.bölme_sayısı.is_some()
     }
 
     /// Parça açık mı (bileşende kapatılmamış mı)?
@@ -336,9 +399,101 @@ impl GörselEşleme {
         !self.kapalı_parçalar.contains(&sıra)
     }
 
+    /// Çözülmüş parça sayısı; otomatik açık uç parçalarını da kapsar.
+    pub fn parça_sayısı(&self) -> usize {
+        if !self.parçalar.is_empty() {
+            self.parçalar.len()
+        } else {
+            self.bölme_sayısı
+                .unwrap_or(0)
+                .saturating_add(usize::from(self.en_az_açık))
+                .saturating_add(usize::from(self.en_çok_açık))
+        }
+    }
+
     /// Değerin düştüğü parça sırası.
     pub fn parça_bul(&self, değer: f64) -> Option<usize> {
         self.parçalar.iter().position(|p| p.içeriyor_mu(değer))
+    }
+
+    /// Değerin düştüğü parça sırası. Otomatik `splitNumber` parçalarını da
+    /// etkin min/max kapsamıyla çözer.
+    pub fn parça_bul_kapsamda(&self, değer: f64, kapsam: [f64; 2]) -> Option<usize> {
+        if !self.parçalar.is_empty() {
+            return self.parça_bul(değer);
+        }
+        let (kapsam, sayı, adım, _, alt_farkı, _) = self.otomatik_bölme(kapsam)?;
+        if değer < kapsam[0] {
+            return self.en_az_açık.then_some(0);
+        }
+        if değer > kapsam[1] {
+            return self.en_çok_açık.then_some(alt_farkı.saturating_add(sayı));
+        }
+        for sıra in 0..sayı {
+            let alt = kapsam[0] + sıra as f64 * adım;
+            let üst = if sıra + 1 == sayı {
+                kapsam[1]
+            } else {
+                alt + adım
+            };
+            let alt_uyuyor = if sıra == 0 {
+                değer >= alt
+            } else {
+                değer > alt
+            };
+            if alt_uyuyor && değer <= üst {
+                return Some(alt_farkı + sıra);
+            }
+        }
+        None
+    }
+
+    /// ECharts `PiecewiseModel` tarafından üretilen düşükten yükseğe parça
+    /// listesini döndürür. Açık/kapalı ortak sınırlar, otomatik hassasiyet,
+    /// etiketler ve parça sıra renkleri resmî modelle aynıdır.
+    pub fn parçaları_çöz(&self, kapsam: [f64; 2]) -> Vec<EşlemeParçası> {
+        if !self.parçalar.is_empty() {
+            return self.parçalar.clone();
+        }
+        let Some((kapsam, sayı, adım, hassasiyet, _, toplam)) = self.otomatik_bölme(kapsam)
+        else {
+            return Vec::new();
+        };
+        let mut sonuç = Vec::with_capacity(toplam);
+        if self.en_az_açık {
+            sonuç.push(
+                EşlemeParçası::aralık(None, false, Some(kapsam[0]), false, Renk::SİYAH)
+                    .etiket(format!("< {:.*}", hassasiyet, kapsam[0])),
+            );
+        }
+        for sıra in 0..sayı {
+            let alt = kapsam[0] + sıra as f64 * adım;
+            let üst = if sıra + 1 == sayı {
+                kapsam[1]
+            } else {
+                alt + adım
+            };
+            sonuç.push(
+                EşlemeParçası::aralık(Some(alt), sıra == 0, Some(üst), true, Renk::SİYAH)
+                    .etiket(format!("{:.*} - {:.*}", hassasiyet, alt, hassasiyet, üst)),
+            );
+        }
+        if self.en_çok_açık {
+            sonuç.push(
+                EşlemeParçası::aralık(Some(kapsam[1]), false, None, false, Renk::SİYAH)
+                    .etiket(format!("> {:.*}", hassasiyet, kapsam[1])),
+            );
+        }
+        let payda = sonuç.len().saturating_sub(1);
+        for (sıra, parça) in sonuç.iter_mut().enumerate() {
+            let oran = if payda == 0 {
+                0.5
+            } else {
+                sıra as f32 / payda as f32
+            };
+            parça.renk = self.şerit_rengi(oran);
+        }
+        sonuç
     }
 
     /// Etkin eşleme kapsamı: seçenek sınırları veri kapsamıyla birleşir.
@@ -375,20 +530,43 @@ impl GörselEşleme {
     /// kipte şeritte çok duraklı doğrusal ara değerleme.
     pub fn renk_çöz(&self, değer: f64, kapsam: [f64; 2]) -> Renk {
         if self.parçalı_mı() {
-            return self
-                .parça_bul(değer)
+            let Some(sıra) = self
+                .parça_bul_kapsamda(değer, kapsam)
                 .filter(|sıra| self.parça_açık_mı(*sıra))
-                .and_then(|sıra| self.parçalar.get(sıra))
-                .map(|p| p.renk)
-                .unwrap_or(self.aralık_dışı_renk);
+            else {
+                return self.aralık_dışı_renk;
+            };
+            if let Some(parça) = self.parçalar.get(sıra) {
+                return parça.renk;
+            }
+            let toplam = self
+                .bölme_sayısı
+                .unwrap_or(1)
+                .saturating_add(usize::from(self.en_az_açık))
+                .saturating_add(usize::from(self.en_çok_açık));
+            let oran = if toplam <= 1 {
+                0.5
+            } else {
+                sıra as f32 / (toplam - 1) as f32
+            };
+            return self.şerit_rengi(oran);
         }
+        let oran = if kapsam[1] > kapsam[0] {
+            ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32
+        } else {
+            0.0
+        };
+        self.şerit_rengi(oran)
+    }
+
+    fn şerit_rengi(&self, oran: f32) -> Renk {
         let (Some(ilk), Some(son)) = (self.renkler.first(), self.renkler.last()) else {
             return Renk::SİYAH;
         };
-        if self.renkler.len() == 1 || kapsam[1] <= kapsam[0] {
+        if self.renkler.len() == 1 {
             return *ilk;
         }
-        let oran = ((değer - kapsam[0]) / (kapsam[1] - kapsam[0])).clamp(0.0, 1.0) as f32;
+        let oran = oran.clamp(0.0, 1.0);
         if oran >= 1.0 {
             return *son;
         }
@@ -400,6 +578,25 @@ impl GörselEşleme {
             (Some(a), Some(b)) => a.karıştır(*b, t),
             _ => *ilk,
         }
+    }
+
+    fn otomatik_bölme(
+        &self,
+        veri_kapsamı: [f64; 2],
+    ) -> Option<([f64; 2], usize, f64, usize, usize, usize)> {
+        let sayı = self.bölme_sayısı?;
+        let kapsam = self.kapsam_çöz(veri_kapsamı);
+        let ham_adım = (kapsam[1] - kapsam[0]) / sayı as f64;
+        let mut hassasiyet = self.hassasiyet.min(20);
+        while yuvarla(ham_adım, hassasiyet) != ham_adım && hassasiyet < 5 {
+            hassasiyet += 1;
+        }
+        let adım = yuvarla(ham_adım, hassasiyet);
+        let alt_farkı = usize::from(self.en_az_açık);
+        let toplam = sayı
+            .saturating_add(alt_farkı)
+            .saturating_add(usize::from(self.en_çok_açık));
+        Some((kapsam, sayı, adım, hassasiyet, alt_farkı, toplam))
     }
 
     /// Görsel eşlemeyi mevcut öğe rengine uygular. `colorLightness`,
@@ -470,6 +667,67 @@ mod testler {
         assert_eq!(eşleme.renk_çöz(3.0, [0.0, 4.0]), yeşil);
         assert_eq!(eşleme.parçalar[0].etiket_metni(), "(1 – 3)");
         assert_eq!(eşleme.parçalar[1].etiket_metni(), "3");
+    }
+
+    #[test]
+    fn split_number_resmi_araliklari_etiketleri_ve_renk_sirasini_uretir() {
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(1.0)
+            .bölme_sayısı(8)
+            .renkler([
+                0x313695u32,
+                0x4575b4,
+                0x74add1,
+                0xabd9e9,
+                0xe0f3f8,
+                0xffffbf,
+                0xfee090,
+                0xfdae61,
+                0xf46d43,
+                0xd73027,
+                0xa50026,
+            ]);
+        let parçalar = eşleme.parçaları_çöz([0.0, 1.0]);
+
+        assert_eq!(parçalar.len(), 8);
+        assert_eq!(parçalar[0].etiket_metni(), "0.000 - 0.125");
+        assert_eq!(parçalar[7].etiket_metni(), "0.875 - 1.000");
+        assert!(parçalar[0].en_az_dahil && parçalar[0].en_çok_dahil);
+        assert!(!parçalar[1].en_az_dahil && parçalar[1].en_çok_dahil);
+        assert_eq!(eşleme.parça_bul_kapsamda(0.125, [0.0, 1.0]), Some(0));
+        assert_eq!(eşleme.parça_bul_kapsamda(0.125_001, [0.0, 1.0]), Some(1));
+        assert_eq!(eşleme.parça_bul_kapsamda(1.0, [0.0, 1.0]), Some(7));
+        assert_eq!(eşleme.parça_bul_kapsamda(1.01, [0.0, 1.0]), None);
+
+        let rgb8 = |renk: Renk| {
+            [
+                (renk.kırmızı * 255.0).round() as u8,
+                (renk.yeşil * 255.0).round() as u8,
+                (renk.mavi * 255.0).round() as u8,
+            ]
+        };
+        assert_eq!(rgb8(parçalar[0].renk), [49, 54, 149]);
+        assert_eq!(rgb8(parçalar[1].renk), [89, 141, 192]);
+        assert_eq!(rgb8(parçalar[7].renk), [165, 0, 38]);
+    }
+
+    #[test]
+    fn split_number_acik_uclari_ayri_parca_olarak_cozer() {
+        let eşleme = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(10.0)
+            .bölme_sayısı(2)
+            .en_az_açık(true)
+            .en_çok_açık(true);
+        let parçalar = eşleme.parçaları_çöz([0.0, 10.0]);
+
+        assert_eq!(parçalar.len(), 4);
+        assert_eq!(parçalar[0].etiket_metni(), "< 0");
+        assert_eq!(parçalar[3].etiket_metni(), "> 10");
+        assert_eq!(eşleme.parça_bul_kapsamda(-1.0, [0.0, 10.0]), Some(0));
+        assert_eq!(eşleme.parça_bul_kapsamda(0.0, [0.0, 10.0]), Some(1));
+        assert_eq!(eşleme.parça_bul_kapsamda(11.0, [0.0, 10.0]), Some(3));
     }
 
     #[test]

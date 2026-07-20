@@ -756,6 +756,10 @@ pub enum ÇalışmaOlayı {
         sıra: usize,
         seçili: [f64; 2],
     },
+    GörselParçalarDeğişti {
+        sıra: usize,
+        seçili: BTreeMap<usize, bool>,
+    },
     GöstergeDeğişti {
         seçili: BTreeMap<String, bool>,
     },
@@ -979,6 +983,55 @@ impl GrafikÇalışmaZamanı {
         if !sessiz {
             self.olaylar
                 .push(ÇalışmaOlayı::GörselAralıkDeğişti { sıra, seçili });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(seçili)
+    }
+
+    /// Parçalı `visualMap` için `selectDataRange.selected` nesnesini modele
+    /// uygular. ECharts gibi belirtilmeyen anahtarlar seçili sayılmaz.
+    pub fn görsel_parçalarını_ayarla(
+        &mut self,
+        sıra: Option<usize>,
+        seçili: BTreeMap<usize, bool>,
+        sessiz: bool,
+    ) -> Result<BTreeMap<usize, bool>, BilesenHatasi> {
+        self.açık_mı("dispatchAction.selectDataRange")?;
+        let sıra = sıra.unwrap_or(0);
+        let eşleme = if let Some(tekil) = self.seçenekler.görsel_eşleme.as_mut() {
+            (sıra == 0).then_some(tekil)
+        } else {
+            self.seçenekler.görsel_eşlemeler.get_mut(sıra)
+        }
+        .ok_or(BilesenHatasi::EksikVeri {
+            bileşen: "visualMap",
+            sıra,
+        })?;
+        if !eşleme.parçalı_mı() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "visualMap.selected",
+                ayrıntı: "nesne biçimli selected yalnız parçalı visualMap içindir".to_owned(),
+            });
+        }
+        let parça_sayısı = eşleme.parça_sayısı();
+        if let Some(geçersiz) = seçili.keys().find(|sıra| **sıra >= parça_sayısı) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "visualMap.selected",
+                ayrıntı: format!("{geçersiz} parça anahtarı 0..{parça_sayısı} dışında"),
+            });
+        }
+        let seçili = (0..parça_sayısı)
+            .map(|parça| (parça, seçili.get(&parça).copied().unwrap_or(false)))
+            .collect::<BTreeMap<_, _>>();
+        eşleme.kapalı_parçalar = seçili
+            .iter()
+            .filter_map(|(parça, açık)| (!*açık).then_some(*parça))
+            .collect();
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::GörselParçalarDeğişti {
+                sıra,
+                seçili: seçili.clone(),
+            });
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok(seçili)

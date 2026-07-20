@@ -105,6 +105,12 @@ function html(id, kaynak, frame, state) {
           ? `myChart.dispatchAction({type:'showTip', seriesIndex:0, dataIndex:${3 * 24 + 13}});`
         : id === 'heatmap-cartesian' && state === 'aralık'
           ? `myChart.dispatchAction({type:'selectDataRange', visualMapIndex:0, selected:[3, 7]});`
+        : id === 'heatmap-large-piecewise' && state === 'parça'
+          ? `myChart.dispatchAction({
+              type:'selectDataRange',
+              visualMapIndex:0,
+              selected:{0:true,1:true,2:true,3:false,4:true,5:true,6:true,7:true}
+            });`
         : id === 'dynamic-data2' && state === 'son'
         ? `{
             const zamanlayıcı = window.__capturedIntervals[0];

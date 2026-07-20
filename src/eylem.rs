@@ -51,6 +51,13 @@ impl EylemDeğeri {
             _ => None,
         }
     }
+
+    pub fn mantıksal(&self) -> Option<bool> {
+        match self {
+            Self::Mantıksal(değer) => Some(*değer),
+            _ => None,
+        }
+    }
 }
 
 impl From<f64> for EylemDeğeri {
@@ -538,7 +545,7 @@ pub fn veri_yakınlaştırma_eylemini_kaydet(
     )
 }
 
-/// Sürekli `visualMap` için resmî `selectDataRange` action'ı.
+/// Sürekli ve parçalı `visualMap` için resmî `selectDataRange` action'ı.
 pub fn görsel_aralık_eylemini_kaydet(
     kayıt: &mut EylemKayıtDefteri
 ) -> Result<(), BilesenHatasi> {
@@ -555,26 +562,69 @@ pub fn görsel_aralık_eylemini_kaydet(
                 });
             }
             let sıra = isteğe_bağlı_sıra(yük, "visualMapIndex")?;
-            let seçili = yük
+            let sıra = sıra.unwrap_or(0);
+            let selected = yük
                 .al("selected")
-                .and_then(EylemDeğeri::dizi)
-                .filter(|değerler| değerler.len() == 2)
-                .and_then(|değerler| Some([değerler.first()?.sayı()?, değerler.get(1)?.sayı()?]))
-                .filter(|değerler| değerler.iter().all(|değer| değer.is_finite()))
                 .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
                     alan: "visualMap.selected",
-                    ayrıntı: "iki sonlu sayıdan oluşan dizi gerekli".to_owned(),
+                    ayrıntı: "sürekli kipte iki sayılı dizi, parçalı kipte bool nesnesi gerekli"
+                        .to_owned(),
                 })?;
-            let seçili = çalışma.görsel_aralığı_ayarla(sıra, seçili, true)?;
-            let sıra = sıra.unwrap_or(0);
+            let (alt_tür, olay_değeri) = if let Some(değerler) = selected.dizi() {
+                let seçili = (değerler.len() == 2)
+                    .then(|| Some([değerler.first()?.sayı()?, değerler.get(1)?.sayı()?]))
+                    .flatten()
+                    .filter(|değerler| değerler.iter().all(|değer| değer.is_finite()))
+                    .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                        alan: "visualMap.selected",
+                        ayrıntı: "iki sonlu sayıdan oluşan dizi gerekli".to_owned(),
+                    })?;
+                let seçili = çalışma.görsel_aralığı_ayarla(Some(sıra), seçili, true)?;
+                (
+                    "continuous",
+                    EylemDeğeri::Dizi(seçili.into_iter().map(EylemDeğeri::from).collect()),
+                )
+            } else if let Some(nesne) = selected.nesne() {
+                let mut seçili = BTreeMap::new();
+                for (anahtar, değer) in nesne {
+                    let parça =
+                        anahtar
+                            .parse::<usize>()
+                            .map_err(|_| BilesenHatasi::GeçersizSeçenek {
+                                alan: "visualMap.selected",
+                                ayrıntı: format!("geçersiz parça anahtarı: {anahtar}"),
+                            })?;
+                    let açık =
+                        değer
+                            .mantıksal()
+                            .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                                alan: "visualMap.selected",
+                                ayrıntı: format!("{anahtar} anahtarında bool değer gerekli"),
+                            })?;
+                    seçili.insert(parça, açık);
+                }
+                let seçili = çalışma.görsel_parçalarını_ayarla(Some(sıra), seçili, true)?;
+                (
+                    "piecewise",
+                    EylemDeğeri::Nesne(
+                        seçili
+                            .into_iter()
+                            .map(|(parça, açık)| (parça.to_string(), EylemDeğeri::from(açık)))
+                            .collect(),
+                    ),
+                )
+            } else {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "visualMap.selected",
+                    ayrıntı: "sürekli kipte iki sayılı dizi, parçalı kipte bool nesnesi gerekli"
+                        .to_owned(),
+                });
+            };
             Ok(vec![OlayYükü {
                 bileşen_türü: Some("visualMap".to_owned()),
-                bileşen_alt_türü: Some("continuous".to_owned()),
+                bileşen_alt_türü: Some(alt_tür.to_owned()),
                 bileşen_sırası: Some(sıra),
-                alanlar: BTreeMap::from([(
-                    "selected".to_owned(),
-                    EylemDeğeri::Dizi(seçili.into_iter().map(EylemDeğeri::from).collect()),
-                )]),
+                alanlar: BTreeMap::from([("selected".to_owned(), olay_değeri)]),
                 ..OlayYükü::default()
             }])
         },
@@ -1060,6 +1110,49 @@ mod testler {
                 .unwrap()
                 .seçili_aralık,
             Some([3.0, 7.0])
+        );
+    }
+
+    #[test]
+    fn select_data_range_parcali_gorsel_esleme_secim_nesnesini_gunceller() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .görsel_eşleme(GörselEşleme::yeni().en_az(0.0).en_çok(1.0).bölme_sayısı(3));
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        görsel_aralık_eylemini_kaydet(&mut kayıt).unwrap();
+        let selected = EylemDeğeri::Nesne(BTreeMap::from([
+            ("0".to_owned(), true.into()),
+            ("1".to_owned(), false.into()),
+            ("2".to_owned(), true.into()),
+        ]));
+
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("selectDataRange").alan("selected", selected),
+            )
+            .unwrap();
+
+        assert_eq!(olaylar[0].tür, "dataRangeSelected");
+        assert_eq!(olaylar[0].bileşen_alt_türü.as_deref(), Some("piecewise"));
+        assert_eq!(
+            çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .görsel_eşleme
+                .unwrap()
+                .kapalı_parçalar,
+            vec![1]
+        );
+        assert_eq!(
+            olaylar[0]
+                .alanlar
+                .get("selected")
+                .and_then(EylemDeğeri::nesne)
+                .and_then(|seçili| seçili.get("1"))
+                .and_then(EylemDeğeri::mantıksal),
+            Some(false)
         );
     }
 

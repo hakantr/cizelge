@@ -4,7 +4,7 @@
 //! içindedir ve bu modül olmadan da (ör. WASM/SVG hedeflerinde) çalışır.
 
 use std::cell::{Cell, RefCell};
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Instant;
@@ -1077,15 +1077,22 @@ impl Render for GrafikGörünümü {
                             .map(|(_, sıra)| *sıra),
                         Err(_) => None,
                     };
-                    if let Some(sıra) = eşleme_vuruşu {
+                    if let Some(parça_sırası) = eşleme_vuruşu {
                         let seçenekler = Arc::make_mut(&mut bu.seçenekler);
                         if let Some(eşleme) = seçenekler.görsel_eşleme.as_mut() {
-                            if let Some(k) = eşleme.kapalı_parçalar.iter().position(|k| *k == sıra)
+                            if let Some(k) = eşleme
+                                .kapalı_parçalar
+                                .iter()
+                                .position(|k| *k == parça_sırası)
                             {
                                 eşleme.kapalı_parçalar.remove(k);
                             } else {
-                                eşleme.kapalı_parçalar.push(sıra);
+                                eşleme.kapalı_parçalar.push(parça_sırası);
                             }
+                            let seçili = (0..eşleme.parça_sayısı())
+                                .map(|sıra| (sıra, eşleme.parça_açık_mı(sıra)))
+                                .collect::<BTreeMap<_, _>>();
+                            cx.emit(GrafikOlayı::GörselParçalarDeğişti { sıra: 0, seçili });
                             cx.notify();
                         }
                         return;

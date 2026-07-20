@@ -3671,7 +3671,7 @@ fn heatmap_cartesian(seçili_aralık: bool) -> GrafikSeçenekleri {
         )
 }
 
-fn heatmap_large() -> GrafikSeçenekleri {
+fn heatmap_large_verisi() -> (Vec<String>, Vec<String>, Vec<VeriÖğesi>) {
     // Referans sayfası `Math.random`ı 0x5eed1234 Mulberry32 tohumu ile
     // sabitler; resmî noisejs yardımcısına giden ilk değer burada aynıdır.
     let mut rastgele_tohumu = 0x5eed_1234;
@@ -3690,6 +3690,11 @@ fn heatmap_large() -> GrafikSeçenekleri {
     // Kaynak örnek bilerek 100 kategoride durur; y=100 veri satırı eksen
     // clip sınırını doğrulayan taşan son satırdır.
     let y_verisi = (0..100).map(|değer| değer.to_string()).collect::<Vec<_>>();
+    (x_verisi, y_verisi, veri)
+}
+
+fn heatmap_large() -> GrafikSeçenekleri {
+    let (x_verisi, y_verisi, veri) = heatmap_large_verisi();
 
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -3708,6 +3713,43 @@ fn heatmap_large() -> GrafikSeçenekleri {
                     "#fdae61", "#f46d43", "#d73027", "#a50026",
                 ]),
         )
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .ad("Gaussian")
+                .hücre_boşluğu(0.0)
+                .vurgu_öğe_stili(
+                    ÖğeStili::yeni()
+                        .kenarlık_rengi("#333")
+                        .kenarlık_kalınlığı(1.0),
+                )
+                .veri(veri),
+        )
+}
+
+fn heatmap_large_piecewise(parça_kapalı: bool) -> GrafikSeçenekleri {
+    let (x_verisi, y_verisi, veri) = heatmap_large_verisi();
+    let mut eşleme = GörselEşleme::yeni()
+        .en_az(0.0)
+        .en_çok(1.0)
+        .hesaplanabilir(true)
+        .bölme_sayısı(8)
+        .sol("right")
+        .üst("center")
+        .renkler([
+            "#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090", "#fdae61",
+            "#f46d43", "#d73027", "#a50026",
+        ]);
+    if parça_kapalı {
+        eşleme = eşleme.parça_seçimi(3, false);
+    }
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .ızgara(Izgara::yeni().sol(40).sağ(140))
+        .x_ekseni(Eksen::kategori().veri(x_verisi))
+        .y_ekseni(Eksen::kategori().veri(y_verisi))
+        .görsel_eşleme(eşleme)
         .seri(
             IsıHaritasıSerisi::yeni()
                 .ad("Gaussian")
@@ -4443,6 +4485,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
+        "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),

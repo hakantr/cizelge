@@ -1,0 +1,19 @@
+{
+  "id": "heatmap-large-piecewise",
+  "senaryo": "etkileşim",
+  "kare": "başlangıç",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1641,
+  "değişen_piksel_oranı": 0.006077777777777777,
+  "ssim": 0.9966607912873048,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-large-piecewise-başlangıç.png",
+    "gerçek": "testler/gorsel/gerçek/default/heatmap-large-piecewise-başlangıç.png",
+    "fark": "testler/gorsel/fark/default/heatmap-large-piecewise-başlangıç.png"
+  }
+}

@@ -45,6 +45,12 @@ impl Kök {
                 GrafikOlayı::GörselAralıkDeğişti { sıra, alt, üst } => {
                     format!("Görsel eşleme {sıra} → {alt:.2}–{üst:.2}").into()
                 }
+                GrafikOlayı::GörselParçalarDeğişti { sıra, seçili } => format!(
+                    "Parçalı eşleme {sıra} → {}/{} parça seçili",
+                    seçili.values().filter(|açık| **açık).count(),
+                    seçili.len()
+                )
+                .into(),
                 GrafikOlayı::FırçaSeçildi { öğeler } => {
                     format!("Fırça → {} öğe seçildi", öğeler.len()).into()
                 }

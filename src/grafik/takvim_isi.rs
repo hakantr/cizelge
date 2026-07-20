@@ -163,7 +163,7 @@ pub fn takvim_çiz(
             Some(d) => {
                 // Parçalı eşlemede kapalı dilim hücreleri boş görünür.
                 if eşleme.parçalı_mı() {
-                    match eşleme.parça_bul(d) {
+                    match eşleme.parça_bul_kapsamda(d, eşleme_kapsamı) {
                         Some(parça) if eşleme.parça_açık_mı(parça) => {
                             eşleme.renk_çöz(d, eşleme_kapsamı)
                         }

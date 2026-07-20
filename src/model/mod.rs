@@ -117,6 +117,12 @@ impl From<f32> for DikeyKonum {
     }
 }
 
+impl From<i32> for DikeyKonum {
+    fn from(p: i32) -> Self {
+        DikeyKonum::Değer(Uzunluk::Piksel(p as f32))
+    }
+}
+
 impl From<&str> for DikeyKonum {
     fn from(s: &str) -> Self {
         match s.trim() {

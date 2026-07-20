@@ -124,6 +124,14 @@ const SENARYOLAR = [
     ]
   },
   { id: 'heatmap-large', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'heatmap-large-piecewise',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'parça', kare: 1, durum: 'parça' }
+    ]
+  },
   { id: 'pie-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-doughnut', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-roseType-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
