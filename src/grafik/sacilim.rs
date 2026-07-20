@@ -41,6 +41,20 @@ pub struct SaçılımNoktası {
     pub y_değeri: f64,
 }
 
+/// ECharts scatter verisinin ilk iki boyutunu kartezyen koordinata çözer.
+/// `[x, y, ...]` biçimindeki ek boyutlar sembol boyutu, etiket, tooltip ve
+/// visualMap gibi kanallar için veri öğesinde korunur.
+pub(crate) fn saçılım_xy(değer: &VeriDeğeri, sıra: usize) -> Option<(f64, f64)> {
+    if değer.boş_mu() {
+        return None;
+    }
+    match değer {
+        VeriDeğeri::Çift([x, y]) => Some((*x, *y)),
+        VeriDeğeri::Dizi(değerler) if değerler.len() >= 2 => Some((değerler[0], değerler[1])),
+        _ => değer.sayı().map(|y| (sıra as f64, y)),
+    }
+}
+
 /// Serinin piksel noktalarını üretir. Veri `[x, y]` çifti değilse `x`
 /// olarak veri sırası kullanılır.
 pub fn saçılım_noktaları(
@@ -59,15 +73,10 @@ pub fn saçılım_noktaları(
                 };
                 (x, y)
             }
-            None => {
-                if öğe.değer.boş_mu() {
-                    continue;
-                }
-                let Some(y) = öğe.değer.sayı() else {
-                    continue;
-                };
-                (öğe.değer.x().unwrap_or(i as f64), y)
-            }
+            None => match saçılım_xy(&öğe.değer, i) {
+                Some(koordinat) => koordinat,
+                None => continue,
+            },
         };
         sonuç.push(SaçılımNoktası {
             sıra: i,
@@ -107,7 +116,12 @@ pub fn takvim_saçılım_noktaları(
 /// Scatter/effectScatter ikinci koordinat boyutunun görsel eşleme kapsamı.
 pub fn saçılım_değer_kapsamı(seri: &SaçılımSerisi) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
-    for değer in seri.veri.iter().filter_map(|öğe| öğe.değer.sayı()) {
+    for değer in seri
+        .veri
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, öğe)| saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y))
+    {
         if değer.is_finite() {
             kapsam[0] = kapsam[0].min(değer);
             kapsam[1] = kapsam[1].max(değer);
@@ -589,6 +603,35 @@ mod testler {
         assert_eq!(noktalar.len(), 1);
         assert!((noktalar[0].konum.0 - 100.0).abs() < 1e-5);
         assert!((noktalar[0].konum.1 - 50.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn çok_boyutlu_scatter_ilk_iki_boyutu_koordinata_kalanını_sembole_aktarır() {
+        let seri = SaçılımSerisi::yeni()
+            .sembol_boyutu_işlevi(|öğe| {
+                öğe
+                    .değer
+                    .dizi()
+                    .and_then(|değerler| değerler.get(2))
+                    .copied()
+                    .unwrap_or_default() as f32
+                    * 2.0
+            })
+            .veri([[3.0, 2.0, 7.0]]);
+        let kartezyen = Kartezyen2B {
+            x: değer_ekseni([0.0, 6.0], [0.0, 120.0], EksenKonumu::Alt),
+            y: değer_ekseni([0.0, 4.0], [80.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 120.0, 80.0),
+        };
+
+        let noktalar = saçılım_noktaları(&seri, &kartezyen);
+
+        assert_eq!(noktalar.len(), 1);
+        assert_eq!(noktalar[0].konum, (60.0, 40.0));
+        assert_eq!(noktalar[0].x_değeri, 3.0);
+        assert_eq!(noktalar[0].y_değeri, 2.0);
+        assert_eq!(noktalar[0].boyut, 14.0);
+        assert_eq!(saçılım_değer_kapsamı(&seri), [2.0, 2.0]);
     }
 
     #[test]

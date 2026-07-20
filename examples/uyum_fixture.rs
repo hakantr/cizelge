@@ -3610,6 +3610,59 @@ fn scatter_simple() -> GrafikSeçenekleri {
         ]))
 }
 
+fn scatter_punch_card() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-punchCard.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let saatler: Vec<String> = resmi_javascript_dizisi(&kaynak, "const hours")?;
+    let günler: Vec<String> = resmi_javascript_dizisi(&kaynak, "const days")?;
+    let ham_veri: Vec<[f64; 3]> = resmi_javascript_dizisi(&kaynak, "const data")?;
+    let veri = ham_veri
+        .into_iter()
+        // Resmî örnekteki `.map`: [gün, saat, değer] -> [saat, gün, değer].
+        .map(|[gün, saat, değer]| [saat, gün, değer])
+        .collect::<Vec<_>>();
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Punch Card of Github").iç_boşluk(15.0))
+        .gösterge(
+            Gösterge::yeni()
+                .veri(["Punch Card"])
+                .sol("right")
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().konum(İpucuKonumu::Üst))
+        .ızgara(Izgara::yeni().sol(2).alt(10).sağ(10).etiketi_kapsa(true))
+        .x_ekseni(
+            Eksen::kategori()
+                .veri(saatler)
+                .kenar_boşluğu(false)
+                .bölme_çizgisi_göster(true)
+                .çizgi(EksenÇizgisi::yeni().göster(false)),
+        )
+        .y_ekseni(
+            Eksen::kategori()
+                .veri(günler)
+                .çizgi(EksenÇizgisi::yeni().göster(false)),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("Punch Card")
+                .sembol_boyutu_işlevi(|öğe| {
+                    öğe
+                        .değer
+                        .dizi()
+                        .and_then(|değerler| değerler.get(2))
+                        .copied()
+                        .unwrap_or_default() as f32
+                        * 2.0
+                })
+                .veri(veri),
+        ))
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5802,6 +5855,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "boxplot-light-velocity" => boxplot_light_velocity(false),
         "boxplot-light-velocity2" => boxplot_light_velocity(true),
         "scatter-simple" => Ok(scatter_simple()),
+        "scatter-punchCard" => scatter_punch_card(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

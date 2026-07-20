@@ -41,7 +41,7 @@ use crate::grafik::radar::{
     radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
 };
 use crate::grafik::sacilim::{
-    SaçılımNoktası, saçılım_değer_kapsamı, saçılım_noktaları, saçılım_çiz_eşlemeli,
+    SaçılımNoktası, saçılım_değer_kapsamı, saçılım_noktaları, saçılım_xy, saçılım_çiz_eşlemeli,
     takvim_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
@@ -757,19 +757,31 @@ fn kartezyen_kur(
         // Scatter `encode.x/y`, veri öğesinin birincil (y) değerinden
         // bağımsız iki dataset boyutudur. Kapsamı ham sıra uzayından değil
         // bu iki boyuttan kurmak, çoklu grid/değer eksenlerini doğru ölçekler.
-        if let Seri::Saçılım(saçılım) = seri
-            && let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme
-        {
-            for öğe in &saçılım.veri {
-                if !x_kategorik
-                    && let Some(değer) = öğe.boyut(x_boyutu).and_then(|değer| değer.sayı())
-                {
-                    kapsa(x_kapsam, değer);
+        if let Seri::Saçılım(saçılım) = seri {
+            if let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme {
+                for öğe in &saçılım.veri {
+                    if !x_kategorik
+                        && let Some(değer) = öğe.boyut(x_boyutu).and_then(|değer| değer.sayı())
+                    {
+                        kapsa(x_kapsam, değer);
+                    }
+                    if !y_kategorik
+                        && let Some(değer) = öğe.boyut(y_boyutu).and_then(|değer| değer.sayı())
+                    {
+                        kapsa(y_kapsam, değer);
+                    }
                 }
-                if !y_kategorik
-                    && let Some(değer) = öğe.boyut(y_boyutu).and_then(|değer| değer.sayı())
-                {
-                    kapsa(y_kapsam, değer);
+            } else {
+                for (sıra, öğe) in saçılım.veri.iter().enumerate() {
+                    let Some((x, y)) = saçılım_xy(&öğe.değer, sıra) else {
+                        continue;
+                    };
+                    if !x_kategorik {
+                        kapsa(x_kapsam, x);
+                    }
+                    if !y_kategorik {
+                        kapsa(y_kapsam, y);
+                    }
                 }
             }
             continue;
@@ -1070,12 +1082,17 @@ fn kartezyen_kur(
                 }
                 continue;
             }
-            if let Seri::Saçılım(saçılım) = seri
-                && let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme
-            {
-                for öğe in &saçılım.veri {
-                    let x = öğe.boyut(x_boyutu).and_then(|değer| değer.sayı());
-                    let y = öğe.boyut(y_boyutu).and_then(|değer| değer.sayı());
+            if let Seri::Saçılım(saçılım) = seri {
+                for (sıra, öğe) in saçılım.veri.iter().enumerate() {
+                    let (x, y) = match &saçılım.eşleme {
+                        Some((x_boyutu, y_boyutu)) => (
+                            öğe.boyut(x_boyutu).and_then(|değer| değer.sayı()),
+                            öğe.boyut(y_boyutu).and_then(|değer| değer.sayı()),
+                        ),
+                        None => saçılım_xy(&öğe.değer, sıra)
+                            .map(|(x, y)| (Some(x), Some(y)))
+                            .unwrap_or((None, None)),
+                    };
                     let x_değerleri = [x.unwrap_or(f64::NAN)];
                     let y_değerleri = [y.unwrap_or(f64::NAN)];
                     if !pencereden_geçer(x_penceresi, &x_değerleri)
@@ -1169,7 +1186,10 @@ fn kartezyen_kur(
         .enumerate()
         .map(|(g, ızgara)| {
             let mut sol = ızgara.sol.çöz(yüzey.genişlik());
-            let mut sağ_boşluk = ızgara.sağ.çöz(yüzey.genişlik());
+            // `containLabel`, yatay eksenin uç etiketini grid'in içine
+            // zorlamaz; ECharts açık `right` mesafesini aynen korur ve uç
+            // kategori etiketi tuval kenarına kadar uzanabilir.
+            let sağ_boşluk = ızgara.sağ.çöz(yüzey.genişlik());
             let üst = ızgara.üst.çöz(yüzey.yükseklik());
             let mut alt_boşluk = ızgara.alt.çöz(yüzey.yükseklik());
             if ızgara.etiketi_kapsa {
@@ -1214,7 +1234,6 @@ fn kartezyen_kur(
                     // fazladan dikey boşluk üretmemelidir.
                     alt_boşluk += x_boyut + x_seçenek.etiket.boşluk;
                 }
-                sağ_boşluk = sağ_boşluk.max(20.0);
             }
             let genişlik = ızgara
                 .genişlik
