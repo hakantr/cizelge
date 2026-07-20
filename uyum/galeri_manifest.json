@@ -5494,7 +5494,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-polynomial-regression.ts",
     "kaynak_sha256": "67a9214a38d0c305aa4df0500099201a947f60a00e033707b35a77fbfd1188c2",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_polynomial_regression",
     "seriler": [
       "cross",
       "dashed",
@@ -5511,7 +5511,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5522,15 +5522,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 2222,
+          "değişen_piksel_oranı": 0.00822962962962963,
+          "ssim": 0.9902885867961626,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-polynomial-regression.png",
+            "sha256": "3893162122c4646cb60df515853c8140f226d192384bec799e5469ab1fa11a86"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-polynomial-regression.png",
+            "sha256": "dae5e7de4fa08ac52ffac7c46ff45d464cf77a3b065fb09b41e91cd9675de368"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-polynomial-regression.png",
+            "sha256": "7d5a6ce3b2754aa5ce34719328cd59ebace6777db91fb5d0b68c7eec4e5165f7"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-polynomial-regression-son.json",
+            "sha256": "02816c771ca9b7c876a85206d5dc8bf8200417ff28926c3cd80d104124963edf"
+          }
+        }
+      ]
     }
   },
   {
@@ -15571,24 +15596,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 1027,
-          "değişen_piksel_oranı": 0.0038037037037037037,
-          "ssim": 0.9948644677587911,
+          "değişen_piksel": 939,
+          "değişen_piksel_oranı": 0.003477777777777778,
+          "ssim": 0.9963128156896969,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-y-category.png",
             "sha256": "5fac10078557c2c437848b1cde932b4ee07d48272b6224247da191758027b86a"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/line-y-category.png",
-            "sha256": "09d5535c027e941a277f3761a72df05ada6b2efae8740e6cf05d2446a22edcd1"
+            "sha256": "53250e4897a24bdb93128fe3b6a4f4a383e8e46569789cb70dae5b4902fa85e1"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/line-y-category.png",
-            "sha256": "f0fced41a143f3d2166a851666e67ce11763bf623b2349b0e9b4cc01ae5ee091"
+            "sha256": "91d2c7f9caa1cc94c69c1d35a80ab620caab10b397efa69531265f15d88567a3"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/line-y-category-son.json",
-            "sha256": "7d0a381607ed298af52b4ee237d798e84ff2fa7065e4520f4f1037a6450bc1d8"
+            "sha256": "171acf4744d29c1243ffd9bc6132b2520739e90ca9c9ab01f24b1ebea24d9634"
           }
         }
       ]
