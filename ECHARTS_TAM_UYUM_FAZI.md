@@ -789,6 +789,60 @@ Gerçekleşen dilim — `candlestick-sh-2015` (2026-07-20):
   kapanışı Faz 5/6 matrisinde `kısmi` kalır; bunlar tamamlanmadan kart nihai
   `tam_kanıtlı` sayılmaz.
 
+Gerçekleşen dilim — `bar-brush` (2026-07-20):
+
+- Resmî örnek ve olay akışı
+  `../echarts-examples/public/examples/ts/bar-brush.ts` dosyasından taşındı.
+  Brush seçimi ve varsayılan görsel kanalları
+  `../echarts/src/component/brush/BrushModel.ts`, `selector.ts`,
+  `visualEncoding.ts`, `install.ts` ve `preprocessor.ts`; yan yana/stack
+  sütun yerleşimi ise `../echarts/src/chart/bar/` ile
+  `../echarts/src/layout/barGrid.ts` kaynaklarından sabit committe
+  doğrulandı.
+- Örneğin on kategorisi ve dört serisi, resmî koşucudaki deterministik
+  Mulberry32 akışıyla üretildi. `bar`/`bar2` serileri `one`, `bar3`/`bar4`
+  serileri `two` stack'inde; legend'in `%10` sol konumu, boş tooltip,
+  `X Axis` adlı kategori ekseni, `bottom: 100` grid, 10 px vurgu gölgesi ve
+  toolbox içindeki `magicType(stack)`, `dataView`, ardından
+  `rect/polygon/lineX/lineY/keep/clear` sırası korunur.
+- Programatik `dispatchAction({type: 'brush', areas})` sonucuna seri bazlı
+  ham veri sıraları eklendi ve `BoyamaÇıktısı.fırça_seçimleri` üzerinden
+  tipli olarak dışarı açıldı. `Class2..Class5` lineX alanında ECharts'ın
+  gerçek sütun gövdesi isabeti korunur: `one` stack'indeki ilk iki seri
+  `[3, 4, 5]`, sağdaki `two` stack'indeki son iki seri `[2, 3, 4]` seçer.
+  Böylece seçim kategori merkezinden kestirilmez; side-by-side stack
+  dikdörtgeninin gerçek merkezi ve ham veri sırası kullanılır.
+- `Fırça` API'sine `inBrush.color` ve `outOfBrush.color` karşılıkları
+  eklendi. Açık bir dış görsel verilmediğinde ECharts tema token'ının
+  devre dışı rengi `#cfd2d7` uygulanır; yalnız alpha kanalı verilmişse renk
+  zorla değiştirilmez. Öğe bazlı brush görseli gereken sütun serisi large
+  toplu yoldan güvenle normal öğe yoluna düşer; seçili ve seçili-dışı
+  renkler her veri öğesine ayrı uygulanır.
+- Resmî `brushSelected` callback'i seçilen ham sıraları birleştirip
+  `SELECTED DATA INDICES` başlığını `bottom: 0`, `right: 10%`,
+  `width: 100`, 12 px beyaz yazı ve `#333` zeminle kurar. Ortak başlık
+  modeli `right`, `bottom` ve `width` option yollarını taşır; sağ/alt
+  yerleşim, kalın yazının gerçek ölçüsüyle hesaplanır. Fixture koşucusu
+  hem gönderilen brush action'ını hem de oluşan dört seri satırlı başlık
+  metnini ekran görüntüsünden önce doğrular.
+- Çekirdek birim kapısı 281/281, fixture kapısı 37/37 geçti;
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Yeni iki kare dahil tam
+  görsel regresyon 174/174 geçti ve önceden kilitli hiçbir resmî referans
+  yenilenmedi. Ortak kalın başlık ölçümü yalnız iki mevcut
+  `boxplot-light-velocity*` gerçek/fark çıktısını yeniden üretti; sabit
+  referansları değişmeden SSIM değerleri iyileşti.
+- Başlangıç karesi 741 değişen piksel, `%0,2744` fark ve `0,999128` SSIM;
+  lineX seçim karesi 1.316 değişen piksel, `%0,4874` fark ve `0,998631`
+  SSIM üretti. İki resmî referans yalnız bu yeni kart için bir kez üretildi,
+  ardından referans, gerçek, fark ve metrik dosyaları SHA-256 değerleriyle
+  galeri manifestine kilitlendi.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 148/332, yani `%44,6`
+  oldu. Pointer ile serbest alan oluşturma/dönüştürme, tüm brush olay yaşam
+  döngüsü, animasyon, erişilebilirlik ve ölçümlü performans kapıları Faz
+  5/6/7/8'de kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
