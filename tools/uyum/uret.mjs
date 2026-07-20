@@ -145,6 +145,7 @@ const YEREL_FIXTURE = Object.freeze({
   'pie-borderRadius': 'examples/uyum_fixture.rs#pie_border_radius',
   'pie-alignTo': 'examples/uyum_fixture.rs#pie_align_to',
   'scatter-simple': 'examples/uyum_fixture.rs#scatter_simple',
+  'scatter-anscombe-quartet': 'examples/uyum_fixture.rs#scatter_anscombe_quartet',
   'scatter-punchCard': 'examples/uyum_fixture.rs#scatter_punch_card',
   'scatter-effect': 'examples/uyum_fixture.rs#scatter_effect',
   'candlestick-simple': 'examples/uyum_fixture.rs#candlestick_simple',

@@ -3663,6 +3663,85 @@ fn scatter_punch_card() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn scatter_anscombe_quartet() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-anscombe-quartet.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let veri: Vec<Vec<[f64; 2]>> = resmi_javascript_dizisi(&kaynak, "const dataAll")?;
+    if veri.len() != 4 {
+        return Err(format!(
+            "{} dört Anscombe veri grubu içermiyor",
+            dosya.display()
+        ));
+    }
+
+    let im_çizgisi = || {
+        İmÇizgisi::yeni()
+            .stil(ÇizgiStili::yeni().kalınlık(1.0).tür(ÇizgiTürü::Düz))
+            .etiket(
+                Etiket::yeni()
+                    .göster(true)
+                    .biçimleyici("y = 0.5 * x + 3")
+                    .yatay_hiza(YazıYatayHizası::Sağ),
+            )
+            .koordinat_parçası((0.0, 3.0), (20.0, 13.0))
+            .parça_simgeleri(İmÇizgisiUçSimgesi::Yok, İmÇizgisiUçSimgesi::Yok)
+    };
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Anscombe's quartet")
+                .sol("center")
+                .üst(0)
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().biçimleyici("Group {a}: ({c})"))
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sol("7%")
+                .üst("7%")
+                .genişlik("38%")
+                .yükseklik("38%"),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sağ("7%")
+                .üst("7%")
+                .genişlik("38%")
+                .yükseklik("38%"),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sol("7%")
+                .alt("7%")
+                .genişlik("38%")
+                .yükseklik("38%"),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sağ("7%")
+                .alt("7%")
+                .genişlik("38%")
+                .yükseklik("38%"),
+        );
+    for sıra in 0..4 {
+        seçenekler = seçenekler
+            .x_ekseni_ekle(Eksen::değer().ızgara_sırası(sıra).en_az(0.0).en_çok(20.0))
+            .y_ekseni_ekle(Eksen::değer().ızgara_sırası(sıra).en_az(0.0).en_çok(15.0))
+            .seri(
+                SaçılımSerisi::yeni()
+                    .ad(["I", "II", "III", "IV"][sıra])
+                    .eksenler(sıra, sıra)
+                    .im_çizgisi(im_çizgisi())
+                    .veri(veri[sıra].clone()),
+            );
+    }
+    Ok(seçenekler)
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5855,6 +5934,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "boxplot-light-velocity" => boxplot_light_velocity(false),
         "boxplot-light-velocity2" => boxplot_light_velocity(true),
         "scatter-simple" => Ok(scatter_simple()),
+        "scatter-anscombe-quartet" => scatter_anscombe_quartet(),
         "scatter-punchCard" => scatter_punch_card(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),

@@ -1,0 +1,19 @@
+{
+  "id": "scatter-anscombe-quartet",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 776,
+  "değişen_piksel_oranı": 0.002874074074074074,
+  "ssim": 0.9965826209878236,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-anscombe-quartet.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-anscombe-quartet.png",
+    "fark": "testler/gorsel/fark/default/scatter-anscombe-quartet.png"
+  }
+}

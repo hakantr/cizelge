@@ -1185,13 +1185,34 @@ fn kartezyen_kur(
         .iter()
         .enumerate()
         .map(|(g, ızgara)| {
-            let mut sol = ızgara.sol.çöz(yüzey.genişlik());
+            let sol_boşluk = ızgara.sol.çöz(yüzey.genişlik());
             // `containLabel`, yatay eksenin uç etiketini grid'in içine
             // zorlamaz; ECharts açık `right` mesafesini aynen korur ve uç
             // kategori etiketi tuval kenarına kadar uzanabilir.
             let sağ_boşluk = ızgara.sağ.çöz(yüzey.genişlik());
-            let üst = ızgara.üst.çöz(yüzey.yükseklik());
-            let mut alt_boşluk = ızgara.alt.çöz(yüzey.yükseklik());
+            let üst_boşluk = ızgara.üst.çöz(yüzey.yükseklik());
+            let alt_boşluk = ızgara.alt.çöz(yüzey.yükseklik());
+            let açık_genişlik = ızgara.genişlik.map(|uzunluk| uzunluk.çöz(yüzey.genişlik()));
+            let açık_yükseklik = ızgara
+                .yükseklik
+                .map(|uzunluk| uzunluk.çöz(yüzey.yükseklik()));
+            let mut genişlik = açık_genişlik
+                .unwrap_or_else(|| yüzey.genişlik() - sol_boşluk - sağ_boşluk)
+                .max(1.0);
+            let mut yükseklik = açık_yükseklik
+                .unwrap_or_else(|| yüzey.yükseklik() - üst_boşluk - alt_boşluk)
+                .max(1.0);
+            let mut sol = if açık_genişlik.is_some() && ızgara.sağ_açık && !ızgara.sol_açık
+            {
+                yüzey.genişlik() - sağ_boşluk - genişlik
+            } else {
+                sol_boşluk
+            };
+            let üst = if açık_yükseklik.is_some() && ızgara.alt_açık && !ızgara.üst_açık {
+                yüzey.yükseklik() - alt_boşluk - yükseklik
+            } else {
+                üst_boşluk
+            };
             if ızgara.etiketi_kapsa {
                 if let Some((yi, y_seçenek)) = y_seçenekler
                     .iter()
@@ -1225,26 +1246,18 @@ fn kartezyen_kur(
                     // pikseldir. Eski 3/8 px dengesi boşluk çevresi kerning'i
                     // düzeltilmeden önce gerekliydi ve yatay çizgileri 0,34
                     // px genişletiyordu.
-                    sol += en_geniş + y_seçenek.etiket.boşluk - 0.04;
+                    let sol_etiket_payı = en_geniş + y_seçenek.etiket.boşluk - 0.04;
+                    sol += sol_etiket_payı;
+                    genişlik = (genişlik - sol_etiket_payı).max(1.0);
                 }
                 if let Some(x_seçenek) = x_seçenekler.iter().find(|e| e.ızgara_sırası == g) {
                     let x_boyut = x_seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
                     // Tek satırlı eksen etiketi için zrender sınır kutusu
                     // font boyudur; genel rich-text satır oranı burada
                     // fazladan dikey boşluk üretmemelidir.
-                    alt_boşluk += x_boyut + x_seçenek.etiket.boşluk;
+                    yükseklik = (yükseklik - x_boyut - x_seçenek.etiket.boşluk).max(1.0);
                 }
             }
-            let genişlik = ızgara
-                .genişlik
-                .map(|uzunluk| uzunluk.çöz(yüzey.genişlik()))
-                .unwrap_or_else(|| yüzey.genişlik() - sol - sağ_boşluk)
-                .max(1.0);
-            let yükseklik = ızgara
-                .yükseklik
-                .map(|uzunluk| uzunluk.çöz(yüzey.yükseklik()))
-                .unwrap_or_else(|| yüzey.yükseklik() - üst - alt_boşluk)
-                .max(1.0);
             Dikdörtgen::yeni(sol, üst, genişlik, yükseklik)
         })
         .collect();
@@ -4020,6 +4033,31 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn sabit_boyutlu_grid_acik_sag_ve_alt_kenarlara_capanir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .ızgara_ekle(
+                crate::model::bilesen::Izgara::yeni()
+                    .sağ("7%")
+                    .alt("7%")
+                    .genişlik("38%")
+                    .yükseklik("38%"),
+            )
+            .x_ekseni(Eksen::değer())
+            .y_ekseni(Eksen::değer())
+            .seri(crate::model::seri::SaçılımSerisi::yeni().veri([[1.0, 2.0]]));
+        let yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let kurulum = kartezyen_kur(&yüzey, &seçenekler, &HashSet::new())
+            .expect("kartezyen kurulum üretilmeli");
+        let alan = kurulum.ızgara_alanları[0];
+
+        assert!((alan.x - 385.0).abs() < 1e-4, "{alan:?}");
+        assert!((alan.y - 288.75).abs() < 1e-4, "{alan:?}");
+        assert!((alan.genişlik - 266.0).abs() < 1e-4, "{alan:?}");
+        assert!((alan.yükseklik - 199.5).abs() < 1e-4, "{alan:?}");
+    }
 
     #[test]
     fn sessiz_scatter_çizilir_ama_isabet_bölgesi_üretmez() {

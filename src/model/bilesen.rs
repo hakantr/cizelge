@@ -542,6 +542,13 @@ pub struct Izgara {
     pub sağ: Uzunluk,
     pub üst: Uzunluk,
     pub alt: Uzunluk,
+    /// İlgili kenarın kullanıcı tarafından açıkça verilip verilmediği.
+    /// Sabit boyutlu kutuda yalnız `right`/`bottom` verildiğinde yerleşim
+    /// karşı kenardan çözülür; model varsayılanı açık seçenek sayılmaz.
+    pub sol_açık: bool,
+    pub sağ_açık: bool,
+    pub üst_açık: bool,
+    pub alt_açık: bool,
     /// Açık genişlik/yükseklik verilirse karşı kenar boşluğunun önüne geçer
     /// (`grid.width` / `grid.height`).
     pub genişlik: Option<Uzunluk>,
@@ -558,6 +565,10 @@ impl Default for Izgara {
             sağ: Uzunluk::Yüzde(10.0),
             üst: Uzunluk::Piksel(65.0),
             alt: Uzunluk::Piksel(80.0),
+            sol_açık: false,
+            sağ_açık: false,
+            üst_açık: false,
+            alt_açık: false,
             genişlik: None,
             yükseklik: None,
             etiketi_kapsa: false,
@@ -572,21 +583,25 @@ impl Izgara {
 
     pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
         self.sol = sol.into();
+        self.sol_açık = true;
         self
     }
 
     pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
         self.sağ = sağ.into();
+        self.sağ_açık = true;
         self
     }
 
     pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
         self.üst = üst.into();
+        self.üst_açık = true;
         self
     }
 
     pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
         self.alt = alt.into();
+        self.alt_açık = true;
         self
     }
 
