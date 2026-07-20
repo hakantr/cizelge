@@ -2837,6 +2837,265 @@ fn bar_breaks_brush(durum: &str) -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn bar_breaks_simple_düğmesi(yoksay: bool) -> GrafikBileşeni {
+    GrafikBileşeni::yeni().öğe(
+        GrafikÖğesi::dikdörtgen(cizelge::koordinat::Dikdörtgen::yeni(0.0, 0.0, 140.0, 24.0))
+            .ad("collapseAxisBreakBtn")
+            .sol(5.0)
+            .üst(5.0)
+            .köşe_yarıçapı(3.0)
+            .stil(SahneStili {
+                dolgu: Some(Dolgu::Düz(Renk::onaltılık(0xeeeeee))),
+                çizgi_rengi: Some(Renk::onaltılık(0x999999)),
+                çizgi_kalınlığı: 1.0,
+                ..SahneStili::default()
+            })
+            .bağlı_metin(
+                GrafikBağlıMetni::yeni("Collapse Axis Breaks")
+                    .boyut(13.0)
+                    .kalın(true),
+            )
+            .yoksay(yoksay),
+    )
+}
+
+fn bar_breaks_simple(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let ilk_genişletilmiş = match durum {
+        "başlangıç" | "daralt" => false,
+        "genişlet" => true,
+        _ => {
+            return Err(format!(
+                "bar-breaks-simple durumu başlangıç, genişlet veya daralt olmalı: {durum}"
+            ));
+        }
+    };
+    let kırılmalar = [
+        EksenKırılması::yeni(5_000.0, 100_000.0)
+            .boşluk("1.5%")
+            .genişletilmiş(ilk_genişletilmiş),
+        EksenKırılması::yeni(105_000.0, 3_100_000.0).boşluk("1.5%"),
+    ];
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Bar Chart with Axis Breaks")
+                .alt_metin("Click the break area to expand it")
+                .sol("center")
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(20.0))
+                .alt_yazı(YazıStili::yeni().renk("#175ce5").boyut(15.0).kalın(true)),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Eksen)
+                .imleç(İmleçTürü::Gölge),
+        )
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0))
+        .ızgara(Izgara::yeni().üst(120))
+        .x_ekseni(Eksen::kategori().veri(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
+        .y_ekseni(
+            Eksen::değer()
+                .kırılmalar(kırılmalar)
+                .kırılma_alanı(EksenKırılmaAlanı::yeni().opaklık(1.0).zikzak_z(200)),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data A")
+                .veri([1500, 2032, 2001, 3154, 2190, 4330, 2410]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data B")
+                .veri([1200, 1320, 1010, 1340, 900, 2300, 2100]),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Data C")
+                .veri([103200, 100320, 103010, 102340, 103900, 103300, 103200]),
+        )
+        .seri(SütunSerisi::yeni().ad("Data D").veri([
+            3106212, 3102118, 3102643, 3104631, 3106679, 3100130, 3107022,
+        ]));
+
+    // İlk setOption henüz `axisbreakchanged` üretmediği için resmî örnekte
+    // graphic bileşeni başlangıçta yoktur. İlk action'dan sonra dinleyici
+    // düğmeyi ekler; daraltma action'ı aynı öğeyi `ignore: true` yapar.
+    if durum == "genişlet" {
+        seçenekler = seçenekler.grafik(bar_breaks_simple_düğmesi(false));
+    } else if durum == "daralt" {
+        seçenekler = seçenekler.grafik(bar_breaks_simple_düğmesi(true));
+    }
+    Ok(seçenekler)
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::expect_used, clippy::panic)]
+mod bar_breaks_simple_testleri {
+    use std::collections::BTreeMap;
+
+    use super::*;
+
+    fn kırılma_yükü() -> EylemDeğeri {
+        EylemDeğeri::Dizi(vec![EylemDeğeri::Nesne(BTreeMap::from([
+            ("start".to_owned(), 5_000.0f64.into()),
+            ("end".to_owned(), 100_000.0f64.into()),
+        ]))])
+    }
+
+    #[test]
+    fn resmi_option_iki_kirilmayi_ve_dort_seriyi_kayipsiz_tasir() {
+        let seçenekler = bar_breaks_simple("başlangıç").expect("fixture kurulmalı");
+        let başlık = seçenekler.başlık.as_ref().expect("başlık olmalı");
+        assert_eq!(başlık.metin.as_deref(), Some("Bar Chart with Axis Breaks"));
+        assert_eq!(
+            başlık.alt_metin.as_deref(),
+            Some("Click the break area to expand it")
+        );
+        assert_eq!(başlık.yazı.boyut, Some(20.0));
+        assert_eq!(başlık.alt_yazı.boyut, Some(15.0));
+        assert!(başlık.alt_yazı.kalın);
+        assert_eq!(başlık.alt_yazı.renk, Some(Renk::onaltılık(0x175ce5)));
+        assert_eq!(seçenekler.ızgara.üst, Uzunluk::Piksel(120.0));
+        let eksen = seçenekler.y_ekseni.as_ref().expect("y ekseni");
+        assert_eq!(eksen.kırılmalar.len(), 2);
+        assert_eq!(eksen.kırılmalar[0].başlangıç, 5_000.0);
+        assert_eq!(eksen.kırılmalar[0].bitiş, 100_000.0);
+        assert_eq!(
+            eksen.kırılmalar[0].boşluk,
+            EksenKırılmaBoşluğu::Yüzde(0.015)
+        );
+        assert_eq!(eksen.kırılmalar[1].başlangıç, 105_000.0);
+        assert_eq!(eksen.kırılmalar[1].bitiş, 3_100_000.0);
+        assert_eq!(eksen.kırılma_alanı.opaklık, 1.0);
+        assert_eq!(eksen.kırılma_alanı.zikzak_genliği, 4.0);
+        assert_eq!(eksen.kırılma_alanı.zikzak_z, 200);
+        assert!(seçenekler.grafik.is_none());
+
+        let beklenen = [
+            ("Data A", 1500.0, 2410.0),
+            ("Data B", 1200.0, 2100.0),
+            ("Data C", 103200.0, 103200.0),
+            ("Data D", 3106212.0, 3107022.0),
+        ];
+        for (seri, (ad, ilk, son)) in seçenekler.seriler.iter().zip(beklenen) {
+            let Seri::Sütun(seri) = seri else {
+                panic!("bar serisi bekleniyordu");
+            };
+            assert_eq!(seri.ad.as_deref(), Some(ad));
+            assert_eq!(
+                seri.veri.first().and_then(|öğe| öğe.değer.sayı()),
+                Some(ilk)
+            );
+            assert_eq!(seri.veri.last().and_then(|öğe| öğe.değer.sayı()), Some(son));
+        }
+    }
+
+    #[test]
+    fn genişlet_ve_daralt_durumlari_graphic_dugmesini_dogru_yonetir() {
+        let genişlet = bar_breaks_simple("genişlet").expect("genişlet durumu");
+        assert!(genişlet.y_ekseni.as_ref().unwrap().kırılmalar[0].genişletilmiş);
+        let grafik = genişlet.grafik.as_ref().expect("düğme görünmeli");
+        assert!(!grafik.öğeler[0].yoksay);
+        assert_eq!(grafik.öğeler[0].ad.as_deref(), Some("collapseAxisBreakBtn"));
+        let sahne = grafik_sahnesi_hazırla(grafik, 700.0, 525.0);
+        let isabet = sahne.sahne.isabet((75.0, 17.0)).expect("düğme isabeti");
+        assert_eq!(
+            sahne.öğe_bilgileri[&isabet.kimlik].ad.as_deref(),
+            Some("collapseAxisBreakBtn")
+        );
+
+        let daralt = bar_breaks_simple("daralt").expect("daralt durumu");
+        assert!(
+            daralt
+                .y_ekseni
+                .as_ref()
+                .unwrap()
+                .kırılmalar
+                .iter()
+                .all(|kırılma| !kırılma.genişletilmiş)
+        );
+        let grafik = daralt.grafik.as_ref().expect("gizli düğme modeli kalmalı");
+        assert!(grafik.öğeler[0].yoksay);
+        assert!(
+            grafik_sahnesi_hazırla(grafik, 700.0, 525.0)
+                .sahne
+                .isabet((75.0, 17.0))
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn resmi_action_olayi_dugmeyi_acar_ve_dugme_tum_kiriklari_daraltir() {
+        let başlangıç = bar_breaks_simple("başlangıç").expect("başlangıç");
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), başlangıç)
+                .expect("çalışma zamanı");
+        let mut eylemler = EylemKayıtDefteri::yeni();
+        eksen_kırılma_eylemlerini_kaydet(&mut eylemler).expect("action kaydı");
+
+        let olaylar = eylemler
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("expandAxisBreak")
+                    .alan("yAxisIndex", 0usize)
+                    .alan("breaks", kırılma_yükü()),
+            )
+            .expect("genişlet action");
+        assert_eq!(olaylar[0].tür, "axisbreakchanged");
+        assert_eq!(
+            olaylar[0].alanlar["breaks"].dizi().unwrap()[0]
+                .nesne()
+                .unwrap()["isExpanded"]
+                .mantıksal(),
+            Some(true)
+        );
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni().grafik(bar_breaks_simple_düğmesi(false)),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .expect("axisbreakchanged düğme güncellemesi");
+
+        let tüm_kırılmalar = EylemDeğeri::Dizi(vec![
+            EylemDeğeri::Nesne(BTreeMap::from([
+                ("start".to_owned(), 5_000.0f64.into()),
+                ("end".to_owned(), 100_000.0f64.into()),
+            ])),
+            EylemDeğeri::Nesne(BTreeMap::from([
+                ("start".to_owned(), 105_000.0f64.into()),
+                ("end".to_owned(), 3_100_000.0f64.into()),
+            ])),
+        ]);
+        let olaylar = eylemler
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("collapseAxisBreak")
+                    .alan("yAxisIndex", 0usize)
+                    .alan("breaks", tüm_kırılmalar),
+            )
+            .expect("daralt action");
+        assert_eq!(olaylar[0].tür, "axisbreakchanged");
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni().grafik(bar_breaks_simple_düğmesi(true)),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .expect("düğme gizleme güncellemesi");
+        let sonuç = çalışma.seçenekleri_al().expect("son seçenekler");
+        assert!(
+            sonuç
+                .y_ekseni
+                .unwrap()
+                .kırılmalar
+                .iter()
+                .all(|kırılma| !kırılma.genişletilmiş)
+        );
+        assert!(sonuç.grafik.unwrap().öğeler[0].yoksay);
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::indexing_slicing, clippy::expect_used, clippy::panic)]
 mod bar_breaks_brush_testleri {
@@ -8842,6 +9101,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-waterfall2" => Ok(bar_waterfall2()),
         "bar-stack-normalization" => Ok(bar_stack_normalization()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
+        "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),
         "data-transform-sort-bar" => data_transform_sort_bar(),
         "dataset-simple0" => Ok(dataset_simple0()),

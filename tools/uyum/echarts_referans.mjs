@@ -92,7 +92,7 @@ function html(id, kaynak, frame, state, width, height) {
   const ecStatBetigi = kaynak.includes('ecStat')
     ? '<script src="/ecStat.min.js"></script>'
     : '';
-  const erkenRastgele = id === 'bar-breaks-brush'
+  const erkenRastgele = id === 'bar-breaks-brush' || id === 'bar-breaks-simple'
     // Kırık zikzağı, global rastgele akışta kendinden önce kaç tüketim
     // yapıldığından etkilenmemeli. 0.5 resmî algoritmanın geçerli ve sabit
     // bir girdisidir; hem modül yükleme hem görünüm kurma evresini kilitler.
@@ -129,6 +129,51 @@ function html(id, kaynak, frame, state, width, height) {
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'scatter-nutrients-matrix' && state === 'zoom-left'
       ? `myChart.dispatchAction({type:'dataZoom', dataZoomIndex:0, start:20, end:80});`
+    : id === 'bar-breaks-simple' && state === 'genişlet'
+      ? `{
+          myChart.dispatchAction({
+            type:'expandAxisBreak',
+            yAxisIndex:0,
+            breaks:[{start:5000, end:100000}]
+          });
+          const expanded = (myChart.getOption().yAxis[0].breaks || [])
+            .find((item) => item.start === 5000 && item.end === 100000);
+          if (!expanded || expanded.isExpanded !== true) {
+            throw new Error('bar-breaks-simple expandAxisBreak durumu uygulanmadı');
+          }
+          const graphic = myChart.getOption().graphic || [];
+          const elements = graphic.flatMap((item) => item.elements || []);
+          const button = elements.find((item) => item.name === 'collapseAxisBreakBtn');
+          if (!button || button.ignore === true) {
+            throw new Error('bar-breaks-simple genişletme düğmeyi görünür yapmadı');
+          }
+        }`
+    : id === 'bar-breaks-simple' && state === 'daralt'
+      ? `{
+          myChart.dispatchAction({
+            type:'expandAxisBreak',
+            yAxisIndex:0,
+            breaks:[{start:5000, end:100000}]
+          });
+          const zr = myChart.getZr();
+          zr.flush();
+          const target = zr.storage.getDisplayList()
+            .find((item) => item.name === 'collapseAxisBreakBtn');
+          if (!target) {
+            throw new Error('bar-breaks-simple gerçek graphic düğmesi bulunamadı');
+          }
+          zr.trigger('click', {target, offsetX:75, offsetY:17});
+          const breaks = myChart.getOption().yAxis[0].breaks || [];
+          if (breaks.some((item) => item.isExpanded === true)) {
+            throw new Error('bar-breaks-simple düğme tıklaması kırıkları daraltmadı');
+          }
+          const graphic = myChart.getOption().graphic || [];
+          const elements = graphic.flatMap((item) => item.elements || []);
+          const button = elements.find((item) => item.name === 'collapseAxisBreakBtn');
+          if (!button || button.ignore !== true) {
+            throw new Error('bar-breaks-simple daraltma düğmeyi ignore yapmadı');
+          }
+        }`
     : id === 'bar-breaks-brush' && state === 'fırça'
       ? `{
           const x = myChart.getWidth() / 2;
@@ -235,6 +280,7 @@ function html(id, kaynak, frame, state, width, height) {
       : '';
   const zamanlayıcıyıBekle = id === 'dataset-link'
     || id === 'bar-breaks-brush'
+    || id === 'bar-breaks-simple'
     || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
@@ -294,7 +340,7 @@ html,body,#viewport{margin:0;width:${width}px;height:${height}px;overflow:hidden
   };
 })();
 let seed = 0x5eed1234;
-Math.random = ${id === 'bar-breaks-brush' ? '() => 0.5' : `() => {
+Math.random = ${id === 'bar-breaks-brush' || id === 'bar-breaks-simple' ? '() => 0.5' : `() => {
   seed |= 0; seed = seed + 0x6D2B79F5 | 0;
   let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;

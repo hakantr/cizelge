@@ -92,6 +92,15 @@ const SENARYOLAR = [
   { id: 'bar-stack-normalization', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
+    id: 'bar-breaks-simple',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'genişlet', kare: 1, durum: 'genişlet' },
+      { ad: 'daralt', kare: 1, durum: 'daralt' }
+    ]
+  },
+  {
     id: 'bar-breaks-brush',
     tür: 'etkileşim',
     kareler: [

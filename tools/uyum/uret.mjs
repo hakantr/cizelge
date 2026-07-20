@@ -126,6 +126,7 @@ const YEREL_FIXTURE = Object.freeze({
   'bar-waterfall2': 'examples/uyum_fixture.rs#bar_waterfall2',
   'bar-stack-normalization': 'examples/uyum_fixture.rs#bar_stack_normalization',
   'bar-label-rotation': 'examples/uyum_fixture.rs#bar_label_rotation',
+  'bar-breaks-simple': 'examples/uyum_fixture.rs#bar_breaks_simple',
   'bar-breaks-brush': 'examples/uyum_fixture.rs#bar_breaks_brush',
   'data-transform-sort-bar': 'examples/uyum_fixture.rs#data_transform_sort_bar',
   'dataset-simple0': 'examples/uyum_fixture.rs#dataset_simple0',
