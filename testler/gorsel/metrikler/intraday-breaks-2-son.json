@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 839,
-  "değişen_piksel_oranı": 0.0031074074074074073,
-  "ssim": 0.997600248556829,
+  "değişen_piksel": 792,
+  "değişen_piksel_oranı": 0.0029333333333333334,
+  "ssim": 0.9982899408428607,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/intraday-breaks-2.png",
     "gerçek": "testler/gorsel/gerçek/default/intraday-breaks-2.png",

@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 885,
-  "değişen_piksel_oranı": 0.003277777777777778,
-  "ssim": 0.9973793372359684,
+  "değişen_piksel": 997,
+  "değişen_piksel_oranı": 0.003692592592592593,
+  "ssim": 0.9966082086923881,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/mix-zoom-on-value-başlangıç.png",
     "gerçek": "testler/gorsel/gerçek/default/mix-zoom-on-value-başlangıç.png",

@@ -1,0 +1,19 @@
+{
+  "id": "bar-breaks-brush",
+  "senaryo": "etkileşim",
+  "kare": "başlangıç",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2603,
+  "değişen_piksel_oranı": 0.009640740740740741,
+  "ssim": 0.990369959956886,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-başlangıç.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-breaks-brush-başlangıç.png",
+    "fark": "testler/gorsel/fark/default/bar-breaks-brush-başlangıç.png"
+  }
+}
