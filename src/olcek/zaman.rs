@@ -138,11 +138,11 @@ impl ZamanÖlçeği {
     }
 
     pub fn oranla(&self, değer: f64) -> f64 {
-        doğrusal_eşle(değer, self.kapsam, [0.0, 1.0], true)
+        doğrusal_eşle(değer, self.kapsam, [0.0, 1.0], false)
     }
 
     pub fn orandan(&self, oran: f64) -> f64 {
-        doğrusal_eşle(oran, [0.0, 1.0], self.kapsam, true)
+        doğrusal_eşle(oran, [0.0, 1.0], self.kapsam, false)
     }
 
     pub fn çentikler(&self) -> Vec<Çentik> {

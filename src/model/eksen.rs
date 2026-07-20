@@ -539,6 +539,18 @@ pub struct Eksen {
     /// Kategori ekseninde uçlarda yarım bant boşluğu bırakılsın mı
     /// (`boundaryGap`)? Kategoride öntanımlı `true`.
     pub kenar_boşluğu: Option<bool>,
+    /// Scatter noktalarını kategori merkezinin çevresine piksel cinsinden
+    /// dağıtır (`jitter`, ECharts 6).
+    pub titreme: f32,
+    /// `jitterOverlap`: `true` rastgele dağıtır; `false` mümkün olduğunda
+    /// sembolleri çakışmadan yerleştirir.
+    pub titreme_örtüşmesi: bool,
+    /// Örtüşmesiz yerleşimde semboller arasındaki ek piksel payı.
+    pub titreme_boşluğu: f32,
+    /// Yeniden boyamada kararlı jitter için sözde-rastgele akış tohumu.
+    /// ECharts tarayıcıda `Math.random` kullanır; açık tohum SSR ve görsel
+    /// doğrulamada aynı akışın yeniden üretilmesini sağlar.
+    pub titreme_tohumu: u32,
     /// Değer/zaman ekseni `boundaryGap: [alt, üst]` uçları.
     pub sayısal_kenar_boşluğu: Option<[SayısalKenarBoşluğu; 2]>,
     pub en_az: Option<f64>,
@@ -590,6 +602,10 @@ impl Default for Eksen {
             ad_boşluğu: 15.0,
             veri: Vec::new(),
             kenar_boşluğu: None,
+            titreme: 0.0,
+            titreme_örtüşmesi: true,
+            titreme_boşluğu: 2.0,
+            titreme_tohumu: 0x5eed_1234,
             sayısal_kenar_boşluğu: None,
             en_az: None,
             en_çok: None,
@@ -683,6 +699,26 @@ impl Eksen {
 
     pub fn kenar_boşluğu(mut self, açık: bool) -> Self {
         self.kenar_boşluğu = Some(açık);
+        self
+    }
+
+    pub fn titreme(mut self, piksel: f32) -> Self {
+        self.titreme = piksel.max(0.0);
+        self
+    }
+
+    pub fn titreme_örtüşmesi(mut self, örtüşsün: bool) -> Self {
+        self.titreme_örtüşmesi = örtüşsün;
+        self
+    }
+
+    pub fn titreme_boşluğu(mut self, piksel: f32) -> Self {
+        self.titreme_boşluğu = piksel.max(0.0);
+        self
+    }
+
+    pub fn titreme_tohumu(mut self, tohum: u32) -> Self {
+        self.titreme_tohumu = tohum;
         self
     }
 

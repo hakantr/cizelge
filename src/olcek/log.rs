@@ -87,13 +87,13 @@ impl LogÖlçeği {
             Self::log_dönüşümü(değer, self.taban),
             self.log_kapsam,
             [0.0, 1.0],
-            true,
+            false,
         )
     }
 
     pub fn orandan(&self, oran: f64) -> f64 {
         self.taban
-            .powf(doğrusal_eşle(oran, [0.0, 1.0], self.log_kapsam, true))
+            .powf(doğrusal_eşle(oran, [0.0, 1.0], self.log_kapsam, false))
     }
 
     pub fn çentikler(&self) -> Vec<Çentik> {

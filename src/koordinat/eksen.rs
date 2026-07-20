@@ -113,7 +113,7 @@ impl ÇalışmaEkseni {
             oran,
             [0.0, 1.0],
             self.etkin_piksel(),
-            self.pencere.is_none(),
+            self.pencere.is_none() && self.ölçek.kategorik_mi(),
         ) as f32
     }
 

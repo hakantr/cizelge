@@ -288,6 +288,7 @@ fn takvim_saçılım_serisini_çiz(
     seri_sırası: usize,
     yerleşim: &TakvimYerleşimi,
     seri_rengi: Renk,
+    palet: &[Renk],
     görsel_eşleme: Option<&crate::model::gorsel_esleme::GörselEşleme>,
     ilerleme: f32,
     zaman_sn: f32,
@@ -325,6 +326,7 @@ fn takvim_saçılım_serisini_çiz(
         zaman_sn,
         vurgu,
         görsel_eşleme.zip(eşleme_kapsamı),
+        palet,
     );
     if !seri.sessiz {
         for nokta in &noktalar {
@@ -2310,11 +2312,10 @@ pub fn grafiği_boya(
                     None,
                 );
             };
-            if kartezyen.x.pencere.is_some() || kartezyen.y.pencere.is_some() {
-                yüzey.kırpılı(kartezyen.alan, &mut alanı_çiz);
-            } else {
-                alanı_çiz(yüzey);
-            }
+            // LineView alan grubu `clip: true` öntanımıyla her zaman
+            // koordinat alanına kırpılır. Bu özellikle eksen sıfırı görünür
+            // kapsamın dışındayken alan tabanının tuval dışına taşmasını önler.
+            yüzey.kırpılı(kartezyen.alan, &mut alanı_çiz);
         }
 
         // ECharts `labelLayout.moveOverlap: 'shiftY'`: aynı eksen çiftine
@@ -2358,10 +2359,11 @@ pub fn grafiği_boya(
             let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
                 continue;
             };
-            // Yakınlaştırma penceresi etkinse seri ızgaraya kırpılır
-            // (ECharts `clip: true`).
-            let pencereli = kartezyen.x.pencere.is_some()
-                || kartezyen.y.pencere.is_some()
+            // Scatter, ECharts `SymbolDraw` gibi merkez-bazlı süzülür ve
+            // kenardaki sembolün taşan kısmı korunur. Diğer serilerde etkin
+            // yakınlaştırma penceresi ızgara kırpmasını kullanır.
+            let pencereli = (!matches!(seri, Seri::Saçılım(_))
+                && (kartezyen.x.pencere.is_some() || kartezyen.y.pencere.is_some()))
                 || matches!(seri, Seri::Hatlar(hatlar) if hatlar.kırp);
             let mut yerel_isabetler: Vec<İsabetBölgesi> = Vec::new();
             let mut yerel_ipucu: Option<Bekleyenİpucu> = None;
@@ -2426,6 +2428,7 @@ pub fn grafiği_boya(
                                     zaman_sn,
                                     *vurgu,
                                     görsel_eşleme.zip(eşleme_kapsamı),
+                                    &seçenekler.palet,
                                 );
                                 if !s.sessiz {
                                     for n in noktalar {
@@ -3907,6 +3910,7 @@ pub fn grafiği_boya(
             seri_sırası,
             yerleşim,
             seçenekler.seri_rengi(seri_sırası),
+            &seçenekler.palet,
             seçenekler.seri_görsel_eşlemesi(seri_sırası),
             ilerleme,
             zaman_sn,
@@ -3974,6 +3978,7 @@ pub fn grafiği_boya(
             seri_sırası,
             yerleşim,
             seçenekler.seri_rengi(seri_sırası),
+            &seçenekler.palet,
             seçenekler.seri_görsel_eşlemesi(seri_sırası),
             ilerleme,
             zaman_sn,

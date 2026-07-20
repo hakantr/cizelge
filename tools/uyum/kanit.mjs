@@ -114,6 +114,7 @@ const SENARYOLAR = [
   { id: 'boxplot-light-velocity2', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-anscombe-quartet', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'scatter-jitter', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-punchCard', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'candlestick-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {

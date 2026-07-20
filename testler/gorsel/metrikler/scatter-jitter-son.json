@@ -1,0 +1,19 @@
+{
+  "id": "scatter-jitter",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 299,
+  "değişen_piksel_oranı": 0.0011074074074074074,
+  "ssim": 0.9986663809656563,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-jitter.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-jitter.png",
+    "fark": "testler/gorsel/fark/default/scatter-jitter.png"
+  }
+}

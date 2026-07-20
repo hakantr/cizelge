@@ -233,11 +233,11 @@ impl AralıkÖlçeği {
     }
 
     pub fn oranla(&self, değer: f64) -> f64 {
-        doğrusal_eşle(değer, self.kapsam, [0.0, 1.0], true)
+        doğrusal_eşle(değer, self.kapsam, [0.0, 1.0], false)
     }
 
     pub fn orandan(&self, oran: f64) -> f64 {
-        doğrusal_eşle(oran, [0.0, 1.0], self.kapsam, true)
+        doğrusal_eşle(oran, [0.0, 1.0], self.kapsam, false)
     }
 
     /// `Interval.ts` içindeki `getTicks` portu: güzel kapsamda adım adım
@@ -315,5 +315,13 @@ mod testler {
         let ö = AralıkÖlçeği::kur([-120.0, 80.0], None, None, true, 5, None, None);
         assert!(ö.kapsam[0] <= -120.0);
         assert!(ö.kapsam[1] >= 80.0);
+    }
+
+    #[test]
+    fn kapsam_disi_deger_koordinat_kirpmasi_icin_oranlanmaya_devam_eder() {
+        let ö = AralıkÖlçeği::kur([0.0, 10.0], Some(0.0), Some(10.0), false, 5, None, None);
+        assert_eq!(ö.oranla(-2.0), -0.2);
+        assert_eq!(ö.oranla(12.0), 1.2);
+        assert_eq!(ö.orandan(1.2), 12.0);
     }
 }

@@ -39,6 +39,9 @@ pub struct SaçılımNoktası {
     pub boyut: f32,
     pub x_değeri: f64,
     pub y_değeri: f64,
+    /// `colorBy: 'data'` palet anahtarı; kategorik eksende kategori sırası,
+    /// iki sayısal eksende `None` (ham veri sırası kullanılır).
+    pub palet_sırası: Option<usize>,
 }
 
 /// ECharts scatter verisinin ilk iki boyutunu kartezyen koordinata çözer.
@@ -52,6 +55,124 @@ pub(crate) fn saçılım_xy(değer: &VeriDeğeri, sıra: usize) -> Option<(f64, 
         VeriDeğeri::Çift([x, y]) => Some((*x, *y)),
         VeriDeğeri::Dizi(değerler) if değerler.len() >= 2 => Some((değerler[0], değerler[1])),
         _ => değer.sayı().map(|y| (sıra as f64, y)),
+    }
+}
+
+#[derive(Clone, Copy)]
+struct TitremeÖğesi {
+    sabit: f32,
+    kayan: f32,
+    yarıçap: f32,
+}
+
+fn titreme_yönünde_yerleştir(
+    öğeler: &[TitremeÖğesi],
+    sabit: f32,
+    kayan: f32,
+    yarıçap: f32,
+    titreme: f32,
+    boşluk: f32,
+    yön: f32,
+) -> f32 {
+    let mut yeni = kayan;
+    let mut sıra = 0usize;
+    while sıra < öğeler.len() {
+        let öğe = öğeler[sıra];
+        let dx = sabit - öğe.sabit;
+        let dy = yeni - öğe.kayan;
+        let toplam_yarıçap = yarıçap + öğe.yarıçap + boşluk;
+        if dx * dx + dy * dy < toplam_yarıçap * toplam_yarıçap {
+            let kök = (toplam_yarıçap * toplam_yarıçap - dx * dx).max(0.0).sqrt();
+            let gereken = öğe.kayan + kök * yön;
+            if (gereken - kayan).abs() > titreme / 2.0 {
+                return f32::MAX;
+            }
+            if (yön > 0.0 && gereken > yeni) || (yön < 0.0 && gereken < yeni) {
+                yeni = gereken;
+                sıra = 0;
+                continue;
+            }
+        }
+        sıra += 1;
+    }
+    yeni
+}
+
+fn titreme_rastgelesi(durum: &mut u32) -> f32 {
+    *durum = durum.wrapping_add(0x6d2b_79f5);
+    let mut t = (*durum ^ (*durum >> 15)).wrapping_mul(1 | *durum);
+    t = t.wrapping_add((t ^ (t >> 7)).wrapping_mul(61 | t)) ^ t;
+    (t ^ (t >> 14)) as f32 / 4_294_967_296.0
+}
+
+fn titremeyi_uygula(noktalar: &mut [SaçılımNoktası], kartezyen: &Kartezyen2B) {
+    let (x_mi, eksen) = if kartezyen.x.ölçek.kategorik_mi() && kartezyen.x.seçenek.titreme > 0.0
+    {
+        (true, &kartezyen.x)
+    } else if kartezyen.y.ölçek.kategorik_mi() && kartezyen.y.seçenek.titreme > 0.0 {
+        (false, &kartezyen.y)
+    } else {
+        return;
+    };
+    let titreme = eksen.seçenek.titreme;
+    let bant = eksen.bant_genişliği();
+    let mut yerleşenler = Vec::with_capacity(noktalar.len());
+    // Görsel kanıt hattı Math.random'ı aynı Mulberry32 tohumu ile sabitler;
+    // çekirdekteki sabit akış, yeniden boyamalarda nokta sıçramasını önler.
+    let mut rastgele = eksen.seçenek.titreme_tohumu;
+    for nokta in noktalar {
+        let (sabit, kayan) = if x_mi {
+            (nokta.konum.1, nokta.konum.0)
+        } else {
+            (nokta.konum.0, nokta.konum.1)
+        };
+        let yarıçap = nokta.boyut / 2.0;
+        let etkin_titreme = titreme.min((bant - yarıçap * 2.0).max(0.0));
+        let mut rastgele_yer = || kayan + (titreme_rastgelesi(&mut rastgele) - 0.5) * etkin_titreme;
+        let yeni = if eksen.seçenek.titreme_örtüşmesi {
+            rastgele_yer()
+        } else {
+            let artı = titreme_yönünde_yerleştir(
+                &yerleşenler,
+                sabit,
+                kayan,
+                yarıçap,
+                etkin_titreme,
+                eksen.seçenek.titreme_boşluğu,
+                1.0,
+            );
+            let eksi = titreme_yönünde_yerleştir(
+                &yerleşenler,
+                sabit,
+                kayan,
+                yarıçap,
+                etkin_titreme,
+                eksen.seçenek.titreme_boşluğu,
+                -1.0,
+            );
+            let aday = if (artı - kayan).abs() < (eksi - kayan).abs() {
+                artı
+            } else {
+                eksi
+            };
+            if (aday - kayan).abs() > etkin_titreme / 2.0
+                || (aday - kayan).abs() > bant / 2.0 - yarıçap
+            {
+                rastgele_yer()
+            } else {
+                yerleşenler.push(TitremeÖğesi {
+                    sabit,
+                    kayan: aday,
+                    yarıçap,
+                });
+                aday
+            }
+        };
+        if x_mi {
+            nokta.konum.0 = yeni;
+        } else {
+            nokta.konum.1 = yeni;
+        }
     }
 }
 
@@ -84,8 +205,21 @@ pub fn saçılım_noktaları(
             boyut: seri.sembol_boyutu.çöz(öğe),
             x_değeri: x,
             y_değeri: y,
+            palet_sırası: if kartezyen.x.ölçek.kategorik_mi() {
+                Some(x.max(0.0).round() as usize)
+            } else if kartezyen.y.ölçek.kategorik_mi() {
+                Some(y.max(0.0).round() as usize)
+            } else {
+                None
+            },
         });
     }
+    titremeyi_uygula(&mut sonuç, kartezyen);
+    // ECharts `SymbolDraw`, scatter grubuna bir clip-path takmak yerine
+    // sembol merkezini koordinat alanıyla sınar. Böylece merkez sınırdaysa
+    // sembolün dışarı taşan yarısı kesilmez; merkez dışarıdaysa öğe hiç
+    // çizilmez. Jitter yerleşimi de bu sınamadan önce uygulanır.
+    sonuç.retain(|nokta| kartezyen.alan.içeriyor_mu(nokta.konum));
     sonuç
 }
 
@@ -108,6 +242,7 @@ pub fn takvim_saçılım_noktaları(
                 boyut: seri.sembol_boyutu.çöz(öğe),
                 x_değeri: tarih,
                 y_değeri: değer,
+                palet_sırası: None,
             })
         })
         .collect()
@@ -233,7 +368,15 @@ pub fn saçılım_çiz(
     vurgulu: Option<usize>,
 ) {
     saçılım_çiz_eşlemeli(
-        çizici, seri, noktalar, seri_rengi, ilerleme, zaman_sn, vurgulu, None,
+        çizici,
+        seri,
+        noktalar,
+        seri_rengi,
+        ilerleme,
+        zaman_sn,
+        vurgulu,
+        None,
+        &tema::PALET,
     );
 }
 
@@ -249,6 +392,7 @@ pub fn saçılım_çiz_eşlemeli(
     zaman_sn: f32,
     vurgulu: Option<usize>,
     görsel_eşleme: Option<(&GörselEşleme, [f64; 2])>,
+    palet: &[Renk],
 ) {
     // `scatter` öntanımlı 0.8, `effectScatter` ise 1.0 opaklıktadır.
     let opaklık = seri
@@ -262,10 +406,23 @@ pub fn saçılım_çiz_eşlemeli(
         .map(|d| d.temsilî())
         .unwrap_or(seri_rengi);
     let nokta_rengi = |nokta: &SaçılımNoktası| {
-        if seri.öğe_stili.renk.is_some() {
+        if let Some(renk) = seri
+            .veri
+            .get(nokta.sıra)
+            .and_then(|öğe| öğe.stil.as_ref())
+            .and_then(|stil| stil.renk.as_ref())
+        {
+            renk.temsilî()
+        } else if seri.öğe_stili.renk.is_some() {
             taban_rengi
         } else if let Some((eşleme, kapsam)) = görsel_eşleme {
             eşleme.renk_çöz(nokta.y_değeri, kapsam)
+        } else if seri.veriye_göre_renk {
+            let palet_sırası = nokta.palet_sırası.unwrap_or(nokta.sıra);
+            palet
+                .get(palet_sırası % palet.len().max(1))
+                .copied()
+                .unwrap_or_else(|| tema::palet_rengi(palet_sırası))
         } else {
             taban_rengi
         }
@@ -275,7 +432,12 @@ pub fn saçılım_çiz_eşlemeli(
         let renk = nokta_rengi(nokta);
         let vurgulu_mu = vurgulu == Some(nokta.sıra);
         let boyut = nokta.boyut * ilerleme.clamp(0.0, 1.0) * if vurgulu_mu { 1.15 } else { 1.0 };
-        let nokta_opaklığı = if vurgulu_mu { 1.0 } else { opaklık };
+        let öğe_stili = seri.veri.get(nokta.sıra).and_then(|öğe| öğe.stil.as_ref());
+        let nokta_opaklığı = if vurgulu_mu {
+            1.0
+        } else {
+            öğe_stili.and_then(|stil| stil.opaklık).unwrap_or(opaklık)
+        };
         if let Some(gölge_rengi) = seri.öğe_stili.gölge_rengi
             && (seri.öğe_stili.gölge_bulanıklığı > 0.0
                 || seri.öğe_stili.gölge_kayması != (0.0, 0.0))
@@ -300,7 +462,9 @@ pub fn saçılım_çiz_eşlemeli(
             nokta.konum,
             boyut,
             renk,
-            seri.öğe_stili.renk.as_ref(),
+            öğe_stili
+                .and_then(|stil| stil.renk.as_ref())
+                .or(seri.öğe_stili.renk.as_ref()),
             kenarlık,
             nokta_opaklığı,
         );
@@ -635,6 +799,70 @@ mod testler {
     }
 
     #[test]
+    fn kategori_ekseni_titremesi_bant_icinde_ve_yeniden_boyamada_sabittir() {
+        let seri = SaçılımSerisi::yeni().veri([[0.0, 1.0], [0.0, 2.0]]);
+        let kartezyen = Kartezyen2B {
+            x: ÇalışmaEkseni::yeni(
+                Eksen::kategori().titreme(20.0),
+                Ölçek::Kategorik(KategorikÖlçek::yeni(vec!["A".to_string()])),
+                [0.0, 100.0],
+                EksenKonumu::Alt,
+            ),
+            y: değer_ekseni([0.0, 3.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+
+        let ilk = saçılım_noktaları(&seri, &kartezyen);
+        let ikinci = saçılım_noktaları(&seri, &kartezyen);
+
+        assert_eq!(ilk[0].konum, ikinci[0].konum);
+        assert_eq!(ilk[1].konum, ikinci[1].konum);
+        assert!((ilk[0].konum.0 - 50.0).abs() <= 10.0);
+        assert!((ilk[1].konum.0 - 50.0).abs() <= 10.0);
+        assert_ne!(ilk[0].konum.0, ilk[1].konum.0);
+    }
+
+    #[test]
+    fn ortusmesiz_titreme_ayni_noktalar_arasinda_sembol_payini_korur() {
+        let seri = SaçılımSerisi::yeni()
+            .sembol_boyutu(4.0)
+            .veri([[0.0, 1.0], [0.0, 1.0]]);
+        let kartezyen = Kartezyen2B {
+            x: ÇalışmaEkseni::yeni(
+                Eksen::kategori()
+                    .titreme(20.0)
+                    .titreme_örtüşmesi(false)
+                    .titreme_boşluğu(2.0),
+                Ölçek::Kategorik(KategorikÖlçek::yeni(vec!["A".to_string()])),
+                [0.0, 100.0],
+                EksenKonumu::Alt,
+            ),
+            y: değer_ekseni([0.0, 2.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+
+        let noktalar = saçılım_noktaları(&seri, &kartezyen);
+
+        assert!((noktalar[0].konum.0 - noktalar[1].konum.0).abs() >= 6.0 - 1e-4);
+    }
+
+    #[test]
+    fn alan_disindaki_scatter_merkezi_atilir_sinirdaki_korunur() {
+        let seri = SaçılımSerisi::yeni().veri([[0.0, 5.0], [5.0, 5.0], [12.0, 5.0]]);
+        let kartezyen = Kartezyen2B {
+            x: değer_ekseni([0.0, 10.0], [0.0, 100.0], EksenKonumu::Alt),
+            y: değer_ekseni([0.0, 10.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+
+        let noktalar = saçılım_noktaları(&seri, &kartezyen);
+
+        assert_eq!(noktalar.len(), 2);
+        assert_eq!(noktalar[0].konum.0, 0.0);
+        assert_eq!(noktalar[1].konum.0, 50.0);
+    }
+
+    #[test]
     fn takvim_scatter_tarihi_hücre_merkezine_ve_değeri_boyuta_aktarır() {
         let tarih = takvimden_ana(TakvimAnı {
             yıl: 2017,
@@ -679,6 +907,7 @@ mod testler {
             boyut: 0.0,
             x_değeri: 0.0,
             y_değeri: 1.0,
+            palet_sırası: None,
         }];
         let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
 
@@ -713,6 +942,7 @@ mod testler {
             boyut: 0.0,
             x_değeri: 0.0,
             y_değeri: 1.0,
+            palet_sırası: None,
         }];
         let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
 

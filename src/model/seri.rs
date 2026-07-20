@@ -1194,6 +1194,8 @@ pub struct SaçılımSerisi {
     pub z_seviyesi: i32,
     /// İşaretçi/isabet olaylarını kapatır (`silent`).
     pub sessiz: bool,
+    /// Paleti seri yerine her veri öğesinde ilerletir (`colorBy: 'data'`).
+    pub veriye_göre_renk: bool,
     /// Veri kümesi eşlemesi: `(x boyutu, y boyutu)` (`encode.x/y`).
     pub eşleme: Option<(String, String)>,
     /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
@@ -1222,6 +1224,7 @@ impl Default for SaçılımSerisi {
             takvim_sırası: None,
             z_seviyesi: 0,
             sessiz: false,
+            veriye_göre_renk: false,
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
@@ -1278,6 +1281,11 @@ impl SaçılımSerisi {
 
     pub fn sessiz(mut self, sessiz: bool) -> Self {
         self.sessiz = sessiz;
+        self
+    }
+
+    pub fn veriye_göre_renklendir(mut self, açık: bool) -> Self {
+        self.veriye_göre_renk = açık;
         self
     }
 
