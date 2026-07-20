@@ -3525,24 +3525,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 942,
-          "değişen_piksel_oranı": 0.003488888888888889,
-          "ssim": 0.9971583531784963,
+          "değişen_piksel": 782,
+          "değişen_piksel_oranı": 0.002896296296296296,
+          "ssim": 0.9975343499744608,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-label-radial.png",
             "sha256": "c7e83776e7a5e3249c261fa56285efb1471d65fc88c649324c67889438e82c41"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-polar-label-radial.png",
-            "sha256": "19007f438dd4bfcbae7657299f4a2597ec71956a9d7804386b80adace7b1d0ed"
+            "sha256": "3fee13dcf87bba43e49b05260f79b36b5ae11bb51ca6ff2decbe1a2c00d4ca27"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-polar-label-radial.png",
-            "sha256": "d52c43f1313c7c0c7aeb26c635c278af336be23b18701e4c74ff4302db53e5c0"
+            "sha256": "cb829c5feb8d7d31f4655a8bf8e3d577cc3256072c495eb14771ea990aea2efa"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-polar-label-radial-son.json",
-            "sha256": "22e396aa50704f3456cc09855ce35cbeb868ec69f3d06bba3599d1009c47cc71"
+            "sha256": "192d743869b2d0c895f6f5557f4b59f1667d0740a1d10bcd1c34e5ee35280a63"
           }
         }
       ]
@@ -3570,7 +3570,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-polar-label-tangential.ts",
     "kaynak_sha256": "1892eecd0827487c1b2dee32fd6960ce6074103a5733b34d6eb99b76fd4ff44d",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_polar_label_tangential",
     "seriler": [
       "bar"
     ],
@@ -3585,7 +3585,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -3596,15 +3596,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1174,
+          "değişen_piksel_oranı": 0.004348148148148148,
+          "ssim": 0.9975533233719168,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-label-tangential.png",
+            "sha256": "df007785d87d6d11e1c7cbb526fc3bc4d134926ee0099afada457d51ce0d3362"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-polar-label-tangential.png",
+            "sha256": "341e29da6089720cc0a87e4e3029c42d33cd1199e1e6892371fcbe164bee8851"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-polar-label-tangential.png",
+            "sha256": "3a600082616776e275a081ef512193219cf21cfafb1c8a00d5bb74ad561a5485"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-polar-label-tangential-son.json",
+            "sha256": "d3e2a0afe2b8e968009a41783febc93d5a0c450995828d0079a1e031e008a1d5"
+          }
+        }
+      ]
     }
   },
   {
