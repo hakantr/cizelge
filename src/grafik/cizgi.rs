@@ -622,13 +622,14 @@ pub fn çizgi_serisi_çiz(
                     .unwrap_or(1.0);
                 sembol_stilli_çiz(
                     ç,
-                    seri.sembol,
+                    &seri.sembol,
                     *nokta,
                     seri.sembol_boyutu,
                     görsel_renk.unwrap_or(seri_rengi),
                     dolgu,
                     kenarlık,
                     opaklık,
+                    false,
                 );
             }
         }

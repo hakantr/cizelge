@@ -306,7 +306,7 @@ pub fn sütunları_çiz(
                     for k in 0..sayı {
                         crate::grafik::sembol_çiz(
                             çizici,
-                            pik.sembol,
+                            &pik.sembol,
                             (d.x + adım * k as f32 + pik.boyut / 2.0, orta_y),
                             pik.boyut,
                             sembol_rengi,
@@ -318,7 +318,7 @@ pub fn sütunları_çiz(
                     for k in 0..sayı {
                         crate::grafik::sembol_çiz(
                             çizici,
-                            pik.sembol,
+                            &pik.sembol,
                             (orta_x, d.alt() - adım * k as f32 - pik.boyut / 2.0),
                             pik.boyut,
                             sembol_rengi,

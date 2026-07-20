@@ -9,7 +9,6 @@ use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::{
     EtiketYerleşimParametreleri, EtiketYerleşimSonucu, EtiketÖrtüşmeKaydırması, SaçılımSerisi,
-    Sembol,
 };
 use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
 use crate::model::veri_kumesi::BoyutSeçici;
@@ -385,41 +384,6 @@ pub fn saçılım_nokta_boyutlarını_eşle(
             }
         }
     }
-}
-
-fn sembol_gölge_yolu(sembol: Sembol, merkez: (f32, f32), boyut: f32) -> Option<Yol> {
-    let yarıçap = boyut / 2.0;
-    if yarıçap <= 0.0 || sembol == Sembol::Yok {
-        return None;
-    }
-    let mut yol = Yol::yeni();
-    match sembol {
-        Sembol::Daire | Sembol::İçiBoşDaire => {
-            yol.taşı((merkez.0 + yarıçap, merkez.1));
-            yol.yay(yarıçap, false, true, (merkez.0 - yarıçap, merkez.1));
-            yol.yay(yarıçap, false, true, (merkez.0 + yarıçap, merkez.1));
-        }
-        Sembol::Kare => {
-            yol.taşı((merkez.0 - yarıçap, merkez.1 - yarıçap));
-            yol.çiz((merkez.0 + yarıçap, merkez.1 - yarıçap));
-            yol.çiz((merkez.0 + yarıçap, merkez.1 + yarıçap));
-            yol.çiz((merkez.0 - yarıçap, merkez.1 + yarıçap));
-        }
-        Sembol::Üçgen => {
-            yol.taşı((merkez.0, merkez.1 - yarıçap));
-            yol.çiz((merkez.0 + yarıçap, merkez.1 + yarıçap));
-            yol.çiz((merkez.0 - yarıçap, merkez.1 + yarıçap));
-        }
-        Sembol::Elmas => {
-            yol.taşı((merkez.0, merkez.1 - yarıçap));
-            yol.çiz((merkez.0 + yarıçap, merkez.1));
-            yol.çiz((merkez.0, merkez.1 + yarıçap));
-            yol.çiz((merkez.0 - yarıçap, merkez.1));
-        }
-        Sembol::Yok => return None,
-    }
-    yol.kapat();
-    Some(yol)
 }
 
 /// Saçılım serisini çizer; `vurgulu` ipucuyla öne çıkarılan noktadır.
@@ -1288,7 +1252,12 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
         if let Some(gölge_rengi) = seri.öğe_stili.gölge_rengi
             && (seri.öğe_stili.gölge_bulanıklığı > 0.0
                 || seri.öğe_stili.gölge_kayması != (0.0, 0.0))
-            && let Some(yol) = sembol_gölge_yolu(seri.sembol, nokta.konum, boyut)
+            && let Some(yol) = crate::grafik::sembol_yolu(
+                &seri.sembol,
+                nokta.konum,
+                boyut,
+                seri.sembol_oranını_koru,
+            )
         {
             çizici.yol_gölgesi(
                 &yol,
@@ -1309,13 +1278,14 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
             .and_then(|(_, dolgu)| dolgu.as_ref());
         sembol_stilli_çiz(
             çizici,
-            seri.sembol,
+            &seri.sembol,
             nokta.konum,
             boyut,
             renk,
             dolgu,
             kenarlık,
             nokta_opaklığı,
+            seri.sembol_oranını_koru,
         );
     }
 

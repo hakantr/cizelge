@@ -151,13 +151,13 @@ fn uç_sembollerini_çiz(
     noktalar: &[(f32, f32)],
     renk: Renk,
 ) {
-    let semboller = veri.semboller.unwrap_or(seri.semboller);
+    let semboller = veri.semboller.as_ref().unwrap_or(&seri.semboller);
     let boyutlar = veri.sembol_boyutları.unwrap_or(seri.sembol_boyutları);
     if let Some(başlangıç) = noktalar.first().copied() {
-        sembol_çiz(yüzey, semboller[0], başlangıç, boyutlar[0], renk);
+        sembol_çiz(yüzey, &semboller[0], başlangıç, boyutlar[0], renk);
     }
     if let Some(bitiş) = noktalar.last().copied() {
-        sembol_çiz(yüzey, semboller[1], bitiş, boyutlar[1], renk);
+        sembol_çiz(yüzey, &semboller[1], bitiş, boyutlar[1], renk);
     }
 }
 
@@ -238,7 +238,7 @@ fn efekti_çiz(
                 let alfa = (1.0 - sıra as f32 / 9.0) * 0.45;
                 sembol_çiz(
                     yüzey,
-                    efekt.sembol,
+                    &efekt.sembol,
                     nokta,
                     efekt.sembol_boyutu * (1.0 - sıra as f32 / 16.0),
                     renk.opaklık(alfa),
@@ -247,7 +247,7 @@ fn efekti_çiz(
         }
     }
     if let Some(nokta) = yol_noktası(noktalar, oran) {
-        sembol_çiz(yüzey, efekt.sembol, nokta, efekt.sembol_boyutu, renk);
+        sembol_çiz(yüzey, &efekt.sembol, nokta, efekt.sembol_boyutu, renk);
     }
 }
 

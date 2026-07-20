@@ -522,41 +522,18 @@ fn öğe_çiz(
             // LegendView, seri sembolünü `itemHeight * 0.8` boyutunda
             // ölçekler (14px öntanımlıda çap/kenar 11.2px).
             let yarı = seçenek.simge_yüksekliği * 0.4;
-            match öğe.çizgi_sembolü.unwrap_or(Sembol::İçiBoşDaire) {
-                Sembol::İçiBoşDaire => çizici.daire(
-                    merkez,
-                    yarı,
-                    Some(&Dolgu::Düz(Renk::BEYAZ)),
-                    Some((2.0, renk)),
-                ),
-                Sembol::Daire => {
-                    çizici.daire(merkez, yarı, Some(&Dolgu::Düz(renk)), None);
-                }
-                Sembol::Kare => çizici.dikdörtgen(
-                    Dikdörtgen::yeni(merkez.0 - yarı, merkez.1 - yarı, yarı * 2.0, yarı * 2.0),
-                    &Dolgu::Düz(renk),
-                    [0.0; 4],
-                    None,
-                ),
-                Sembol::Üçgen => {
-                    let mut yol = Yol::yeni();
-                    yol.taşı((merkez.0, merkez.1 - yarı));
-                    yol.çiz((merkez.0 + yarı, merkez.1 + yarı));
-                    yol.çiz((merkez.0 - yarı, merkez.1 + yarı));
-                    yol.kapat();
-                    çizici.yol_doldur(&yol, &Dolgu::Düz(renk));
-                }
-                Sembol::Elmas => {
-                    let mut yol = Yol::yeni();
-                    yol.taşı((merkez.0, merkez.1 - yarı));
-                    yol.çiz((merkez.0 + yarı, merkez.1));
-                    yol.çiz((merkez.0, merkez.1 + yarı));
-                    yol.çiz((merkez.0 - yarı, merkez.1));
-                    yol.kapat();
-                    çizici.yol_doldur(&yol, &Dolgu::Düz(renk));
-                }
-                Sembol::Yok => {}
-            }
+            let varsayılan = Sembol::İçiBoşDaire;
+            crate::grafik::sembol_stilli_çiz(
+                çizici,
+                öğe.çizgi_sembolü.as_ref().unwrap_or(&varsayılan),
+                merkez,
+                yarı * 2.0,
+                renk,
+                None,
+                None,
+                1.0,
+                true,
+            );
         }
     }
 

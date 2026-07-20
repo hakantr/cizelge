@@ -960,7 +960,7 @@ fn gösterge_öğeleri(
                     _ => None,
                 };
                 let çizgi_sembolü = match seri {
-                    Seri::Çizgi(çizgi) => Some(çizgi.sembol),
+                    Seri::Çizgi(çizgi) => Some(çizgi.sembol.clone()),
                     _ => None,
                 };
                 let opaklık = match seri {

@@ -130,7 +130,7 @@ pub fn ağaç_çiz(
         let konum = ölçekle(düğüm.konum);
         sembol_çiz(
             çizici,
-            crate::model::seri::Sembol::İçiBoşDaire,
+            &crate::model::seri::Sembol::İçiBoşDaire,
             konum,
             seri.sembol_boyutu,
             seri_rengi,

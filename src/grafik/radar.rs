@@ -230,7 +230,7 @@ pub fn radar_serisi_çiz(
         );
         if seri.sembol_göster {
             for nokta in &noktalar {
-                sembol_çiz(çizici, seri.sembol, *nokta, seri.sembol_boyutu, renk);
+                sembol_çiz(çizici, &seri.sembol, *nokta, seri.sembol_boyutu, renk);
             }
         }
 

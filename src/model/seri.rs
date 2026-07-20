@@ -4,6 +4,7 @@
 use std::fmt;
 use std::sync::Arc;
 
+use crate::cizim::{SvgYolHatası, Yol};
 use crate::koordinat::Dikdörtgen;
 use crate::model::Uzunluk;
 use crate::model::deger::{VeriÖğesi, veri_listesi};
@@ -16,16 +17,39 @@ use crate::model::veri_kumesi::SeriYerleşimi;
 use crate::renk::Dolgu;
 
 /// Sembol biçimi (`symbol`).
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, PartialEq, Debug, Default)]
 pub enum Sembol {
     /// ECharts çizgi serisinin öntanımlısı (`'emptyCircle'`).
     #[default]
     İçiBoşDaire,
     Daire,
     Kare,
+    /// ECharts `roundRect`; köşe yarıçapı kısa kenarın dörtte biridir.
+    YuvarlakDikdörtgen,
     Üçgen,
     Elmas,
+    /// ECharts `path://...` biçimindeki özel SVG sembolü.
+    SvgYolu(Arc<Yol>),
     Yok,
+}
+
+impl Sembol {
+    /// ECharts `path://...` sembolünü ortak çizim yoluna çözer.
+    ///
+    /// `path://` öneki isteğe bağlıdır; böylece hem doğrudan ECharts option
+    /// değerleri hem de yalnız SVG `d` içeriği aynı API'den geçirilebilir.
+    pub fn svg_yolu(veri: impl AsRef<str>) -> Result<Self, SvgYolHatası> {
+        let veri = veri
+            .as_ref()
+            .strip_prefix("path://")
+            .unwrap_or(veri.as_ref());
+        Yol::svg_path_data(veri).map(|yol| Self::SvgYolu(Arc::new(yol)))
+    }
+
+    /// Önceden çözülmüş bir yolu özel sembol olarak kullanır.
+    pub fn yoldan(yol: Yol) -> Self {
+        Self::SvgYolu(Arc::new(yol))
+    }
 }
 
 /// Serinin bağlı olduğu eksenler (`xAxisIndex` / `yAxisIndex`).
@@ -55,7 +79,7 @@ pub enum Basamak {
 
 /// Resimli sütun ayarları (`pictorialBar` karşılığı): sütun, tekrarlanan
 /// sembollerle çizilir.
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Piktogram {
     pub sembol: Sembol,
     /// Sembol çapı.
@@ -1273,6 +1297,8 @@ pub struct SaçılımSerisi {
     pub veri: Vec<VeriÖğesi>,
     pub sembol: Sembol,
     pub sembol_boyutu: SembolBoyutu,
+    /// Özel SVG yolunun en/boy oranını korur (`symbolKeepAspect`).
+    pub sembol_oranını_koru: bool,
     pub öğe_stili: ÖğeStili,
     /// Seri düzeyindeki işlevsel `itemStyle.color`. Veri öğesinin açık
     /// `itemStyle.color` değeri bu callback'in önüne geçer.
@@ -1326,6 +1352,7 @@ impl Default for SaçılımSerisi {
             veri: Vec::new(),
             sembol: Sembol::Daire,
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
+            sembol_oranını_koru: false,
             öğe_stili: ÖğeStili::default(),
             öğe_rengi_işlevi: None,
             etiket: Etiket::default(),
@@ -1445,6 +1472,13 @@ impl SaçılımSerisi {
 
     pub fn sembol_boyutu(mut self, boyut: impl Into<SembolBoyutu>) -> Self {
         self.sembol_boyutu = boyut.into();
+        self
+    }
+
+    /// Özel SVG sembolünü kutusunda ortalayıp en/boy oranını korur
+    /// (`symbolKeepAspect`).
+    pub fn sembol_oranını_koru(mut self, koru: bool) -> Self {
+        self.sembol_oranını_koru = koru;
         self
     }
 

@@ -555,7 +555,7 @@ pub fn kutupsal_serileri_çiz(
                 }
                 if s.sembol_göster && s.sembol != Sembol::Yok {
                     for n in &noktalar {
-                        sembol_çiz(çizici, s.sembol, *n, s.sembol_boyutu, renk);
+                        sembol_çiz(çizici, &s.sembol, *n, s.sembol_boyutu, renk);
                     }
                 }
             }
@@ -566,7 +566,7 @@ pub fn kutupsal_serileri_çiz(
                     };
                     let nokta = düzen.nokta(açısal, radyal);
                     let boyut = s.sembol_boyutu.çöz(öğe) * ilerleme;
-                    sembol_çiz(çizici, s.sembol, nokta, boyut, renk.opaklık(0.8));
+                    sembol_çiz(çizici, &s.sembol, nokta, boyut, renk.opaklık(0.8));
                     if !s.sessiz {
                         isabetler.push(İsabetBölgesi {
                             seri_sırası: i,

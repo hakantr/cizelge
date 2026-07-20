@@ -164,7 +164,7 @@ pub fn bölme_çizgilerini_çiz(
     //    bantlar; çizgilerin de altında kalır.
     let tema_bantları = tema::bölme_alanı_renkleri().to_vec();
     for eksen in eksenler {
-        if !eksen.seçenek.bölme_alanı.göster {
+        if !eksen.seçenek.göster || !eksen.seçenek.bölme_alanı.göster {
             continue;
         }
         let renkler = if eksen.seçenek.bölme_alanı.renkler.is_empty() {
@@ -210,7 +210,7 @@ pub fn bölme_çizgilerini_çiz(
 
     // 2) Ara bölme çizgileri (`minorSplitLine`).
     for eksen in eksenler {
-        if !eksen.seçenek.ara_bölme_çizgisi.göster.unwrap_or(false) {
+        if !eksen.seçenek.göster || !eksen.seçenek.ara_bölme_çizgisi.göster.unwrap_or(false) {
             continue;
         }
         let renk = eksen
@@ -231,7 +231,7 @@ pub fn bölme_çizgilerini_çiz(
 
     // 3) Ana bölme çizgileri (`splitLine`).
     for eksen in eksenler {
-        if !eksen.seçenek.bölme_görünür_mü() {
+        if !eksen.seçenek.göster || !eksen.seçenek.bölme_görünür_mü() {
             continue;
         }
         let renk = eksen
@@ -255,6 +255,9 @@ pub fn bölme_çizgilerini_çiz(
     // çizilir; seri katmanı daha sonra üstlerinden geçerek ECharts'ın z
     // düzenindeki kesintisiz veri uçlarını korur.
     for eksen in eksenler {
+        if !eksen.seçenek.göster {
+            continue;
+        }
         let seçenek = &eksen.seçenek.kırılma_alanı;
         if !seçenek.göster {
             continue;
@@ -356,6 +359,9 @@ pub fn eksenleri_çiz(
     çizici: &mut dyn ÇizimYüzeyi, alan: Dikdörtgen, eksenler: &[&ÇalışmaEkseni]
 ) {
     for eksen in eksenler {
+        if !eksen.seçenek.göster {
+            continue;
+        }
         // ECharts `axisLine.show: 'auto'`: eksen çizgisi yalnız dikindeki
         // eksen interval (değer) ya da log ölçeğiyse otomatik görünür.
         // Time ölçeği bu kararda kategori ölçeği gibi davranır.

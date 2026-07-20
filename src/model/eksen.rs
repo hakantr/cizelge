@@ -529,6 +529,9 @@ impl Default for BölmeÇizgisi {
 /// Eksen seçenekleri (`xAxis` / `yAxis`).
 #[derive(Clone, PartialEq, Debug)]
 pub struct Eksen {
+    /// Bütün eksen görsellerini kapatır (`xAxis.show` / `yAxis.show`). Ölçek
+    /// ve koordinat dönüşümü etkin kalır.
+    pub göster: bool,
     pub tür: EksenTürü,
     pub ad: Option<String>,
     pub ad_konumu: EksenAdKonumu,
@@ -607,6 +610,7 @@ pub struct Eksen {
 impl Default for Eksen {
     fn default() -> Self {
         Eksen {
+            göster: true,
             tür: EksenTürü::Değer,
             ad: None,
             ad_konumu: EksenAdKonumu::Bitiş,
@@ -652,6 +656,13 @@ impl Default for Eksen {
 }
 
 impl Eksen {
+    /// Eksen çizgisi, çentikleri, etiketleri ve bölme görsellerini birlikte
+    /// açar/kapatır; koordinat sistemi her iki durumda da çalışır.
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
+    }
+
     /// Sayısal değer ekseni.
     pub fn değer() -> Self {
         Eksen {
