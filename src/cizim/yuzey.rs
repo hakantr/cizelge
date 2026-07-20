@@ -229,6 +229,29 @@ pub trait ÇizimYüzeyi {
         kenarlık: Option<(f32, Renk)>,
     );
 
+    /// ECharts `LargeSymbolPath.afterBrush` karşılığı: iç içe olmayan
+    /// `[x0, y0, x1, y1, ...]` ekran koordinatlarını küçük `fillRect`
+    /// sembolleri olarak topluca boyar. Yüzeyler bu çağrıyı hızlandırabilir;
+    /// güvenli öntanımlı yol aynı semantiği tek tek dikdörtgenlerle korur.
+    fn büyük_saçılım_noktaları(&mut self, konumlar: &[f32], boyut: f32, dolgu: &Dolgu) {
+        if boyut <= 0.0 {
+            return;
+        }
+        let yarı = boyut / 2.0;
+        for çift in konumlar.chunks_exact(2) {
+            let [x, y] = çift else { continue };
+            if !x.is_finite() || !y.is_finite() {
+                continue;
+            }
+            self.dikdörtgen(
+                Dikdörtgen::yeni(*x - yarı, *y - yarı, boyut, boyut),
+                dolgu,
+                [0.0; 4],
+                None,
+            );
+        }
+    }
+
     /// Gölge boyar (ipucu penceresi vb. için).
     fn gölge(&mut self, d: Dikdörtgen, yarıçap: f32, renk: Renk, bulanıklık: f32);
 

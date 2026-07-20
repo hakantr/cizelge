@@ -104,9 +104,9 @@ pub use model::matris::{
 pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
-    AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
-    EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi,
-    GöstergeSaatiSerisi, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
+    AğaçHaritasıSerisi, AğaçSerisi, Basamak, DüzSaçılımVerisi, EtiketYerleşimParametreleri,
+    EtiketYerleşimSonucu, EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi,
+    GrafoYerleşimi, GöstergeSaatiSerisi, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
     IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
     PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
     SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi,

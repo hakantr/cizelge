@@ -44,8 +44,9 @@ use crate::grafik::radar::{
     radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
 };
 use crate::grafik::sacilim::{
-    SaçılımNoktası, saçılım_görsel_kapsamı, saçılım_nokta_boyutlarını_eşle, saçılım_noktaları,
-    saçılım_xy, saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları, tek_eksen_saçılım_noktaları,
+    BüyükSaçılımNoktaları, SaçılımNoktası, büyük_saçılım_noktaları, büyük_saçılım_çiz,
+    saçılım_görsel_kapsamı, saçılım_nokta_boyutlarını_eşle, saçılım_noktaları, saçılım_xy,
+    saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları, tek_eksen_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
@@ -1236,7 +1237,16 @@ fn kartezyen_kur(
         // bağımsız iki dataset boyutudur. Kapsamı ham sıra uzayından değil
         // bu iki boyuttan kurmak, çoklu grid/değer eksenlerini doğru ölçekler.
         if let Seri::Saçılım(saçılım) = seri {
-            if let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme {
+            if saçılım.düz_veri.is_some() {
+                for (_, x, y) in saçılım.düz_xy_iter() {
+                    if !x_kategorik {
+                        kapsa(x_kapsam, x);
+                    }
+                    if !y_kategorik {
+                        kapsa(y_kapsam, y);
+                    }
+                }
+            } else if let Some((x_boyutu, y_boyutu)) = &saçılım.eşleme {
                 for öğe in &saçılım.veri {
                     if !x_kategorik
                         && let Some(değer) = öğe.boyut(x_boyutu).and_then(|değer| değer.sayı())
@@ -1561,6 +1571,24 @@ fn kartezyen_kur(
                 continue;
             }
             if let Seri::Saçılım(saçılım) = seri {
+                if saçılım.düz_veri.is_some() {
+                    for (_, x, y) in saçılım.düz_xy_iter() {
+                        let x_değerleri = [x];
+                        let y_değerleri = [y];
+                        if !pencereden_geçer(x_penceresi, &x_değerleri)
+                            || !pencereden_geçer(y_penceresi, &y_değerleri)
+                        {
+                            continue;
+                        }
+                        if !x_kategorik {
+                            kapsa(x_kapsam, x);
+                        }
+                        if !y_kategorik {
+                            kapsa(y_kapsam, y);
+                        }
+                    }
+                    continue;
+                }
                 for (sıra, öğe) in saçılım.veri.iter().enumerate() {
                     let (x, y) = match &saçılım.eşleme {
                         Some((x_boyutu, y_boyutu)) => (
@@ -2756,9 +2784,15 @@ pub fn grafiği_boya(
         }
         let mut çizilen_sütun_grupları: HashSet<(bool, usize)> = HashSet::new();
 
-        // Saçılım vurgusu (öğe ipucu) için önden isabet araması.
+        // Saçılım vurgusu (öğe ipucu) için önden isabet araması. Büyük kip,
+        // her nokta için ağır model/isabet nesnesi ayırmadan düz piksel
+        // tamponunu korur.
+        enum HazırSaçılım {
+            Normal(Vec<SaçılımNoktası>),
+            Büyük(BüyükSaçılımNoktaları),
+        }
         // `(seri sırası, vurgulu veri sırası, noktalar)`.
-        type SaçılımVurgusu = (usize, Option<usize>, Vec<SaçılımNoktası>);
+        type SaçılımVurgusu = (usize, Option<usize>, HazırSaçılım);
         let mut saçılım_vurguları: Vec<SaçılımVurgusu> = Vec::new();
         for (i, seri) in seçenekler.seriler.iter().enumerate() {
             if let Seri::Saçılım(s) = seri {
@@ -2768,6 +2802,36 @@ pub fn grafiği_boya(
                 let Some(kartezyen) = kurulum.seri_kartezyeni(seri) else {
                     continue;
                 };
+                if s.büyük_etkin_mi()
+                    && let Some(noktalar) = büyük_saçılım_noktaları(s, &kartezyen)
+                {
+                    // LargeSymbolPath.findDataIndex: en son çizilen öğeden
+                    // geriye doğru, en az 4x4 px dikdörtgen isabet sınaması.
+                    let vurgu = match (s.sessiz, &ipucu_seçeneği, fare) {
+                        (false, Some(ipucu), Some(f)) if ipucu.tetikleme == Tetikleme::Öğe => {
+                            let boyut = noktalar.boyut.max(4.0);
+                            let yarı = boyut / 2.0;
+                            noktalar
+                                .konumlar
+                                .chunks_exact(2)
+                                .enumerate()
+                                .rev()
+                                .find_map(|(sıra, çift)| {
+                                    let [x, y] = çift else { return None };
+                                    (x.is_finite()
+                                        && y.is_finite()
+                                        && f.0 >= *x - yarı
+                                        && f.0 <= *x + yarı
+                                        && f.1 >= *y - yarı
+                                        && f.1 <= *y + yarı)
+                                        .then_some(sıra)
+                                })
+                        }
+                        _ => None,
+                    };
+                    saçılım_vurguları.push((i, vurgu, HazırSaçılım::Büyük(noktalar)));
+                    continue;
+                }
                 let görsel_eşlemeler = seçenekler
                     .seri_görsel_eşlemeleri(i)
                     .map(|eşleme| (eşleme, saçılım_görsel_kapsamı(s, eşleme)))
@@ -2793,7 +2857,7 @@ pub fn grafiği_boya(
                     }
                     _ => None,
                 };
-                saçılım_vurguları.push((i, vurgu, noktalar));
+                saçılım_vurguları.push((i, vurgu, HazırSaçılım::Normal(noktalar)));
             }
         }
 
@@ -2927,49 +2991,94 @@ pub fn grafiği_boya(
                         Seri::Saçılım(s) => {
                             let kayıt = saçılım_vurguları.iter().find(|(sıra, ..)| *sıra == i);
                             if let Some((_, vurgu, noktalar)) = kayıt {
-                                let görsel_eşlemeler = seçenekler
-                                    .seri_görsel_eşlemeleri(i)
-                                    .map(|eşleme| (eşleme, saçılım_görsel_kapsamı(s, eşleme)))
-                                    .collect::<Vec<_>>();
-                                saçılım_çiz_çoklu_eşlemeli(
-                                    yüzey,
-                                    s,
-                                    noktalar,
-                                    seçenekler.seri_rengi(i),
-                                    ilerleme,
-                                    zaman_sn,
-                                    *vurgu,
-                                    &görsel_eşlemeler,
-                                    &seçenekler.palet,
-                                );
-                                if !s.sessiz {
-                                    for n in noktalar {
-                                        isabetler.push(İsabetBölgesi {
-                                            seri_sırası: i,
-                                            veri_sırası: n.sıra,
-                                            seri_adı: s.ad.clone(),
-                                            ad: s.veri.get(n.sıra).and_then(|ö| ö.ad.clone()),
-                                            değer: Some(n.y_değeri),
-                                            geometri: İsabetGeometrisi::Daire {
-                                                merkez: n.konum,
-                                                yarıçap: (n.boyut / 2.0 + 3.0).max(8.0),
-                                            },
-                                        });
+                                match noktalar {
+                                    HazırSaçılım::Normal(noktalar) => {
+                                        let görsel_eşlemeler = seçenekler
+                                            .seri_görsel_eşlemeleri(i)
+                                            .map(|eşleme| {
+                                                (eşleme, saçılım_görsel_kapsamı(s, eşleme))
+                                            })
+                                            .collect::<Vec<_>>();
+                                        saçılım_çiz_çoklu_eşlemeli(
+                                            yüzey,
+                                            s,
+                                            noktalar,
+                                            seçenekler.seri_rengi(i),
+                                            ilerleme,
+                                            zaman_sn,
+                                            *vurgu,
+                                            &görsel_eşlemeler,
+                                            &seçenekler.palet,
+                                        );
+                                        if !s.sessiz {
+                                            for n in noktalar {
+                                                isabetler.push(İsabetBölgesi {
+                                                    seri_sırası: i,
+                                                    veri_sırası: n.sıra,
+                                                    seri_adı: s.ad.clone(),
+                                                    ad: s
+                                                        .veri
+                                                        .get(n.sıra)
+                                                        .and_then(|ö| ö.ad.clone()),
+                                                    değer: Some(n.y_değeri),
+                                                    geometri: İsabetGeometrisi::Daire {
+                                                        merkez: n.konum,
+                                                        yarıçap: (n.boyut / 2.0 + 3.0).max(8.0),
+                                                    },
+                                                });
+                                            }
+                                        }
+                                    }
+                                    HazırSaçılım::Büyük(noktalar) => {
+                                        büyük_saçılım_çiz(
+                                            yüzey,
+                                            s,
+                                            noktalar,
+                                            seçenekler.seri_rengi(i),
+                                            ilerleme,
+                                        );
+                                        // Bir milyon ayrı bölge yerine yalnız
+                                        // ters taramada bulunan etkin öğe
+                                        // olay hattına aktarılır.
+                                        if !s.sessiz
+                                            && let Some(sıra) = *vurgu
+                                            && let Some(çift) =
+                                                noktalar.konumlar.chunks_exact(2).nth(sıra)
+                                            && let [x, y] = çift
+                                        {
+                                            let boyut = noktalar.boyut.max(4.0);
+                                            isabetler.push(İsabetBölgesi {
+                                                seri_sırası: i,
+                                                veri_sırası: sıra,
+                                                seri_adı: s.ad.clone(),
+                                                ad: None,
+                                                değer: s.xy(sıra).map(|(_, y)| y),
+                                                geometri: İsabetGeometrisi::Dikdörtgen(
+                                                    Dikdörtgen::yeni(
+                                                        *x - boyut / 2.0,
+                                                        *y - boyut / 2.0,
+                                                        boyut,
+                                                        boyut,
+                                                    ),
+                                                ),
+                                            });
+                                        }
                                     }
                                 }
                                 // Öğe ipucu.
-                                if let (Some(sıra), Some(f)) = (vurgu, fare)
-                                    && let Some(nokta) = noktalar.iter().find(|n| n.sıra == *sıra)
-                                {
+                                let ipucu_xy = vurgu.and_then(|sıra| match noktalar {
+                                    HazırSaçılım::Normal(noktalar) => noktalar
+                                        .iter()
+                                        .find(|nokta| nokta.sıra == sıra)
+                                        .map(|nokta| (nokta.x_değeri, nokta.y_değeri)),
+                                    HazırSaçılım::Büyük(_) => s.xy(sıra),
+                                });
+                                if let (Some((x, y)), Some(f)) = (ipucu_xy, fare) {
                                     *bekleyen = Some((
                                         seri.ad().map(str::to_string),
                                         vec![İpucuSatırı {
                                             im_rengi: Some(seçenekler.seri_rengi(i)),
-                                            ad: format!(
-                                                "({}, {})",
-                                                binlik_ayır(nokta.x_değeri),
-                                                binlik_ayır(nokta.y_değeri)
-                                            ),
+                                            ad: format!("({}, {})", binlik_ayır(x), binlik_ayır(y)),
                                             değer: String::new(),
                                         }],
                                         f,

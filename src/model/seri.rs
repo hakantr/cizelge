@@ -1290,11 +1290,52 @@ impl IsıHaritasıSerisi {
     }
 }
 
+/// ECharts büyük saçılım hattının kullandığı iç içe olmayan
+/// `Float32Array` veri deposu. Değerler `[x0, y0, x1, y1, ...]` sırasındadır;
+/// tamamlanmamış son değer güvenle yok sayılır.
+#[derive(Clone, Debug)]
+pub struct DüzSaçılımVerisi {
+    değerler: Arc<[f32]>,
+}
+
+impl DüzSaçılımVerisi {
+    pub fn yeni(değerler: impl Into<Arc<[f32]>>) -> Self {
+        Self {
+            değerler: değerler.into(),
+        }
+    }
+
+    /// XY noktası sayısı.
+    pub fn len(&self) -> usize {
+        self.değerler.len() / 2
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Ham, iç içe olmayan `f32` dilimi.
+    pub fn değerler(&self) -> &[f32] {
+        &self.değerler
+    }
+
+    /// Özgün veri sırasındaki XY çiftini döndürür.
+    pub fn xy(&self, sıra: usize) -> Option<(f64, f64)> {
+        let başlangıç = sıra.checked_mul(2)?;
+        let x = *self.değerler.get(başlangıç)?;
+        let y = *self.değerler.get(başlangıç + 1)?;
+        Some((f64::from(x), f64::from(y)))
+    }
+}
+
 /// Saçılım serisi (`series-scatter`).
 #[derive(Clone, Debug)]
 pub struct SaçılımSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
+    /// ECharts'ın `Float32Array` kabul eden büyük-veri yolu. `Some` iken
+    /// `veri` boş tutulur ve XY çiftleri bu depodan okunur.
+    pub düz_veri: Option<DüzSaçılımVerisi>,
     pub sembol: Sembol,
     pub sembol_boyutu: SembolBoyutu,
     /// Özel SVG yolunun en/boy oranını korur (`symbolKeepAspect`).
@@ -1343,6 +1384,17 @@ pub struct SaçılımSerisi {
     pub veri_kümesi_sırası: usize,
     /// `seriesLayoutBy`.
     pub seri_yerleşimi: SeriYerleşimi,
+    /// Büyük sembol çizimini açar (`large`).
+    pub büyük: bool,
+    /// Büyük çizim yoluna geçilecek en küçük veri sayısı
+    /// (`largeThreshold`, ECharts öntanımlısı 2000).
+    pub büyük_eşiği: usize,
+    /// Bir artımlı çizim parçasındaki nokta sayısı (`progressive`, ECharts
+    /// scatter öntanımlısı 5000).
+    pub aşamalı: usize,
+    /// Artımlı işleme eşiği (`progressiveThreshold`, ECharts öntanımlısı
+    /// 10000).
+    pub aşamalı_eşiği: usize,
 }
 
 impl Default for SaçılımSerisi {
@@ -1350,6 +1402,7 @@ impl Default for SaçılımSerisi {
         SaçılımSerisi {
             ad: None,
             veri: Vec::new(),
+            düz_veri: None,
             sembol: Sembol::Daire,
             sembol_boyutu: SembolBoyutu::Sabit(10.0),
             sembol_oranını_koru: false,
@@ -1374,6 +1427,10 @@ impl Default for SaçılımSerisi {
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
+            büyük: false,
+            büyük_eşiği: 2_000,
+            aşamalı: 5_000,
+            aşamalı_eşiği: 10_000,
         }
     }
 }
@@ -1462,7 +1519,91 @@ impl SaçılımSerisi {
 
     pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
         self.veri = veri_listesi(veri);
+        self.düz_veri = None;
         self
+    }
+
+    /// İç içe olmayan `Float32Array` eşdeğerini kopyalamadan bağlar.
+    ///
+    /// Girdi `[x0, y0, x1, y1, ...]` düzenindedir. Bu yol, milyonlarca
+    /// nokta için her satırda [`VeriÖğesi`] ayırma maliyetini önler.
+    pub fn düz_veri(mut self, veri: impl Into<Arc<[f32]>>) -> Self {
+        self.düz_veri = Some(DüzSaçılımVerisi::yeni(veri));
+        self.veri.clear();
+        self
+    }
+
+    /// Serideki gerçek veri öğesi sayısı.
+    pub fn veri_sayısı(&self) -> usize {
+        self.düz_veri
+            .as_ref()
+            .map(DüzSaçılımVerisi::len)
+            .unwrap_or(self.veri.len())
+    }
+
+    /// Veri sırasındaki sayısal XY çiftini döndürür. Dataset `encode`
+    /// kullanan nesne verisinde eşleme eksen bağlamıyla çözüldüğünden burada
+    /// yalnız doğal ilk iki boyut ele alınır.
+    pub fn xy(&self, sıra: usize) -> Option<(f64, f64)> {
+        match &self.düz_veri {
+            Some(veri) => veri.xy(sıra),
+            None => self
+                .veri
+                .get(sıra)
+                .and_then(|öğe| crate::grafik::sacilim::saçılım_xy(&öğe.değer, sıra)),
+        }
+    }
+
+    pub fn büyük(mut self, açık: bool) -> Self {
+        self.büyük = açık;
+        self
+    }
+
+    pub fn büyük_eşiği(mut self, eşik: usize) -> Self {
+        self.büyük_eşiği = eşik;
+        self
+    }
+
+    pub fn aşamalı(mut self, parça_boyutu: usize) -> Self {
+        self.aşamalı = parça_boyutu.max(1);
+        self
+    }
+
+    pub fn aşamalı_eşiği(mut self, eşik: usize) -> Self {
+        self.aşamalı_eşiği = eşik;
+        self
+    }
+
+    /// ECharts `pipelineContext.large` koşulunun seri düzeyindeki karşılığı.
+    pub fn büyük_etkin_mi(&self) -> bool {
+        self.büyük && self.veri_sayısı() >= self.büyük_eşiği
+    }
+
+    pub(crate) fn veri_boş_mu(&self) -> bool {
+        self.veri.is_empty()
+            && self
+                .düz_veri
+                .as_ref()
+                .is_none_or(DüzSaçılımVerisi::is_empty)
+    }
+
+    pub(crate) fn düz_değerler(&self) -> Option<&[f32]> {
+        self.düz_veri.as_ref().map(DüzSaçılımVerisi::değerler)
+    }
+
+    pub(crate) fn düz_boyut_çöz(&self, sıra: usize, x: f64, y: f64) -> f32 {
+        match &self.sembol_boyutu {
+            SembolBoyutu::Sabit(boyut) => *boyut,
+            boyut => boyut.bağlamla_çöz(&VeriÖğesi::yeni([x, y]), sıra),
+        }
+    }
+
+    pub(crate) fn düz_xy_iter(&self) -> impl Iterator<Item = (usize, f64, f64)> + '_ {
+        self.düz_değerler()
+            .into_iter()
+            .flat_map(|değerler| değerler.chunks_exact(2))
+            .enumerate()
+            .map(|(sıra, çift)| (sıra, f64::from(çift[0]), f64::from(çift[1])))
     }
 
     pub fn sembol(mut self, sembol: Sembol) -> Self {

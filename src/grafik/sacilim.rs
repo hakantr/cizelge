@@ -49,6 +49,15 @@ pub struct SaçılımNoktası {
     pub palet_sırası: Option<usize>,
 }
 
+/// `LargeSymbolPath` için veri sırasını koruyan iç içe olmayan ekran
+/// koordinatları. Kırpılan/geçersiz öğeler kendi yerlerinde `NaN, NaN`
+/// taşır; böylece hover sonucu doğrudan özgün `dataIndex` olur.
+#[derive(Clone, Debug)]
+pub struct BüyükSaçılımNoktaları {
+    pub konumlar: Vec<f32>,
+    pub boyut: f32,
+}
+
 /// Bir scatter serisine uygulanacak, kapsamı çözülmüş `visualMap` girdisi.
 /// ECharts görsel kodlama aşaması aynı seride birden çok bileşenin farklı
 /// kanallarını sırayla birleştirir.
@@ -197,6 +206,29 @@ pub fn saçılım_noktaları(
     seri: &SaçılımSerisi,
     kartezyen: &Kartezyen2B,
 ) -> Vec<SaçılımNoktası> {
+    if seri.düz_veri.is_some() {
+        let mut sonuç = Vec::with_capacity(seri.veri_sayısı());
+        for (sıra, x, y) in seri.düz_xy_iter() {
+            if !x.is_finite() || !y.is_finite() {
+                continue;
+            }
+            let konum = kartezyen.nokta(x, y);
+            if !kartezyen.alan.içeriyor_mu(konum) {
+                continue;
+            }
+            sonuç.push(SaçılımNoktası {
+                sıra,
+                konum,
+                boyut: seri.düz_boyut_çöz(sıra, x, y),
+                x_değeri: x,
+                y_değeri: y,
+                palet_sırası: None,
+            });
+        }
+        titremeyi_uygula(&mut sonuç, kartezyen);
+        return sonuç;
+    }
+
     let mut sonuç = Vec::with_capacity(seri.veri.len());
     for (i, öğe) in seri.veri.iter().enumerate() {
         let (x, y) = match &seri.eşleme {
@@ -236,6 +268,50 @@ pub fn saçılım_noktaları(
     // çizilmez. Jitter yerleşimi de bu sınamadan önce uygulanır.
     sonuç.retain(|nokta| kartezyen.alan.içeriyor_mu(nokta.konum));
     sonuç
+}
+
+/// ECharts `pointsLayout(..., true)` + `LargeSymbolDraw` karşılığı. Büyük
+/// kipte sembol boyutu seri düzeyinde tek değerdir; işlevsel boyut varsa
+/// normal sembol hattına geri dönülür.
+pub fn büyük_saçılım_noktaları(
+    seri: &SaçılımSerisi,
+    kartezyen: &Kartezyen2B,
+) -> Option<BüyükSaçılımNoktaları> {
+    let crate::model::seri::SembolBoyutu::Sabit(boyut) = seri.sembol_boyutu else {
+        return None;
+    };
+    let mut konumlar = Vec::with_capacity(seri.veri_sayısı().saturating_mul(2));
+    let mut ekle = |koordinat: Option<(f64, f64)>| {
+        if let Some((x, y)) = koordinat
+            && x.is_finite()
+            && y.is_finite()
+        {
+            let konum = kartezyen.nokta(x, y);
+            if kartezyen.alan.içeriyor_mu(konum) {
+                konumlar.extend_from_slice(&[konum.0, konum.1]);
+                return;
+            }
+        }
+        konumlar.extend_from_slice(&[f32::NAN, f32::NAN]);
+    };
+    if seri.düz_veri.is_some() {
+        for (_, x, y) in seri.düz_xy_iter() {
+            ekle(Some((x, y)));
+        }
+    } else {
+        for (sıra, öğe) in seri.veri.iter().enumerate() {
+            let koordinat = match &seri.eşleme {
+                Some((x_boyutu, y_boyutu)) => {
+                    let x = eksen_değeri(öğe, x_boyutu, &kartezyen.x);
+                    let y = eksen_değeri(öğe, y_boyutu, &kartezyen.y);
+                    x.zip(y)
+                }
+                None => saçılım_xy(&öğe.değer, sıra),
+            };
+            ekle(koordinat);
+        }
+    }
+    Some(BüyükSaçılımNoktaları { konumlar, boyut })
 }
 
 /// Takvim koordinatına bağlı scatter/effectScatter noktalarını üretir.
@@ -298,12 +374,13 @@ pub fn tek_eksen_saçılım_noktaları(
 /// Scatter/effectScatter ikinci koordinat boyutunun görsel eşleme kapsamı.
 pub fn saçılım_değer_kapsamı(seri: &SaçılımSerisi) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
-    for değer in seri
+    let düz_değerler = seri.düz_xy_iter().map(|(_, _, y)| y);
+    let nesne_değerleri = seri
         .veri
         .iter()
         .enumerate()
-        .filter_map(|(sıra, öğe)| saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y))
-    {
+        .filter_map(|(sıra, öğe)| saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y));
+    for değer in düz_değerler.chain(nesne_değerleri) {
         if değer.is_finite() {
             kapsam[0] = kapsam[0].min(değer);
             kapsam[1] = kapsam[1].max(değer);
@@ -321,6 +398,15 @@ fn saçılım_görsel_değeri(
     eşleme: &GörselEşleme,
     sıra: usize,
 ) -> Option<f64> {
+    if let Some((x, y)) = seri.düz_veri.as_ref().and_then(|veri| veri.xy(sıra)) {
+        return match eşleme.boyut.as_ref() {
+            None | Some(BoyutSeçici::Sıra(1)) => Some(y),
+            Some(BoyutSeçici::Sıra(0)) => Some(x),
+            Some(BoyutSeçici::Ad(ad)) if ad == "x" => Some(x),
+            Some(BoyutSeçici::Ad(ad)) if ad == "y" => Some(y),
+            Some(BoyutSeçici::Sıra(_)) | Some(BoyutSeçici::Ad(_)) => None,
+        };
+    }
     let öğe = seri.veri.get(sıra)?;
     match eşleme.boyut.as_ref() {
         None => saçılım_xy(&öğe.değer, sıra).map(|(_, y)| y),
@@ -355,7 +441,7 @@ fn saçılım_görsel_değeri(
 /// Seçilen `visualMap.dimension` için scatter veri kapsamı.
 pub fn saçılım_görsel_kapsamı(seri: &SaçılımSerisi, eşleme: &GörselEşleme) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
-    for sıra in 0..seri.veri.len() {
+    for sıra in 0..seri.veri_sayısı() {
         if let Some(değer) = saçılım_görsel_değeri(seri, eşleme, sıra)
             && değer.is_finite()
         {
@@ -1163,6 +1249,40 @@ pub fn saçılım_çiz_eşlemeli(
     );
 }
 
+/// Büyük saçılım noktalarını ECharts'ın küçük sembol Canvas hızlandırmasıyla
+/// boyar. `LargeSymbolDraw` kenarlığı/öğe durumlarını bilerek atlar ve bütün
+/// noktalar için tek seri dolgusu kullanır. Büyük dizi, `progressive`
+/// boyutunda parçalara ayrılarak yüzeye aktarılır; tek karelik başsız çizimde
+/// parçalar ardışık tamamlanır.
+pub fn büyük_saçılım_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    noktalar: &BüyükSaçılımNoktaları,
+    seri_rengi: Renk,
+    ilerleme: f32,
+) {
+    let opaklık = seri.öğe_stili.opaklık.unwrap_or(0.8);
+    let dolgu = seri
+        .öğe_stili
+        .renk
+        .clone()
+        .unwrap_or(Dolgu::Düz(seri_rengi))
+        .opaklık(opaklık);
+    let boyut = noktalar.boyut * ilerleme.clamp(0.0, 1.0);
+    if boyut <= 0.0 {
+        return;
+    }
+    let parça_nokta_sayısı = if seri.veri_sayısı() >= seri.aşamalı_eşiği {
+        seri.aşamalı.max(1)
+    } else {
+        seri.veri_sayısı().max(1)
+    };
+    let parça_değer_sayısı = parça_nokta_sayısı.saturating_mul(2).max(2);
+    for parça in noktalar.konumlar.chunks(parça_değer_sayısı) {
+        çizici.büyük_saçılım_noktaları(parça, boyut, &dolgu);
+    }
+}
+
 /// Birden çok `visualMap` bileşeninin bağımsız renk, açıklık, opaklık ve
 /// sembol boyutu kanallarını ECharts görsel kodlama sırasıyla birleştirir.
 #[allow(clippy::too_many_arguments)]
@@ -1543,6 +1663,53 @@ mod testler {
             piksel,
             konum,
         )
+    }
+
+    #[test]
+    fn düz_float32_veri_data_index_ve_xy_değerlerini_korur() {
+        let seri = SaçılımSerisi::yeni()
+            .veri([[99.0, 99.0]])
+            .düz_veri(vec![1.25_f32, 2.5, 3.75, 4.5, 9.0]);
+
+        assert!(seri.veri.is_empty());
+        assert_eq!(seri.veri_sayısı(), 2);
+        assert_eq!(seri.xy(0), Some((1.25, 2.5)));
+        assert_eq!(seri.xy(1), Some((3.75, 4.5)));
+        assert_eq!(seri.xy(2), None);
+    }
+
+    #[test]
+    fn büyük_scatter_kırpılan_sırayı_nan_ile_korur_ve_parçalı_toplu_çizer() {
+        let seri = SaçılımSerisi::yeni()
+            .düz_veri(vec![1.0_f32, 1.0, 2.0, 2.0, 20.0, 20.0])
+            .sembol_boyutu(3.0)
+            .öğe_stili(crate::model::stil::ÖğeStili::yeni().opaklık(0.4))
+            .büyük(true)
+            .büyük_eşiği(2)
+            .aşamalı_eşiği(2)
+            .aşamalı(2);
+        let kartezyen = Kartezyen2B {
+            x: değer_ekseni([0.0, 10.0], [0.0, 100.0], EksenKonumu::Alt),
+            y: değer_ekseni([0.0, 10.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        };
+
+        let noktalar = büyük_saçılım_noktaları(&seri, &kartezyen).expect("büyük yol kurulmalı");
+        assert_eq!(noktalar.konumlar.len(), 6);
+        assert_eq!(&noktalar.konumlar[..4], &[10.0, 90.0, 20.0, 80.0]);
+        assert!(noktalar.konumlar[4].is_nan());
+        assert!(noktalar.konumlar[5].is_nan());
+
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+        büyük_saçılım_çiz(&mut yüzey, &seri, &noktalar, Renk::onaltılık(0x5470c6), 1.0);
+        let döküm = yüzey.döküm();
+        let komutlar = döküm
+            .lines()
+            .filter(|satır| satır.starts_with("büyük-saçılım"))
+            .collect::<Vec<_>>();
+        assert_eq!(komutlar.len(), 1);
+        assert!(komutlar[0].contains("adet=2"));
+        assert!(komutlar[0].contains("@0.4"));
     }
 
     #[test]

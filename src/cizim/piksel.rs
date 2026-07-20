@@ -1205,6 +1205,41 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         }
     }
 
+    fn büyük_saçılım_noktaları(&mut self, konumlar: &[f32], boyut: f32, dolgu: &Dolgu) {
+        if boyut <= 0.0 {
+            return;
+        }
+        let yarı = boyut / 2.0;
+        if let Dolgu::Düz(renk) = dolgu {
+            // LargeSymbolPath'in `< 4px` Canvas hızlandırması her noktayı
+            // ayrı `fillRect` ile boyar. Ayrı geçişler, üst üste gelen yarı
+            // saydam noktaların alfa birikimini de birebir korur.
+            for çift in konumlar.chunks_exact(2) {
+                let [x, y] = çift else { continue };
+                if !x.is_finite() || !y.is_finite() {
+                    continue;
+                }
+                self.düz_dikdörtgen_doldur(
+                    Dikdörtgen::yeni(*x - yarı, *y - yarı, boyut, boyut),
+                    *renk,
+                );
+            }
+            return;
+        }
+        for çift in konumlar.chunks_exact(2) {
+            let [x, y] = çift else { continue };
+            if !x.is_finite() || !y.is_finite() {
+                continue;
+            }
+            self.dikdörtgen(
+                Dikdörtgen::yeni(*x - yarı, *y - yarı, boyut, boyut),
+                dolgu,
+                [0.0; 4],
+                None,
+            );
+        }
+    }
+
     fn gölge(&mut self, d: Dikdörtgen, yarıçap: f32, renk: Renk, bulanıklık: f32) {
         if d.genişlik <= 0.0 || d.yükseklik <= 0.0 || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
             return;

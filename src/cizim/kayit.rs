@@ -265,6 +265,38 @@ impl ÇizimYüzeyi for KayıtYüzeyi {
         self.kaydet(satır);
     }
 
+    fn büyük_saçılım_noktaları(&mut self, konumlar: &[f32], boyut: f32, dolgu: &Dolgu) {
+        if boyut <= 0.0 {
+            return;
+        }
+        let mut adet = 0usize;
+        let mut en_küçük = (f32::INFINITY, f32::INFINITY);
+        let mut en_büyük = (f32::NEG_INFINITY, f32::NEG_INFINITY);
+        for çift in konumlar.chunks_exact(2) {
+            let [x, y] = çift else { continue };
+            if !x.is_finite() || !y.is_finite() {
+                continue;
+            }
+            adet += 1;
+            en_küçük.0 = en_küçük.0.min(*x);
+            en_küçük.1 = en_küçük.1.min(*y);
+            en_büyük.0 = en_büyük.0.max(*x);
+            en_büyük.1 = en_büyük.1.max(*y);
+        }
+        if adet == 0 {
+            return;
+        }
+        self.kaydet(format!(
+            "büyük-saçılım adet={adet} boyut={} kapsam=({},{} {}x{}) {}",
+            s(boyut),
+            s(en_küçük.0),
+            s(en_küçük.1),
+            s(en_büyük.0 - en_küçük.0),
+            s(en_büyük.1 - en_küçük.1),
+            dolgu_yaz(dolgu),
+        ));
+    }
+
     fn gölge(&mut self, d: Dikdörtgen, yarıçap: f32, renk: Renk, bulanıklık: f32) {
         let satır = format!(
             "gölge ({},{} {}x{}) r={} {} b={}",

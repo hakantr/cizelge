@@ -405,7 +405,7 @@ impl GrafikSeçenekleri {
                     s.eşleme.clone(),
                     s.veri_kümesi_sırası,
                     s.seri_yerleşimi,
-                    s.veri.is_empty(),
+                    s.veri_boş_mu(),
                     x_eksenleri
                         .get(s.eksen_bağı.x)
                         .is_some_and(|eksen| eksen.tür != EksenTürü::Kategori),
@@ -561,6 +561,7 @@ impl GrafikSeçenekleri {
                 }
                 Seri::Saçılım(s) => {
                     s.veri = veri;
+                    s.düz_veri = None;
                     if otomatik_eşleme && s.ad.is_none() {
                         s.ad = Some(değer_boyutu.clone());
                     }
