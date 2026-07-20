@@ -4273,6 +4273,72 @@ fn scatter_weight() -> Result<GrafikSeçenekleri, String> {
         .seri(seri("Male", erkek, 170.0, "Average")))
 }
 
+fn scatter_stream_verisini_oku() -> Result<Vec<[f64; 2]>, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/house-price-area2.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))
+}
+
+fn scatter_stream_visual() -> Result<GrafikSeçenekleri, String> {
+    let veri = scatter_stream_verisini_oku()?;
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Dispersion of house price based on the area")
+                .sol("center")
+                .üst(0)
+                .iç_boşluk(15.0),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(15_202.0)
+                .en_çok(159_980.0)
+                .boyut(1usize)
+                .sağ(10)
+                .üst("center")
+                .metin("HIGH", "LOW")
+                .hesaplanabilir(true)
+                .renkler(["#f2c31a", "#24b7f2"]),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .imleç(İmleçTürü::Çapraz),
+        )
+        .x_ekseni(Eksen::değer())
+        .y_ekseni(Eksen::değer())
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("price-area")
+                .sembol_boyutu(5.0)
+                .veri(veri),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_stream_verisi_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_ev_fiyati_varligini_kayipsiz_okur() {
+        let veri = scatter_stream_verisini_oku().expect("resmi veri okunmalı");
+        assert_eq!(veri.len(), 16_174);
+        assert_eq!(veri.first(), Some(&[18.78, 22_365.0]));
+        assert_eq!(veri.last(), Some(&[81.68, 50_931.0]));
+        let y_kapsamı = veri.iter().fold(
+            [f64::INFINITY, f64::NEG_INFINITY],
+            |[en_az, en_çok], [_, y]| [en_az.min(*y), en_çok.max(*y)],
+        );
+        assert_eq!(y_kapsamı, [15_202.0, 159_980.0]);
+    }
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6474,6 +6540,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-label-align-right" => scatter_label_align_right(),
         "scatter-aqi-color" => scatter_aqi_color(),
         "scatter-weight" => scatter_weight(),
+        "scatter-stream-visual" => scatter_stream_visual(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),

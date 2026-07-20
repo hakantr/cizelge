@@ -209,6 +209,12 @@ window.$ = {
     window.__pending = görev;
     return görev;
   },
+  // Resmî örnekler veri varlığını hem jQuery get hem de getJSON ile
+  // çağırır; ikisi de JSON yanıtı ve aynı jQuery-benzeri promise zincirini
+  // kullanır.
+  getJSON(url, callback) {
+    return this.get(url, callback);
+  },
   getScript(url) {
     const görev = new Promise((resolve, reject) => {
       const betik = document.createElement('script');

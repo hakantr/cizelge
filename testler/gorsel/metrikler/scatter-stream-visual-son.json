@@ -1,0 +1,19 @@
+{
+  "id": "scatter-stream-visual",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 875,
+  "değişen_piksel_oranı": 0.0032407407407407406,
+  "ssim": 0.9973382980005093,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-stream-visual.png",
+    "gerçek": "testler/gorsel/gerçek/default/scatter-stream-visual.png",
+    "fark": "testler/gorsel/fark/default/scatter-stream-visual.png"
+  }
+}
