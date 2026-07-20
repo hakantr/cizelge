@@ -189,6 +189,133 @@ pub fn yerleşim_hesapla(girdiler: &[SütunGirdisi], bant_genişliği: f32) -> V
         .collect()
 }
 
+#[allow(clippy::too_many_arguments)]
+fn büyük_sütun_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    girdi: &SütunGirdisi,
+    konum: SütunKonumu,
+    yatay: bool,
+    ilerleme: f32,
+    fare: Option<(f32, f32)>,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) {
+    let seri = girdi.seri;
+    let bant_ekseni = if yatay {
+        &girdi.kartezyen.y
+    } else {
+        &girdi.kartezyen.x
+    };
+    let değer_ekseni = if yatay {
+        &girdi.kartezyen.x
+    } else {
+        &girdi.kartezyen.y
+    };
+    let mut yol = Yol {
+        komutlar: Vec::with_capacity(girdi.aralıklar.len().saturating_mul(5)),
+    };
+    let mut arka_yol = seri.arka_plan_göster.then(|| Yol {
+        komutlar: Vec::with_capacity(girdi.aralıklar.len().saturating_mul(5)),
+    });
+    let mut vurgulu = None;
+
+    let dikdörtgeni_ekle = |yol: &mut Yol, d: Dikdörtgen| {
+        yol.taşı((d.x, d.y));
+        yol.çiz((d.sağ(), d.y));
+        yol.çiz((d.sağ(), d.alt()));
+        yol.çiz((d.x, d.alt()));
+        yol.kapat();
+    };
+
+    for (sıra, aralık) in girdi.aralıklar.iter().enumerate() {
+        let Some((taban, tepe)) = aralık else {
+            continue;
+        };
+        if !bant_ekseni.pencerede_mi(sıra as f64) {
+            continue;
+        }
+        let bant_merkezi = bant_ekseni.veriden_piksele(sıra as f64);
+        let kenar = bant_merkezi + konum.kaydırma;
+        let taban_p = değer_ekseni.veriden_piksele(*taban);
+        let tepe_p = değer_ekseni.veriden_piksele(*tepe);
+        let tepe_p = taban_p + (tepe_p - taban_p) * ilerleme.clamp(0.0, 1.0);
+        let d = if yatay {
+            Dikdörtgen::yeni(
+                taban_p.min(tepe_p),
+                kenar,
+                (tepe_p - taban_p).abs(),
+                konum.genişlik,
+            )
+        } else {
+            Dikdörtgen::yeni(
+                kenar,
+                taban_p.min(tepe_p),
+                konum.genişlik,
+                (tepe_p - taban_p).abs(),
+            )
+        };
+        if d.genişlik <= 0.0 || d.yükseklik <= 0.0 {
+            continue;
+        }
+        dikdörtgeni_ekle(&mut yol, d);
+        if let Some(arka_yol) = &mut arka_yol {
+            let arka = if yatay {
+                Dikdörtgen::yeni(
+                    girdi.kartezyen.alan.x,
+                    kenar,
+                    girdi.kartezyen.alan.genişlik,
+                    konum.genişlik,
+                )
+            } else {
+                Dikdörtgen::yeni(
+                    kenar,
+                    girdi.kartezyen.alan.y,
+                    konum.genişlik,
+                    girdi.kartezyen.alan.yükseklik,
+                )
+            };
+            dikdörtgeni_ekle(arka_yol, arka);
+        }
+        if fare.is_some_and(|nokta| d.içeriyor_mu(nokta)) {
+            vurgulu = Some((sıra, d));
+        }
+    }
+
+    if let Some(arka_yol) = arka_yol {
+        let arka = seri.arka_plan_stili.as_ref();
+        let dolgu = arka
+            .and_then(|stil| stil.renk.clone())
+            .unwrap_or_else(|| {
+                Dolgu::Düz(Renk::kyma(180.0 / 255.0, 180.0 / 255.0, 180.0 / 255.0, 0.2))
+            })
+            .opaklık(arka.and_then(|stil| stil.opaklık).unwrap_or(1.0));
+        çizici.yol_doldur(&arka_yol, &dolgu);
+    }
+    // `BarView.createLarge`, öğe stillerini ve kenarlıkları değil serinin
+    // tek görsel stilini kullanır; bütün rect'ler aynı dolgu yolundadır.
+    let dolgu = seri
+        .öğe_stili
+        .renk
+        .clone()
+        .unwrap_or(Dolgu::Düz(girdi.renk))
+        .opaklık(seri.öğe_stili.opaklık.unwrap_or(1.0));
+    çizici.yol_doldur(&yol, &dolgu);
+
+    // Büyük yolda yüz binlerce ayrı isabet nesnesi yerine yalnız o karede
+    // işaretçinin altında çözülen öğe olay hattına aktarılır.
+    if let Some((sıra, d)) = vurgulu
+        && let Some(öğe) = seri.veri.get(sıra)
+    {
+        isabetler.push(İsabetBölgesi {
+            seri_sırası: girdi.genel_sıra,
+            veri_sırası: sıra,
+            seri_adı: seri.ad.clone(),
+            ad: öğe.ad.clone(),
+            değer: öğe.değer.sayı(),
+            geometri: İsabetGeometrisi::Dikdörtgen(d),
+        });
+    }
+}
+
 /// Tüm görünür sütun serilerini çizer. Kategori ekseni y ise sütunlar yatay
 /// çizilir. Çizilen her sütun için `isabetler`e tıklama bölgesi eklenir.
 pub fn sütunları_çiz(
@@ -212,6 +339,10 @@ pub fn sütunları_çiz(
 
     for (girdi, konum) in girdiler.iter().zip(&konumlar) {
         let seri = girdi.seri;
+        if seri.büyük && seri.veri.len() >= seri.büyük_eşiği && seri.piktogram.is_none() {
+            büyük_sütun_çiz(çizici, girdi, *konum, yatay, ilerleme, fare, isabetler);
+            continue;
+        }
         let değer_ekseni = if yatay {
             &girdi.kartezyen.x
         } else {
@@ -510,6 +641,10 @@ pub fn sütunları_çiz(
 #[cfg(test)]
 mod testler {
     use super::*;
+    use crate::cizim::gorunum::{BoyamaGirdisi, grafiği_boya};
+    use crate::cizim::kayit::KayıtYüzeyi;
+    use crate::model::eksen::Eksen;
+    use crate::model::secenekler::GrafikSeçenekleri;
 
     #[test]
     fn iç_yazı_rengi_zrender_parlaklık_eşiklerini_izler() {
@@ -525,5 +660,34 @@ mod testler {
             otomatik_iç_yazı_rengi(Renk::onaltılık(0x111111)),
             Renk::onaltılık(0xcccccc)
         );
+    }
+
+    #[test]
+    fn buyuk_sutunlar_tek_dolgu_yolunda_toplanir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+            .y_ekseni(Eksen::değer())
+            .seri(
+                SütunSerisi::yeni()
+                    .büyük(true)
+                    .büyük_eşiği(3)
+                    .öğe_stili(crate::model::stil::ÖğeStili::yeni().renk(0x123456))
+                    .veri([10.0, 20.0, 15.0]),
+            );
+        let mut yüzey = KayıtYüzeyi::yeni(300.0, 200.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+        let döküm = yüzey.döküm();
+
+        assert_eq!(
+            döküm
+                .lines()
+                .filter(|satır| satır.starts_with("doldur #123456@1.0 |"))
+                .count(),
+            1
+        );
+        assert!(!döküm.contains("dikdörtgen #123456"));
+        assert!(çıktı.isabetler.is_empty());
     }
 }

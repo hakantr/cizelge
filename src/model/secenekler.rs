@@ -393,6 +393,107 @@ impl GrafikSeçenekleri {
         // tahsis eder. Satır ve sütun görünümleri birbirinden bağımsızdır.
         let mut otomatik_sıralar: BTreeMap<(usize, SeriYerleşimi), usize> = BTreeMap::new();
         for (seri_sırası, seri) in sonuç.seriler.iter_mut().enumerate() {
+            // Candlestick encode.y dört boyut taşır. Tek değerli serilerin
+            // ortak `(x, y)` yoluna indirgenirse open/close/lowest/highest
+            // sırası kaybolur; resmî `createSeriesData` gibi bu seri için
+            // çok boyutlu değeri doğrudan kur.
+            if let Seri::Mum(mum) = &mut *seri {
+                if !mum.veri.is_empty() {
+                    continue;
+                }
+                let Some(taban_küme) = kümeler.get(mum.veri_kümesi_sırası) else {
+                    hatalar.push(crate::hata::BilesenHatasi::EksikVeri {
+                        bileşen: "dataset",
+                        sıra: mum.veri_kümesi_sırası,
+                    });
+                    continue;
+                };
+                let dönüştürülmüş;
+                let küme = if mum.seri_yerleşimi == SeriYerleşimi::Sütun {
+                    taban_küme
+                } else {
+                    dönüştürülmüş = taban_küme.seri_yerleşimiyle(mum.seri_yerleşimi);
+                    &dönüştürülmüş
+                };
+                let (x_boyutu, y_boyutları) = match mum.eşleme.clone() {
+                    Some(eşleme) => eşleme,
+                    None => {
+                        let Some(x) = küme.boyutlar.first().cloned() else {
+                            hatalar.push(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                                alan: "dataset.encode",
+                                ayrıntı: format!(
+                                    "dataset[{}] içinde mum x boyutu yok",
+                                    mum.veri_kümesi_sırası
+                                ),
+                            });
+                            continue;
+                        };
+                        let Some(y) = küme.boyutlar.get(1..5) else {
+                            hatalar.push(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                                alan: "dataset.encode",
+                                ayrıntı: format!(
+                                    "dataset[{}] içinde mum için dört y boyutu yok",
+                                    mum.veri_kümesi_sırası
+                                ),
+                            });
+                            continue;
+                        };
+                        (x, [y[0].clone(), y[1].clone(), y[2].clone(), y[3].clone()])
+                    }
+                };
+                let adlar = match küme.metinler(&x_boyutu) {
+                    Ok(adlar) => adlar,
+                    Err(hata) => {
+                        hatalar.push(hata);
+                        continue;
+                    }
+                };
+                let mut değer_sütunları = Vec::with_capacity(4);
+                let mut geçerli = true;
+                for boyut in &y_boyutları {
+                    match küme.sayılar(boyut) {
+                        Ok(değerler) => değer_sütunları.push(değerler),
+                        Err(hata) => {
+                            hatalar.push(hata);
+                            geçerli = false;
+                            break;
+                        }
+                    }
+                }
+                if !geçerli {
+                    continue;
+                }
+                mum.veri = adlar
+                    .into_iter()
+                    .enumerate()
+                    .map(|(satır_sırası, ad)| {
+                        let değer = [
+                            değer_sütunları[0][satır_sırası],
+                            değer_sütunları[1][satır_sırası],
+                            değer_sütunları[2][satır_sırası],
+                            değer_sütunları[3][satır_sırası],
+                        ];
+                        let boyutlar = küme
+                            .boyutlar
+                            .iter()
+                            .enumerate()
+                            .map(|(boyut_sırası, boyut_adı)| {
+                                (
+                                    boyut_adı.clone(),
+                                    küme
+                                        .satırlar
+                                        .get(satır_sırası)
+                                        .and_then(|satır| satır.get(boyut_sırası))
+                                        .cloned()
+                                        .unwrap_or(crate::model::deger::VeriDeğeri::Boş),
+                                )
+                            })
+                            .collect::<Vec<_>>();
+                        crate::model::deger::VeriÖğesi::adlı(ad, değer).boyutlar(boyutlar)
+                    })
+                    .collect();
+                continue;
+            }
             let (açık_eşleme, küme_sırası, yerleşim, veri_boş, sayısal_x) = match &*seri {
                 Seri::Çizgi(s) => (
                     s.eşleme.clone(),
@@ -439,7 +540,13 @@ impl GrafikSeçenekleri {
                 });
                 continue;
             };
-            let küme = taban_küme.seri_yerleşimiyle(yerleşim);
+            let dönüştürülmüş;
+            let küme = if yerleşim == SeriYerleşimi::Sütun {
+                taban_küme
+            } else {
+                dönüştürülmüş = taban_küme.seri_yerleşimiyle(yerleşim);
+                &dönüştürülmüş
+            };
             // ECharts yalnız otomatik encode ürettiğinde `seriesName`
             // boyutunu da otomatik doldurur. Kullanıcı açık `encode.x/y`
             // verdiğinde seri adı boş kalır (legend öğesi oluşmaz).
@@ -1108,7 +1215,7 @@ mod testler {
     use super::*;
     use crate::model::deger::VeriDeğeri;
     use crate::model::eksen::EksenKırılması;
-    use crate::model::seri::{SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
+    use crate::model::seri::{MumSerisi, SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::ÖğeStili;
     use crate::renk::{Dolgu, Renk};
 
@@ -1202,6 +1309,37 @@ mod testler {
                 .collect::<Vec<_>>(),
             vec![VeriDeğeri::Çift([1.0, 10.0]), VeriDeğeri::Çift([3.0, 30.0]),]
         );
+    }
+
+    #[test]
+    fn dataset_mum_encode_dort_y_boyutunu_resmi_sirada_tasir() {
+        let küme = VeriKümesi::yeni([
+            "time", "open", "highest", "lowest", "close", "volume", "sign",
+        ])
+        .satır([
+            "2011-01-01\n00:01:00".into(),
+            10.0.into(),
+            15.0.into(),
+            8.0.into(),
+            12.0.into(),
+            42_000.0.into(),
+            1.0.into(),
+        ]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .seri(MumSerisi::yeni().eşle("time", ["open", "close", "lowest", "highest"]));
+
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+
+        assert!(hatalar.is_empty());
+        let öğe = &çözülmüş.seriler[0].veri()[0];
+        assert_eq!(öğe.ad.as_deref(), Some("2011-01-01\n00:01:00"));
+        assert_eq!(öğe.değer.dizi(), Some([10.0, 12.0, 8.0, 15.0].as_slice()));
+        assert_eq!(
+            öğe.boyut("volume").and_then(VeriDeğeri::sayı),
+            Some(42_000.0)
+        );
+        assert_eq!(öğe.boyut("sign").and_then(VeriDeğeri::sayı), Some(1.0));
     }
 
     #[test]

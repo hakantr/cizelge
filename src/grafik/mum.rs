@@ -31,12 +31,19 @@ pub fn mum_çiz(
     ilerleme: f32,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
+    if seri.büyük && seri.veri.len() >= seri.büyük_eşiği {
+        mum_büyük_çiz(çizici, seri, kartezyen);
+        return;
+    }
     let bant = kartezyen.x.bant_genişliği();
     let gövde_genişliği = (bant * seri.gövde_oranı.clamp(0.05, 1.0)).max(1.0);
     let alan = kartezyen.alan;
 
     let gövde = |ç: &mut dyn ÇizimYüzeyi, isabetler: &mut Vec<İsabetBölgesi>| {
         for (i, öğe) in seri.veri.iter().enumerate() {
+            if !kartezyen.x.pencerede_mi(i as f64) {
+                continue;
+            }
             let Some(dizi) = öğe.değer.dizi() else {
                 continue;
             };
@@ -46,10 +53,10 @@ pub fn mum_çiz(
                 continue;
             };
             let yükselen = kapanış >= açılış;
-            let renk = if yükselen {
-                seri.yükselen_renk
+            let (dolgu_rengi, kenarlık_rengi) = if yükselen {
+                (seri.yükselen_renk, seri.yükselen_kenarlık_rengi)
             } else {
-                seri.düşen_renk
+                (seri.düşen_renk, seri.düşen_kenarlık_rengi)
             };
 
             let ham_x = kartezyen.x.veriden_piksele(i as f64);
@@ -59,13 +66,36 @@ pub fn mum_çiz(
             let tepe = kartezyen.y.veriden_piksele(en_yüksek);
             let dip = kartezyen.y.veriden_piksele(en_düşük);
 
+            // `candlestickLayout.isSimpleBox`: gövde 1,3 pikselden darsa
+            // zrender yalnız yüksek–düşük çizgisini boyar.
+            if gövde_genişliği <= 1.3 {
+                let mut basit = Yol::yeni();
+                basit.taşı((x, tepe));
+                basit.çiz((x, dip));
+                çizici_fitil(ç, &basit, seri.kenarlık_kalınlığı, kenarlık_rengi);
+                isabetler.push(İsabetBölgesi {
+                    seri_sırası: genel_sıra,
+                    veri_sırası: i,
+                    seri_adı: seri.ad.clone(),
+                    ad: öğe.ad.clone(),
+                    değer: Some(kapanış),
+                    geometri: İsabetGeometrisi::Dikdörtgen(Dikdörtgen::yeni(
+                        ham_x - 0.5,
+                        tepe.min(dip),
+                        1.0,
+                        (dip - tepe).abs().max(1.0),
+                    )),
+                });
+                continue;
+            }
+
             // Fitiller (gövdenin üstünde ve altında).
             let mut fitil = Yol::yeni();
             fitil.taşı((x, tepe));
             fitil.çiz((x, gövde_üst));
             fitil.taşı((x, gövde_alt));
             fitil.çiz((x, dip));
-            çizici_fitil(ç, &fitil, seri.kenarlık_kalınlığı, renk);
+            çizici_fitil(ç, &fitil, seri.kenarlık_kalınlığı, kenarlık_rengi);
 
             // Gövde.
             let sol = mum_alt_pikseli(ham_x - gövde_genişliği / 2.0, true);
@@ -78,9 +108,9 @@ pub fn mum_çiz(
             );
             ç.dikdörtgen(
                 d,
-                &Dolgu::Düz(renk),
+                &Dolgu::Düz(dolgu_rengi),
                 [0.0; 4],
-                Some((seri.kenarlık_kalınlığı, renk)),
+                Some((seri.kenarlık_kalınlığı, kenarlık_rengi)),
             );
 
             isabetler.push(İsabetBölgesi {
@@ -113,6 +143,67 @@ pub fn mum_çiz(
         çizici.kırpılı(kırpma, &mut |ç| gövde(ç, &mut geçici));
         isabetler.append(&mut geçici);
     }
+}
+
+/// ECharts `LargeBoxPath`: her mum için gövde yerine yüksek–düşük arasında
+/// tek çizgi üretir ve işarete göre iki toplu yolda boyar. Bu yol milyonlarca
+/// ayrı zrender öğesi/isabet bölgesi üretmez.
+fn mum_büyük_çiz(çizici: &mut dyn ÇizimYüzeyi, seri: &MumSerisi, kartezyen: &Kartezyen2B) {
+    let mut yükselen = Yol {
+        komutlar: Vec::with_capacity(seri.veri.len()),
+    };
+    let mut düşen = Yol {
+        komutlar: Vec::with_capacity(seri.veri.len()),
+    };
+    let mut önceki_kapanış = None;
+
+    for (sıra, öğe) in seri.veri.iter().enumerate() {
+        let Some(dizi) = öğe.değer.dizi() else {
+            continue;
+        };
+        let (Some(&açılış), Some(&kapanış), Some(&en_düşük), Some(&en_yüksek)) =
+            (dizi.first(), dizi.get(1), dizi.get(2), dizi.get(3))
+        else {
+            continue;
+        };
+        let pozitif = if açılış < kapanış {
+            true
+        } else if açılış > kapanış {
+            false
+        } else {
+            önceki_kapanış.is_none_or(|önceki| önceki <= kapanış)
+        };
+        önceki_kapanış = Some(kapanış);
+        if !kartezyen.x.pencerede_mi(sıra as f64) {
+            continue;
+        }
+        let x = kartezyen.x.veriden_piksele(sıra as f64);
+        let y_düşük = kartezyen.y.veriden_piksele(en_düşük);
+        let y_yüksek = kartezyen.y.veriden_piksele(en_yüksek);
+        if !x.is_finite() || !y_düşük.is_finite() || !y_yüksek.is_finite() {
+            continue;
+        }
+        let yol = if pozitif {
+            &mut yükselen
+        } else {
+            &mut düşen
+        };
+        yol.taşı((x, y_düşük));
+        yol.çiz((x, y_yüksek));
+    }
+
+    çizici_fitil(
+        çizici,
+        &yükselen,
+        seri.kenarlık_kalınlığı,
+        seri.yükselen_kenarlık_rengi,
+    );
+    çizici_fitil(
+        çizici,
+        &düşen,
+        seri.kenarlık_kalınlığı,
+        seri.düşen_kenarlık_rengi,
+    );
 }
 
 fn çizici_fitil(ç: &mut dyn ÇizimYüzeyi, yol: &Yol, kalınlık: f32, renk: Renk) {
@@ -288,5 +379,43 @@ pub fn kutu_çiz(
                 (y_düşük - y_yüksek).abs().max(1.0),
             )),
         });
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod testler {
+    use super::*;
+    use crate::cizim::gorunum::{BoyamaGirdisi, grafiği_boya};
+    use crate::cizim::kayit::KayıtYüzeyi;
+    use crate::model::eksen::Eksen;
+    use crate::model::secenekler::GrafikSeçenekleri;
+
+    #[test]
+    fn buyuk_mumlar_oge_basina_sekil_yerine_iki_isaret_yolu_cizer() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::kategori().veri(["A", "B", "C"]))
+            .y_ekseni(Eksen::değer())
+            .seri(
+                MumSerisi::yeni()
+                    .büyük_eşiği(3)
+                    .yükselen_kenarlık_rengi(0x123456)
+                    .düşen_kenarlık_rengi(0x654321)
+                    .veri([
+                        [10.0, 12.0, 8.0, 14.0],
+                        [12.0, 9.0, 7.0, 13.0],
+                        [9.0, 11.0, 8.0, 12.0],
+                    ]),
+            );
+        let mut yüzey = KayıtYüzeyi::yeni(300.0, 200.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+        let döküm = yüzey.döküm();
+
+        assert!(döküm.contains("çiz #123456@1.0 k=1.0 düz |"));
+        assert!(döküm.contains("çiz #654321@1.0 k=1.0 düz |"));
+        assert!(!döküm.contains("dikdörtgen #eb5454"));
+        assert!(çıktı.isabetler.is_empty());
     }
 }

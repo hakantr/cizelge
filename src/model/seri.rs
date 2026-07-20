@@ -445,6 +445,15 @@ pub struct SütunSerisi {
     pub veri_kümesi_sırası: usize,
     /// `seriesLayoutBy`.
     pub seri_yerleşimi: SeriYerleşimi,
+    /// Büyük veri için tek bir toplu yol kullanır (`large`). ECharts bar
+    /// serisinde bu kip açıkça etkinleştirilir.
+    pub büyük: bool,
+    /// Toplu çizime geçilecek veri sayısı (`largeThreshold`).
+    pub büyük_eşiği: usize,
+    /// Bir artımlı çizim parçasındaki öğe sayısı (`progressive`).
+    pub aşamalı: usize,
+    /// Artımlı işleme eşiği (`progressiveThreshold`).
+    pub aşamalı_eşiği: usize,
 }
 
 impl Default for SütunSerisi {
@@ -475,6 +484,10 @@ impl Default for SütunSerisi {
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
+            büyük: false,
+            büyük_eşiği: 400,
+            aşamalı: 3_000,
+            aşamalı_eşiği: 3_000,
         }
     }
 }
@@ -501,6 +514,27 @@ impl SütunSerisi {
 
     pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
         self.seri_yerleşimi = yerleşim;
+        self
+    }
+
+    /// ECharts `series.bar.large`.
+    pub fn büyük(mut self, açık: bool) -> Self {
+        self.büyük = açık;
+        self
+    }
+
+    pub fn büyük_eşiği(mut self, eşik: usize) -> Self {
+        self.büyük_eşiği = eşik;
+        self
+    }
+
+    pub fn aşamalı(mut self, parça: usize) -> Self {
+        self.aşamalı = parça.max(1);
+        self
+    }
+
+    pub fn aşamalı_eşiği(mut self, eşik: usize) -> Self {
+        self.aşamalı_eşiği = eşik;
         self
     }
 
@@ -1092,6 +1126,10 @@ pub struct MumSerisi {
     pub yükselen_renk: crate::renk::Renk,
     /// Düşen mum rengi (`itemStyle.color0`).
     pub düşen_renk: crate::renk::Renk,
+    /// Yükselen mumun fitil/gövde kenarlığı (`itemStyle.borderColor`).
+    pub yükselen_kenarlık_rengi: crate::renk::Renk,
+    /// Düşen mumun fitil/gövde kenarlığı (`itemStyle.borderColor0`).
+    pub düşen_kenarlık_rengi: crate::renk::Renk,
     /// Gövde genişliğinin bant genişliğine oranı. ECharts, açık bir
     /// `barWidth` verilmediğinde bant genişliğinin yarısını kullanır.
     pub gövde_oranı: f32,
@@ -1099,6 +1137,21 @@ pub struct MumSerisi {
     pub imleyiciler: İmleyiciler,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
+    /// Veri kümesi eşlemesi: kategori boyutu ile
+    /// `[open, close, lowest, highest]` boyutları (`encode.x/y`).
+    pub eşleme: Option<(String, [String; 4])>,
+    /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
+    pub veri_kümesi_sırası: usize,
+    /// `seriesLayoutBy`.
+    pub seri_yerleşimi: SeriYerleşimi,
+    /// ECharts candlestick öntanımlısı gibi büyük veri çizimini açar.
+    pub büyük: bool,
+    /// Toplu çizime geçilecek veri sayısı (`largeThreshold`).
+    pub büyük_eşiği: usize,
+    /// Bir artımlı çizim parçasındaki öğe sayısı (`progressive`).
+    pub aşamalı: usize,
+    /// Artımlı işleme eşiği (`progressiveThreshold`).
+    pub aşamalı_eşiği: usize,
 }
 
 impl Default for MumSerisi {
@@ -1109,10 +1162,19 @@ impl Default for MumSerisi {
             // ECharts v5 öntanımlıları: color '#eb5454', color0 '#47b262'.
             yükselen_renk: crate::renk::Renk::onaltılık(0xeb5454),
             düşen_renk: crate::renk::Renk::onaltılık(0x47b262),
+            yükselen_kenarlık_rengi: crate::renk::Renk::onaltılık(0xeb5454),
+            düşen_kenarlık_rengi: crate::renk::Renk::onaltılık(0x47b262),
             gövde_oranı: 0.5,
             kenarlık_kalınlığı: 1.0,
             imleyiciler: İmleyiciler::default(),
             eksen_bağı: EksenBağı::default(),
+            eşleme: None,
+            veri_kümesi_sırası: 0,
+            seri_yerleşimi: SeriYerleşimi::Sütun,
+            büyük: true,
+            büyük_eşiği: 600,
+            aşamalı: 3_000,
+            aşamalı_eşiği: 10_000,
         }
     }
 }
@@ -1120,6 +1182,27 @@ impl Default for MumSerisi {
 impl MumSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    /// Seriyi veri kümesine bağlar. `y_boyutları` sırası ECharts
+    /// `encode.y: [open, close, lowest, highest]` ile aynıdır.
+    pub fn eşle<X, Y>(mut self, x_boyutu: X, y_boyutları: [Y; 4]) -> Self
+    where
+        X: Into<String>,
+        Y: Into<String>,
+    {
+        self.eşleme = Some((x_boyutu.into(), y_boyutları.map(Into::into)));
+        self
+    }
+
+    pub fn veri_kümesi_sırası(mut self, sıra: usize) -> Self {
+        self.veri_kümesi_sırası = sıra;
+        self
+    }
+
+    pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
+        self.seri_yerleşimi = yerleşim;
+        self
     }
 
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
@@ -1146,6 +1229,36 @@ impl MumSerisi {
 
     pub fn düşen_renk(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
         self.düşen_renk = renk.into();
+        self
+    }
+
+    pub fn yükselen_kenarlık_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.yükselen_kenarlık_rengi = renk.into();
+        self
+    }
+
+    pub fn düşen_kenarlık_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.düşen_kenarlık_rengi = renk.into();
+        self
+    }
+
+    pub fn büyük(mut self, açık: bool) -> Self {
+        self.büyük = açık;
+        self
+    }
+
+    pub fn büyük_eşiği(mut self, eşik: usize) -> Self {
+        self.büyük_eşiği = eşik;
+        self
+    }
+
+    pub fn aşamalı(mut self, parça: usize) -> Self {
+        self.aşamalı = parça.max(1);
+        self
+    }
+
+    pub fn aşamalı_eşiği(mut self, eşik: usize) -> Self {
+        self.aşamalı_eşiği = eşik;
         self
     }
 
