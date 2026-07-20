@@ -376,12 +376,24 @@ impl Gösterge {
 pub enum AraçKutusuÖzelliği {
     VeriGörünümü,
     VeriYakınlaştırma,
+    Fırça,
     SihirliÇizgi,
     SihirliSütun,
     SihirliYığın,
     GeriYükle,
     SvgKaydet,
     PngKaydet,
+}
+
+/// `toolbox.feature.brush.type` içindeki fırça araçları.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum FırçaAracıTürü {
+    Dikdörtgen,
+    Çokgen,
+    Yatay,
+    Dikey,
+    Koru,
+    Temizle,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -407,6 +419,9 @@ pub struct AraçKutusu {
     /// Dikdörtgen seçimiyle eksen yakınlaştırma ve geçmişe dönme araçları
     /// (`feature.dataZoom`: `zoom` + `back`).
     pub veri_yakınlaştırma: bool,
+    /// Genel fırça özelliğinin görünür düğmeleri
+    /// (`feature.brush.type`); sıra seçenek nesnesindeki sırayı korur.
+    pub fırça_türleri: Vec<FırçaAracıTürü>,
     /// Seri türünü çizgiye dönüştürme (`magicType: line`).
     pub sihirli_çizgi: bool,
     /// Seri türünü sütuna dönüştürme (`magicType: bar`).
@@ -432,6 +447,7 @@ impl Default for AraçKutusu {
             png_kaydet: false,
             veri_görünümü: false,
             veri_yakınlaştırma: false,
+            fırça_türleri: Vec::new(),
             sihirli_çizgi: false,
             sihirli_sütun: false,
             sihirli_yığın: false,
@@ -508,6 +524,17 @@ impl AraçKutusu {
         self
     }
 
+    /// Fırça seçimi düğmelerini verilen sırayla ekler. Boş dizi özelliği
+    /// kapatır; ECharts'ın tam öntanımlı takımı çağıran tarafından açıkça
+    /// belirtilebilir.
+    pub fn fırça_türleri(
+        mut self, türler: impl IntoIterator<Item = FırçaAracıTürü>
+    ) -> Self {
+        self.fırça_türleri = türler.into_iter().collect();
+        self.özellik_durumunu_ayarla(AraçKutusuÖzelliği::Fırça, !self.fırça_türleri.is_empty());
+        self
+    }
+
     pub fn sihirli_tür(mut self, çizgi: bool, sütun: bool) -> Self {
         self.sihirli_çizgi = çizgi;
         self.sihirli_sütun = sütun;
@@ -523,15 +550,41 @@ impl AraçKutusu {
     }
 }
 
-/// Fırça (`brush`): dikdörtgen seçim.
+/// Etkin fırça geometrisi (`brush.brushType`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum FırçaTürü {
+    #[default]
+    Dikdörtgen,
+    Çokgen,
+    Yatay,
+    Dikey,
+}
+
+/// Fırça (`brush`): dikdörtgen ya da çokgen seçim.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub struct Fırça {
     pub etkin: bool,
+    pub tür: FırçaTürü,
+    /// Seçim alanlarını koruma kipi (`brushMode: 'multiple'`).
+    pub çoklu: bool,
 }
 
 impl Fırça {
     pub fn yeni() -> Self {
-        Fırça { etkin: true }
+        Fırça {
+            etkin: true,
+            ..Default::default()
+        }
+    }
+
+    pub fn tür(mut self, tür: FırçaTürü) -> Self {
+        self.tür = tür;
+        self
+    }
+
+    pub fn çoklu(mut self, çoklu: bool) -> Self {
+        self.çoklu = çoklu;
+        self
     }
 }
 

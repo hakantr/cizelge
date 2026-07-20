@@ -20,7 +20,7 @@ use crate::calisma_zamani::{
 };
 use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::gorunum::{
-    AraçTürü, BoyamaGirdisi, SürgüBölgesi, SürgüParçası, grafiği_boya, gösterge_adları,
+    AraçTürü, BoyamaGirdisi, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya, gösterge_adları,
     İçYakınlaştırmaAlanı,
 };
 use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi};
@@ -99,12 +99,16 @@ pub struct GrafikGörünümü {
     araç_düğmeleri: AraçKutuları,
     /// Pencere-mutlak iç yakınlaştırma alanları.
     iç_yakınlaştırma_alanları: Rc<RefCell<Vec<İçYakınlaştırmaAlanı>>>,
+    /// Pencere-mutlak Kartezyen ızgaralar (lineX/lineY brush sınırı).
+    ızgara_alanları: Rc<RefCell<Vec<Dikdörtgen>>>,
     /// Etkin sürükleme (kaydırma ya da sürgü).
     sürükleme: Option<Sürükleme>,
     /// Kaydırmalı göstergenin sayfası.
     gösterge_sayfası: usize,
-    /// Etkin fırça seçimi: (başlangıç, şimdiki) pencere-mutlak.
-    fırça_seçimi: Option<((f32, f32), (f32, f32))>,
+    /// Sürmekte olan fırça alanı, pencere-mutlak.
+    fırça_seçimi: Option<FırçaAlanı>,
+    /// Tamamlanmış, temizlenene kadar kalan fırça alanları.
+    fırça_alanları: Vec<FırçaAlanı>,
     /// İlk seçenekler (araç kutusu "geri yükle" için).
     ilk_seçenekler: Arc<GrafikSeçenekleri>,
     ölçüm_önbelleği: ÖlçümÖnbelleği,
@@ -182,9 +186,11 @@ impl GrafikGörünümü {
             gösterge_okları: Rc::new(RefCell::new(Vec::new())),
             araç_düğmeleri: Rc::new(RefCell::new(Vec::new())),
             iç_yakınlaştırma_alanları: Rc::new(RefCell::new(Vec::new())),
+            ızgara_alanları: Rc::new(RefCell::new(Vec::new())),
             sürükleme: None,
             gösterge_sayfası: 0,
             fırça_seçimi: None,
+            fırça_alanları: Vec::new(),
             ölçüm_önbelleği: Rc::new(RefCell::new(std::collections::HashMap::new())),
             film: None,
             film_düğmeleri: Rc::new(RefCell::new(Vec::new())),
@@ -430,6 +436,7 @@ impl GrafikGörünümü {
         self.kapalı = model_kapalı_adları(&self.seçenekler);
         self.gösterge_sayfası = 0;
         self.fırça_seçimi = None;
+        self.fırça_alanları.clear();
         self.gezinmeyi_sıfırla();
         cx.notify();
         Ok(())
@@ -531,12 +538,16 @@ impl Render for GrafikGörünümü {
         let fare = self.fare;
         let kapalı = self.kapalı.clone();
         let gösterge_sayfası = self.gösterge_sayfası;
-        let fırça = self.fırça_seçimi.map(|(b, ş)| [b.0, b.1, ş.0, ş.1]);
+        let mut fırça_alanları = self.fırça_alanları.clone();
+        if let Some(alan) = self.fırça_seçimi.clone() {
+            fırça_alanları.push(alan);
+        }
         let gösterge_kutuları = self.gösterge_kutuları.clone();
         let isabetler = self.isabetler.clone();
         let tanılar = self.bekleyen_tanılar.clone();
         let sürgüler = self.sürgü_bölgeleri.clone();
         let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
+        let ızgara_alanları = self.ızgara_alanları.clone();
         let eşleme_kutuları = self.eşleme_kutuları.clone();
         let sürekli_eşleme_alanı = self.sürekli_eşleme_alanı.clone();
         let gösterge_okları = self.gösterge_okları.clone();
@@ -574,9 +585,11 @@ impl Render for GrafikGörünümü {
                             ipucu_öğesi: None,
                             kapalı: kapalı.clone(),
                             gösterge_sayfası,
-                            fırça: fırça.map(|[x0, y0, x1, y1]| {
-                                [x0 - köken.0, y0 - köken.1, x1 - köken.0, y1 - köken.1]
-                            }),
+                            fırça: None,
+                            fırça_alanları: fırça_alanları
+                                .iter()
+                                .map(|alan| alan.kaydır(-köken.0, -köken.1))
+                                .collect(),
                             zaman_şeridi,
                             hiyerarşi_yolu: hiyerarşi_yolu.clone(),
                             grafo_görünümü,
@@ -645,6 +658,14 @@ impl Render for GrafikGörünümü {
                             }
                             Err(_) => tanı_bildir("iç_yakınlaştırma_alanları"),
                         }
+                        match ızgara_alanları.try_borrow_mut() {
+                            Ok(mut kayıt) => {
+                                kayıt.clear();
+                                kayıt
+                                    .extend(çıktı.ızgara_alanları.iter().copied().map(kaydırılmış));
+                            }
+                            Err(_) => tanı_bildir("ızgara_alanları"),
+                        }
                         match eşleme_kutuları.try_borrow_mut() {
                             Ok(mut kayıt) => {
                                 kayıt.clear();
@@ -706,9 +727,21 @@ impl Render for GrafikGörünümü {
                 let yeni = (f32::from(olay.position.x), f32::from(olay.position.y));
                 // Fırça seçimi sürüyor.
                 if olay.pressed_button == Some(MouseButton::Left)
-                    && let Some((_, şimdiki)) = bu.fırça_seçimi.as_mut()
+                    && let Some(alan) = bu.fırça_seçimi.as_mut()
                 {
-                    *şimdiki = yeni;
+                    match alan {
+                        FırçaAlanı::Dikdörtgen { bitiş, .. } => *bitiş = yeni,
+                        FırçaAlanı::Çokgen { noktalar } => {
+                            let ekle = noktalar.last().is_none_or(|son| {
+                                (yeni.0 - son.0).powi(2) + (yeni.1 - son.1).powi(2) >= 4.0
+                            });
+                            if ekle {
+                                noktalar.push(yeni);
+                            }
+                        }
+                        FırçaAlanı::Yatay { bitiş, .. } => *bitiş = yeni.0,
+                        FırçaAlanı::Dikey { bitiş, .. } => *bitiş = yeni.1,
+                    }
                     cx.notify();
                     return;
                 }
@@ -881,23 +914,32 @@ impl Render for GrafikGörünümü {
                 MouseButton::Left,
                 cx.listener(|bu, _: &MouseUpEvent, _, cx| {
                     bu.sürükleme = None;
-                    if let Some((başlangıç, şimdiki)) = bu.fırça_seçimi.take() {
-                        let x0 = başlangıç.0.min(şimdiki.0);
-                        let x1 = başlangıç.0.max(şimdiki.0);
-                        let y0 = başlangıç.1.min(şimdiki.1);
-                        let y1 = başlangıç.1.max(şimdiki.1);
-                        if x1 - x0 > 3.0 && y1 - y0 > 3.0 {
-                            let öğeler: Vec<(usize, usize)> = match bu.isabetler.try_borrow() {
+                    if let Some(alan) = bu.fırça_seçimi.take() {
+                        if alan.geçerli_mi() {
+                            let çoklu = bu
+                                .seçenekler
+                                .fırça
+                                .map(|fırça| fırça.çoklu)
+                                .unwrap_or(false);
+                            if !çoklu {
+                                bu.fırça_alanları.clear();
+                            }
+                            bu.fırça_alanları.push(alan);
+                            let mut öğeler: Vec<(usize, usize)> = match bu.isabetler.try_borrow() {
                                 Ok(bölgeler) => bölgeler
                                     .iter()
-                                    .filter(|b| {
-                                        let (mx, my) = b.geometri.merkez();
-                                        mx >= x0 && mx <= x1 && my >= y0 && my <= y1
+                                    .filter(|bölge| {
+                                        let merkez = bölge.geometri.merkez();
+                                        bu.fırça_alanları
+                                            .iter()
+                                            .any(|alan| alan.içeriyor_mu(merkez))
                                     })
-                                    .map(|b| (b.seri_sırası, b.veri_sırası))
+                                    .map(|bölge| (bölge.seri_sırası, bölge.veri_sırası))
                                     .collect(),
                                 Err(_) => Vec::new(),
                             };
+                            öğeler.sort_unstable();
+                            öğeler.dedup();
                             cx.emit(GrafikOlayı::FırçaSeçildi { öğeler });
                         }
                         cx.notify();
@@ -978,6 +1020,7 @@ impl Render for GrafikGörünümü {
                             bu.kapalı.clear();
                             bu.gösterge_sayfası = 0;
                             bu.fırça_seçimi = None;
+                            bu.fırça_alanları.clear();
                             bu.gezinmeyi_sıfırla();
                             cx.emit(GrafikOlayı::GeriYüklendi);
                             cx.notify();
@@ -992,6 +1035,7 @@ impl Render for GrafikGörünümü {
                             let etkin = seçenekler.fırça.map(|f| f.etkin).unwrap_or(false);
                             seçenekler.fırça = (!etkin).then(crate::model::bilesen::Fırça::yeni);
                             bu.fırça_seçimi = None;
+                            bu.fırça_alanları.clear();
                             cx.notify();
                             return;
                         }
@@ -1000,6 +1044,49 @@ impl Render for GrafikGörünümü {
                             seçenekler.fırça = None;
                             seçenekler.veri_yakınlaştırmaları.clear();
                             bu.fırça_seçimi = None;
+                            bu.fırça_alanları.clear();
+                            cx.notify();
+                            return;
+                        }
+                        Some(AraçTürü::Fırça(tür)) => {
+                            use crate::model::bilesen::{FırçaAracıTürü, FırçaTürü};
+
+                            let seçenekler = Arc::make_mut(&mut bu.seçenekler);
+                            match tür {
+                                FırçaAracıTürü::Temizle => {
+                                    bu.fırça_seçimi = None;
+                                    bu.fırça_alanları.clear();
+                                    cx.emit(GrafikOlayı::FırçaSeçildi {
+                                        öğeler: Vec::new()
+                                    });
+                                }
+                                FırçaAracıTürü::Koru => {
+                                    let mut fırça = seçenekler.fırça.unwrap_or_default();
+                                    fırça.çoklu = !fırça.çoklu;
+                                    seçenekler.fırça = Some(fırça);
+                                }
+                                tür => {
+                                    let fırça_türü = match tür {
+                                        FırçaAracıTürü::Dikdörtgen => {
+                                            FırçaTürü::Dikdörtgen
+                                        }
+                                        FırçaAracıTürü::Çokgen => FırçaTürü::Çokgen,
+                                        FırçaAracıTürü::Yatay => FırçaTürü::Yatay,
+                                        FırçaAracıTürü::Dikey => FırçaTürü::Dikey,
+                                        FırçaAracıTürü::Koru | FırçaAracıTürü::Temizle => {
+                                            return;
+                                        }
+                                    };
+                                    let etkin = seçenekler.fırça.is_some_and(|fırça| {
+                                        fırça.etkin && fırça.tür == fırça_türü
+                                    });
+                                    let mut fırça = seçenekler.fırça.unwrap_or_default();
+                                    fırça.etkin = !etkin;
+                                    fırça.tür = fırça_türü;
+                                    seçenekler.fırça = Some(fırça);
+                                    bu.fırça_seçimi = None;
+                                }
+                            }
                             cx.notify();
                             return;
                         }
@@ -1064,8 +1151,35 @@ impl Render for GrafikGörünümü {
                         return;
                     }
                     // 0c) Fırça etkinse seçim başlat.
-                    if bu.seçenekler.fırça.map(|f| f.etkin).unwrap_or(false) {
-                        bu.fırça_seçimi = Some((konum, konum));
+                    if let Some(fırça) = bu.seçenekler.fırça.filter(|fırça| fırça.etkin) {
+                        use crate::model::bilesen::FırçaTürü;
+
+                        let ızgara = || {
+                            bu.ızgara_alanları.try_borrow().ok().and_then(|alanlar| {
+                                alanlar.iter().find(|alan| alan.içeriyor_mu(konum)).copied()
+                            })
+                        };
+                        bu.fırça_seçimi = match fırça.tür {
+                            FırçaTürü::Dikdörtgen => Some(FırçaAlanı::Dikdörtgen {
+                                başlangıç: konum,
+                                bitiş: konum,
+                            }),
+                            FırçaTürü::Çokgen => Some(FırçaAlanı::Çokgen {
+                                noktalar: vec![konum],
+                            }),
+                            FırçaTürü::Yatay => ızgara().map(|alan| FırçaAlanı::Yatay {
+                                başlangıç: konum.0,
+                                bitiş: konum.0,
+                                üst: alan.y,
+                                alt: alan.alt(),
+                            }),
+                            FırçaTürü::Dikey => ızgara().map(|alan| FırçaAlanı::Dikey {
+                                başlangıç: konum.1,
+                                bitiş: konum.1,
+                                sol: alan.x,
+                                sağ: alan.sağ(),
+                            }),
+                        };
                         cx.notify();
                         return;
                     }

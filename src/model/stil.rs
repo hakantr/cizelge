@@ -92,6 +92,8 @@ pub struct ÖğeStili {
     pub renk: Option<Dolgu>,
     pub kenarlık_rengi: Option<Renk>,
     pub kenarlık_kalınlığı: f32,
+    /// Öğe kenarlığının çizgi türü (`itemStyle.borderType`).
+    pub kenarlık_türü: ÇizgiTürü,
     /// Köşe yarıçapları: `[sol üst, sağ üst, sağ alt, sol alt]`
     /// (`itemStyle.borderRadius`).
     pub kenarlık_yarıçapı: [f32; 4],
@@ -120,6 +122,11 @@ impl ÖğeStili {
 
     pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
         self.kenarlık_kalınlığı = kalınlık;
+        self
+    }
+
+    pub fn kenarlık_türü(mut self, tür: ÇizgiTürü) -> Self {
+        self.kenarlık_türü = tür;
         self
     }
 

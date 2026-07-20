@@ -427,14 +427,29 @@ impl İmNoktası {
     }
 }
 
+/// İm alanı ucunun eksen değeri. `min`/`max`, ECharts markArea sözdiziminde
+/// alanın bağlı olduğu serinin ilgili boyuttaki veri kapsamını anlatır.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum İmAlanıDeğeri {
+    Değer(f64),
+    VeriEnKüçük,
+    VeriEnBüyük,
+}
+
+impl From<f64> for İmAlanıDeğeri {
+    fn from(değer: f64) -> Self {
+        Self::Değer(değer)
+    }
+}
+
 /// Tek bir im alanı tanımı (`markArea.data` öğesi): eksen değerleriyle
 /// sınırlanan dikdörtgen. `None` uç, ızgara kenarına uzanır.
 #[derive(Clone, Copy, PartialEq, Debug, Default)]
 pub struct İmAlanıTanımı {
-    pub x0: Option<f64>,
-    pub x1: Option<f64>,
-    pub y0: Option<f64>,
-    pub y1: Option<f64>,
+    pub x0: Option<İmAlanıDeğeri>,
+    pub x1: Option<İmAlanıDeğeri>,
+    pub y0: Option<İmAlanıDeğeri>,
+    pub y1: Option<İmAlanıDeğeri>,
 }
 
 /// İm alanı (`markArea`): vurgulanan bölgeler.
@@ -456,8 +471,8 @@ impl İmAlanı {
         self.veri.push((
             Some(ad.into()),
             İmAlanıTanımı {
-                x0: Some(x0),
-                x1: Some(x1),
+                x0: Some(x0.into()),
+                x1: Some(x1.into()),
                 ..Default::default()
             },
         ));
@@ -469,8 +484,8 @@ impl İmAlanı {
         self.veri.push((
             Some(ad.into()),
             İmAlanıTanımı {
-                y0: Some(y0),
-                y1: Some(y1),
+                y0: Some(y0.into()),
+                y1: Some(y1.into()),
                 ..Default::default()
             },
         ));
@@ -479,6 +494,21 @@ impl İmAlanı {
 
     pub fn tanım(mut self, ad: Option<String>, tanım: İmAlanıTanımı) -> Self {
         self.veri.push((ad, tanım));
+        self
+    }
+
+    /// Her iki eksende serinin veri kapsamını çevreleyen resmi
+    /// `[{xAxis:'min', yAxis:'min'}, {xAxis:'max', yAxis:'max'}]` alanı.
+    pub fn veri_kapsamı(mut self, ad: impl Into<String>) -> Self {
+        self.veri.push((
+            Some(ad.into()),
+            İmAlanıTanımı {
+                x0: Some(İmAlanıDeğeri::VeriEnKüçük),
+                x1: Some(İmAlanıDeğeri::VeriEnBüyük),
+                y0: Some(İmAlanıDeğeri::VeriEnKüçük),
+                y1: Some(İmAlanıDeğeri::VeriEnBüyük),
+            },
+        ));
         self
     }
 

@@ -49,7 +49,7 @@ pub use calisma_zamani::{
     ÖrnekBaşlatmaSeçenekleri,
 };
 pub use cizim::gorunum::{
-    AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, SürgüBölgesi, SürgüParçası, grafiği_boya,
+    AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya,
     İçYakınlaştırmaAlanı,
 };
 #[cfg(feature = "gpui")]
@@ -76,8 +76,9 @@ pub use genisletme::{
 pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::agac::AğaçDüğümü;
 pub use model::bilesen::{
-    AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, Gösterge, GöstergeSeçimKipi,
-    Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi, İpucuKonumu, İpucuParametresi,
+    AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaTürü,
+    Gösterge, GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi,
+    İpucuKonumu, İpucuParametresi,
 };
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
@@ -91,9 +92,9 @@ pub use model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
 };
 pub use model::imleyici::{
-    İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler, İmÇizgisi,
-    İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası, İmÇizgisiTanımı, İmÇizgisiUcu,
-    İmÇizgisiUçSimgesi,
+    İmAlanı, İmAlanıDeğeri, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü,
+    İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası,
+    İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
 };
 pub use model::kutupsal::KutupsalKoordinat;
 pub use model::matris::{
@@ -146,7 +147,9 @@ pub mod hazir {
         SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
         ÖrnekBaşlatmaSeçenekleri,
     };
-    pub use crate::cizim::gorunum::{BoyamaGirdisi, BoyamaÇıktısı, grafiği_boya};
+    pub use crate::cizim::gorunum::{
+        BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, grafiği_boya
+    };
     #[cfg(feature = "gpui")]
     pub use crate::cizim::pencere::GrafikGörünümü;
     #[cfg(feature = "png")]
@@ -172,9 +175,9 @@ pub mod hazir {
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
     pub use crate::model::agac::AğaçDüğümü;
     pub use crate::model::bilesen::{
-        AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, Gösterge,
-        GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi,
-        İpucuKonumu, İpucuParametresi,
+        AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü,
+        FırçaTürü, Gösterge, GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
+        İpucuBiçimleyicisi, İpucuKonumu, İpucuParametresi,
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{
@@ -188,9 +191,9 @@ pub mod hazir {
         HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
     };
     pub use crate::model::imleyici::{
-        İmAlanı, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü, İmleyiciler,
-        İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası, İmÇizgisiTanımı,
-        İmÇizgisiUcu, İmÇizgisiUçSimgesi,
+        İmAlanı, İmAlanıDeğeri, İmAlanıTanımı, İmDeğeri, İmNoktası, İmNoktasıTanımı, İmYönü,
+        İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası,
+        İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
     };
     pub use crate::model::kutupsal::KutupsalKoordinat;
     pub use crate::model::matris::{

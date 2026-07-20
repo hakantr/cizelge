@@ -4,9 +4,10 @@
 
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, keskin, ÇizimYüzeyi};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
+use crate::model::deger::VeriDeğeri;
 use crate::model::imleyici::{
-    İmDeğeri, İmYönü, İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması,
-    İmÇizgisiUcu, İmÇizgisiUçSimgesi,
+    İmAlanıDeğeri, İmDeğeri, İmYönü, İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu,
+    İmÇizgisiEtiketYaması, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
 };
 use crate::model::seri::Seri;
 use crate::model::stil::{Etiket, YazıDikeyHizası, YazıYatayHizası};
@@ -24,6 +25,46 @@ fn otomatik_iç_yazı_rengi(ana_renk: Renk) -> Renk {
         Renk::onaltılık(0xeeeeee)
     } else {
         Renk::onaltılık(0xcccccc)
+    }
+}
+
+fn seri_xy_kapsamı(seri: &Seri, kartezyen: &Kartezyen2B) -> Option<([f64; 2], [f64; 2])> {
+    let mut x = [f64::INFINITY, f64::NEG_INFINITY];
+    let mut y = [f64::INFINITY, f64::NEG_INFINITY];
+    for (sıra, öğe) in seri.veri().iter().enumerate() {
+        let nokta = match &öğe.değer {
+            VeriDeğeri::Çift([x, y]) => Some((*x, *y)),
+            VeriDeğeri::Dizi(değerler) if değerler.len() >= 2 => {
+                Some((değerler[0], değerler[1]))
+            }
+            değer => değer.sayı().map(|değer| {
+                if kartezyen.y.ölçek.kategorik_mi() && !kartezyen.x.ölçek.kategorik_mi() {
+                    (değer, sıra as f64)
+                } else {
+                    (sıra as f64, değer)
+                }
+            }),
+        };
+        let Some((x_değeri, y_değeri)) = nokta else {
+            continue;
+        };
+        if x_değeri.is_finite() {
+            x[0] = x[0].min(x_değeri);
+            x[1] = x[1].max(x_değeri);
+        }
+        if y_değeri.is_finite() {
+            y[0] = y[0].min(y_değeri);
+            y[1] = y[1].max(y_değeri);
+        }
+    }
+    (x[0].is_finite() && x[1].is_finite() && y[0].is_finite() && y[1].is_finite()).then_some((x, y))
+}
+
+fn im_alanı_değeri_çöz(değer: İmAlanıDeğeri, kapsam: [f64; 2]) -> f64 {
+    match değer {
+        İmAlanıDeğeri::Değer(değer) => değer,
+        İmAlanıDeğeri::VeriEnKüçük => kapsam[0],
+        İmAlanıDeğeri::VeriEnBüyük => kapsam[1],
     }
 }
 
@@ -440,27 +481,62 @@ pub fn im_alanlarını_çiz(
     };
     let alan = kartezyen.alan;
     let dolgu = im_alanı_dolgusu(alan_imi, seri_rengi);
-    let _ = seri;
+    let (x_kapsamı, y_kapsamı) =
+        seri_xy_kapsamı(seri, kartezyen).unwrap_or(([0.0, 1.0], [0.0, 1.0]));
 
     for (ad, tanım) in &alan_imi.veri {
         let x0 = tanım
             .x0
-            .map(|v| kartezyen.x.veriden_piksele(v))
+            .map(|v| {
+                kartezyen
+                    .x
+                    .veriden_piksele(im_alanı_değeri_çöz(v, x_kapsamı))
+            })
             .unwrap_or(alan.x);
         let x1 = tanım
             .x1
-            .map(|v| kartezyen.x.veriden_piksele(v))
+            .map(|v| {
+                kartezyen
+                    .x
+                    .veriden_piksele(im_alanı_değeri_çöz(v, x_kapsamı))
+            })
             .unwrap_or(alan.sağ());
         let y0 = tanım
             .y0
-            .map(|v| kartezyen.y.veriden_piksele(v))
+            .map(|v| {
+                kartezyen
+                    .y
+                    .veriden_piksele(im_alanı_değeri_çöz(v, y_kapsamı))
+            })
             .unwrap_or(alan.y);
         let y1 = tanım
             .y1
-            .map(|v| kartezyen.y.veriden_piksele(v))
+            .map(|v| {
+                kartezyen
+                    .y
+                    .veriden_piksele(im_alanı_değeri_çöz(v, y_kapsamı))
+            })
             .unwrap_or(alan.alt());
         let d = Dikdörtgen::yeni(x0.min(x1), y0.min(y1), (x1 - x0).abs(), (y1 - y0).abs());
         yüzey.dikdörtgen(d, &dolgu, [0.0; 4], None);
+        if alan_imi.stil.kenarlık_kalınlığı > 0.0 {
+            let renk = alan_imi.stil.kenarlık_rengi.unwrap_or(seri_rengi);
+            let mut kenarlık = Yol::yeni();
+            // ECharts `markArea` çokgenini sol alttan başlatır. Özellikle kesikli
+            // kenarlıklarda başlangıç köşesi çizgi fazını belirlediği için aynı
+            // dolaşım sırasını korumak görsel eşleşmenin parçasıdır.
+            kenarlık.taşı((d.x, d.alt()));
+            kenarlık.çiz((d.sağ(), d.alt()));
+            kenarlık.çiz((d.sağ(), d.y));
+            kenarlık.çiz((d.x, d.y));
+            kenarlık.kapat();
+            yüzey.yol_çiz(
+                &kenarlık,
+                alan_imi.stil.kenarlık_kalınlığı,
+                renk,
+                alan_imi.stil.kenarlık_türü,
+            );
+        }
 
         if let Some(ad) = ad
             && (alan_imi.etiket.göster || !ad.is_empty())
@@ -471,14 +547,17 @@ pub fn im_alanlarını_çiz(
                 .yazı
                 .renk
                 .unwrap_or_else(tema::birincil_metin);
-            yüzey.yazı(
+            yüzey.dönüşümlü_konturlu_yazı(
                 ad,
-                (d.x + d.genişlik / 2.0, d.y - 4.0),
+                (d.x + d.genişlik / 2.0, d.y - 5.5),
                 YatayHiza::Orta,
                 DikeyHiza::Alt,
                 boyut,
                 renk,
-                false,
+                alan_imi.etiket.yazı.kalın,
+                Renk::onaltılık(0xffffff),
+                2.0,
+                AfinMatris::BİRİM,
             );
         }
     }
@@ -533,12 +612,11 @@ pub fn im_çizgi_ve_noktalarını_çiz(
             im_uç_simgesini_çiz(yüzey, parça.bitiş_simgesi, bitiş, başlangıç, renk);
             let etiket = im_çizgisi_etiketini_çöz(çizgi_imi, parça.etiket.as_ref());
             let ham = ondalık_kırp(başlangıç_değeri);
-            let varsayılan = parça.ad.as_deref().unwrap_or(&ham);
             let metin = im_çizgisi_etiket_metni(
                 &etiket,
                 başlangıç_değeri,
                 &ham,
-                varsayılan,
+                &ham,
                 seri.ad().unwrap_or_default(),
                 parça.ad.as_deref().unwrap_or_default(),
             );
@@ -549,17 +627,12 @@ pub fn im_çizgi_ve_noktalarını_çiz(
                 continue;
             };
             let biçimli_değer = binlik_ayır(yuvarla(değer, 2));
-            let etiket_metni = tanım
-                .ad
-                .clone()
-                .map(|ad| format!("{ad}: {biçimli_değer}"))
-                .unwrap_or_else(|| biçimli_değer.clone());
             let etiket = im_çizgisi_etiketini_çöz(çizgi_imi, tanım.etiket.as_ref());
             let etiket_metni = im_çizgisi_etiket_metni(
                 &etiket,
                 değer,
                 &biçimli_değer,
-                &etiket_metni,
+                &biçimli_değer,
                 seri.ad().unwrap_or_default(),
                 tanım.ad.as_deref().unwrap_or_default(),
             );
@@ -743,14 +816,23 @@ fn raptiye_çiz(
             .yazı
             .renk
             .unwrap_or_else(|| otomatik_iç_yazı_rengi(renk));
-        yüzey.yazı(
+        // Symbol iç etiketi, `pin` yolunun geometrik merkezine değil
+        // zrender `calculateTextPosition` sonucuna yerleşir. 50 px resmi
+        // raptiyede bu çapa sivri uçtan 26.142857 px yukarıdadır ve boyutla
+        // doğrusal ölçeklenir. Marker varsayılanı ayrıca 2 px seri rengi
+        // `textBorder` uygular.
+        let yazı_merkezi = (uç.0, uç.1 - boyut * 0.522_857_1);
+        yüzey.dönüşümlü_konturlu_yazı(
             metin,
-            merkez,
+            yazı_merkezi,
             YatayHiza::Orta,
             DikeyHiza::Orta,
             boyut_yazı,
             yazı_rengi,
             nokta_imi.etiket.yazı.kalın,
+            renk,
+            2.0,
+            AfinMatris::BİRİM,
         );
     }
 }
@@ -759,11 +841,41 @@ fn raptiye_çiz(
 #[allow(clippy::expect_used, clippy::panic)]
 mod testler {
     use super::*;
-    use crate::model::imleyici::İmAlanı;
-    use crate::model::stil::{YazıStili, ÖğeStili};
+    use crate::cizim::KayıtYüzeyi;
+    use crate::koordinat::ÇalışmaEkseni;
+    use crate::model::eksen::{Eksen, EksenKonumu};
+    use crate::model::imleyici::{İmAlanı, İmÇizgisiTanımı};
+    use crate::model::seri::SaçılımSerisi;
+    use crate::model::stil::{YazıStili, ÇizgiTürü, ÖğeStili};
+    use crate::olcek::{AralıkÖlçeği, Ölçek};
 
     fn yakın(sol: f32, sağ: f32) {
         assert!((sol - sağ).abs() < 1e-3, "{sol} != {sağ}");
+    }
+
+    fn değer_ekseni(kapsam: [f64; 2], piksel: [f32; 2], konum: EksenKonumu) -> ÇalışmaEkseni {
+        ÇalışmaEkseni::yeni(
+            Eksen::değer(),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                kapsam,
+                Some(kapsam[0]),
+                Some(kapsam[1]),
+                false,
+                5,
+                None,
+                None,
+            )),
+            piksel,
+            konum,
+        )
+    }
+
+    fn test_kartezyeni() -> Kartezyen2B {
+        Kartezyen2B {
+            x: değer_ekseni([0.0, 10.0], [0.0, 100.0], EksenKonumu::Alt),
+            y: değer_ekseni([0.0, 100.0], [100.0, 0.0], EksenKonumu::Sol),
+            alan: Dikdörtgen::yeni(0.0, 0.0, 100.0, 100.0),
+        }
     }
 
     #[test]
@@ -780,6 +892,73 @@ mod testler {
             panic!("açık markArea dolgusu düz renk olmalı");
         };
         yakın(açık_renk.alfa, 0.1);
+    }
+
+    #[test]
+    fn markarea_veri_min_max_kapsamini_ve_resmi_kesik_fazini_kullanir() {
+        let seri = Seri::from(SaçılımSerisi::yeni().veri([[2.0, 30.0], [8.0, 70.0]]));
+        let imleyiciler = İmleyiciler {
+            alan: Some(
+                İmAlanı::yeni().veri_kapsamı("Kapsam").stil(
+                    ÖğeStili::yeni()
+                        .kenarlık_kalınlığı(1.0)
+                        .kenarlık_türü(ÇizgiTürü::Kesikli),
+                ),
+            ),
+            ..Default::default()
+        };
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+
+        im_alanlarını_çiz(
+            &mut yüzey,
+            &imleyiciler,
+            &seri,
+            &test_kartezyeni(),
+            Renk::onaltılık(0x5470c6),
+        );
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("dikdörtgen (20.0,30.0 60.0x40.0)"),
+            "veri kapsamı çözülmedi: {döküm}"
+        );
+        assert!(
+            döküm.contains("kesikli | T(20.0,70.0) Ç(80.0,70.0) Ç(80.0,30.0) Ç(20.0,30.0) Z"),
+            "kesik çizgi ECharts'ın sol-alt başlangıç fazını izlemiyor: {döküm}"
+        );
+    }
+
+    #[test]
+    fn markline_adlandirilmis_istatistikte_varsayilan_olarak_yalniz_degeri_yazar() {
+        let seri = Seri::from(
+            SaçılımSerisi::yeni()
+                .ad("Kadın")
+                .veri([[2.0, 40.0], [8.0, 60.0]]),
+        );
+        let imleyiciler = İmleyiciler {
+            çizgi: Some(
+                İmÇizgisi::yeni()
+                    .tanım(İmÇizgisiTanımı::yeni(İmYönü::Yatay, İmDeğeri::Ortalama).ad("AVG")),
+            ),
+            ..Default::default()
+        };
+        let mut yüzey = KayıtYüzeyi::yeni(100.0, 100.0);
+
+        im_çizgi_ve_noktalarını_çiz(
+            &mut yüzey,
+            &imleyiciler,
+            &seri,
+            &test_kartezyeni(),
+            Renk::onaltılık(0x5470c6),
+            0.0,
+        );
+
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("yazı \"50\""), "{döküm}");
+        assert!(
+            !döküm.contains("AVG:"),
+            "ad yalnız {{b}} ile yazılmalı: {döküm}"
+        );
     }
 
     #[test]

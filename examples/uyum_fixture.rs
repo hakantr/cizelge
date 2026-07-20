@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 use base64::Engine as _;
 use cizelge::hazir::*;
+use cizelge::yardimci::bicim::ondalık_kırp;
 use serde::Deserialize;
 use serde::de::DeserializeOwned;
 
@@ -4176,6 +4177,102 @@ fn scatter_aqi_color() -> Result<GrafikSeçenekleri, String> {
         .seri(seri("广州", veri[2].clone())))
 }
 
+fn scatter_weight() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/scatter-weight.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let kadın: Vec<[f64; 2]> = resmi_javascript_dizisi(&kaynak, "name: 'Female'")?;
+    let erkek: Vec<[f64; 2]> = resmi_javascript_dizisi(&kaynak, "name: 'Male'")?;
+
+    let seri = |ad: &str, veri: Vec<[f64; 2]>, dikey_im: f64, ortalama_adı: &str| {
+        let alan = İmAlanı::yeni()
+            .veri_kapsamı(format!("{ad} Data Range"))
+            .stil(
+                ÖğeStili::yeni()
+                    .renk("transparent")
+                    .kenarlık_kalınlığı(1.0)
+                    .kenarlık_türü(ÇizgiTürü::Kesikli),
+            );
+        let çizgi = İmÇizgisi::yeni()
+            .stil(ÇizgiStili::yeni().kalınlık(1.0).tür(ÇizgiTürü::Düz))
+            .tanım(İmÇizgisiTanımı::yeni(İmYönü::Yatay, İmDeğeri::Ortalama).ad(ortalama_adı))
+            .dikey(İmDeğeri::Değer(dikey_im));
+        SaçılımSerisi::yeni()
+            .ad(ad)
+            .veri(veri)
+            .im_alanı(alan)
+            .im_noktası(İmNoktası::yeni().en_büyük().en_küçük())
+            .im_çizgisi(çizgi)
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Male and female height and weight distribution")
+                .alt_metin("Data from: Heinz 2003")
+                .iç_boşluk(15.0),
+        )
+        .ızgara(
+            Izgara::yeni()
+                .sol("3%")
+                .sağ("7%")
+                .alt("7%")
+                .etiketi_kapsa(true),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .imleç(İmleçTürü::Çapraz)
+                .bağlamlı_biçimleyici(|parametreler| {
+                    let Some(parametre) = parametreler.first() else {
+                        return String::new();
+                    };
+                    match &parametre.değer {
+                        VeriDeğeri::Çift([boy, ağırlık]) => format!(
+                            "{} :<br/>{}cm {}kg ",
+                            parametre.seri_adı,
+                            ondalık_kırp(*boy),
+                            ondalık_kırp(*ağırlık)
+                        ),
+                        değer => format!(
+                            "{} :<br/>{} : {}kg ",
+                            parametre.seri_adı,
+                            parametre.ad,
+                            değer.sayı().map(ondalık_kırp).unwrap_or_default()
+                        ),
+                    }
+                }),
+        )
+        .araç_kutusu(AraçKutusu::yeni().veri_yakınlaştırma(true).fırça_türleri([
+            FırçaAracıTürü::Dikdörtgen,
+            FırçaAracıTürü::Çokgen,
+            FırçaAracıTürü::Temizle,
+        ]))
+        .fırça(Fırça::default())
+        .gösterge(
+            Gösterge::yeni()
+                .sol("center")
+                .alt(10)
+                .iç_boşluk(15.0)
+                .veri(["Female", "Male"]),
+        )
+        .x_ekseni(
+            Eksen::değer()
+                .ölçekli(true)
+                .etiket_biçimleyici("{value} cm")
+                .bölme_çizgisi_göster(false),
+        )
+        .y_ekseni(
+            Eksen::değer()
+                .ölçekli(true)
+                .etiket_biçimleyici("{value} kg")
+                .bölme_çizgisi_göster(false),
+        )
+        .seri(seri("Female", kadın, 160.0, "AVG"))
+        .seri(seri("Male", erkek, 170.0, "Average")))
+}
+
 fn candlestick_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -6376,6 +6473,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-label-align-top" => scatter_label_align_top(),
         "scatter-label-align-right" => scatter_label_align_right(),
         "scatter-aqi-color" => scatter_aqi_color(),
+        "scatter-weight" => scatter_weight(),
         "candlestick-simple" => Ok(candlestick_simple()),
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
