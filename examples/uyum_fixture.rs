@@ -5181,6 +5181,7 @@ const BESIN_ALANLARI: [&str; 17] = [
 
 #[derive(Debug)]
 struct BesinSatırı {
+    ad: String,
     grup: String,
     değerler: [f64; 17],
 }
@@ -5205,6 +5206,11 @@ fn scatter_nutrients_verisini_oku() -> Result<(Vec<BesinSatırı>, Vec<String>),
 
     let mut satırlar = Vec::with_capacity(ham.len().min(1_000));
     for (sıra, satır) in ham.into_iter().take(1_000).enumerate() {
+        let ad = satır
+            .first()
+            .and_then(serde_json::Value::as_str)
+            .ok_or_else(|| format!("{} satır {sıra}: name metni eksik", dosya.display()))?
+            .to_owned();
         let grup = satır
             .get(1)
             .and_then(serde_json::Value::as_str)
@@ -5223,7 +5229,9 @@ fn scatter_nutrients_verisini_oku() -> Result<(Vec<BesinSatırı>, Vec<String>),
                 // bozuk bir kimliği de güvenli biçimde aynı sıfıra düşürürüz.
                 .unwrap_or(0.0);
         }
-        satırlar.push(BesinSatırı { grup, değerler });
+        satırlar.push(BesinSatırı {
+            ad, grup, değerler
+        });
     }
     Ok((satırlar, kategoriler))
 }
@@ -5313,6 +5321,258 @@ fn scatter_nutrients(durum: &str) -> Result<GrafikSeçenekleri, String> {
             .aşamalı_eşiği(5_000)
             .veri(veri),
     ))
+}
+
+fn scatter_nutrients_matrix(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let (satırlar, kategoriler) = scatter_nutrients_verisini_oku()?;
+    let mut alanlar = ["carbohydrate", "calcium", "potassium", "fiber"];
+    if let Some(ham) = durum.strip_prefix("axes-") {
+        let seçilen = ham.split('-').collect::<Vec<_>>();
+        if seçilen.len() != 4 {
+            return Err(format!(
+                "scatter-nutrients-matrix dört eksen alanı bekliyor: {durum}"
+            ));
+        }
+        alanlar.copy_from_slice(&seçilen);
+    }
+    let alan_sırası = |ad: &str| {
+        BESIN_ALANLARI
+            .iter()
+            .position(|alan| *alan == ad)
+            .filter(|sıra| (2..16).contains(sıra))
+            .ok_or_else(|| format!("scatter-nutrients-matrix alanı geçersiz: {ad}"))
+    };
+    let [x_sol_sırası, y_üst_sırası, x_sağ_sırası, y_alt_sırası] = [
+        alan_sırası(alanlar[0])?,
+        alan_sırası(alanlar[1])?,
+        alan_sırası(alanlar[2])?,
+        alan_sırası(alanlar[3])?,
+    ];
+    let grup_renkleri = (0..kategoriler.len())
+        .map(|sıra| Renk::onaltılık(0x5a94df).ton_ile((13 * sıra) as f32))
+        .collect::<Vec<_>>();
+    let eksen_renkleri = [0x2a8339, 0xa68b36, 0x367da6, 0xbd5692];
+    let eksen = |ızgara_sırası: usize, ad: &str, renk: u32, yatay: bool| {
+        let ad_konumu = if yatay {
+            EksenAdKonumu::Orta
+        } else {
+            EksenAdKonumu::Bitiş
+        };
+        Eksen::değer()
+            .ad(ad)
+            .ad_konumu(ad_konumu)
+            .ad_boşluğu(if yatay { 30.0 } else { 10.0 })
+            .ad_yazı(YazıStili::yeni().renk(renk))
+            .ızgara_sırası(ızgara_sırası)
+            .çizgi(EksenÇizgisi::yeni().renk(renk))
+            .çentik(EksenÇentiği::yeni().renk(renk))
+            .etiket(EksenEtiketi::yeni().yazı(YazıStili::yeni().renk(renk)))
+            .bölme_çizgisi_göster(false)
+    };
+    let seri_verisi = |x_sırası: usize, y_sırası: usize, x_adı: &str, y_adı: &str| {
+        satırlar
+            .iter()
+            .enumerate()
+            .map(|(sıra, satır)| {
+                let x = satır.değerler[x_sırası];
+                let y = satır.değerler[y_sırası];
+                VeriÖğesi::adlı(satır.ad.clone(), [x, y]).boyutlar([
+                    ("x".to_owned(), x.into()),
+                    ("y".to_owned(), y.into()),
+                    ("group".to_owned(), satır.grup.clone().into()),
+                    ("name".to_owned(), satır.ad.clone().into()),
+                    ("schemaX".to_owned(), x_adı.to_owned().into()),
+                    ("schemaY".to_owned(), y_adı.to_owned().into()),
+                    ("index".to_owned(), (sıra as f64).into()),
+                ])
+            })
+            .collect::<Vec<_>>()
+    };
+    let seri =
+        |ızgara_sırası: usize, x_sırası: usize, y_sırası: usize, x_adı: &str, y_adı: &str| {
+            SaçılımSerisi::yeni()
+                .ad("nutrients")
+                .eksenler(ızgara_sırası, ızgara_sırası)
+                .z_seviyesi(1)
+                .sembol_boyutu(8.0)
+                .vurgu_öğe_stili(ÖğeStili::yeni().renk(0xffffff))
+                .animasyon_eşiği(5_000)
+                .aşamalı_eşiği(5_000)
+                .veri(seri_verisi(x_sırası, y_sırası, x_adı, y_adı))
+        };
+    let yakınlaştırma = || {
+        VeriYakınlaştırma::sürgü()
+            .süzme_kipi(YakınlaştırmaSüzmeKipi::Boşalt)
+            .gerçek_zamanlı(false)
+    };
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .animasyon_eğrisi(Yumuşatma::KübikGirişÇıkış)
+        .animasyon_süresi_güncelleme(2_000.0)
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Kapalı)
+                .imleç(İmleçTürü::Çapraz)
+                .imleç_animasyonu(false)
+                .imleç_etiketi_arkaplanı(0x555566)
+                .arkaplan(Renk::kyma(0.0, 0.0, 0.0, 0.7))
+                .yazı(YazıStili::yeni().renk(0xffffff).boyut(12.0))
+                .bağlantılı(true),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sol(80)
+                .üst(50)
+                .genişlik("35%")
+                .yükseklik("35%"),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sol(80)
+                .alt(80)
+                .genişlik("35%")
+                .yükseklik("35%"),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sağ(50)
+                .üst(50)
+                .genişlik("35%")
+                .yükseklik("35%"),
+        )
+        .ızgara_ekle(
+            Izgara::yeni()
+                .sağ(50)
+                .alt(80)
+                .genişlik("35%")
+                .yükseklik("35%"),
+        )
+        .x_ekseni_ekle(eksen(0, alanlar[0], eksen_renkleri[0], true))
+        .x_ekseni_ekle(eksen(1, alanlar[0], eksen_renkleri[0], true))
+        .x_ekseni_ekle(eksen(2, alanlar[2], eksen_renkleri[2], true))
+        .x_ekseni_ekle(eksen(3, alanlar[2], eksen_renkleri[2], true))
+        .y_ekseni_ekle(eksen(0, alanlar[1], eksen_renkleri[1], false))
+        .y_ekseni_ekle(eksen(1, alanlar[3], eksen_renkleri[3], false))
+        .y_ekseni_ekle(eksen(2, alanlar[1], eksen_renkleri[1], false))
+        .y_ekseni_ekle(eksen(3, alanlar[3], eksen_renkleri[3], false))
+        .veri_yakınlaştırma(
+            yakınlaştırma()
+                .x_eksenleri([0, 1])
+                .sol(80)
+                .alt(10)
+                .genişlik("35%")
+                .yükseklik(20),
+        )
+        .veri_yakınlaştırma(
+            yakınlaştırma()
+                .x_eksenleri([2, 3])
+                .sağ(50)
+                .alt(10)
+                .genişlik("35%")
+                .yükseklik(20),
+        )
+        .veri_yakınlaştırma(
+            yakınlaştırma()
+                .y_eksenleri([0, 2])
+                .sol(10)
+                .üst(50)
+                .genişlik(20)
+                .yükseklik("35%"),
+        )
+        .veri_yakınlaştırma(
+            yakınlaştırma()
+                .y_eksenleri([1, 3])
+                .sol(10)
+                .alt(80)
+                .genişlik(20)
+                .yükseklik("35%"),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .göster(false)
+                .gerçek_zamanlı(false)
+                .üst(20)
+                .boyut(2usize)
+                .kategoriler(kategoriler)
+                .renkler(grup_renkleri)
+                .aralık_dışı_renk("#ccc"),
+        )
+        .seri(seri(0, x_sol_sırası, y_üst_sırası, alanlar[0], alanlar[1]))
+        .seri(seri(1, x_sol_sırası, y_alt_sırası, alanlar[0], alanlar[3]))
+        .seri(seri(2, x_sağ_sırası, y_üst_sırası, alanlar[2], alanlar[1]))
+        .seri(seri(3, x_sağ_sırası, y_alt_sırası, alanlar[2], alanlar[3]));
+    if durum == "zoom-left" {
+        seçenekler.veri_yakınlaştırmaları[0] = seçenekler.veri_yakınlaştırmaları[0]
+            .clone()
+            .aralık(20.0, 80.0);
+
+        // Resmî örnek zlevel=1 katmanında motionBlur kullanır. dataZoom
+        // action'ı geldiğinde önceki tuval `lastFrameAlpha=0.7` ile kalır,
+        // ardından daraltılmış eksenlerdeki yeni semboller çizilir. Önceki
+        // sol-grid piksel konumlarını yeni [17.8, 71.2] kapsamına taşıyarak
+        // aynı kareyi ayrı, %0.8 * %0.7 = %0.56 opaklıklı serilerle koru.
+        let geçmiş_seri = |ızgara_sırası: usize,
+                           x_sırası: usize,
+                           y_sırası: usize,
+                           x_adı: &str,
+                           y_adı: &str,
+                           x_dönüştür: fn(f64) -> f64| {
+            let mut geçmiş = seri(ızgara_sırası, x_sırası, y_sırası, x_adı, y_adı)
+                .ad("nutrients-motion-blur-history")
+                .öğe_stili(ÖğeStili::yeni().opaklık(0.56));
+            for öğe in &mut geçmiş.veri {
+                let VeriDeğeri::Çift([x, _]) = &mut öğe.değer else {
+                    continue;
+                };
+                *x = x_dönüştür(*x);
+                if let Some((_, değer)) = öğe
+                    .boyutlar
+                    .iter_mut()
+                    .find(|(boyut_adı, _)| boyut_adı == "x")
+                {
+                    *değer = (*x).into();
+                }
+            }
+            geçmiş
+        };
+        let sol_x = |x: f64| 17.8 + x * 0.534;
+        let aynı_x = |x: f64| x;
+        seçenekler = seçenekler
+            .seri(geçmiş_seri(
+                0,
+                x_sol_sırası,
+                y_üst_sırası,
+                alanlar[0],
+                alanlar[1],
+                sol_x,
+            ))
+            .seri(geçmiş_seri(
+                1,
+                x_sol_sırası,
+                y_alt_sırası,
+                alanlar[0],
+                alanlar[3],
+                sol_x,
+            ))
+            .seri(geçmiş_seri(
+                2,
+                x_sağ_sırası,
+                y_üst_sırası,
+                alanlar[2],
+                alanlar[1],
+                aynı_x,
+            ))
+            .seri(geçmiş_seri(
+                3,
+                x_sağ_sırası,
+                y_alt_sırası,
+                alanlar[2],
+                alanlar[3],
+                aynı_x,
+            ));
+    }
+    Ok(seçenekler)
 }
 
 #[cfg(test)]
@@ -5599,6 +5859,10 @@ mod scatter_nutrients_testleri {
         );
         assert_eq!(satırlar[0].değerler[2], 19.9);
         assert_eq!(satırlar[0].değerler[3], 0.285);
+        assert_eq!(
+            satırlar[0].ad,
+            "Beverage, instant breakfast powder, chocolate, not reconstituted"
+        );
         assert_eq!(satırlar[999].değerler[2], 25.73);
         assert_eq!(satırlar[999].değerler[5], 0.0);
         assert_eq!(satırlar[999].değerler[16], 28_480.0);
@@ -5667,6 +5931,75 @@ mod scatter_nutrients_testleri {
             değişmiş.seriler[1].veri()[0].değer,
             VeriDeğeri::Çift([1.4, 0.4])
         );
+    }
+
+    #[test]
+    fn matrix_dort_grid_eksen_seri_ve_bagli_slider_uretir() {
+        let seçenekler = scatter_nutrients_matrix("başlangıç").expect("matrix fixture kurulmalı");
+        let değiştirilmiş = scatter_nutrients_matrix("axes-fat-sodium-sugars-water")
+            .expect("matrix config onChange durumu kurulmalı");
+        let yakınlaştırılmış =
+            scatter_nutrients_matrix("zoom-left").expect("matrix dataZoom durumu kurulmalı");
+
+        assert_eq!(seçenekler.ızgaralar.len(), 4);
+        assert_eq!(seçenekler.x_eksenleri.len(), 4);
+        assert_eq!(seçenekler.y_eksenleri.len(), 4);
+        assert_eq!(seçenekler.seriler.len(), 4);
+        assert_eq!(seçenekler.veri_yakınlaştırmaları.len(), 4);
+        assert_eq!(
+            seçenekler.x_eksenleri[0].ad.as_deref(),
+            Some("carbohydrate")
+        );
+        assert_eq!(seçenekler.x_eksenleri[2].ad.as_deref(), Some("potassium"));
+        assert_eq!(seçenekler.y_eksenleri[0].ad.as_deref(), Some("calcium"));
+        assert_eq!(seçenekler.y_eksenleri[1].ad.as_deref(), Some("fiber"));
+        assert_eq!(
+            seçenekler.veri_yakınlaştırmaları[0]
+                .hedef_x_eksenleri()
+                .collect::<Vec<_>>(),
+            [0, 1]
+        );
+        assert_eq!(
+            seçenekler.veri_yakınlaştırmaları[3]
+                .hedef_y_eksenleri()
+                .collect::<Vec<_>>(),
+            [1, 3]
+        );
+        assert!(
+            seçenekler
+                .veri_yakınlaştırmaları
+                .iter()
+                .all(|yakınlaştırma| !yakınlaştırma.gerçek_zamanlı)
+        );
+        let Some(Seri::Saçılım(ilk)) = seçenekler.seriler.first() else {
+            panic!("ilk matrix serisi scatter olmalı");
+        };
+        assert_eq!(ilk.veri.len(), 1_000);
+        assert_eq!(
+            ilk.veri[0].ad.as_deref(),
+            Some("Beverage, instant breakfast powder, chocolate, not reconstituted")
+        );
+        assert_eq!(ilk.veri[0].boyut("schemaX"), Some(&"carbohydrate".into()));
+        assert_eq!(ilk.veri[0].boyut("schemaY"), Some(&"calcium".into()));
+        assert_eq!(değiştirilmiş.x_eksenleri[0].ad.as_deref(), Some("fat"));
+        assert_eq!(değiştirilmiş.x_eksenleri[2].ad.as_deref(), Some("sugars"));
+        assert_eq!(değiştirilmiş.y_eksenleri[0].ad.as_deref(), Some("sodium"));
+        assert_eq!(değiştirilmiş.y_eksenleri[1].ad.as_deref(), Some("water"));
+        assert_eq!(yakınlaştırılmış.veri_yakınlaştırmaları[0].başlangıç, 20.0);
+        assert_eq!(yakınlaştırılmış.veri_yakınlaştırmaları[0].bitiş, 80.0);
+        assert_eq!(yakınlaştırılmış.seriler.len(), 8);
+        let Some(Seri::Saçılım(geçmiş)) = yakınlaştırılmış.seriler.get(4) else {
+            panic!("motionBlur geçmişi scatter olmalı");
+        };
+        assert_eq!(geçmiş.öğe_stili.opaklık, Some(0.56));
+        let VeriDeğeri::Çift([geçmiş_x, geçmiş_y]) = geçmiş.veri[0].değer else {
+            panic!("motionBlur geçmiş öğesi XY olmalı");
+        };
+        assert!((geçmiş_x - 53.150_8).abs() < 1e-9);
+        assert!((geçmiş_y - 0.285).abs() < 1e-9);
+        seçenekler
+            .doğrula()
+            .expect("matrix eksen ve seri bağları geçerli olmalı");
     }
 }
 
@@ -8378,6 +8711,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "scatter-large" => Ok(scatter_large()),
         "scatter-nebula" => scatter_nebula(),
         "scatter-nutrients" => scatter_nutrients(durum),
+        "scatter-nutrients-matrix" => scatter_nutrients_matrix(durum),
         "scatter-exponential-regression" => scatter_exponential_regression(),
         "scatter-linear-regression" => scatter_linear_regression(),
         "scatter-polynomial-regression" => scatter_polynomial_regression(),

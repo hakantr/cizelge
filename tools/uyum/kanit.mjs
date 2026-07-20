@@ -155,6 +155,14 @@ const SENARYOLAR = [
       { ad: 'fat-fiber', kare: 1, durum: 'axes-fat-fiber' }
     ]
   },
+  {
+    id: 'scatter-nutrients-matrix',
+    tür: 'etkileşim',
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'zoom-left', kare: 1, durum: 'zoom-left' }
+    ]
+  },
   { id: 'scatter-stream-visual', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-painter-choice', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'scatter-clustering', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

@@ -121,6 +121,8 @@ function html(id, kaynak, frame, state, width, height) {
         }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
+    : id === 'scatter-nutrients-matrix' && state === 'zoom-left'
+      ? `myChart.dispatchAction({type:'dataZoom', dataZoomIndex:0, start:20, end:80});`
     : id === 'scatter-nutrients' && state === 'axes-fat-fiber'
       ? `{
           app.config.xAxis = 'fat';
@@ -455,7 +457,7 @@ async function çalıştır() {
     const hata = await sayfa.evaluate(() => window.__referenceError || null);
     if (hata) throw new Error(hata);
     if (process.env.UYUM_DEBUG_LAYOUT) {
-      const yerleşim = await sayfa.evaluate(() => {
+      const yerleşim = await sayfa.evaluate((yalnızDataZoom) => {
         const chart = window.__chart;
         const sonuç = [];
         const tooltipAdayları = [...document.querySelectorAll('div')]
@@ -517,6 +519,22 @@ async function çalıştır() {
               return { x: kutu.x, y: kutu.y, width: kutu.width, height: kutu.height };
             })()
           } : null;
+          const gölgeÖzetle = (grup) => grup?.children?.().map((öğe) => {
+            const noktalar = öğe.shape?.points || [];
+            return {
+              tür: öğe.type,
+              noktaSayısı: noktalar.length,
+              ilkNoktalar: noktalar.slice(0, 12),
+              sonNoktalar: noktalar.slice(-3),
+              stil: {
+                fill: öğe.style?.fill,
+                stroke: öğe.style?.stroke,
+                lineWidth: öğe.style?.lineWidth,
+                opacity: öğe.style?.opacity
+              },
+              dönüşüm: öğe.getComputedTransform?.()
+            };
+          }) || [];
           sonuç.push({
             sıra: model.componentIndex,
             tür: model.subType,
@@ -526,12 +544,15 @@ async function çalıştır() {
             uçlar: view?._handleEnds,
             grup: view?.group ? { x: view.group.x, y: view.group.y } : null,
             sürgüGrubu: özetle(görüntüler?.sliderGroup),
+            sürgüÖğeleri: görüntüler?.sliderGroup?.children?.().map(özetle),
             sınır: sınır ? { x: sınır.x, y: sınır.y, width: sınır.width, height: sınır.height } : null,
             filler: özetle(görüntüler?.filler),
+            veriGölgeleri: görüntüler?.dataShadowSegs?.map(gölgeÖzetle),
             tutamaçlar: görüntüler?.handles?.map(özetle),
             taşıma: özetle(görüntüler?.moveHandle)
           });
         });
+        if (yalnızDataZoom) return sonuç;
         chart.getModel().eachComponent('visualMap', (model) => {
           const view = chart.getViewOfComponentModel(model);
           const öğeler = [];
@@ -855,7 +876,7 @@ async function çalıştır() {
           }));
         sonuç.push({ kesikliYollar });
         return sonuç;
-      });
+      }, Boolean(process.env.UYUM_DEBUG_DATAZOOM));
       process.stderr.write(`${JSON.stringify(yerleşim, null, 2)}\n`);
     }
     fs.mkdirSync(path.dirname(path.resolve(args.output)), { recursive: true });
