@@ -15799,7 +15799,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-nutrients-matrix.ts",
     "kaynak_sha256": "1706f6f6e51ff6e68d7fb93264044397c734f2a456a43181715f63ff091bb0ce",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_nutrients_matrix",
     "seriler": [
       "dashed",
       "piecewise",
@@ -15819,7 +15819,7 @@
     "dış_varlıklar": [
       "/data/asset/data/nutrients.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15830,15 +15830,64 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "başlangıç",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 837,
+          "değişen_piksel_oranı": 0.0031,
+          "ssim": 0.9967901767764625,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-nutrients-matrix-başlangıç.png",
+            "sha256": "b573cc2ae7ada7e236f187db2bddbac09895e140585d443a0da2ce616bcbef24"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-nutrients-matrix-başlangıç.png",
+            "sha256": "f930df1203113a4468010cdb2f28ebbdf61c29af24d839ba24b9eb9904957f8d"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-nutrients-matrix-başlangıç.png",
+            "sha256": "a4eee3626dd3ef968be5ee4dcb444a9e56909d3c70a4a2126537586eb17de077"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-nutrients-matrix-başlangıç.json",
+            "sha256": "22d76fe25c19b422f38ea81ebf9df56cfca79a601a86ca6abf1522846b931a69"
+          }
+        },
+        {
+          "ad": "zoom-left",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 2190,
+          "değişen_piksel_oranı": 0.00811111111111111,
+          "ssim": 0.9904338094456787,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-nutrients-matrix-zoom-left.png",
+            "sha256": "3082a6513140f5e894a844466e13bf4ce83e51e289a55b958fca26f23aff9367"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-nutrients-matrix-zoom-left.png",
+            "sha256": "0c9b4836aaab67d0afbc6305de68557c734c07f1bece69433d17395bbdbb126c"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-nutrients-matrix-zoom-left.png",
+            "sha256": "408cb93745718d19101d6252baf925bf5a183f11674ee13f1ae26efc154d82d7"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-nutrients-matrix-zoom-left.json",
+            "sha256": "9d649770b0a1a40dfba1e02d1e6f5f7a75b428a716e40575f38febb5d26f7481"
+          }
+        }
+      ]
     }
   },
   {

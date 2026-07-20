@@ -6329,7 +6329,7 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (dataZoom.realtime)",
+    "rust_api": "src/model/yakinlastirma.rs (VeriYakınlaştırma::gerçek_zamanlı)",
     "veri_biçimleri": [],
     "koordinat_dalları": [],
     "kaynak": {
