@@ -746,6 +746,49 @@ Gerçekleşen dilim — `candlestick-brush` (2026-07-20):
   erişilebilirlik ve ölçümlü performans kapıları ilgili ileri fazlarda
   kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
+Gerçekleşen dilim — `candlestick-sh-2015` (2026-07-20):
+
+- Resmî kaynak
+  `../echarts-examples/public/examples/ts/candlestick-sh-2015.ts`
+  dosyasıdır. Mum yerleşimi/görseli için
+  `../echarts/src/chart/candlestick/CandlestickSeries.ts`,
+  `CandlestickView.ts`, `candlestickLayout.ts` ve `candlestickVisual.ts`;
+  özel sürgü tutamacı ile veri gölgesi için
+  `../echarts/src/component/dataZoom/SliderZoomModel.ts` ve
+  `SliderZoomView.ts` sabit ECharts commitinde karşılaştırıldı.
+- Kaynaktaki tek satırlık `rawData` kopyalanıp sadeleştirilmedi; fixture,
+  sabitlenmiş TypeScript dosyasındaki diziyi doğrudan ve doğrulamalı olarak
+  okur. JavaScript `.reverse()` sırası ile sonda bulunan iki boş satırın
+  başa gelmesi ve `+''` işlemiyle OHLC değerlerinin sıfıra dönüşmesi korunur.
+  Sonuç 246 satırdır; ilk gerçek `2015/1/5` ve son `2015/12/31` değerleri
+  ayrı testte kilitlidir.
+- MA5/10/20/30, ilk `dayCount` öğeyi boş bırakır ve kaynaktaki kayan kapanış
+  toplamını yuvarlama eklemeden uygular. Beşinci sıradaki `2673,876` sonucu,
+  iki sıfır satırın hesaptan yanlışlıkla atılmadığını ayrıca kanıtlar.
+- Kaynaktaki ad uyuşmazlığı da değiştirilmedi: legend `日K` isterken mum
+  serisinin adı `Day` olduğundan ECharts gibi yalnız MA5/10/20/30 legend
+  öğeleri görünür. `inactiveColor`, eksen tetiklemeli ve animasyonsuz çapraz
+  pointer, `#8392A5` eksen çizgileri, `scale: true`, kapalı yatay bölme
+  çizgileri, `bottom: 80` grid, varsayılan tam aralıklı `slider` + `inside`
+  dataZoom ve dört simgesiz/yumuşak 1 px MA çizgisi taşındı. Mumun yükselen
+  ve düşen dolgu/kenarlık renkleri ayrı kanallarda korunur.
+- `handleIcon` içindeki resmî `path://` SVG verisi ortak yol çözücüsünden
+  geçirilerek sürgünün iki ucunda en-boy oranını koruyan gerçek geometriyle
+  çizilir. Kaynaktaki tam-seçili başlangıç durumu, veri gölgesi, seçim
+  dolgusu ve tutamaçlarıyla birlikte kilitli görsel kanıtta doğrulandı.
+- Birim kapısı 279/279, fixture kapısı 35/35, her iki `cargo check` kipi ve
+  üretilmiş-dosya denetimi geçti. Mevcut hiçbir resmî referans yenilenmeden
+  tam görsel regresyon 172/172 kareyi geçti. Yeni 600×450 sonuç 1.056
+  değişen piksel, `%0,3911` fark ve `0,996551` SSIM üretir; dört kanıt
+  dosyası hashleriyle galeri manifestine bağlıdır.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 147/332, yani `%44,3`
+  oldu. Bu statik karede görünür sonucu değiştirmeyen
+  `dataZoom.dataBackground`, `dataZoom.textStyle`, `brushSelect` ve
+  `tooltip.axisPointer.lineStyle` seçeneklerinin genel API/etkileşim
+  kapanışı Faz 5/6 matrisinde `kısmi` kalır; bunlar tamamlanmadan kart nihai
+  `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
