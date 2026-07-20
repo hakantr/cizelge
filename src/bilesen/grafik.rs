@@ -124,6 +124,9 @@ fn öğeyi_hazırla(
 
     let mut düğüm = SahneDüğümü::grup(temel.clone());
     düğüm.öğe = SahneÖğesi::Grup(çocuklar);
+    // zrender `textContent`, ev sahibinin yerleşim sınır kutusunu büyütmez.
+    // Bağlı metni eklemeden önceki ağacı bu amaçla ayrı tut.
+    let mut yerleşim_düğümü = düğüm.clone();
 
     if let Some(bağlı) = &öğe.bağlı_metin {
         let sınır = düğüm
@@ -149,6 +152,7 @@ fn öğeyi_hazırla(
     }
 
     düğüm.dönüşüm = öğe.dönüşüm;
+    yerleşim_düğümü.dönüşüm = öğe.dönüşüm;
     düğüm.kırpmalar = öğe.kırpmalar.clone();
     düğüm.zlevel = öğe.zlevel;
     düğüm.z = öğe.z;
@@ -158,7 +162,7 @@ fn öğeyi_hazırla(
     düğüm.sürüklenebilir = öğe.sürüklenebilir;
     düğüm.imleç = öğe.imleç.clone();
 
-    if let Some(sınır) = düğüm.sınır_kutusu() {
+    if let Some(sınır) = yerleşim_düğümü.sınır_kutusu() {
         let dx = yatay_kayma(&öğe.yerleşim, sınır, kap.0);
         let dy = dikey_kayma(&öğe.yerleşim, sınır, kap.1);
         düğüm.dönüşüm.x += dx;
@@ -255,6 +259,8 @@ mod testler {
                 .bağlı_metin(GrafikBağlıMetni::yeni("Collapse Axis Breaks").boyut(13.0)),
         );
         let hazır = grafik_sahnesi_hazırla(&grafik, 800.0, 600.0);
+        assert_eq!(hazır.sahne.bul("graphic:0").unwrap().dönüşüm.x, 5.0);
+        assert_eq!(hazır.sahne.bul("graphic:0").unwrap().dönüşüm.y, 5.0);
         let isabet = hazır.sahne.isabet((75.0, 17.0)).expect("düğme isabeti");
         assert_eq!(
             hazır.öğe_bilgileri[&isabet.kimlik].kimlik.as_deref(),
