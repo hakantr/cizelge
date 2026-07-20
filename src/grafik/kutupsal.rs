@@ -73,6 +73,35 @@ fn kutupsal_sütun_açıklığı(seri: &crate::model::seri::SütunSerisi, bant: 
     açıklık.clamp(0.0, bant)
 }
 
+fn teğetsel_sütun_uzunluğunu_çöz(uzunluk: Uzunluk, bant: f32) -> f32 {
+    match uzunluk {
+        Uzunluk::Yüzde(yüzde) => bant * yüzde / 100.0,
+        // RadiusAxis üzerindeki sayısal barWidth/barMinWidth/barMaxWidth
+        // değerleri ekran pikselidir.
+        Uzunluk::Piksel(piksel) => piksel,
+    }
+}
+
+fn teğetsel_sütun_kalınlığı(seri: &crate::model::seri::SütunSerisi, bant: f32) -> f32 {
+    let mut kalınlık = seri.genişlik.map_or_else(
+        || {
+            let kategori_boşluğu = seri
+                .kategori_boşluğu
+                .map(|boşluk| teğetsel_sütun_uzunluğunu_çöz(boşluk, bant))
+                .unwrap_or(bant * 0.2);
+            (bant - kategori_boşluğu).max(0.0)
+        },
+        |genişlik| teğetsel_sütun_uzunluğunu_çöz(genişlik, bant),
+    );
+    if let Some(en_çok) = seri.en_çok_genişlik {
+        kalınlık = kalınlık.min(teğetsel_sütun_uzunluğunu_çöz(en_çok, bant));
+    }
+    if let Some(en_az) = seri.en_az_genişlik {
+        kalınlık = kalınlık.max(teğetsel_sütun_uzunluğunu_çöz(en_az, bant));
+    }
+    kalınlık.clamp(0.0, bant)
+}
+
 fn yazı_yatay_hizası(hiza: YazıYatayHizası) -> YatayHiza {
     match hiza {
         YazıYatayHizası::Sol => YatayHiza::Sol,
@@ -209,6 +238,139 @@ fn kutupsal_sütun_etiketi_çiz(
     );
 }
 
+#[allow(clippy::too_many_arguments)]
+fn teğetsel_sütun_etiketi_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    etiket: &Etiket,
+    seri_adı: &str,
+    veri_adı: &str,
+    değer: f64,
+    merkez: (f32, f32),
+    iç_yarıçap: f32,
+    dış_yarıçap: f32,
+    başlangıç_açısı: f32,
+    bitiş_açısı: f32,
+    dolgu: &Dolgu,
+) {
+    if !etiket.göster {
+        return;
+    }
+
+    let pozitif = bitiş_açısı >= başlangıç_açısı;
+    let konum = match etiket.konum {
+        EtiketKonumu::Dış => {
+            if pozitif {
+                EtiketKonumu::Bitiş
+            } else {
+                EtiketKonumu::Başlangıç
+            }
+        }
+        diğer => diğer,
+    };
+    let orta_yarıçap = (iç_yarıçap + dış_yarıçap) / 2.0;
+    let orta_açı = (başlangıç_açısı + bitiş_açısı) / 2.0;
+    let uzaklık = etiket.uzaklık;
+    let açı_noktası = |açı: f32, uzaklık: f32, bitiş: bool| {
+        let yön = if bitiş { -1.0 } else { 1.0 };
+        (
+            merkez.0 + orta_yarıçap * açı.cos() + yön * uzaklık * açı.sin(),
+            merkez.1 + orta_yarıçap * açı.sin() - yön * uzaklık * açı.cos(),
+        )
+    };
+    let (nokta, doğal_yatay, doğal_dikey, içeride, dayanak_açısı) = match konum {
+        EtiketKonumu::Başlangıç => (
+            açı_noktası(başlangıç_açısı, uzaklık, false),
+            YatayHiza::Sağ,
+            DikeyHiza::Orta,
+            false,
+            başlangıç_açısı,
+        ),
+        EtiketKonumu::İçBaşlangıç => (
+            açı_noktası(başlangıç_açısı, -uzaklık, false),
+            YatayHiza::Sol,
+            DikeyHiza::Orta,
+            true,
+            başlangıç_açısı,
+        ),
+        EtiketKonumu::Bitiş => (
+            açı_noktası(bitiş_açısı, uzaklık, true),
+            YatayHiza::Sol,
+            DikeyHiza::Orta,
+            false,
+            bitiş_açısı,
+        ),
+        EtiketKonumu::İçBitiş => (
+            açı_noktası(bitiş_açısı, -uzaklık, true),
+            YatayHiza::Sağ,
+            DikeyHiza::Orta,
+            true,
+            bitiş_açısı,
+        ),
+        // `middle`, zrender'ın bağlı `inside` varsayılanı ve Kartezyen'e
+        // özgü konumların kutupsal güvenli geri düşüşü sektör merkezidir.
+        _ => (
+            (
+                merkez.0 + orta_yarıçap * orta_açı.cos(),
+                merkez.1 + orta_yarıçap * orta_açı.sin(),
+            ),
+            YatayHiza::Orta,
+            DikeyHiza::Orta,
+            true,
+            orta_açı,
+        ),
+    };
+    let nokta = (nokta.0 + etiket.kayma.0, nokta.1 + etiket.kayma.1);
+    let yatay = etiket
+        .yatay_hiza
+        .map(yazı_yatay_hizası)
+        .unwrap_or(doğal_yatay);
+    let dikey = etiket
+        .dikey_hiza
+        .map(yazı_dikey_hizası)
+        .unwrap_or(doğal_dikey);
+    let ham = ondalık_kırp(değer);
+    let metin = etiket
+        .biçimleyici
+        .as_ref()
+        .map(|biçimleyici| biçimleyici.uygula_bağlamla(değer, &ham, seri_adı, veri_adı))
+        .unwrap_or(ham);
+    let renk = etiket.yazı.renk.unwrap_or_else(|| {
+        if içeride {
+            dolgu.zrender_iç_etiket_stili(tema::koyu_mu()).0
+        } else {
+            tema::birincil_metin()
+        }
+    });
+    let dönüş = match etiket.döndürme {
+        EtiketDöndürme::Yok | EtiketDöndürme::Teğetsel => {
+            let mut açı =
+                (std::f32::consts::PI * 1.5 - dayanak_açısı).rem_euclid(std::f32::consts::TAU);
+            if konum == EtiketKonumu::Merkez
+                && açı > std::f32::consts::FRAC_PI_2
+                && açı < std::f32::consts::PI * 1.5
+            {
+                açı -= std::f32::consts::PI;
+            }
+            -açı
+        }
+        EtiketDöndürme::Derece(derece) => -derece.to_radians(),
+        EtiketDöndürme::Radyal => dayanak_açısı,
+        EtiketDöndürme::TeğetselÇevirmesiz => {
+            -(std::f32::consts::PI * 1.5 - dayanak_açısı).rem_euclid(std::f32::consts::TAU)
+        }
+    };
+    çizici.dönüşümlü_yazı(
+        &metin,
+        (0.0, 0.0),
+        yatay,
+        dikey,
+        etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK),
+        renk.opaklık(etiket.yazı.opaklık.unwrap_or(1.0)),
+        etiket.yazı.kalın,
+        AfinMatris::ötele(nokta.0, nokta.1).çarp(AfinMatris::döndür(dönüş)),
+    );
+}
+
 impl KutupsalDüzen {
     /// Açısal değeri ekran radyanına çevirir (0 üstte, saat yönü).
     pub fn açı(&self, değer: f64) -> f32 {
@@ -234,6 +396,13 @@ impl KutupsalDüzen {
     pub fn bant_açısı(&self) -> f32 {
         let n = self.açısal_ölçek.kategori_sayısı().max(1) as f32;
         std::f32::consts::TAU / n
+    }
+
+    /// RadiusAxis kategori bant yüksekliği (piksel) — teğetsel kutupsal
+    /// sütunların kalınlığını ve kategori boşluğunu çözer.
+    pub fn bant_yarıçapı(&self) -> f32 {
+        let n = self.radyal_ölçek.kategori_sayısı().max(1) as f32;
+        (self.yarıçap - self.iç_yarıçap) / n
     }
 
     /// Radyal değeri yarıçapa çevirir.
@@ -305,6 +474,8 @@ pub fn kutupsal_kur(
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
     let mut açısal_kapsam = [f64::INFINITY, f64::NEG_INFINITY];
     let mut en_uzun = 0usize;
+    let açısal_kategorik = koordinat.açısal_eksen.tür == EksenTürü::Kategori;
+    let radyal_kategorik = koordinat.radyal_eksen.tür == EksenTürü::Kategori;
     let kapsa = |hedef: &mut [f64; 2], değer: f64| {
         if değer.is_finite() {
             hedef[0] = hedef[0].min(değer);
@@ -344,10 +515,17 @@ pub fn kutupsal_kur(
         if let Some(seri_aralıkları) = aralıklar.get(i) {
             for (sıra, aralık) in seri_aralıkları.iter().enumerate() {
                 if let Some(aralık) = aralık {
-                    for v in [aralık.0, aralık.1] {
-                        kapsa(&mut kapsam, v);
+                    if radyal_kategorik && !açısal_kategorik {
+                        kapsa(&mut kapsam, sıra as f64);
+                        for v in [aralık.0, aralık.1] {
+                            kapsa(&mut açısal_kapsam, v);
+                        }
+                    } else {
+                        for v in [aralık.0, aralık.1] {
+                            kapsa(&mut kapsam, v);
+                        }
+                        kapsa(&mut açısal_kapsam, sıra as f64);
                     }
-                    kapsa(&mut açısal_kapsam, sıra as f64);
                 }
             }
         }
@@ -360,8 +538,6 @@ pub fn kutupsal_kur(
         açısal_kapsam = [0.0, en_uzun.saturating_sub(1).max(1) as f64];
     }
 
-    let açısal_kategorik = koordinat.açısal_eksen.tür == EksenTürü::Kategori;
-    let radyal_kategorik = koordinat.radyal_eksen.tür == EksenTürü::Kategori;
     let açısal_ölçek = if açısal_kategorik {
         Ölçek::Kategorik(KategorikÖlçek::yeni(koordinat.açısal_eksen.veri.clone()))
     } else {
@@ -667,6 +843,21 @@ pub fn kutupsal_ağ_çiz(
                 .unwrap_or_else(tema::eksen_çizgisi),
             crate::model::stil::ÇizgiTürü::Düz,
         );
+        // ECharts AngleAxisView, polar.radius iki uçlu olduğunda axisLine'ı
+        // tek çember yerine Ring olarak çizer; iç sınır da aynı stildedir.
+        if düzen.iç_yarıçap > 0.5 {
+            let iç = crate::cizim::yuzey::daire_yolu(düzen.merkez, düzen.iç_yarıçap);
+            çizici.yol_çiz(
+                &iç,
+                koordinat.açısal_eksen.çizgi.kalınlık,
+                koordinat
+                    .açısal_eksen
+                    .çizgi
+                    .renk
+                    .unwrap_or_else(tema::eksen_çizgisi),
+                crate::model::stil::ÇizgiTürü::Düz,
+            );
+        }
     }
     if koordinat.radyal_eksen.göster && koordinat.radyal_eksen.çizgi.göster.unwrap_or(true) {
         çizici.çizgi(
@@ -711,8 +902,17 @@ pub fn kutupsal_serileri_çiz(
         let renk = seçenekler.seri_rengi(i);
         match seri {
             Seri::Sütun(s) => {
-                let bant = düzen.bant_açısı();
-                let dilim_açıklığı = kutupsal_sütun_açıklığı(s, bant);
+                let teğetsel = düzen.radyal_kategorik && !düzen.açısal_kategorik;
+                let dilim_açıklığı = if teğetsel {
+                    0.0
+                } else {
+                    kutupsal_sütun_açıklığı(s, düzen.bant_açısı())
+                };
+                let bant_kalınlığı = if teğetsel {
+                    teğetsel_sütun_kalınlığı(s, düzen.bant_yarıçapı())
+                } else {
+                    0.0
+                };
                 for (j, aralık) in aralıklar
                     .get(i)
                     .map(Vec::as_slice)
@@ -723,10 +923,27 @@ pub fn kutupsal_serileri_çiz(
                     let Some((taban, tepe)) = aralık else {
                         continue;
                     };
-                    let orta = düzen.açı(j as f64);
-                    let iç = düzen.yarıçapa(*taban);
-                    let dış_tam = düzen.yarıçapa(*tepe);
-                    let dış = iç + (dış_tam - iç) * ilerleme;
+                    let (iç, dış, açı0, açı1) = if teğetsel {
+                        let orta_yarıçap = düzen.yarıçapa(j as f64);
+                        let başlangıç = düzen.açı(*taban);
+                        let bitiş_tam = düzen.açı(*tepe);
+                        (
+                            orta_yarıçap - bant_kalınlığı / 2.0,
+                            orta_yarıçap + bant_kalınlığı / 2.0,
+                            başlangıç,
+                            başlangıç + (bitiş_tam - başlangıç) * ilerleme,
+                        )
+                    } else {
+                        let orta = düzen.açı(j as f64);
+                        let iç = düzen.yarıçapa(*taban);
+                        let dış_tam = düzen.yarıçapa(*tepe);
+                        (
+                            iç,
+                            iç + (dış_tam - iç) * ilerleme,
+                            orta - dilim_açıklığı / 2.0,
+                            orta + dilim_açıklığı / 2.0,
+                        )
+                    };
                     let veri_öğesi = s.veri.get(j);
                     let öğe_stili = veri_öğesi.and_then(|öğe| öğe.stil.as_ref());
                     let dolgu = öğe_stili
@@ -752,8 +969,8 @@ pub fn kutupsal_serileri_çiz(
                         düzen.merkez,
                         iç.min(dış),
                         iç.max(dış),
-                        orta - dilim_açıklığı / 2.0,
-                        orta + dilim_açıklığı / 2.0,
+                        açı0,
+                        açı1,
                         &dolgu,
                         kenarlık,
                     );
@@ -764,21 +981,44 @@ pub fn kutupsal_serileri_çiz(
                     let veri_adı = veri_öğesi
                         .and_then(|öğe| öğe.ad.as_deref())
                         .map(str::to_owned)
-                        .unwrap_or_else(|| düzen.açısal_ölçek.etiket(j as f64));
-                    kutupsal_sütun_etiketi_çiz(
-                        çizici,
-                        etiket,
-                        s.ad.as_deref().unwrap_or(""),
-                        &veri_adı,
-                        veri_öğesi
-                            .and_then(|öğe| öğe.değer.sayı())
-                            .unwrap_or(*tepe - *taban),
-                        düzen.merkez,
-                        iç,
-                        dış,
-                        orta,
-                        &dolgu,
-                    );
+                        .unwrap_or_else(|| {
+                            if teğetsel {
+                                düzen.radyal_ölçek.etiket(j as f64)
+                            } else {
+                                düzen.açısal_ölçek.etiket(j as f64)
+                            }
+                        });
+                    let değer = veri_öğesi
+                        .and_then(|öğe| öğe.değer.sayı())
+                        .unwrap_or(*tepe - *taban);
+                    if teğetsel {
+                        teğetsel_sütun_etiketi_çiz(
+                            çizici,
+                            etiket,
+                            s.ad.as_deref().unwrap_or(""),
+                            &veri_adı,
+                            değer,
+                            düzen.merkez,
+                            iç,
+                            dış,
+                            açı0,
+                            açı1,
+                            &dolgu,
+                        );
+                    } else {
+                        kutupsal_sütun_etiketi_çiz(
+                            çizici,
+                            etiket,
+                            s.ad.as_deref().unwrap_or(""),
+                            &veri_adı,
+                            değer,
+                            düzen.merkez,
+                            iç,
+                            dış,
+                            (açı0 + açı1) / 2.0,
+                            &dolgu,
+                        );
+                    }
                     isabetler.push(İsabetBölgesi {
                         seri_sırası: i,
                         veri_sırası: j,
@@ -789,8 +1029,8 @@ pub fn kutupsal_serileri_çiz(
                             merkez: düzen.merkez,
                             iç_yarıçap: iç.min(dış),
                             dış_yarıçap: iç.max(dış),
-                            açı0: orta - dilim_açıklığı / 2.0,
-                            açı1: orta + dilim_açıklığı / 2.0,
+                            açı0,
+                            açı1,
                         },
                     });
                 }
@@ -952,6 +1192,46 @@ mod testler {
         assert!(
             (kutupsal_sütun_açıklığı(&seri, düzen.bant_açısı()).to_degrees() - 72.0).abs() < 0.01
         );
+    }
+
+    #[test]
+    fn kategorik_radius_teğetsel_sütun_bant_ve_açı_kapsamını_echarts_gibi_kurur() {
+        let seri = SütunSerisi::yeni()
+            .kutupsal(true)
+            .etiket(Etiket::yeni().göster(true).konum(EtiketKonumu::Merkez))
+            .veri([2.0, 1.2, 2.4, 3.6]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(
+                KutupsalKoordinat::yeni()
+                    .yarıçap_aralığı(30, "80%")
+                    .başlangıç_açısı(75.0)
+                    .açısal_eksen(Eksen::değer().en_çok(4.0).bölme_sayısı(12))
+                    .radyal_eksen(Eksen::kategori().veri(["a", "b", "c", "d"])),
+            )
+            .seri(seri.clone());
+        let düzen = kutupsal_kur(
+            seçenekler.kutupsal.as_ref().unwrap(),
+            &seçenekler,
+            &[vec![
+                Some((0.0, 2.0)),
+                Some((0.0, 1.2)),
+                Some((0.0, 2.4)),
+                Some((0.0, 3.6)),
+            ]],
+            &[true],
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+        );
+
+        assert!(!düzen.açısal_kategorik);
+        assert!(düzen.radyal_kategorik);
+        assert_eq!(düzen.açısal_ölçek.kapsam(), [0.0, 4.0]);
+        assert!((düzen.iç_yarıçap - 30.0).abs() < 0.01);
+        assert!((düzen.yarıçap - 210.0).abs() < 0.01);
+        assert!((düzen.bant_yarıçapı() - 45.0).abs() < 0.01);
+        assert!((düzen.yarıçapa(0.0) - 52.5).abs() < 0.01);
+        assert!((teğetsel_sütun_kalınlığı(&seri, düzen.bant_yarıçapı()) - 36.0).abs() < 0.01);
+        assert!((düzen.açı(0.0).to_degrees() + 75.0).abs() < 0.01);
+        assert!((düzen.açı(2.0).to_degrees() - 105.0).abs() < 0.01);
     }
 
     #[test]
