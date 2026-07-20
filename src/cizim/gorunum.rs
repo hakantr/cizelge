@@ -3456,15 +3456,33 @@ pub fn grafiği_boya(
                     // gösterir.
                     if yakınlaştırma.veri_gölgesi
                         && !dikey
-                        && let Some(veri) = seçenekler
-                            .seriler
-                            .iter()
-                            .map(Seri::veri)
-                            .find(|veri| !veri.is_empty())
+                        && let Some(gölge_serisi) =
+                            seçenekler.seriler.iter().find(|seri| match seri {
+                                Seri::Saçılım(saçılım) => saçılım.veri_sayısı() > 0,
+                                _ => !seri.veri().is_empty(),
+                            })
                     {
-                        let kapsam = veri
-                            .iter()
-                            .filter_map(|öğe| öğe.değer.sayı())
+                        let veri_sayısı = match gölge_serisi {
+                            Seri::Saçılım(saçılım) => saçılım.veri_sayısı(),
+                            _ => gölge_serisi.veri().len(),
+                        };
+                        let değer_al = |sıra: usize| match gölge_serisi {
+                            Seri::Saçılım(saçılım) if saçılım.düz_veri.is_some() => {
+                                saçılım.xy(sıra).map(|(_, y)| y)
+                            }
+                            _ => gölge_serisi
+                                .veri()
+                                .get(sıra)
+                                .and_then(|öğe| öğe.değer.sayı()),
+                        };
+                        let x_al = |sıra: usize| match gölge_serisi {
+                            Seri::Saçılım(saçılım) if saçılım.düz_veri.is_some() => {
+                                saçılım.xy(sıra).map(|(x, _)| x)
+                            }
+                            _ => gölge_serisi.veri().get(sıra).and_then(|öğe| öğe.değer.x()),
+                        };
+                        let kapsam = (0..veri_sayısı)
+                            .filter_map(değer_al)
                             .filter(|değer| değer.is_finite())
                             .fold(
                                 [f64::INFINITY, f64::NEG_INFINITY],
@@ -3494,9 +3512,8 @@ pub fn grafiği_boya(
                             .get(yakınlaştırma.x_eksen_sırası)
                             .filter(|eksen| eksen.seçenek.tür == EksenTürü::Zaman)
                             .and_then(|_| {
-                                let kapsam = veri
-                                    .iter()
-                                    .filter_map(|öğe| öğe.değer.x())
+                                let kapsam = (0..veri_sayısı)
+                                    .filter_map(x_al)
                                     .filter(|değer| değer.is_finite())
                                     .fold(
                                         [f64::INFINITY, f64::NEG_INFINITY],
@@ -3518,28 +3535,28 @@ pub fn grafiği_boya(
                         let mut son_x = şerit.x;
                         // ECharts büyük veri gölgesinde yaklaşık bir örnek /
                         // yatay piksel bırakır (`Math.round(count / width)`).
-                        let adım =
-                            ((veri.len() as f32 / şerit.genişlik.max(1.0)).round() as usize).max(1);
-                        for (sıra, öğe) in veri.iter().enumerate() {
+                        let adım = ((veri_sayısı as f32 / şerit.genişlik.max(1.0)).round()
+                            as usize)
+                            .max(1);
+                        for sıra in 0..veri_sayısı {
                             if sıra % adım != 0 {
                                 continue;
                             }
-                            let oran =
-                                zaman_x_kapsamı
-                                    .and_then(|[en_az, en_çok]| {
-                                        öğe.değer.x().filter(|değer| değer.is_finite()).map(
-                                            |değer| ((değer - en_az) / (en_çok - en_az)) as f32,
-                                        )
-                                    })
-                                    .unwrap_or_else(|| {
-                                        if veri.len() > 1 {
-                                            sıra as f32 / (veri.len() - 1) as f32
-                                        } else {
-                                            0.5
-                                        }
-                                    });
+                            let oran = zaman_x_kapsamı
+                                .and_then(|[en_az, en_çok]| {
+                                    x_al(sıra)
+                                        .filter(|değer| değer.is_finite())
+                                        .map(|değer| ((değer - en_az) / (en_çok - en_az)) as f32)
+                                })
+                                .unwrap_or_else(|| {
+                                    if veri_sayısı > 1 {
+                                        sıra as f32 / (veri_sayısı - 1) as f32
+                                    } else {
+                                        0.5
+                                    }
+                                });
                             let x = şerit.x + şerit.genişlik * oran;
-                            let değer = öğe.değer.sayı().filter(|değer| değer.is_finite());
+                            let değer = değer_al(sıra).filter(|değer| değer.is_finite());
                             if değer.is_none() && !son_boş && sıra > 0 {
                                 alan_yolu.çiz((son_x, şerit.alt()));
                                 if çizgi_başladı {
