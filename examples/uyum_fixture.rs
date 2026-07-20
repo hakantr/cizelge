@@ -3031,6 +3031,72 @@ mod bar_polar_label_radial_testleri {
     }
 }
 
+fn bar_polar_label_tangential() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .başlık(
+            Başlık::yeni()
+                .metin("Tangential Polar Bar Label Position (middle)")
+                .iç_boşluk(15.0),
+        )
+        .kutupsal(
+            KutupsalKoordinat::yeni()
+                .yarıçap_aralığı(30, "80%")
+                .açısal_eksen(Eksen::değer().en_çok(4.0).bölme_sayısı(12))
+                .radyal_eksen(Eksen::kategori().veri(["a", "b", "c", "d"]))
+                .başlangıç_açısı(75.0),
+        )
+        .ipucu(İpucu::yeni())
+        .seri(
+            SütunSerisi::yeni()
+                .kutupsal(true)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .konum(EtiketKonumu::Merkez)
+                        .biçimleyici("{b}: {c}"),
+                )
+                .veri([2.0, 1.2, 2.4, 3.6]),
+        )
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod bar_polar_label_tangential_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_angle_radius_eksenleri_ve_middle_etiketleri_kayipsizdir() {
+        let seçenekler = bar_polar_label_tangential();
+        assert!(
+            seçenekler.animasyon,
+            "resmi örnek animation alanını kapatmıyor"
+        );
+        let kutupsal = seçenekler.kutupsal.as_ref().expect("polar bileşeni");
+        assert_eq!(kutupsal.iç_yarıçap, Uzunluk::Piksel(30.0));
+        assert_eq!(kutupsal.yarıçap, Uzunluk::Yüzde(80.0));
+        assert_eq!(kutupsal.başlangıç_açısı, 75.0);
+        assert_eq!(kutupsal.açısal_eksen.en_çok, Some(4.0));
+        assert_eq!(kutupsal.açısal_eksen.bölme_sayısı, 12);
+        assert_eq!(kutupsal.radyal_eksen.veri, ["a", "b", "c", "d"]);
+
+        let Seri::Sütun(seri) = &seçenekler.seriler[0] else {
+            panic!("polar bar serisi bekleniyordu");
+        };
+        assert!(seri.kutupsal);
+        assert_eq!(seri.etiket.konum, EtiketKonumu::Merkez);
+        assert!(seri.etiket.göster);
+        assert_eq!(
+            seri.veri
+                .iter()
+                .filter_map(|öğe| öğe.değer.sayı())
+                .collect::<Vec<_>>(),
+            [2.0, 1.2, 2.4, 3.6]
+        );
+        let biçimleyici = seri.etiket.biçimleyici.as_ref().expect("formatter");
+        assert_eq!(biçimleyici.uygula_bağlamla(2.0, "2", "", "a"), "a: 2");
+    }
+}
+
 fn bar_label_rotation() -> GrafikSeçenekleri {
     let etiket = Etiket::yeni()
         .göster(true)
@@ -10357,6 +10423,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-stack-normalization" => Ok(bar_stack_normalization()),
         "bar-brush" => bar_brush(durum),
         "bar-polar-label-radial" => Ok(bar_polar_label_radial()),
+        "bar-polar-label-tangential" => Ok(bar_polar_label_tangential()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),
