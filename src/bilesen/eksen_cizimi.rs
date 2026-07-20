@@ -47,6 +47,27 @@ fn eksen_metni_ölç(çizici: &dyn ÇizimYüzeyi, metin: &str, boyut: f32) -> (f
     (genişlik, boyut * satırlar.len().max(1) as f32)
 }
 
+/// Etiket kutusunun eksen yönündeki izdüşümü. ECharts eksen etiketlerine
+/// öntanımlı `textMargin: [0, 3]` uygular: yatay metin ilerleme yönünde iki
+/// yanda üçer piksel bulunur, dikey yönde ek pay yoktur. Döndürülmüş kutunun
+/// eksen doğrultusundaki gerçek boyu bu genişletilmiş yerel kutudan çıkar.
+fn eksen_yönündeki_metin_boyutu(
+    ölçü: (f32, f32),
+    yatay_eksen: bool,
+    döndürme_derecesi: f32,
+) -> f32 {
+    let genişlik = ölçü.0 + 6.0;
+    let yükseklik = ölçü.1;
+    let radyan = döndürme_derecesi.to_radians();
+    let kosinüs = radyan.cos().abs();
+    let sinüs = radyan.sin().abs();
+    if yatay_eksen {
+        genişlik * kosinüs + yükseklik * sinüs
+    } else {
+        genişlik * sinüs + yükseklik * kosinüs
+    }
+}
+
 /// Kategori ekseninin otomatik `axisLabel.interval` çizim adımı. Çizgi
 /// serisinin `showAllSymbol: 'auto'` davranışı aynı görünür etiket kümesini
 /// izlediğinden bu hesap AxisBuilder ile LineView arasında ortaktır.
@@ -616,11 +637,16 @@ pub fn eksenleri_çiz(
                     let bitiş_metni = etiket_metni(eksen, bitiş_çentiği, bitiş_sırası);
                     let başlangıç_ölçüsü = eksen_metni_ölç(çizici, &başlangıç_metni, boyut);
                     let bitiş_ölçüsü = eksen_metni_ölç(çizici, &bitiş_metni, boyut);
-                    let (başlangıç_boyutu, bitiş_boyutu) = if eksen.yatay_mı() {
-                        (başlangıç_ölçüsü.0, bitiş_ölçüsü.0)
-                    } else {
-                        (başlangıç_ölçüsü.1, bitiş_ölçüsü.1)
-                    };
+                    let başlangıç_boyutu = eksen_yönündeki_metin_boyutu(
+                        başlangıç_ölçüsü,
+                        eksen.yatay_mı(),
+                        eksen.seçenek.etiket.döndürme,
+                    );
+                    let bitiş_boyutu = eksen_yönündeki_metin_boyutu(
+                        bitiş_ölçüsü,
+                        eksen.yatay_mı(),
+                        eksen.seçenek.etiket.döndürme,
+                    );
                     if başlangıç_boyutu <= 0.0 || bitiş_boyutu <= 0.0 {
                         continue;
                     }
@@ -832,5 +858,14 @@ mod testler {
             assert_eq!(alt.0, üst.0);
             assert_eq!(alt.1 - üst.1, 7.0);
         }
+    }
+
+    #[test]
+    fn kirilma_etiketi_izdusumu_text_margin_ve_dondurmeyi_izler() {
+        let ölçü = (30.0, 12.0);
+        assert!((eksen_yönündeki_metin_boyutu(ölçü, true, 0.0) - 36.0).abs() < 1e-6);
+        assert!((eksen_yönündeki_metin_boyutu(ölçü, false, 0.0) - 12.0).abs() < 1e-6);
+        assert!((eksen_yönündeki_metin_boyutu(ölçü, true, 90.0) - 12.0).abs() < 1e-5);
+        assert!((eksen_yönündeki_metin_boyutu(ölçü, false, 90.0) - 36.0).abs() < 1e-5);
     }
 }
