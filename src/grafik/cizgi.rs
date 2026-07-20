@@ -468,6 +468,7 @@ pub fn çizgi_serisi_çiz(
     aralıklar: &[YığınAralığı],
     seri_rengi: Renk,
     görsel_eşleme: Option<&GörselEşleme>,
+    öğe_opaklıkları: Option<&[f32]>,
     ilerleme: f32,
     katman: ÇizgiKatmanı,
     uç_etiketi_y: Option<f32>,
@@ -619,7 +620,11 @@ pub fn çizgi_serisi_çiz(
                 let opaklık = veri_stili
                     .and_then(|stil| stil.opaklık)
                     .or(seri.öğe_stili.opaklık)
-                    .unwrap_or(1.0);
+                    .unwrap_or(1.0)
+                    * öğe_opaklıkları
+                        .and_then(|opaklıklar| opaklıklar.get(i))
+                        .copied()
+                        .unwrap_or(1.0);
                 sembol_stilli_çiz(
                     ç,
                     &seri.sembol,

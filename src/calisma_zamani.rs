@@ -12,7 +12,9 @@ use std::collections::{BTreeMap, BTreeSet, HashSet};
 use crate::animasyon::Yumuşatma;
 use crate::hata::BilesenHatasi;
 use crate::koordinat::Kartezyen2B;
-use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
+use crate::model::bilesen::{
+    AraçKutusu, Başlık, Fırça, FırçaSeçimAlanı, Gösterge, Izgara, İpucu
+};
 use crate::model::deger::VeriÖğesi;
 use crate::model::eksen::{Eksen, EksenKırılması};
 use crate::model::gorsel_esleme::GörselEşleme;
@@ -1194,6 +1196,29 @@ impl GrafikÇalışmaZamanı {
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok(değişiklikler)
+    }
+
+    /// `dispatchAction({type: "brush", areas})` model güncellemesi.
+    /// `areas` verilmezse ECharts gibi mevcut seçim korunur; brush bileşeni
+    /// olmayan bir grafikte eylem güvenli bir no-op'tur.
+    pub fn fırça_alanlarını_ayarla(
+        &mut self,
+        alanlar: Option<Vec<FırçaSeçimAlanı>>,
+        sessiz: bool,
+    ) -> Result<bool, BilesenHatasi> {
+        self.açık_mı("dispatchAction.brush")?;
+        let Some(alanlar) = alanlar else {
+            return Ok(false);
+        };
+        let Some(fırça) = self.seçenekler.fırça.as_mut() else {
+            return Ok(false);
+        };
+        fırça.alanlar = alanlar;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::SeçenekDeğişti);
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(true)
     }
 
     /// `dispatchAction({type: "selectDataRange"})` model güncellemesi.

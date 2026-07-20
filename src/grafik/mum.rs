@@ -29,9 +29,10 @@ pub fn mum_çiz(
     genel_sıra: usize,
     kartezyen: &Kartezyen2B,
     ilerleme: f32,
+    öğe_opaklıkları: Option<&[f32]>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
-    if seri.büyük && seri.veri.len() >= seri.büyük_eşiği {
+    if seri.büyük && seri.veri.len() >= seri.büyük_eşiği && öğe_opaklıkları.is_none() {
         mum_büyük_çiz(çizici, seri, kartezyen);
         return;
     }
@@ -58,6 +59,13 @@ pub fn mum_çiz(
             } else {
                 (seri.düşen_renk, seri.düşen_kenarlık_rengi)
             };
+            let opaklık = öğe_opaklıkları
+                .and_then(|opaklıklar| opaklıklar.get(i))
+                .copied()
+                .unwrap_or(1.0)
+                .clamp(0.0, 1.0);
+            let dolgu_rengi = dolgu_rengi.opaklık(opaklık);
+            let kenarlık_rengi = kenarlık_rengi.opaklık(opaklık);
 
             let ham_x = kartezyen.x.veriden_piksele(i as f64);
             let x = mum_alt_pikseli(ham_x, false);

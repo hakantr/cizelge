@@ -933,6 +933,7 @@ impl Render for GrafikGörünümü {
                             let çoklu = bu
                                 .seçenekler
                                 .fırça
+                                .as_ref()
                                 .map(|fırça| fırça.çoklu)
                                 .unwrap_or(false);
                             if !çoklu {
@@ -1046,7 +1047,11 @@ impl Render for GrafikGörünümü {
                         }
                         Some(AraçTürü::VeriYakınlaştır) => {
                             let seçenekler = Arc::make_mut(&mut bu.seçenekler);
-                            let etkin = seçenekler.fırça.map(|f| f.etkin).unwrap_or(false);
+                            let etkin = seçenekler
+                                .fırça
+                                .as_ref()
+                                .map(|fırça| fırça.etkin)
+                                .unwrap_or(false);
                             seçenekler.fırça = (!etkin).then(crate::model::bilesen::Fırça::yeni);
                             bu.fırça_seçimi = None;
                             bu.fırça_alanları.clear();
@@ -1075,7 +1080,7 @@ impl Render for GrafikGörünümü {
                                     });
                                 }
                                 FırçaAracıTürü::Koru => {
-                                    let mut fırça = seçenekler.fırça.unwrap_or_default();
+                                    let mut fırça = seçenekler.fırça.clone().unwrap_or_default();
                                     fırça.çoklu = !fırça.çoklu;
                                     seçenekler.fırça = Some(fırça);
                                 }
@@ -1091,10 +1096,10 @@ impl Render for GrafikGörünümü {
                                             return;
                                         }
                                     };
-                                    let etkin = seçenekler.fırça.is_some_and(|fırça| {
+                                    let etkin = seçenekler.fırça.as_ref().is_some_and(|fırça| {
                                         fırça.etkin && fırça.tür == fırça_türü
                                     });
-                                    let mut fırça = seçenekler.fırça.unwrap_or_default();
+                                    let mut fırça = seçenekler.fırça.clone().unwrap_or_default();
                                     fırça.etkin = !etkin;
                                     fırça.tür = fırça_türü;
                                     seçenekler.fırça = Some(fırça);
@@ -1184,7 +1189,8 @@ impl Render for GrafikGörünümü {
                         return;
                     }
                     // 0c) Fırça etkinse seçim başlat.
-                    if let Some(fırça) = bu.seçenekler.fırça.filter(|fırça| fırça.etkin) {
+                    if let Some(fırça) = bu.seçenekler.fırça.as_ref().filter(|fırça| fırça.etkin)
+                    {
                         use crate::model::bilesen::FırçaTürü;
 
                         let ızgara = || {

@@ -26,6 +26,8 @@ pub struct SütunGirdisi<'s> {
     pub genel_sıra: usize,
     pub aralıklar: &'s [YığınAralığı],
     pub renk: Renk,
+    /// Brush visual aşamasının ham veri sırasına göre renk alfa çarpanları.
+    pub öğe_opaklıkları: Option<&'s [f32]>,
 }
 
 fn yığın_kimliği(seri: &SütunSerisi, genel_sıra: usize) -> String {
@@ -345,7 +347,11 @@ pub fn sütunları_çiz(
 
     for (girdi, konum) in girdiler.iter().zip(&konumlar) {
         let seri = girdi.seri;
-        if seri.büyük && seri.veri.len() >= seri.büyük_eşiği && seri.piktogram.is_none() {
+        if seri.büyük
+            && seri.veri.len() >= seri.büyük_eşiği
+            && seri.piktogram.is_none()
+            && girdi.öğe_opaklıkları.is_none()
+        {
             büyük_sütun_çiz(çizici, girdi, *konum, yatay, ilerleme, fare, isabetler);
             continue;
         }
@@ -404,7 +410,12 @@ pub fn sütunları_çiz(
             let normal_opaklık = öğe_stili
                 .and_then(|stil| stil.opaklık)
                 .or(seri.öğe_stili.opaklık)
-                .unwrap_or(1.0);
+                .unwrap_or(1.0)
+                * girdi
+                    .öğe_opaklıkları
+                    .and_then(|opaklıklar| opaklıklar.get(i))
+                    .copied()
+                    .unwrap_or(1.0);
             let normal_gölge = öğe_stili
                 .filter(|stil| {
                     stil.gölge_bulanıklığı > 0.0

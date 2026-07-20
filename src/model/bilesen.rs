@@ -560,13 +560,231 @@ pub enum FırçaTürü {
     Dikey,
 }
 
-/// Fırça (`brush`): dikdörtgen ya da çokgen seçim.
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+/// `brush.brushLink`: bir koordinat sisteminde seçilen ham veri sıralarını
+/// başka serilere yayınlama kuralı.
+#[derive(Clone, PartialEq, Eq, Debug, Default)]
+pub enum FırçaBağı {
+    /// ECharts `brushLink: 'none'` / belirtilmemiş durum.
+    #[default]
+    Yok,
+    /// ECharts `brushLink: 'all'`.
+    Tümü,
+    /// Yalnız belirtilen `seriesIndex` değerleri arasında bağ kurar.
+    Seriler(Vec<usize>),
+}
+
+/// Programatik fırça alanındaki tek veri koordinatı. Kategori değerinin ham
+/// metni korunur; sayısal/zaman eksenleri sonlu bir sayı kullanır.
+#[derive(Clone, PartialEq, Debug)]
+pub enum FırçaKoordinatı {
+    Sayı(f64),
+    Kategori(String),
+}
+
+impl From<f64> for FırçaKoordinatı {
+    fn from(değer: f64) -> Self {
+        Self::Sayı(değer)
+    }
+}
+
+impl From<f32> for FırçaKoordinatı {
+    fn from(değer: f32) -> Self {
+        Self::Sayı(değer as f64)
+    }
+}
+
+impl From<usize> for FırçaKoordinatı {
+    fn from(değer: usize) -> Self {
+        Self::Sayı(değer as f64)
+    }
+}
+
+impl From<&str> for FırçaKoordinatı {
+    fn from(değer: &str) -> Self {
+        Self::Kategori(değer.to_owned())
+    }
+}
+
+impl From<String> for FırçaKoordinatı {
+    fn from(değer: String) -> Self {
+        Self::Kategori(değer)
+    }
+}
+
+/// `dispatchAction({type: 'brush', areas[*].coordRange})` biçimleri.
+#[derive(Clone, PartialEq, Debug)]
+pub enum FırçaKoordinatAralığı {
+    /// `lineX` / `lineY`: tek eksendeki iki uç.
+    Eksen([FırçaKoordinatı; 2]),
+    /// `rect`: x ve y uçları.
+    Dikdörtgen {
+        x: [FırçaKoordinatı; 2],
+        y: [FırçaKoordinatı; 2],
+    },
+    /// `polygon`: veri koordinatındaki köşeler.
+    Çokgen(Vec<[FırçaKoordinatı; 2]>),
+}
+
+/// Programatik bir ECharts `brush` alanı. `xAxisIndex` / `yAxisIndex`
+/// seçicileri alanın hangi Kartezyen panele bağlandığını belirler.
+#[derive(Clone, PartialEq, Debug)]
+pub struct FırçaSeçimAlanı {
+    pub tür: FırçaTürü,
+    pub koordinat_aralığı: FırçaKoordinatAralığı,
+    pub x_ekseni_sırası: Option<usize>,
+    pub y_ekseni_sırası: Option<usize>,
+    pub dönüştürülebilir: Option<bool>,
+}
+
+impl FırçaSeçimAlanı {
+    pub fn yatay<B: Into<FırçaKoordinatı>, S: Into<FırçaKoordinatı>>(
+        başlangıç: B,
+        bitiş: S,
+    ) -> Self {
+        Self {
+            tür: FırçaTürü::Yatay,
+            koordinat_aralığı: FırçaKoordinatAralığı::Eksen(
+                [başlangıç.into(), bitiş.into()],
+            ),
+            x_ekseni_sırası: None,
+            y_ekseni_sırası: None,
+            dönüştürülebilir: None,
+        }
+    }
+
+    pub fn dikey<B: Into<FırçaKoordinatı>, S: Into<FırçaKoordinatı>>(
+        başlangıç: B,
+        bitiş: S,
+    ) -> Self {
+        Self {
+            tür: FırçaTürü::Dikey,
+            koordinat_aralığı: FırçaKoordinatAralığı::Eksen(
+                [başlangıç.into(), bitiş.into()],
+            ),
+            x_ekseni_sırası: None,
+            y_ekseni_sırası: None,
+            dönüştürülebilir: None,
+        }
+    }
+
+    pub fn dikdörtgen<X, Y>(x: [X; 2], y: [Y; 2]) -> Self
+    where
+        X: Into<FırçaKoordinatı>,
+        Y: Into<FırçaKoordinatı>,
+    {
+        let [x0, x1] = x;
+        let [y0, y1] = y;
+        Self {
+            tür: FırçaTürü::Dikdörtgen,
+            koordinat_aralığı: FırçaKoordinatAralığı::Dikdörtgen {
+                x: [x0.into(), x1.into()],
+                y: [y0.into(), y1.into()],
+            },
+            x_ekseni_sırası: None,
+            y_ekseni_sırası: None,
+            dönüştürülebilir: None,
+        }
+    }
+
+    pub fn x_ekseni(mut self, sıra: usize) -> Self {
+        self.x_ekseni_sırası = Some(sıra);
+        self
+    }
+
+    pub fn y_ekseni(mut self, sıra: usize) -> Self {
+        self.y_ekseni_sırası = Some(sıra);
+        self
+    }
+
+    pub fn dönüştürülebilir(mut self, açık: bool) -> Self {
+        self.dönüştürülebilir = Some(açık);
+        self
+    }
+}
+
+/// Tamamlanmış fırça örtüsünün ECharts `brushStyle` karşılığı.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct FırçaStili {
+    pub renk: Renk,
+    pub kenarlık_rengi: Renk,
+    pub kenarlık_kalınlığı: f32,
+}
+
+impl Default for FırçaStili {
+    fn default() -> Self {
+        Self {
+            // ECharts 6 tokens.color.backgroundTint / borderTint.
+            renk: Renk::kyma(234.0 / 255.0, 237.0 / 255.0, 245.0 / 255.0, 0.5),
+            kenarlık_rengi: Renk::onaltılık(0xcfd2d7),
+            kenarlık_kalınlığı: 1.0,
+        }
+    }
+}
+
+impl FırçaStili {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
+        self.renk = renk.into();
+        self
+    }
+
+    pub fn kenarlık_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.kenarlık_rengi = renk.into();
+        self
+    }
+
+    pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
+        self.kenarlık_kalınlığı = kalınlık.max(0.0);
+        self
+    }
+}
+
+/// Fırça (`brush`): etkileşim aracı, programatik alanlar ve seçim görseli.
+#[derive(Clone, PartialEq, Debug)]
 pub struct Fırça {
     pub etkin: bool,
     pub tür: FırçaTürü,
     /// Seçim alanlarını koruma kipi (`brushMode: 'multiple'`).
     pub çoklu: bool,
+    /// Etkileşimli fırçanın hedef x eksenleri (`xAxisIndex`). Boş = tümü.
+    pub x_ekseni_sıraları: Vec<usize>,
+    /// Etkileşimli fırçanın hedef y eksenleri (`yAxisIndex`). Boş = tümü.
+    pub y_ekseni_sıraları: Vec<usize>,
+    /// `seriesIndex`; boş = tüm seriler.
+    pub seri_sıraları: Vec<usize>,
+    pub bağlantı: FırçaBağı,
+    /// `inBrush.colorAlpha`; belirtilmezse özgün alfa korunur.
+    pub iç_renk_opaklığı: Option<f32>,
+    /// `outOfBrush.colorAlpha`; belirtilmezse özgün alfa korunur.
+    pub dış_renk_opaklığı: Option<f32>,
+    pub dönüştürülebilir: bool,
+    pub tıklayınca_kaldır: bool,
+    pub stil: FırçaStili,
+    /// `dispatchAction({type: 'brush', areas})` ile ayarlanmış alanlar.
+    pub alanlar: Vec<FırçaSeçimAlanı>,
+}
+
+impl Default for Fırça {
+    fn default() -> Self {
+        Self {
+            etkin: false,
+            tür: FırçaTürü::Dikdörtgen,
+            çoklu: false,
+            x_ekseni_sıraları: Vec::new(),
+            y_ekseni_sıraları: Vec::new(),
+            seri_sıraları: Vec::new(),
+            bağlantı: FırçaBağı::Yok,
+            iç_renk_opaklığı: None,
+            dış_renk_opaklığı: None,
+            dönüştürülebilir: true,
+            tıklayınca_kaldır: true,
+            stil: FırçaStili::default(),
+            alanlar: Vec::new(),
+        }
+    }
 }
 
 impl Fırça {
@@ -584,6 +802,61 @@ impl Fırça {
 
     pub fn çoklu(mut self, çoklu: bool) -> Self {
         self.çoklu = çoklu;
+        self
+    }
+
+    pub fn x_eksenleri(mut self, sıralar: impl IntoIterator<Item = usize>) -> Self {
+        self.x_ekseni_sıraları = sıralar.into_iter().collect();
+        self
+    }
+
+    pub fn y_eksenleri(mut self, sıralar: impl IntoIterator<Item = usize>) -> Self {
+        self.y_ekseni_sıraları = sıralar.into_iter().collect();
+        self
+    }
+
+    pub fn seri_sıraları(mut self, sıralar: impl IntoIterator<Item = usize>) -> Self {
+        self.seri_sıraları = sıralar.into_iter().collect();
+        self
+    }
+
+    pub fn bağlantı(mut self, bağlantı: FırçaBağı) -> Self {
+        self.bağlantı = bağlantı;
+        self
+    }
+
+    pub fn iç_renk_opaklığı(mut self, opaklık: f32) -> Self {
+        self.iç_renk_opaklığı = Some(opaklık.clamp(0.0, 1.0));
+        self
+    }
+
+    pub fn dış_renk_opaklığı(mut self, opaklık: f32) -> Self {
+        self.dış_renk_opaklığı = Some(opaklık.clamp(0.0, 1.0));
+        self
+    }
+
+    pub fn dönüştürülebilir(mut self, açık: bool) -> Self {
+        self.dönüştürülebilir = açık;
+        self
+    }
+
+    pub fn tıklayınca_kaldır(mut self, açık: bool) -> Self {
+        self.tıklayınca_kaldır = açık;
+        self
+    }
+
+    pub fn stil(mut self, stil: FırçaStili) -> Self {
+        self.stil = stil;
+        self
+    }
+
+    pub fn alan(mut self, alan: FırçaSeçimAlanı) -> Self {
+        self.alanlar.push(alan);
+        self
+    }
+
+    pub fn alanlar(mut self, alanlar: impl IntoIterator<Item = FırçaSeçimAlanı>) -> Self {
+        self.alanlar = alanlar.into_iter().collect();
         self
     }
 }

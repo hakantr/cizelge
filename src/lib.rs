@@ -66,8 +66,9 @@ pub use cizim::{
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, eksen_imleci_eylemini_kaydet,
-    eksen_kırılma_eylemlerini_kaydet, geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet,
-    gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+    eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
+    görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet,
+    öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -77,9 +78,10 @@ pub use genisletme::{
 pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::agac::AğaçDüğümü;
 pub use model::bilesen::{
-    AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaTürü,
-    Gösterge, GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi,
-    İpucuKonumu, İpucuParametresi,
+    AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaBağı,
+    FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaStili, FırçaTürü, Gösterge,
+    GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi, İpucuKonumu,
+    İpucuParametresi,
 };
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
@@ -177,7 +179,7 @@ pub mod hazir {
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
-        eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet,
+        eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
         geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
         veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
@@ -190,8 +192,9 @@ pub mod hazir {
     pub use crate::model::agac::AğaçDüğümü;
     pub use crate::model::bilesen::{
         AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü,
-        FırçaTürü, Gösterge, GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu,
-        İpucuBiçimleyicisi, İpucuKonumu, İpucuParametresi,
+        FırçaBağı, FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaStili, FırçaTürü,
+        Gösterge, GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi,
+        İpucuKonumu, İpucuParametresi,
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{

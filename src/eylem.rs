@@ -11,6 +11,9 @@ use crate::calisma_zamani::{
     GöstergeSeçimEylemi, SeriSeçici,
 };
 use crate::hata::BilesenHatasi;
+use crate::model::bilesen::{
+    FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaTürü
+};
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::yakinlastirma::YakınlaştırmaDeğeri;
 
@@ -560,6 +563,152 @@ pub fn veri_yakınlaştırma_eylemini_kaydet(
     )
 }
 
+/// ECharts `brush` action'ı. Programatik `coordRange` alanlarını modelde
+/// tutar; veri koordinatından piksele dönüşüm ve `brushLink` görseli ortak
+/// boyama hattında çözülür.
+pub fn fırça_eylemini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "brush",
+        "brush",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| {
+            let alanlar = yük.al("areas").map(fırça_alanlarını_oku).transpose()?;
+            let değişti = çalışma.fırça_alanlarını_ayarla(alanlar, true)?;
+            let mut olay = OlayYükü {
+                bileşen_türü: Some("brush".to_owned()),
+                bileşen_sırası: Some(0),
+                ..OlayYükü::default()
+            };
+            if let Some(alanlar) = yük.al("areas") {
+                olay.alanlar.insert("areas".to_owned(), alanlar.clone());
+            }
+            olay.alanlar
+                .insert("changed".to_owned(), EylemDeğeri::from(değişti));
+            Ok(vec![olay])
+        },
+    )
+}
+
+fn fırça_alanlarını_oku(
+    değer: &EylemDeğeri,
+) -> Result<Vec<FırçaSeçimAlanı>, BilesenHatasi> {
+    let alanlar = değer.dizi().ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+        alan: "action.brush.areas",
+        ayrıntı: "areas bir nesne dizisi olmalı".to_owned(),
+    })?;
+    alanlar.iter().map(fırça_alanını_oku).collect()
+}
+
+fn fırça_alanını_oku(değer: &EylemDeğeri) -> Result<FırçaSeçimAlanı, BilesenHatasi> {
+    let nesne = değer
+        .nesne()
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "action.brush.areas",
+            ayrıntı: "her alan bir nesne olmalı".to_owned(),
+        })?;
+    let tür_metni = nesne
+        .get("brushType")
+        .and_then(EylemDeğeri::metin)
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "action.brush.brushType",
+            ayrıntı: "rect, polygon, lineX veya lineY gerekli".to_owned(),
+        })?;
+    let tür = match tür_metni {
+        "rect" => FırçaTürü::Dikdörtgen,
+        "polygon" => FırçaTürü::Çokgen,
+        "lineX" => FırçaTürü::Yatay,
+        "lineY" => FırçaTürü::Dikey,
+        diğer => {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "action.brush.brushType",
+                ayrıntı: format!("`{diğer}` desteklenen bir brushType değil"),
+            });
+        }
+    };
+    let koordinat = nesne
+        .get("coordRange")
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "action.brush.coordRange",
+            ayrıntı: "koordinat ekseni seçildiğinde coordRange gerekli".to_owned(),
+        })?;
+    let koordinat_aralığı = match tür {
+        FırçaTürü::Yatay | FırçaTürü::Dikey => {
+            FırçaKoordinatAralığı::Eksen(fırça_koordinat_uçlarını_oku(koordinat)?)
+        }
+        FırçaTürü::Dikdörtgen => {
+            let boyutlar = koordinat
+                .dizi()
+                .filter(|boyutlar| boyutlar.len() == 2)
+                .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                    alan: "action.brush.coordRange",
+                    ayrıntı: "rect coordRange [[x0,x1],[y0,y1]] olmalı".to_owned(),
+                })?;
+            FırçaKoordinatAralığı::Dikdörtgen {
+                x: fırça_koordinat_uçlarını_oku(&boyutlar[0])?,
+                y: fırça_koordinat_uçlarını_oku(&boyutlar[1])?,
+            }
+        }
+        FırçaTürü::Çokgen => {
+            let noktalar = koordinat
+                .dizi()
+                .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                    alan: "action.brush.coordRange",
+                    ayrıntı: "polygon coordRange nokta çiftlerinden oluşmalı".to_owned(),
+                })?
+                .iter()
+                .map(fırça_koordinat_uçlarını_oku)
+                .collect::<Result<Vec<_>, _>>()?;
+            FırçaKoordinatAralığı::Çokgen(noktalar)
+        }
+    };
+    let sıra = |ad: &str| -> Result<Option<usize>, BilesenHatasi> {
+        let Some(değer) = nesne.get(ad) else {
+            return Ok(None);
+        };
+        let sayı = değer
+            .sayı()
+            .filter(|sayı| {
+                sayı.is_finite()
+                    && *sayı >= 0.0
+                    && sayı.fract() == 0.0
+                    && *sayı <= usize::MAX as f64
+            })
+            .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                alan: "action.brush.axisIndex",
+                ayrıntı: format!("{ad} negatif olmayan tam sayı olmalı"),
+            })?;
+        Ok(Some(sayı as usize))
+    };
+    Ok(FırçaSeçimAlanı {
+        tür,
+        koordinat_aralığı,
+        x_ekseni_sırası: sıra("xAxisIndex")?,
+        y_ekseni_sırası: sıra("yAxisIndex")?,
+        dönüştürülebilir: nesne.get("transformable").and_then(EylemDeğeri::mantıksal),
+    })
+}
+
+fn fırça_koordinat_uçlarını_oku(
+    değer: &EylemDeğeri,
+) -> Result<[FırçaKoordinatı; 2], BilesenHatasi> {
+    let uçlar = değer
+        .dizi()
+        .filter(|uçlar| uçlar.len() == 2)
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "action.brush.coordRange",
+            ayrıntı: "aralık tam iki uç içermeli".to_owned(),
+        })?;
+    let uç = |değer: &EylemDeğeri| match değer {
+        EylemDeğeri::Sayı(sayı) if sayı.is_finite() => Ok(FırçaKoordinatı::Sayı(*sayı)),
+        EylemDeğeri::Metin(kategori) => Ok(FırçaKoordinatı::Kategori(kategori.clone())),
+        _ => Err(BilesenHatasi::GeçersizSeçenek {
+            alan: "action.brush.coordRange",
+            ayrıntı: "uç sonlu sayı veya kategori adı olmalı".to_owned(),
+        }),
+    };
+    Ok([uç(&uçlar[0])?, uç(&uçlar[1])?])
+}
+
 /// ECharts 6 kırık eksen action takımını kaydeder. Kırılmalar özgün
 /// `start`/`end` çiftleriyle seçilir; `axisbreakchanged` olayı eski/yeni
 /// `isExpanded` durumunu ve hedef eksen sırasını birlikte taşır.
@@ -1005,6 +1154,7 @@ fn eksen_imleci_kategori_sırası(
 pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
     append_data_eylemini_kaydet(kayıt)?;
     veri_yakınlaştırma_eylemini_kaydet(kayıt)?;
+    fırça_eylemini_kaydet(kayıt)?;
     eksen_kırılma_eylemlerini_kaydet(kayıt)?;
     görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
@@ -1200,7 +1350,7 @@ mod testler {
 
     use super::*;
     use crate::calisma_zamani::ÖrnekBaşlatmaSeçenekleri;
-    use crate::model::bilesen::{Başlık, Gösterge, GöstergeSeçimKipi, Izgara};
+    use crate::model::bilesen::{Başlık, Fırça, Gösterge, GöstergeSeçimKipi, Izgara};
     use crate::model::eksen::{Eksen, EksenKırılması};
     use crate::model::gorsel_esleme::GörselEşleme;
     use crate::model::secenekler::GrafikSeçenekleri;
@@ -1342,6 +1492,83 @@ mod testler {
                 Some(YakınlaştırmaDeğeri::Kategori("F".to_owned()))
             );
         }
+    }
+
+    #[test]
+    fn firca_action_line_x_kategori_araligini_korur_ve_temizler() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .x_ekseni(Eksen::kategori().veri(["2024-01-01", "2024-01-02", "2024-01-03"]))
+            .y_ekseni(Eksen::değer())
+            .fırça(Fırça::default())
+            .seri(ÇizgiSerisi::yeni().veri([1, 2, 3]));
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        fırça_eylemini_kaydet(&mut kayıt).unwrap();
+
+        let alan = EylemDeğeri::Nesne(BTreeMap::from([
+            ("brushType".to_owned(), "lineX".into()),
+            (
+                "coordRange".to_owned(),
+                EylemDeğeri::Dizi(vec!["2024-01-02".into(), "2024-01-03".into()]),
+            ),
+            ("xAxisIndex".to_owned(), 0usize.into()),
+        ]));
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("brush").alan("areas", EylemDeğeri::Dizi(vec![alan.clone()])),
+            )
+            .unwrap();
+        assert_eq!(olaylar.len(), 1);
+        assert_eq!(olaylar[0].tür, "brush");
+        assert_eq!(olaylar[0].bileşen_türü.as_deref(), Some("brush"));
+        assert_eq!(olaylar[0].alanlar.get("changed"), Some(&true.into()));
+
+        let seçenekler = çalışma.seçenekleri_al().unwrap();
+        let fırça = seçenekler.fırça.as_ref().unwrap();
+        assert_eq!(fırça.alanlar.len(), 1);
+        assert_eq!(fırça.alanlar[0].tür, FırçaTürü::Yatay);
+        assert_eq!(fırça.alanlar[0].x_ekseni_sırası, Some(0));
+        assert_eq!(
+            fırça.alanlar[0].koordinat_aralığı,
+            FırçaKoordinatAralığı::Eksen([
+                FırçaKoordinatı::Kategori("2024-01-02".to_owned()),
+                FırçaKoordinatı::Kategori("2024-01-03".to_owned()),
+            ])
+        );
+
+        kayıt
+            .gönder(&mut çalışma, &EylemYükü::yeni("brush"))
+            .unwrap();
+        assert_eq!(
+            çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .fırça
+                .as_ref()
+                .unwrap()
+                .alanlar
+                .len(),
+            1,
+            "areas verilmezse mevcut seçim korunmalı"
+        );
+        kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("brush").alan("areas", EylemDeğeri::Dizi(Vec::new())),
+            )
+            .unwrap();
+        assert!(
+            çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .fırça
+                .as_ref()
+                .unwrap()
+                .alanlar
+                .is_empty()
+        );
     }
 
     #[test]
