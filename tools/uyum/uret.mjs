@@ -150,6 +150,7 @@ const YEREL_FIXTURE = Object.freeze({
   'doc-example/scatter-jitter-avoidOverlap': 'examples/uyum_fixture.rs#scatter_jitter_avoid_overlap',
   'scatter-punchCard': 'examples/uyum_fixture.rs#scatter_punch_card',
   'scatter-polar-punchCard': 'examples/uyum_fixture.rs#scatter_polar_punch_card',
+  'scatter-single-axis': 'examples/uyum_fixture.rs#scatter_single_axis',
   'bubble-gradient': 'examples/uyum_fixture.rs#bubble_gradient',
   'scatter-label-align-top': 'examples/uyum_fixture.rs#scatter_label_align_top',
   'scatter-label-align-right': 'examples/uyum_fixture.rs#scatter_label_align_right',

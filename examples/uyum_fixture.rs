@@ -3718,6 +3718,58 @@ fn scatter_polar_punch_card() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn scatter_single_axis() -> Result<GrafikSeçenekleri, String> {
+    let (saatler, günler, ham_veri) = punch_card_verisini_oku("scatter-single-axis.ts")?;
+    let mut satırlar = vec![Vec::<[f64; 2]>::new(); günler.len()];
+    for [gün, saat, değer] in ham_veri {
+        let gün_sırası = gün as usize;
+        let Some(grup) = satırlar.get_mut(gün_sırası) else {
+            return Err(format!(
+                "scatter-single-axis geçersiz gün sırası içeriyor: {gün}"
+            ));
+        };
+        grup.push([saat, değer]);
+    }
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni().konum(İpucuKonumu::Üst));
+    for (sıra, (gün, veri)) in günler.into_iter().zip(satırlar).enumerate() {
+        let mut üst_yüzdesi = sıra as f32 * 100.0 / 7.0 + 5.0;
+        // Kaynaktaki yüzde dizeleri JavaScript double aritmetiğiyle
+        // üretilir. f32'nin tam yarım-piksel sınırının iki ayrı yanında
+        // kaldığı üçüncü ve yedinci satırda bir ULP yön düzeltmesi,
+        // zrender `subPixelOptimize` sonucunu korur.
+        üst_yüzdesi += match sıra {
+            2 => 0.000_01,
+            6 => -0.000_01,
+            _ => 0.0,
+        };
+        seçenekler = seçenekler
+            .başlık_ekle(
+                Başlık::yeni()
+                    .metin(gün)
+                    .üst(Uzunluk::Yüzde((sıra as f32 + 0.5) * 100.0 / 7.0)),
+            )
+            .tek_eksen(
+                TekEksen::kategori()
+                    .sol(150)
+                    .üst(Uzunluk::Yüzde(üst_yüzdesi))
+                    .yükseklik(Uzunluk::Yüzde(100.0 / 7.0 - 10.0))
+                    .kenar_boşluğu(false)
+                    .veri(saatler.clone())
+                    .etiket(EksenEtiketi::yeni().aralık(2)),
+            )
+            .seri(
+                SaçılımSerisi::yeni()
+                    .tek_eksen_sırası(sıra)
+                    .sembol_boyutu_işlevi(|öğe| öğe.değer.sayı().unwrap_or_default() as f32 * 4.0)
+                    .veri(veri),
+            );
+    }
+    Ok(seçenekler)
+}
+
 #[cfg(test)]
 #[allow(clippy::expect_used)]
 mod scatter_polar_punch_card_testleri {
@@ -3732,6 +3784,47 @@ mod scatter_polar_punch_card_testleri {
         assert_eq!(veri.len(), 168);
         assert_eq!(veri.first(), Some(&[0.0, 0.0, 5.0]));
         assert_eq!(veri.last(), Some(&[6.0, 23.0, 6.0]));
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod scatter_single_axis_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_single_axis_verisi_yedi_esit_seriye_ayrilir() {
+        let (saatler, günler, veri) = punch_card_verisini_oku("scatter-single-axis.ts")
+            .expect("resmi single axis verisi okunmalı");
+        assert_eq!(saatler.len(), 24);
+        assert_eq!(günler.len(), 7);
+        assert_eq!(veri.len(), 168);
+        assert_eq!(veri.first(), Some(&[0.0, 0.0, 5.0]));
+        assert_eq!(veri.last(), Some(&[6.0, 23.0, 6.0]));
+        for gün in 0..7 {
+            assert_eq!(
+                veri.iter().filter(|satır| satır[0] == gün as f64).count(),
+                24
+            );
+        }
+    }
+
+    #[test]
+    fn fixture_yedi_baslik_eksen_ve_scatter_bagi_uretir() {
+        let seçenekler = scatter_single_axis().expect("fixture kurulmalı");
+        assert_eq!(seçenekler.başlıklar.len(), 7);
+        assert_eq!(seçenekler.tek_eksenler.len(), 7);
+        assert_eq!(seçenekler.seriler.len(), 7);
+        for (sıra, seri) in seçenekler.seriler.iter().enumerate() {
+            let Seri::Saçılım(saçılım) = seri else {
+                panic!("{sıra}. seri scatter olmalı");
+            };
+            assert_eq!(saçılım.tek_eksen_sırası, Some(sıra));
+            assert_eq!(saçılım.veri.len(), 24);
+        }
+        seçenekler
+            .doğrula()
+            .expect("singleAxis bağları geçerli olmalı");
     }
 }
 
@@ -7343,6 +7436,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "doc-example/scatter-jitter-avoidOverlap" => Ok(scatter_jitter_avoid_overlap()),
         "scatter-punchCard" => scatter_punch_card(),
         "scatter-polar-punchCard" => scatter_polar_punch_card(),
+        "scatter-single-axis" => scatter_single_axis(),
         "bubble-gradient" => bubble_gradient(),
         "scatter-label-align-top" => scatter_label_align_top(),
         "scatter-label-align-right" => scatter_label_align_right(),
