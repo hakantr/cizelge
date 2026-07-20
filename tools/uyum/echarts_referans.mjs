@@ -595,6 +595,23 @@ async function çalıştır() {
               .map((metin) => ({metin, genişlik: ölçümBağlamı.measureText(metin).width}))
           });
         }
+        const kırılmaŞekilleri = chart.getZr().storage.getDisplayList()
+          .filter((öğe) => Array.isArray(öğe?.shape?.points) && öğe.z >= 100)
+          .map((öğe) => ({
+            tür: öğe.type,
+            z: öğe.z,
+            noktalar: öğe.shape.points,
+            stil: {
+              fill: öğe.style?.fill,
+              stroke: öğe.style?.stroke,
+              lineWidth: öğe.style?.lineWidth,
+              lineDash: öğe.style?.lineDash,
+              opacity: öğe.style?.opacity
+            }
+          }));
+        if (kırılmaŞekilleri.length) {
+          sonuç.push({bileşen: 'axisBreakShapes', öğeler: kırılmaŞekilleri});
+        }
         chart.getModel().eachComponent('dataZoom', (model) => {
           const view = chart.getViewOfComponentModel(model);
           const sınır = view?.group?.getBoundingRect?.();
