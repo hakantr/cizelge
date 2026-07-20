@@ -2711,7 +2711,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-anscombe-quartet.ts",
     "kaynak_sha256": "d5b69188af4849a4a56b2f7305850b9160694c429a46ceb15052f4fc197d94e6",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_anscombe_quartet",
     "seriler": [
       "scatter",
       "solid"
@@ -2726,7 +2726,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2737,15 +2737,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 776,
+          "değişen_piksel_oranı": 0.002874074074074074,
+          "ssim": 0.9965826209878236,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-anscombe-quartet.png",
+            "sha256": "67eaab6c092c1239262823ff236c37f3634c1f9ac9d36ba627b6fa1c18121023"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-anscombe-quartet.png",
+            "sha256": "5ba8042bd22f079e1f485a915b126aa091ce4e0926e42f514ae828369ec2ad24"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-anscombe-quartet.png",
+            "sha256": "9cdc779307e3f8a6a75bd6211dcbe9e657f334f002f538eff2de0145d5a94c46"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-anscombe-quartet-son.json",
+            "sha256": "108047c82d0445419164e20061bc732d1f7636ce651880f14d9d7f15dd6ff775"
+          }
+        }
+      ]
     }
   },
   {
