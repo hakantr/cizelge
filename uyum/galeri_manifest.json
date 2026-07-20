@@ -3857,7 +3857,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/candlestick-sh.ts",
     "kaynak_sha256": "c144db739bf3c55999e8bd98e291ecddbd50e22b744377622386db53296e5758",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#candlestick_sh",
     "seriler": [
       "average",
       "candlestick",
@@ -3880,7 +3880,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -3891,15 +3891,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1969,
+          "değişen_piksel_oranı": 0.007292592592592593,
+          "ssim": 0.9918138735686828,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/candlestick-sh.png",
+            "sha256": "5c8cbb5e15035b0f3902eb7d35243061a19eeba3e12a0f33ce6fea24cd53a897"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/candlestick-sh.png",
+            "sha256": "ab868d707b8cac793780ff5148f55f9276238e14b19a6c7d0c21bd733e693e74"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/candlestick-sh.png",
+            "sha256": "4ee35b503bfd1f024572c4a0be1ece9e1d6b39067ad4832ee0230431eec45639"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/candlestick-sh-son.json",
+            "sha256": "d8e8ff70081d1760c0a0cfe8c9c6e9275f01e8578c3eac4dae5c60e06f875c86"
+          }
+        }
+      ]
     }
   },
   {
@@ -6810,24 +6835,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 1646,
-          "değişen_piksel_oranı": 0.006096296296296297,
-          "ssim": 0.9953345639802513,
+          "değişen_piksel": 1642,
+          "değişen_piksel_oranı": 0.006081481481481481,
+          "ssim": 0.9953354836279199,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/candlestick-large.png",
             "sha256": "1cecf34efd7288d14a989dfd4c748809f42136135d5d4961122167aacfc78819"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/candlestick-large.png",
-            "sha256": "b600f8b463decbe582dc7ef2d1846c1540e32c5fbef77e8751bd2d14fa5f7626"
+            "sha256": "66a4b6c8e4ef02c1aa7f722d5bd7975d7cc27e3cf09014e5e39a300c608e3f1c"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/candlestick-large.png",
-            "sha256": "9f9c7f3d693579a0b397c03162fa3342f770415868603dac8ece9c626bf13ec2"
+            "sha256": "3365bb194491fd5486838927e2370b9a547317e0b0b86ecf3515a57267dc6c61"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/candlestick-large-son.json",
-            "sha256": "804a02cb139b1303a1b7bdfd8bed57d9498fae1d33219df8d3bfc06589c15488"
+            "sha256": "e5055bc957f6c010a556686d3eaa6dbef3f8d629e8160db16ce6e0b3ff2d37f6"
           }
         }
       ]
