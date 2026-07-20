@@ -2880,7 +2880,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/scatter-clustering-process.js",
     "kaynak_sha256": "11e5a9407835d6d1c27d99d26d81f56d3dd237f771a33a47578d34b58f6bb3e4",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#scatter_clustering_process",
     "seriler": [
       "circle",
       "custom",
@@ -2896,7 +2896,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2910,15 +2910,160 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "adım-0",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 554,
+          "değişen_piksel_oranı": 0.002051851851851852,
+          "ssim": 0.9962958014878976,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-0.png",
+            "sha256": "24210931c84ae53689a81f22f7393a93a3fb531de93e579e6294e6434a4d6dcc"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-0.png",
+            "sha256": "2e54ca3ebb9c87971c3a60a1b300e5e1337916a79020238e9c82e804c649f9b1"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering-process-adım-0.png",
+            "sha256": "35fdded2f386cf25ee86ecf686bee93f8e711ca35a2c014a83d41b3c30fabccd"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-process-adım-0.json",
+            "sha256": "e0fe21a748cb176e6682644c3ae06aef4d81ae07711fc100c00798993c20d524"
+          }
+        },
+        {
+          "ad": "adım-1",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 545,
+          "değişen_piksel_oranı": 0.0020185185185185184,
+          "ssim": 0.9961242892339449,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-1.png",
+            "sha256": "355aca032ca9d87e7480b5ddc686bd988aa8f449166a773ca8f66fa4062194de"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-1.png",
+            "sha256": "61b82170a0a7d8734d7d74ffcc8629d9e3f9f4fcb9a312498d2a49a706d51d16"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering-process-adım-1.png",
+            "sha256": "fd55ffedb981cb92d063ad520d28cbc4474896ef7dfb71f95db8d442906ad1ff"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-process-adım-1.json",
+            "sha256": "31115d49b55ff711c9462014189bf7830437c9d560b6d38e60337ab521c2b4cf"
+          }
+        },
+        {
+          "ad": "adım-2",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 544,
+          "değişen_piksel_oranı": 0.0020148148148148148,
+          "ssim": 0.99618269748449,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-2.png",
+            "sha256": "4cb673a36b58974b6953ddc00882931c99647b00b1a9d0f5f501f0a4cfcaf797"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-2.png",
+            "sha256": "a6a53e087fabb2d6020ffb46c59750323b18d5ddd59af440aac3f1d4d63c91cb"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering-process-adım-2.png",
+            "sha256": "a0f83e7954518c00e1bc02fc288330ebfe5a5044b47a83e36cc3dc445cdee00c"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-process-adım-2.json",
+            "sha256": "30c45b04c1dd1086bce2034e0263b58155b822cc2aeef475387b20779515d1c1"
+          }
+        },
+        {
+          "ad": "adım-3",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 533,
+          "değişen_piksel_oranı": 0.0019740740740740743,
+          "ssim": 0.9962077902877637,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-3.png",
+            "sha256": "91ca15c66db964ca4cd58944d309950f8c94d669e9fc0305eda2d664d4b81b09"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-3.png",
+            "sha256": "687e4441a5f79d0b3bb13c561a6a25dd3eb27c730169c8d3c13361292d067e37"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering-process-adım-3.png",
+            "sha256": "5b93193f27cbc1d31f1238d6a159b32b8eeeb8ded792d719250612f12b219026"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-process-adım-3.json",
+            "sha256": "6d448a224ba6df74e78e19ac596abe02c663423990b467fe9e8a433e6360a0ac"
+          }
+        },
+        {
+          "ad": "adım-4",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 533,
+          "değişen_piksel_oranı": 0.0019740740740740743,
+          "ssim": 0.9962120452557404,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-4.png",
+            "sha256": "a9cb37929b4d7a93516eec2cc0d640ef220c41662fd5fba3247fd5072bcfc341"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-4.png",
+            "sha256": "be00f8559f197c33e9b9f9284eb634fa02dd96a3519b159f7c1f18cfd8ebd451"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering-process-adım-4.png",
+            "sha256": "b105e089a41af009d4015aa9308b8741c37343ff0cb528156647940d726531bb"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-process-adım-4.json",
+            "sha256": "8958a54725bb58cd5383836c4366bd9c044b547883dbfae068f58a79eafe9f6a"
+          }
+        },
+        {
+          "ad": "adım-5",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 533,
+          "değişen_piksel_oranı": 0.0019740740740740743,
+          "ssim": 0.9963524778483467,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-5.png",
+            "sha256": "ec641474080341185b4f8bd72167ea13439ddc1996df854f0ce75bb489247ab1"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-5.png",
+            "sha256": "b87d30a9693548f937537e06dd70b6e4a179206fb70384cfe11fb0837f8f5068"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/scatter-clustering-process-adım-5.png",
+            "sha256": "67d09c23d5ce249b05bb4d0df3c4e9318b8e66c1fa520bdaa2d1c4e6ea8b8ce7"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/scatter-clustering-process-adım-5.json",
+            "sha256": "cf595919b1a6dddfae3fb209433dac1ddde54493ac9880b18d0c6689151df035"
+          }
+        }
+      ]
     }
   },
   {
