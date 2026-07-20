@@ -159,6 +159,12 @@ pub struct GörselEşleme {
     /// Opaklık şeridi (`inRange.opacity`). Tek değer iki uca aynı değer
     /// yazılarak sabit opaklık olarak temsil edilir.
     pub opaklık: Option<[f32; 2]>,
+    /// Denetleyici çubuğuna özgü `controller.inRange.color`.
+    pub denetleyici_renkleri: Option<Vec<Renk>>,
+    /// Denetleyici çubuğuna özgü `controller.inRange.opacity`.
+    pub denetleyici_opaklığı: Option<[f32; 2]>,
+    /// Denetleyici çubuğunun `controller.outOfRange.color` zemini.
+    pub denetleyici_aralık_dışı_renk: Option<Renk>,
     /// `visualMap.dimension`: seri koordinat değerinden farklı bir dataset
     /// boyutu da renk kanalını sürebilir.
     pub boyut: Option<BoyutSeçici>,
@@ -177,7 +183,8 @@ pub struct GörselEşleme {
     /// Sayısal/yüzde `top` değerleri geriye dönük uyum için `üst`te tutulur.
     pub dikey_konum: Option<DikeyKonum>,
     pub alt: Uzunluk,
-    /// `(yüksek, düşük)` uç metinleri (`text`). Boşsa sayısal kapsam yazılır.
+    /// `(yüksek, düşük)` uç metinleri (`text`). `None`, sürekli ve
+    /// hesaplanamaz denetleyicide uç etiketlerini gizler.
     pub metin: Option<(String, String)>,
     /// Bileşen (gradyan çubuğu) çizilsin mi?
     pub göster: bool,
@@ -220,6 +227,9 @@ impl Default for GörselEşleme {
             aralık_dışı_renk: Renk::SAYDAM,
             renk_açıklığı: None,
             opaklık: None,
+            denetleyici_renkleri: None,
+            denetleyici_opaklığı: None,
+            denetleyici_aralık_dışı_renk: None,
             boyut: None,
             seri_sıraları: Vec::new(),
             yön: Yön::Dikey,
@@ -283,6 +293,24 @@ impl GörselEşleme {
     /// `inRange.opacity: [düşük, yüksek]`.
     pub fn opaklık_aralığı(mut self, düşük: f32, yüksek: f32) -> Self {
         self.opaklık = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
+        self
+    }
+
+    pub fn denetleyici_renkleri<R: Into<Renk>>(
+        mut self,
+        renkler: impl IntoIterator<Item = R>,
+    ) -> Self {
+        self.denetleyici_renkleri = Some(renkler.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn denetleyici_opaklık_aralığı(mut self, düşük: f32, yüksek: f32) -> Self {
+        self.denetleyici_opaklığı = Some([düşük.clamp(0.0, 1.0), yüksek.clamp(0.0, 1.0)]);
+        self
+    }
+
+    pub fn denetleyici_aralık_dışı_renk(mut self, renk: impl Into<Renk>) -> Self {
+        self.denetleyici_aralık_dışı_renk = Some(renk.into());
         self
     }
 
@@ -577,24 +605,40 @@ impl GörselEşleme {
     }
 
     fn şerit_rengi(&self, oran: f32) -> Renk {
-        let (Some(ilk), Some(son)) = (self.renkler.first(), self.renkler.last()) else {
-            return Renk::SİYAH;
+        renk_dizisi_karıştır(&self.renkler, oran)
+    }
+
+    /// Controller görselini veri üzerindeki `inRange` kanallarından bağımsız
+    /// çözer. Açık controller kanalı yoksa ECharts gibi veri kanalına düşer.
+    pub fn denetleyici_rengi(&self, oran: f32) -> Renk {
+        let renkler = self
+            .denetleyici_renkleri
+            .as_deref()
+            .unwrap_or(&self.renkler);
+        let renk = renk_dizisi_karıştır(renkler, oran);
+        let opaklık = self.denetleyici_opaklığı.or(self.opaklık);
+        match opaklık {
+            Some([düşük, yüksek]) => {
+                renk.opaklık(düşük + (yüksek - düşük) * oran.clamp(0.0, 1.0))
+            }
+            None => renk,
+        }
+    }
+
+    /// Controller renk/opaklık gradyanını temsil etmek için gereken durak
+    /// sayısı (tek renk + değişken opaklıkta iki uç gerekir).
+    pub fn denetleyici_durak_sayısı(&self) -> usize {
+        let renk_durakları = self
+            .denetleyici_renkleri
+            .as_ref()
+            .map(Vec::len)
+            .unwrap_or(self.renkler.len());
+        let opaklık_durakları = if self.denetleyici_opaklığı.or(self.opaklık).is_some() {
+            2
+        } else {
+            1
         };
-        if self.renkler.len() == 1 {
-            return *ilk;
-        }
-        let oran = oran.clamp(0.0, 1.0);
-        if oran >= 1.0 {
-            return *son;
-        }
-        let bölme_sayısı = self.renkler.len() - 1;
-        let konum = oran * bölme_sayısı as f32;
-        let alt = (konum.floor() as usize).min(bölme_sayısı.saturating_sub(1));
-        let t = konum - alt as f32;
-        match (self.renkler.get(alt), self.renkler.get(alt + 1)) {
-            (Some(a), Some(b)) => a.karıştır(*b, t),
-            _ => *ilk,
-        }
+        renk_durakları.max(opaklık_durakları).max(1)
     }
 
     fn otomatik_bölme(
@@ -645,6 +689,27 @@ impl GörselEşleme {
             0.0
         };
         renk.opaklık(düşük + (yüksek - düşük) * oran)
+    }
+}
+
+fn renk_dizisi_karıştır(renkler: &[Renk], oran: f32) -> Renk {
+    let (Some(ilk), Some(son)) = (renkler.first(), renkler.last()) else {
+        return Renk::SİYAH;
+    };
+    if renkler.len() == 1 {
+        return *ilk;
+    }
+    let oran = oran.clamp(0.0, 1.0);
+    if oran >= 1.0 {
+        return *son;
+    }
+    let bölme_sayısı = renkler.len() - 1;
+    let konum = oran * bölme_sayısı as f32;
+    let alt = (konum.floor() as usize).min(bölme_sayısı.saturating_sub(1));
+    let t = konum - alt as f32;
+    match (renkler.get(alt), renkler.get(alt + 1)) {
+        (Some(a), Some(b)) => a.karıştır(*b, t),
+        _ => *ilk,
     }
 }
 
@@ -699,6 +764,28 @@ mod testler {
             .opaklık_aralığı(0.2, 0.8)
             .renk_çöz(300.0, [0.0, 300.0]);
         assert!((yüksek.alfa - 0.8).abs() < 1e-6);
+    }
+
+    #[test]
+    fn denetleyici_kanalları_veri_görselinden_bağımsız_çözülür() {
+        let eşleme = GörselEşleme::yeni()
+            .renkler(["grey"])
+            .opaklık_aralığı(0.0, 0.3)
+            .denetleyici_renkleri(["red", "blue"])
+            .denetleyici_opaklık_aralığı(0.3, 0.6)
+            .denetleyici_aralık_dışı_renk("#ccc");
+
+        let veri_sonu = eşleme.renk_çöz(1000.0, [0.0, 1000.0]);
+        let denetleyici_başı = eşleme.denetleyici_rengi(0.0);
+        let denetleyici_sonu = eşleme.denetleyici_rengi(1.0);
+        assert_eq!(veri_sonu, Renk::from("grey").opaklık(0.3));
+        assert_eq!(denetleyici_başı, Renk::from("red").opaklık(0.3));
+        assert_eq!(denetleyici_sonu, Renk::from("blue").opaklık(0.6));
+        assert_eq!(eşleme.denetleyici_durak_sayısı(), 2);
+        assert_eq!(
+            eşleme.denetleyici_aralık_dışı_renk,
+            Some(Renk::from("#ccc"))
+        );
     }
 
     #[test]

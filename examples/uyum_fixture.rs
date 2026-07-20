@@ -24,6 +24,8 @@ struct Girdi {
     çıktı: PathBuf,
     kare: f32,
     durum: String,
+    genişlik: f32,
+    yükseklik: f32,
 }
 
 /// Resmî referans üreticisinin sabitlediği Mulberry32 akışı.
@@ -39,6 +41,8 @@ fn argümanları_oku() -> Result<Girdi, String> {
     let mut çıktı = None;
     let mut kare = 1.0_f32;
     let mut durum = String::from("başlangıç");
+    let mut genişlik = 700.0_f32;
+    let mut yükseklik = 525.0_f32;
     let mut argümanlar = std::env::args().skip(1);
     while let Some(argüman) = argümanlar.next() {
         match argüman.as_str() {
@@ -57,6 +61,20 @@ fn argümanları_oku() -> Result<Girdi, String> {
                     .next()
                     .ok_or_else(|| "--state değeri eksik".to_string())?;
             }
+            "--width" => {
+                genişlik = argümanlar
+                    .next()
+                    .ok_or_else(|| "--width değeri eksik".to_string())?
+                    .parse::<f32>()
+                    .map_err(|hata| format!("geçersiz --width: {hata}"))?;
+            }
+            "--height" => {
+                yükseklik = argümanlar
+                    .next()
+                    .ok_or_else(|| "--height değeri eksik".to_string())?
+                    .parse::<f32>()
+                    .map_err(|hata| format!("geçersiz --height: {hata}"))?;
+            }
             bilinmeyen => return Err(format!("bilinmeyen argüman: {bilinmeyen}")),
         }
     }
@@ -65,6 +83,8 @@ fn argümanları_oku() -> Result<Girdi, String> {
         çıktı: çıktı.ok_or_else(|| "--output zorunludur".to_string())?,
         kare: kare.clamp(0.0, 1.0),
         durum,
+        genişlik: genişlik.max(1.0),
+        yükseklik: yükseklik.max(1.0),
     })
 }
 
@@ -2924,7 +2944,9 @@ fn dataset_encode0() -> GrafikSeçenekleri {
             GörselEşleme::yeni()
                 .yön(Yön::Yatay)
                 .sol("center")
-                .alt(15)
+                // Resmî seçenek `bottom` vermiyor; ECharts varsayılanı 0,
+                // 15 px bileşen padding'i çubuğun gerçek alt boşluğunu kurar.
+                .alt(0)
                 .en_az(10.0)
                 .en_çok(100.0)
                 .metin("High Score", "Low Score")
@@ -4672,6 +4694,152 @@ fn custom_calendar_icon() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+fn calendar_charts() -> GrafikSeçenekleri {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let tarih = |ay, gün| {
+        takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay,
+            gün,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        })
+    };
+    let yıl_başı = tarih(1, 1);
+    let yıl_sonu = takvimden_ana(TakvimAnı {
+        yıl: 2018,
+        ay: 1,
+        gün: 1,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+    let mut tohum = 0x5eed_1234;
+    let mut sanal_veri = || {
+        let mut sonuç = Vec::with_capacity(365);
+        let mut zaman = yıl_başı;
+        while zaman < yıl_sonu {
+            sonuç.push(VeriÖğesi::from([
+                zaman,
+                (kanıt_rastgele(&mut tohum) * 1000.0).floor(),
+            ]));
+            zaman += 86_400_000.0;
+        }
+        sonuç
+    };
+    // Kaynak, dört getVirtualData çağrısını seri tanım sırasıyla tüketir.
+    let şubat_ısı_verisi = sanal_veri();
+    let ocak_efekt_verisi = sanal_veri();
+    let mart_saçılım_verisi = sanal_veri();
+    let nisan_ısı_verisi = sanal_veri();
+
+    let graph_verisi = [
+        (2, 1, 260.0),
+        (2, 4, 200.0),
+        (2, 9, 279.0),
+        (2, 13, 847.0),
+        (2, 18, 241.0),
+        (2, 23, 411.0),
+        (2, 27, 985.0),
+    ];
+    let düğümler = graph_verisi
+        .iter()
+        .map(|(ay, gün, değer)| {
+            GrafoDüğümü::yeni(format!("2017-{ay:02}-{gün:02}"), 10.0)
+                .değerli(*değer)
+                .takvim_tarihi(tarih(*ay, *gün))
+        })
+        .collect::<Vec<_>>();
+    let bağlar = düğümler
+        .windows(2)
+        .map(|çift| (çift[0].ad.clone(), çift[1].ad.clone()))
+        .collect::<Vec<_>>();
+
+    let takvim = |ay, son_gün, sol: Option<f32>, üst: Option<f32>, ilk_gün, tam_gün_adı| {
+        let mut koordinat =
+            TakvimKoordinatı::yeni(TakvimAralığı::yeni(tarih(ay, 1), tarih(ay, son_gün)))
+                .yön(TakvimYönü::Dikey)
+                .hücre_boyutu(Some(40.0), Some(40.0))
+                .ilk_gün(ilk_gün)
+                .yıl_etiketi_kenar_boşluğu(40.0)
+                .ay_etiketi_kenar_boşluğu(20.0);
+        if let Some(sol) = sol {
+            koordinat = koordinat.sol(sol);
+        }
+        if let Some(üst) = üst {
+            koordinat = koordinat.üst(üst);
+        }
+        if tam_gün_adı {
+            koordinat = koordinat.gün_adları(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+        }
+        koordinat
+    };
+
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .ipucu(İpucu::yeni().konum(İpucuKonumu::Üst))
+        .görsel_eşlemeler([
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(1000.0)
+                .hesaplanabilir(true)
+                .seri_sıraları([2, 3, 4])
+                .yön(Yön::Yatay)
+                .sol("55%")
+                .alt(20),
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(1000.0)
+                .renkler(["grey"])
+                .opaklık_aralığı(0.0, 0.3)
+                .denetleyici_opaklık_aralığı(0.3, 0.6)
+                .denetleyici_aralık_dışı_renk("#ccc")
+                .seri_sırası(1)
+                .yön(Yön::Yatay)
+                .sol("10%")
+                .alt(20),
+        ])
+        .takvim(takvim(2, 28, None, None, 1, false))
+        .takvim(takvim(1, 31, Some(460.0), None, 0, false))
+        .takvim(takvim(3, 31, None, Some(350.0), 0, false))
+        .takvim(takvim(4, 30, Some(460.0), Some(350.0), 1, true))
+        .seri(
+            GrafoSerisi::yeni()
+                .takvim_sırası(0)
+                .hedef_oku(true)
+                .düğümler(düğümler)
+                .bağlar(bağlar),
+        )
+        .seri(
+            TakvimSerisi::yeni(2017)
+                .takvim_sırası(0)
+                .veri(şubat_ısı_verisi),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .takvim_sırası(1)
+                .efektli(true)
+                .sembol_boyutu_işlevi(|öğe| öğe.değer.sayı().unwrap_or_default() as f32 / 40.0)
+                .veri(ocak_efekt_verisi),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .takvim_sırası(2)
+                .sembol_boyutu_işlevi(|öğe| öğe.değer.sayı().unwrap_or_default() as f32 / 60.0)
+                .veri(mart_saçılım_verisi),
+        )
+        .seri(
+            TakvimSerisi::yeni(2017)
+                .takvim_sırası(3)
+                .veri(nisan_ısı_verisi),
+        )
+}
+
 fn pie_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -5404,6 +5572,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "calendar-lunar" => Ok(calendar_lunar()),
         "calendar-pie" => Ok(calendar_pie()),
         "custom-calendar-icon" => custom_calendar_icon(),
+        "calendar-charts" => Ok(calendar_charts()),
         "pie-simple" => Ok(pie_simple()),
         "pie-doughnut" => Ok(pie_doughnut()),
         "pie-roseType-simple" => Ok(pie_rose_type_simple()),
@@ -5465,7 +5634,7 @@ fn çalıştır() -> Result<(), String> {
                 _ => {}
             }
         }
-        let mut kayıt = KayıtYüzeyi::yeni(700.0, 525.0);
+        let mut kayıt = KayıtYüzeyi::yeni(girdi.genişlik, girdi.yükseklik);
         let _ = grafiği_boya(
             &mut kayıt,
             &seçenekler,
@@ -5477,9 +5646,10 @@ fn çalıştır() -> Result<(), String> {
         );
         eprintln!("{}", kayıt.döküm());
     }
-    // Resmi örnek üreticisinin viewport'u 700×525'tir; kanıt aracı bu ham
-    // kareyi aynı `sharp.resize(600, 450)` adımıyla küçük resme çevirir.
-    let mut yüzey = PikselYüzeyi::yeni(700.0, 525.0, 1.0).map_err(|hata| hata.to_string())?;
+    // Kanıt aracı, örnek metadata'sındaki 4:3 viewport'u iki renderer'a da
+    // geçirip ham kareyi aynı `sharp.resize(600, 450)` adımıyla küçültür.
+    let mut yüzey = PikselYüzeyi::yeni(girdi.genişlik, girdi.yükseklik, 1.0)
+        .map_err(|hata| hata.to_string())?;
     if std::env::var_os("UYUM_DEBUG_LAYOUT").is_some() {
         eprintln!(
             "piksel yazı ölçüleri: 10,000={:?} 10 km={:?} -80 °C={:?} Australia={:?} Life Expectancy={:?} legend={:?}",

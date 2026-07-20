@@ -41,7 +41,8 @@ use crate::grafik::radar::{
     radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
 };
 use crate::grafik::sacilim::{
-    SaçılımNoktası, saçılım_noktaları, saçılım_çiz, takvim_saçılım_noktaları,
+    SaçılımNoktası, saçılım_değer_kapsamı, saçılım_noktaları, saçılım_çiz_eşlemeli,
+    takvim_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{SütunGirdisi, sütunları_çiz, yerleşim_hesapla};
@@ -287,6 +288,7 @@ fn takvim_saçılım_serisini_çiz(
     seri_sırası: usize,
     yerleşim: &TakvimYerleşimi,
     seri_rengi: Renk,
+    görsel_eşleme: Option<&crate::model::gorsel_esleme::GörselEşleme>,
     ilerleme: f32,
     zaman_sn: f32,
     ipucu_seçeneği: Option<&İpucu>,
@@ -294,6 +296,8 @@ fn takvim_saçılım_serisini_çiz(
     isabetler: &mut Vec<İsabetBölgesi>,
 ) -> Option<Bekleyenİpucu> {
     let noktalar = takvim_saçılım_noktaları(seri, yerleşim);
+    let eşleme_kapsamı =
+        görsel_eşleme.map(|eşleme| eşleme.kapsam_çöz(saçılım_değer_kapsamı(seri)));
     let vurgu = match (seri.sessiz, ipucu_seçeneği, fare) {
         (true, _, _) => None,
         (false, Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => noktalar
@@ -312,8 +316,15 @@ fn takvim_saçılım_serisini_çiz(
             .map(|nokta| nokta.sıra),
         _ => None,
     };
-    saçılım_çiz(
-        yüzey, seri, &noktalar, seri_rengi, ilerleme, zaman_sn, vurgu,
+    saçılım_çiz_eşlemeli(
+        yüzey,
+        seri,
+        &noktalar,
+        seri_rengi,
+        ilerleme,
+        zaman_sn,
+        vurgu,
+        görsel_eşleme.zip(eşleme_kapsamı),
     );
     if !seri.sessiz {
         for nokta in &noktalar {
@@ -2364,7 +2375,10 @@ pub fn grafiği_boya(
                         Seri::Saçılım(s) => {
                             let kayıt = saçılım_vurguları.iter().find(|(sıra, ..)| *sıra == i);
                             if let Some((_, vurgu, noktalar)) = kayıt {
-                                saçılım_çiz(
+                                let görsel_eşleme = seçenekler.seri_görsel_eşlemesi(i);
+                                let eşleme_kapsamı = görsel_eşleme
+                                    .map(|eşleme| eşleme.kapsam_çöz(saçılım_değer_kapsamı(s)));
+                                saçılım_çiz_eşlemeli(
                                     yüzey,
                                     s,
                                     noktalar,
@@ -2372,6 +2386,7 @@ pub fn grafiği_boya(
                                     ilerleme,
                                     zaman_sn,
                                     *vurgu,
+                                    görsel_eşleme.zip(eşleme_kapsamı),
                                 );
                                 if !s.sessiz {
                                     for n in noktalar {
@@ -3204,20 +3219,27 @@ pub fn grafiği_boya(
         }
     }
 
-    // 4b) Görsel eşleme bileşeni (gradyan çubuğu).
-    if let Some(eşleme) = &seçenekler.görsel_eşleme {
+    // 4b) Görsel eşleme bileşenleri (gradyan çubukları). ECharts
+    // `visualMap: []` dizisinin her üyesini çizer; ilk üyenin isabet alanı
+    // geriye uyumlu tekil etkileşim alanında korunur.
+    for (eşleme_sırası, eşleme) in seçenekler.tüm_görsel_eşlemeler().enumerate() {
         let veri_kapsamı = seçenekler
             .seriler
             .iter()
-            .find_map(|s| match s {
+            .enumerate()
+            .filter(|(seri_sırası, _)| eşleme.seriye_uygulanır_mı(*seri_sırası))
+            .find_map(|(_, s)| match s {
                 Seri::Isı(ısı) => Some(ısı_değer_kapsamı(ısı)),
                 Seri::Takvim(takvim) => Some(takvim_değer_kapsamı(takvim)),
+                Seri::Saçılım(saçılım) => Some(saçılım_değer_kapsamı(saçılım)),
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
         let eşleme_çıktısı = görsel_eşleme_çiz(yüzey, eşleme, eşleme.kapsam_çöz(veri_kapsamı));
-        çıktı.eşleme_kutuları = eşleme_çıktısı.parça_kutuları;
-        çıktı.sürekli_eşleme = eşleme_çıktısı.sürekli;
+        if eşleme_sırası == 0 {
+            çıktı.eşleme_kutuları = eşleme_çıktısı.parça_kutuları;
+            çıktı.sürekli_eşleme = eşleme_çıktısı.sürekli;
+        }
     }
 
     // 4c) Kutupsal koordinat ve kutupsal seriler.
@@ -3846,6 +3868,7 @@ pub fn grafiği_boya(
             seri_sırası,
             yerleşim,
             seçenekler.seri_rengi(seri_sırası),
+            seçenekler.seri_görsel_eşlemesi(seri_sırası),
             ilerleme,
             zaman_sn,
             ipucu_seçeneği.as_ref(),
@@ -3912,6 +3935,7 @@ pub fn grafiği_boya(
             seri_sırası,
             yerleşim,
             seçenekler.seri_rengi(seri_sırası),
+            seçenekler.seri_görsel_eşlemesi(seri_sırası),
             ilerleme,
             zaman_sn,
             ipucu_seçeneği.as_ref(),

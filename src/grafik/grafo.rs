@@ -236,7 +236,9 @@ pub fn grafo_çiz(
             continue;
         }
         let boyut = düğüm.boyut.max(4.0) * opaklık.max(0.01) * ölçek;
-        let palet_rengi = palet(düğüm.kategori.unwrap_or(i));
+        // ECharts'ta kategori atanmamış bütün graph düğümleri serinin
+        // palet rengini paylaşır; düğüm sırası yalnız açık kategoriyi seçer.
+        let palet_rengi = palet(düğüm.kategori.unwrap_or(genel_sıra));
         let dolgu = seri
             .öğe_stili
             .renk

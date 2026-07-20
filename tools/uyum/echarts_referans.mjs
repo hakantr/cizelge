@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 // Kilitli ECharts 6.1 klonu ve kilitli echarts-examples kaynağından gerçek
-// 700x525 referans kare üretir. Harici CDN kullanılmaz.
+// Varsayılan 700x525 veya örnek metadata'sından gelen 4:3 viewport'ta
+// referans kare üretir. Harici CDN kullanılmaz.
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -32,7 +33,7 @@ const CHROME_ADAYLARI = [
 ].filter(Boolean);
 
 function argümanlarıOku() {
-  const sonuç = { id: '', output: '', frame: 1, state: 'başlangıç' };
+  const sonuç = { id: '', output: '', frame: 1, state: 'başlangıç', width: 700, height: 525 };
   for (let sıra = 2; sıra < process.argv.length; sıra += 1) {
     const argüman = process.argv[sıra];
     const değer = process.argv[sıra + 1];
@@ -40,11 +41,15 @@ function argümanlarıOku() {
     else if (argüman === '--output') sonuç.output = değer;
     else if (argüman === '--frame') sonuç.frame = Number(değer);
     else if (argüman === '--state') sonuç.state = değer;
+    else if (argüman === '--width') sonuç.width = Number(değer);
+    else if (argüman === '--height') sonuç.height = Number(değer);
     else throw new Error(`bilinmeyen argüman: ${argüman}`);
     sıra += 1;
   }
   if (!sonuç.id || !sonuç.output) throw new Error('--id ve --output zorunludur');
   sonuç.frame = Math.max(0, Math.min(1, sonuç.frame));
+  sonuç.width = Math.max(1, Math.round(sonuç.width));
+  sonuç.height = Math.max(1, Math.round(sonuç.height));
   return sonuç;
 }
 
@@ -83,7 +88,7 @@ function örnekJavaScript(id) {
     .replace(/Object\.defineProperty\(exports,\s*["']__esModule["'],\s*\{\s*value:\s*true\s*\}\);?\s*/g, '');
 }
 
-function html(id, kaynak, frame, state) {
+function html(id, kaynak, frame, state, width, height) {
   const sonEylem = id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'dataset-link' && state === 'son'
@@ -138,9 +143,13 @@ function html(id, kaynak, frame, state) {
   const zamanlayıcıyıBekle = id === 'dataset-link' || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
-  const hedefMs = id === 'scatter-effect' || id === 'calendar-effectscatter' ? frame * 2000 : 0;
+  const hedefMs = id === 'scatter-effect'
+    || id === 'calendar-effectscatter'
+    || id === 'calendar-charts'
+    ? frame * 2000
+    : 0;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-html,body,#viewport{margin:0;width:700px;height:525px;overflow:hidden}
+html,body,#viewport{margin:0;width:${width}px;height:${height}px;overflow:hidden}
 </style><script src="/echarts.js"></script></head><body><div id="viewport"></div><script>
 (() => {
   let now = 0;
@@ -227,7 +236,7 @@ window.$ = {
   }
 };
 const myChart = echarts.init(document.getElementById('viewport'), null, {
-  renderer: 'canvas', width: 700, height: 525, devicePixelRatio: 1
+  renderer: 'canvas', width: ${width}, height: ${height}, devicePixelRatio: 1
 });
 window.__chart = myChart;
 const originalSetOption = myChart.setOption.bind(myChart);
@@ -363,7 +372,9 @@ async function sunucuBaşlat(sayfa) {
 async function çalıştır() {
   const args = argümanlarıOku();
   const kaynak = örnekJavaScript(args.id);
-  const { sunucu, url } = await sunucuBaşlat(html(args.id, kaynak, args.frame, args.state));
+  const { sunucu, url } = await sunucuBaşlat(
+    html(args.id, kaynak, args.frame, args.state, args.width, args.height)
+  );
   const tarayıcı = await puppeteer.launch({
     executablePath: chromeBul(),
     headless: true,
@@ -375,7 +386,7 @@ async function çalıştır() {
     sayfa.on('console', (ileti) => {
       if (ileti.type() === 'error') process.stderr.write(`ECharts console: ${ileti.text()}\n`);
     });
-    await sayfa.setViewport({ width: 700, height: 525, deviceScaleFactor: 1 });
+    await sayfa.setViewport({ width: args.width, height: args.height, deviceScaleFactor: 1 });
     await sayfa.emulateTimezone('Europe/Istanbul');
     await sayfa.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
     await sayfa.waitForFunction(() => window.__ready || window.__referenceError, { timeout: 30000 });
@@ -786,7 +797,10 @@ async function çalıştır() {
       process.stderr.write(`${JSON.stringify(yerleşim, null, 2)}\n`);
     }
     fs.mkdirSync(path.dirname(path.resolve(args.output)), { recursive: true });
-    await sayfa.screenshot({ path: path.resolve(args.output), clip: { x: 0, y: 0, width: 700, height: 525 } });
+    await sayfa.screenshot({
+      path: path.resolve(args.output),
+      clip: { x: 0, y: 0, width: args.width, height: args.height }
+    });
   } finally {
     await tarayıcı.close();
     sunucu.close();

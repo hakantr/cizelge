@@ -145,6 +145,13 @@ const SENARYOLAR = [
   { id: 'calendar-lunar', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'calendar-pie', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'custom-calendar-icon', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'calendar-charts',
+    tür: 'animasyon',
+    genişlik: 1000,
+    yükseklik: 750,
+    kareler: [0, 0.25, 0.5, 0.75, 1].map((kare, sıra) => ({ ad: `kare-${sıra}`, kare, durum: 'başlangıç' }))
+  },
   { id: 'pie-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-doughnut', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'pie-roseType-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -198,7 +205,9 @@ async function referansıYenile(senaryo, kare, referans, sonek) {
       '--id', senaryo.id,
       '--output', ham,
       '--frame', String(kare.kare),
-      '--state', kare.durum
+      '--state', kare.durum,
+      '--width', String(senaryo.genişlik ?? 700),
+      '--height', String(senaryo.yükseklik ?? 525)
     ], { cwd: KÖK, stdio: 'inherit' });
     await sharp(ham).resize(600, 450).toFile(aday);
     fs.rmSync(ham, { force: true });
@@ -284,7 +293,9 @@ async function çalıştır() {
         '--id', senaryo.id,
         '--output', ham,
         '--frame', String(kare.kare),
-        '--state', kare.durum
+        '--state', kare.durum,
+        '--width', String(senaryo.genişlik ?? 700),
+        '--height', String(senaryo.yükseklik ?? 525)
       ], { cwd: KÖK, stdio: 'inherit' });
       await sharp(ham).resize(600, 450).toFile(gerçek);
       fs.rmSync(ham, { force: true });

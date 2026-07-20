@@ -4,6 +4,7 @@ use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::sembol_stilli_çiz;
 use crate::koordinat::{Kartezyen2B, TakvimYerleşimi};
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
+use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::{SaçılımSerisi, Sembol};
 use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
 use crate::renk::Renk;
@@ -101,6 +102,22 @@ pub fn takvim_saçılım_noktaları(
             })
         })
         .collect()
+}
+
+/// Scatter/effectScatter ikinci koordinat boyutunun görsel eşleme kapsamı.
+pub fn saçılım_değer_kapsamı(seri: &SaçılımSerisi) -> [f64; 2] {
+    let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+    for değer in seri.veri.iter().filter_map(|öğe| öğe.değer.sayı()) {
+        if değer.is_finite() {
+            kapsam[0] = kapsam[0].min(değer);
+            kapsam[1] = kapsam[1].max(değer);
+        }
+    }
+    if kapsam[0].is_finite() {
+        kapsam
+    } else {
+        [0.0, 1.0]
+    }
 }
 
 fn sembol_gölge_yolu(sembol: Sembol, merkez: (f32, f32), boyut: f32) -> Option<Yol> {
@@ -201,19 +218,47 @@ pub fn saçılım_çiz(
     zaman_sn: f32,
     vurgulu: Option<usize>,
 ) {
+    saçılım_çiz_eşlemeli(
+        çizici, seri, noktalar, seri_rengi, ilerleme, zaman_sn, vurgulu, None,
+    );
+}
+
+/// [`saçılım_çiz`] ile aynı çizimi, varsa `visualMap` rengini her noktanın
+/// ikinci veri boyutuna ayrı ayrı uygulayarak gerçekleştirir.
+#[allow(clippy::too_many_arguments)]
+pub fn saçılım_çiz_eşlemeli(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    noktalar: &[SaçılımNoktası],
+    seri_rengi: Renk,
+    ilerleme: f32,
+    zaman_sn: f32,
+    vurgulu: Option<usize>,
+    görsel_eşleme: Option<(&GörselEşleme, [f64; 2])>,
+) {
     // `scatter` öntanımlı 0.8, `effectScatter` ise 1.0 opaklıktadır.
     let opaklık = seri
         .öğe_stili
         .opaklık
         .unwrap_or(if seri.efektli { 1.0 } else { 0.8 });
-    let renk = seri
+    let taban_rengi = seri
         .öğe_stili
         .renk
         .as_ref()
         .map(|d| d.temsilî())
         .unwrap_or(seri_rengi);
+    let nokta_rengi = |nokta: &SaçılımNoktası| {
+        if seri.öğe_stili.renk.is_some() {
+            taban_rengi
+        } else if let Some((eşleme, kapsam)) = görsel_eşleme {
+            eşleme.renk_çöz(nokta.y_değeri, kapsam)
+        } else {
+            taban_rengi
+        }
+    };
     // EffectSymbol çekirdeği önce, z2=99 dalgaları sonra boyar.
     for nokta in noktalar {
+        let renk = nokta_rengi(nokta);
         let vurgulu_mu = vurgulu == Some(nokta.sıra);
         let boyut = nokta.boyut * ilerleme.clamp(0.0, 1.0) * if vurgulu_mu { 1.15 } else { 1.0 };
         let nokta_opaklığı = if vurgulu_mu { 1.0 } else { opaklık };
@@ -251,6 +296,7 @@ pub fn saçılım_çiz(
     // etiketini miras alır; açık align/verticalAlign/rotate değerleri
     // zrender bağlı metin yerleşimine aktarılır.
     for nokta in noktalar {
+        let renk = nokta_rengi(nokta);
         let Some(öğe) = seri.veri.get(nokta.sıra) else {
             continue;
         };
@@ -445,6 +491,7 @@ pub fn saçılım_çiz(
         const DALGA_SAYISI: usize = 3;
         let tur = (zaman_sn / seri.efekt_süresi_sn.max(0.1)).fract();
         for nokta in noktalar {
+            let renk = nokta_rengi(nokta);
             for d in 0..DALGA_SAYISI {
                 let evre = (tur + d as f32 / DALGA_SAYISI as f32).fract();
                 let yarıçap = (nokta.boyut / 2.0) * (1.0 + evre * (seri.efekt_ölçeği - 1.0));
