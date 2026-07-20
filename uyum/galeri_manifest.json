@@ -6068,7 +6068,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-gradient.ts",
     "kaynak_sha256": "d3b49e7e93e78f559fd0879de6c0cd0f252f7b6cd2659ba5e2a19e5df7f596ae",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_gradient",
     "seriler": [
       "bar",
       "dataZoom"
@@ -6085,7 +6085,7 @@
       "click"
     ],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -6096,15 +6096,88 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "başlangıç",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 2202,
+          "değişen_piksel_oranı": 0.008155555555555555,
+          "ssim": 0.996885609096762,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-gradient-başlangıç.png",
+            "sha256": "0a0d7b133ec950954023c01422aa2918f32a39f742c4acd2519bb4faa1efbb3d"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-gradient-başlangıç.png",
+            "sha256": "ac90555c13b9a3f5a057abfbfcb9e3c2643a85c8ccceda8244beb345e1196a71"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-gradient-başlangıç.png",
+            "sha256": "38c0eddd91c0904c49daf60e1ca5e54fefbcb25e02db76e81d3322adb0784e5f"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-gradient-başlangıç.json",
+            "sha256": "f43d4d8635549f2cef45796f6aef720be03bb3e4de81426ed910ab62736dd58d"
+          }
+        },
+        {
+          "ad": "vurgu",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 2188,
+          "değişen_piksel_oranı": 0.008103703703703703,
+          "ssim": 0.9968972838572533,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-gradient-vurgu.png",
+            "sha256": "48da12ff72c5fd981339a7f67d61f5ae8aaccfab26c172094914395e15e05724"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-gradient-vurgu.png",
+            "sha256": "16edbb1487252873d0da6cdb838d8042094662a87b238df1bbc946f972cc9a48"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-gradient-vurgu.png",
+            "sha256": "41ac8b5ec2161790a16ec3274b1d5423c4513432038a764e11af6e2c6330e618"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-gradient-vurgu.json",
+            "sha256": "66e66a0c6a54a3b06dff7cef311b0f598b80bf5b4c7cadb5ec666e0ca052b6ef"
+          }
+        },
+        {
+          "ad": "yakınlaştır",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 1351,
+          "değişen_piksel_oranı": 0.005003703703703704,
+          "ssim": 0.9957810805608841,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-gradient-yakınlaştır.png",
+            "sha256": "b229a575e3c05da279fc3065fff6382c0b9d6933147f0da7c1ae35956b2deff4"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-gradient-yakınlaştır.png",
+            "sha256": "6395abff52387424e3651dbe4fa1851c18ee1aae9605a64c1676c2dbe002b44f"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-gradient-yakınlaştır.png",
+            "sha256": "8ed25831ff46c64c460b439436ffc55ffd1a0316cf587c5cd865a9926f640d95"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-gradient-yakınlaştır.json",
+            "sha256": "778038220289610a6713ce996790179791373700e42ed54e2535e2f85db5ea3a"
+          }
+        }
+      ]
     }
   },
   {

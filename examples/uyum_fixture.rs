@@ -9368,6 +9368,11 @@ fn çalıştır() -> Result<(), String> {
         Some((446.25, 250.0))
     } else if girdi.id == "bar-gradient" && girdi.durum == "vurgu" {
         Some((328.0, 280.0))
+    } else if girdi.id == "bar-gradient" && girdi.durum == "yakınlaştır" {
+        // Click sonrası dataIndex=8, `者..上` penceresindeki dördüncü
+        // sütundur; ECharts pointer/emphasis durumunu yeniden yerleşimde de
+        // aynı veri öğesi üzerinde tutar.
+        Some((367.5, 280.0))
     } else {
         None
     };

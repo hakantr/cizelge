@@ -1,6 +1,6 @@
 # Cizelge — ECharts 6.1 Tam Uyum ve Görsel Galeri Faz Planı
 
-Son güncelleme: 2026-07-17
+Son güncelleme: 2026-07-20
 
 Bu belge, `cizelge` için **normatif tam uyum planıdır**. [FAZ_PLANI.md](FAZ_PLANI.md)
 mevcut uygulama tarihini ve daha önce tamamlanan özellik dilimlerini kaydeder;
@@ -540,6 +540,30 @@ kartezyen heatmap ve pictorialBar.
    animasyon.
 9. Bu serilerin tooltip, legend, markers, select/blur/emphasis, dataset,
    dataZoom, animation ve export bütünleşmesi.
+
+Gerçekleşen dilim — `bar-gradient` (2026-07-20):
+
+- `../echarts-examples/public/examples/ts/bar-gradient.ts` içindeki 20
+  kategori/değer, Çince başlık, İngilizce alt başlık, `showBackground`,
+  normal ve `emphasis.itemStyle` doğrusal gradyanları kayıpsız fixture'a
+  taşındı.
+- Ortak çekirdeğe `axisLabel.inside`, eksen `z`, sütun
+  `emphasis.itemStyle` mirası ve kategori adı/sayısal değer kabul eden
+  `dispatchAction({type: 'dataZoom', startValue, endValue})` eklendi. Yüzde
+  ucu aynı taraftaki değer ucunun önüne geçer ve onu temizler; aynı ekseni
+  hedefleyen dataZoom bileşenleri atomik güncellenir.
+- Kanıt senaryosu üç gerçek durumdan oluşur: başlangıç, canvas pointer ile
+  sekizinci sütunun vurgulanması ve aynı sütuna tıklanınca resmi callback'in
+  `者..上` aralığına yakınlaştırması. Referans koşucusu hover state'ini ve
+  click yükünün iki değer ucunu ekran görüntüsünden önce ayrıca doğrular.
+- Kilitli ECharts `74e9e09…` referansına karşı 600×450 sonuçları sırasıyla
+  `%0,816 / 0,99689`, `%0,810 / 0,99690` ve `%0,500 / 0,99578`
+  (değişen piksel oranı / SSIM) ile kabul eşiğini geçti. Üç referans iki
+  ardışık üretimde byte düzeyinde aynı çıktı verdi.
+- Kart manifestte `yok`tan `uygulandı_kanıt_bekliyor` durumuna geçti;
+  statik görsel kanıtı `tam_kanıtlı`dır. Fazlar üstü animasyon,
+  erişilebilirlik ve performans kapıları tamamlanmadan kart yapay biçimde
+  `tam_kanıtlı` sayılmaz.
 
 Kabul:
 
