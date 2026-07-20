@@ -3423,7 +3423,11 @@ pub fn grafiği_boya(
                             })
                             // SliderZoomView'in dikey öntanımlısı hedef
                             // kartezyen alanın üst kenarına hizalanır.
-                            .unwrap_or(alan.y);
+                            .unwrap_or(alan.y)
+                            // Dikey grupta döndürülmüş varsayılan tutamaç
+                            // yolunun sınır kutusu, filler başlangıcını
+                            // layout konumundan 1.764 px aşağı taşır.
+                            + 1.764_264_2;
                         Dikdörtgen::yeni(x, y, genişlik, yükseklik)
                     } else {
                         let genişlik = yakınlaştırma
@@ -3841,45 +3845,43 @@ pub fn grafiği_boya(
                         let [sol_merkez, sağ_merkez] = merkezler;
                         (tutamacı_çiz(sol_merkez), tutamacı_çiz(sağ_merkez))
                     } else {
-                        // Öntanımlı handleIcon yolu: sap–gövde–sap oranları
-                        // 30 px / %100 için 5.625 / 18.795 / 5.58 px'tir.
-                        let ölçek = if kısa_kenar > f32::EPSILON {
-                            tutamaç_boyutu / kısa_kenar
-                        } else {
-                            0.0
-                        };
+                        // Öntanımlı handleIcon'ın kaynak sınırı 8×40'tır.
+                        // zrender yolu oranı korunarak 2×2 sembol kutusuna,
+                        // ardından `handleSize` yüksekliğine ölçekler:
+                        // toplam uzunluk 20, yuvarlak gövde 12.5×4 ve iki
+                        // uçtaki sap 3.75 birimdir.
+                        let ölçek = tutamaç_boyutu / 20.0;
+                        let toplam = 20.0 * ölçek;
+                        let uzun = 12.5 * ölçek;
+                        let kısa = 4.0 * ölçek;
                         let (sol, sağ) = if dikey {
-                            let başlangıç = şerit.merkez().0 - tutamaç_boyutu / 2.0;
-                            let x = başlangıç + 5.625 * ölçek;
                             (
                                 Dikdörtgen::yeni(
-                                    x,
-                                    merkezler[0].1 - 3.0 * ölçek,
-                                    18.795 * ölçek,
-                                    6.0 * ölçek,
+                                    merkezler[0].0 - uzun / 2.0,
+                                    merkezler[0].1 - kısa / 2.0,
+                                    uzun,
+                                    kısa,
                                 ),
                                 Dikdörtgen::yeni(
-                                    x,
-                                    merkezler[1].1 - 3.0 * ölçek,
-                                    18.795 * ölçek,
-                                    6.0 * ölçek,
+                                    merkezler[1].0 - uzun / 2.0,
+                                    merkezler[1].1 - kısa / 2.0,
+                                    uzun,
+                                    kısa,
                                 ),
                             )
                         } else {
-                            let başlangıç = şerit.merkez().1 - tutamaç_boyutu / 2.0;
-                            let y = başlangıç + 5.625 * ölçek;
                             (
                                 Dikdörtgen::yeni(
-                                    merkezler[0].0 - 3.0 * ölçek,
-                                    y,
-                                    6.0 * ölçek,
-                                    18.795 * ölçek,
+                                    merkezler[0].0 - kısa / 2.0,
+                                    merkezler[0].1 - uzun / 2.0,
+                                    kısa,
+                                    uzun,
                                 ),
                                 Dikdörtgen::yeni(
-                                    merkezler[1].0 - 3.0 * ölçek,
-                                    y,
-                                    6.0 * ölçek,
-                                    18.795 * ölçek,
+                                    merkezler[1].0 - kısa / 2.0,
+                                    merkezler[1].1 - uzun / 2.0,
+                                    kısa,
+                                    uzun,
                                 ),
                             )
                         };
@@ -3887,13 +3889,13 @@ pub fn grafiği_boya(
                             yüzey.dikdörtgen(
                                 t,
                                 &Dolgu::Düz(crate::renk::Renk::BEYAZ),
-                                [1.5 * ölçek; 4],
+                                [1.0 * ölçek; 4],
                                 Some((1.0, crate::renk::Renk::onaltılık(0xc0c9e6))),
                             );
                         }
                         if dikey {
-                            let başlangıç = şerit.merkez().0 - tutamaç_boyutu / 2.0;
-                            let bitiş = başlangıç + tutamaç_boyutu;
+                            let başlangıç = şerit.merkez().0 - toplam / 2.0;
+                            let bitiş = şerit.merkez().0 + toplam / 2.0;
                             for kutu in [sol, sağ] {
                                 let merkez_y = kutu.merkez().1;
                                 yüzey.çizgi(
@@ -3912,8 +3914,8 @@ pub fn grafiği_boya(
                                 );
                             }
                         } else {
-                            let başlangıç = şerit.merkez().1 - tutamaç_boyutu / 2.0;
-                            let bitiş = başlangıç + tutamaç_boyutu;
+                            let başlangıç = şerit.merkez().1 - toplam / 2.0;
+                            let bitiş = şerit.merkez().1 + toplam / 2.0;
                             for kutu in [sol, sağ] {
                                 let merkez_x = kutu.merkez().0;
                                 yüzey.çizgi(
@@ -3936,7 +3938,7 @@ pub fn grafiği_boya(
                     };
                     // Alt/sağ taşıma tutamacı (`brushSelect`).
                     let taşıma = if dikey {
-                        Dikdörtgen::yeni(şerit.sağ(), pencere.y, 7.0, pencere.yükseklik)
+                        Dikdörtgen::yeni(şerit.sağ() - 0.5, pencere.y, 7.0, pencere.yükseklik)
                     } else {
                         Dikdörtgen::yeni(pencere.x, şerit.y - 6.5, pencere.genişlik, 7.0)
                     };
@@ -5041,7 +5043,7 @@ mod yakınlaştırma_yönü_testleri {
 
         let döküm = yüzey.döküm();
         assert!(
-            döküm.contains("çiz #8292cc@1.0 k=0.5 düz | T(14.3,120.0) Ç(20.5,70.0) Ç(26.8,20.0)"),
+            döküm.contains("çiz #8292cc@1.0 k=0.5 düz | T(14.3,121.8) Ç(20.5,71.8) Ç(26.8,21.8)"),
             "{döküm}"
         );
     }
@@ -5079,7 +5081,11 @@ mod yakınlaştırma_yönü_testleri {
         assert!((yatay.sol_tutamaç.yükseklik - 24.0).abs() < 1e-3);
         assert!((dikey.sol_tutamaç.genişlik - 24.0).abs() < 1e-3);
         assert!((dikey.sol_tutamaç.yükseklik - 12.0).abs() < 1e-3);
-        assert!((dikey.şerit.y - 65.0).abs() < 1e-3, "{:?}", dikey.şerit);
+        assert!(
+            (dikey.şerit.y - 66.764_27).abs() < 1e-3,
+            "{:?}",
+            dikey.şerit
+        );
         assert!((dikey.şerit.yükseklik - 390.0).abs() < 1e-3);
     }
 
