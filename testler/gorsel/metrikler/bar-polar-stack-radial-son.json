@@ -1,0 +1,19 @@
+{
+  "id": "bar-polar-stack-radial",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 783,
+  "değişen_piksel_oranı": 0.0029,
+  "ssim": 0.9976812479300281,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-stack-radial.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-polar-stack-radial.png",
+    "fark": "testler/gorsel/fark/default/bar-polar-stack-radial.png"
+  }
+}

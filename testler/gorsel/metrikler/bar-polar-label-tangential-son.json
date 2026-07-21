@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1174,
-  "değişen_piksel_oranı": 0.004348148148148148,
-  "ssim": 0.9975533233719168,
+  "değişen_piksel": 1169,
+  "değişen_piksel_oranı": 0.0043296296296296295,
+  "ssim": 0.997556920357528,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-label-tangential.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-polar-label-tangential.png",

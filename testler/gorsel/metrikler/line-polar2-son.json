@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 862,
-  "değişen_piksel_oranı": 0.003192592592592593,
-  "ssim": 0.9975677568399908,
+  "değişen_piksel": 781,
+  "değişen_piksel_oranı": 0.0028925925925925924,
+  "ssim": 0.9976794989522735,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-polar2.png",
     "gerçek": "testler/gorsel/gerçek/default/line-polar2.png",
