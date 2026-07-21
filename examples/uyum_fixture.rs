@@ -4415,6 +4415,68 @@ fn gauge_simple() -> GrafikSeçenekleri {
         )
 }
 
+fn gauge_speed() -> Result<GrafikSeçenekleri, String> {
+    let ibre = Sembol::svg_yolu(
+        "path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z",
+    )
+    .map_err(|hata| format!("gauge-speed pointer.icon çözülemedi: {hata}"))?;
+    let detail = YazıStili::yeni()
+        .arkaplan("#fff")
+        .kenarlık_rengi("#999")
+        .kenarlık_kalınlığı(2.0)
+        .genişlik("60%")
+        .satır_yüksekliği(40.0)
+        .yükseklik(40.0)
+        .kenarlık_yarıçapı(8.0);
+    let biçimleyici = Biçimleyici::İşlev(Arc::new(|değer, _| {
+        format!("{{value|{değer:.0}}}{{unit|km/h}}")
+    }));
+
+    Ok(GrafikSeçenekleri::yeni().seri(
+        GöstergeSaatiSerisi::yeni()
+            .veri([100.0])
+            .aralık(0.0, 240.0)
+            .açılar(180.0, 0.0)
+            .bölme_sayısı(12)
+            .öğe_stili(
+                ÖğeStili::yeni()
+                    .renk("#58D9F9")
+                    .gölge_rengi("rgba(0,138,255,0.45)")
+                    .gölge_bulanıklığı(10.0)
+                    .gölge_kayması(2.0, 2.0),
+            )
+            .ilerleme(true, 18.0)
+            .ilerleme_yuvarlak_uç(true)
+            .ibre(true, "75%", 16.0)
+            .ibre_simgesi(ibre)
+            .ibre_merkez_kayması(0.0, "5%")
+            .şerit(true, 18.0)
+            .şerit_yuvarlak_uç(true)
+            .ara_çentikler(true, 2, 6.0, 10.0, 2.0)
+            .ara_çentik_rengi("#999")
+            .ana_çentikler(true, 12.0, 10.0, 3.0)
+            .ana_çentik_rengi("#999")
+            .eksen_etiketleri(true, 30.0, 20.0)
+            .eksen_etiket_rengi("#999")
+            .ad_göster(false)
+            .değer_merkez_kayması(0.0, "35%")
+            .değer_animasyonu(true)
+            .değer_biçimleyici(biçimleyici)
+            .değer_stili(detail)
+            .değer_zengin_stil(
+                "value",
+                YazıStili::yeni().boyut(50.0).kalın(true).renk("#777"),
+            )
+            .değer_zengin_stil(
+                "unit",
+                YazıStili::yeni()
+                    .boyut(20.0)
+                    .renk("#999")
+                    .iç_boşluk([0.0, 0.0, -20.0, 10.0]),
+            ),
+    ))
+}
+
 #[cfg(test)]
 #[allow(clippy::indexing_slicing, clippy::panic)]
 mod gauge_testleri {
@@ -4463,6 +4525,48 @@ mod gauge_testleri {
         assert_eq!(seri.ilerleme_rengi, None);
         assert!(seri.değer_animasyonu);
         assert_eq!(seri.veri[0].değer.sayı(), Some(50.0));
+    }
+
+    #[test]
+    fn speed_gauge_resmi_svg_ibre_round_cap_golge_ve_rich_detaili_tasir() {
+        let seçenekler = gauge_speed().expect("gauge-speed fixture");
+        let Seri::GöstergeSaati(seri) = &seçenekler.seriler[0] else {
+            panic!("seri gauge olmalı");
+        };
+        assert_eq!((seri.başlangıç_açısı, seri.bitiş_açısı), (180.0, 0.0));
+        assert_eq!(
+            (seri.en_az, seri.en_çok, seri.bölme_sayısı),
+            (0.0, 240.0, 12)
+        );
+        assert_eq!(
+            seri.öğe_stili.renk.as_ref().map(Dolgu::temsilî),
+            Some(Renk::onaltılık(0x58d9f9))
+        );
+        assert_eq!(seri.öğe_stili.gölge_bulanıklığı, 10.0);
+        assert_eq!(seri.öğe_stili.gölge_kayması, (2.0, 2.0));
+        assert!(seri.şerit_yuvarlak_uç && seri.ilerleme_yuvarlak_uç);
+        assert_eq!(
+            (seri.şerit_kalınlığı, seri.ilerleme_kalınlığı),
+            (18.0, 18.0)
+        );
+        assert!(matches!(seri.ibre_simgesi, Some(Sembol::SvgYolu(_))));
+        assert_eq!(seri.ibre_uzunluğu, Uzunluk::Yüzde(75.0));
+        assert_eq!(seri.ibre_merkez_kayması.1, Uzunluk::Yüzde(5.0));
+        assert_eq!(seri.ara_çentik_sayısı, 2);
+        assert_eq!(seri.etiket_boyutu, 20.0);
+        assert!(!seri.adı_göster);
+        assert_eq!(seri.değer_merkez_kayması.1, Uzunluk::Yüzde(35.0));
+        assert!(seri.değer_animasyonu);
+        assert_eq!(seri.değer_zengin.len(), 2);
+        assert_eq!(seri.değer_stili.genişlik, Some(Uzunluk::Yüzde(60.0)));
+        assert_eq!(seri.veri[0].değer.sayı(), Some(100.0));
+        assert_eq!(
+            seri.değer_biçimleyici
+                .as_ref()
+                .expect("detail formatter")
+                .uygula(100.0, "100"),
+            "100km/h"
+        );
     }
 }
 
@@ -11096,6 +11200,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-histogram" => Ok(bar_histogram()),
         "gauge" => Ok(gauge()),
         "gauge-simple" => Ok(gauge_simple()),
+        "gauge-speed" => gauge_speed(),
         "bar-simple" => Ok(bar_simple()),
         "bar1" => Ok(bar1()),
         "mix-line-bar" => Ok(mix_line_bar()),

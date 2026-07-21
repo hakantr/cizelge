@@ -2027,6 +2027,9 @@ impl HuniSerisi {
 pub struct GöstergeSaatiSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
+    /// Seri/veri görsel stili (`itemStyle`); pointer ve progress bunu
+    /// miras alır.
+    pub öğe_stili: ÖğeStili,
     pub en_az: f64,
     pub en_çok: f64,
     /// Başlangıç açısı, derece (`startAngle`, öntanımlı 225).
@@ -2043,12 +2046,16 @@ pub struct GöstergeSaatiSerisi {
     pub şeridi_göster: bool,
     /// Yay şeridinin kalınlığı (`axisLine.lineStyle.width`).
     pub şerit_kalınlığı: f32,
+    /// `axisLine.roundCap`.
+    pub şerit_yuvarlak_uç: bool,
     /// Değere kadar uzanan ön yay (`progress.show`).
     pub ilerlemeyi_göster: bool,
     /// `progress.width`.
     pub ilerleme_kalınlığı: f32,
     /// `progress.itemStyle.color`; verilmezse seri palet rengi kullanılır.
     pub ilerleme_rengi: Option<crate::renk::Renk>,
+    /// `progress.roundCap`.
+    pub ilerleme_yuvarlak_uç: bool,
     pub bölme_sayısı: usize,
     /// Ana bölme çizgileri (`splitLine.show`).
     pub çentikleri_göster: bool,
@@ -2077,6 +2084,12 @@ pub struct GöstergeSaatiSerisi {
     pub ibre_uzunluğu: Uzunluk,
     pub ibre_genişliği: f32,
     pub ibre_rengi: Option<crate::renk::Renk>,
+    /// `pointer.icon`; `None`, ECharts'ın yerleşik PointerPath şeklidir.
+    pub ibre_simgesi: Option<Sembol>,
+    /// `pointer.offsetCenter`, gauge yarıçapına göre çözülür.
+    pub ibre_merkez_kayması: (Uzunluk, Uzunluk),
+    /// `pointer.keepAspect`.
+    pub ibre_oranı_koru: bool,
     /// Veri adı (`title.show`).
     pub adı_göster: bool,
     pub ad_merkez_kayması: (Uzunluk, Uzunluk),
@@ -2091,6 +2104,11 @@ pub struct GöstergeSaatiSerisi {
     /// `detail.valueAnimation`: detail metni de seri geçiş değerini izler.
     pub değer_animasyonu: bool,
     pub değer_biçimleyici: Option<crate::model::stil::Biçimleyici>,
+    /// `detail` text-style yaması: arka plan, kenarlık, boyutlar, satır
+    /// yüksekliği ve iç boşluk dâhil.
+    pub değer_stili: crate::model::stil::YazıStili,
+    /// `detail.rich` adlandırılmış metin koşuları.
+    pub değer_zengin: std::collections::BTreeMap<String, crate::model::stil::YazıStili>,
 }
 
 impl Default for GöstergeSaatiSerisi {
@@ -2098,6 +2116,7 @@ impl Default for GöstergeSaatiSerisi {
         GöstergeSaatiSerisi {
             ad: None,
             veri: Vec::new(),
+            öğe_stili: ÖğeStili::default(),
             en_az: 0.0,
             en_çok: 100.0,
             başlangıç_açısı: 225.0,
@@ -2107,9 +2126,11 @@ impl Default for GöstergeSaatiSerisi {
             renk_bantları: Vec::new(),
             şeridi_göster: true,
             şerit_kalınlığı: 10.0,
+            şerit_yuvarlak_uç: false,
             ilerlemeyi_göster: false,
             ilerleme_kalınlığı: 10.0,
             ilerleme_rengi: None,
+            ilerleme_yuvarlak_uç: false,
             bölme_sayısı: 10,
             çentikleri_göster: true,
             çentik_uzunluğu: 10.0,
@@ -2131,6 +2152,9 @@ impl Default for GöstergeSaatiSerisi {
             ibre_uzunluğu: Uzunluk::Yüzde(60.0),
             ibre_genişliği: 6.0,
             ibre_rengi: None,
+            ibre_simgesi: None,
+            ibre_merkez_kayması: (Uzunluk::Piksel(0.0), Uzunluk::Piksel(0.0)),
+            ibre_oranı_koru: false,
             adı_göster: true,
             ad_merkez_kayması: (Uzunluk::Piksel(0.0), Uzunluk::Yüzde(20.0)),
             ad_boyutu: crate::tema::YAZI_BÜYÜK,
@@ -2142,6 +2166,8 @@ impl Default for GöstergeSaatiSerisi {
             değer_kalın: true,
             değer_animasyonu: false,
             değer_biçimleyici: None,
+            değer_stili: crate::model::stil::YazıStili::default(),
+            değer_zengin: std::collections::BTreeMap::new(),
         }
     }
 }
@@ -2159,6 +2185,16 @@ impl GöstergeSaatiSerisi {
     /// Tek değer + ad (`data: [{ value, name }]`).
     pub fn değer(mut self, değer: f64, ad: impl Into<String>) -> Self {
         self.veri = vec![VeriÖğesi::adlı(ad, değer)];
+        self
+    }
+
+    pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
+        self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
         self
     }
 
@@ -2198,6 +2234,11 @@ impl GöstergeSaatiSerisi {
         self
     }
 
+    pub fn şerit_yuvarlak_uç(mut self, açık: bool) -> Self {
+        self.şerit_yuvarlak_uç = açık;
+        self
+    }
+
     pub fn ilerleme(mut self, göster: bool, kalınlık: f32) -> Self {
         self.ilerlemeyi_göster = göster;
         self.ilerleme_kalınlığı = kalınlık.max(0.0);
@@ -2206,6 +2247,11 @@ impl GöstergeSaatiSerisi {
 
     pub fn ilerleme_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
         self.ilerleme_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn ilerleme_yuvarlak_uç(mut self, açık: bool) -> Self {
+        self.ilerleme_yuvarlak_uç = açık;
         self
     }
 
@@ -2228,6 +2274,11 @@ impl GöstergeSaatiSerisi {
         self
     }
 
+    pub fn ana_çentik_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.çentik_rengi = Some(renk.into());
+        self
+    }
+
     pub fn ara_çentikler(
         mut self,
         göster: bool,
@@ -2244,10 +2295,20 @@ impl GöstergeSaatiSerisi {
         self
     }
 
+    pub fn ara_çentik_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.ara_çentik_rengi = Some(renk.into());
+        self
+    }
+
     pub fn eksen_etiketleri(mut self, göster: bool, mesafe: f32, boyut: f32) -> Self {
         self.etiketleri_göster = göster;
         self.etiket_mesafesi = mesafe;
         self.etiket_boyutu = boyut.max(0.0);
+        self
+    }
+
+    pub fn eksen_etiket_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.etiket_rengi = Some(renk.into());
         self
     }
 
@@ -2263,6 +2324,21 @@ impl GöstergeSaatiSerisi {
         self.ibreyi_göster = göster;
         self.ibre_uzunluğu = uzunluk.into();
         self.ibre_genişliği = genişlik.max(0.0);
+        self
+    }
+
+    pub fn ibre_simgesi(mut self, simge: Sembol) -> Self {
+        self.ibre_simgesi = Some(simge);
+        self
+    }
+
+    pub fn ibre_merkez_kayması<X: Into<Uzunluk>, Y: Into<Uzunluk>>(mut self, x: X, y: Y) -> Self {
+        self.ibre_merkez_kayması = (x.into(), y.into());
+        self
+    }
+
+    pub fn ibre_oranı_koru(mut self, koru: bool) -> Self {
+        self.ibre_oranı_koru = koru;
         self
     }
 
@@ -2297,6 +2373,20 @@ impl GöstergeSaatiSerisi {
 
     pub fn değer_biçimleyici(mut self, b: impl Into<crate::model::stil::Biçimleyici>) -> Self {
         self.değer_biçimleyici = Some(b.into());
+        self
+    }
+
+    pub fn değer_stili(mut self, stil: crate::model::stil::YazıStili) -> Self {
+        self.değer_stili = stil;
+        self
+    }
+
+    pub fn değer_zengin_stil(
+        mut self,
+        ad: impl Into<String>,
+        stil: crate::model::stil::YazıStili,
+    ) -> Self {
+        self.değer_zengin.insert(ad.into(), stil);
         self
     }
 }
@@ -3284,11 +3374,11 @@ impl Seri {
             Seri::Sütun(s) => s.öğe_stili.renk.as_ref(),
             Seri::Pasta(s) => s.öğe_stili.renk.as_ref(),
             Seri::Saçılım(s) => s.öğe_stili.renk.as_ref(),
+            Seri::GöstergeSaati(s) => s.öğe_stili.renk.as_ref(),
             Seri::Mum(_)
             | Seri::Kutu(_)
             | Seri::Isı(_)
             | Seri::Huni(_)
-            | Seri::GöstergeSaati(_)
             | Seri::Radar(_)
             | Seri::Özel(_)
             | Seri::AğaçHaritası(_)

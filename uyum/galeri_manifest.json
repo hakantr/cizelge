@@ -4140,7 +4140,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/gauge-speed.ts",
     "kaynak_sha256": "96f34fd478b8658526f9bf23fca2ea0cf9f25167d3242bf42e03ceb70a455cbf",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#gauge_speed",
     "seriler": [
       "gauge"
     ],
@@ -4151,7 +4151,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -4163,15 +4163,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 595,
+          "değişen_piksel_oranı": 0.002203703703703704,
+          "ssim": 0.9964575648770181,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/gauge-speed.png",
+            "sha256": "d79e93fee7856050320b75fabce96222e06a475c322baf4f5f61d577ceda7104"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/gauge-speed.png",
+            "sha256": "e3eb65731817ab2b0e35ad16dca73bf09cecb0e97a43e61fce9af816fc6c97de"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/gauge-speed.png",
+            "sha256": "83c54a924b03d8d817e2e11ca0a58222d8528320f29f99610b3aef882415b98e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/gauge-speed-son.json",
+            "sha256": "412b3ba8d02a2d3a4e365f08c1691c5532e23f979a4b103e62045fe98c913016"
+          }
+        }
+      ]
     }
   },
   {

@@ -1393,6 +1393,49 @@ Gerçekleşen dilim — `gauge-simple` (2026-07-22):
   sayısı 0/332'dir; kartın statik görsel kapısı `tam_kanıtlı`, diğer kapıları
   `kısmi`dır.
 
+Gerçekleşen dilim — `gauge-speed` (2026-07-22):
+
+- Sabit `../echarts-examples/public/examples/ts/gauge-speed.ts`; resmî
+  `../echarts/src/chart/gauge/GaugeView.ts`, `GaugeSeries.ts`,
+  `PointerPath.ts`, `util/shape/sausage` ve `util/symbol.ts` yollarıyla
+  karşılaştırıldı. Fixture; `180..0` yarım daireyi, `0..240` aralığını, 12
+  bölmeyi, `#58D9F9` item rengini ve yarı saydam 10 px gölgeyi kaynakla aynı
+  option anlamlarıyla taşır.
+- `GöstergeSaatiSerisi`, `itemStyle`, `axisLine.roundCap`,
+  `progress.roundCap`, eksen/çentik açık renkleri, `pointer.icon`,
+  `pointer.offsetCenter` ve `pointer.keepAspect` alanlarını akıcı API'ye
+  ekledi. Açık item rengi seri palet sırasını tüketmez; pointer ve progress
+  aynı dolgu, opaklık, kenarlık ve gölgeyi miras alır. Yuvarlak axisLine ve
+  progress yolları zrender `Sausage` eşdeğerindeki iki yarım kapakla boyanır.
+- Özel `path://` ibre kesin SVG sınır kutusundan 16 px × `%75` hedef kutuya
+  `createSymbol(..., cover)` gibi ölçeklenir; `[0, '5%']` merkez kaymasıyla
+  birlikte değer açısına döndürülür. Resmî uzun kübik yol fixture'da
+  sadeleştirilmeden çözülür. Böylece ECharts'ın özel ibre geometrisi ve
+  gölgesi genel dörtgen PointerPath'e düşmez.
+- `detail` arka plan/kenarlık/genişlik/yükseklik/satır yüksekliği/köşe
+  yarıçapı ile `rich` koşu haritasına bağlandı. `%60` genişlik gauge
+  yarıçapına göre çözülür; `100` için 50 px kalın `#777`, `km/h` için 20 px
+  `#999` koşuları ayrı çizilir. Zrender'ın `[0, 0, -20, 10]` negatif rich
+  padding'i korunur. `detail.width`, açık `overflow` yokken metni üç
+  noktaya kırpmadığından kutu ve taşabilen rich içerik iki boyama geçişinde
+  üretilir; `valueAnimation` aynı ara değeri formatter'a verir.
+- Yapısal çekirdek testi 13 ana bölme + 36 ara çentiği, axisLine/progress
+  yuvarlak kapaklarını, iki itemStyle gölgesini, kübik SVG pointer yolunu,
+  `%60` detail kutusunu ve iki rich metin koşusunu ayrı ayrı kilitler.
+  Fixture testi resmî option değerlerini ve görünür `100km/h` sonucunu
+  doğrular.
+- Yeni resmî referans yalnız `gauge-speed` için iki üretimli kararlılık
+  kontrolünden sonra bir kez yazıldı; referansa yazmayan hedefli tekrar 1/1
+  ve depo çapındaki kilitli koşu 185/185 geçti. 600×450 kanıt 595 değişen
+  piksel, `%0,2204` fark ve `0,996458` SSIM üretir. Çekirdek 303/303,
+  fixture 48/48, `cargo check --all-targets`,
+  `cargo check --no-default-features` ve üretilmiş-dosya denetimi geçti.
+- Uyum raporu 332 kartı korur; çalıştırılabilir fixture 148/332, kilitli
+  statik görsel kanıt 138/332 (`%41,6`), tüm kapıları tam kart 0/332'dir.
+  `gauge-speed` kartının statik görsel kapısı `tam_kanıtlı`; canlı değer
+  animasyonu, erişilebilirlik ve performans kapıları sonraki fazlar için
+  `kısmi` kalır.
+
 Kabul:
 
 - Radar 5, Gauge 12, Funnel 4, ThemeRiver 2, Calendar 9, Matrix 12 ve

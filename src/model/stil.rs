@@ -295,12 +295,15 @@ impl YazıStili {
     }
 
     pub fn iç_boşluk(mut self, boşluk: [f32; 4]) -> Self {
-        self.iç_boşluk = Some(boşluk.map(|değer| değer.max(0.0)));
+        // zrender rich-text padding değerlerini olduğu gibi kullanır.
+        // Özellikle gauge-speed örneğindeki `[0, 0, -20, 10]`, birim
+        // koşusunu taban çizgisine doğru kaydırmak için kasıtlıdır.
+        self.iç_boşluk = Some(boşluk.map(|değer| if değer.is_finite() { değer } else { 0.0 }));
         self
     }
 
     pub fn eş_iç_boşluk(mut self, boşluk: f32) -> Self {
-        self.iç_boşluk = Some([boşluk.max(0.0); 4]);
+        self.iç_boşluk = Some([if boşluk.is_finite() { boşluk } else { 0.0 }; 4]);
         self
     }
 
@@ -930,6 +933,16 @@ mod testler {
 
         let bilinmeyen = Biçimleyici::from("{x} / {name|Forest}");
         assert_eq!(bilinmeyen.uygula_bağlamla(0.0, "0", "", ""), "{x} / Forest");
+    }
+
+    #[test]
+    fn zengin_metin_negatif_padding_degerini_korur() {
+        let yazı = YazıStili::yeni().iç_boşluk([0.0, 0.0, -20.0, 10.0]);
+        assert_eq!(yazı.iç_boşluk, Some([0.0, 0.0, -20.0, 10.0]));
+        assert_eq!(
+            YazıStili::yeni().eş_iç_boşluk(-3.0).iç_boşluk,
+            Some([-3.0; 4])
+        );
     }
 
     #[test]
