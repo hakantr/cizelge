@@ -452,6 +452,31 @@ pub trait ÇizimYüzeyi {
         }
     }
 
+    /// Teğetsel polar sütun için iki ucu yarım daireli halka parçası
+    /// (`series.bar.roundCap`, zrender `Sausage`) boyar.
+    #[allow(clippy::too_many_arguments)]
+    fn yuvarlak_uçlu_dilim(
+        &mut self,
+        merkez: (f32, f32),
+        iç_yarıçap: f32,
+        dış_yarıçap: f32,
+        açı0: f32,
+        açı1: f32,
+        dolgu: &Dolgu,
+        kenarlık: Option<(f32, Renk)>,
+    ) {
+        let yol = yuvarlak_uçlu_dilim_yolu(merkez, iç_yarıçap, dış_yarıçap, açı0, açı1);
+        if yol.boş_mu() {
+            return;
+        }
+        self.yol_doldur(&yol, dolgu);
+        if let Some((kalınlık, renk)) = kenarlık
+            && kalınlık > 0.0
+        {
+            self.yol_çiz(&yol, kalınlık, renk, ÇizgiTürü::Düz);
+        }
+    }
+
     /// Köşeleri yuvarlatılmış pasta dilimi boyar. Köşe sırası zrender
     /// `Sector.cornerRadius` ile aynıdır: iç-başlangıç, iç-bitiş,
     /// dış-başlangıç, dış-bitiş. Sıfır yarıçaplar düz [`Self::dilim`]
@@ -550,6 +575,84 @@ pub fn dilim_yolu(
         yol.çiz(uç(dış_yarıçap, açı0));
         yol.yay(dış_yarıçap, büyük, süpürme, uç(dış_yarıçap, açı1));
         yol.kapat();
+    }
+    yol
+}
+
+/// zrender `Sausage.buildPath` eşdeğeri: orta yarıçap boyunca ilerleyen
+/// halka şeridinin başlangıç ve bitişine yarım daire kapak ekler. Yol
+/// bilerek kapatılmaz; Canvas/SVG dolgu açık yolu kapatırken stroke, tam tur
+/// durumunda görünmeyen bir radyal dikiş üretmez.
+pub fn yuvarlak_uçlu_dilim_yolu(
+    merkez: (f32, f32),
+    iç_yarıçap: f32,
+    dış_yarıçap: f32,
+    açı0: f32,
+    açı1: f32,
+) -> Yol {
+    const EPS: f32 = 1e-5;
+    let iç = iç_yarıçap.min(dış_yarıçap).max(0.0);
+    let dış = iç_yarıçap.max(dış_yarıçap).max(0.0);
+    if dış - iç <= EPS || !açı0.is_finite() || !açı1.is_finite() {
+        return Yol::yeni();
+    }
+
+    let saat_yönünde = açı1 >= açı0;
+    let yön = if saat_yönünde { 1.0 } else { -1.0 };
+    let tam_tur = std::f32::consts::TAU;
+    let özgün_açıklık = (açı1 - açı0).abs();
+    let tam_tur_mu = özgün_açıklık >= tam_tur - EPS;
+    let başlangıç = if tam_tur_mu {
+        açı1 - yön * tam_tur
+    } else {
+        açı0
+    };
+    let yarım_kalınlık = (dış - iç) / 2.0;
+    let uç = |yarıçap: f32, açı: f32| {
+        (
+            merkez.0 + yarıçap * açı.cos(),
+            merkez.1 + yarıçap * açı.sin(),
+        )
+    };
+    let dış_baş = uç(dış, başlangıç);
+    let iç_baş = uç(iç, başlangıç);
+    let iç_son = uç(iç, açı1);
+
+    let yay = |yol: &mut Yol, yarıçap: f32, baş: f32, son: f32, süpürme: bool| {
+        if yarıçap <= EPS || (son - baş).abs() <= EPS {
+            return;
+        }
+        let yay_açıklığı = (son - baş).abs();
+        if yay_açıklığı >= tam_tur - EPS {
+            let orta_açı = baş
+                + if süpürme {
+                    std::f32::consts::PI
+                } else {
+                    -std::f32::consts::PI
+                };
+            yol.yay(yarıçap, false, süpürme, uç(yarıçap, orta_açı));
+            yol.yay(yarıçap, false, süpürme, uç(yarıçap, son));
+        } else {
+            yol.yay(
+                yarıçap,
+                yay_açıklığı > std::f32::consts::PI,
+                süpürme,
+                uç(yarıçap, son),
+            );
+        }
+    };
+
+    let mut yol = Yol::yeni();
+    if tam_tur_mu {
+        yol.taşı(dış_baş);
+    } else {
+        yol.taşı(iç_baş);
+        yol.yay(yarım_kalınlık, false, saat_yönünde, dış_baş);
+    }
+    yay(&mut yol, dış, başlangıç, açı1, saat_yönünde);
+    yol.yay(yarım_kalınlık, false, saat_yönünde, iç_son);
+    if iç > EPS {
+        yay(&mut yol, iç, açı1, başlangıç, !saat_yönünde);
     }
     yol
 }

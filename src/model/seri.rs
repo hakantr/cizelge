@@ -415,6 +415,9 @@ pub struct SütunSerisi {
     pub z: i32,
     /// İşaretçi/isabet olaylarını kapatır (`series.bar.silent`).
     pub sessiz: bool,
+    /// Teğetsel polar sütunun iki ucunu yarım daireyle kapatır
+    /// (`series.bar.roundCap`). Kartezyen ve radyal polar sütunlarda etkisizdir.
+    pub yuvarlak_uç: bool,
     /// `barWidth` — verilmezse otomatik hesaplanır.
     pub genişlik: Option<Uzunluk>,
     /// `barMaxWidth`.
@@ -468,6 +471,7 @@ impl Default for SütunSerisi {
             yığın: None,
             z: 2,
             sessiz: false,
+            yuvarlak_uç: false,
             genişlik: None,
             en_çok_genişlik: None,
             en_az_genişlik: None,
@@ -578,6 +582,11 @@ impl SütunSerisi {
 
     pub fn sessiz(mut self, sessiz: bool) -> Self {
         self.sessiz = sessiz;
+        self
+    }
+
+    pub fn yuvarlak_uç(mut self, yuvarlak: bool) -> Self {
+        self.yuvarlak_uç = yuvarlak;
         self
     }
 

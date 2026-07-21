@@ -102,6 +102,187 @@ fn teğetsel_sütun_kalınlığı(seri: &crate::model::seri::SütunSerisi, bant:
     kalınlık.clamp(0.0, bant)
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum KutupsalSütunGrupKimliği {
+    Yığın(String),
+    Seri(usize),
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+struct KutupsalSütunBantYerleşimi {
+    ofset: f32,
+    genişlik: f32,
+}
+
+#[derive(Clone, Debug)]
+struct KutupsalSütunGrubu {
+    kimlik: KutupsalSütunGrupKimliği,
+    genişlik: f32,
+    en_çok_genişlik: f32,
+    en_az_genişlik: f32,
+}
+
+fn kutupsal_sütun_grup_kimliği(
+    seri_sırası: usize,
+    seri: &crate::model::seri::SütunSerisi,
+) -> KutupsalSütunGrupKimliği {
+    seri.yığın
+        .as_ref()
+        .map_or(KutupsalSütunGrupKimliği::Seri(seri_sırası), |yığın| {
+            KutupsalSütunGrupKimliği::Yığın(yığın.clone())
+        })
+}
+
+/// `layout/barPolar.ts::calcRadialBar` eşdeğeri. Aynı stack tek bant
+/// paylaşır; bağımsız stack'ler `barGap` ve `barCategoryGap` ile kategori
+/// bandı içinde yan yana ya da negatif boşlukla üst üste yerleşir.
+fn kutupsal_sütun_bantları(
+    seçenekler: &GrafikSeçenekleri,
+    düzen: &KutupsalDüzen,
+    görünürler: &[bool],
+) -> Vec<Option<KutupsalSütunBantYerleşimi>> {
+    let teğetsel = düzen.radyal_kategorik && !düzen.açısal_kategorik;
+    let bant = if teğetsel {
+        düzen.bant_yarıçapı()
+    } else {
+        düzen.bant_açısı()
+    };
+    let uzunluk_çöz = |uzunluk| {
+        if teğetsel {
+            teğetsel_sütun_uzunluğunu_çöz(uzunluk, bant)
+        } else {
+            kutupsal_sütun_uzunluğunu_çöz(uzunluk, bant)
+        }
+    };
+
+    let mut gruplar: Vec<KutupsalSütunGrubu> = Vec::new();
+    let mut kalan = bant;
+    let mut otomatik_sayı = 0usize;
+    let mut kategori_boşluğu = bant * 0.2;
+    let mut sütun_boşluğu_oranı = 0.3_f32;
+
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Sütun(seri) = seri else {
+            continue;
+        };
+        if !seri.kutupsal || !görünürler.get(seri_sırası).copied().unwrap_or(false) {
+            continue;
+        }
+        let kimlik = kutupsal_sütun_grup_kimliği(seri_sırası, seri);
+        let grup_sırası = gruplar
+            .iter()
+            .position(|grup| grup.kimlik == kimlik)
+            .unwrap_or_else(|| {
+                otomatik_sayı += 1;
+                gruplar.push(KutupsalSütunGrubu {
+                    kimlik,
+                    genişlik: 0.0,
+                    en_çok_genişlik: 0.0,
+                    en_az_genişlik: 0.0,
+                });
+                gruplar.len() - 1
+            });
+        let grup = &mut gruplar[grup_sırası];
+        if let Some(genişlik) = seri.genişlik
+            && grup.genişlik <= 0.0
+        {
+            let genişlik = uzunluk_çöz(genişlik).min(kalan).max(0.0);
+            if genişlik > 0.0 {
+                grup.genişlik = genişlik;
+                kalan -= genişlik;
+            }
+        }
+        if let Some(en_çok) = seri.en_çok_genişlik {
+            grup.en_çok_genişlik = uzunluk_çöz(en_çok).max(0.0);
+        }
+        if let Some(en_az) = seri.en_az_genişlik {
+            grup.en_az_genişlik = uzunluk_çöz(en_az).max(0.0);
+        }
+        if let Some(boşluk) = seri.sütun_boşluğu {
+            sütun_boşluğu_oranı = match boşluk {
+                Uzunluk::Yüzde(yüzde) => yüzde / 100.0,
+                Uzunluk::Piksel(değer) => değer,
+            };
+        }
+        if let Some(boşluk) = seri.kategori_boşluğu {
+            kategori_boşluğu = uzunluk_çöz(boşluk);
+        }
+    }
+
+    let otomatik_genişlik = |kalan: f32, otomatik_sayı: usize| {
+        let sayı = otomatik_sayı as f32;
+        let payda = sayı + (sayı - 1.0).max(0.0) * sütun_boşluğu_oranı;
+        if payda.abs() <= f32::EPSILON {
+            0.0
+        } else {
+            ((kalan - kategori_boşluğu) / payda).max(0.0)
+        }
+    };
+    let mut otomatik = otomatik_genişlik(kalan, otomatik_sayı);
+    for grup in &mut gruplar {
+        if grup.en_çok_genişlik > 0.0 && grup.en_çok_genişlik < otomatik {
+            let genişlik = if grup.genişlik > 0.0 {
+                grup.en_çok_genişlik.min(grup.genişlik)
+            } else {
+                grup.en_çok_genişlik
+            }
+            .min(kalan);
+            kalan -= genişlik;
+            grup.genişlik = genişlik;
+            otomatik_sayı = otomatik_sayı.saturating_sub(1);
+        }
+    }
+    otomatik = otomatik_genişlik(kalan, otomatik_sayı);
+    for grup in &mut gruplar {
+        if grup.genişlik <= 0.0 {
+            grup.genişlik = otomatik;
+        }
+        if grup.en_az_genişlik > 0.0 {
+            grup.genişlik = grup.genişlik.max(grup.en_az_genişlik);
+        }
+        grup.genişlik = grup.genişlik.clamp(0.0, bant);
+    }
+
+    let mut toplam = gruplar
+        .iter()
+        .map(|grup| grup.genişlik * (1.0 + sütun_boşluğu_oranı))
+        .sum::<f32>();
+    if let Some(son) = gruplar.last() {
+        toplam -= son.genişlik * sütun_boşluğu_oranı;
+    }
+    let mut ofset = -toplam / 2.0;
+    let grup_yerleşimleri = gruplar
+        .iter()
+        .map(|grup| {
+            let yerleşim = KutupsalSütunBantYerleşimi {
+                ofset,
+                genişlik: grup.genişlik,
+            };
+            ofset += grup.genişlik * (1.0 + sütun_boşluğu_oranı);
+            (grup.kimlik.clone(), yerleşim)
+        })
+        .collect::<Vec<_>>();
+
+    seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .map(|(seri_sırası, seri)| {
+            let Seri::Sütun(seri) = seri else {
+                return None;
+            };
+            if !seri.kutupsal || !görünürler.get(seri_sırası).copied().unwrap_or(false) {
+                return None;
+            }
+            let kimlik = kutupsal_sütun_grup_kimliği(seri_sırası, seri);
+            grup_yerleşimleri
+                .iter()
+                .find(|(grup_kimliği, _)| *grup_kimliği == kimlik)
+                .map(|(_, yerleşim)| *yerleşim)
+        })
+        .collect()
+}
+
 fn yazı_yatay_hizası(hiza: YazıYatayHizası) -> YatayHiza {
     match hiza {
         YazıYatayHizası::Sol => YatayHiza::Sol,
@@ -908,6 +1089,7 @@ pub fn kutupsal_serileri_çiz(
 ) {
     let _ = kapalı;
     let ilerleme = ilerleme.clamp(0.0, 1.0);
+    let sütun_bantları = kutupsal_sütun_bantları(seçenekler, düzen, görünürler);
     let mut seri_sıraları = seçenekler
         .seriler
         .iter()
@@ -932,16 +1114,17 @@ pub fn kutupsal_serileri_çiz(
         match seri {
             Seri::Sütun(s) => {
                 let teğetsel = düzen.radyal_kategorik && !düzen.açısal_kategorik;
-                let dilim_açıklığı = if teğetsel {
-                    0.0
-                } else {
-                    kutupsal_sütun_açıklığı(s, düzen.bant_açısı())
-                };
-                let bant_kalınlığı = if teğetsel {
-                    teğetsel_sütun_kalınlığı(s, düzen.bant_yarıçapı())
-                } else {
-                    0.0
-                };
+                let bant = sütun_bantları.get(i).copied().flatten().unwrap_or_else(|| {
+                    let genişlik = if teğetsel {
+                        teğetsel_sütun_kalınlığı(s, düzen.bant_yarıçapı())
+                    } else {
+                        kutupsal_sütun_açıklığı(s, düzen.bant_açısı())
+                    };
+                    KutupsalSütunBantYerleşimi {
+                        ofset: -genişlik / 2.0,
+                        genişlik,
+                    }
+                });
                 for (j, aralık) in aralıklar
                     .get(i)
                     .map(Vec::as_slice)
@@ -957,8 +1140,8 @@ pub fn kutupsal_serileri_çiz(
                         let başlangıç = düzen.açı(*taban);
                         let bitiş_tam = düzen.açı(*tepe);
                         (
-                            orta_yarıçap - bant_kalınlığı / 2.0,
-                            orta_yarıçap + bant_kalınlığı / 2.0,
+                            orta_yarıçap + bant.ofset,
+                            orta_yarıçap + bant.ofset + bant.genişlik,
                             başlangıç,
                             başlangıç + (bitiş_tam - başlangıç) * ilerleme,
                         )
@@ -969,8 +1152,8 @@ pub fn kutupsal_serileri_çiz(
                         (
                             iç,
                             iç + (dış_tam - iç) * ilerleme,
-                            orta - dilim_açıklığı / 2.0,
-                            orta + dilim_açıklığı / 2.0,
+                            orta + bant.ofset,
+                            orta + bant.ofset + bant.genişlik,
                         )
                     };
                     let veri_öğesi = s.veri.get(j);
@@ -994,15 +1177,27 @@ pub fn kutupsal_serileri_çiz(
                         .filter(|_| kenarlık_kalınlığı > 0.0)
                         .map(|renk| (kenarlık_kalınlığı, renk));
                     let dolgu = dolgu.opaklık(opaklık);
-                    çizici.dilim(
-                        düzen.merkez,
-                        iç.min(dış),
-                        iç.max(dış),
-                        açı0,
-                        açı1,
-                        &dolgu,
-                        kenarlık,
-                    );
+                    if teğetsel && s.yuvarlak_uç {
+                        çizici.yuvarlak_uçlu_dilim(
+                            düzen.merkez,
+                            iç.min(dış),
+                            iç.max(dış),
+                            açı0,
+                            açı1,
+                            &dolgu,
+                            kenarlık,
+                        );
+                    } else {
+                        çizici.dilim(
+                            düzen.merkez,
+                            iç.min(dış),
+                            iç.max(dış),
+                            açı0,
+                            açı1,
+                            &dolgu,
+                            kenarlık,
+                        );
+                    }
                     let öğe_etiketi = veri_öğesi
                         .and_then(|öğe| öğe.etiket.as_ref())
                         .map(|yama| yama.uygula(&s.etiket));
@@ -1164,6 +1359,7 @@ pub fn kutupsal_serileri_çiz(
 mod testler {
     use super::*;
     use crate::cizim::KayıtYüzeyi;
+    use crate::cizim::yuzey::{YolKomutu, yuvarlak_uçlu_dilim_yolu};
     use crate::model::eksen::{Eksen, EksenEtiketi, EksenÇizgisi};
     use crate::model::seri::{SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::{Etiket, EtiketKonumu, ÖğeStili};
@@ -1264,6 +1460,67 @@ mod testler {
         assert!((teğetsel_sütun_kalınlığı(&seri, düzen.bant_yarıçapı()) - 36.0).abs() < 0.01);
         assert!((düzen.açı(0.0).to_degrees() + 75.0).abs() < 0.01);
         assert!((düzen.açı(2.0).to_degrees() - 105.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn polar_bağımsız_grupları_bar_gap_ile_aynı_bantta_yerleştirir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(
+                KutupsalKoordinat::yeni()
+                    .açısal_eksen(Eksen::değer().en_çok(2.0))
+                    .radyal_eksen(Eksen::kategori().veri(["v", "w", "x", "y", "z"])),
+            )
+            .seri(SütunSerisi::yeni().kutupsal(true).veri([4, 3, 2, 1, 0]))
+            .seri(
+                SütunSerisi::yeni()
+                    .kutupsal(true)
+                    .yuvarlak_uç(true)
+                    .veri([4, 3, 2, 1, 0]),
+            );
+        let görünürler = [true, true];
+        let düzen = kutupsal_kur(
+            seçenekler.kutupsal.as_ref().expect("polar"),
+            &seçenekler,
+            &[vec![Some((0.0, 4.0)); 5], vec![Some((0.0, 4.0)); 5]],
+            &görünürler,
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+        );
+
+        let bantlar = kutupsal_sütun_bantları(&seçenekler, &düzen, &görünürler);
+        let ilk = bantlar[0].expect("ilk grup");
+        let ikinci = bantlar[1].expect("ikinci grup");
+        assert!((düzen.bant_yarıçapı() - 42.0).abs() < 1e-4);
+        assert!((ilk.genişlik - 14.608_696).abs() < 1e-4, "{ilk:?}");
+        assert!((ikinci.genişlik - ilk.genişlik).abs() < 1e-4);
+        assert!((ilk.ofset + 16.8).abs() < 1e-4, "{ilk:?}");
+        assert!((ikinci.ofset - 2.191_304).abs() < 1e-4, "{ikinci:?}");
+        assert!((ikinci.ofset - (ilk.ofset + ilk.genişlik) - 4.382_609).abs() < 1e-4);
+    }
+
+    #[test]
+    fn round_cap_sıfır_değeri_iki_yarım_yaylı_daireye_dönüştürür() {
+        let yol = yuvarlak_uçlu_dilim_yolu((0.0, 0.0), 10.0, 20.0, 0.0, 0.0);
+
+        assert_eq!(yol.komutlar.len(), 3);
+        assert_eq!(yol.komutlar[0], YolKomutu::Taşı((10.0, 0.0)));
+        assert_eq!(
+            yol.komutlar[1],
+            YolKomutu::Yay {
+                yarıçap: 5.0,
+                büyük_yay: false,
+                süpürme: true,
+                uç: (20.0, 0.0),
+            }
+        );
+        assert_eq!(
+            yol.komutlar[2],
+            YolKomutu::Yay {
+                yarıçap: 5.0,
+                büyük_yay: false,
+                süpürme: true,
+                uç: (10.0, 0.0),
+            }
+        );
     }
 
     #[test]
