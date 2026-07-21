@@ -15206,7 +15206,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-polar-stack.ts",
     "kaynak_sha256": "2546197e9189a2d5c22e34fda50edcb7d4477028feb1e8e4798d00e862b31487",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_polar_stack",
     "seriler": [
       "bar"
     ],
@@ -15221,7 +15221,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15232,15 +15232,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 769,
+          "değişen_piksel_oranı": 0.0028481481481481483,
+          "ssim": 0.9977433303410718,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-stack.png",
+            "sha256": "1aa5ac7b53f35983bf32df39b53241debb206777eea5856ce2cc99e69b56dff1"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-polar-stack.png",
+            "sha256": "f3071348428ef6dd9d6c52cc0efacbc1fb310c89ad06d7fb970872c0a3c792a0"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-polar-stack.png",
+            "sha256": "40b922276a2c510b8dc20c3c0dd9639a348a965d343634a1662891dcb76b9fc2"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-polar-stack-son.json",
+            "sha256": "967418ce8b20f8c2e653c41ffe654cfd7c9b7ba6876ee4ce54280449b2c800bb"
+          }
+        }
+      ]
     }
   },
   {
