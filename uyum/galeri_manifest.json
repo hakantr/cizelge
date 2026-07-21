@@ -15145,7 +15145,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-polar-real-estate.ts",
     "kaynak_sha256": "18cf4c8c6980d523847cb195174b74d4a9f089986ff846826b6a6a780553d8d6",
-    "cizelge_fixture": "examples/kutupsal.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_polar_real_estate",
     "seriler": [
       "bar"
     ],

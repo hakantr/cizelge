@@ -118,6 +118,13 @@ const SENARYOLAR = [
     tür: 'statik',
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
+  {
+    id: 'bar-polar-real-estate',
+    tür: 'statik',
+    genişlik: 800,
+    yükseklik: 600,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'bar-breaks-simple',

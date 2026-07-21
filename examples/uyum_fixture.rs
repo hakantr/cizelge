@@ -3226,6 +3226,222 @@ mod bar_polar_stack_radial_testleri {
     }
 }
 
+const BAR_POLAR_REAL_ESTATE_DATA: [[f64; 3]; 19] = [
+    [5000.0, 10000.0, 6785.71],
+    [4000.0, 10000.0, 6825.0],
+    [3000.0, 6500.0, 4463.33],
+    [2500.0, 5600.0, 3793.83],
+    [2000.0, 4000.0, 3060.0],
+    [2000.0, 4000.0, 3222.33],
+    [2500.0, 4000.0, 3133.33],
+    [1800.0, 4000.0, 3100.0],
+    [2000.0, 3500.0, 2750.0],
+    [2000.0, 3000.0, 2500.0],
+    [1800.0, 3000.0, 2433.33],
+    [2000.0, 2700.0, 2375.0],
+    [1500.0, 2800.0, 2150.0],
+    [1500.0, 2300.0, 2100.0],
+    [1600.0, 3500.0, 2057.14],
+    [1500.0, 2600.0, 2037.5],
+    [1500.0, 2417.54, 1905.85],
+    [1500.0, 2000.0, 1775.0],
+    [1500.0, 1800.0, 1650.0],
+];
+
+const BAR_POLAR_REAL_ESTATE_CITIES: [&str; 19] = [
+    "北京", "上海", "深圳", "广州", "苏州", "杭州", "南京", "福州", "青岛", "济南", "长春", "大连",
+    "温州", "郑州", "武汉", "成都", "东莞", "沈阳", "烟台",
+];
+
+fn bar_polar_real_estate() -> GrafikSeçenekleri {
+    const BAR_HEIGHT: f64 = 50.0;
+
+    GrafikSeçenekleri::yeni()
+        .başlık(
+            Başlık::yeni()
+                .metin("How expensive is it to rent an apartment in China?")
+                .alt_metin("Data from https://www.numbeo.com")
+                .iç_boşluk(15.0),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .üst("bottom")
+                .iç_boşluk(15.0)
+                .veri(["Range", "Average"]),
+        )
+        .ızgara(Izgara::yeni().üst(100))
+        .kutupsal(
+            KutupsalKoordinat::yeni()
+                .açısal_eksen(Eksen::kategori().veri(BAR_POLAR_REAL_ESTATE_CITIES)),
+        )
+        .ipucu(İpucu::yeni().bağlamlı_biçimleyici(|parametreler| {
+            let Some(veri_sırası) = parametreler.first().map(|parametre| parametre.veri_sırası)
+            else {
+                return String::new();
+            };
+            let (Some(şehir), Some([en_düşük, en_yüksek, ortalama])) = (
+                BAR_POLAR_REAL_ESTATE_CITIES.get(veri_sırası),
+                BAR_POLAR_REAL_ESTATE_DATA.get(veri_sırası),
+            ) else {
+                return String::new();
+            };
+            format!(
+                "{şehir}<br>Lowest：{}<br>Highest：{}<br>Average：{}",
+                ondalık_kırp(*en_düşük),
+                ondalık_kırp(*en_yüksek),
+                ondalık_kırp(*ortalama)
+            )
+        }))
+        .seri(
+            SütunSerisi::yeni()
+                .öğe_stili(ÖğeStili::yeni().renk("transparent"))
+                .veri(BAR_POLAR_REAL_ESTATE_DATA.map(|veri| veri[0]))
+                .kutupsal(true)
+                .yığın("Min Max")
+                .sessiz(true),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .veri(BAR_POLAR_REAL_ESTATE_DATA.map(|veri| veri[1] - veri[0]))
+                .kutupsal(true)
+                .ad("Range")
+                .yığın("Min Max"),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .öğe_stili(ÖğeStili::yeni().renk("transparent"))
+                .veri(BAR_POLAR_REAL_ESTATE_DATA.map(|veri| veri[2] - BAR_HEIGHT))
+                .kutupsal(true)
+                .yığın("Average")
+                .sessiz(true)
+                .z(10),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .veri(BAR_POLAR_REAL_ESTATE_DATA.map(|_| BAR_HEIGHT * 2.0))
+                .kutupsal(true)
+                .ad("Average")
+                .yığın("Average")
+                .sütun_boşluğu("-100%")
+                .z(10),
+        )
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod bar_polar_real_estate_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_veri_yiginlar_z_silent_ve_ipucu_formatteri_kayipsizdir() {
+        let seçenekler = bar_polar_real_estate();
+        let başlık = seçenekler.başlık.as_ref().expect("title");
+        assert_eq!(
+            başlık.metin.as_deref(),
+            Some("How expensive is it to rent an apartment in China?")
+        );
+        assert_eq!(
+            başlık.alt_metin.as_deref(),
+            Some("Data from https://www.numbeo.com")
+        );
+        let gösterge = seçenekler.gösterge.as_ref().expect("legend");
+        assert!(gösterge.göster);
+        assert_eq!(gösterge.üst, Some(DikeyKonum::Alt));
+        assert_eq!(gösterge.alt, None);
+        assert_eq!(gösterge.veri, ["Range", "Average"]);
+        assert_eq!(seçenekler.ızgara.üst, Uzunluk::Piksel(100.0));
+
+        let kutupsal = seçenekler.kutupsal.as_ref().expect("polar");
+        assert_eq!(kutupsal.açısal_eksen.veri, BAR_POLAR_REAL_ESTATE_CITIES);
+        assert_eq!(kutupsal.radyal_eksen.tür, EksenTürü::Değer);
+
+        let ipucu = seçenekler.ipucu.as_ref().expect("tooltip");
+        assert!(ipucu.göster);
+        let biçimleyici = ipucu
+            .bağlamlı_biçimleyici
+            .as_ref()
+            .expect("tooltip formatter");
+        assert_eq!(
+            biçimleyici.uygula(&[İpucuParametresi {
+                seri_sırası: 1,
+                seri_adı: "Range".to_owned(),
+                veri_sırası: 0,
+                ad: "北京".to_owned(),
+                değer: VeriDeğeri::Sayı(5000.0),
+                boyutlar: Vec::new(),
+            }]),
+            "北京<br>Lowest：5000<br>Highest：10000<br>Average：6785.71"
+        );
+
+        assert_eq!(seçenekler.seriler.len(), 4);
+        let seriler = seçenekler
+            .seriler
+            .iter()
+            .map(|seri| match seri {
+                Seri::Sütun(seri) => seri,
+                _ => panic!("polar bar serisi bekleniyordu"),
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(seriler[0].ad, None);
+        assert_eq!(seriler[0].yığın.as_deref(), Some("Min Max"));
+        assert!(seriler[0].sessiz);
+        assert_eq!(seriler[0].z, 2);
+        assert!(matches!(
+            seriler[0].öğe_stili.renk,
+            Some(Dolgu::Düz(Renk::SAYDAM))
+        ));
+        assert_eq!(seriler[1].ad.as_deref(), Some("Range"));
+        assert_eq!(seriler[1].yığın.as_deref(), Some("Min Max"));
+        assert!(!seriler[1].sessiz);
+        assert_eq!(seriler[1].z, 2);
+        assert_eq!(seriler[2].ad, None);
+        assert_eq!(seriler[2].yığın.as_deref(), Some("Average"));
+        assert!(seriler[2].sessiz);
+        assert_eq!(seriler[2].z, 10);
+        assert!(matches!(
+            seriler[2].öğe_stili.renk,
+            Some(Dolgu::Düz(Renk::SAYDAM))
+        ));
+        assert_eq!(seriler[3].ad.as_deref(), Some("Average"));
+        assert_eq!(seriler[3].yığın.as_deref(), Some("Average"));
+        assert!(!seriler[3].sessiz);
+        assert_eq!(seriler[3].z, 10);
+        assert_eq!(seriler[3].sütun_boşluğu, Some(Uzunluk::Yüzde(-100.0)));
+        assert_eq!(
+            seriler[0]
+                .veri
+                .iter()
+                .filter_map(|öğe| öğe.değer.sayı())
+                .collect::<Vec<_>>(),
+            BAR_POLAR_REAL_ESTATE_DATA.map(|veri| veri[0])
+        );
+        assert_eq!(
+            seriler[1]
+                .veri
+                .iter()
+                .filter_map(|öğe| öğe.değer.sayı())
+                .collect::<Vec<_>>(),
+            BAR_POLAR_REAL_ESTATE_DATA.map(|veri| veri[1] - veri[0])
+        );
+        assert_eq!(
+            seriler[2]
+                .veri
+                .iter()
+                .filter_map(|öğe| öğe.değer.sayı())
+                .collect::<Vec<_>>(),
+            BAR_POLAR_REAL_ESTATE_DATA.map(|veri| veri[2] - 50.0)
+        );
+        assert_eq!(
+            seriler[3]
+                .veri
+                .iter()
+                .filter_map(|öğe| öğe.değer.sayı())
+                .collect::<Vec<_>>(),
+            [100.0; 19]
+        );
+    }
+}
+
 fn bar_label_rotation() -> GrafikSeçenekleri {
     let etiket = Etiket::yeni()
         .göster(true)
@@ -10555,6 +10771,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-polar-label-tangential" => Ok(bar_polar_label_tangential()),
         "bar-polar-stack" => Ok(bar_polar_stack()),
         "bar-polar-stack-radial" => Ok(bar_polar_stack_radial()),
+        "bar-polar-real-estate" => Ok(bar_polar_real_estate()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),
