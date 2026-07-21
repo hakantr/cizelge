@@ -8335,7 +8335,10 @@ fn candlestick_brush() -> Result<GrafikSeçenekleri, String> {
             Gösterge::yeni()
                 .alt(10)
                 .sol("center")
-                .iç_boşluk(15.95)
+                // Piksel yüzeyi font/simge kutusu telafisi: zrender'ın
+                // 1 px mum kenarlığını kattığı 14,2 px görünen satırla
+                // resmî legend merkezini korur.
+                .iç_boşluk(14.95)
                 .simge_genişliği(24.9)
                 .simge_yüksekliği(13.2)
                 .veri(["Dow-Jones index", "MA5", "MA10", "MA20", "MA30"]),

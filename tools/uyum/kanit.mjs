@@ -125,6 +125,11 @@ const SENARYOLAR = [
     yükseklik: 600,
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
+  {
+    id: 'polar-roundCap',
+    tür: 'statik',
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'bar-breaks-simple',

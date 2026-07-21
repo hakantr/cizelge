@@ -15188,14 +15188,14 @@
           "geçti": true,
           "değişen_piksel": 1239,
           "değişen_piksel_oranı": 0.004588888888888889,
-          "ssim": 0.9972487517722224,
+          "ssim": 0.9972486379944924,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-real-estate.png",
             "sha256": "f1a2e73693ab94d23064194445877297fde05c2c20d96cd42f9a565b37b1a88b"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-polar-real-estate.png",
-            "sha256": "0c40b5c163f2e99cda572840c486aab2927b792f5134a94dbe2eb820dd6d1438"
+            "sha256": "6d7e79bf226637a76d14c2ebb2d88f3cdc5ed277286df54bb24a9f11ab932106"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-polar-real-estate.png",
@@ -15203,7 +15203,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-polar-real-estate-son.json",
-            "sha256": "2c8e2b7cfc69af3d6959134530455e7e758a1161e16240f2fbc51a24285be2d0"
+            "sha256": "a8fa10781e20367a8e3a3e072adc89d337e0d404c44e7d335fd9410d8a856c2b"
           }
         }
       ]
@@ -15933,7 +15933,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15945,14 +15945,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1470,
+          "değişen_piksel_oranı": 0.0054444444444444445,
+          "ssim": 0.9919582218642348,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/polar-roundCap.png",
+            "sha256": "a1fb6719e0202e720dfc8579741d265c794f9e2b3585c3c700c6166cabc1f507"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/polar-roundCap.png",
+            "sha256": "c16d83e98152f35ed843e176c422853957995de3ae9a464c095db1fe47a81857"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/polar-roundCap.png",
+            "sha256": "b50c60d1481ece38f20eaac3e716d76ae7f48583989e5e3541e4c9dacad35ec3"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/polar-roundCap-son.json",
+            "sha256": "910c89df10e89fbf297ca6490c5f2fdbd95ecddcca48db1f8f104fbd34e2b38c"
+          }
+        }
+      ]
     }
   },
   {
