@@ -28,6 +28,16 @@ seçenek modeli içerir:
 Apache ECharts:
   Copyright 2017-2026 The Apache Software Foundation
 
+Bu ürün ayrıca `echarts-stat` 1.2.0 istatistik yordamlarının Rust
+uyarlamalarını içerir: histogram kutulama/eşik yöntemleri, hiyerarşik
+k-means kümeleme ve regresyon yöntemleri (`src/model/veri_kumesi.rs`).
+Kaynak paket `package.json` içinde “BSD” lisansı ve aşağıdaki yazarı beyan
+eder; kaynak atfı korunur:
+
+echarts-stat (https://github.com/ecomfe/echarts-stat)
+  Copyright Deqing Li ve echarts-stat katkıcıları
+  Yazar: Deqing Li <annong035@gmail.com>
+
 Çizim, bağımsız GPUI kaynak deposundaki
 https://github.com/hakantr/gpui Apache License 2.0 beyanlı `gpui`
 kütüphanesi üzerinden yapılır. Kaynak pakette korunan telif bildirimi:

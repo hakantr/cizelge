@@ -827,17 +827,34 @@ impl GrafikSeçenekleri {
             return renk.temsilî();
         }
         // PaletteTask, açık bir `itemStyle.color` taşıyan seriyi paletten
-        // boyamaz ve bu seri palette bir sıra da tüketmez. Waterfall'daki
-        // saydam placeholder'dan sonraki görünür seri bu nedenle ilk rengi
-        // alır.
-        let palet_sırası = self
-            .seriler
-            .iter()
-            .take(sıra.saturating_add(1))
-            .filter(|seri| seri.açık_renk().is_none() && !matches!(seri, Seri::Mum(_)))
-            .count()
-            .saturating_sub(1);
-        self.palet_rengi(palet_sırası)
+        // boyamaz ve bu seri palette bir sıra da tüketmez. Global
+        // PaletteMixin ayrıca seri adını renge eşler; aynı adlı iki seri
+        // (ör. histogramın dikey/yatay görünümleri) aynı palet rengini alır.
+        let mut sonraki = 0usize;
+        let mut ad_sıraları = BTreeMap::<&str, usize>::new();
+        for (aday_sırası, seri) in self.seriler.iter().enumerate().take(sıra.saturating_add(1)) {
+            if seri.açık_renk().is_some() || matches!(seri, Seri::Mum(_)) {
+                continue;
+            }
+            let palet_sırası = if let Some(ad) = seri.ad().filter(|ad| !ad.is_empty()) {
+                if let Some(kayıtlı) = ad_sıraları.get(ad) {
+                    *kayıtlı
+                } else {
+                    let yeni = sonraki;
+                    ad_sıraları.insert(ad, yeni);
+                    sonraki = sonraki.saturating_add(1);
+                    yeni
+                }
+            } else {
+                let yeni = sonraki;
+                sonraki = sonraki.saturating_add(1);
+                yeni
+            };
+            if aday_sırası == sıra {
+                return self.palet_rengi(palet_sırası);
+            }
+        }
+        self.palet_rengi(0)
     }
 
     /// Paletten sıra numarasıyla renk (pasta dilimleri gibi öğe-bazlı
@@ -1372,6 +1389,18 @@ mod testler {
 
         assert_eq!(seçenekler.seri_rengi(0), Renk::onaltılık(0xec0000));
         assert_eq!(seçenekler.seri_rengi(1), seçenekler.palet_rengi(0));
+    }
+
+    #[test]
+    fn ayni_adli_seriler_global_palet_rengini_paylasir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .seri(SaçılımSerisi::yeni().ad("ham").veri([[1.0, 2.0]]))
+            .seri(SütunSerisi::yeni().ad("histogram").veri([2]))
+            .seri(SütunSerisi::yeni().ad("histogram").veri([3]));
+
+        assert_eq!(seçenekler.seri_rengi(0), seçenekler.palet_rengi(0));
+        assert_eq!(seçenekler.seri_rengi(1), seçenekler.palet_rengi(1));
+        assert_eq!(seçenekler.seri_rengi(2), seçenekler.palet_rengi(1));
     }
 
     #[test]

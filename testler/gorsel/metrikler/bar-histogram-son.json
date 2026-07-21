@@ -1,0 +1,19 @@
+{
+  "id": "bar-histogram",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 456,
+  "değişen_piksel_oranı": 0.0016888888888888889,
+  "ssim": 0.9982828575101728,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-histogram.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-histogram.png",
+    "fark": "testler/gorsel/fark/default/bar-histogram.png"
+  }
+}

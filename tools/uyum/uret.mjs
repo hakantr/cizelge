@@ -217,6 +217,7 @@ const YEREL_FIXTURE = Object.freeze({
   'bar-polar-real-estate': 'examples/uyum_fixture.rs#bar_polar_real_estate',
   'polar-roundCap': 'examples/uyum_fixture.rs#polar_round_cap',
   'polar-endAngle': 'examples/uyum_fixture.rs#polar_end_angle',
+  'bar-histogram': 'examples/uyum_fixture.rs#bar_histogram',
   'radar': 'examples/radar.rs',
   'funnel': 'examples/huni.rs',
   'gauge-simple': 'examples/gosterge_saati.rs',

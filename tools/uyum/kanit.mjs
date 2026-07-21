@@ -22,6 +22,7 @@ const EŞİK = Object.freeze({ pixelmatch: 0.1, değişenPikselOranı: 0.01, ssi
 const REFERANS_YENİLE = process.argv.includes('--referans-yenile');
 
 const SENARYOLAR = [
+  { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'line-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'line-markline',

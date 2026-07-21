@@ -21,7 +21,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/bar-histogram.ts",
     "kaynak_sha256": "1067fbfa595cca472f65b064b1d24d33e995b04482065913849255f802c2d8a2",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#bar_histogram",
     "seriler": [
       "bar",
       "scatter"
@@ -36,7 +36,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -50,15 +50,40 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 456,
+          "değişen_piksel_oranı": 0.0016888888888888889,
+          "ssim": 0.9982828575101728,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-histogram.png",
+            "sha256": "2791dd6fb34b6fa605f848e4ac2600d9d3a957ced69acc6624dbd2a3ec05d006"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-histogram.png",
+            "sha256": "ffc0910834719b7fa0fe1e5aede38cd46aec9c87e58cf4ffa269610820bdd7c9"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-histogram.png",
+            "sha256": "23a7f1e0b7982c8c1486e24317b82e01e4764e6ff0033dea4284f394d42fa877"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-histogram-son.json",
+            "sha256": "3a1c8eaf17cfcb7114c286c585d935effad81c7da7bd54d1dc04b750f5690266"
+          }
+        }
+      ]
     }
   },
   {

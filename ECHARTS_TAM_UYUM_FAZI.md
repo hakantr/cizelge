@@ -1236,8 +1236,8 @@ Gerçekleşen dilim — `polar-endAngle` ve kanıt raporu (2026-07-21):
 - Uyum raporu artık kapsam içindeki 332 kaydın tamamını kartlaştırır:
   261 resmî galeri kartı ve 71 işaretli gizli doğrulama kartı. Başlık
   `kilitli görsel kanıt` ile `tüm kapılar tam` sayılarını ayırır;
-  `bar-histogram` gibi uygulanmamış kartlar “Henüz uygulanmadı · Faz 6”
-  yazar. Makine-okunur tek ilerleme kaynağı `uyum/ozet.json`dır: bu dilim
+  uygulanmamış kartlar “Henüz uygulanmadı · Faz N” yazar. Makine-okunur tek
+  ilerleme kaynağı `uyum/ozet.json`dır: bu dilim
   sonunda 134/332 (`%40,4`) kilitli statik görsel kanıt ve 0/332 tüm
   kapıları tamamlanmış kart vardır.
 - Çekirdek 296/296, fixture 44/44, `cargo check --all-targets`,
@@ -1245,6 +1245,48 @@ Gerçekleşen dilim — `polar-endAngle` ve kanıt raporu (2026-07-21):
   Kart `uygulandı_kanıt_bekliyor`, statik görsel kapısı `tam_kanıtlı`dır;
   animasyon, etkileşim, erişilebilirlik ve performans kapıları kapanmadan
   nihai `tam_kanıtlı` sayılmaz.
+
+Gerçekleşen dilim — `bar-histogram` (2026-07-21):
+
+- Sabit kaynak `../echarts-examples/public/examples/ts/bar-histogram.ts`
+  ile `../echarts-examples/package.json` içindeki `echarts-stat: ^1.2.0`
+  bağı birlikte doğrulandı. Örnek başlığı tarihsel olarak “Custom Series”
+  olsa da bu snapshot `renderItem` kullanmaz; aynı ham dataset'in 0. ve 1.
+  boyutlarına uygulanan iki `ecStat:histogram` dönüşümünü normal scatter ve
+  bar serilerine bağlar. Kart bu gerçek kaynak yapısına göre uygulanmış,
+  paketin “BSD” beyanı ve yazarı `NOTICE` içinde kayda alınmıştır.
+- `HistogramDönüşümü`, echarts-stat 1.2.0'ın `squareRoot`, `scott`,
+  `freedmanDiaconis` ve `sturges` eşik yöntemlerini; tick-step/toFixed kutu
+  sınırlarını ve `dimensions` seçimini taşır. Dönüşüm ilk sonuçta
+  `MeanOfV0V1`, `VCount`, `V0`, `V1`, `DisplayableName`; ikinci sonuçta
+  custom-series tüketicileri için `[alt, üst, adet]` üretir. Kök
+  `VeriKümesiTanımı::histogram` ve `kaynaktan_histogram` yolları dönüşümü
+  sibling dataset'lerde ECharts'ın varsayılan `fromDatasetIndex: 0`
+  davranışıyla çalıştırır.
+- Resmî 31 satırlık kaynakla ilk histogramın `8..22` aralığındaki
+  `[3,11,6,3,5,2,1]`, ikinci histogramın `0..300` aralığındaki
+  `[6,7,4,10,3,1]` adetleri ve her iki dönüşüm sonucu kayıpsız API
+  testindedir. Dört eşik yöntemi için toplam örnek sayısının korunması da
+  ayrı çekirdek testidir.
+- Global seri paleti ECharts `PaletteMixin` gibi açık rengi olmayan seri
+  adlarını renge eşler. Bu nedenle `origianl scatter` ilk palet rengini,
+  aynı `histogram` adlı dikey ve yatay bar serileri birlikte ikinci palet
+  rengini alır; açık renkli seri ve candlestick'in palet tüketmeme kuralları
+  korunur.
+- Fixture resmî üç grid yerleşimini, üç x + üç y eksenini, gizli kategori
+  eksen görsellerini, `scale`, `barWidth: '99.3%'`, üst/sağ değer
+  etiketlerini, datasetIndex/encode bağlarını ve tooltip bileşenini taşır.
+  Yeni resmî referans yalnız bu kart için bir kez üretildi; referansa
+  yazmayan tekrar 1/1, depo çapındaki kilitli koşu 182/182 geçti. 600×450
+  kanıt 456 değişen piksel, `%0,1689` fark ve `0,998283` SSIM üretir.
+- Çekirdek 299/299, fixture 45/45, `cargo check --all-targets`,
+  `cargo check --no-default-features` ve üretilmiş-dosya denetimi geçmiştir.
+  Rapor gerçekten 332 kart gösterir; makine-okunur güncel ilerleme
+  135/332 (`%40,7`) kilitli statik görsel kanıt ve 0/332 tüm kapıları tam
+  karttır. `bar-histogram` önizlemesi artık boş değildir; kart
+  `uygulandı_kanıt_bekliyor`, statik görsel kapısı `tam_kanıtlı`dır.
+- Tooltip hover içeriği, animasyon, klavye/ARIA, koyu profil ve ölçümlü
+  performans kapıları kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
 Kabul:
 

@@ -654,6 +654,10 @@ pub enum VeriKümesiTanımı {
         kaynak: Option<usize>,
         koşul: SüzmeKoşulu,
     },
+    Histogram {
+        kaynak: Option<usize>,
+        dönüşüm: HistogramDönüşümü,
+    },
     Kümele {
         kaynak: Option<usize>,
         dönüşüm: KümelemeDönüşümü,
@@ -697,6 +701,22 @@ impl VeriKümesiTanımı {
         Self::Süz {
             kaynak: Some(kaynak),
             koşul,
+        }
+    }
+
+    /// `ecStat:histogram` dönüşümünü varsayılan ilk dataset'e uygular.
+    pub fn histogram(dönüşüm: HistogramDönüşümü) -> Self {
+        Self::Histogram {
+            kaynak: None,
+            dönüşüm,
+        }
+    }
+
+    /// `ecStat:histogram` dönüşümünü açık upstream dataset'e uygular.
+    pub fn kaynaktan_histogram(kaynak: usize, dönüşüm: HistogramDönüşümü) -> Self {
+        Self::Histogram {
+            kaynak: Some(kaynak),
+            dönüşüm,
         }
     }
 
@@ -771,6 +791,26 @@ pub fn veri_kümelerini_çöz(
                 let depo = upstream.depoya()?;
                 koşul.doğrula(&depo)?;
                 VeriKümesi::depodan(&depo.süz(|satır, _| koşul.değerlendir(&depo, satır)))
+            }
+            VeriKümesiTanımı::Histogram {
+                kaynak, dönüşüm
+            } => {
+                let kaynak_sırası = kaynak.unwrap_or(0);
+                let upstream = sonuçlar
+                    .get(kaynak_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "dataset.fromDatasetIndex",
+                        sıra: kaynak_sırası,
+                    })?;
+                let depo = upstream.depoya()?;
+                let çıktılar = dönüşüm.uygula(&[depo])?;
+                let ilk = çıktılar
+                    .first()
+                    .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                        alan: "transform.result",
+                        ayrıntı: "ecStat:histogram veri sonucu üretmedi".to_owned(),
+                    })?;
+                VeriKümesi::depodan(ilk)
             }
             VeriKümesiTanımı::Kümele {
                 kaynak, dönüşüm
@@ -931,6 +971,285 @@ impl VeriDönüşümü for SıralamaDönüşümü {
     fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
         let kaynak = tek_upstream(upstream, "sort")?;
         Ok(vec![kaynak.sırala(&self.anahtarlar)?])
+    }
+}
+
+/// `echarts-stat` histogramının kutu sayısı yöntemi (`config.method`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum HistogramEşikYöntemi {
+    /// `ceil(sqrt(n))`; echarts-stat öntanımlısı ve en çok 50 kutu.
+    #[default]
+    Karekök,
+    Scott,
+    FreedmanDiaconis,
+    Sturges,
+}
+
+/// `echarts-stat` paketinin `ecStat:histogram` dönüşümü.
+///
+/// İlk sonuç, resmî eklentideki beş boyutu (`MeanOfV0V1`, `VCount`,
+/// `V0`, `V1`, `DisplayableName`); ikinci sonuç ise custom-series için
+/// `[alt, üst, adet]` satırlarını üretir. `dimensions` birden çok boyut
+/// içerirse echarts-stat gibi ilk boyut dağılıma girer, diğerleri satırın
+/// sayısal geçerlilik denetimine katılır.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct HistogramDönüşümü {
+    pub yöntem: HistogramEşikYöntemi,
+    /// `config.dimensions`; boşsa bütün kaynak boyutları doğrulanır ve ilk
+    /// boyut dağılıma girer.
+    pub boyutlar: Vec<BoyutSeçici>,
+}
+
+impl HistogramDönüşümü {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn yöntem(mut self, yöntem: HistogramEşikYöntemi) -> Self {
+        self.yöntem = yöntem;
+        self
+    }
+
+    pub fn boyut(mut self, boyut: impl Into<BoyutSeçici>) -> Self {
+        self.boyutlar = vec![boyut.into()];
+        self
+    }
+
+    pub fn boyutlar(mut self, boyutlar: impl IntoIterator<Item = impl Into<BoyutSeçici>>) -> Self {
+        self.boyutlar = boyutlar.into_iter().map(Into::into).collect();
+        self
+    }
+}
+
+fn histogram_sabit(değer: f64, basamak: usize) -> f64 {
+    crate::yardimci::sayi::yuvarla(değer, basamak)
+}
+
+fn histogram_çeyreği(sıralı: &[f64], oran: f64) -> f64 {
+    let uzunluk = sıralı.len();
+    if uzunluk == 0 {
+        return 0.0;
+    }
+    if oran <= 0.0 || uzunluk < 2 {
+        return sıralı.first().copied().unwrap_or(0.0);
+    }
+    if oran >= 1.0 {
+        return sıralı.last().copied().unwrap_or(0.0);
+    }
+    let h = (uzunluk.saturating_sub(1) as f64) * oran;
+    let sıra = h.floor() as usize;
+    let a = sıralı.get(sıra).copied().unwrap_or(0.0);
+    let b = sıralı.get(sıra.saturating_add(1)).copied().unwrap_or(a);
+    a + (b - a) * (h - sıra as f64)
+}
+
+fn histogram_kutu_sayısı(
+    değerler: &[f64],
+    yöntem: HistogramEşikYöntemi,
+    en_az: f64,
+    en_çok: f64,
+) -> usize {
+    let uzunluk = değerler.len();
+    let ham = match yöntem {
+        HistogramEşikYöntemi::Karekök => (uzunluk as f64).sqrt().ceil().min(50.0),
+        HistogramEşikYöntemi::Sturges => (uzunluk as f64).log2().ceil() + 1.0,
+        HistogramEşikYöntemi::Scott => {
+            let ortalama = değerler.iter().sum::<f64>() / uzunluk.max(1) as f64;
+            let kareler = değerler
+                .iter()
+                .map(|değer| (değer - ortalama).powi(2))
+                .sum::<f64>();
+            let sapma = if uzunluk < 2 {
+                0.0
+            } else {
+                (kareler / uzunluk.saturating_sub(1) as f64).sqrt()
+            };
+            ((en_çok - en_az) / (3.5 * sapma * (uzunluk as f64).powf(-1.0 / 3.0))).ceil()
+        }
+        HistogramEşikYöntemi::FreedmanDiaconis => {
+            let mut sıralı = değerler.to_vec();
+            sıralı.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+            let çeyrek_açıklığı =
+                histogram_çeyreği(&sıralı, 0.75) - histogram_çeyreği(&sıralı, 0.25);
+            ((en_çok - en_az) / (2.0 * çeyrek_açıklığı * (uzunluk as f64).powf(-1.0 / 3.0))).ceil()
+        }
+    };
+    if ham.is_finite() && ham > 0.0 {
+        ham as usize
+    } else {
+        0
+    }
+}
+
+fn histogram_adım(başlangıç: f64, bitiş: f64, kutu_sayısı: usize) -> Option<(f64, usize)> {
+    if kutu_sayısı == 0 {
+        return None;
+    }
+    let ilk_adım = (bitiş - başlangıç).abs() / kutu_sayısı as f64;
+    if !ilk_adım.is_finite() || ilk_adım <= 0.0 {
+        return None;
+    }
+    let hassasiyet = crate::yardimci::sayi::nicelik_üssü(ilk_adım);
+    let mut adım = 10_f64.powi(hassasiyet);
+    let hata = ilk_adım / adım;
+    if hata >= 50_f64.sqrt() {
+        adım *= 10.0;
+    } else if hata >= 10_f64.sqrt() {
+        adım *= 5.0;
+    } else if hata >= 2_f64.sqrt() {
+        adım *= 2.0;
+    }
+    let sabit_hassasiyet = if hassasiyet < 0 {
+        usize::try_from(-hassasiyet).unwrap_or(0)
+    } else {
+        0
+    };
+    let yönlü = if bitiş >= başlangıç {
+        adım
+    } else {
+        -adım
+    };
+    let sonuç = histogram_sabit(yönlü, sabit_hassasiyet);
+    (sonuç.is_finite() && sonuç != 0.0).then_some((sonuç, sabit_hassasiyet))
+}
+
+impl VeriDönüşümü for HistogramDönüşümü {
+    fn tür_adı(&self) -> &str {
+        "ecStat:histogram"
+    }
+
+    fn uygula(&self, upstream: &[VeriDeposu]) -> Result<Vec<VeriDeposu>, BilesenHatasi> {
+        let kaynak = tek_upstream(upstream, self.tür_adı())?;
+        if kaynak.boyutlar.is_empty() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.dimensions",
+                ayrıntı: "histogram en az bir kaynak boyutu gerektirir".to_owned(),
+            });
+        }
+        let doğrulanacak = if self.boyutlar.is_empty() {
+            (0..kaynak.boyutlar.len()).collect::<Vec<_>>()
+        } else {
+            self.boyutlar
+                .iter()
+                .map(|boyut| {
+                    kaynak
+                        .boyut_sırası(boyut)
+                        .ok_or_else(|| boyut_hatası(boyut))
+                })
+                .collect::<Result<Vec<_>, _>>()?
+        };
+        let hedef = doğrulanacak.first().copied().unwrap_or(0);
+        let değerler = kaynak
+            .satırları_kopyala()
+            .into_iter()
+            .filter_map(|satır| {
+                doğrulanacak
+                    .iter()
+                    .all(|boyut| {
+                        satır
+                            .get(*boyut)
+                            .and_then(VeriDeğeri::sayı)
+                            .is_some_and(|değer| !değer.is_nan())
+                    })
+                    .then(|| satır.get(hedef).and_then(VeriDeğeri::sayı))
+                    .flatten()
+            })
+            .filter(|değer| değer.is_finite())
+            .collect::<Vec<_>>();
+        let en_az = değerler.iter().copied().reduce(f64::min);
+        let en_çok = değerler.iter().copied().reduce(f64::max);
+        let (Some(en_az), Some(en_çok)) = (en_az, en_çok) else {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.dimensions",
+                ayrıntı: "histogram seçilen boyutta sayısal veri bulamadı".to_owned(),
+            });
+        };
+        let kutu_sayısı = histogram_kutu_sayısı(&değerler, self.yöntem, en_az, en_çok);
+        let Some((adım, sabit_hassasiyet)) = histogram_adım(en_az, en_çok, kutu_sayısı) else {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.method",
+                ayrıntı: "histogram kutu aralığı hesaplanamadı".to_owned(),
+            });
+        };
+        let başlangıç = histogram_sabit((en_az / adım).ceil() * adım, sabit_hassasiyet);
+        let bitiş = histogram_sabit((en_çok / adım).floor() * adım, sabit_hassasiyet);
+        let aralık_sayısı = histogram_sabit((bitiş - başlangıç) / adım, sabit_hassasiyet).ceil();
+        if !aralık_sayısı.is_finite() || !(0.0..=100_000.0).contains(&aralık_sayısı) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "transform.config.method",
+                ayrıntı: "histogram kutu sayısı güvenli sınırın dışında".to_owned(),
+            });
+        }
+        let sınırlar = (0..=aralık_sayısı as usize)
+            .map(|sıra| histogram_sabit(başlangıç + sıra as f64 * adım, sabit_hassasiyet))
+            .collect::<Vec<_>>();
+        let mut adetler = vec![0usize; sınırlar.len().saturating_add(1)];
+        for değer in &değerler {
+            let sıra = sınırlar.partition_point(|sınır| sınır <= değer);
+            if let Some(adet) = adetler.get_mut(sıra) {
+                *adet = adet.saturating_add(1);
+            }
+        }
+
+        let mut ana_satırlar = Vec::with_capacity(adetler.len());
+        let mut özel_satırlar = Vec::with_capacity(adetler.len());
+        for (sıra, adet) in adetler.into_iter().enumerate() {
+            let alt = if sıra > 0 {
+                sınırlar.get(sıra - 1).copied().unwrap_or(en_az)
+            } else {
+                let ilk = sınırlar.first().copied().unwrap_or(en_az);
+                if ilk - en_az == adım {
+                    en_az
+                } else {
+                    ilk - adım
+                }
+            };
+            let üst = if sıra < sınırlar.len() {
+                sınırlar.get(sıra).copied().unwrap_or(en_çok)
+            } else {
+                let son = sınırlar.last().copied().unwrap_or(en_çok);
+                if en_çok - son == adım {
+                    en_çok
+                } else {
+                    son + adım
+                }
+            };
+            let ortalama = histogram_sabit((alt + üst) / 2.0, sabit_hassasiyet);
+            let ad = format!(
+                "{} - {}",
+                crate::yardimci::bicim::ondalık_kırp(alt),
+                crate::yardimci::bicim::ondalık_kırp(üst)
+            );
+            ana_satırlar.push(vec![
+                ortalama.into(),
+                (adet as f64).into(),
+                alt.into(),
+                üst.into(),
+                ad.into(),
+            ]);
+            özel_satırlar.push(vec![alt.into(), üst.into(), (adet as f64).into()]);
+        }
+
+        Ok(vec![
+            VeriDeposu::satırlardan(
+                [
+                    BoyutTanımı::yeni("MeanOfV0V1").tür(BoyutTürü::Sayı),
+                    BoyutTanımı::yeni("VCount").tür(BoyutTürü::Sayı),
+                    BoyutTanımı::yeni("V0").tür(BoyutTürü::Sayı),
+                    BoyutTanımı::yeni("V1").tür(BoyutTürü::Sayı),
+                    BoyutTanımı::yeni("DisplayableName").tür(BoyutTürü::Sıralı),
+                ],
+                ana_satırlar,
+            )?,
+            VeriDeposu::satırlardan(
+                [
+                    BoyutTanımı::yeni("boyut0").tür(BoyutTürü::Sayı),
+                    BoyutTanımı::yeni("boyut1").tür(BoyutTürü::Sayı),
+                    BoyutTanımı::yeni("boyut2").tür(BoyutTürü::Sayı),
+                ],
+                özel_satırlar,
+            )?,
+        ])
     }
 }
 
@@ -2637,6 +2956,175 @@ mod testler {
                 .değer(0, &BoyutSeçici::ad("ürün")),
             Some(&VeriDeğeri::Metin("B".to_owned()))
         );
+    }
+
+    fn resmi_histogram_kaynağı() -> VeriKümesi {
+        let satırlar = [
+            [8.3, 143.0],
+            [8.6, 214.0],
+            [8.8, 251.0],
+            [10.5, 26.0],
+            [10.7, 86.0],
+            [10.8, 93.0],
+            [11.0, 176.0],
+            [11.0, 39.0],
+            [11.1, 221.0],
+            [11.2, 188.0],
+            [11.3, 57.0],
+            [11.4, 91.0],
+            [11.4, 191.0],
+            [11.7, 8.0],
+            [12.0, 196.0],
+            [12.9, 177.0],
+            [12.9, 153.0],
+            [13.3, 201.0],
+            [13.7, 199.0],
+            [13.8, 47.0],
+            [14.0, 81.0],
+            [14.2, 98.0],
+            [14.5, 121.0],
+            [16.0, 37.0],
+            [16.3, 12.0],
+            [17.3, 105.0],
+            [17.5, 168.0],
+            [17.9, 84.0],
+            [18.0, 197.0],
+            [18.0, 155.0],
+            [20.6, 125.0],
+        ];
+        satırlar
+            .into_iter()
+            .fold(VeriKümesi::yeni(["v0", "v1"]), |küme, [v0, v1]| {
+                küme.satır([v0.into(), v1.into()])
+            })
+    }
+
+    #[test]
+    fn ecstat_histogram_resmi_kutu_sinirlarini_ve_iki_sonucu_uretir() {
+        let kaynak = resmi_histogram_kaynağı();
+        let x = HistogramDönüşümü::yeni()
+            .uygula(&[kaynak.depoya().unwrap()])
+            .unwrap();
+        assert_eq!(x.len(), 2);
+        assert_eq!(
+            x[0].boyutlar
+                .iter()
+                .map(|boyut| boyut.ad.as_str())
+                .collect::<Vec<_>>(),
+            ["MeanOfV0V1", "VCount", "V0", "V1", "DisplayableName"]
+        );
+        assert_eq!(
+            x[0].satırları_kopyala(),
+            vec![
+                vec![
+                    9.0.into(),
+                    3.0.into(),
+                    8.0.into(),
+                    10.0.into(),
+                    "8 - 10".into()
+                ],
+                vec![
+                    11.0.into(),
+                    11.0.into(),
+                    10.0.into(),
+                    12.0.into(),
+                    "10 - 12".into()
+                ],
+                vec![
+                    13.0.into(),
+                    6.0.into(),
+                    12.0.into(),
+                    14.0.into(),
+                    "12 - 14".into()
+                ],
+                vec![
+                    15.0.into(),
+                    3.0.into(),
+                    14.0.into(),
+                    16.0.into(),
+                    "14 - 16".into()
+                ],
+                vec![
+                    17.0.into(),
+                    5.0.into(),
+                    16.0.into(),
+                    18.0.into(),
+                    "16 - 18".into()
+                ],
+                vec![
+                    19.0.into(),
+                    2.0.into(),
+                    18.0.into(),
+                    20.0.into(),
+                    "18 - 20".into()
+                ],
+                vec![
+                    21.0.into(),
+                    1.0.into(),
+                    20.0.into(),
+                    22.0.into(),
+                    "20 - 22".into()
+                ],
+            ]
+        );
+        assert_eq!(
+            x[1].satırları_kopyala()[0],
+            vec![8.0.into(), 10.0.into(), 3.0.into()]
+        );
+
+        let y = HistogramDönüşümü::yeni()
+            .boyut("v1")
+            .uygula(&[kaynak.depoya().unwrap()])
+            .unwrap();
+        assert_eq!(
+            y[0].satırları_kopyala()
+                .iter()
+                .map(|satır| satır[1].sayı().unwrap() as usize)
+                .collect::<Vec<_>>(),
+            [6, 7, 4, 10, 3, 1]
+        );
+        assert_eq!(
+            y[0].satırları_kopyala()[0],
+            vec![
+                25.0.into(),
+                6.0.into(),
+                0.0.into(),
+                50.0.into(),
+                "0 - 50".into(),
+            ]
+        );
+
+        let zincir = veri_kümelerini_çöz(&[
+            VeriKümesiTanımı::kaynak(kaynak),
+            VeriKümesiTanımı::histogram(HistogramDönüşümü::yeni()),
+            VeriKümesiTanımı::histogram(HistogramDönüşümü::yeni().boyut(1usize)),
+        ])
+        .unwrap();
+        assert_eq!(zincir[1].satırlar.len(), 7);
+        assert_eq!(zincir[2].satırlar.len(), 6);
+    }
+
+    #[test]
+    fn ecstat_histogram_tum_esik_yontemlerinde_ornek_sayisini_korur() {
+        let kaynak = resmi_histogram_kaynağı().depoya().unwrap();
+        for yöntem in [
+            HistogramEşikYöntemi::Karekök,
+            HistogramEşikYöntemi::Scott,
+            HistogramEşikYöntemi::FreedmanDiaconis,
+            HistogramEşikYöntemi::Sturges,
+        ] {
+            let çıktı = HistogramDönüşümü::yeni()
+                .yöntem(yöntem)
+                .boyut("v0")
+                .uygula(std::slice::from_ref(&kaynak))
+                .unwrap();
+            let toplam = çıktı[0]
+                .satırları_kopyala()
+                .iter()
+                .filter_map(|satır| satır.get(1).and_then(VeriDeğeri::sayı))
+                .sum::<f64>();
+            assert_eq!(toplam, 31.0, "{yöntem:?}");
+        }
     }
 
     #[test]

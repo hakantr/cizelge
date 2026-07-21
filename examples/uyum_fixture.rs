@@ -4242,6 +4242,155 @@ mod bar_breaks_brush_testleri {
     }
 }
 
+fn bar_histogram() -> GrafikSeçenekleri {
+    // ../echarts-examples/public/examples/ts/bar-histogram.ts kaynağındaki
+    // dataset[0]. Başlıktaki tarihsel “Custom Series” adına karşın sabitli
+    // örnek iki ecStat histogram dönüşümünü normal bar serilerine bağlar.
+    let ham = [
+        [8.3, 143.0],
+        [8.6, 214.0],
+        [8.8, 251.0],
+        [10.5, 26.0],
+        [10.7, 86.0],
+        [10.8, 93.0],
+        [11.0, 176.0],
+        [11.0, 39.0],
+        [11.1, 221.0],
+        [11.2, 188.0],
+        [11.3, 57.0],
+        [11.4, 91.0],
+        [11.4, 191.0],
+        [11.7, 8.0],
+        [12.0, 196.0],
+        [12.9, 177.0],
+        [12.9, 153.0],
+        [13.3, 201.0],
+        [13.7, 199.0],
+        [13.8, 47.0],
+        [14.0, 81.0],
+        [14.2, 98.0],
+        [14.5, 121.0],
+        [16.0, 37.0],
+        [16.3, 12.0],
+        [17.3, 105.0],
+        [17.5, 168.0],
+        [17.9, 84.0],
+        [18.0, 197.0],
+        [18.0, 155.0],
+        [20.6, 125.0],
+    ]
+    .into_iter()
+    .fold(VeriKümesi::yeni(["v0", "v1"]), |küme, [v0, v1]| {
+        küme.satır([v0.into(), v1.into()])
+    });
+    let gizli_kategori = |ızgara_sırası| {
+        Eksen::kategori()
+            .ölçekli(true)
+            .ızgara_sırası(ızgara_sırası)
+            .çentik(EksenÇentiği::yeni().göster(false))
+            .etiket(EksenEtiketi::yeni().göster(false))
+            .çizgi(EksenÇizgisi::yeni().göster(false))
+    };
+    let histogram_etiketi = |konum| Etiket::yeni().göster(true).konum(konum);
+
+    GrafikSeçenekleri::yeni()
+        .ipucu(İpucu::yeni())
+        .veri_kümeleri([
+            VeriKümesiTanımı::kaynak(ham),
+            VeriKümesiTanımı::histogram(HistogramDönüşümü::yeni()),
+            VeriKümesiTanımı::histogram(HistogramDönüşümü::yeni().boyut("v1")),
+        ])
+        .ızgara_ekle(Izgara::yeni().üst("50%").sağ("50%"))
+        .ızgara_ekle(Izgara::yeni().alt("52%").sağ("50%"))
+        .ızgara_ekle(Izgara::yeni().üst("50%").sol("52%"))
+        .x_ekseni_ekle(Eksen::değer().ölçekli(true).ızgara_sırası(0))
+        .x_ekseni_ekle(gizli_kategori(1))
+        .x_ekseni_ekle(Eksen::değer().ölçekli(true).ızgara_sırası(2))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(1))
+        .y_ekseni_ekle(gizli_kategori(2))
+        .seri(
+            SaçılımSerisi::yeni()
+                .ad("origianl scatter")
+                .eksenler(0, 0)
+                .veri_kümesi_sırası(0)
+                .eşle("v0", "v1"),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("histogram")
+                .eksenler(1, 1)
+                .genişlik("99.3%")
+                .etiket(histogram_etiketi(EtiketKonumu::Üst))
+                .veri_kümesi_sırası(1)
+                // `itemName: 4`; kategori ekseni gizli olduğundan resmî
+                // mean koordinatıyla aynı sıra/geometriyi korur.
+                .eşle("DisplayableName", "VCount"),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("histogram")
+                .eksenler(2, 2)
+                .genişlik("99.3%")
+                .etiket(histogram_etiketi(EtiketKonumu::Sağ))
+                .veri_kümesi_sırası(2)
+                .eşle("DisplayableName", "VCount"),
+        )
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod bar_histogram_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_dataset_grid_eksen_encode_ve_palet_baglari_kayipsizdir() {
+        let seçenekler = bar_histogram();
+        assert!(seçenekler.ipucu.is_some());
+        assert_eq!(seçenekler.veri_kümeleri.len(), 3);
+        assert_eq!(seçenekler.ızgaralar.len(), 3);
+        assert_eq!(seçenekler.x_eksenleri.len(), 3);
+        assert_eq!(seçenekler.y_eksenleri.len(), 3);
+        assert_eq!(seçenekler.seriler.len(), 3);
+        assert_eq!(seçenekler.seri_rengi(1), seçenekler.seri_rengi(2));
+
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+        assert!(hatalar.is_empty(), "{hatalar:?}");
+        let Seri::Saçılım(saçılım) = &çözülmüş.seriler[0] else {
+            panic!("ilk seri scatter olmalı");
+        };
+        assert_eq!(saçılım.veri.len(), 31);
+        for (sıra, (beklenen, eksenler, etiket)) in [
+            (
+                [3.0, 11.0, 6.0, 3.0, 5.0, 2.0, 1.0].as_slice(),
+                (1, 1),
+                EtiketKonumu::Üst,
+            ),
+            (
+                [6.0, 7.0, 4.0, 10.0, 3.0, 1.0].as_slice(),
+                (2, 2),
+                EtiketKonumu::Sağ,
+            ),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let Seri::Sütun(seri) = &çözülmüş.seriler[sıra + 1] else {
+                panic!("histogram serisi bar olmalı");
+            };
+            assert_eq!((seri.eksen_bağı.x, seri.eksen_bağı.y), eksenler);
+            assert_eq!(seri.etiket.konum, etiket);
+            assert_eq!(
+                seri.veri
+                    .iter()
+                    .filter_map(|öğe| öğe.değer.sayı())
+                    .collect::<Vec<_>>(),
+                beklenen
+            );
+        }
+    }
+}
+
 fn data_transform_sort_bar() -> Result<GrafikSeçenekleri, String> {
     let kaynak = VeriKümesi::yeni(["name", "age", "profession", "score", "date"])
         .satır([
@@ -10869,6 +11018,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-simple" => Ok(line_simple()),
         "line-markline" => Ok(line_markline()),
         "line-marker" => Ok(line_marker()),
+        "bar-histogram" => Ok(bar_histogram()),
         "bar-simple" => Ok(bar_simple()),
         "bar1" => Ok(bar1()),
         "mix-line-bar" => Ok(mix_line_bar()),
