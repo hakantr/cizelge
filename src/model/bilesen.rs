@@ -210,7 +210,9 @@ pub struct Gösterge {
     /// Sağ kenardan uzaklık (`right`). `Some` olduğunda yatay yerleşimde
     /// `left` yerine kullanılır.
     pub sağ: Option<Uzunluk>,
-    pub üst: Option<Uzunluk>,
+    /// Üst yerleşimi (`top`). Sayısal/yüzde değerlerin yanında ECharts'ın
+    /// `top`, `middle` ve `bottom` anahtar sözcüklerini de korur.
+    pub üst: Option<DikeyKonum>,
     /// Alt kenardan uzaklık (`bottom`); ECharts 6.1 öntanımlısı 15.
     pub alt: Option<Uzunluk>,
     /// Legend kutusunun iç boşluğu (`padding`).
@@ -292,7 +294,7 @@ impl Gösterge {
         self
     }
 
-    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+    pub fn üst(mut self, üst: impl Into<DikeyKonum>) -> Self {
         self.üst = Some(üst.into());
         self.alt = None;
         self

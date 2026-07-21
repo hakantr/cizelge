@@ -6203,6 +6203,31 @@ mod yakınlaştırma_yönü_testleri {
     }
 
     #[test]
+    fn gösterge_top_bottom_anahtar_sözcüğüyle_alt_kenara_yerleşir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .gösterge(
+                crate::model::bilesen::Gösterge::yeni()
+                    .üst("bottom")
+                    .iç_boşluk(15.0),
+            )
+            .seri(
+                crate::model::seri::SütunSerisi::yeni()
+                    .ad("Range")
+                    .veri([1.0]),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(800.0, 600.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let (kutu, ad) = çıktı
+            .gösterge_kutuları
+            .first()
+            .expect("gösterge öğesi çizilmeli");
+        assert_eq!(ad, "Range");
+        assert!((kutu.y - 571.0).abs() < 1e-3, "{kutu:?}");
+    }
+
+    #[test]
     fn çokgen_fırça_iç_kenar_ve_dış_noktaları_ayırt_eder() {
         let alan = FırçaAlanı::Çokgen {
             noktalar: vec![(10.0, 10.0), (50.0, 10.0), (30.0, 40.0)],

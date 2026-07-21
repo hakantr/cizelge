@@ -5,9 +5,9 @@
 
 use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
-use crate::model::YatayKonum;
 use crate::model::bilesen::{Gösterge, GöstergeSimgesi, Yön};
 use crate::model::seri::Sembol;
+use crate::model::{DikeyKonum, YatayKonum};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
@@ -162,7 +162,14 @@ pub fn gösterge_çiz(
     };
     let üst = seçenek
         .üst
-        .map(|u| u.çöz(çizici.yükseklik()) + seçenek.iç_boşluk)
+        .map(|konum| {
+            dikey_başlangıç(
+                konum,
+                çizici.yükseklik(),
+                içerik_yüksekliği,
+                seçenek.iç_boşluk,
+            )
+        })
         .or_else(|| {
             seçenek.alt.map(|alt| {
                 çizici.yükseklik()
@@ -270,7 +277,7 @@ pub fn gösterge_çiz(
         let x = yatay_başlangıç(seçenek, çizici.genişlik(), en_geniş);
         let üst_kenar = seçenek
             .üst
-            .map(|değer| değer.çöz(çizici.yükseklik()))
+            .map(|konum| dikey_kenar(konum, çizici.yükseklik()))
             .unwrap_or(0.0);
         let alt_kenar = seçenek
             .alt
@@ -461,6 +468,29 @@ fn yatay_başlangıç(
         YatayKonum::Orta => (yüzey_genişliği - içerik_genişliği) / 2.0,
         YatayKonum::Sağ => yüzey_genişliği - içerik_genişliği - seçenek.iç_boşluk,
         YatayKonum::Değer(u) => u.çöz(yüzey_genişliği) + seçenek.iç_boşluk,
+    }
+}
+
+fn dikey_başlangıç(
+    konum: DikeyKonum,
+    yüzey_yüksekliği: f32,
+    içerik_yüksekliği: f32,
+    iç_boşluk: f32,
+) -> f32 {
+    match konum {
+        DikeyKonum::Üst => iç_boşluk,
+        DikeyKonum::Orta => (yüzey_yüksekliği - içerik_yüksekliği) / 2.0,
+        DikeyKonum::Alt => yüzey_yüksekliği - iç_boşluk - içerik_yüksekliği,
+        DikeyKonum::Değer(değer) => değer.çöz(yüzey_yüksekliği) + iç_boşluk,
+    }
+}
+
+fn dikey_kenar(konum: DikeyKonum, yüzey_yüksekliği: f32) -> f32 {
+    match konum {
+        DikeyKonum::Üst => 0.0,
+        DikeyKonum::Orta => yüzey_yüksekliği / 2.0,
+        DikeyKonum::Alt => yüzey_yüksekliği,
+        DikeyKonum::Değer(değer) => değer.çöz(yüzey_yüksekliği),
     }
 }
 
