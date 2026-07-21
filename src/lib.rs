@@ -1,7 +1,7 @@
 //! # çizelge
 //!
-//! [Apache ECharts](https://echarts.apache.org)'ın, Zed editörünün arayüz
-//! çatısı olan [gpui](https://gpui.rs) üzerinde çalışan yerli Rust uyarlaması.
+//! [Apache ECharts](https://echarts.apache.org)'ın
+//! [gpui](https://gpui.rs) üzerinde çalışan yerli Rust uyarlaması.
 //!
 //! Modül düzeni ECharts kaynak ağacını (`src/scale`, `src/coord`, `src/model`,
 //! `src/chart`, `src/component`) birebir izler; çekirdek sayısal algoritmalar

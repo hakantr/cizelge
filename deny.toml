@@ -36,13 +36,10 @@ allow = [
 ]
 confidence-threshold = 0.9
 
-# BİLİNEN İHLAL (çözüm bekliyor): Zed çalışma alanındaki `zlog`, `ztracing`,
-# `ztracing_macro` GPL-3.0-or-later lisanslıdır ve Apache-2.0 beyanlı
-# `gpui`, `sum_tree` üzerinden bunlara bağımlıdır (üst-akım tutarsızlığı).
-# Politika gereği GPL izin listesine EKLENMEZ; bu denetim, sorun üst-akımda
-# ya da yama ile çözülene dek bu üç crate için kırmızı kalır.
-# Ayrıca `gpui_shared_string` ve `gpui_util` lisans alanı bildirmiyor
-# (BELİRSİZ) — üst-akıma bildirilecek.
+# Bağımsız GPUI çalışma alanındaki `gpui_shared_string` ve `gpui_util`
+# manifestleri lisans alanı bildirmiyor. Bu belirsizlik `../gpui/NOTICE`
+# ve `../gpui/EXTRACTION.md` içinde kayıtlıdır; burada sessizce lisans
+# eşlemesi yapılmaz.
 
 [bans]
 multiple-versions = "allow"
@@ -50,5 +47,5 @@ multiple-versions = "allow"
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-# gpui, yerel yol bağımlılığıyla Zed deposundan gelir (Apache-2.0 beyanlı
-# crate'ler); bkz. FAZ_PLANI.md lisans kuralı madde 4.
+# gpui, sabitlenmiş bağımsız `../gpui` çalışma alanından yerel yol
+# bağımlılığıyla gelir; bkz. FAZ_PLANI.md lisans kuralı madde 4.

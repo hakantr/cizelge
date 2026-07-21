@@ -1,6 +1,6 @@
 # Cizelge — ECharts 6.1 Tam Uyum ve Görsel Galeri Faz Planı
 
-Son güncelleme: 2026-07-20
+Son güncelleme: 2026-07-21
 
 Bu belge, `cizelge` için **normatif tam uyum planıdır**. [FAZ_PLANI.md](FAZ_PLANI.md)
 mevcut uygulama tarihini ve daha önce tamamlanan özellik dilimlerini kaydeder;
@@ -24,6 +24,7 @@ sabitlenmiş bir kaynak görüntüsüne göre yürütülür.
 |---|---|---|---|
 | Apache ECharts | v6.1.0, `74e9e09a0b5687fdd34319121ac73b3022d1483c` | `../echarts` | Seri/bileşen listesi, seçenek tipleri, `defaultOption`, yerleşim, olay ve animasyon davranışı |
 | Apache ECharts Examples | `gh-pages`, `1ff3451941535c51af83eacd504035ef4bfd7d0d` | `../echarts-examples` | Galeri kategorileri, örnek metadatası/kaynağı, küçük resimler ve görsel test yaklaşımı |
+| Bağımsız GPUI | `5566476024607a4c6999ab7b91d0218633a9b96c` | `../gpui` | `gpui` ve `gpui_platform` için tek derleme ve güncelleme kaynağı |
 | Resmi galeri | [echarts.apache.org/examples/en/index.html](https://echarts.apache.org/examples/en/index.html) | — | Kullanıcıya sunulacak liste ve gezinme deneyiminin referansı |
 
 ECharts tarafında başlıca kaynaklar:
@@ -225,8 +226,9 @@ testler/gorsel/
   metrikler/<ornek-id>.json
 ```
 
-`kaynak_kilidi.toml` ECharts, zrender ve echarts-examples commit/sürümünü,
-snapshot tarihini ve kullanılan sabit font/veri görüntüsünü tutar.
+`kaynak_kilidi.toml` ECharts, zrender, echarts-examples ve bağımsız GPUI
+commit/sürümünü, snapshot tarihini ve kullanılan sabit font/veri görüntüsünü
+tutar. GPUI için başka bir yerel çalışma alanı izlenmez.
 
 Her `galeri_manifest.json` kaydı en az şunları içerir:
 

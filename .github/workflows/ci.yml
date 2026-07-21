@@ -1,10 +1,5 @@
-# Sürekli tümleştirme iskeleti.
-#
-# NOT: `gpui` bağımlılığı Zed çalışma alanına yol (path) ile bağlıdır;
-# öntanımlı özelliklerle derleme, depo yanında `zed` checkout'u ister.
-# Bu hat, gpui'siz çekirdeği (--no-default-features) doğrular — altın
-# testler dahil tüm test takımı gpui olmadan çalışır. Depo GitHub'a
-# taşındığında olduğu gibi kullanılabilir.
+# Sürekli tümleştirme iskeleti. Yol bağımlılıkları yerel düzenle aynı
+# olacak biçimde `cizelge/` ve bağımsız `gpui/` kardeş dizinlerine alınır.
 
 name: ci
 on:
@@ -20,6 +15,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: cizelge
+      - name: Kilitli bağımsız GPUI
+        uses: actions/checkout@v4
+        with:
+          repository: hakantr/gpui
+          ref: 5566476024607a4c6999ab7b91d0218633a9b96c
+          path: gpui
       - name: Kilitli Apache ECharts
         uses: actions/checkout@v4
         with:
@@ -53,6 +54,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: cizelge
+      - name: Kilitli bağımsız GPUI
+        uses: actions/checkout@v4
+        with:
+          repository: hakantr/gpui
+          ref: 5566476024607a4c6999ab7b91d0218633a9b96c
+          path: gpui
       - name: Kilitli Apache ECharts
         uses: actions/checkout@v4
         with:
@@ -91,18 +98,31 @@ jobs:
   cekirdek:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Cizelge
+        uses: actions/checkout@v4
+        with:
+          path: cizelge
+      - name: Kilitli bağımsız GPUI
+        uses: actions/checkout@v4
+        with:
+          repository: hakantr/gpui
+          ref: 5566476024607a4c6999ab7b91d0218633a9b96c
+          path: gpui
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
           targets: wasm32-unknown-unknown
       - name: Clippy (çekirdek, uyarı = hata)
+        working-directory: cizelge
         run: cargo clippy --no-default-features --lib --tests -- -D warnings
       - name: Testler (birim + altın)
+        working-directory: cizelge
         run: cargo test --no-default-features
       - name: WASM hedefi derlenir
+        working-directory: cizelge
         run: cargo check --lib --no-default-features --target wasm32-unknown-unknown
       - name: Lisans denetimi
         uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check licenses
+          manifest-path: cizelge/Cargo.toml

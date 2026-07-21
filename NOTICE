@@ -28,8 +28,10 @@ seçenek modeli içerir:
 Apache ECharts:
   Copyright 2017-2026 The Apache Software Foundation
 
-Çizim, Zed Industries tarafından geliştirilen ve Apache License 2.0 ile
-lisanslanan gpui kütüphanesi (https://gpui.rs) üzerinden yapılır.
+Çizim, bağımsız GPUI kaynak deposundaki
+https://github.com/hakantr/gpui Apache License 2.0 beyanlı `gpui`
+kütüphanesi üzerinden yapılır. Kaynak pakette korunan telif bildirimi:
+  Copyright 2022-2025 Zed Industries, Inc.
 
 --- MPL-2.0 bağımlılıkları hakkında not ---
 

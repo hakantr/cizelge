@@ -1,7 +1,7 @@
 # çizelge
 
-[Apache ECharts](https://echarts.apache.org)'ın, [Zed](https://zed.dev) editörünün
-arayüz çatısı **gpui** üzerinde çalışan, tümüyle Türkçe API'li yerli Rust uyarlaması.
+[Apache ECharts](https://echarts.apache.org)'ın **gpui** üzerinde çalışan,
+tümüyle Türkçe API'li yerli Rust uyarlaması.
 
 Web/Canvas yerine doğrudan GPU'da çizer: ECharts'ın bildirime dayalı `option`
 modeli, "güzel" çentik algoritması, sütun yerleşimi, yumuşak eğri kontrol
@@ -32,7 +32,8 @@ cargo run --example sacilim   # kabarcık saçılımı, işlevsel sembol boyutu
 cargo run --example pano      # tek pencerede dört grafik
 ```
 
-> Depo, `../zed` içindeki gpui'ye yol bağımlılığıyla bağlıdır.
+> Depo, bağımsız `../gpui` çalışma alanındaki `gpui` ve `gpui_platform`
+> crate'lerine yol bağımlılığıyla bağlıdır.
 
 ## Modül eşlemesi (ECharts → çizelge)
 

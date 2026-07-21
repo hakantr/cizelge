@@ -52,15 +52,13 @@ esnetemez:
    yapılması gerekirse o değişiklikler MPL-2.0 gereği **açık kaynak olarak
    yayımlanır** ve bu durum `NOTICE` dosyasındaki MPL bölümüne işlenir.
    MPL'li bağımlılıklar ve durumları `NOTICE`'ta liste olarak tutulur.
-4. **Zed deposu özel durumu (kesinleştirildi, 2026-07-17):** Zed çalışma
-   alanı karma lisanslıdır (Apache-2.0 **ve** GPL bölümler içerir).
-   **Yalnızca `Cargo.toml`'unda açıkça `license = "Apache-2.0"` beyan eden
-   crate'ler kullanılır** (bugün: `gpui`, `gpui_platform`); **GPL-3
-   sınırına dokunulmaz**: GPL lisanslı hiçbir Zed crate'inden kod
-   kopyalanamaz, uyarlanamaz, doğrudan bağımlılık alınamaz, yama yapılamaz.
-   `gpui`nin kendi içinden geçişli olarak gelen GPL crate'leri (zlog,
-   ztracing) üst-akımın tutarsızlığıdır; bizim tarafımızda kullanılmaz,
-   yalnızca bulgu olarak izlenir (aşağıda).
+4. **GPUI kaynak sınırı (kesinleştirildi, 2026-07-21):** `gpui` ve
+   `gpui_platform` yalnızca bağımsız `../gpui` çalışma alanından yol
+   bağımlılığı olarak alınır. Doğrulanan kaynak revizyonu
+   `5566476024607a4c6999ab7b91d0218633a9b96c`'dir. Başka bir çalışma
+   alanı GPUI derleme, karşılaştırma veya güncelleme kaynağı değildir.
+   Kaynak kapsamı ve lisans provenansı için `../gpui/NOTICE`,
+   `../gpui/UPSTREAM.md` ve `../gpui/EXTRACTION.md` esas alınır.
 5. **Varlıklar da kapsamdadır:** Örnek verileri, yazı tipleri ve görseller Apache-2.0 ile uyumlu lisanslı olmalı
    ve kaynağı `NOTICE`'a işlenmelidir.
 6. **Doğrulama otomatiktir:** `deny.toml`, madde 3'teki onaylı listeyi
@@ -70,15 +68,11 @@ esnetemez:
    Apache-2.0 LLVM istisnası, bzip2, Unlicense-ikili) `deny.toml`de
    gerekçeli olarak işaretlenmiştir ve kullanıcı vetosuna açıktır.
 
-   **Bilinen lisans bulguları (2026-07-17 taraması):**
-   - ❗ Zed'in `zlog`, `ztracing`, `ztracing_macro` crate'leri
-     **GPL-3.0-or-later** ve Apache-2.0 beyanlı `gpui`, `sum_tree` üzerinden
-     bunlara bağımlı (üst-akım tutarsızlığı). Politika gereği izinli
-     DEĞİLDİR; çözüm seçenekleri: üst-akıma bildirim, Zed'de yama/`[patch]`
-     ile GPL'siz eşdeğer, ya da kullanıcı kararı. Çözülene dek lisans
-     denetimi bu üç crate için kırmızıdır.
+   **Bilinen lisans bulguları (2026-07-21 taraması):**
    - ❗ `gpui_shared_string`, `gpui_util` lisans alanı bildirmiyor —
-     üst-akıma bildirilecek.
+     bağımsız GPUI deposunun `NOTICE` ve `EXTRACTION.md` belgelerinde bu
+     belirsizlik açıkça kayıtlıdır; otomatik denetimde sessizce izinli
+     sayılmazlar.
    - ✅ MPL-2.0 bağımlılıkları (değiştirilmeden kullanılır, NOTICE'ta
      listeli): `option-ext`, `dwrote` (yalnız Windows hedefi), `cbindgen`
      (derleme aracı; mevcut derleme grafiğinde etkin değil).
@@ -193,12 +187,11 @@ tıklanan dilimi raporlayan yeni örnek; golden test altyapısı CI'da koşuyor.
   Karar: kısa vadede yatay geri düşüş; kalıcı çözüm gpui'ye upstream katkı
   (metin koşusuna dönüşüm matrisi) ya da glif konturlarını yol olarak
   doldurma. Faz 2'deki etiket döndürme kalemi bu karara bağlı.
-- ✅ CI iskeleti: `.github/workflows/ci.yml` — çekirdek (gpui'siz)
-  clippy -D warnings + tüm test takımı + wasm32 derleme + lisans
-  denetimi; depo GitHub'a taşındığında olduğu gibi çalışır (gpui'li
-  derleme, Zed checkout'u gerektirdiğinden bilinçli kapsam dışı).
-  `cargo deny` yapılandırması `deny.toml`de
-  hazır, CI kurulunca bağlanacak.
+- ✅ CI iskeleti: `.github/workflows/ci.yml` — sabit revizyonlu bağımsız
+  GPUI çalışma alanını kardeş `gpui/` yoluna alır; çekirdek clippy
+  `-D warnings`, tüm test takımı, wasm32 derleme, görsel kapı ve lisans
+  denetimini aynı kaynak sınırıyla çalıştırır. `cargo deny`
+  yapılandırması `deny.toml`de hazırdır.
 
 ---
 

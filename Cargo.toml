@@ -2,7 +2,7 @@
 name = "cizelge"
 version = "0.1.0"
 edition = "2024"
-description = "Apache ECharts'ın gpui (Zed) üzerinde çalışan yerli Rust uyarlaması"
+description = "Apache ECharts'ın gpui üzerinde çalışan yerli Rust uyarlaması"
 license = "Apache-2.0"
 
 # Panik yasağı (bkz. FAZ_PLANI.md — değiştirilemez kural): çalışma zamanı
@@ -19,7 +19,7 @@ unreachable = "deny"
 indexing_slicing = "deny"
 
 [dependencies]
-gpui = { path = "../zed/crates/gpui", optional = true }
+gpui = { path = "../gpui/crates/gpui", optional = true }
 # PNG dışa aktarım (kullanıcı onayı 2026-07-17): rasterleştirme tiny-skia,
 # yazı biçimlendirme ab_glyph + sistem yazı tipi keşfi fontdb.
 tiny-skia = { version = "0.11", optional = true }
@@ -42,7 +42,7 @@ core-text = { version = "21", optional = true }
 core-graphics = { version = "0.24", optional = true }
 
 [dev-dependencies]
-gpui_platform = { path = "../zed/crates/gpui_platform", features = ["font-kit", "wayland", "x11"] }
+gpui_platform = { path = "../gpui/crates/gpui_platform", features = ["font-kit", "wayland", "x11"] }
 base64 = "0.22"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
 serde = { version = "1", features = ["derive"] }

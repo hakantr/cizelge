@@ -19,6 +19,12 @@ commit = "1ff3451941535c51af83eacd504035ef4bfd7d0d"
 yol = "../echarts-examples"
 lisans = "Apache-2.0"
 
+[gpui]
+commit = "5566476024607a4c6999ab7b91d0218633a9b96c"
+yol = "../gpui"
+paketler = ["gpui", "gpui_platform"]
+lisans_belgesi = "../gpui/NOTICE"
+
 [render_profili]
 varsayılan_viewport = [700, 525]
 varsayılan_çıktı = [600, 450]

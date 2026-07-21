@@ -12,12 +12,14 @@ const ARAÇ_DİZİNİ = path.dirname(new URL(import.meta.url).pathname);
 const KÖK = path.resolve(ARAÇ_DİZİNİ, '../..');
 const ECHARTS = path.resolve(KÖK, '../echarts');
 const ÖRNEKLER = path.resolve(KÖK, '../echarts-examples');
+const GPUI = path.resolve(KÖK, '../gpui');
 const UYUM = path.join(KÖK, 'uyum');
 const GÖRSEL_METRİKLER = path.join(KÖK, 'testler/gorsel/metrikler');
 
 const BEKLENEN = Object.freeze({
   echartsCommit: '74e9e09a0b5687fdd34319121ac73b3022d1483c',
   examplesCommit: '1ff3451941535c51af83eacd504035ef4bfd7d0d',
+  gpuiCommit: '5566476024607a4c6999ab7b91d0218633a9b96c',
   echartsVersion: '6.1.0',
   zrenderVersion: '6.1.0',
   çekirdek: 377,
@@ -719,6 +721,11 @@ function kilitToml(echartsPaket, commitler) {
     `commit = "${commitler.examples}"\n`+
     `yol = "../echarts-examples"\n`+
     `lisans = "Apache-2.0"\n\n`+
+    `[gpui]\n`+
+    `commit = "${commitler.gpui}"\n`+
+    `yol = "../gpui"\n`+
+    `paketler = ["gpui", "gpui_platform"]\n`+
+    `lisans_belgesi = "../gpui/NOTICE"\n\n`+
     `[render_profili]\n`+
     `varsayılan_viewport = [700, 525]\n`+
     `varsayılan_çıktı = [600, 450]\n`+
@@ -729,9 +736,14 @@ function kilitToml(echartsPaket, commitler) {
 
 function üret(hedef) {
   const echartsPaket = JSON.parse(oku(path.join(ECHARTS, 'package.json')));
-  const commitler = { echarts: gitCommit(ECHARTS), examples: gitCommit(ÖRNEKLER) };
+  const commitler = {
+    echarts: gitCommit(ECHARTS),
+    examples: gitCommit(ÖRNEKLER),
+    gpui: gitCommit(GPUI)
+  };
   if (commitler.echarts !== BEKLENEN.echartsCommit) hata(`ECharts commit farklı: ${commitler.echarts}`);
   if (commitler.examples !== BEKLENEN.examplesCommit) hata(`örnekler commit farklı: ${commitler.examples}`);
+  if (commitler.gpui !== BEKLENEN.gpuiCommit) hata(`GPUI commit farklı: ${commitler.gpui}`);
   if (echartsPaket.version !== BEKLENEN.echartsVersion) hata(`ECharts sürümü farklı: ${echartsPaket.version}`);
   if (echartsPaket.dependencies.zrender !== BEKLENEN.zrenderVersion) hata(`zrender sürümü farklı: ${echartsPaket.dependencies.zrender}`);
 
