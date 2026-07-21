@@ -1163,32 +1163,49 @@ Gerçekleşen dilim — `bar-polar-real-estate` (2026-07-20):
   performans ilgili Faz 3/4/7/8 kapılarında kapanmadan kart nihai
   `tam_kanıtlı` sayılmaz.
 
-Çalışma kontrol noktası — `polar-roundCap` (tamamlanmadı, 2026-07-20):
+Gerçekleşen dilim — `polar-roundCap` (2026-07-21):
 
-- Operasyonel ilerleme 153/332 (`%46,1`) olarak kalır; bu kart için kilitli
-  referans oluşturulmadı ve kart tamamlanmış sayılmadı.
-- `e2d9bfc` commit'i, `../echarts/src/layout/barPolar.ts` içindeki bağımsız
+- `e2d9bfc`, `../echarts/src/layout/barPolar.ts` içindeki bağımsız
   stack/grup bant hesabını ve `../echarts/src/util/shape/sausage.ts`
-  kaynaklı `roundCap` yolunu çekirdeğe taşır. Sıfır değer iki yarım yaylı
-  daireye, tam tur dikişsiz halkaya dönüşür; 289/289 kütüphane testi
-  geçmiştir.
-- Resmî `public/examples/ts/polar-roundCap.ts` option'ı fixture'a aktarıldı:
+  kaynaklı `roundCap` yolunu çekirdeğe taşır. Aynı polar kategoride bağımsız
+  seriler artık `barGap`/`barCategoryGap` ile ayrı bant alır; teğetsel
+  yuvarlak uçlar Sausage geometrisini kullanır ve tam tur dikişsizdir.
+- `3bfe393`, angle value-axis bağlamını tamamlar. `Eksen`, `splitNumber`ın
+  açıkça belirtilip belirtilmediğini korur; belirtilmeyen angle axis,
+  `component/polar/install.ts::angleAxisExtraOption` gibi 12 bölme kullanır,
+  açık `splitNumber` ve `interval` ise ezilmez. Böylece resmî `max: 2`
+  ekseni `0,2` adımlı `0..1,8` etiketlerini üretir.
+- `BarView.updateStyle::isZeroOnPolar` davranışı taşındı: sıfır açıklıklı
+  teğetsel bar, Sausage yordamı daire üretebilse bile boyanmaz. Seri/veri
+  `itemStyle.opacity` değeri dolgu ile kenarlığa birlikte uygulanır.
+  Sütun legend simgesi aynı opaklık, `borderColor` ve `borderWidth`
+  görselini miras alır.
+- `LegendView.getLegendStyle/layoutInner` ile `util/layout.ts::box` kaynakları
+  doğrulanarak 1 px vuruşun iki yarım piksellik `Path.getBoundingRect`
+  taşması satır yüksekliğine katıldı. Alt legend artık 14 px ham simge
+  yerine 15 px görünen kutuyla yerleşir. Bu genel düzeltmenin önceden
+  kalibre edilmiş `candlestick-brush` merkezini değiştirmemesi için yalnız
+  onun piksel-yüzeyi padding telafisi `15,95`ten `14,95`e çekildi; kilitli
+  metriği yeniden tam eski 1.390 piksel / `0,990133` SSIM sonucuna döndü.
+- Resmî `public/examples/ts/polar-roundCap.ts` option'ı fixture'da kayıpsızdır:
   `max: 2`, `startAngle: 30`, gizli splitLine, `v..z` radius kategorileri,
-  `[4,3,2,1,0]` verili iki bağımsız seri, kırmızı/yeşil 1 px kenarlık,
+  iki bağımsız `[4,3,2,1,0]` serisi, kırmızı/yeşil 1 px kenarlık,
   `opacity: 0.8`, yalnız ikinci seride `roundCap: true` ve iki legend adı.
-  Fixture sözleşme testi geçer; üretici bu kartı `kısmi` olarak kaydeder.
-- Geçici 700×525 renderlarda halka geometrisi, bant ofsetleri, sıfır-değer
-  kapağı ve legend yerleşimi resmî kareyle görsel olarak hizalıdır. Kalan
-  bilinen sapma angle value-axis tikleridir: resmî kare `0,2` aralıklı
-  `0..1,8`, Cizelge ise `0,5` aralıklı `0..1,5` etiketleri çizer.
-- Devamda önce `../echarts/src/component/polar/install.ts` içindeki angle-axis
-  `splitNumber: 12` varsayılanı ile `../echarts/src/coord/axisNiceTicks.ts`
-  aralık hesabı Cizelge'nin polar değer eksenine uygulanacak. Ardından geçici
-  PNG'ler 600×450'ye indirilip `%1` pixelmatch / `0,99` SSIM kapısı geçilecek;
-  ancak bundan sonra kart kanıt koşucusuna eklenecek ve yeni referans yalnız
-  bir kez oluşturulacaktır. Son adımlar kilitli tekrar, tam görsel regresyon,
-  tüm derleme/test kapıları, gerçekleşen dilim kaydı ve ilerlemeyi
-  154/332 (`%46,4`) yapmaktır.
+- Geçici kapı geçtikten sonra resmî referans iki ardışık üretimde piksel
+  düzeyinde kararlı bulundu ve yalnız bu yeni kart için bir kez oluşturuldu.
+  Referansa yazmayan bağımsız tekrar 1/1; depo çapındaki kilitli regresyon
+  180/180 geçti. 600×450 kanıt 1.470 değişen piksel, `%0,5444` fark ve
+  `0,991958` SSIM üretir; referans, gerçek, fark ve metrik hashleri galeri
+  manifestine bağlıdır.
+- Çekirdek 292/292, fixture 43/43 geçti; `cargo check --all-targets`,
+  `cargo check --no-default-features` ve `node tools/uyum/uret.mjs --check`
+  temizdir. Kart `kısmi`den `uygulandı_kanıt_bekliyor` durumuna, statik
+  görsel kapısı `tam_kanıtlı`ya geçti.
+- Operasyonel kart ilerlemesi 154/332, yani `%46,4` oldu. Negatif/ters polar
+  birleşimleri, `barMinAngle`, tooltip pointer/hover yaşam döngüsü,
+  animasyon, erişilebilirlik ve ölçümlü performans ilgili Faz 3/4/7/8
+  kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz. Sıradaki resmî
+  kart `polar-endAngle`dır.
 
 Kabul:
 
