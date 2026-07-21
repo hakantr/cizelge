@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 783,
-  "değişen_piksel_oranı": 0.0029,
-  "ssim": 0.9976812479300281,
+  "değişen_piksel": 782,
+  "değişen_piksel_oranı": 0.002896296296296296,
+  "ssim": 0.9976802800994781,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-stack-radial.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-polar-stack-radial.png",

@@ -3474,6 +3474,66 @@ fn polar_round_cap() -> GrafikSeçenekleri {
         )
 }
 
+fn polar_end_angle() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .ipucu(İpucu::yeni())
+        .kutupsallar([
+            KutupsalKoordinat::yeni()
+                .başlangıç_açısı(90.0)
+                .bitiş_açısı(0.0)
+                .açısal_eksen(Eksen::kategori().veri(["S1", "S2", "S3"])),
+            KutupsalKoordinat::yeni()
+                .başlangıç_açısı(-90.0)
+                .bitiş_açısı(-180.0)
+                .açısal_eksen(Eksen::kategori().veri(["T1", "T2", "T3"])),
+        ])
+        .seri(SütunSerisi::yeni().kutupsal_sırası(0).veri([1, 2, 3]))
+        .seri(SütunSerisi::yeni().kutupsal_sırası(1).veri([1, 2, 3]))
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod polar_end_angle_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_iki_kismi_polar_ekseni_ve_polar_index_baglari_kayipsizdir() {
+        let seçenekler = polar_end_angle();
+        assert!(seçenekler.animasyon);
+        assert!(seçenekler.ipucu.is_some());
+        assert_eq!(seçenekler.kutupsal_sayısı(), 2);
+
+        let kutupsallar = seçenekler.tüm_kutupsallar().collect::<Vec<_>>();
+        for (sıra, (başlangıç, bitiş, kategoriler)) in [
+            (90.0, 0.0, ["S1", "S2", "S3"]),
+            (-90.0, -180.0, ["T1", "T2", "T3"]),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            assert_eq!(kutupsallar[sıra].başlangıç_açısı, başlangıç);
+            assert_eq!(kutupsallar[sıra].bitiş_açısı, Some(bitiş));
+            assert_eq!(kutupsallar[sıra].açısal_eksen.veri, kategoriler);
+        }
+
+        assert_eq!(seçenekler.seriler.len(), 2);
+        for (sıra, seri) in seçenekler.seriler.iter().enumerate() {
+            let Seri::Sütun(seri) = seri else {
+                panic!("{sıra}. seri polar bar olmalı");
+            };
+            assert!(seri.kutupsal);
+            assert_eq!(seri.kutupsal_sırası, sıra);
+            assert_eq!(
+                seri.veri
+                    .iter()
+                    .filter_map(|öğe| öğe.değer.sayı())
+                    .collect::<Vec<_>>(),
+                [1.0, 2.0, 3.0]
+            );
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::indexing_slicing, clippy::panic)]
 mod polar_round_cap_testleri {
@@ -10861,6 +10921,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-polar-stack-radial" => Ok(bar_polar_stack_radial()),
         "bar-polar-real-estate" => Ok(bar_polar_real_estate()),
         "polar-roundCap" => Ok(polar_round_cap()),
+        "polar-endAngle" => Ok(polar_end_angle()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),

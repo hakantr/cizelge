@@ -19,6 +19,9 @@ pub struct KutupsalKoordinat {
     pub radyal_eksen: Eksen,
     /// Açısal eksenin başlangıcı, derece (`angleAxis.startAngle`).
     pub başlangıç_açısı: f32,
+    /// Açısal eksenin açık bitişi, derece (`angleAxis.endAngle`).
+    /// `None`, yön ve `inverse` bileşiminden tam tur üretir.
+    pub bitiş_açısı: Option<f32>,
     /// Açı değerleri saat yönünde artsın (`angleAxis.clockwise`).
     pub saat_yönü: bool,
 }
@@ -32,6 +35,7 @@ impl Default for KutupsalKoordinat {
             açısal_eksen: Eksen::değer().bölme_sayısı(12),
             radyal_eksen: Eksen::değer(),
             başlangıç_açısı: 90.0,
+            bitiş_açısı: None,
             saat_yönü: true,
         }
     }
@@ -74,6 +78,16 @@ impl KutupsalKoordinat {
 
     pub fn başlangıç_açısı(mut self, derece: f32) -> Self {
         self.başlangıç_açısı = derece;
+        self
+    }
+
+    pub fn bitiş_açısı(mut self, derece: f32) -> Self {
+        self.bitiş_açısı = Some(derece);
+        self
+    }
+
+    pub fn otomatik_bitiş_açısı(mut self) -> Self {
+        self.bitiş_açısı = None;
         self
     }
 

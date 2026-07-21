@@ -270,6 +270,7 @@ pub struct HatlarSerisi {
     pub koordinat_sistemi: HatKoordinatSistemi,
     pub veri: Vec<HatVerisi>,
     pub eksen_bağı: EksenBağı,
+    pub kutupsal_sırası: usize,
     pub takvim_sırası: usize,
     pub matris_sırası: usize,
     pub semboller: [Sembol; 2],
@@ -293,6 +294,7 @@ impl HatlarSerisi {
             koordinat_sistemi,
             veri: Vec::new(),
             eksen_bağı: EksenBağı::default(),
+            kutupsal_sırası: 0,
             takvim_sırası: 0,
             matris_sırası: 0,
             semboller: [Sembol::Yok, Sembol::Yok],
@@ -330,6 +332,12 @@ impl HatlarSerisi {
 
     pub fn eksenler(mut self, x: usize, y: usize) -> Self {
         self.eksen_bağı = EksenBağı { x, y };
+        self
+    }
+
+    pub fn kutupsal_sırası(mut self, sıra: usize) -> Self {
+        self.koordinat_sistemi = HatKoordinatSistemi::Kutupsal;
+        self.kutupsal_sırası = sıra;
         self
     }
 

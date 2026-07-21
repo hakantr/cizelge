@@ -130,6 +130,11 @@ const SENARYOLAR = [
     tür: 'statik',
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
+  {
+    id: 'polar-endAngle',
+    tür: 'statik',
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'bar-label-rotation', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'bar-breaks-simple',
@@ -477,7 +482,7 @@ async function çalıştır() {
         kare: kare.ad,
         eşikler: EŞİK,
         ...metrik,
-        yapısal_kontroller,
+        ...(yapısal_kontroller.length > 0 ? { yapısal_kontroller } : {}),
         dosyalar: {
           referans: path.relative(KÖK, referans),
           gerçek: path.relative(KÖK, gerçek),
@@ -493,8 +498,9 @@ async function çalıştır() {
     );
   }
   const satırlar = sonuçlar.map((sonuç) => {
-    const yapısal = sonuç.yapısal_kontroller.length
-      ? ` · yapısal ${sonuç.yapısal_kontroller.filter((kontrol) => kontrol.geçti).length}/${sonuç.yapısal_kontroller.length}`
+    const yapısalKontroller = sonuç.yapısal_kontroller ?? [];
+    const yapısal = yapısalKontroller.length
+      ? ` · yapısal ${yapısalKontroller.filter((kontrol) => kontrol.geçti).length}/${yapısalKontroller.length}`
       : '';
     return `<article class="${sonuç.geçti ? 'geçti' : 'kaldı'}"><h2>${htmlKaçır(sonuç.id)} · ${htmlKaçır(sonuç.kare)}</h2><p>${sonuç.geçti ? 'GEÇTİ' : 'KALDI'} · fark %${(sonuç.değişen_piksel_oranı * 100).toFixed(3)} · SSIM ${sonuç.ssim.toFixed(5)}${yapısal}</p><div><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.referans))}"><figcaption>ECharts</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.gerçek))}"><figcaption>Cizelge</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.fark))}"><figcaption>Fark</figcaption></figure></div></article>`;
   }).join('\n');

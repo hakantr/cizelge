@@ -429,7 +429,7 @@ fn kırılma_zikzağını_çiz(
 pub fn eksenleri_çiz(
     çizici: &mut dyn ÇizimYüzeyi, alan: Dikdörtgen, eksenler: &[&ÇalışmaEkseni]
 ) {
-    eksenleri_çiz_iç(çizici, alan, eksenler, None);
+    eksenleri_çiz_iç(çizici, alan, eksenler, None, false);
 }
 
 /// Eksenleri kartezyen serilerin öntanımlı `z: 2` katmanının altında veya
@@ -441,7 +441,19 @@ pub fn eksenleri_çiz_katman(
     eksenler: &[&ÇalışmaEkseni],
     serilerin_üstünde: bool,
 ) {
-    eksenleri_çiz_iç(çizici, alan, eksenler, Some(serilerin_üstünde));
+    eksenleri_çiz_iç(çizici, alan, eksenler, Some(serilerin_üstünde), false);
+}
+
+/// Görünür sütunların tabanındaki kategori ekseni çizgisini seri boyasından
+/// sonra yeniden çizer. İnce eksen vuruşu bar dolgusu altında kaldığında
+/// toplam piksel farkı bunu maskeleyebildiği için yalnız çizgi katmanı öne
+/// alınır; bar geometrisi, çentikler ve etiketler yer değiştirmez.
+pub fn kategori_taban_çizgilerini_üstte_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+) {
+    eksenleri_çiz_iç(çizici, alan, eksenler, Some(false), true);
 }
 
 fn eksenleri_çiz_iç(
@@ -449,8 +461,12 @@ fn eksenleri_çiz_iç(
     alan: Dikdörtgen,
     eksenler: &[&ÇalışmaEkseni],
     katman: Option<bool>,
+    yalnız_kategori_çizgisi: bool,
 ) {
     for eksen in eksenler {
+        if yalnız_kategori_çizgisi && eksen.seçenek.tür != EksenTürü::Kategori {
+            continue;
+        }
         if katman.is_some_and(|üstte| (eksen.seçenek.z > 2) != üstte) {
             continue;
         }
@@ -555,6 +571,9 @@ fn eksenleri_çiz_iç(
                     );
                 }
             }
+        }
+        if yalnız_kategori_çizgisi {
+            continue;
         }
 
         // Kategori eksenlerinde seyreltme adımı: sığmayan etiket VE

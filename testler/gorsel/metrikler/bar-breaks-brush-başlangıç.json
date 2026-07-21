@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 2299,
   "değişen_piksel_oranı": 0.008514814814814815,
-  "ssim": 0.9964504253530632,
+  "ssim": 0.9964503812156305,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-başlangıç.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-breaks-brush-başlangıç.png",

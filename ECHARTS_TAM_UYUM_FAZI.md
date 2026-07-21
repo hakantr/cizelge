@@ -135,9 +135,11 @@ aracı tarafından her yenilemede tekrar hesaplanmalıdır:
   zaten Geo/Map kapsam dışı olduğundan kapsam içi sayı değişmez.
 - Bunların Geo/Map bağımlı olanları: **22**.
 - Resmi sayfada gösterilecek kapsam içi benzersiz örnek: **261**.
-- `noExplore` olduğu için kart listesinde gösterilmeyen fakat kapsam içi ve
-  ek conformance girdisi olarak kullanılacak örnek: **71**.
-- Toplam kapsam içi çekirdek örnek kaydı: **332**.
+- `noExplore` olduğu için resmî keşif sayfasında gizlenen fakat kapsam içi
+  ek conformance girdisi olarak kullanılacak örnek: **71**. Yerel uyum
+  raporu bu kayıtları kesik çerçeveli “gizli doğrulama” kartları olarak
+  ayrıca gösterir.
+- Toplam kapsam içi çekirdek örnek kaydı ve yerel rapor kartı: **332**.
 - GL kataloğu: **59** kayıt; tamamı kapsam dışı. Resmi alan adına özgü
   `BLACK_MAP` filtresi bunların dokuzunu daha gizlese de kapsam kararı değişmez.
 
@@ -614,8 +616,7 @@ Gerçekleşen dilim — `candlestick-large` (2026-07-20):
   `0,99534` SSIM ile `%1 / 0,99` kabul eşiğini geçti; referans, gerçek, fark
   ve metrik dosyaları galeri manifestine hashleriyle bağlandı.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 144/332, yani `%43,4`
-  oldu. Gerçek scheduler progressive parçalama, etkileşim,
+  `tam_kanıtlı`ya geçti. Gerçek scheduler progressive parçalama, etkileşim,
   erişilebilirlik ve ölçümlü performans Faz 7/8 kapıları tamamlanmadan kart
   nihai `tam_kanıtlı` sayılmaz.
 
@@ -679,8 +680,7 @@ Gerçekleşen dilim — `candlestick-sh` (2026-07-20):
   fark ve metrik dosyaları ECharts tarzı galeri manifestine SHA-256
   değerleriyle bağlandı.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 145/332, yani
-  `%43,7` oldu. Animasyon, etkileşim, erişilebilirlik ve ölçümlü performans
+  `tam_kanıtlı`ya geçti. Animasyon, etkileşim, erişilebilirlik ve ölçümlü performans
   kapıları ilgili ileri fazlarda kapanmadan kart nihai `tam_kanıtlı`
   sayılmaz.
 
@@ -743,8 +743,7 @@ Gerçekleşen dilim — `candlestick-brush` (2026-07-20):
   SSIM ile `%1 / 0,99` kabul eşiğini geçti. Referans, gerçek, fark ve metrik
   dosyaları ECharts tarzı galeri manifestine SHA-256 değerleriyle bağlandı.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 146/332, yani `%44,0`
-  oldu. Serbest pointer ile alan çizme/dönüştürme, animasyon,
+  `tam_kanıtlı`ya geçti. Serbest pointer ile alan çizme/dönüştürme, animasyon,
   erişilebilirlik ve ölçümlü performans kapıları ilgili ileri fazlarda
   kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
@@ -784,8 +783,7 @@ Gerçekleşen dilim — `candlestick-sh-2015` (2026-07-20):
   değişen piksel, `%0,3911` fark ve `0,996551` SSIM üretir; dört kanıt
   dosyası hashleriyle galeri manifestine bağlıdır.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 147/332, yani `%44,3`
-  oldu. Bu statik karede görünür sonucu değiştirmeyen
+  `tam_kanıtlı`ya geçti. Bu statik karede görünür sonucu değiştirmeyen
   `dataZoom.dataBackground`, `dataZoom.textStyle`, `brushSelect` ve
   `tooltip.axisPointer.lineStyle` seçeneklerinin genel API/etkileşim
   kapanışı Faz 5/6 matrisinde `kısmi` kalır; bunlar tamamlanmadan kart nihai
@@ -840,8 +838,7 @@ Gerçekleşen dilim — `bar-brush` (2026-07-20):
   ardından referans, gerçek, fark ve metrik dosyaları SHA-256 değerleriyle
   galeri manifestine kilitlendi.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 148/332, yani `%44,6`
-  oldu. Pointer ile serbest alan oluşturma/dönüştürme, tüm brush olay yaşam
+  `tam_kanıtlı`ya geçti. Pointer ile serbest alan oluşturma/dönüştürme, tüm brush olay yaşam
   döngüsü, animasyon, erişilebilirlik ve ölçümlü performans kapıları Faz
   5/6/7/8'de kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
@@ -901,8 +898,7 @@ Gerçekleşen dilim — `bar-polar-label-radial` (2026-07-20):
   açılırken bir kez oluşturuldu; referans, gerçek, fark ve metrik dosyaları
   hashleriyle galeri manifestine bağlıdır.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 149/332, yani `%44,9`
-  oldu. Teğetsel polar bar, çoklu stack/grup yerleşimi, `roundCap`,
+  `tam_kanıtlı`ya geçti. Teğetsel polar bar, çoklu stack/grup yerleşimi, `roundCap`,
   `barMinAngle`, polar tooltip/hover davranışının bütün kombinasyonları,
   animasyon, erişilebilirlik ve ölçümlü performans izleyen Faz 3/4/6/7/8
   kartlarıyla kapanmadan bu kart nihai `tam_kanıtlı` sayılmaz.
@@ -958,8 +954,7 @@ Gerçekleşen dilim — `bar-polar-label-tangential` (2026-07-20):
   kez oluşturuldu; referans, gerçek, fark ve metrik dosyaları hashleriyle
   galeri manifestine bağlandı.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 150/332, yani `%45,2`
-  oldu. Birden fazla bağımsız polar stack/grubun bant paylaşımı,
+  `tam_kanıtlı`ya geçti. Birden fazla bağımsız polar stack/grubun bant paylaşımı,
   `roundCap`, `barMinAngle`, tüm negatif/ters/saat yönü kombinasyonları,
   tooltip/hover yaşam döngüsü, animasyon, erişilebilirlik ve ölçümlü
   performans izleyen Faz 3/4/6/7/8 kartları kapanmadan bu kart nihai
@@ -1019,8 +1014,7 @@ Gerçekleşen dilim — `bar-polar-stack` (2026-07-20):
   izleyen bağımsız koşu referansa yazmadan geçti. Referans, gerçek, fark ve
   metrik dosyaları SHA-256 değerleriyle galeri manifestine bağlandı.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 151/332, yani `%45,5`
-  oldu. Birden fazla bağımsız stack/grup, negatif/ters eksen bileşimleri,
+  `tam_kanıtlı`ya geçti. Birden fazla bağımsız stack/grup, negatif/ters eksen bileşimleri,
   `roundCap`, `barMinAngle`, tooltip/seri odaklı hover, animasyon,
   erişilebilirlik ve ölçümlü performans Faz 3/4/6/7/8 kapılarında
   kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
@@ -1078,8 +1072,7 @@ Gerçekleşen dilim — `bar-polar-stack-radial` (2026-07-20):
   oluşturuldu ve izleyen koşuda referansa yazılmadan tekrar geçti;
   referans, gerçek, fark ve metrik hashleri galeri manifestine bağlıdır.
 - Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 152/332, yani `%45,8`
-  oldu. Negatif yığınlar, ters/saat yönü kombinasyonları, birden fazla
+  `tam_kanıtlı`ya geçti. Negatif yığınlar, ters/saat yönü kombinasyonları, birden fazla
   stack/grubun polar bant paylaşımı, `roundCap`, `barMinAngle`, tooltip ve
   seri odaklı hover, animasyon, erişilebilirlik ile ölçümlü performans ilgili
   Faz 3/4/6/7/8 kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
@@ -1157,8 +1150,7 @@ Gerçekleşen dilim — `bar-polar-real-estate` (2026-07-20):
   bağımsız ve tam koşular referansa yazmadan geçti. Referans, gerçek, fark
   ve metrik hashleri galeri manifestine bağlıdır.
 - Kart `kısmi`den `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
-  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 153/332, yani `%46,1`
-  oldu. `roundCap`, `barMinAngle`, negatif/ters polar birleşimleri, tooltip
+  `tam_kanıtlı`ya geçti. `roundCap`, `barMinAngle`, negatif/ters polar birleşimleri, tooltip
   pointer/hover yaşam döngüsü, animasyon, erişilebilirlik ve ölçümlü
   performans ilgili Faz 3/4/7/8 kapılarında kapanmadan kart nihai
   `tam_kanıtlı` sayılmaz.
@@ -1201,11 +1193,58 @@ Gerçekleşen dilim — `polar-roundCap` (2026-07-21):
   `cargo check --no-default-features` ve `node tools/uyum/uret.mjs --check`
   temizdir. Kart `kısmi`den `uygulandı_kanıt_bekliyor` durumuna, statik
   görsel kapısı `tam_kanıtlı`ya geçti.
-- Operasyonel kart ilerlemesi 154/332, yani `%46,4` oldu. Negatif/ters polar
-  birleşimleri, `barMinAngle`, tooltip pointer/hover yaşam döngüsü,
+- Negatif/ters polar birleşimleri, `barMinAngle`, tooltip pointer/hover yaşam döngüsü,
   animasyon, erişilebilirlik ve ölçümlü performans ilgili Faz 3/4/7/8
-  kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz. Sıradaki resmî
-  kart `polar-endAngle`dır.
+  kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
+
+Gerçekleşen dilim — `polar-endAngle` ve kanıt raporu (2026-07-21):
+
+- `../echarts/src/coord/polar/polarCreator.ts`, `AngleAxis.ts`,
+  `Polar.ts`, `../echarts/src/component/axis/AngleAxisView.ts` ve
+  `RadiusAxisView.ts` kaynakları izlenerek `angleAxis.endAngle` açık kapsamı
+  taşındı. `startAngle - endAngle` imzalı ekran açıklığını belirler;
+  `clockwise` ile `inverse` etkin yönü kurar ve `endAngle` yoksa aynı yönde
+  tam tur üretilir. `boundaryGap: false` kategorik açı ekseninin son kapsamı
+  resmî `360 / categoryCount` düzeltmesini uygular.
+- Kısmi polar bölme çizgileri ve sıfır iç yarıçaplı angle axis artık tam
+  çember yerine imzalı yaydır. Kategori etiketleri bant merkezlerine,
+  ayrım ışınları bant sınırlarına düşer; kısmi kapsamın son sınırı ayrıca
+  çizilir, tam turdaki çakışan son ışın yinelenmez.
+- `GrafikSeçenekleri::kutupsallar`, `kutupsal_ekle`,
+  `tüm_kutupsallar` ve `kutupsal_sayısı` tekil API'yi bozmadan ECharts
+  `polar: []` dizisini taşır. Line/bar/scatter ve çekirdek `lines` modelleri
+  `polarIndex` karşılığı `kutupsal_sırası` kazanmıştır. Doğrulama eksik
+  indeksleri reddeder; çalışma zamanı yamaları tekil ve çoklu polar
+  bileşenlerini atomik biçimde değiştirir.
+- Boyama hattı her polar için ayrı görünürlük maskesi, yığın aralığı ve
+  ölçek kurar. Bütün alt eksen katmanları serilerden önce, seri ve tooltip
+  isabetleri kendi `polarIndex` grubunda, bütün üst eksen katmanları da
+  serilerden sonra çizilir; örtüşen iki polar birbirinin verisini kapsamına
+  veya yığınına katmaz.
+- Resmî `public/examples/ts/polar-endAngle.ts` fixture'ı iki açık açı
+  eksenini (`90→0`, `-90→-180`), `S1..S3`/`T1..T3` kategorilerini ve
+  `[1,2,3]` verili iki bar serisinin `polarIndex: 0/1` bağlarını kayıpsız
+  taşır. Yeni referans yalnız bu kart için bir kez oluşturuldu; referansa
+  yazmayan bağımsız tekrar 1/1 ve tam depo koşusu 181/181 geçti. 600×450
+  kanıt 1.122 değişen piksel, `%0,4156` fark ve `0,997493` SSIM üretir.
+- Kullanıcının işaretlediği `dataset-encode0` taban çizgisi bar geometrisi
+  kaydırılmadan, kategori `axisLine`ı barlardan sonra yeniden çizilerek
+  korunur. Görsel kapı x=172 üzerindeki dokuz bar merkezini ayrı yapısal
+  örnekler; 9/9 geçmeden toplam piksel/SSIM eşikleri tek başına kartı
+  geçiremez. Bu katman değişimiyle tüm eski kartlar referans yenilenmeden
+  yeniden doğrulanmıştır.
+- Uyum raporu artık kapsam içindeki 332 kaydın tamamını kartlaştırır:
+  261 resmî galeri kartı ve 71 işaretli gizli doğrulama kartı. Başlık
+  `kilitli görsel kanıt` ile `tüm kapılar tam` sayılarını ayırır;
+  `bar-histogram` gibi uygulanmamış kartlar “Henüz uygulanmadı · Faz 6”
+  yazar. Makine-okunur tek ilerleme kaynağı `uyum/ozet.json`dır: bu dilim
+  sonunda 134/332 (`%40,4`) kilitli statik görsel kanıt ve 0/332 tüm
+  kapıları tamamlanmış kart vardır.
+- Çekirdek 296/296, fixture 44/44, `cargo check --all-targets`,
+  `cargo check --no-default-features` ve üretilmiş-dosya denetimi geçmiştir.
+  Kart `uygulandı_kanıt_bekliyor`, statik görsel kapısı `tam_kanıtlı`dır;
+  animasyon, etkileşim, erişilebilirlik ve performans kapıları kapanmadan
+  nihai `tam_kanıtlı` sayılmaz.
 
 Kabul:
 
@@ -1386,8 +1425,8 @@ Amaç: Bütün parçaları tek, denetlenebilir uyum teslimine dönüştürmek.
 İş kalemleri:
 
 1. 261 resmi kapsam içi görünür örneğin Rust fixture'ını ve kartını kapatma.
-2. 71 kapsam içi `noExplore` kaydını görünür karta dönüştürmeden conformance
-   testine veya aynı yeteneği kanıtlayan açık bir matrise bağlama.
+2. 71 kapsam içi `noExplore` kaydının işaretli gizli doğrulama kartını
+   conformance testine veya aynı yeteneği kanıtlayan açık bir matrise bağlama.
 3. Kategori/arama/filtre/dark/decal/diff UX'ini tamamlayıp klavye ve ekran
    okuyucuyla test etme.
 4. Tüm referans ve gerçek küçük resimleri kilitli kaynaklarla yeniden üretme;
@@ -1399,8 +1438,10 @@ Amaç: Bütün parçaları tek, denetlenebilir uyum teslimine dönüştürmek.
 
 Nihai kabul:
 
-- Galeri sayacı `261 / 261 tam_kanıtlı` gösterir.
-- 332 kapsam içi resmi çekirdek kaydın tamamı kart veya conformance kanıtına
+- Galeri sayaçları `332 / 332 kilitli görsel kanıt` ve `332 / 332 tüm
+  kapılar tam` gösterir; 261 resmî görünür ve 71 gizli doğrulama kartı ayrı
+  sayılır.
+- 332 kapsam içi resmi çekirdek kaydın tamamı kart ve conformance kanıtına
   bağlıdır.
 - Özellik matrisinde kapsam içi `yok`, `kısmi` veya
   `uygulandı_kanıt_bekliyor` satırı yoktur.

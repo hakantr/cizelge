@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 603,
-  "değişen_piksel_oranı": 0.0022333333333333333,
-  "ssim": 0.9970079324399138,
+  "değişen_piksel": 602,
+  "değişen_piksel_oranı": 0.0022296296296296296,
+  "ssim": 0.9970018784355277,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-polar-punchCard.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-polar-punchCard.png",

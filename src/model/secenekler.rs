@@ -58,6 +58,9 @@ pub struct GrafikSeçenekleri {
     pub radar: Option<RadarKoordinatı>,
     /// Kutupsal koordinat sistemi (`polar` + `angleAxis` + `radiusAxis`).
     pub kutupsal: Option<KutupsalKoordinat>,
+    /// Çoklu kutupsal koordinat listesi (`polar: []`). Boşsa geriye
+    /// uyumlu tekil `kutupsal` alanı kullanılır.
+    pub kutupsallar: Vec<KutupsalKoordinat>,
     /// ECharts 6.1 `matrix` koordinat sistemi.
     pub matris: Option<MatrisKoordinatı>,
     /// Birden çok ECharts `calendar` koordinat bileşeni.
@@ -116,6 +119,7 @@ impl Default for GrafikSeçenekleri {
             görsel_eşlemeler: Vec::new(),
             radar: None,
             kutupsal: None,
+            kutupsallar: Vec::new(),
             matris: None,
             takvimler: Vec::new(),
             tek_eksenler: Vec::new(),
@@ -319,7 +323,41 @@ impl GrafikSeçenekleri {
 
     pub fn kutupsal(mut self, koordinat: KutupsalKoordinat) -> Self {
         self.kutupsal = Some(koordinat);
+        self.kutupsallar.clear();
         self
+    }
+
+    /// `polar: []` listesini doğrudan ayarlar.
+    pub fn kutupsallar(
+        mut self,
+        koordinatlar: impl IntoIterator<Item = KutupsalKoordinat>,
+    ) -> Self {
+        self.kutupsal = None;
+        self.kutupsallar = koordinatlar.into_iter().collect();
+        self
+    }
+
+    /// Var olan tekil/serili kutupsal listeye bir koordinat ekler.
+    pub fn kutupsal_ekle(mut self, koordinat: KutupsalKoordinat) -> Self {
+        if self.kutupsallar.is_empty()
+            && let Some(tekil) = self.kutupsal.take()
+        {
+            self.kutupsallar.push(tekil);
+        }
+        self.kutupsallar.push(koordinat);
+        self
+    }
+
+    /// Etkin `polar` bileşenlerini ECharts dizi sırasıyla dolaşır.
+    pub fn tüm_kutupsallar(&self) -> impl Iterator<Item = &KutupsalKoordinat> {
+        self.kutupsal
+            .iter()
+            .filter(|_| self.kutupsallar.is_empty())
+            .chain(self.kutupsallar.iter())
+    }
+
+    pub fn kutupsal_sayısı(&self) -> usize {
+        self.tüm_kutupsallar().count()
     }
 
     pub fn matris(mut self, koordinat: MatrisKoordinatı) -> Self {
@@ -919,10 +957,27 @@ impl GrafikSeçenekleri {
                 }
             }
         }
+        for (sıra, kutupsal) in self.tüm_kutupsallar().enumerate() {
+            for (alan, açı) in [
+                ("angleAxis.startAngle", Some(kutupsal.başlangıç_açısı)),
+                ("angleAxis.endAngle", kutupsal.bitiş_açısı),
+            ] {
+                if açı.is_some_and(|değer| !değer.is_finite()) {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan,
+                        ayrıntı: format!("polar[{sıra}] açısı sonlu olmalı"),
+                    });
+                }
+            }
+        }
         for eksen in x_eksenler
             .iter()
             .chain(y_eksenler.iter())
             .chain(self.tek_eksenler.iter().map(|tek| &tek.eksen))
+            .chain(
+                self.tüm_kutupsallar()
+                    .flat_map(|kutupsal| [&kutupsal.açısal_eksen, &kutupsal.radyal_eksen]),
+            )
         {
             if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
                 && en_az >= en_çok
@@ -985,6 +1040,14 @@ impl GrafikSeçenekleri {
             }
         }
         for seri in &self.seriler {
+            if let Some(kutupsal_sırası) = seri.kutupsal_sırası()
+                && self.tüm_kutupsallar().nth(kutupsal_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "polar",
+                    sıra: kutupsal_sırası,
+                });
+            }
             if let Seri::Saçılım(saçılım) = seri
                 && let Some(tek_eksen_sırası) = saçılım.tek_eksen_sırası
                 && self.tek_eksenler.get(tek_eksen_sırası).is_none()
@@ -1071,11 +1134,11 @@ impl GrafikSeçenekleri {
             if let Seri::Hatlar(hatlar) = seri {
                 match hatlar.koordinat_sistemi {
                     crate::model::hatlar::HatKoordinatSistemi::Kutupsal
-                        if self.kutupsal.is_none() =>
+                        if self.tüm_kutupsallar().nth(hatlar.kutupsal_sırası).is_none() =>
                     {
                         return Err(BilesenHatasi::EksikVeri {
                             bileşen: "polar",
-                            sıra: 0,
+                            sıra: hatlar.kutupsal_sırası,
                         });
                     }
                     crate::model::hatlar::HatKoordinatSistemi::Takvim
@@ -1225,6 +1288,38 @@ mod testler {
     use crate::model::seri::{MumSerisi, SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::ÖğeStili;
     use crate::renk::{Dolgu, Renk};
+
+    #[test]
+    fn coklu_polar_tekil_apiyi_yukseltir_ve_polar_indexi_dogrular() {
+        let ilk = KutupsalKoordinat::yeni().başlangıç_açısı(90.0);
+        let ikinci = KutupsalKoordinat::yeni().başlangıç_açısı(-90.0);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(ilk)
+            .kutupsal_ekle(ikinci)
+            .seri(SütunSerisi::yeni().kutupsal_sırası(1).veri([1.0]));
+
+        assert!(seçenekler.kutupsal.is_none());
+        assert_eq!(seçenekler.kutupsal_sayısı(), 2);
+        assert_eq!(
+            seçenekler
+                .tüm_kutupsallar()
+                .map(|kutupsal| kutupsal.başlangıç_açısı)
+                .collect::<Vec<_>>(),
+            [90.0, -90.0]
+        );
+        assert!(seçenekler.doğrula().is_ok());
+
+        let eksik = GrafikSeçenekleri::yeni()
+            .kutupsal(KutupsalKoordinat::yeni())
+            .seri(SütunSerisi::yeni().kutupsal_sırası(1).veri([1.0]));
+        assert!(matches!(
+            eksik.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "polar",
+                sıra: 1
+            })
+        ));
+    }
 
     #[test]
     fn ara_değerleme() {

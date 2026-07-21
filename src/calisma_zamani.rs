@@ -423,12 +423,21 @@ impl SeçenekYaması {
 
     pub fn kutupsal(mut self, kutupsal: KutupsalKoordinat) -> Self {
         self.değer.kutupsal = Some(kutupsal);
+        self.değer.kutupsallar.clear();
+        self.sağlanan.insert(SeçenekAlanı::Kutupsal);
+        self
+    }
+
+    pub fn kutupsallar(mut self, kutupsallar: impl IntoIterator<Item = KutupsalKoordinat>) -> Self {
+        self.değer.kutupsal = None;
+        self.değer.kutupsallar = kutupsallar.into_iter().collect();
         self.sağlanan.insert(SeçenekAlanı::Kutupsal);
         self
     }
 
     pub fn kutupsalı_kaldır(mut self) -> Self {
         self.değer.kutupsal = None;
+        self.değer.kutupsallar.clear();
         self.sağlanan.insert(SeçenekAlanı::Kutupsal);
         self
     }
@@ -1778,7 +1787,13 @@ fn yamayı_uygula(
         hedef.görsel_eşlemeler = öntanımlı.görsel_eşlemeler.clone();
     }
     alanı_uygula!(radar, SeçenekAlanı::Radar);
-    alanı_uygula!(kutupsal, SeçenekAlanı::Kutupsal);
+    if yama.sağlandı_mı(SeçenekAlanı::Kutupsal) {
+        hedef.kutupsal = yama.değer.kutupsal.clone();
+        hedef.kutupsallar = yama.değer.kutupsallar.clone();
+    } else if kip.değiştirerek_birleştir.contains(&SeçenekAlanı::Kutupsal) {
+        hedef.kutupsal = öntanımlı.kutupsal.clone();
+        hedef.kutupsallar = öntanımlı.kutupsallar.clone();
+    }
     alanı_uygula!(matris, SeçenekAlanı::Matris);
     alanı_uygula!(takvimler, SeçenekAlanı::Takvimler);
     alanı_uygula!(tek_eksenler, SeçenekAlanı::TekEksenler);

@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 759,
   "değişen_piksel_oranı": 0.002811111111111111,
-  "ssim": 0.9975627466810791,
+  "ssim": 0.9975625871257929,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-label-radial.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-polar-label-radial.png",

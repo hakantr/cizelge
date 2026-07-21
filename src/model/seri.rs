@@ -213,6 +213,8 @@ pub struct ÇizgiSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Bağlı kutupsal koordinat sırası (`polarIndex`).
+    pub kutupsal_sırası: usize,
     /// Veri kümesi eşlemesi: `(ad/kategori boyutu, değer boyutu)` (`encode`).
     pub eşleme: Option<(String, String)>,
     /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
@@ -252,6 +254,7 @@ impl Default for ÇizgiSerisi {
             örnekleme: None,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
+            kutupsal_sırası: 0,
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
@@ -283,6 +286,13 @@ impl ÇizgiSerisi {
     /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
     pub fn kutupsal(mut self, açık: bool) -> Self {
         self.kutupsal = açık;
+        self
+    }
+
+    /// Seriyi belirtilen `polarIndex` bileşenine bağlar.
+    pub fn kutupsal_sırası(mut self, sıra: usize) -> Self {
+        self.kutupsal = true;
+        self.kutupsal_sırası = sıra;
         self
     }
 
@@ -446,6 +456,8 @@ pub struct SütunSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Bağlı kutupsal koordinat sırası (`polarIndex`).
+    pub kutupsal_sırası: usize,
     /// Veri kümesi eşlemesi: `(x boyutu, y boyutu)` (`encode.x/y`).
     pub eşleme: Option<(String, String)>,
     /// Bağlı `dataset` dizisi sırası (`datasetIndex`).
@@ -491,6 +503,7 @@ impl Default for SütunSerisi {
             piktogram: None,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
+            kutupsal_sırası: 0,
             eşleme: None,
             veri_kümesi_sırası: 0,
             seri_yerleşimi: SeriYerleşimi::Sütun,
@@ -551,6 +564,13 @@ impl SütunSerisi {
     /// Seriyi kutupsal koordinata bağlar (`coordinateSystem: 'polar'`).
     pub fn kutupsal(mut self, açık: bool) -> Self {
         self.kutupsal = açık;
+        self
+    }
+
+    /// Seriyi belirtilen `polarIndex` bileşenine bağlar.
+    pub fn kutupsal_sırası(mut self, sıra: usize) -> Self {
+        self.kutupsal = true;
+        self.kutupsal_sırası = sıra;
         self
     }
 
@@ -1521,6 +1541,8 @@ pub struct SaçılımSerisi {
     pub eksen_bağı: EksenBağı,
     /// Kutupsal koordinatta çizilir (`coordinateSystem: 'polar'`).
     pub kutupsal: bool,
+    /// Bağlı kutupsal koordinat sırası (`polarIndex`).
+    pub kutupsal_sırası: usize,
     /// Takvim koordinatına bağlıysa `calendarIndex`; `None`, kartezyen ya da
     /// başka bir koordinat sistemindeki saçılım demektir.
     pub takvim_sırası: Option<usize>,
@@ -1578,6 +1600,7 @@ impl Default for SaçılımSerisi {
             efekt_vuruşlu: false,
             eksen_bağı: EksenBağı::default(),
             kutupsal: false,
+            kutupsal_sırası: 0,
             takvim_sırası: None,
             tek_eksen_sırası: None,
             z_seviyesi: 0,
@@ -1627,6 +1650,15 @@ impl SaçılımSerisi {
             self.takvim_sırası = None;
             self.tek_eksen_sırası = None;
         }
+        self
+    }
+
+    /// Seriyi belirtilen `polarIndex` bileşenine bağlar.
+    pub fn kutupsal_sırası(mut self, sıra: usize) -> Self {
+        self.kutupsal = true;
+        self.kutupsal_sırası = sıra;
+        self.takvim_sırası = None;
+        self.tek_eksen_sırası = None;
         self
     }
 
@@ -2917,6 +2949,24 @@ impl Seri {
             }
             Seri::Hatlar(s) => s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal,
             _ => false,
+        }
+    }
+
+    /// Kutupsal serinin bağlı olduğu `polarIndex`; kutupsal olmayan
+    /// serilerde `None`.
+    pub fn kutupsal_sırası(&self) -> Option<usize> {
+        match self {
+            Seri::Çizgi(s) if s.kutupsal => Some(s.kutupsal_sırası),
+            Seri::Sütun(s) if s.kutupsal => Some(s.kutupsal_sırası),
+            Seri::Saçılım(s)
+                if s.kutupsal && s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none() =>
+            {
+                Some(s.kutupsal_sırası)
+            }
+            Seri::Hatlar(s) if s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal => {
+                Some(s.kutupsal_sırası)
+            }
+            _ => None,
         }
     }
 

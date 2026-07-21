@@ -120,14 +120,14 @@
           "geçti": true,
           "değişen_piksel": 232,
           "değişen_piksel_oranı": 0.0008592592592592593,
-          "ssim": 0.9993144614774343,
+          "ssim": 0.9993144117318077,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-simple.png",
             "sha256": "72bdb45de85676337da5138f690498c59a173e71f094ebe68d0ea8dfe18ab40a"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-simple.png",
-            "sha256": "ba99778d7fe7cc9f3eefcdfa5d174faf162a69f037179ebd8a62b4a6f651c527"
+            "sha256": "6a4783bcb55f2133c137020887a05d8aa06ed7def1e6c90f69ec2f7cabb5a72b"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-simple.png",
@@ -135,7 +135,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-simple-son.json",
-            "sha256": "b880ceed962bea949d8b1ae329513d843cb3582b0459cd49a8f8a48b66942fe5"
+            "sha256": "8c48983dc2e465598dafbd6eace9c9da2224820380d51d07f252bedcd13c6c9b"
           }
         }
       ]
@@ -204,14 +204,14 @@
           "geçti": true,
           "değişen_piksel": 294,
           "değişen_piksel_oranı": 0.0010888888888888888,
-          "ssim": 0.9990903080546714,
+          "ssim": 0.9990848304177249,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-tick-align.png",
             "sha256": "ebee25b57ee91d08b846c9970dbe9ed23ecc4d5dc3bf79df6e8bb63125c54281"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-tick-align.png",
-            "sha256": "6fd8a91979883d12e6a3cd3402f8ed6cc7282b5dd3088b8abf01e9dcff151239"
+            "sha256": "a65343d9f0944ecbfbea92b923b6dd5e770b742743c5fc0d6246f8f8e951ed47"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-tick-align.png",
@@ -219,7 +219,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-tick-align-son.json",
-            "sha256": "801fd277bf6c56bcd54e577048348b1915337c9e8375f9ebdbe8e010976d5a86"
+            "sha256": "e74ce4960e484f2055296602a2176309f8550fd67ec001b393c75303408d5fe4"
           }
         }
       ]
@@ -512,14 +512,14 @@
           "geçti": true,
           "değişen_piksel": 543,
           "değişen_piksel_oranı": 0.002011111111111111,
-          "ssim": 0.9988351074561028,
+          "ssim": 0.998835057505629,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/data-transform-sort-bar.png",
             "sha256": "c284000dffa849f85e4eba424743934b771d1d74cdae87f149bbbe3299137d0e"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/data-transform-sort-bar.png",
-            "sha256": "87ceb50d0b8ab44b4585aabb2c3c40e0f2a49ec424834ee579e9a08f431f9d01"
+            "sha256": "9c9508bfb1cb7fc1dd57db50b67049949d94309fb3b865b508e04f473566cc26"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/data-transform-sort-bar.png",
@@ -527,7 +527,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/data-transform-sort-bar-son.json",
-            "sha256": "cfd12bfa881bfa0e2a23a780f87f6c3eb492877ef4b3008ef7ee697385b9a36f"
+            "sha256": "ee1f0ad51a4bd7e2eccaf02c3437106622b412034fcbc1c32f55742f70e62e69"
           }
         }
       ]
@@ -1240,14 +1240,14 @@
           "geçti": true,
           "değişen_piksel": 232,
           "değişen_piksel_oranı": 0.0008592592592592593,
-          "ssim": 0.9993136485190306,
+          "ssim": 0.9993135987734104,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-background.png",
             "sha256": "537856b365f2cbfa562b5cb8df8c04dedbd9a75ac6426ddf1fa25fa1e8cd4f86"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-background.png",
-            "sha256": "66ca8f812cb46de05e158b190ecc4333d87918df1eea2709dbcc9005b84f131f"
+            "sha256": "8ad81a154d90c86f7e50ec0775862fb4df3c498bb0ac9654fa959e8ba2e49eaf"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-background.png",
@@ -1255,7 +1255,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-background-son.json",
-            "sha256": "4cf1b88244298db0d14cd5aab00db6eb94e018923bf7555cf0710874c8765d2a"
+            "sha256": "c8f293c54364247ef6a1248fe924afc37c4f7e5df4dbd23ba87738d7b2af1781"
           }
         }
       ]
@@ -1320,14 +1320,14 @@
           "geçti": true,
           "değişen_piksel": 232,
           "değişen_piksel_oranı": 0.0008592592592592593,
-          "ssim": 0.9993171880201068,
+          "ssim": 0.9993171382744803,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-data-color.png",
             "sha256": "cbbbd09635dfbc3e7bf76ae1343a7a4dc78d39284f0bffa06f13a0350c3101a9"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-data-color.png",
-            "sha256": "9cd9b241446380ed9325a0ab736f19003887f97151c21eb3809dc2980f626b52"
+            "sha256": "00156eddc4703cf916edd2d604b8f72c67a776960725563068cd9453e19ef2b2"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-data-color.png",
@@ -1335,7 +1335,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-data-color-son.json",
-            "sha256": "f3004a216cbb3d59431061c272c2d86bbc0d023e7105043778a7ea8149fad496"
+            "sha256": "b9084c965b498f999914974166d76174d9ba9b0a234780f5a0173b39eff480fb"
           }
         }
       ]
@@ -1404,14 +1404,14 @@
           "geçti": true,
           "değişen_piksel": 998,
           "değişen_piksel_oranı": 0.0036962962962962965,
-          "ssim": 0.9974633104458633,
+          "ssim": 0.9974610048598432,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-waterfall.png",
             "sha256": "e2f7bbd8ef6899ef94969d9b271b22db2bfc6215bff3459f722ff8d7494c851f"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-waterfall.png",
-            "sha256": "b429a1252a8c518577818037b62babb654275bcecf129dc6e59ffd8ec7623417"
+            "sha256": "bc1019c7ce5ca83555cbdbebe470052a2abb1468df21e2fbf97896f689cbdb47"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-waterfall.png",
@@ -1419,7 +1419,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-waterfall-son.json",
-            "sha256": "3bf1daaf345b30d61c540c79681b1508eecc2af602391b3a482f10c642303b49"
+            "sha256": "fa4ae84cd8c9b2c0c29e526c95939a43a22b1a60ebbe5a9c2c8b340d272e367f"
           }
         }
       ]
@@ -1852,14 +1852,14 @@
           "geçti": true,
           "değişen_piksel": 1220,
           "değişen_piksel_oranı": 0.004518518518518519,
-          "ssim": 0.9966472110038045,
+          "ssim": 0.996632694069209,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-encode0.png",
             "sha256": "a6afd1b4b3cbe648ade626ed05463a556185d8a63dc52dd34493ccda11e6c82c"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dataset-encode0.png",
-            "sha256": "27b427f97aaca33e297712ddba52959f4d590939440d295d246879cb7401d7a4"
+            "sha256": "14504bf3b797a8b63e95684005adab07376fcddcbb5773c2a58dc5182459c08b"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dataset-encode0.png",
@@ -1867,7 +1867,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dataset-encode0-son.json",
-            "sha256": "08aef8c40d2a46c542595114f45a727979d176faaa898a990c958b1f9dff6d92"
+            "sha256": "a1d3160807eebcec3949796037b858f98e5d5395c3f889bce06e69cb58752112"
           }
         }
       ]
@@ -3527,14 +3527,14 @@
           "geçti": true,
           "değişen_piksel": 759,
           "değişen_piksel_oranı": 0.002811111111111111,
-          "ssim": 0.9975627466810791,
+          "ssim": 0.9975625871257929,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-label-radial.png",
             "sha256": "c7e83776e7a5e3249c261fa56285efb1471d65fc88c649324c67889438e82c41"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-polar-label-radial.png",
-            "sha256": "8b38a2b2a45199522edd4628f9bf855e714c4c6bb6a459de913027aaf44a8fd3"
+            "sha256": "41cf2a6f80243b2017e0e1f0a1c4a2ced78f4ea492d00278e19b758cb5400b52"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-polar-label-radial.png",
@@ -3542,7 +3542,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-polar-label-radial-son.json",
-            "sha256": "3c473a55da7858b8c658bb825e525d8bf97b4554c7a31cb0ee467d7a519274b3"
+            "sha256": "ca4e6d0260e9357dd38b9dd038fac8d928bb03dac8f8456d5f38de440be385ab"
           }
         }
       ]
@@ -3611,14 +3611,14 @@
           "geçti": true,
           "değişen_piksel": 1169,
           "değişen_piksel_oranı": 0.0043296296296296295,
-          "ssim": 0.997556920357528,
+          "ssim": 0.9975567001802118,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-label-tangential.png",
             "sha256": "df007785d87d6d11e1c7cbb526fc3bc4d134926ee0099afada457d51ce0d3362"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-polar-label-tangential.png",
-            "sha256": "4c9f826e797655fd340b114b6bb7c2f4a67211ec393d366ddfdea7985ef986f5"
+            "sha256": "8480c952cd2001f6841e3879827695b7c692b799e950c004ef5b6a35ed792d0e"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-polar-label-tangential.png",
@@ -3626,7 +3626,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-polar-label-tangential-son.json",
-            "sha256": "d579b4d8795b405434427bcd9d1e10ea93b39a9d366ef6fc7c93bc210cf15a87"
+            "sha256": "3770b0dd270c44cb83a4406c85ff70a2f3377271cfa04428240bd9b7d7059bee"
           }
         }
       ]
@@ -3693,24 +3693,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 591,
-          "değişen_piksel_oranı": 0.002188888888888889,
-          "ssim": 0.9982292057064193,
+          "değişen_piksel": 818,
+          "değişen_piksel_oranı": 0.0030296296296296295,
+          "ssim": 0.997407352127075,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-y-category.png",
             "sha256": "91b261fed775ce14b0ae3882fff4ef6ed563599378075b70c77798941fa16743"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-y-category.png",
-            "sha256": "1b8d435d38acf3f0a91db9a557c2ad36002761b2fb29a7293e8557666cf608d3"
+            "sha256": "556727751499791fd797f5d82d251c573cd7da6bc15b0b3ce542dfa14db57754"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-y-category.png",
-            "sha256": "164aab8d2872bd9a1f8a3a1ef466c48127ea764bc3dbfe97363f0b05b865beea"
+            "sha256": "1117d26072a76d941daad2ad9a3c544d97cdb90d9614f3e091d1ab942fb75a56"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-y-category-son.json",
-            "sha256": "9991f5ac97638c9f10a783f161138652e9b545c3e93ab8e3fe25bc4404faab8a"
+            "sha256": "d8715f65145a8e5f9568777ed364583cf3cabb2af9e3b7528c8d95c209b0fc58"
           }
         }
       ]
@@ -5214,7 +5214,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/polar-endAngle.ts",
     "kaynak_sha256": "28dc8575914af26adbe260bcc6546dacae0d8e7901c672fba197fbb442997439",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#polar_end_angle",
     "seriler": [
       "bar"
     ],
@@ -5229,7 +5229,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5240,15 +5240,40 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1122,
+          "değişen_piksel_oranı": 0.0041555555555555556,
+          "ssim": 0.9974925941225838,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/polar-endAngle.png",
+            "sha256": "6eb15132969c207cbb6df35b96b33fff33120fa3ef09225320bf9493e2db9f24"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/polar-endAngle.png",
+            "sha256": "7fe04244895bbda94415735b35a06c7d798ccc87208f0bf739648e080adb1307"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/polar-endAngle.png",
+            "sha256": "f816448e8d4b1ee4b77e0dab3371553a90902b35558e32a67f65b4400d0eb7a2"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/polar-endAngle-son.json",
+            "sha256": "eb1f259ae1fc6ca40fcd95ff13a87ba7d42d336ad0ae5e56d74e0c72556c29f0"
+          }
+        }
+      ]
     }
   },
   {
@@ -6052,14 +6077,14 @@
           "geçti": true,
           "değişen_piksel": 1305,
           "değişen_piksel_oranı": 0.004833333333333334,
-          "ssim": 0.99778627050166,
+          "ssim": 0.9977862264451696,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-simple-başlangıç.png",
             "sha256": "49c72cc54afea61ff01004f62198d74a11e3af1edab97a55ed8238afbabb180c"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-breaks-simple-başlangıç.png",
-            "sha256": "4da7baf407303b3f70198a49679383675f9853ac0f344bfe21c502787db979d1"
+            "sha256": "1f3199996444591994326be482e40cb513a51c07b51f07b7ea1f6081e7cabd4c"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-breaks-simple-başlangıç.png",
@@ -6067,7 +6092,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-breaks-simple-başlangıç.json",
-            "sha256": "0c3b5b23c7707c294d40034a63cc9ccd748a88a1a3c6196fd74d7e24fefc6978"
+            "sha256": "9319f4db46c87f81f1a9bf91a56e10a342604474358f6e29eb29a64446810cb8"
           }
         },
         {
@@ -6076,14 +6101,14 @@
           "geçti": true,
           "değişen_piksel": 1305,
           "değişen_piksel_oranı": 0.004833333333333334,
-          "ssim": 0.99778627050166,
+          "ssim": 0.9977862264451696,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-simple-daralt.png",
             "sha256": "49c72cc54afea61ff01004f62198d74a11e3af1edab97a55ed8238afbabb180c"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-breaks-simple-daralt.png",
-            "sha256": "4da7baf407303b3f70198a49679383675f9853ac0f344bfe21c502787db979d1"
+            "sha256": "1f3199996444591994326be482e40cb513a51c07b51f07b7ea1f6081e7cabd4c"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-breaks-simple-daralt.png",
@@ -6091,7 +6116,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-breaks-simple-daralt.json",
-            "sha256": "e659f1c44bb460e8c8d3d5ef2e368f63fd244338d3d005184059e4cf48be4dd3"
+            "sha256": "1e1cb18b7a7ad4807f7aebe906509e6511a844121978a042e12010a1682d73c7"
           }
         },
         {
@@ -6100,14 +6125,14 @@
           "geçti": true,
           "değişen_piksel": 2311,
           "değişen_piksel_oranı": 0.00855925925925926,
-          "ssim": 0.9956189082975738,
+          "ssim": 0.9956188725088247,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-simple-genişlet.png",
             "sha256": "19e5106644280dffa1cd6f273186a45c7c8009b80980a3398aab75420a324ea8"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-breaks-simple-genişlet.png",
-            "sha256": "b501725b12b61d31fadf66f5a661843dd9ed3edbff1898ebdee8ffa97a0ed655"
+            "sha256": "50a060e857645758359790ff640388b580c128454d943cb010d49db95d243ba9"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-breaks-simple-genişlet.png",
@@ -6115,7 +6140,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-breaks-simple-genişlet.json",
-            "sha256": "7def8be5fda1e55937530a46d90b6b7c5b9b42fc189ed69395de704abe7a2677"
+            "sha256": "8f9c2144e319901249cd498b766af15d8f2cd41e6c24bb7e38dbe22884cd34d1"
           }
         }
       ]
@@ -6319,14 +6344,14 @@
           "geçti": true,
           "değişen_piksel": 2690,
           "değişen_piksel_oranı": 0.009962962962962963,
-          "ssim": 0.996700815298135,
+          "ssim": 0.9967007773216763,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-label-rotation.png",
             "sha256": "b7b690bd7e4d6f7f05c88edc43f93051745546dc02897e723eda03262d26cfb9"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-label-rotation.png",
-            "sha256": "c3853b4f78e7476a200490bd23e6fb514fe2c9f3aab0c688bb2757bf506d6e79"
+            "sha256": "eac6aa30e675e1512a50332c73388a2b538ccdb5625b071df632b28655f77950"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-label-rotation.png",
@@ -6334,7 +6359,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-label-rotation-son.json",
-            "sha256": "b80cf2d49a71bc19cd12438593fb8863ba6e2a7dbc5eeb61cb7b0d9325d00b78"
+            "sha256": "c91adbe4914c1cf90480949b206521ecaf17e6bef71821f887256dfa24d05603"
           }
         }
       ]
@@ -6407,14 +6432,14 @@
           "geçti": true,
           "değişen_piksel": 604,
           "değişen_piksel_oranı": 0.002237037037037037,
-          "ssim": 0.9988224930779489,
+          "ssim": 0.9988224212514727,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-stack.png",
             "sha256": "616acccc07d9f2f7ea29971149e1265db7830b22e51760cb3caedf701bfa5f62"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-stack.png",
-            "sha256": "d03207ff251b8512fcea78857f5aa4377f43aa9195c260c7c63455552cd782ef"
+            "sha256": "ab1dc90c6d00002758e141b22f9f655683ecd58effef956b1885b191f853247a"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-stack.png",
@@ -6422,7 +6447,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-stack-son.json",
-            "sha256": "7e4bb2e4573836c56aaff17f6af365755e20fb9f77b4901bfbd2bf308481e3c4"
+            "sha256": "187dc49531d2d6e057d83d80086be9ca1a0cd8f445a130f896a1cb552a7ce6af"
           }
         }
       ]
@@ -6487,14 +6512,14 @@
           "geçti": true,
           "değişen_piksel": 460,
           "değişen_piksel_oranı": 0.0017037037037037038,
-          "ssim": 0.9977017086593468,
+          "ssim": 0.9977016413476187,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-stack-borderRadius.png",
             "sha256": "227f3bd4b0f6fd9cbd775752a087d27ae25a17bf8310e84862f1b29eeed6ff90"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-stack-borderRadius.png",
-            "sha256": "b0b994de95cac1e7eb31017498269ae65acb5755e323e89581d6a42215ea23a1"
+            "sha256": "698ad1c0209991cf859ed7af09ce3a6699c329f39098738e741e937a030d21b4"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-stack-borderRadius.png",
@@ -6502,7 +6527,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-stack-borderRadius-son.json",
-            "sha256": "4f2404a423d8e94b1a599e74e351cf4a82b46aa061d1e1a2a839815432dcdbcc"
+            "sha256": "acfbb11aafd6cda0c482a59bacba2af64516c3df3568896c428aead811ad4b9a"
           }
         }
       ]
@@ -6568,14 +6593,14 @@
           "geçti": true,
           "değişen_piksel": 1479,
           "değişen_piksel_oranı": 0.005477777777777778,
-          "ssim": 0.9971438271214929,
+          "ssim": 0.9971437855659052,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-stack-normalization.png",
             "sha256": "4614eaa80c239f5413f572e8215d2eaba850158da9302d2b64d43ecf5e24c270"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-stack-normalization.png",
-            "sha256": "0771909b6b04eb91695dd6cd5a30d46f3186ddc44cedb41c3c71a74035d5bea8"
+            "sha256": "252ce23f92361010f1d393c7a3cbf69928a089b070b2998aa92a768d67d1dc16"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-stack-normalization.png",
@@ -6583,7 +6608,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-stack-normalization-son.json",
-            "sha256": "db3d8654d2e850d6ccddd1d4ace8cf933676e17954d19c16937f3cc5dec8882b"
+            "sha256": "c89bff8dcd1fee4841d44d4882bdcb6930b60dc1580ea281edafeb4852a0d1e7"
           }
         }
       ]
@@ -6714,14 +6739,14 @@
           "geçti": true,
           "değişen_piksel": 1186,
           "değişen_piksel_oranı": 0.004392592592592593,
-          "ssim": 0.997408943470511,
+          "ssim": 0.9974083846511379,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-waterfall2.png",
             "sha256": "a903fd87bc23c624796d16b9e95b93510286c692ae6814db952c5d8c976f5b10"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-waterfall2.png",
-            "sha256": "aedf2790e25653b5a7bd7b79326f3d3707a00f43311b872e7c0eb8078c5d33d8"
+            "sha256": "ac110bdfe27ae6feeaa6bc339775f927648329e8bd0eec6562c503e0fc733dfc"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-waterfall2.png",
@@ -6729,7 +6754,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-waterfall2-son.json",
-            "sha256": "a2958e759534f27f36d9814a9e8f8fc6bbb8f6bcb681d31b608aff8e43c6cc31"
+            "sha256": "64e77b3c38bc3a591ffb0f76c13c348258373a4861baaf2f3731ee3365bc01bd"
           }
         }
       ]
@@ -6796,24 +6821,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 1284,
-          "değişen_piksel_oranı": 0.004755555555555555,
-          "ssim": 0.9975223625159136,
+          "değişen_piksel": 1507,
+          "değişen_piksel_oranı": 0.0055814814814814815,
+          "ssim": 0.9974575304156152,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-y-category-stack.png",
             "sha256": "082304f6ebdf46df995fcedd46e88bc6c8320bcd68a2498152ee0d1598d38a1f"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-y-category-stack.png",
-            "sha256": "5cffa0690aa4298fbd05a57cc8654b504aef29c6469e55221329352441d5c0e2"
+            "sha256": "3b634b337aa4a935cad0099c752f23c1d565e8b1054f457e481de66f874e206a"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-y-category-stack.png",
-            "sha256": "1c43d09ccea7f08faaf38012ff7cd1afc765dae2dbe57621c24c2043b9b693c2"
+            "sha256": "d6f3023d035dbc9f49662ceebb8cdba572dde11ec2d8b5cfcca1d5994e31bbfd"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-y-category-stack-son.json",
-            "sha256": "03afdd7ab21cdec8c4c86dc1156a7b9827407e5b89ec492cba213fc13f134875"
+            "sha256": "b877becee1f729191ef269d83e1b73159ebdf50ede8c56f2bf40de2a5ebeb6ad"
           }
         }
       ]
@@ -9235,14 +9260,14 @@
           "geçti": true,
           "değişen_piksel": 741,
           "değişen_piksel_oranı": 0.0027444444444444443,
-          "ssim": 0.9991283777455627,
+          "ssim": 0.9991283534695289,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-brush-başlangıç.png",
             "sha256": "30ab3ea3bd1cf49f7735daa6dda14c69faa24f62fbc6e423eaf888f310c359da"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-brush-başlangıç.png",
-            "sha256": "b954a92a0549528666cb4f6e5ee656e358ff1d21761c60cffa70bdbbaad2a1b1"
+            "sha256": "ef0135cc2e841197719cc3194f5c022f11869f37279ebdd0e420437da79c5d0b"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-brush-başlangıç.png",
@@ -9250,7 +9275,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-brush-başlangıç.json",
-            "sha256": "fc993677725dcfe0a48eb24f3cc2564d544f9d8ab0c0f62f488af8597c51d54c"
+            "sha256": "34335b0898904505130a19d37757f48f33bb9e30fc9a7f6f99d12ae5ba2380d8"
           }
         },
         {
@@ -9259,14 +9284,14 @@
           "geçti": true,
           "değişen_piksel": 1316,
           "değişen_piksel_oranı": 0.004874074074074074,
-          "ssim": 0.9986309559505773,
+          "ssim": 0.998630940320891,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-brush-seçim.png",
             "sha256": "55e9c568d01b898efda1084a39d5bdc43963eed4684933b50f0185ac8b2415e2"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-brush-seçim.png",
-            "sha256": "213aea7eb997c4cc77cb3feaa98eb61326cc5773629f2720b19a00c3379d4029"
+            "sha256": "fee597077f0d81460e3577f6e85bdc71116f199beda6006456bf3f3ffc3b5b3b"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-brush-seçim.png",
@@ -9274,7 +9299,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-brush-seçim.json",
-            "sha256": "5c46da16a744aa77627ff1c8800c485bf64c59f4783569167d13dbe1bda5f6bd"
+            "sha256": "16ffe7c78872cf0c2cc16ce6c06fe6c9a754d32ac5347194c334cdde56f2f113"
           }
         }
       ]
@@ -9341,24 +9366,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 965,
-          "değişen_piksel_oranı": 0.003574074074074074,
-          "ssim": 0.9974908599633183,
+          "değişen_piksel": 1192,
+          "değişen_piksel_oranı": 0.004414814814814815,
+          "ssim": 0.9972872952635597,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-negative.png",
             "sha256": "d6a856dee1e8fc54108f323aa6bb0a005dcc7bde557f25637f2aba8bde644304"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-negative.png",
-            "sha256": "0e4302c689ccb14ba6df0f2abba73b266164e4ac524cdc644abd37b037bf2a40"
+            "sha256": "204699710b3bf606c3c3eb98f318df7d6b9eded7a028f1e1e5bc13b9de3f4392"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-negative.png",
-            "sha256": "f9465adf53cea4f886d2baf890c9e7f425556bcfaf4d3bf7161ab8d9b6452a2d"
+            "sha256": "ccd078df706ae1351ffa9cdaff13dd2b126dc5ac29571bfade247889966ff1e9"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-negative-son.json",
-            "sha256": "510628d4ee7ce108dbaeaf67ee1ec3f29dc798f2523677ecfa6b7aa25a76cd9a"
+            "sha256": "7729ad0cdb6ccc549093d2bbd0ab5f2f8bb90948e19e638fd5b627d1228e953b"
           }
         }
       ]
@@ -9431,14 +9456,14 @@
           "geçti": true,
           "değişen_piksel": 858,
           "değişen_piksel_oranı": 0.0031777777777777776,
-          "ssim": 0.9979856915083607,
+          "ssim": 0.9979856253517365,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar1.png",
             "sha256": "11842a0132593c1b0279e1d0dc3a5de6a8feaa850a08333233571c45319aada9"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar1.png",
-            "sha256": "1e1c201c45bf80cd80e023e7f544f02e9ead92acf08aee9e3baf0b80fabcb1c1"
+            "sha256": "9c167699d191a60b06a20290dea2c30d104492862239dfcf216b75bc763159fe"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar1.png",
@@ -9446,7 +9471,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar1-son.json",
-            "sha256": "5b69cf263c3ad0fa57e2cac6cdb88b858af1b7e1a06e908efc25128dddba8f6a"
+            "sha256": "a896ff6a1dee4bcd96484dc666c06980f7890e13d1eb7fad5eea8ad87eeaecb0"
           }
         }
       ]
@@ -10721,14 +10746,14 @@
           "geçti": true,
           "değişen_piksel": 912,
           "değişen_piksel_oranı": 0.0033777777777777777,
-          "ssim": 0.9933509931962338,
+          "ssim": 0.9933509200540062,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/mix-line-bar.png",
             "sha256": "42d8c3837c58506cbebcc8261af1c819719c636d9ccef02d77b134d765913035"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/mix-line-bar.png",
-            "sha256": "f4d4004e8f2fb478d9ec3c562c16a84f312e5cfc47f16840f3f4ef8f8aa04e7c"
+            "sha256": "6a129024d39fd0597896b202250be2e120590c5ae4e6aff68b66814d2a9d4bfd"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/mix-line-bar.png",
@@ -10736,7 +10761,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/mix-line-bar-son.json",
-            "sha256": "0756a83ef2fcfbc2dcea675a46e8b8832874a2a92613602d09d71af685fe49f3"
+            "sha256": "34363e432d60e9d00c6f4e1ff3c370dc04d0d7bc01845a7e908267f456198d56"
           }
         }
       ]
@@ -10810,22 +10835,22 @@
           "geçti": true,
           "değişen_piksel": 997,
           "değişen_piksel_oranı": 0.003692592592592593,
-          "ssim": 0.9966082086923881,
+          "ssim": 0.9966084406888319,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/mix-zoom-on-value-başlangıç.png",
             "sha256": "dad2e488cb714ce1a349d62f647778231511afd9f45c3229546832389002c52f"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/mix-zoom-on-value-başlangıç.png",
-            "sha256": "f4688ddbd155bd03f73d37b587d17d5909bb182f00e9984295202ac6009028d6"
+            "sha256": "bfb5d8656ef80797afc0d20e4e5b8df6046618754e24e72d9b8f5b3be9e5bbec"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/mix-zoom-on-value-başlangıç.png",
-            "sha256": "2dfbd37fa22b14f5287c62cc55ebd115379c0086ca0037580531e6b27eea372d"
+            "sha256": "65d478e449304282660aaa46d979e2edd552f4d64c7fbc6592f381338dd46083"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/mix-zoom-on-value-başlangıç.json",
-            "sha256": "02ff11606b38457eb4f6e85022eb4c455c6eb4ac73608b665351417e8a34667c"
+            "sha256": "6ba6630d28708b9205ad1b244b23fb94c1eb82e6bf8f5cf05822393b22274fe6"
           }
         },
         {
@@ -10834,22 +10859,22 @@
           "geçti": true,
           "değişen_piksel": 1166,
           "değişen_piksel_oranı": 0.004318518518518518,
-          "ssim": 0.9948543618404899,
+          "ssim": 0.9948550060557039,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/mix-zoom-on-value-son.png",
             "sha256": "2e4fd66d17db37ca72caad98d0b2526a53f4977454ac671f14159d693094dd72"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/mix-zoom-on-value-son.png",
-            "sha256": "a6aca3345f843284b0e19b2323c3b606bebf84eba0da5bd939f056110126b169"
+            "sha256": "43698137e62e4cc6af4a51909a222c103fa364174f3c1ad136e2af6a3edddb13"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/mix-zoom-on-value-son.png",
-            "sha256": "ef070556edb47bf91dbd0835daa98344c253cf428e518873d9c3a3601f80034f"
+            "sha256": "6c0095ae87035195c52786ed42d84ee3bde0452f78c71db00f441516cddd69dd"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/mix-zoom-on-value-son.json",
-            "sha256": "4b7f4b10b259f08f0db8f83249f379d579c71eebbdbe031b2aba69debda588ae"
+            "sha256": "238207f173d8765382d58e5b39f173f2965aaec16a23924184152e9d5a3bb257"
           }
         }
       ]
@@ -11384,14 +11409,14 @@
           "geçti": true,
           "değişen_piksel": 171,
           "değişen_piksel_oranı": 0.0006333333333333333,
-          "ssim": 0.9994597003547298,
+          "ssim": 0.9994594811848915,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-aggregate-bar-bar.png",
             "sha256": "a9ddbf92d533b436de071a9d14d2cdeb127e8c2990f96ea0c59bd406acddcc54"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/scatter-aggregate-bar-bar.png",
-            "sha256": "8d6673f563bb48ec48a5299506c356e8355a21c0628efb93212643849c368ecc"
+            "sha256": "77cac219b6a4183a7ef616469f366bf4fc1b5ffbf7d751295d3a68ff79987b25"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/scatter-aggregate-bar-bar.png",
@@ -11399,7 +11424,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/scatter-aggregate-bar-bar.json",
-            "sha256": "953157b36af946344484d0ad1ec306ad346573ea625921e77666b9c5d97409c8"
+            "sha256": "b2bf01c3778d9b5f0b9f3b0d5b25e3f5ae3cd00d19f9e8c60642c7d38cd6ee8f"
           }
         },
         {
@@ -12639,14 +12664,14 @@
           "geçti": true,
           "değişen_piksel": 678,
           "değişen_piksel_oranı": 0.002511111111111111,
-          "ssim": 0.9976823252923662,
+          "ssim": 0.9976557871398114,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-series-layout-by.png",
             "sha256": "53649830317195579913eeb2a759fe0df5080a1a9a8bd072ab05fe22bc541c7b"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dataset-series-layout-by.png",
-            "sha256": "664796e216e3513eed5eab930d692ca69bd363d1ddb0cb6bedf3eda988f81bc6"
+            "sha256": "2f45e1cb2a3715c2df01f067103c8303f9837ac393c5e1dad2b63ba921bae14f"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dataset-series-layout-by.png",
@@ -12654,7 +12679,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dataset-series-layout-by-son.json",
-            "sha256": "41a4cc903ddf1ad1c6d845a74c0f555a68e2cfe6500a0fe0ad87b712e45d6fd6"
+            "sha256": "ac21614c4e2619baa534f76a2c6bfae88ea6fbe8af1049953fdea271f57aaf02"
           }
         }
       ]
@@ -12723,14 +12748,14 @@
           "geçti": true,
           "değişen_piksel": 400,
           "değişen_piksel_oranı": 0.0014814814814814814,
-          "ssim": 0.9990322206670277,
+          "ssim": 0.9990320989457099,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-simple0.png",
             "sha256": "3f53b844b1bff0ed9dd01c4e5b2b3a17cd50c88e45c1f68bb5c1f34c4950c730"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dataset-simple0.png",
-            "sha256": "6b0d349277389e2f2d5643cc4569c91614093f28b672634dc7a1701cef76bc7b"
+            "sha256": "c589453725cca9bc5c862760ba1d209e50450a31551af987a9e0eef6b04472b6"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dataset-simple0.png",
@@ -12738,7 +12763,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dataset-simple0-son.json",
-            "sha256": "0128657d8ba41aadf91cbf9625793d6deadbc7f0490552abe24bfe0262931fdb"
+            "sha256": "6ebf43ec58e2c99a6f9adec20f640a474ada2f8b45b047b3aae8e4c08cf7310c"
           }
         }
       ]
@@ -12807,14 +12832,14 @@
           "geçti": true,
           "değişen_piksel": 400,
           "değişen_piksel_oranı": 0.0014814814814814814,
-          "ssim": 0.9990322206670277,
+          "ssim": 0.9990320989457099,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-simple1.png",
             "sha256": "3f53b844b1bff0ed9dd01c4e5b2b3a17cd50c88e45c1f68bb5c1f34c4950c730"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dataset-simple1.png",
-            "sha256": "6b0d349277389e2f2d5643cc4569c91614093f28b672634dc7a1701cef76bc7b"
+            "sha256": "c589453725cca9bc5c862760ba1d209e50450a31551af987a9e0eef6b04472b6"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dataset-simple1.png",
@@ -12822,7 +12847,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dataset-simple1-son.json",
-            "sha256": "56d4b7530ab4602ea105f7924c1b535be19303bcb261c8c2df5f5c01de3579c0"
+            "sha256": "bb89dbf5b5cc4323ce2415de18ce2b2c493a438576e3eb8818772798ad082b74"
           }
         }
       ]
@@ -14466,14 +14491,14 @@
           "geçti": true,
           "değişen_piksel": 861,
           "değişen_piksel_oranı": 0.0031888888888888887,
-          "ssim": 0.9979895743995567,
+          "ssim": 0.9979895666107226,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data-başlangıç.png",
             "sha256": "2d8deb968ea0bae7185c7f736705a49575fec45d63d83ec5b4e61ea2e8e7ddf8"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dynamic-data-başlangıç.png",
-            "sha256": "193a07d922be7d9357697f354324dde747e4557f04283c2fd7598333e693d2a5"
+            "sha256": "71ac3ed959f85c9e5372ff22d387c98ebfd8df0f2049ac5e5e546b412c81e21f"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dynamic-data-başlangıç.png",
@@ -14481,7 +14506,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dynamic-data-başlangıç.json",
-            "sha256": "c99a9e550d6e0383e86c363e6122a55eb858f17b650273279929b0ecda3a7979"
+            "sha256": "e909fa8ed5d2d3c04b599950cfbe899e13fa823724ad6fe4f71b95e9f8033390"
           }
         },
         {
@@ -14490,14 +14515,14 @@
           "geçti": true,
           "değişen_piksel": 2204,
           "değişen_piksel_oranı": 0.008162962962962962,
-          "ssim": 0.9950411033371034,
+          "ssim": 0.9950410955482676,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data-ipucu.png",
             "sha256": "49ee66623d5debb63e6ac07b363c04d0342e12b926ea998e1441ccb0eeef0ce4"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dynamic-data-ipucu.png",
-            "sha256": "47a8cb715708cd98d16b5ef6b03d23b62e1aa1b8b5020dc51ebc3d8064fbcba5"
+            "sha256": "d2a4abd02576572722b27523930579e5c442e80ac853200ebea6b71902422a0e"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dynamic-data-ipucu.png",
@@ -14505,7 +14530,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dynamic-data-ipucu.json",
-            "sha256": "cdfbd5410ce8f95d7ea35ee7bce45851fc9caee55ad4f1f2e6df5b9fc9a0cf42"
+            "sha256": "b0e60d151d14298602cc1da3d95234a94825af2355a1b62ba7e140dfb99bf142"
           }
         },
         {
@@ -14514,14 +14539,14 @@
           "geçti": true,
           "değişen_piksel": 961,
           "değişen_piksel_oranı": 0.0035592592592592594,
-          "ssim": 0.9950279083630194,
+          "ssim": 0.9950279004504254,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dynamic-data-son.png",
             "sha256": "fdb1b3fbb701b13b3cc351f12b0abb0d49f6b436e5be196af586919a9a1cd57c"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dynamic-data-son.png",
-            "sha256": "2918333d01352c9747b49d23a5fd16dce8a2ddf2fae2c7cd3de009acb256e5a6"
+            "sha256": "57c3c1f1dd9cdc08e4d57e7dff894e4807effcf17cb4390851f86c41070213e2"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dynamic-data-son.png",
@@ -14529,7 +14554,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dynamic-data-son.json",
-            "sha256": "2fb9d3d96377adea09b80cd7d25b5c5e6d914995e532ca9d7c45f207a26a1995"
+            "sha256": "2b74f9943a4f9cc16b3152e185e97a59b684043ca975fdc5c605f396f6e7a7f2"
           }
         }
       ]
@@ -15270,24 +15295,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 769,
-          "değişen_piksel_oranı": 0.0028481481481481483,
-          "ssim": 0.9977433303410718,
+          "değişen_piksel": 770,
+          "değişen_piksel_oranı": 0.002851851851851852,
+          "ssim": 0.9977561841688121,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-stack.png",
             "sha256": "1aa5ac7b53f35983bf32df39b53241debb206777eea5856ce2cc99e69b56dff1"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-polar-stack.png",
-            "sha256": "f3071348428ef6dd9d6c52cc0efacbc1fb310c89ad06d7fb970872c0a3c792a0"
+            "sha256": "bace391bbd231a3713925db43f6a9de4af310a688b91f9b475ffbb9afbd9b708"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-polar-stack.png",
-            "sha256": "40b922276a2c510b8dc20c3c0dd9639a348a965d343634a1662891dcb76b9fc2"
+            "sha256": "21cddcec821191ef253377a1356a478e44ef33f41566a7b698c6a5defb1bcd2b"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-polar-stack-son.json",
-            "sha256": "967418ce8b20f8c2e653c41ffe654cfd7c9b7ba6876ee4ce54280449b2c800bb"
+            "sha256": "9faae2f85d27868308bce3a8fcf3b8496686c4a7caa0eddd507d98bb51451e7a"
           }
         }
       ]
@@ -15354,24 +15379,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 783,
-          "değişen_piksel_oranı": 0.0029,
-          "ssim": 0.9976812479300281,
+          "değişen_piksel": 782,
+          "değişen_piksel_oranı": 0.002896296296296296,
+          "ssim": 0.9976802800994781,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-stack-radial.png",
             "sha256": "dcf87289f2c2e898b25a8cfc24292992ccb40cacdf0a4286205c2f2bf0f263ab"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-polar-stack-radial.png",
-            "sha256": "9a67dfe5e7c08c2fe1946cb8a97bdbe8a783845040f496e846d1e867c7db86d2"
+            "sha256": "617c422687ff67ac9e7c156f8168109e6f6193a27de49c1a489de053c8470174"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-polar-stack-radial.png",
-            "sha256": "7ef694703a431baac906f48542997ac049b22c94a15d94003dee38f740c0e0af"
+            "sha256": "55ab3342a7d83b454dd21087f909b9fb5e3a5ac6e20048d8e5700438d8d43170"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-polar-stack-radial-son.json",
-            "sha256": "e74d46e4facc5bb15baeff9149d60d60f46fc1f99fa7111338d3e62d095358d1"
+            "sha256": "d7e79f9334fafb3019d5193b6ce311fcfd22309f3fd173743d7223e194bcb14c"
           }
         }
       ]
@@ -15959,14 +15984,14 @@
           "geçti": true,
           "değişen_piksel": 1470,
           "değişen_piksel_oranı": 0.0054444444444444445,
-          "ssim": 0.9919582218642348,
+          "ssim": 0.9919712441151038,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/polar-roundCap.png",
             "sha256": "a1fb6719e0202e720dfc8579741d265c794f9e2b3585c3c700c6166cabc1f507"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/polar-roundCap.png",
-            "sha256": "c16d83e98152f35ed843e176c422853957995de3ae9a464c095db1fe47a81857"
+            "sha256": "995da9212909d3891c5ff6c40136cc312833f942f2244a1a3788bccdb0bc2209"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/polar-roundCap.png",
@@ -15974,7 +15999,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/polar-roundCap-son.json",
-            "sha256": "910c89df10e89fbf297ca6490c5f2fdbd95ecddcca48db1f8f104fbd34e2b38c"
+            "sha256": "9e4d8ec873d6b7117baee804c04c4c0e284321a6f546a2f6b684719ef6dbdde4"
           }
         }
       ]
@@ -16353,14 +16378,14 @@
           "geçti": true,
           "değişen_piksel": 2299,
           "değişen_piksel_oranı": 0.008514814814814815,
-          "ssim": 0.9964504253530632,
+          "ssim": 0.9964503812156305,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-başlangıç.png",
             "sha256": "4db0a766831b97da494050a246619570510557013084e074fe3120a9b9aaf119"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-breaks-brush-başlangıç.png",
-            "sha256": "46fabb59198e320e31ea4ca3d8e698a931404a35b73c9dcf63a017048e26e307"
+            "sha256": "db51816bcf66726b3bb799e3a0196f5a428c0c4bbb5bd8d0a8c8121e952fe3cc"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-breaks-brush-başlangıç.png",
@@ -16368,7 +16393,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-breaks-brush-başlangıç.json",
-            "sha256": "5610ca34f5ab19c1c3cce3732f626e74b510438bbab37b65c981d85ffdc054a9"
+            "sha256": "c2efbdcb08856c292d8fa38066d38e5e6634a92f76333e716aa29420566ee674"
           }
         },
         {
@@ -16377,14 +16402,14 @@
           "geçti": true,
           "değişen_piksel": 2232,
           "değişen_piksel_oranı": 0.008266666666666667,
-          "ssim": 0.9968428317285617,
+          "ssim": 0.9968428099137558,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-fırça.png",
             "sha256": "7eae03ecdcce27df3a950933d2d9c54edc4dae832c3b9948a62c3694c4a78cb8"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-breaks-brush-fırça.png",
-            "sha256": "898c914d99a5a1b055557530a34e7203fc913239671009b0665312f7003b6f15"
+            "sha256": "56028504bb477c9a59c8e3c310e4ce29d9dcbb021b3870a1d8812600e03791f6"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-breaks-brush-fırça.png",
@@ -16392,7 +16417,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-breaks-brush-fırça.json",
-            "sha256": "90ef9d3cdcc839cc3602cc5441ec520589cc9446bc44fcd9bb376a36cfb0b3b2"
+            "sha256": "91b7e2cc97841e6ce9e9aea59b84a5932706ab125d5b3cbbc83149ca1db82198"
           }
         },
         {
@@ -16401,14 +16426,14 @@
           "geçti": true,
           "değişen_piksel": 2182,
           "değişen_piksel_oranı": 0.008081481481481481,
-          "ssim": 0.996896392455523,
+          "ssim": 0.9968963565142143,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-breaks-brush-sıfırla.png",
             "sha256": "03bebed2b43563f173715a3d9e7f14a3c1008ccd6bea67389e34d64ab822dd29"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/bar-breaks-brush-sıfırla.png",
-            "sha256": "7a5b666b6d3a6cd79504a643939c3e20ad76a09a353e124cdecc16866bd4cef3"
+            "sha256": "8f591de376aeef130bec8a7845fde19248598489ae6bf96190075a641c3cb0a6"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/bar-breaks-brush-sıfırla.png",
@@ -16416,7 +16441,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/bar-breaks-brush-sıfırla.json",
-            "sha256": "c11efb5cb555ffb5f03a1e7237d6be8a0c2b58121e074439dad00a5747047a27"
+            "sha256": "6b53b729c5ffabfabe9c0c864a3256174af970b3f5d3bc391651aa8f2b869c46"
           }
         }
       ]
@@ -16805,24 +16830,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 603,
-          "değişen_piksel_oranı": 0.0022333333333333333,
-          "ssim": 0.9970079324399138,
+          "değişen_piksel": 602,
+          "değişen_piksel_oranı": 0.0022296296296296296,
+          "ssim": 0.9970018784355277,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-polar-punchCard.png",
             "sha256": "3ff2fcb80aca3fd60a16bb2c9c2db2dce19050655d2689b35208214e04f34812"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/scatter-polar-punchCard.png",
-            "sha256": "237fa114271dc50f4773f88cfd03943cb520a0d9c05b6755ac68b6ee491d7a5c"
+            "sha256": "5d9c3e341417ce6c1356bcc8e201c65cfcbb700a3ea0be7c3a1310bc1fd6552a"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/scatter-polar-punchCard.png",
-            "sha256": "f2ea10f49aac29e318dafde9862409ea1b5038e6e21691f3cfe7b49f8351c47a"
+            "sha256": "7244718ca803a6310c6685ecae11e81a8f2751debfedbb40719cd4b4481672cf"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/scatter-polar-punchCard-son.json",
-            "sha256": "b5614889d618564b6459cace3f04cf77fb5151699e5bb67becc6bd2b4dc55121"
+            "sha256": "f8fa8ff5e84a4b2b0cfed2be4ca022e122399ae54a86890114d8ba56e971ed28"
           }
         }
       ]
@@ -18812,24 +18837,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 726,
-          "değişen_piksel_oranı": 0.002688888888888889,
-          "ssim": 0.9977115337762928,
+          "değişen_piksel": 727,
+          "değişen_piksel_oranı": 0.0026925925925925928,
+          "ssim": 0.9977130096095272,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-polar.png",
             "sha256": "0787ac7a06f3343f815784482d37fe7586e13c6080246108c5ad757e5c2cd069"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/line-polar.png",
-            "sha256": "d9d688f4a6369cd7084f7bd4d5459bd838bd5b852d716ba3db331a5d29f769c4"
+            "sha256": "445562e93d5ae8f97cf4c41bae91e8f131e3c051435dbabdbaa0c880f4fe9d84"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/line-polar.png",
-            "sha256": "15a4adacbb9188a2c4ff81f1c6efc373a39686f4c59dfd5441ae21bb0f2e9947"
+            "sha256": "5853a91226ede94adf850bc7cd6b5c2e3481724393bee28449810e8d787e225e"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/line-polar-son.json",
-            "sha256": "8e6f2edbc1e588cf092537f2afb123210d83ee75fc128995960b3db2b084c630"
+            "sha256": "9962a1a65804dfea483cc1d581f9b434576bdb9a02b759cac2dae4f59befbd38"
           }
         }
       ]
@@ -18901,14 +18926,14 @@
           "geçti": true,
           "değişen_piksel": 781,
           "değişen_piksel_oranı": 0.0028925925925925924,
-          "ssim": 0.9976794989522735,
+          "ssim": 0.9976796257792241,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-polar2.png",
             "sha256": "edf69e4adcff03a0fe0ca650e482d80cfebc6452c3d2aca84e919945121384e5"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/line-polar2.png",
-            "sha256": "a40fb35f9b7084d866dc3dcdc4aa84b6fca58b0b4fd9a331139bb12ba8f09656"
+            "sha256": "24872996d3770089b34bb9d7273d781fa51bed4db620b4e10b3367775d3dbb40"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/line-polar2.png",
@@ -18916,7 +18941,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/line-polar2-son.json",
-            "sha256": "2a63e9cb592c7a05608513d9e402d6917b967f228f4306646ed9de633ecc4024"
+            "sha256": "a4c893ba296a1df988e799b6eb645f746ed31452b2bd5b868144604ed4e092ee"
           }
         }
       ]

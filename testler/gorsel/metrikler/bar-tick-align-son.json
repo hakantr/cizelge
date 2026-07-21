@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 294,
   "değişen_piksel_oranı": 0.0010888888888888888,
-  "ssim": 0.9990903080546714,
+  "ssim": 0.9990848304177249,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-tick-align.png",
     "gerçek": "testler/gorsel/gerçek/default/bar-tick-align.png",

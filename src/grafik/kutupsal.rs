@@ -40,7 +40,35 @@ pub struct KutupsalDüzen {
     pub radyal_kenar_boşluğu: bool,
     pub radyal_ters: bool,
     pub başlangıç_açısı: f32,
+    /// Başlangıçtan bitişe imzali ekran açıklığı (radyan).
+    /// Pozitif değer ekranda saat yönündedir.
+    pub açı_açıklığı: f32,
     pub saat_yönü: bool,
+}
+
+fn kutupsal_yay_yolu(
+    merkez: (f32, f32), yarıçap: f32, başlangıç: f32, açıklık: f32
+) -> Yol {
+    if açıklık.abs() >= std::f32::consts::TAU - 1e-4 {
+        return crate::cizim::yuzey::daire_yolu(merkez, yarıçap);
+    }
+    let nokta = |açı: f32| {
+        (
+            merkez.0 + yarıçap * açı.cos(),
+            merkez.1 + yarıçap * açı.sin(),
+        )
+    };
+    let mut yol = Yol::yeni();
+    yol.taşı(nokta(başlangıç));
+    if açıklık.abs() > 1e-6 {
+        yol.yay(
+            yarıçap,
+            açıklık.abs() > std::f32::consts::PI,
+            açıklık > 0.0,
+            nokta(başlangıç + açıklık),
+        );
+    }
+    yol
 }
 
 fn kutupsal_sütun_uzunluğunu_çöz(uzunluk: Uzunluk, bant_açısı: f32) -> f32 {
@@ -559,24 +587,38 @@ impl KutupsalDüzen {
             let n = self.açısal_ölçek.kategori_sayısı().max(1) as f64;
             if self.açısal_kenar_boşluğu {
                 (değer + 0.5) / n
+            } else if n > 1.0 {
+                değer / (n - 1.0)
             } else {
-                // Tam daire üzerindeki onBand=false kategori ekseni son
-                // kategoriden sonra bir bant daha ayırır; ilk ve son etiket
-                // aynı ışına yığılmaz.
-                değer / n
+                0.5
             }
         } else {
             self.açısal_ölçek.oranla(değer)
         };
-        let başlangıç = -(self.başlangıç_açısı as f64).to_radians();
-        let yön = if self.saat_yönü { 1.0 } else { -1.0 };
-        (başlangıç + yön * oran * std::f64::consts::TAU) as f32
+        self.orandan_açı(oran)
+    }
+
+    fn orandan_açı(&self, oran: f64) -> f32 {
+        self.başlangıç_ekran_açısı() + self.açı_açıklığı * oran as f32
+    }
+
+    fn başlangıç_ekran_açısı(&self) -> f32 {
+        -self.başlangıç_açısı.to_radians()
+    }
+
+    fn tam_tur_mu(&self) -> bool {
+        (self.açı_açıklığı.abs() - std::f32::consts::TAU).abs() <= 1e-4
     }
 
     /// Bant açıklığı (radyan) — kutupsal sütunlar için.
     pub fn bant_açısı(&self) -> f32 {
         let n = self.açısal_ölçek.kategori_sayısı().max(1) as f32;
-        std::f32::consts::TAU / n
+        let bölen = if self.açısal_kenar_boşluğu || n <= 1.0 {
+            n
+        } else {
+            n - 1.0
+        };
+        self.açı_açıklığı.abs() / bölen.max(1.0)
     }
 
     /// RadiusAxis kategori bant yüksekliği (piksel) — teğetsel kutupsal
@@ -759,6 +801,24 @@ pub fn kutupsal_kur(
         ))
     };
 
+    // `polarCreator.ts::setAxis`: ECharts, `inverse` ile `clockwise`
+    // bileşimini açı ekseninin etkin yönüne dönüştürür. `endAngle` yoksa
+    // bu yönde tam tur kurulur; açık uç verildiğinde kapsam aynen korunur.
+    let saat_yönü = koordinat.saat_yönü ^ koordinat.açısal_eksen.ters;
+    let mut bitiş_açısı = koordinat
+        .bitiş_açısı
+        .unwrap_or_else(|| koordinat.başlangıç_açısı + if saat_yönü { -360.0 } else { 360.0 });
+    let açısal_kenar_boşluğu = koordinat.açısal_eksen.kenar_boşluğu.unwrap_or(true);
+    if açısal_kategorik && !açısal_kenar_boşluğu {
+        // `updatePolarScale`: onBand=false kategori ekseninde son kategori
+        // ilk ışına yığılmadan, kategoriler eksen kapsamına eşit aralıkla
+        // yayılır. Düzeltme açı ekseninin etkin yönünde uygulanır.
+        let kategori_sayısı = açısal_ölçek.kategori_sayısı().max(1) as f32;
+        let adım = 360.0 / kategori_sayısı;
+        bitiş_açısı += if saat_yönü { adım } else { -adım };
+    }
+    let açı_açıklığı = (koordinat.başlangıç_açısı - bitiş_açısı).to_radians();
+
     KutupsalDüzen {
         merkez,
         iç_yarıçap,
@@ -767,11 +827,12 @@ pub fn kutupsal_kur(
         radyal_ölçek,
         açısal_kategorik,
         radyal_kategorik,
-        açısal_kenar_boşluğu: koordinat.açısal_eksen.kenar_boşluğu.unwrap_or(true),
+        açısal_kenar_boşluğu,
         radyal_kenar_boşluğu: koordinat.radyal_eksen.kenar_boşluğu.unwrap_or(true),
         radyal_ters: koordinat.radyal_eksen.ters,
         başlangıç_açısı: koordinat.başlangıç_açısı,
-        saat_yönü: koordinat.saat_yönü ^ koordinat.açısal_eksen.ters,
+        açı_açıklığı,
+        saat_yönü,
     }
 }
 
@@ -793,7 +854,7 @@ pub fn kutupsal_ağ_çiz(
 
     // RadiusAxisView ekseni ilk veri merkezine değil angleAxis extent'inin
     // başlangıç ışınına yerleştirir; onBand kategori ekseninde ayrım görünür.
-    let başlangıç = -(düzen.başlangıç_açısı.to_radians());
+    let başlangıç = düzen.başlangıç_ekran_açısı();
     let radyal_yön = (başlangıç.cos(), başlangıç.sin());
     let etiket_normali = (radyal_yön.1, -radyal_yön.0);
 
@@ -821,7 +882,7 @@ pub fn kutupsal_ağ_çiz(
             if yarıçap <= 0.5 {
                 continue;
             }
-            let yol = crate::cizim::yuzey::daire_yolu(düzen.merkez, yarıçap);
+            let yol = kutupsal_yay_yolu(düzen.merkez, yarıçap, başlangıç, düzen.açı_açıklığı);
             çizici.yol_çiz(
                 &yol,
                 1.0,
@@ -927,7 +988,7 @@ pub fn kutupsal_ağ_çiz(
 
     // Açısal ışınlar + etiketler.
     let mut çentikler = düzen.açısal_ölçek.çentikler();
-    if !düzen.açısal_kategorik && çentikler.len() > 1 {
+    if !düzen.açısal_kategorik && düzen.tam_tur_mu() && çentikler.len() > 1 {
         // Tam dairede kapsamın iki ucu aynı ışına düşer; ECharts son
         // (360 gibi) etiketi yinelenen 0 etiketi yerine göstermez.
         çentikler.pop();
@@ -938,12 +999,9 @@ pub fn kutupsal_ağ_çiz(
         .göster
         .unwrap_or(koordinat.açısal_eksen.tür != EksenTürü::Kategori);
     for çentik in &çentikler {
-        let açı = if düzen.açısal_kategorik {
+        let açı = if düzen.açısal_kategorik && düzen.açısal_kenar_boşluğu {
             let n = düzen.açısal_ölçek.kategori_sayısı().max(1) as f64;
-            let oran = çentik.değer / n;
-            let başlangıç = -(düzen.başlangıç_açısı as f64).to_radians();
-            let yön = if düzen.saat_yönü { 1.0 } else { -1.0 };
-            (başlangıç + yön * oran * std::f64::consts::TAU) as f32
+            düzen.orandan_açı(çentik.değer / n)
         } else {
             düzen.açı(çentik.değer)
         };
@@ -1030,13 +1088,64 @@ pub fn kutupsal_ağ_çiz(
         );
     }
 
+    // Kategori bantlarının ayırıcıları başlangıç sınırından başlar. Kısmi
+    // eksende son bant sınırı ayrıca görünür; tam turda bu ışın başlangıçla
+    // çakıştığı için yinelenmez.
+    if açısal_bu_katmanda
+        && düzen.açısal_kategorik
+        && düzen.açısal_kenar_boşluğu
+        && !düzen.tam_tur_mu()
+    {
+        let açı = düzen.orandan_açı(1.0);
+        let başlangıç_noktası = (
+            düzen.merkez.0 + düzen.iç_yarıçap * açı.cos(),
+            düzen.merkez.1 + düzen.iç_yarıçap * açı.sin(),
+        );
+        let uç = (
+            düzen.merkez.0 + düzen.yarıçap * açı.cos(),
+            düzen.merkez.1 + düzen.yarıçap * açı.sin(),
+        );
+        if açısal_bölme_göster {
+            çizici.çizgi(
+                başlangıç_noktası,
+                uç,
+                1.0,
+                koordinat
+                    .açısal_eksen
+                    .bölme_çizgisi
+                    .renk
+                    .unwrap_or_else(tema::bölme_çizgisi),
+                koordinat.açısal_eksen.bölme_çizgisi.tür,
+            );
+        }
+        if koordinat.açısal_eksen.göster && koordinat.açısal_eksen.çentik.göster.unwrap_or(true)
+        {
+            let uzunluk = koordinat.açısal_eksen.çentik.uzunluk;
+            çizici.çizgi(
+                uç,
+                (uç.0 + uzunluk * açı.cos(), uç.1 + uzunluk * açı.sin()),
+                1.0,
+                koordinat
+                    .açısal_eksen
+                    .çentik
+                    .renk
+                    .unwrap_or_else(tema::eksen_çentiği),
+                crate::model::stil::ÇizgiTürü::Düz,
+            );
+        }
+    }
+
     // angleAxis.axisLine dış halkadır; radiusAxis.axisLine başlangıç açısı
     // boyunca iç yarıçaptan dış halkaya uzanır.
     if açısal_bu_katmanda
         && koordinat.açısal_eksen.göster
         && koordinat.açısal_eksen.çizgi.göster.unwrap_or(true)
     {
-        let dış = crate::cizim::yuzey::daire_yolu(düzen.merkez, düzen.yarıçap);
+        let dış = if düzen.iç_yarıçap > 0.5 {
+            crate::cizim::yuzey::daire_yolu(düzen.merkez, düzen.yarıçap)
+        } else {
+            kutupsal_yay_yolu(düzen.merkez, düzen.yarıçap, başlangıç, düzen.açı_açıklığı)
+        };
         çizici.yol_çiz(
             &dış,
             koordinat.açısal_eksen.çizgi.kalınlık,
@@ -1382,6 +1491,79 @@ mod testler {
     use crate::model::eksen::{Eksen, EksenEtiketi, EksenÇizgisi};
     use crate::model::seri::{SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::{Etiket, EtiketKonumu, ÖğeStili};
+
+    #[test]
+    fn end_angle_kategori_merkezlerini_kismi_kapsama_yayar() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(
+                KutupsalKoordinat::yeni()
+                    .başlangıç_açısı(90.0)
+                    .bitiş_açısı(0.0)
+                    .açısal_eksen(Eksen::kategori().veri(["S1", "S2", "S3"])),
+            )
+            .seri(SütunSerisi::yeni().kutupsal(true).veri([1.0, 2.0, 3.0]));
+        let düzen = kutupsal_kur(
+            seçenekler.kutupsal.as_ref().expect("polar"),
+            &seçenekler,
+            &[vec![Some((0.0, 1.0)), Some((0.0, 2.0)), Some((0.0, 3.0))]],
+            &[true],
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+        );
+
+        assert!(!düzen.tam_tur_mu());
+        assert!((düzen.açı_açıklığı.to_degrees() - 90.0).abs() < 0.001);
+        assert!((düzen.bant_açısı().to_degrees() - 30.0).abs() < 0.001);
+        for (kategori, beklenen) in [-75.0_f32, -45.0, -15.0].into_iter().enumerate() {
+            assert!((düzen.açı(kategori as f64).to_degrees() - beklenen).abs() < 0.001);
+        }
+
+        let yay = kutupsal_yay_yolu(
+            düzen.merkez,
+            düzen.yarıçap,
+            düzen.başlangıç_ekran_açısı(),
+            düzen.açı_açıklığı,
+        );
+        assert_eq!(yay.komutlar.len(), 2);
+        assert!(matches!(
+            yay.komutlar[1],
+            YolKomutu::Yay {
+                büyük_yay: false,
+                süpürme: true,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn kismi_kategori_ekseni_son_bant_sinirini_cizer() {
+        let koordinat = KutupsalKoordinat::yeni()
+            .başlangıç_açısı(90.0)
+            .bitiş_açısı(0.0)
+            .açısal_eksen(
+                Eksen::kategori()
+                    .veri(["S1", "S2", "S3"])
+                    .bölme_çizgisi_göster(true),
+            );
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(koordinat.clone())
+            .seri(SütunSerisi::yeni().kutupsal(true).veri([1.0, 2.0, 3.0]));
+        let düzen = kutupsal_kur(
+            &koordinat,
+            &seçenekler,
+            &[vec![Some((0.0, 1.0)), Some((0.0, 2.0)), Some((0.0, 3.0))]],
+            &[true],
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+        );
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        kutupsal_ağ_çiz(&mut yüzey, &koordinat, &düzen, false);
+
+        let döküm = yüzey.döküm();
+        assert!(
+            döküm.contains("T(350.0,262.5) Ç(560.0,262.5)"),
+            "endAngle sınırı çizilmelidir:\n{döküm}"
+        );
+    }
 
     #[test]
     fn iki_değer_ekseni_radius_angle_sırasını_ve_saat_yönünü_kullanır() {

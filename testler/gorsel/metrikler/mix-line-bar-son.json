@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 912,
   "değişen_piksel_oranı": 0.0033777777777777777,
-  "ssim": 0.9933509931962338,
+  "ssim": 0.9933509200540062,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/mix-line-bar.png",
     "gerçek": "testler/gorsel/gerçek/default/mix-line-bar.png",

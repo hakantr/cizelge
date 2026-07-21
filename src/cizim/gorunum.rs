@@ -11,7 +11,8 @@ use std::collections::{HashMap, HashSet};
 
 use crate::bilesen::baslik::başlık_çiz;
 use crate::bilesen::eksen_cizimi::{
-    bölme_çizgilerini_çiz, eksenleri_çiz, eksenleri_çiz_katman, kırılma_alanlarını_çiz,
+    bölme_çizgilerini_çiz, eksenleri_çiz, eksenleri_çiz_katman,
+    kategori_taban_çizgilerini_üstte_çiz, kırılma_alanlarını_çiz,
 };
 use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::grafik::{GrafikSahnesi, grafik_sahnesi_hazırla};
@@ -3863,6 +3864,29 @@ pub fn grafiği_boya(
             }
         }
 
+        // Sütun dolgusu kategori ekseninin onZero taban vuruşunu örtmesin.
+        // Yalnız sütun taşıyan ızgaralarda yalnız kategori axisLine yeniden
+        // boyanır; bar dikdörtgeni ve iç etiket çapasına dokunulmaz.
+        for (g, alan) in kurulum.ızgara_alanları.iter().enumerate() {
+            let sütun_var = seçenekler.seriler.iter().enumerate().any(|(i, seri)| {
+                kurulum.görünürler.get(i).copied().unwrap_or(false)
+                    && matches!(seri, Seri::Sütun(_))
+                    && kurulum
+                        .seri_kartezyeni(seri)
+                        .is_some_and(|kartezyen| kartezyen.x.seçenek.ızgara_sırası == g)
+            });
+            if !sütun_var {
+                continue;
+            }
+            let ızgara_eksenleri = kurulum
+                .x_eksenler
+                .iter()
+                .chain(kurulum.y_eksenler.iter())
+                .filter(|eksen| eksen.seçenek.ızgara_sırası == g)
+                .collect::<Vec<_>>();
+            kategori_taban_çizgilerini_üstte_çiz(yüzey, *alan, &ızgara_eksenleri);
+        }
+
         // İm çizgileri ve raptiyeler serilerin üstüne boyanır.
         for (i, seri) in seçenekler.seriler.iter().enumerate() {
             if !kurulum.görünürler.get(i).copied().unwrap_or(false) {
@@ -4809,54 +4833,68 @@ pub fn grafiği_boya(
         }
     }
 
-    // 4c) Kutupsal koordinat ve kutupsal seriler.
-    if let Some(koordinat) = &seçenekler.kutupsal {
+    // 4c) Kutupsal koordinatlar ve `polarIndex` ile bağlı seriler. Her
+    // koordinat kendi kapsam/yığın hesabını taşır; tüm alt eksen katmanları
+    // serilerden önce, üst eksen katmanları serilerden sonra çizilir.
+    let temel_görünürler: Vec<bool> = seçenekler
+        .seriler
+        .iter()
+        .map(|s| ad_görünür(s.ad(), kapalı))
+        .collect();
+    let mut kutupsal_düzenleri = Vec::new();
+    for (kutupsal_sırası, koordinat) in seçenekler.tüm_kutupsallar().enumerate() {
         let görünürler: Vec<bool> = seçenekler
             .seriler
             .iter()
-            .map(|s| ad_görünür(s.ad(), kapalı))
+            .enumerate()
+            .map(|(seri_sırası, seri)| {
+                temel_görünürler[seri_sırası] && seri.kutupsal_sırası() == Some(kutupsal_sırası)
+            })
             .collect();
-        let kutupsal_var = seçenekler
-            .seriler
-            .iter()
-            .zip(&görünürler)
-            .any(|(s, g)| s.kutupsal_mı() && *g);
-        if kutupsal_var {
-            let aralıklar = yığın_aralıkları(&seçenekler.seriler, &görünürler);
-            let düzen = kutupsal_kur(
-                koordinat,
-                seçenekler,
-                &aralıklar,
-                &görünürler,
-                Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik()),
-            );
-            kutupsal_ağ_çiz(yüzey, koordinat, &düzen, false);
-            let isabet_başlangıcı = çıktı.isabetler.len();
-            kutupsal_serileri_çiz(
-                yüzey,
-                seçenekler,
-                &düzen,
-                &aralıklar,
-                &görünürler,
-                kapalı,
-                ilerleme,
-                zaman_sn,
-                &mut çıktı.isabetler,
-            );
-            if let Some(ipucu) = ipucu_seçeneği.as_ref()
-                && let Some(bekleyen) = kutupsal_ipucu_hazırla(
-                    seçenekler,
-                    &düzen,
-                    ipucu,
-                    fare,
-                    girdi.ipucu_öğesi,
-                    &çıktı.isabetler[isabet_başlangıcı..],
-                )
-            {
-                bekleyen_ipucu = Some(bekleyen);
-            }
-            kutupsal_ağ_çiz(yüzey, koordinat, &düzen, true);
+        if !görünürler.iter().any(|görünür| *görünür) {
+            continue;
         }
+        let aralıklar = yığın_aralıkları(&seçenekler.seriler, &görünürler);
+        let düzen = kutupsal_kur(
+            koordinat,
+            seçenekler,
+            &aralıklar,
+            &görünürler,
+            Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik()),
+        );
+        kutupsal_düzenleri.push((koordinat, görünürler, aralıklar, düzen));
+    }
+    for (koordinat, _, _, düzen) in &kutupsal_düzenleri {
+        kutupsal_ağ_çiz(yüzey, koordinat, düzen, false);
+    }
+    for (_, görünürler, aralıklar, düzen) in &kutupsal_düzenleri {
+        let isabet_başlangıcı = çıktı.isabetler.len();
+        kutupsal_serileri_çiz(
+            yüzey,
+            seçenekler,
+            düzen,
+            aralıklar,
+            görünürler,
+            kapalı,
+            ilerleme,
+            zaman_sn,
+            &mut çıktı.isabetler,
+        );
+        if let Some(ipucu) = ipucu_seçeneği.as_ref()
+            && let Some(bekleyen) = kutupsal_ipucu_hazırla(
+                seçenekler,
+                düzen,
+                ipucu,
+                fare,
+                girdi.ipucu_öğesi,
+                &çıktı.isabetler[isabet_başlangıcı..],
+            )
+        {
+            bekleyen_ipucu = Some(bekleyen);
+        }
+    }
+    for (koordinat, _, _, düzen) in &kutupsal_düzenleri {
+        kutupsal_ağ_çiz(yüzey, koordinat, düzen, true);
     }
 
     // 4d) Calendar ve matrix üzerindeki çekirdek (GL olmayan) lines.
@@ -5603,6 +5641,35 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn sutun_taban_cizgisi_bar_dolgusundan_sonra_yeniden_cizilir() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .x_ekseni(Eksen::değer())
+            .y_ekseni(Eksen::kategori().veri(["A"]))
+            .seri(crate::model::seri::SütunSerisi::yeni().veri([10.0]));
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(600.0, 450.0);
+
+        grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let bar_sırası = yüzey
+            .komutlar
+            .iter()
+            .position(|komut| komut.starts_with("dikdörtgen "))
+            .expect("bar dikdörtgeni");
+        let önceki_çizgiler = yüzey.komutlar[..bar_sırası]
+            .iter()
+            .filter(|komut| komut.starts_with("çiz "))
+            .collect::<HashSet<_>>();
+        assert!(
+            yüzey.komutlar[bar_sırası + 1..]
+                .iter()
+                .any(|komut| önceki_çizgiler.contains(komut)),
+            "kategori axisLine barın üstünde ikinci kez bulunmalı:\n{}",
+            yüzey.döküm()
+        );
+    }
 
     #[test]
     fn polar_item_tooltip_silent_yigini_atlayip_html_satirlarini_cozer() {
