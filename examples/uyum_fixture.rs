@@ -4391,6 +4391,55 @@ mod bar_histogram_testleri {
     }
 }
 
+fn gauge() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .ipucu(İpucu::yeni().biçimleyici("{a} <br/>{b} : {c}%"))
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("Pressure")
+                .değer(50.0, "SCORE")
+                .değer_biçimleyici("{value}"),
+        )
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod gauge_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_option_ve_echarts_6_1_ontanimlilari_kayipsizdir() {
+        let seçenekler = gauge();
+        let ipucu = seçenekler.ipucu.as_ref().expect("tooltip");
+        let biçimleyici = ipucu.biçimleyici.as_ref().expect("tooltip.formatter");
+        assert_eq!(
+            biçimleyici.uygula_bağlamla(50.0, "50", "Pressure", "SCORE"),
+            "Pressure <br/>SCORE : 50%"
+        );
+
+        let Seri::GöstergeSaati(seri) = &seçenekler.seriler[0] else {
+            panic!("seri gauge olmalı");
+        };
+        assert_eq!(seri.ad.as_deref(), Some("Pressure"));
+        assert_eq!(seri.veri[0].ad.as_deref(), Some("SCORE"));
+        assert_eq!(seri.veri[0].değer.sayı(), Some(50.0));
+        assert_eq!(seri.merkez, (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(50.0)));
+        assert_eq!(seri.yarıçap, Uzunluk::Yüzde(75.0));
+        assert_eq!((seri.başlangıç_açısı, seri.bitiş_açısı), (225.0, -45.0));
+        assert!(
+            seri.renk_bantları.is_empty(),
+            "boş dizi tema neutral10 demektir"
+        );
+        assert_eq!((seri.şerit_kalınlığı, seri.bölme_sayısı), (10.0, 10));
+        assert_eq!((seri.ara_çentik_sayısı, seri.ibre_genişliği), (5, 6.0));
+        assert_eq!(seri.ibre_uzunluğu, Uzunluk::Yüzde(60.0));
+        assert_eq!(seri.ad_merkez_kayması.1, Uzunluk::Yüzde(20.0));
+        assert_eq!(seri.değer_merkez_kayması.1, Uzunluk::Yüzde(40.0));
+        assert_eq!(seri.değer_boyutu, 30.0);
+        assert!(seri.değer_kalın);
+    }
+}
+
 fn data_transform_sort_bar() -> Result<GrafikSeçenekleri, String> {
     let kaynak = VeriKümesi::yeni(["name", "age", "profession", "score", "date"])
         .satır([
@@ -11019,6 +11068,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-markline" => Ok(line_markline()),
         "line-marker" => Ok(line_marker()),
         "bar-histogram" => Ok(bar_histogram()),
+        "gauge" => Ok(gauge()),
         "bar-simple" => Ok(bar_simple()),
         "bar1" => Ok(bar1()),
         "mix-line-bar" => Ok(mix_line_bar()),

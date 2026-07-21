@@ -1325,6 +1325,45 @@ tamamlamak.
    curve, polyline, label, effect/trail ve clip. Geo
    öntanımı kullanılmaz; kullanıcı kapsam içi koordinatı açıkça seçer.
 
+Gerçekleşen dilim — `gauge` (2026-07-22):
+
+- Sabit `../echarts-examples/public/examples/ts/gauge.ts` seçeneği;
+  `../echarts/src/chart/gauge/GaugeSeries.ts`, `GaugeView.ts` ve
+  `PointerPath.ts` ile birlikte doğrulandı. Mevcut gösterge çekirdeğinin
+  eski renkli-yay varsayılanı fixture ile örtüştürülmedi; ECharts 6.1'in
+  gerçek seri varsayılanları modele ve ortak çiziciye taşındı.
+- Öntanımlı merkez `%50/%50`, yarıçap `%75`, açı `225..-45`, aralık
+  `0..100`, 10 bölme, tema `neutral10` renginde 10 px axisLine, 10 px
+  uzaklık/uzunlukta 3 px ana bölme çizgileri ve her aralıkta beş adet 6 px
+  ara çentiktir. Boş `renk_bantları` tema belirtecini çalışma anında çözer;
+  böylece aynı option açık ve koyu temada somut bir açık renk taşımadan
+  doğru kalır. Eski renk bantlı kullanıcı örneği bu görünümü artık açıkça
+  seçer.
+- Eksen etiketi uzaklığı ve açıya bağlı yatay/dikey hizalama ECharts
+  `GaugeView` ile aynıdır. İbre, genel seri palet rengini kullanır ve
+  `PointerPath`in dört köşeli ön/yan/arka geometrisini uygular; varsayılan
+  merkez dairesi çizilmez. Veri adı `title.offsetCenter: [0, '20%']`, 16 px
+  ikincil metin; değer `detail.offsetCenter: [0, '40%']`, 30 px kalın
+  birincil metin olarak birbirinden bağımsız boyanır.
+- `GöstergeSaatiSerisi` API'sine merkez/yarıçap/açı, axisLine, ana ve ara
+  çentikler, eksen etiketleri/formatter, ibre, title ve detail görünürlük ve
+  merkez kayması kurucuları eklendi. Resmî fixture `Pressure`, `SCORE: 50`,
+  detail `{value}` ve tooltip `{a} <br/>{b} : {c}%` bağlarını kayıpsız taşır.
+- Yapısal çekirdek testi 700×525 tuvalde merkez `(350; 262,5)`, yarıçap
+  `196,875`, 11 ana + 60 ara çizgi, üst `50` etiketi, `SCORE`/değer
+  konumları ve ibre çokgenini ayrı ayrı kilitler. Böylece ince öğelerin
+  kaybı toplam piksel oranı içinde saklanamaz.
+- Yeni resmî referans yalnız `gauge` için bir kez üretildi; referansa
+  yazmayan hedefli tekrar 1/1, depo çapındaki kilitli koşu 183/183 geçti.
+  600×450 kanıt 399 değişen piksel, `%0,1478` fark ve `0,998441` SSIM
+  üretir. Çekirdek 300/300, fixture 46/46, `cargo check --all-targets`,
+  `cargo check --no-default-features` ve üretilmiş-dosya denetimi geçti.
+- Uyum raporu 332 kartı korur; çalıştırılabilir fixture 147/332, kilitli
+  statik görsel kanıt 136/332 (`%41,0`), tüm kapıları tam kart 0/332'dir.
+  `gauge` kartı artık boş değildir ve statik görsel kapısı
+  `tam_kanıtlı`dır. Kalan progress, anchor, özel pointer, roundCap, çoklu
+  değer ve değer animasyonu yolları sonraki Gauge kartlarında kapatılacaktır.
+
 Kabul:
 
 - Radar 5, Gauge 12, Funnel 4, ThemeRiver 2, Calendar 9, Matrix 12 ve

@@ -13,6 +13,8 @@ fn seçenekler() -> GrafikSeçenekleri {
             GöstergeSaatiSerisi::yeni()
                 .ad("Yük")
                 .değer(68.0, "CPU")
+                .renk_bantları([(0.3, "#67e0e3"), (0.7, "#37a2da"), (1.0, "#fd666d")])
+                .şerit(true, 18.0)
                 .değer_biçimleyici("{value} %"),
         )
 }

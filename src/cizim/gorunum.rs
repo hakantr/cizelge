@@ -5070,7 +5070,15 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
-                gösterge_saati_çiz(yüzey, g, i, tüm_alan, ilerleme, &mut çıktı.isabetler);
+                gösterge_saati_çiz(
+                    yüzey,
+                    g,
+                    i,
+                    seçenekler.seri_rengi(i),
+                    tüm_alan,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
             }
             Seri::Radar(r) => {
                 if !ad_görünür(seri.ad(), kapalı) {

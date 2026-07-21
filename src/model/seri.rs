@@ -2035,19 +2035,53 @@ pub struct GöstergeSaatiSerisi {
     pub bitiş_açısı: f32,
     pub merkez: (Uzunluk, Uzunluk),
     pub yarıçap: Uzunluk,
-    /// Renk bantları: `(bant sonu oranı 0..=1, renk)` — `axisLine.lineStyle.color`.
+    /// Renk bantları: `(bant sonu oranı 0..=1, renk)` —
+    /// `axisLine.lineStyle.color`. Boş dizi ECharts 6.1'in tema-bağımlı
+    /// `[[1, tokens.color.neutral10]]` öntanımlısını kullanır.
     pub renk_bantları: Vec<(f32, crate::renk::Renk)>,
+    /// Gösterge yayını çiz (`axisLine.show`).
+    pub şeridi_göster: bool,
     /// Yay şeridinin kalınlığı (`axisLine.lineStyle.width`).
     pub şerit_kalınlığı: f32,
     pub bölme_sayısı: usize,
+    /// Ana bölme çizgileri (`splitLine.show`).
+    pub çentikleri_göster: bool,
+    /// `splitLine.length`.
     pub çentik_uzunluğu: f32,
+    /// `splitLine.distance`; yay şeridinin iç kenarından olan ek uzaklık.
+    pub çentik_mesafesi: f32,
+    /// `splitLine.lineStyle.width`.
+    pub çentik_kalınlığı: f32,
+    pub çentik_rengi: Option<crate::renk::Renk>,
+    /// Ara eksen çentikleri (`axisTick`).
+    pub ara_çentikleri_göster: bool,
+    pub ara_çentik_sayısı: usize,
+    pub ara_çentik_uzunluğu: Uzunluk,
+    pub ara_çentik_mesafesi: f32,
+    pub ara_çentik_kalınlığı: f32,
+    pub ara_çentik_rengi: Option<crate::renk::Renk>,
     pub etiketleri_göster: bool,
+    pub etiket_mesafesi: f32,
     pub etiket_boyutu: f32,
+    pub etiket_rengi: Option<crate::renk::Renk>,
+    pub etiket_biçimleyici: Option<crate::model::stil::Biçimleyici>,
+    /// İbre (`pointer.show`).
+    pub ibreyi_göster: bool,
     /// İbre uzunluğu, yarıçapa oranla ya da piksel (`pointer.length`).
     pub ibre_uzunluğu: Uzunluk,
+    pub ibre_genişliği: f32,
+    pub ibre_rengi: Option<crate::renk::Renk>,
+    /// Veri adı (`title.show`).
+    pub adı_göster: bool,
+    pub ad_merkez_kayması: (Uzunluk, Uzunluk),
+    pub ad_boyutu: f32,
+    pub ad_rengi: Option<crate::renk::Renk>,
     /// Değer yazısı (`detail.show`).
     pub değeri_göster: bool,
+    pub değer_merkez_kayması: (Uzunluk, Uzunluk),
     pub değer_boyutu: f32,
+    pub değer_rengi: Option<crate::renk::Renk>,
+    pub değer_kalın: bool,
     pub değer_biçimleyici: Option<crate::model::stil::Biçimleyici>,
 }
 
@@ -2060,21 +2094,41 @@ impl Default for GöstergeSaatiSerisi {
             en_çok: 100.0,
             başlangıç_açısı: 225.0,
             bitiş_açısı: -45.0,
-            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
+            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(50.0)),
             yarıçap: Uzunluk::Yüzde(75.0),
-            renk_bantları: vec![
-                (0.3, crate::renk::Renk::onaltılık(0x67e0e3)),
-                (0.7, crate::renk::Renk::onaltılık(0x37a2da)),
-                (1.0, crate::renk::Renk::onaltılık(0xfd666d)),
-            ],
-            şerit_kalınlığı: 18.0,
+            renk_bantları: Vec::new(),
+            şeridi_göster: true,
+            şerit_kalınlığı: 10.0,
             bölme_sayısı: 10,
-            çentik_uzunluğu: 8.0,
+            çentikleri_göster: true,
+            çentik_uzunluğu: 10.0,
+            çentik_mesafesi: 10.0,
+            çentik_kalınlığı: 3.0,
+            çentik_rengi: None,
+            ara_çentikleri_göster: true,
+            ara_çentik_sayısı: 5,
+            ara_çentik_uzunluğu: Uzunluk::Piksel(6.0),
+            ara_çentik_mesafesi: 10.0,
+            ara_çentik_kalınlığı: 1.0,
+            ara_çentik_rengi: None,
             etiketleri_göster: true,
+            etiket_mesafesi: 15.0,
             etiket_boyutu: crate::tema::YAZI_KÜÇÜK,
+            etiket_rengi: None,
+            etiket_biçimleyici: None,
+            ibreyi_göster: true,
             ibre_uzunluğu: Uzunluk::Yüzde(60.0),
+            ibre_genişliği: 6.0,
+            ibre_rengi: None,
+            adı_göster: true,
+            ad_merkez_kayması: (Uzunluk::Piksel(0.0), Uzunluk::Yüzde(20.0)),
+            ad_boyutu: crate::tema::YAZI_BÜYÜK,
+            ad_rengi: None,
             değeri_göster: true,
-            değer_boyutu: 24.0,
+            değer_merkez_kayması: (Uzunluk::Piksel(0.0), Uzunluk::Yüzde(40.0)),
+            değer_boyutu: 30.0,
+            değer_rengi: None,
+            değer_kalın: true,
             değer_biçimleyici: None,
         }
     }
@@ -2102,11 +2156,114 @@ impl GöstergeSaatiSerisi {
         self
     }
 
+    pub fn açılar(mut self, başlangıç: f32, bitiş: f32) -> Self {
+        self.başlangıç_açısı = başlangıç;
+        self.bitiş_açısı = bitiş;
+        self
+    }
+
+    pub fn merkez<X: Into<Uzunluk>, Y: Into<Uzunluk>>(mut self, x: X, y: Y) -> Self {
+        self.merkez = (x.into(), y.into());
+        self
+    }
+
+    pub fn yarıçap(mut self, yarıçap: impl Into<Uzunluk>) -> Self {
+        self.yarıçap = yarıçap.into();
+        self
+    }
+
     pub fn renk_bantları<R: Into<crate::renk::Renk>>(
         mut self,
         bantlar: impl IntoIterator<Item = (f32, R)>,
     ) -> Self {
         self.renk_bantları = bantlar.into_iter().map(|(o, r)| (o, r.into())).collect();
+        self
+    }
+
+    pub fn şerit(mut self, göster: bool, kalınlık: f32) -> Self {
+        self.şeridi_göster = göster;
+        self.şerit_kalınlığı = kalınlık.max(0.0);
+        self
+    }
+
+    pub fn bölme_sayısı(mut self, sayı: usize) -> Self {
+        self.bölme_sayısı = sayı.max(1);
+        self
+    }
+
+    pub fn ana_çentikler(
+        mut self,
+        göster: bool,
+        uzunluk: f32,
+        mesafe: f32,
+        kalınlık: f32,
+    ) -> Self {
+        self.çentikleri_göster = göster;
+        self.çentik_uzunluğu = uzunluk.max(0.0);
+        self.çentik_mesafesi = mesafe;
+        self.çentik_kalınlığı = kalınlık.max(0.0);
+        self
+    }
+
+    pub fn ara_çentikler(
+        mut self,
+        göster: bool,
+        sayı: usize,
+        uzunluk: impl Into<Uzunluk>,
+        mesafe: f32,
+        kalınlık: f32,
+    ) -> Self {
+        self.ara_çentikleri_göster = göster;
+        self.ara_çentik_sayısı = sayı.max(1);
+        self.ara_çentik_uzunluğu = uzunluk.into();
+        self.ara_çentik_mesafesi = mesafe;
+        self.ara_çentik_kalınlığı = kalınlık.max(0.0);
+        self
+    }
+
+    pub fn eksen_etiketleri(mut self, göster: bool, mesafe: f32, boyut: f32) -> Self {
+        self.etiketleri_göster = göster;
+        self.etiket_mesafesi = mesafe;
+        self.etiket_boyutu = boyut.max(0.0);
+        self
+    }
+
+    pub fn etiket_biçimleyici(
+        mut self,
+        biçimleyici: impl Into<crate::model::stil::Biçimleyici>,
+    ) -> Self {
+        self.etiket_biçimleyici = Some(biçimleyici.into());
+        self
+    }
+
+    pub fn ibre(mut self, göster: bool, uzunluk: impl Into<Uzunluk>, genişlik: f32) -> Self {
+        self.ibreyi_göster = göster;
+        self.ibre_uzunluğu = uzunluk.into();
+        self.ibre_genişliği = genişlik.max(0.0);
+        self
+    }
+
+    pub fn ad_göster(mut self, göster: bool) -> Self {
+        self.adı_göster = göster;
+        self
+    }
+
+    pub fn ad_merkez_kayması<X: Into<Uzunluk>, Y: Into<Uzunluk>>(mut self, x: X, y: Y) -> Self {
+        self.ad_merkez_kayması = (x.into(), y.into());
+        self
+    }
+
+    pub fn değer_göster(mut self, göster: bool) -> Self {
+        self.değeri_göster = göster;
+        self
+    }
+
+    pub fn değer_merkez_kayması<X: Into<Uzunluk>, Y: Into<Uzunluk>>(
+        mut self,
+        x: X,
+        y: Y,
+    ) -> Self {
+        self.değer_merkez_kayması = (x.into(), y.into());
         self
     }
 

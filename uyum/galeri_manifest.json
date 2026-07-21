@@ -1920,7 +1920,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/gauge.ts",
     "kaynak_sha256": "6322590c6e252e806578269c9d102ee334e2ccd6a30952a723e317302b0d1b3d",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#gauge",
     "seriler": [
       "gauge"
     ],
@@ -1932,7 +1932,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -1944,15 +1944,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 399,
+          "değişen_piksel_oranı": 0.0014777777777777777,
+          "ssim": 0.9984409687018078,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/gauge.png",
+            "sha256": "ddf410129500e0c4582d26d985b20f55fbc1b3697bb6bd41cad4260a4fe4ceff"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/gauge.png",
+            "sha256": "905d5bc01649d80b65b88fbd257f4f9a4aec729f22b55ccfefb80f724fb31565"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/gauge.png",
+            "sha256": "f08616d97190c98b6c2ecd9547a75bd0dca9683ce25fd1c673e76727f95c9c51"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/gauge-son.json",
+            "sha256": "9dc26e94c978bd65ebe5e6d7e8092d16de428906b1ad0b79ee1ca94097a5d69b"
+          }
+        }
+      ]
     }
   },
   {
