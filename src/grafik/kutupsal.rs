@@ -908,7 +908,23 @@ pub fn kutupsal_serileri_çiz(
 ) {
     let _ = kapalı;
     let ilerleme = ilerleme.clamp(0.0, 1.0);
-    for (i, seri) in seçenekler.seriler.iter().enumerate() {
+    let mut seri_sıraları = seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, seri)| {
+            (seri.kutupsal_mı() && görünürler.get(sıra).copied().unwrap_or(false)).then_some((
+                sıra,
+                match seri {
+                    Seri::Sütun(sütun) => sütun.z,
+                    _ => 2,
+                },
+            ))
+        })
+        .collect::<Vec<_>>();
+    seri_sıraları.sort_by_key(|(sıra, z)| (*z, *sıra));
+    for (i, _) in seri_sıraları {
+        let seri = &seçenekler.seriler[i];
         if !seri.kutupsal_mı() || !görünürler.get(i).copied().unwrap_or(false) {
             continue;
         }
@@ -1032,20 +1048,22 @@ pub fn kutupsal_serileri_çiz(
                             &dolgu,
                         );
                     }
-                    isabetler.push(İsabetBölgesi {
-                        seri_sırası: i,
-                        veri_sırası: j,
-                        seri_adı: s.ad.clone(),
-                        ad: s.veri.get(j).and_then(|ö| ö.ad.clone()),
-                        değer: s.veri.get(j).and_then(|ö| ö.değer.sayı()),
-                        geometri: İsabetGeometrisi::Halka {
-                            merkez: düzen.merkez,
-                            iç_yarıçap: iç.min(dış),
-                            dış_yarıçap: iç.max(dış),
-                            açı0,
-                            açı1,
-                        },
-                    });
+                    if !s.sessiz {
+                        isabetler.push(İsabetBölgesi {
+                            seri_sırası: i,
+                            veri_sırası: j,
+                            seri_adı: s.ad.clone(),
+                            ad: s.veri.get(j).and_then(|ö| ö.ad.clone()),
+                            değer: s.veri.get(j).and_then(|ö| ö.değer.sayı()),
+                            geometri: İsabetGeometrisi::Halka {
+                                merkez: düzen.merkez,
+                                iç_yarıçap: iç.min(dış),
+                                dış_yarıçap: iç.max(dış),
+                                açı0,
+                                açı1,
+                            },
+                        });
+                    }
                 }
             }
             Seri::Çizgi(s) => {
@@ -1148,7 +1166,7 @@ mod testler {
     use crate::cizim::KayıtYüzeyi;
     use crate::model::eksen::{Eksen, EksenEtiketi, EksenÇizgisi};
     use crate::model::seri::{SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
-    use crate::model::stil::{Etiket, EtiketKonumu};
+    use crate::model::stil::{Etiket, EtiketKonumu, ÖğeStili};
 
     #[test]
     fn iki_değer_ekseni_radius_angle_sırasını_ve_saat_yönünü_kullanır() {
@@ -1277,6 +1295,60 @@ mod testler {
         let üst = üst.döküm();
         assert!(!üst.contains("yazı \"a\""));
         assert!(üst.contains("yazı \"0\""));
+    }
+
+    #[test]
+    fn polar_sutun_z_sirasini_ve_silent_isabetini_korur() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(
+                KutupsalKoordinat::yeni()
+                    .açısal_eksen(Eksen::kategori().veri(["a"]))
+                    .radyal_eksen(Eksen::değer().en_çok(2.0)),
+            )
+            .seri(
+                SütunSerisi::yeni()
+                    .kutupsal(true)
+                    .z(10)
+                    .sessiz(true)
+                    .öğe_stili(ÖğeStili::yeni().renk(0xff0000))
+                    .veri([1.0]),
+            )
+            .seri(
+                SütunSerisi::yeni()
+                    .kutupsal(true)
+                    .z(2)
+                    .öğe_stili(ÖğeStili::yeni().renk(0x0000ff))
+                    .veri([2.0]),
+            );
+        let aralıklar = [vec![Some((0.0, 1.0))], vec![Some((0.0, 2.0))]];
+        let görünürler = [true, true];
+        let düzen = kutupsal_kur(
+            seçenekler.kutupsal.as_ref().unwrap(),
+            &seçenekler,
+            &aralıklar,
+            &görünürler,
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+        );
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let mut isabetler = Vec::new();
+        kutupsal_serileri_çiz(
+            &mut yüzey,
+            &seçenekler,
+            &düzen,
+            &aralıklar,
+            &görünürler,
+            &HashSet::new(),
+            1.0,
+            0.0,
+            &mut isabetler,
+        );
+
+        let döküm = yüzey.döküm();
+        let mavi = döküm.find("#0000ff").expect("z=2 seri çizilmeli");
+        let kırmızı = döküm.find("#ff0000").expect("z=10 seri çizilmeli");
+        assert!(mavi < kırmızı, "düşük z önce çizilmelidir");
+        assert_eq!(isabetler.len(), 1);
+        assert_eq!(isabetler[0].seri_sırası, 1, "silent seri isabet üretmez");
     }
 
     #[test]

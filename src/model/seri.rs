@@ -411,6 +411,10 @@ pub struct SütunSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
     pub yığın: Option<String>,
+    /// ZRender çizim sırası (`series.bar.z`), ECharts öntanımlısı 2.
+    pub z: i32,
+    /// İşaretçi/isabet olaylarını kapatır (`series.bar.silent`).
+    pub sessiz: bool,
     /// `barWidth` — verilmezse otomatik hesaplanır.
     pub genişlik: Option<Uzunluk>,
     /// `barMaxWidth`.
@@ -462,6 +466,8 @@ impl Default for SütunSerisi {
             ad: None,
             veri: Vec::new(),
             yığın: None,
+            z: 2,
+            sessiz: false,
             genişlik: None,
             en_çok_genişlik: None,
             en_az_genişlik: None,
@@ -562,6 +568,16 @@ impl SütunSerisi {
 
     pub fn yığın(mut self, yığın: impl Into<String>) -> Self {
         self.yığın = Some(yığın.into());
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
         self
     }
 

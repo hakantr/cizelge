@@ -37,7 +37,9 @@ use crate::grafik::isi::{
     SürekliGörselEşlemeBölgesi, görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz,
 };
 use crate::grafik::kiris::kiriş_çiz;
-use crate::grafik::kutupsal::{kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz};
+use crate::grafik::kutupsal::{
+    KutupsalDüzen, kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz,
+};
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
 use crate::grafik::paralel::paralel_çiz;
 use crate::grafik::pasta::{
@@ -966,6 +968,85 @@ fn ad_görünür(ad: Option<&str>, kapalı: &HashSet<String>) -> bool {
 }
 
 type Bekleyenİpucu = (Option<String>, Vec<İpucuSatırı>, (f32, f32));
+
+/// Polar seri isabetini ortak item-tooltip modeline çevirir. Görsel z
+/// sırasıyla eklenen bölgeler tersten tarandığı için üstteki bar/saçılım
+/// öğesi, ECharts gibi alttaki örtüşen öğenin önüne geçer.
+fn kutupsal_ipucu_hazırla(
+    seçenekler: &GrafikSeçenekleri,
+    düzen: &KutupsalDüzen,
+    ipucu: &İpucu,
+    fare: Option<(f32, f32)>,
+    programatik: Option<(usize, usize)>,
+    isabetler: &[İsabetBölgesi],
+) -> Option<Bekleyenİpucu> {
+    if ipucu.tetikleme != Tetikleme::Öğe || !ipucu.içerik_göster {
+        return None;
+    }
+    let isabet = programatik
+        .and_then(|(seri_sırası, veri_sırası)| {
+            isabetler.iter().rev().find(|bölge| {
+                bölge.seri_sırası == seri_sırası && bölge.veri_sırası == veri_sırası
+            })
+        })
+        .or_else(|| {
+            let fare = fare?;
+            isabetler
+                .iter()
+                .rev()
+                .find(|bölge| bölge.geometri.içeriyor_mu(fare))
+        })?;
+    let seri = seçenekler.seriler.get(isabet.seri_sırası)?;
+    let öğe = seri.veri().get(isabet.veri_sırası)?;
+    let seri_adı = seri.ad().unwrap_or("").to_string();
+    let veri_adı = öğe.ad.clone().unwrap_or_else(|| {
+        if düzen.açısal_kategorik {
+            düzen.açısal_ölçek.etiket(isabet.veri_sırası as f64)
+        } else if düzen.radyal_kategorik {
+            düzen.radyal_ölçek.etiket(isabet.veri_sırası as f64)
+        } else {
+            isabet.veri_sırası.to_string()
+        }
+    });
+    let parametre = İpucuParametresi {
+        seri_sırası: isabet.seri_sırası,
+        seri_adı: seri_adı.clone(),
+        veri_sırası: isabet.veri_sırası,
+        ad: veri_adı.clone(),
+        değer: öğe.değer.clone(),
+        boyutlar: öğe.boyutlar.clone(),
+    };
+    let konum = fare.unwrap_or_else(|| isabet.geometri.merkez());
+    if let Some(biçimleyici) = &ipucu.bağlamlı_biçimleyici {
+        let metin = biçimleyici.uygula(&[parametre]);
+        let metin = metin.replace("<br />", "<br>").replace("<br/>", "<br>");
+        let satırlar = metin
+            .split("<br>")
+            .map(|satır| İpucuSatırı {
+                im_rengi: None,
+                ad: satır.to_string(),
+                değer: String::new(),
+            })
+            .collect::<Vec<_>>();
+        return Some((None, satırlar, konum));
+    }
+
+    let değer = isabet.değer?;
+    let değer = ipucu
+        .değer_biçimleyici
+        .as_ref()
+        .map(|biçimleyici| biçimleyici.uygula(değer, &binlik_ayır(değer)))
+        .unwrap_or_else(|| binlik_ayır(değer));
+    Some((
+        (!seri_adı.is_empty()).then_some(seri_adı),
+        vec![İpucuSatırı {
+            im_rengi: Some(seçenekler.seri_rengi(isabet.seri_sırası)),
+            ad: veri_adı,
+            değer,
+        }],
+        konum,
+    ))
+}
 
 /// Takvim koordinatındaki scatter/effectScatter serisini tek katmanda
 /// boyar. `zlevel > 0` serileri takvim üst katmanından sonra yeniden aynı
@@ -4743,6 +4824,7 @@ pub fn grafiği_boya(
                 Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik()),
             );
             kutupsal_ağ_çiz(yüzey, koordinat, &düzen, false);
+            let isabet_başlangıcı = çıktı.isabetler.len();
             kutupsal_serileri_çiz(
                 yüzey,
                 seçenekler,
@@ -4754,6 +4836,18 @@ pub fn grafiği_boya(
                 zaman_sn,
                 &mut çıktı.isabetler,
             );
+            if let Some(ipucu) = ipucu_seçeneği.as_ref()
+                && let Some(bekleyen) = kutupsal_ipucu_hazırla(
+                    seçenekler,
+                    &düzen,
+                    ipucu,
+                    fare,
+                    girdi.ipucu_öğesi,
+                    &çıktı.isabetler[isabet_başlangıcı..],
+                )
+            {
+                bekleyen_ipucu = Some(bekleyen);
+            }
             kutupsal_ağ_çiz(yüzey, koordinat, &düzen, true);
         }
     }
@@ -5502,6 +5596,53 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn polar_item_tooltip_silent_yigini_atlayip_html_satirlarini_cozer() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .kutupsal(
+                crate::model::kutupsal::KutupsalKoordinat::yeni()
+                    .açısal_eksen(Eksen::kategori().veri(["Beijing"]))
+                    .radyal_eksen(Eksen::değer().en_çok(100.0)),
+            )
+            .ipucu(İpucu::yeni().bağlamlı_biçimleyici(|parametreler| {
+                let ad = parametreler
+                    .first()
+                    .map(|parametre| parametre.ad.as_str())
+                    .unwrap_or("");
+                format!("{ad}<br>Lowest：50<br>Highest：100")
+            }))
+            .seri(
+                crate::model::seri::SütunSerisi::yeni()
+                    .kutupsal(true)
+                    .yığın("range")
+                    .sessiz(true)
+                    .veri([50.0]),
+            )
+            .seri(
+                crate::model::seri::SütunSerisi::yeni()
+                    .ad("Range")
+                    .kutupsal(true)
+                    .yığın("range")
+                    .veri([50.0]),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(
+            &mut yüzey,
+            &seçenekler,
+            &BoyamaGirdisi {
+                ipucu_öğesi: Some((1, 0)),
+                ..Default::default()
+            },
+        );
+
+        assert_eq!(çıktı.isabetler.len(), 1, "silent placeholder atlanmalı");
+        assert_eq!(çıktı.isabetler[0].seri_sırası, 1);
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("yazı \"Beijing\""));
+        assert!(döküm.contains("yazı \"Lowest：50\""));
+        assert!(döküm.contains("yazı \"Highest：100\""));
+    }
 
     #[test]
     fn sabit_boyutlu_grid_acik_sag_ve_alt_kenarlara_capanir() {
