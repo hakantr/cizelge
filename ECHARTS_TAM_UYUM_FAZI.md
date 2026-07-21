@@ -1082,6 +1082,85 @@ Gerçekleşen dilim — `bar-polar-stack-radial` (2026-07-20):
   seri odaklı hover, animasyon, erişilebilirlik ile ölçümlü performans ilgili
   Faz 3/4/6/7/8 kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
+Gerçekleşen dilim — `bar-polar-real-estate` (2026-07-20):
+
+- Resmî örnek
+  `../echarts-examples/public/examples/ts/bar-polar-real-estate.ts`
+  dosyasından kayıpsız fixture'a taşındı. İki polar stack'in bant ve ofset
+  hesabı `../echarts/src/layout/barPolar.ts`; yığın boyutları
+  `../echarts/src/data/helper/dataStackHelper.ts` ile
+  `../echarts/src/processor/dataStack.ts`; bar `z`, `coordinateSystem` ve
+  genişlik varsayılanları `../echarts/src/chart/bar/BaseBarSeries.ts`;
+  callback parametreleri `../echarts/src/model/mixin/dataFormat.ts`; item
+  tooltip akışı `../echarts/src/component/tooltip/TooltipView.ts`; legend
+  kutusu da `../echarts/src/component/legend/LegendModel.ts`,
+  `LegendView.ts` ve `../echarts/src/util/layout.ts` üzerinden sabit ECharts
+  commitinde doğrulandı.
+- Başlıktaki `How expensive is it to rent an apartment in China?`,
+  `Data from https://www.numbeo.com` alt metni, `grid.top: 100`, boş
+  `radiusAxis`/`polar`, kategorik `angleAxis` ve resmî sıradaki 19 şehir
+  (`北京`den `烟台`a) tipli modele aktarıldı. 19 adet
+  `[lowest, highest, average]` üçlüsünün ondalıkları korunur; fixture testi
+  hem ham minimum dizisini hem `highest-lowest`, `average-50` ve sabit 100
+  dönüşümlerinin tamamını resmî veriyle karşılaştırır.
+- Dört polar bar resmî option sırasını korur. İlk sessiz ve saydam seri
+  `Min Max` yığınını `0→lowest` aralığına taşır; görünen `Range` serisi
+  `lowest→highest` aralığını mavi çizer. Üçüncü sessiz/saydam ve `z: 10`
+  seri `Average` yığınını `0→average-50` aralığına taşır; görünen
+  `Average`, 100 birimlik verisiyle `average-50→average+50` aralığını yeşil
+  çizer. Böylece veri yerleşimi için kullanılan görünmez sektörler legend
+  ya da pointer hedefi olmadan gerçek ECharts stack semantiğini sürdürür.
+- On dokuz kategorili bant `360/19 = 18,9474°`dir. İki bağımsız stack,
+  varsayılan `barCategoryGap: '20%'` ve son serideki
+  `barGap: '-100%'` ile `barPolar.ts` formülünde aynı `15,1579°` sektör
+  açıklığını ve aynı `−7,5789°` ofseti alır; dolayısıyla yeşil ortalama
+  şeridi mavi aralık sektörünün açısal merkezine tam bindirilir. Bu negatif
+  yüzdelik değer `SütunSerisi::sütun_boşluğu`nda kayıpsız saklanır.
+- 800×600 resmî `shotWidth` görünümünde polar merkez `(400, 300)`, dış
+  yarıçap 240 px'dir. Ham kapsam `0..10000`, boş radiusAxis'in güzel ölçeği
+  de 2.000 birimlik `0..10000` halkalarını üretir. Böylece 100 birimlik
+  ortalama bandı 2,4 px radyal kalınlığa; örneğin Pekin aralığı
+  `5000..10000`, ortalama şeridi `6735,71..6835,71` yarıçap değerlerine
+  karşılık gelir. Varsayılan `startAngle: 90`, saat yönü ve kategori
+  `boundaryGap` davranışı 19 sektör/etiketin resmî raster konumunu korur.
+- `SütunSerisi` artık ECharts'ın bar öntanımlı `z: 2` değerini ve açık
+  `silent` seçeneğini taşır. Polar seriler `(z, seriesIndex)` sırasıyla
+  boyanır; `z: 10` ortalama yığını mavi aralığın üstündedir. Sessiz iki
+  taban seri çizilir fakat isabet bölgesi üretmez. Programatik item seçimi
+  de sessiz tabanı atlayıp görünür serinin ham `dataIndex` değerini
+  `İpucuParametresi`ne geçirir.
+- Resmî formatter aynı veri sırasını kullanarak
+  `北京<br>Lowest：5000<br>Highest：10000<br>Average：6785.71` sonucunu
+  üretir. Bağlamlı formatter'ın `<br>`, `<br/>` ve `<br />` ayrımları
+  güvenli yerel tooltip satırlarına çevrilir; birim testinde başlık ile üç
+  değer satırının ayrı çizildiği ve sessiz placeholder'ın hover hedefi
+  olmadığı kilitlidir. Statik kart bu tooltip'i açık göstermediği için tam
+  pointer/hover görsel yaşam döngüsü Faz 7 etkileşim kapısında kalır.
+- `legend.top: 'bottom'` yalnız bu fixture için yaklaşık bir `bottom`
+  uzaklığına çevrilmedi. Genel `Gösterge::üst` API'si sayısal/yüzdelik
+  değerlerin yanında `top`, `middle/center` ve `bottom` anahtarlarını tipli
+  `DikeyKonum` olarak korur. `top: 'bottom'` ve normalize 15 px padding,
+  `layout.getLayoutRect` gibi 600 px yükseklikte 14 px legend içeriğini
+  `y=571`e yerleştirir; `Range/Average` sırası ve renkleri ayrıca fixture
+  ve yerleşim testleriyle sabittir.
+- Çekirdek birim kapısı 287/287, fixture kapısı 42/42 geçti;
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Yeni kart kilitli referansla
+  bağımsız 1/1 tekrar koşusunu, depo ise önceden kilitli hiçbir resmî
+  referans yenilenmeden 179/179 tam görsel regresyonu geçti.
+- 800×600 kaynaklardan ortak 600×450 boyuta indirilen yeni kilitli kanıt
+  1.239 değişen piksel, `%0,4589` fark ve `0,997249` SSIM üretir. Resmî
+  referans iki ardışık üretimde piksel düzeyinde kararlı olduğu
+  doğrulandıktan sonra yalnız bu kart için bir kez oluşturuldu; izleyen
+  bağımsız ve tam koşular referansa yazmadan geçti. Referans, gerçek, fark
+  ve metrik hashleri galeri manifestine bağlıdır.
+- Kart `kısmi`den `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 153/332, yani `%46,1`
+  oldu. `roundCap`, `barMinAngle`, negatif/ters polar birleşimleri, tooltip
+  pointer/hover yaşam döngüsü, animasyon, erişilebilirlik ve ölçümlü
+  performans ilgili Faz 3/4/7/8 kapılarında kapanmadan kart nihai
+  `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
