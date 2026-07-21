@@ -1,0 +1,19 @@
+{
+  "id": "bar-polar-real-estate",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1239,
+  "değişen_piksel_oranı": 0.004588888888888889,
+  "ssim": 0.9972487517722224,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-real-estate.png",
+    "gerçek": "testler/gorsel/gerçek/default/bar-polar-real-estate.png",
+    "fark": "testler/gorsel/fark/default/bar-polar-real-estate.png"
+  }
+}

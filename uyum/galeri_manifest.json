@@ -15162,7 +15162,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15174,14 +15174,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1239,
+          "değişen_piksel_oranı": 0.004588888888888889,
+          "ssim": 0.9972487517722224,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/bar-polar-real-estate.png",
+            "sha256": "f1a2e73693ab94d23064194445877297fde05c2c20d96cd42f9a565b37b1a88b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/bar-polar-real-estate.png",
+            "sha256": "0c40b5c163f2e99cda572840c486aab2927b792f5134a94dbe2eb820dd6d1438"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/bar-polar-real-estate.png",
+            "sha256": "785c8dea82fee99f75ed0cb39a31523aff91819c2fd2ea2e051bdcf0a72dc93f"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/bar-polar-real-estate-son.json",
+            "sha256": "2c8e2b7cfc69af3d6959134530455e7e758a1161e16240f2fbc51a24285be2d0"
+          }
+        }
+      ]
     }
   },
   {
