@@ -3159,6 +3159,73 @@ mod bar_polar_stack_testleri {
     }
 }
 
+fn bar_polar_stack_radial() -> GrafikSeçenekleri {
+    let seri = |ad: &str, veri: [f64; 7]| {
+        SütunSerisi::yeni()
+            .ad(ad)
+            .yığın("a")
+            .kutupsal(true)
+            .veri(veri)
+    };
+    GrafikSeçenekleri::yeni()
+        .kutupsal(KutupsalKoordinat::yeni().açısal_eksen(
+            Eksen::kategori().veri(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]),
+        ))
+        .seri(seri("A", [1.0, 2.0, 3.0, 4.0, 3.0, 5.0, 1.0]))
+        .seri(seri("B", [2.0, 4.0, 6.0, 1.0, 3.0, 2.0, 1.0]))
+        .seri(seri("C", [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 5.0]))
+        // Kanıt koşucusunun title/legend/toolbox için sabitlediği 15 px
+        // padding iki renderer'da da aynı normalize edilmiş option'dır.
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0).veri(["A", "B", "C"]))
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod bar_polar_stack_radial_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_yedi_kategori_uc_seri_ve_tek_yigin_kayipsizdir() {
+        let seçenekler = bar_polar_stack_radial();
+        assert!(
+            seçenekler.animasyon,
+            "resmi örnek animation alanını kapatmıyor"
+        );
+        let kutupsal = seçenekler.kutupsal.as_ref().expect("polar bileşeni");
+        assert_eq!(
+            kutupsal.açısal_eksen.veri,
+            ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        );
+        assert!(kutupsal.radyal_eksen.veri.is_empty());
+        assert_eq!(
+            seçenekler.gösterge.as_ref().expect("legend").veri,
+            ["A", "B", "C"]
+        );
+        assert_eq!(seçenekler.seriler.len(), 3);
+
+        let beklenen = [
+            ("A", [1.0, 2.0, 3.0, 4.0, 3.0, 5.0, 1.0]),
+            ("B", [2.0, 4.0, 6.0, 1.0, 3.0, 2.0, 1.0]),
+            ("C", [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 5.0]),
+        ];
+        for (seri, (ad, veri)) in seçenekler.seriler.iter().zip(beklenen) {
+            let Seri::Sütun(seri) = seri else {
+                panic!("polar bar serisi bekleniyordu");
+            };
+            assert_eq!(seri.ad.as_deref(), Some(ad));
+            assert_eq!(seri.yığın.as_deref(), Some("a"));
+            assert!(seri.kutupsal);
+            assert_eq!(
+                seri.veri
+                    .iter()
+                    .filter_map(|öğe| öğe.değer.sayı())
+                    .collect::<Vec<_>>(),
+                veri
+            );
+        }
+    }
+}
+
 fn bar_label_rotation() -> GrafikSeçenekleri {
     let etiket = Etiket::yeni()
         .göster(true)
@@ -10487,6 +10554,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-polar-label-radial" => Ok(bar_polar_label_radial()),
         "bar-polar-label-tangential" => Ok(bar_polar_label_tangential()),
         "bar-polar-stack" => Ok(bar_polar_stack()),
+        "bar-polar-stack-radial" => Ok(bar_polar_stack_radial()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),

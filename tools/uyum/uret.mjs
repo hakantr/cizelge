@@ -129,6 +129,7 @@ const YEREL_FIXTURE = Object.freeze({
   'bar-polar-label-radial': 'examples/uyum_fixture.rs#bar_polar_label_radial',
   'bar-polar-label-tangential': 'examples/uyum_fixture.rs#bar_polar_label_tangential',
   'bar-polar-stack': 'examples/uyum_fixture.rs#bar_polar_stack',
+  'bar-polar-stack-radial': 'examples/uyum_fixture.rs#bar_polar_stack_radial',
   'bar-label-rotation': 'examples/uyum_fixture.rs#bar_label_rotation',
   'bar-breaks-simple': 'examples/uyum_fixture.rs#bar_breaks_simple',
   'bar-breaks-brush': 'examples/uyum_fixture.rs#bar_breaks_brush',
