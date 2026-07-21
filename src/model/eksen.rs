@@ -635,6 +635,11 @@ pub struct Eksen {
     pub sıfırı_içer: bool,
     /// `splitNumber`, öntanımlı 5.
     pub bölme_sayısı: usize,
+    /// `splitNumber` kullanıcı tarafından açıkça belirtildi mi? ECharts
+    /// angleAxis gibi koordinat bağlamlarında genel eksen öntanımlısını
+    /// ezdiği için ham değerin kaynağını korumak gerekir.
+    #[doc(hidden)]
+    pub bölme_sayısı_belirtildi: bool,
     /// Çentik hizalama (`alignTicks`): aynı ızgaradaki ilk değer ekseninin
     /// bölme sayısına uyar; bölme çizgileri üst üste düşer (yalnız değer
     /// eksenlerinde anlamlıdır).
@@ -694,6 +699,7 @@ impl Default for Eksen {
             en_çok_veri: false,
             sıfırı_içer: true,
             bölme_sayısı: 5,
+            bölme_sayısı_belirtildi: false,
             çentik_hizala: false,
             aralık: None,
             en_küçük_adım: None,
@@ -866,6 +872,7 @@ impl Eksen {
 
     pub fn bölme_sayısı(mut self, sayı: usize) -> Self {
         self.bölme_sayısı = sayı.max(1);
+        self.bölme_sayısı_belirtildi = true;
         self
     }
 

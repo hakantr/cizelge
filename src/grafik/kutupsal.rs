@@ -719,6 +719,13 @@ pub fn kutupsal_kur(
         açısal_kapsam = [0.0, en_uzun.saturating_sub(1).max(1) as f64];
     }
 
+    let açısal_bölme_sayısı = if koordinat.açısal_eksen.bölme_sayısı_belirtildi {
+        koordinat.açısal_eksen.bölme_sayısı
+    } else {
+        // `component/polar/install.ts::angleAxisExtraOption`: tüm angle
+        // axis türleri genel eksen varsayılanı yerine 12 kullanır.
+        12
+    };
     let açısal_ölçek = if açısal_kategorik {
         Ölçek::Kategorik(KategorikÖlçek::yeni(koordinat.açısal_eksen.veri.clone()))
     } else {
@@ -727,9 +734,15 @@ pub fn kutupsal_kur(
             koordinat.açısal_eksen.en_az,
             koordinat.açısal_eksen.en_çok,
             koordinat.açısal_eksen.sıfırı_içer,
-            koordinat.açısal_eksen.bölme_sayısı,
-            koordinat.açısal_eksen.en_küçük_adım,
-            koordinat.açısal_eksen.en_büyük_adım,
+            açısal_bölme_sayısı,
+            koordinat
+                .açısal_eksen
+                .aralık
+                .or(koordinat.açısal_eksen.en_küçük_adım),
+            koordinat
+                .açısal_eksen
+                .aralık
+                .or(koordinat.açısal_eksen.en_büyük_adım),
         ))
     };
     let radyal_ölçek = if radyal_kategorik {
@@ -1156,6 +1169,12 @@ pub fn kutupsal_serileri_çiz(
                             orta + bant.ofset + bant.genişlik,
                         )
                     };
+                    // `BarView.updateStyle::isZeroOnPolar`: Sausage yolu
+                    // sıfır açıklıkta iki kapaktan bir daire kurabilse de
+                    // ECharts bu öğenin fill/stroke'unu `none` yapar.
+                    if teğetsel && (açı1 - açı0).abs() <= f32::EPSILON {
+                        continue;
+                    }
                     let veri_öğesi = s.veri.get(j);
                     let öğe_stili = veri_öğesi.and_then(|öğe| öğe.stil.as_ref());
                     let dolgu = öğe_stili
@@ -1175,7 +1194,7 @@ pub fn kutupsal_serileri_çiz(
                         .unwrap_or(s.öğe_stili.kenarlık_kalınlığı);
                     let kenarlık = kenarlık_rengi
                         .filter(|_| kenarlık_kalınlığı > 0.0)
-                        .map(|renk| (kenarlık_kalınlığı, renk));
+                        .map(|renk| (kenarlık_kalınlığı, renk.opaklık(opaklık)));
                     let dolgu = dolgu.opaklık(opaklık);
                     if teğetsel && s.yuvarlak_uç {
                         çizici.yuvarlak_uçlu_dilim(
@@ -1495,6 +1514,43 @@ mod testler {
         assert!((ilk.ofset + 16.8).abs() < 1e-4, "{ilk:?}");
         assert!((ikinci.ofset - 2.191_304).abs() < 1e-4, "{ikinci:?}");
         assert!((ikinci.ofset - (ilk.ofset + ilk.genişlik) - 4.382_609).abs() < 1e-4);
+    }
+
+    #[test]
+    fn angle_axis_belirtilmeyen_split_number_icin_on_iki_acik_deger_icin_besi_korur() {
+        let kur = |açısal_eksen: Eksen| {
+            let seçenekler = GrafikSeçenekleri::yeni()
+                .kutupsal(
+                    KutupsalKoordinat::yeni()
+                        .açısal_eksen(açısal_eksen)
+                        .radyal_eksen(Eksen::kategori().veri(["v", "w", "x", "y", "z"])),
+                )
+                .seri(SütunSerisi::yeni().kutupsal(true).veri([4, 3, 2, 1, 0]));
+            kutupsal_kur(
+                seçenekler.kutupsal.as_ref().expect("polar"),
+                &seçenekler,
+                &[vec![
+                    Some((0.0, 4.0)),
+                    Some((0.0, 3.0)),
+                    Some((0.0, 2.0)),
+                    Some((0.0, 1.0)),
+                    Some((0.0, 0.0)),
+                ]],
+                &[true],
+                Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+            )
+        };
+
+        let varsayılan = kur(Eksen::değer().en_çok(2.0));
+        let açık = kur(Eksen::değer().en_çok(2.0).bölme_sayısı(5));
+        let Ölçek::Aralık(varsayılan) = varsayılan.açısal_ölçek else {
+            panic!("değer angle axis aralık ölçeği olmalı");
+        };
+        let Ölçek::Aralık(açık) = açık.açısal_ölçek else {
+            panic!("değer angle axis aralık ölçeği olmalı");
+        };
+        assert_eq!(varsayılan.adım, 0.2);
+        assert_eq!(açık.adım, 0.5);
     }
 
     #[test]

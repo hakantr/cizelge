@@ -1474,11 +1474,18 @@ fn gösterge_öğeleri(
                         .öğe_stili
                         .opaklık
                         .unwrap_or(if saçılım.efektli { 1.0 } else { 0.8 }),
+                    Seri::Sütun(sütun) => sütun.öğe_stili.opaklık.unwrap_or(1.0),
                     _ => 1.0,
                 };
                 let kenarlık = match seri {
                     Seri::Mum(mum) if mum.kenarlık_kalınlığı > 0.0 => {
                         Some((mum.kenarlık_kalınlığı, mum.yükselen_kenarlık_rengi))
+                    }
+                    Seri::Sütun(sütun) if sütun.öğe_stili.kenarlık_kalınlığı > 0.0 => {
+                        sütun
+                            .öğe_stili
+                            .kenarlık_rengi
+                            .map(|renk| (sütun.öğe_stili.kenarlık_kalınlığı, renk))
                     }
                     _ => None,
                 };
@@ -5976,6 +5983,27 @@ mod yakınlaştırma_yönü_testleri {
     }
 
     #[test]
+    fn sutun_gosterge_simgesi_item_style_opaklik_ve_kenarligini_tasir() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(
+            crate::model::seri::SütunSerisi::yeni()
+                .ad("With Round Cap")
+                .öğe_stili(
+                    crate::model::stil::ÖğeStili::yeni()
+                        .opaklık(0.8)
+                        .kenarlık_rengi("green")
+                        .kenarlık_kalınlığı(1.0),
+                )
+                .veri([1]),
+        );
+
+        let öğeler = gösterge_öğeleri(&seçenekler, &HashSet::new());
+
+        assert_eq!(öğeler.len(), 1);
+        assert_eq!(öğeler[0].opaklık, 0.8);
+        assert_eq!(öğeler[0].kenarlık, Some((1.0, Renk::from("green"))));
+    }
+
+    #[test]
     fn özel_datazoom_tutamacı_yüzde_boyutunu_ve_dikey_dönüşü_korur() {
         let simge = crate::model::seri::Sembol::svg_yolu("path://M0 0H10V20H0Z")
             .expect("özel tutamaç yolu çözülmeli");
@@ -6225,6 +6253,32 @@ mod yakınlaştırma_yönü_testleri {
             .expect("gösterge öğesi çizilmeli");
         assert_eq!(ad, "Range");
         assert!((kutu.y - 571.0).abs() < 1e-3, "{kutu:?}");
+    }
+
+    #[test]
+    fn alt_gösterge_item_style_kenarlığının_görünen_yüksekliğini_hesaba_katar() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .gösterge(crate::model::bilesen::Gösterge::yeni().iç_boşluk(15.0))
+            .seri(
+                crate::model::seri::SütunSerisi::yeni()
+                    .ad("With Round Cap")
+                    .öğe_stili(
+                        crate::model::stil::ÖğeStili::yeni()
+                            .kenarlık_rengi("green")
+                            .kenarlık_kalınlığı(1.0),
+                    )
+                    .veri([1.0]),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        let (kutu, ad) = çıktı
+            .gösterge_kutuları
+            .first()
+            .expect("gösterge öğesi çizilmeli");
+        assert_eq!(ad, "With Round Cap");
+        assert_eq!((kutu.y, kutu.yükseklik), (480.0, 15.0));
     }
 
     #[test]

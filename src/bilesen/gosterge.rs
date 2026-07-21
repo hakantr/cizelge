@@ -75,6 +75,11 @@ pub fn gösterge_çiz(
         .iter()
         .filter_map(|öğe| öğe.kenarlık.map(|(kalınlık, _)| kalınlık / 2.0))
         .fold(0.0_f32, f32::max);
+    // `Path.getBoundingRect`, vuruşun yarısını şeklin her iki yanına
+    // katar. `LegendView.layoutInner` bu görünen kutuyu sıfıra normalize
+    // edip alt/orta konumu onun yüksekliğiyle çözdüğü için satır adımı da
+    // yalnız sembol yüksekliği değil iki yönlü taşmayı içermelidir.
+    let görünen_satır_yüksekliği = satır_yüksekliği + satır_dikey_taşması * 2.0;
     let görünen_adlar: Vec<String> = öğeler
         .iter()
         .map(|öğe| {
@@ -152,11 +157,11 @@ pub fn gösterge_çiz(
     let içerik_yüksekliği = match seçenek.yön {
         Yön::Yatay => {
             let satır_sayısı = yatay_satırlar.len().max(1);
-            satır_yüksekliği * satır_sayısı as f32
+            görünen_satır_yüksekliği * satır_sayısı as f32
                 + seçenek.öğe_boşluğu * satır_sayısı.saturating_sub(1) as f32
         }
         Yön::Dikey => {
-            satır_yüksekliği * öğeler.len() as f32
+            görünen_satır_yüksekliği * öğeler.len() as f32
                 + seçenek.öğe_boşluğu * öğeler.len().saturating_sub(1) as f32
         }
     };
@@ -220,7 +225,7 @@ pub fn gösterge_çiz(
             .skip(s_baş)
             .take(s_uzunluk)
         {
-            let kutu = Dikdörtgen::yeni(x, üst, *genişlik, satır_yüksekliği);
+            let kutu = Dikdörtgen::yeni(x, üst, *genişlik, görünen_satır_yüksekliği);
             öğe_çiz(
                 çizici,
                 seçenek,
@@ -237,9 +242,9 @@ pub fn gösterge_çiz(
         // Denetimler: ‹ n/m ›
         let mut oklar = Vec::new();
         let denetim_x = çizici.genişlik() - denetim_genişliği - seçenek.iç_boşluk;
-        let orta_y = üst + satır_yüksekliği / 2.0;
-        let sol_ok = Dikdörtgen::yeni(denetim_x, üst, 18.0, satır_yüksekliği);
-        let sağ_ok = Dikdörtgen::yeni(denetim_x + 70.0, üst, 18.0, satır_yüksekliği);
+        let orta_y = üst + görünen_satır_yüksekliği / 2.0;
+        let sol_ok = Dikdörtgen::yeni(denetim_x, üst, 18.0, görünen_satır_yüksekliği);
+        let sağ_ok = Dikdörtgen::yeni(denetim_x + 70.0, üst, 18.0, görünen_satır_yüksekliği);
         for (kutu, işaret, yön) in [(sol_ok, "‹", -1i32), (sağ_ok, "›", 1i32)] {
             çizici.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_10()), [3.0; 4], None);
             çizici.yazı(
@@ -286,12 +291,12 @@ pub fn gösterge_çiz(
             .unwrap_or(0.0);
         let kullanılabilir_yükseklik =
             (çizici.yükseklik() - üst_kenar - alt_kenar - seçenek.iç_boşluk * 2.0)
-                .max(satır_yüksekliği);
+                .max(görünen_satır_yüksekliği);
         let denetim_yüksekliği = 15.0_f32;
         let içerik_yüksekliği =
             (kullanılabilir_yükseklik - denetim_yüksekliği - seçenek.öğe_boşluğu)
-                .max(satır_yüksekliği);
-        let adım = satır_yüksekliği + seçenek.öğe_boşluğu;
+                .max(görünen_satır_yüksekliği);
+        let adım = görünen_satır_yüksekliği + seçenek.öğe_boşluğu;
         let sayfa_adımı = ((içerik_yüksekliği / adım).floor() as usize).max(1);
         let sayfa_sayısı = (öğeler.len().saturating_sub(1) / sayfa_adımı) + 1;
         let sayfa = sayfa.min(sayfa_sayısı.saturating_sub(1));
@@ -312,7 +317,7 @@ pub fn gösterge_çiz(
                 .enumerate()
             {
                 let y = üst + yerel_sıra as f32 * adım;
-                let kutu = Dikdörtgen::yeni(x, y, *genişlik, satır_yüksekliği);
+                let kutu = Dikdörtgen::yeni(x, y, *genişlik, görünen_satır_yüksekliği);
                 öğe_çiz(
                     yüzey,
                     seçenek,
@@ -402,7 +407,8 @@ pub fn gösterge_çiz(
             let başlangıç_x = yatay_başlangıç(seçenek, çizici.genişlik(), toplam);
             for (satır_sırası, (başlangıç, bitiş, _)) in yatay_satırlar.iter().enumerate() {
                 let mut x = başlangıç_x;
-                let y = üst + satır_sırası as f32 * (satır_yüksekliği + seçenek.öğe_boşluğu);
+                let y =
+                    üst + satır_sırası as f32 * (görünen_satır_yüksekliği + seçenek.öğe_boşluğu);
                 for sıra in *başlangıç..*bitiş {
                     let (Some(öğe), Some(görünen_ad), Some(genişlik)) = (
                         öğeler.get(sıra),
@@ -411,7 +417,7 @@ pub fn gösterge_çiz(
                     ) else {
                         continue;
                     };
-                    let kutu = Dikdörtgen::yeni(x, y, *genişlik, satır_yüksekliği);
+                    let kutu = Dikdörtgen::yeni(x, y, *genişlik, görünen_satır_yüksekliği);
                     öğe_çiz(
                         çizici,
                         seçenek,
@@ -432,7 +438,7 @@ pub fn gösterge_çiz(
             let mut y = üst;
             for ((öğe, görünen_ad), genişlik) in öğeler.iter().zip(&görünen_adlar).zip(&genişlikler)
             {
-                let kutu = Dikdörtgen::yeni(x, y, *genişlik, satır_yüksekliği);
+                let kutu = Dikdörtgen::yeni(x, y, *genişlik, görünen_satır_yüksekliği);
                 öğe_çiz(
                     çizici,
                     seçenek,
@@ -443,7 +449,7 @@ pub fn gösterge_çiz(
                     satır_dikey_taşması,
                 );
                 kutular.push((kutu, öğe.ad.clone()));
-                y += satır_yüksekliği + seçenek.öğe_boşluğu;
+                y += görünen_satır_yüksekliği + seçenek.öğe_boşluğu;
             }
         }
     }
@@ -531,6 +537,16 @@ fn öğe_çiz(
     } else {
         öğe.renk.opaklık(öğe.opaklık)
     };
+    let kenarlık = öğe.kenarlık.map(|(kalınlık, renk)| {
+        (
+            kalınlık,
+            if öğe.kapalı {
+                seçenek.devre_dışı_rengi
+            } else {
+                renk.opaklık(öğe.opaklık)
+            },
+        )
+    });
     let simge = seçenek.simge.unwrap_or(öğe.simge);
     // `kutu` zrender grubunun görünen sınırıdır. Çizgi vuruşu ve seri
     // itemStyle kenarlığı gerçek item koordinatının soluna taşabildiği için
@@ -565,7 +581,7 @@ fn öğe_çiz(
                 seçenek.simge_genişliği,
                 seçenek.simge_yüksekliği,
             );
-            çizici.dikdörtgen(d, &Dolgu::Düz(renk), [3.0; 4], öğe.kenarlık);
+            çizici.dikdörtgen(d, &Dolgu::Düz(renk), [3.0; 4], kenarlık);
         }
         GöstergeSimgesi::Daire => {
             let yarıçap = seçenek.simge_yüksekliği / 2.0;
