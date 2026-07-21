@@ -958,6 +958,66 @@ Gerçekleşen dilim — `bar-polar-label-tangential` (2026-07-20):
   performans izleyen Faz 3/4/6/7/8 kartları kapanmadan bu kart nihai
   `tam_kanıtlı` sayılmaz.
 
+Gerçekleşen dilim — `bar-polar-stack` (2026-07-20):
+
+- Resmî örnek `../echarts-examples/public/examples/ts/bar-polar-stack.ts`
+  dosyasından kayıpsız fixture'a taşındı. Kutupsal sütun yerleşimi
+  `../echarts/src/layout/barPolar.ts`; ortak yığın boyutları ve hesaplama
+  sırası `../echarts/src/data/helper/dataStackHelper.ts` ile
+  `../echarts/src/processor/dataStack.ts`; eksen katmanları
+  `../echarts/src/component/axis/AngleAxisView.ts` ve `RadiusAxisView.ts`;
+  gösterge ölçümü/yerleşimi ise `../echarts/src/component/legend/LegendModel.ts`
+  ile `LegendView.ts` üzerinden sabit ECharts commitinde doğrulandı.
+- Boş `polar`, `angleAxis` ve resmî `radiusAxis` option'ı tipli modele aynı
+  anlamla aktarıldı. `radiusAxis.type: 'category'`,
+  `['Mon', 'Tue', 'Wed', 'Thu']` ve `z: 10` korunur; eksen çizgi, çentik ve
+  etiketleri yığın sektörlerinin üstünde çizilir. ECharts'ın varsayılan
+  `%50/%50` merkezi ile `%80` dış yarıçapı 700×525 fixture görünümünde
+  `(350, 262,5)` merkez ve 210 px yarıçap üretir.
+- Dört radius kategorisinin her biri 52,5 px banttır. Açık `barWidth` veya
+  `barCategoryGap` verilmediği için resmî `%20` kategori boşluğu uygulanır;
+  her yığın 42 px kalınlıkla ve sırasıyla 5,25..47,25,
+  57,75..99,75, 110,25..152,25 ve 162,75..204,75 px yarıçap aralıklarında
+  çizilir. Bu hesap önceki teğetsel polar sütunun açık
+  `barWidth`/`barMinWidth`/`barMaxWidth`/`barCategoryGap` yollarıyla aynı
+  ortak yerleşimden gelir.
+- Üç `bar` serisinin `coordinateSystem: 'polar'`, adları `A/B/C`, verileri
+  `[1, 2, 3, 4]`, `[2, 4, 6, 8]`, `[1, 2, 3, 4]` ve ortak `stack: 'a'`
+  değeri fixture testinde kilitlendi. İşaret-korumalı yığın motoru açısal
+  aralıkları A için `0→[1,2,3,4]`, B için `[1,2,3,4]→[3,6,9,12]`, C için
+  `[3,6,9,12]→[4,8,12,16]` olarak üretir; sektörlerin birbirinin üstüne
+  binmesi yerine aynı radyal bantta uç uca eklenmesi böylece doğrulanır.
+- Ortak yığının açısal veri kapsamı `0..16` olarak toplanır. Boş angleAxis'in
+  varsayılan on iki bölmeli güzel ölçeği 1 birim aralık seçer ve `0..15`
+  etiket/ışınlarını üretir; 16'nın 0 ile aynı kutupsal ışına düşen yinelenen
+  ucu bastırılır. Saat yönü ve başlangıç açısı ECharts varsayılanlarını
+  koruduğu için bütün sektör başlangıç/bitiş açıları resmî rasterle aynı
+  konumdadır.
+- Açık legend `A`, `B`, `C` sırasını ve seri palet renklerini korur. Resmî
+  karşılaştırma koşucusunun title/legend/toolbox için uyguladığı 15 px
+  normalize padding fixture'a açıkça taşındı; gösterge 700×525 option
+  görünümünün alt merkezinde aynı simge, metin aralığı ve katmanda çizilir.
+  Kaynaktaki üç `emphasis.focus: 'series'` bildiriminin statik rastere
+  etkisi yoktur; seri odaklı hover/blur yaşam döngüsü ortak etkileşim
+  sistemiyle Faz 7'de kapanacağı için kanıt matrisi etkileşimi bilinçli
+  olarak `kısmi` tutar.
+- Çekirdek birim kapısı 283/283, fixture kapısı 40/40 geçti;
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  `node tools/uyum/uret.mjs --check` temizdir. Yeni kart kilitli referansla
+  bağımsız 1/1 tekrar koşusunu, tüm depo ise önceden kilitli hiçbir resmî
+  referans yenilenmeden 177/177 görsel regresyonu geçti.
+- Yeni 600×450 kilitli kanıt 769 değişen piksel, `%0,2848` fark ve
+  `0,997743` SSIM üretir. Resmî referans geçici üretimlerde kararlı olduğu
+  doğrulandıktan sonra yalnız bu yeni kart için bir kez oluşturuldu;
+  izleyen bağımsız koşu referansa yazmadan geçti. Referans, gerçek, fark ve
+  metrik dosyaları SHA-256 değerleriyle galeri manifestine bağlandı.
+- Kart `yok`tan `uygulandı_kanıt_bekliyor` durumuna, statik görsel kapısı
+  `tam_kanıtlı`ya geçti. Operasyonel kart ilerlemesi 151/332, yani `%45,5`
+  oldu. Birden fazla bağımsız stack/grup, negatif/ters eksen bileşimleri,
+  `roundCap`, `barMinAngle`, tooltip/seri odaklı hover, animasyon,
+  erişilebilirlik ve ölçümlü performans Faz 3/4/6/7/8 kapılarında
+  kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Manifestte bu serilere ait, başka ileri faz özelliği beklemeyen tüm resmi
