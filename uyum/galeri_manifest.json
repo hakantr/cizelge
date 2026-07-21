@@ -1850,24 +1850,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 1005,
-          "değişen_piksel_oranı": 0.0037222222222222223,
-          "ssim": 0.9976472003821123,
+          "değişen_piksel": 1220,
+          "değişen_piksel_oranı": 0.004518518518518519,
+          "ssim": 0.9966472110038045,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-encode0.png",
             "sha256": "a6afd1b4b3cbe648ade626ed05463a556185d8a63dc52dd34493ccda11e6c82c"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/dataset-encode0.png",
-            "sha256": "95d6621e086f025e1db0d1f7a55c3e342fc51275357b56c553deb8496b5a9f1c"
+            "sha256": "27b427f97aaca33e297712ddba52959f4d590939440d295d246879cb7401d7a4"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/dataset-encode0.png",
-            "sha256": "93dbd99399e91acc6262e5c9bbf639cd69450cd42111baf95345b44833fe0927"
+            "sha256": "ad578f6454868a659d7185eb6ead93a1310cc38ab3d7723fcb339c734a63d93d"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/dataset-encode0-son.json",
-            "sha256": "28e046e2da44c0db7848aefd093e21042d786d7da46e4c6987df4dd1fc7585c0"
+            "sha256": "08aef8c40d2a46c542595114f45a727979d176faaa898a990c958b1f9dff6d92"
           }
         }
       ]

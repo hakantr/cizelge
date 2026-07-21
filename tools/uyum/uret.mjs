@@ -680,17 +680,25 @@ function htmlKaçır(değer) {
 
 function raporHtml(manifest, özet) {
   const kartlar = manifest
-    .filter((kayıt) => kayıt.resmi_sayfada_görünür && kayıt.kapsam_durumu !== 'kapsam_dışı_geo_map')
+    .filter((kayıt) => !kayıt.kapsam_durumu.startsWith('kapsam_dışı_'))
     .map((kayıt) => {
       const önizleme = kayıt.çıktılar.kareler.find((kare) => kare.geçti)?.gerçek?.yol;
+      const boşAçıklaması = kayıt.kapsam_durumu === 'yok'
+        ? `Henüz uygulanmadı · Faz ${kayıt.sahip_faz ?? '—'}`
+        : kayıt.cizelge_fixture
+          ? 'Fixture var · görsel kapı bekliyor'
+          : 'Görsel kanıt henüz yok';
       const önizlemeHtml = önizleme
         ? `<img class="önizleme" loading="lazy" src="../../${htmlKaçır(önizleme)}" alt="${htmlKaçır(kayıt.başlık.en)} Cizelge çıktısı">`
-        : '<div class="önizleme boş">Görsel kanıt bekliyor</div>';
-      return `<article class="kart ${kayıt.kapsam_durumu}">
+        : `<div class="önizleme boş">${htmlKaçır(boşAçıklaması)}</div>`;
+      const gizliRozeti = kayıt.resmi_sayfada_görünür
+        ? ''
+        : '\n      <p class="kaynak-rozeti">Resmî galeride gizli · doğrulama senaryosu</p>';
+      return `<article class="kart ${kayıt.kapsam_durumu}${kayıt.resmi_sayfada_görünür ? '' : ' gizli-konformans'}">
       ${önizlemeHtml}
       <h2>${htmlKaçır(kayıt.başlık.en)}</h2>
       <code>${htmlKaçır(kayıt.id)}</code>
-      <p>${htmlKaçır(kayıt.kategoriler.join(' · '))}</p>
+      <p>${htmlKaçır(kayıt.kategoriler.join(' · '))}</p>${gizliRozeti}
       <p class="rozet">API ${htmlKaçır(kayıt.kanıt.api)} · görsel ${htmlKaçır(kayıt.kanıt['statik_görsel'])}</p>
     </article>`;
     }).join('\n');
@@ -698,9 +706,9 @@ function raporHtml(manifest, özet) {
 <html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cizelge ECharts 6.1 uyum raporu</title>
 <style>
-:root{color-scheme:light dark;font:14px system-ui;background:#f5f7fa;color:#1f2937}body{margin:0}.üst{position:sticky;top:0;background:#fff;padding:18px 24px;border-bottom:1px solid #d8dee9;z-index:2}.üst h1{margin:0 0 8px}.özet{display:flex;gap:16px;flex-wrap:wrap}.özet strong{font-size:18px}.ızgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:24px}.kart{background:#fff;border:1px solid #d8dee9;border-top:5px solid #dc2626;border-radius:8px;padding:12px;min-width:0}.kart h2{font-size:16px;margin:10px 0 4px}.kart code{font-size:12px}.önizleme{display:block;width:100%;height:135px;object-fit:contain;border-radius:5px;background:#fff}.önizleme.boş{display:grid;place-items:center;background:repeating-linear-gradient(135deg,#edf0f5,#edf0f5 10px,#e3e7ee 10px,#e3e7ee 20px);color:#6b7280}.rozet{font-size:12px;color:#b91c1c}
+:root{color-scheme:light dark;font:14px system-ui;background:#f5f7fa;color:#1f2937}body{margin:0}.üst{position:sticky;top:0;background:#fff;padding:18px 24px;border-bottom:1px solid #d8dee9;z-index:2}.üst h1{margin:0 0 8px}.özet{display:flex;gap:16px;flex-wrap:wrap}.özet strong{font-size:18px}.ızgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:24px}.kart{background:#fff;border:1px solid #d8dee9;border-top:5px solid #dc2626;border-radius:8px;padding:12px;min-width:0}.kart.gizli-konformans{border-style:dashed}.kart h2{font-size:16px;margin:10px 0 4px}.kart code{font-size:12px}.önizleme{display:block;width:100%;height:135px;object-fit:contain;border-radius:5px;background:#fff}.önizleme.boş{display:grid;place-items:center;background:repeating-linear-gradient(135deg,#edf0f5,#edf0f5 10px,#e3e7ee 10px,#e3e7ee 20px);color:#6b7280}.kaynak-rozeti{font-size:12px;color:#475569}.rozet{font-size:12px;color:#b91c1c}
 @media(prefers-color-scheme:dark){:root{background:#111827;color:#e5e7eb}.üst,.kart{background:#1f2937;border-color:#374151}.önizleme.boş{background:#111827}}
-</style></head><body><header class="üst"><h1>Cizelge · ECharts 6.1 uyum kanıtı</h1><div class="özet"><span><strong>${özet.tam_kanıtlı}</strong> / ${özet.görünür_kapsam_içi} tam kanıtlı</span><span>${özet.kapsam_içi_toplam} kapsam içi</span><span>${özet.geo_map_kapsam_dışı} Geo/Map dışı</span><span>${özet.gl_3d_kapsam_dışı} GL/3B dışı</span></div></header><main class="ızgara">${kartlar}</main></body></html>`;
+</style></head><body><header class="üst"><h1>Cizelge · ECharts 6.1 uyum kanıtı</h1><div class="özet"><span><strong>${özet.statik_görsel_kanıtlı}</strong> / ${özet.kapsam_içi_toplam} kilitli görsel kanıt</span><span>${özet.tam_kanıtlı} / ${özet.kapsam_içi_toplam} tüm kapılar tam</span><span>${özet.görünür_kapsam_içi} resmî galeri kartı</span><span>${özet.gizli_conformance} gizli doğrulama kartı</span><span>${özet.geo_map_kapsam_dışı} Geo/Map dışı</span><span>${özet.gl_3d_kapsam_dışı} GL/3B dışı</span></div></header><main class="ızgara">${kartlar}</main></body></html>`;
 }
 
 function kilitToml(echartsPaket, commitler) {
@@ -791,7 +799,10 @@ function üret(hedef) {
     geo_map_kapsam_dışı: geo.length,
     gl_3d_kapsam_dışı: gl.length,
     option_satırı: matris.length,
-    tam_kanıtlı: görünür.filter((kayıt) => kayıt.kapsam_durumu === 'tam_kanıtlı').length,
+    statik_görsel_kanıtlı: kapsamİçi.filter(
+      (kayıt) => kayıt.kanıt['statik_görsel'] === 'tam_kanıtlı'
+    ).length,
+    tam_kanıtlı: kapsamİçi.filter((kayıt) => kayıt.kapsam_durumu === 'tam_kanıtlı').length,
     kategori_sırası: KATEGORİ_SIRASI,
     kategori_sayıları: Object.fromEntries(KATEGORİ_SIRASI.map((kategori) => [
       kategori,

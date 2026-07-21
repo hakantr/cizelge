@@ -5,6 +5,7 @@ use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::pasta::zengin_etiketi_yaz;
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
+use crate::model::eksen::EksenSıfırKipi;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::SütunSerisi;
 use crate::model::stil::{
@@ -34,6 +35,33 @@ pub struct SütunGirdisi<'s> {
     pub öğe_opaklıkları: Option<&'s [f32]>,
     /// Brush `inBrush.color` / `outOfBrush.color` sabit görselleri.
     pub öğe_renkleri: Option<&'s [Option<Dolgu>]>,
+}
+
+/// Sıfırdan başlayan bir barı kategori ekseni vuruşunun dış kenarından
+/// başlatır. Eksen ve bar aynı pikselde başladığında seri dolgusu daha
+/// sonra boyandığı için taban çizgisini örtüyordu. Veri tepe noktası
+/// değişmez; yalnız vuruşun yarı kalınlığı kadar taban payı ayrılır.
+fn taban_çizgisi_payı(
+    bant_ekseni: &crate::koordinat::ÇalışmaEkseni,
+    taban_değeri: f64,
+    taban_p: f32,
+    tepe_p: f32,
+) -> (f32, f32) {
+    let çizgi = &bant_ekseni.seçenek.çizgi;
+    if taban_değeri.abs() > 1e-9
+        || !çizgi.göster.unwrap_or(true)
+        || çizgi.kalınlık <= 0.0
+        || çizgi.sıfır == EksenSıfırKipi::Kapalı
+    {
+        return (taban_p, tepe_p);
+    }
+    let açıklık = tepe_p - taban_p;
+    let pay = (çizgi.kalınlık / 2.0).max(1.0);
+    if açıklık.abs() <= pay {
+        (taban_p, tepe_p)
+    } else {
+        (taban_p + açıklık.signum() * pay, tepe_p)
+    }
 }
 
 fn sütun_görsel_değeri(
@@ -296,6 +324,7 @@ fn büyük_sütun_çiz(
         let taban_p = değer_ekseni.veriden_piksele(*taban);
         let tepe_p = değer_ekseni.veriden_piksele(*tepe);
         let tepe_p = taban_p + (tepe_p - taban_p) * ilerleme.clamp(0.0, 1.0);
+        let (taban_p, tepe_p) = taban_çizgisi_payı(bant_ekseni, *taban, taban_p, tepe_p);
         let d = if yatay {
             Dikdörtgen::yeni(
                 taban_p.min(tepe_p),
@@ -425,6 +454,7 @@ pub fn sütunları_çiz(
             let tepe_p = değer_ekseni.veriden_piksele(*tepe);
             // Giriş animasyonu: sütun tabandan büyür.
             let tepe_p = taban_p + (tepe_p - taban_p) * ilerleme.clamp(0.0, 1.0);
+            let (taban_p, tepe_p) = taban_çizgisi_payı(bant_ekseni, *taban, taban_p, tepe_p);
 
             let d = if yatay {
                 Dikdörtgen::yeni(
@@ -730,8 +760,23 @@ mod testler {
     use super::*;
     use crate::cizim::gorunum::{BoyamaGirdisi, grafiği_boya};
     use crate::cizim::kayit::KayıtYüzeyi;
-    use crate::model::eksen::Eksen;
+    use crate::model::eksen::{Eksen, EksenKonumu};
     use crate::model::secenekler::GrafikSeçenekleri;
+    use crate::olcek::{KategorikÖlçek, Ölçek};
+
+    #[test]
+    fn sifirdan_baslayan_sutun_eksen_vurusunu_ortmez() {
+        let eksen = crate::koordinat::ÇalışmaEkseni::yeni(
+            Eksen::kategori(),
+            Ölçek::Kategorik(KategorikÖlçek::yeni(vec!["A".to_owned()])),
+            [0.0, 100.0],
+            EksenKonumu::Sol,
+        );
+
+        assert_eq!(taban_çizgisi_payı(&eksen, 0.0, 40.0, 90.0), (41.0, 90.0));
+        assert_eq!(taban_çizgisi_payı(&eksen, 0.0, 40.0, 10.0), (39.0, 10.0));
+        assert_eq!(taban_çizgisi_payı(&eksen, 2.0, 40.0, 90.0), (40.0, 90.0));
+    }
 
     #[test]
     fn iç_yazı_rengi_zrender_parlaklık_eşiklerini_izler() {

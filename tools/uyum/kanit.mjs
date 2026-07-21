@@ -397,6 +397,29 @@ function karşılaştır(referansDosyası, gerçekDosyası, farkDosyası) {
   };
 }
 
+// Toplam piksel oranı, ince fakat anlamlı bir eksen çizgisinin tamamen
+// örtülmesini tek başına yakalayamaz. Kritik geometri kontrolleri, kilitli
+// kartın bilinen semantik örnek noktalarını ayrı bir geçiş kapısı yapar.
+function yapısalKontroller(senaryo, gerçekDosyası) {
+  if (senaryo.id !== 'dataset-encode0') return [];
+  const görüntü = pngOku(gerçekDosyası);
+  const x = 172;
+  const yler = [72, 106, 141, 176, 211, 246, 281, 316, 351];
+  const örnekler = yler.map((y) => {
+    const başlangıç = (y * görüntü.width + x) * 4;
+    const rgb = Array.from(görüntü.data.subarray(başlangıç, başlangıç + 3));
+    const sapma = Math.max(...rgb) - Math.min(...rgb);
+    const parlaklık = rgb.reduce((toplam, kanal) => toplam + kanal, 0) / rgb.length;
+    return { x, y, rgb, geçti: sapma <= 18 && parlaklık <= 190 };
+  });
+  return [{
+    ad: 'kategori_taban_çizgisi',
+    geçti: örnekler.every((örnek) => örnek.geçti),
+    açıklama: 'Y ekseni taban vuruşu dokuz barın başlangıcında kesintisiz görünmeli',
+    örnekler
+  }];
+}
+
 function htmlKaçır(değer) {
   return String(değer).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
@@ -445,12 +468,16 @@ async function çalıştır() {
       await sharp(ham).resize(600, 450).toFile(gerçek);
       fs.rmSync(ham, { force: true });
       const metrik = karşılaştır(referans, gerçek, fark);
+      const yapısal_kontroller = yapısalKontroller(senaryo, gerçek);
+      metrik.geçti = metrik.geçti
+        && yapısal_kontroller.every((kontrol) => kontrol.geçti);
       sonuçlar.push({
         id: senaryo.id,
         senaryo: senaryo.tür,
         kare: kare.ad,
         eşikler: EŞİK,
         ...metrik,
+        yapısal_kontroller,
         dosyalar: {
           referans: path.relative(KÖK, referans),
           gerçek: path.relative(KÖK, gerçek),
@@ -465,7 +492,12 @@ async function çalıştır() {
       `${JSON.stringify(sonuç, null, 2)}\n`
     );
   }
-  const satırlar = sonuçlar.map((sonuç) => `<article class="${sonuç.geçti ? 'geçti' : 'kaldı'}"><h2>${htmlKaçır(sonuç.id)} · ${htmlKaçır(sonuç.kare)}</h2><p>${sonuç.geçti ? 'GEÇTİ' : 'KALDI'} · fark %${(sonuç.değişen_piksel_oranı * 100).toFixed(3)} · SSIM ${sonuç.ssim.toFixed(5)}</p><div><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.referans))}"><figcaption>ECharts</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.gerçek))}"><figcaption>Cizelge</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.fark))}"><figcaption>Fark</figcaption></figure></div></article>`).join('\n');
+  const satırlar = sonuçlar.map((sonuç) => {
+    const yapısal = sonuç.yapısal_kontroller.length
+      ? ` · yapısal ${sonuç.yapısal_kontroller.filter((kontrol) => kontrol.geçti).length}/${sonuç.yapısal_kontroller.length}`
+      : '';
+    return `<article class="${sonuç.geçti ? 'geçti' : 'kaldı'}"><h2>${htmlKaçır(sonuç.id)} · ${htmlKaçır(sonuç.kare)}</h2><p>${sonuç.geçti ? 'GEÇTİ' : 'KALDI'} · fark %${(sonuç.değişen_piksel_oranı * 100).toFixed(3)} · SSIM ${sonuç.ssim.toFixed(5)}${yapısal}</p><div><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.referans))}"><figcaption>ECharts</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.gerçek))}"><figcaption>Cizelge</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.fark))}"><figcaption>Fark</figcaption></figure></div></article>`;
+  }).join('\n');
   fs.writeFileSync(path.join(RAPOR, 'index.html'), `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Uyum görsel kanıtı</title><style>body{font:14px system-ui;margin:24px;background:#f5f7fa;color:#1f2937}article{background:white;border:1px solid #ddd;border-left:6px solid #dc2626;border-radius:8px;margin:18px 0;padding:16px}.geçti{border-left-color:#16a34a}article>div{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}figure{margin:0}img{width:100%;border:1px solid #ddd}figcaption{text-align:center;padding:5px}</style></head><body><h1>Cizelge görsel kanıt raporu</h1><p>pixelmatch 0.1 · değişen piksel ≤ %1 · SSIM ≥ 0.99</p>${satırlar}</body></html>`);
   const geçen = sonuçlar.filter((sonuç) => sonuç.geçti).length;
   process.stdout.write(`${geçen}/${sonuçlar.length} kare eşikleri geçti. Rapor: ${path.relative(KÖK, path.join(RAPOR, 'index.html'))}\n`);

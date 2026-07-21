@@ -8,9 +8,108 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1005,
-  "değişen_piksel_oranı": 0.0037222222222222223,
-  "ssim": 0.9976472003821123,
+  "değişen_piksel": 1220,
+  "değişen_piksel_oranı": 0.004518518518518519,
+  "ssim": 0.9966472110038045,
+  "yapısal_kontroller": [
+    {
+      "ad": "kategori_taban_çizgisi",
+      "geçti": true,
+      "açıklama": "Y ekseni taban vuruşu dokuz barın başlangıcında kesintisiz görünmeli",
+      "örnekler": [
+        {
+          "x": 172,
+          "y": 72,
+          "rgb": [
+            124,
+            124,
+            133
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 106,
+          "rgb": [
+            128,
+            125,
+            131
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 141,
+          "rgb": [
+            126,
+            124,
+            132
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 176,
+          "rgb": [
+            120,
+            125,
+            134
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 211,
+          "rgb": [
+            120,
+            127,
+            133
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 246,
+          "rgb": [
+            121,
+            123,
+            135
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 281,
+          "rgb": [
+            120,
+            126,
+            134
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 316,
+          "rgb": [
+            120,
+            124,
+            135
+          ],
+          "geçti": true
+        },
+        {
+          "x": 172,
+          "y": 351,
+          "rgb": [
+            120,
+            127,
+            133
+          ],
+          "geçti": true
+        }
+      ]
+    }
+  ],
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/dataset-encode0.png",
     "gerçek": "testler/gorsel/gerçek/default/dataset-encode0.png",
