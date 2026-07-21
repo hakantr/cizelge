@@ -15918,7 +15918,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/polar-roundCap.ts",
     "kaynak_sha256": "de7827deed563a75e8d2fa8870c9e27de946b201600bb42b13ba04479c256783",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#polar_round_cap",
     "seriler": [
       "bar"
     ],
@@ -15933,7 +15933,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15944,12 +15944,12 @@
       2
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
       "kareler": []

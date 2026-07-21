@@ -3442,6 +3442,91 @@ mod bar_polar_real_estate_testleri {
     }
 }
 
+fn polar_round_cap() -> GrafikSeçenekleri {
+    let seri = |ad: &str, kenarlık: &str, yuvarlak_uç: bool| {
+        SütunSerisi::yeni()
+            .ad(ad)
+            .kutupsal(true)
+            .yuvarlak_uç(yuvarlak_uç)
+            .öğe_stili(
+                ÖğeStili::yeni()
+                    .kenarlık_rengi(kenarlık)
+                    .kenarlık_kalınlığı(1.0)
+                    .opaklık(0.8),
+            )
+            .veri([4, 3, 2, 1, 0])
+    };
+
+    GrafikSeçenekleri::yeni()
+        .kutupsal(
+            KutupsalKoordinat::yeni()
+                .başlangıç_açısı(30.0)
+                .açısal_eksen(Eksen::değer().en_çok(2.0).bölme_çizgisi_göster(false))
+                .radyal_eksen(Eksen::kategori().veri(["v", "w", "x", "y", "z"]).z(10)),
+        )
+        .seri(seri("Without Round Cap", "red", false))
+        .seri(seri("With Round Cap", "green", true))
+        // Resmî referans önişleyicisi bileşen padding'ini 15 px'e sabitler.
+        .gösterge(
+            Gösterge::yeni()
+                .iç_boşluk(15.0)
+                .veri(["Without Round Cap", "With Round Cap"]),
+        )
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod polar_round_cap_testleri {
+    use super::*;
+
+    #[test]
+    fn resmi_eksenler_iki_bant_stili_ve_round_cap_kayipsizdir() {
+        let seçenekler = polar_round_cap();
+        assert!(
+            seçenekler.animasyon,
+            "resmî örnek animation alanını kapatmıyor"
+        );
+        let kutupsal = seçenekler.kutupsal.as_ref().expect("polar");
+        assert_eq!(kutupsal.başlangıç_açısı, 30.0);
+        assert_eq!(kutupsal.açısal_eksen.en_çok, Some(2.0));
+        assert_eq!(kutupsal.açısal_eksen.bölme_çizgisi.göster, Some(false));
+        assert_eq!(kutupsal.radyal_eksen.veri, ["v", "w", "x", "y", "z"]);
+        assert_eq!(kutupsal.radyal_eksen.z, 10);
+
+        let gösterge = seçenekler.gösterge.as_ref().expect("legend");
+        assert_eq!(gösterge.iç_boşluk, 15.0);
+        assert_eq!(gösterge.veri, ["Without Round Cap", "With Round Cap"]);
+
+        assert_eq!(seçenekler.seriler.len(), 2);
+        for (sıra, (seri, (ad, kenarlık, yuvarlak_uç))) in seçenekler
+            .seriler
+            .iter()
+            .zip([
+                ("Without Round Cap", Renk::from("red"), false),
+                ("With Round Cap", Renk::from("green"), true),
+            ])
+            .enumerate()
+        {
+            let Seri::Sütun(seri) = seri else {
+                panic!("{sıra}. seri polar bar olmalı");
+            };
+            assert_eq!(seri.ad.as_deref(), Some(ad));
+            assert!(seri.kutupsal);
+            assert_eq!(seri.yuvarlak_uç, yuvarlak_uç);
+            assert_eq!(seri.öğe_stili.kenarlık_rengi, Some(kenarlık));
+            assert_eq!(seri.öğe_stili.kenarlık_kalınlığı, 1.0);
+            assert_eq!(seri.öğe_stili.opaklık, Some(0.8));
+            assert_eq!(
+                seri.veri
+                    .iter()
+                    .filter_map(|öğe| öğe.değer.sayı())
+                    .collect::<Vec<_>>(),
+                [4.0, 3.0, 2.0, 1.0, 0.0]
+            );
+        }
+    }
+}
+
 fn bar_label_rotation() -> GrafikSeçenekleri {
     let etiket = Etiket::yeni()
         .göster(true)
@@ -10772,6 +10857,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "bar-polar-stack" => Ok(bar_polar_stack()),
         "bar-polar-stack-radial" => Ok(bar_polar_stack_radial()),
         "bar-polar-real-estate" => Ok(bar_polar_real_estate()),
+        "polar-roundCap" => Ok(polar_round_cap()),
         "bar-label-rotation" => Ok(bar_label_rotation()),
         "bar-breaks-simple" => bar_breaks_simple(durum),
         "bar-breaks-brush" => bar_breaks_brush(durum),
