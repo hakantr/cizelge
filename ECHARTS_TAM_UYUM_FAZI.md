@@ -1361,8 +1361,37 @@ Gerçekleşen dilim — `gauge` (2026-07-22):
 - Uyum raporu 332 kartı korur; çalıştırılabilir fixture 147/332, kilitli
   statik görsel kanıt 136/332 (`%41,0`), tüm kapıları tam kart 0/332'dir.
   `gauge` kartı artık boş değildir ve statik görsel kapısı
-  `tam_kanıtlı`dır. Kalan progress, anchor, özel pointer, roundCap, çoklu
-  değer ve değer animasyonu yolları sonraki Gauge kartlarında kapatılacaktır.
+  `tam_kanıtlı`dır. Progress roundCap/overlap, anchor, özel pointer, çoklu
+  değer ve ileri animasyon yolları sonraki Gauge kartlarında kapatılacaktır.
+
+Gerçekleşen dilim — `gauge-simple` (2026-07-22):
+
+- Sabit `../echarts-examples/public/examples/ts/gauge-simple.ts`, temel
+  `gauge` seçeneğine ek olarak `progress.show: true` ve
+  `detail.valueAnimation: true` taşır. Daha önce bu karta bağlanan genel
+  `examples/gosterge_saati.rs` kanıt fixture'ı değildi; bağ
+  `examples/uyum_fixture.rs#gauge_simple` olarak kaynakla birebir ayrıldı.
+- `GöstergeSaatiSerisi` progress görünürlüğünü, kalınlığını ve isteğe bağlı
+  item rengini ECharts tarzı kurucularla taşır. Çizici progress sektörünü
+  axisLine'ın dış yarıçapında, değerin kırpılmış oranına kadar ve varsayılan
+  seri palet rengiyle boyar. `detail.valueAnimation` açıkken formatter'a ve
+  metne final değer değil aynı karede ibre/progress tarafından kullanılan
+  geçiş değeri verilir.
+- Yapısal test `50` hedefinin yarım animasyon karesinde progress sektörünü
+  `%25` oranına kadar üretir, pointer ile progress için iki ayrı palet
+  dolgusu bulunduğunu ve detail metninin `25` olduğunu doğrular. Statik
+  referans ECharts ön işlemcisinin animasyonu kapattığı final kareyi taşır;
+  animasyon görsel kapısı Faz 8 tamamlanana kadar kasıtlı olarak `kısmi`dır.
+- Yeni resmî referans yalnız `gauge-simple` için bir kez üretildi;
+  referansa yazmayan tekrar 1/1 ve depo çapındaki kilitli koşu 184/184
+  geçti. 600×450 kanıt 402 değişen piksel, `%0,1489` fark ve `0,998431`
+  SSIM üretir. Çekirdek 301/301, fixture 47/47,
+  `cargo check --all-targets`, `cargo check --no-default-features` ve
+  üretilmiş-dosya denetimi geçti.
+- Uyum raporu 332 kartı korur; fixture sayısı 147/332 olarak kalırken
+  kilitli statik görsel kanıt 137/332 (`%41,3`) oldu. Tüm kapıları tam kart
+  sayısı 0/332'dir; kartın statik görsel kapısı `tam_kanıtlı`, diğer kapıları
+  `kısmi`dır.
 
 Kabul:
 

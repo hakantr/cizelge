@@ -2043,6 +2043,12 @@ pub struct GöstergeSaatiSerisi {
     pub şeridi_göster: bool,
     /// Yay şeridinin kalınlığı (`axisLine.lineStyle.width`).
     pub şerit_kalınlığı: f32,
+    /// Değere kadar uzanan ön yay (`progress.show`).
+    pub ilerlemeyi_göster: bool,
+    /// `progress.width`.
+    pub ilerleme_kalınlığı: f32,
+    /// `progress.itemStyle.color`; verilmezse seri palet rengi kullanılır.
+    pub ilerleme_rengi: Option<crate::renk::Renk>,
     pub bölme_sayısı: usize,
     /// Ana bölme çizgileri (`splitLine.show`).
     pub çentikleri_göster: bool,
@@ -2082,6 +2088,8 @@ pub struct GöstergeSaatiSerisi {
     pub değer_boyutu: f32,
     pub değer_rengi: Option<crate::renk::Renk>,
     pub değer_kalın: bool,
+    /// `detail.valueAnimation`: detail metni de seri geçiş değerini izler.
+    pub değer_animasyonu: bool,
     pub değer_biçimleyici: Option<crate::model::stil::Biçimleyici>,
 }
 
@@ -2099,6 +2107,9 @@ impl Default for GöstergeSaatiSerisi {
             renk_bantları: Vec::new(),
             şeridi_göster: true,
             şerit_kalınlığı: 10.0,
+            ilerlemeyi_göster: false,
+            ilerleme_kalınlığı: 10.0,
+            ilerleme_rengi: None,
             bölme_sayısı: 10,
             çentikleri_göster: true,
             çentik_uzunluğu: 10.0,
@@ -2129,6 +2140,7 @@ impl Default for GöstergeSaatiSerisi {
             değer_boyutu: 30.0,
             değer_rengi: None,
             değer_kalın: true,
+            değer_animasyonu: false,
             değer_biçimleyici: None,
         }
     }
@@ -2183,6 +2195,17 @@ impl GöstergeSaatiSerisi {
     pub fn şerit(mut self, göster: bool, kalınlık: f32) -> Self {
         self.şeridi_göster = göster;
         self.şerit_kalınlığı = kalınlık.max(0.0);
+        self
+    }
+
+    pub fn ilerleme(mut self, göster: bool, kalınlık: f32) -> Self {
+        self.ilerlemeyi_göster = göster;
+        self.ilerleme_kalınlığı = kalınlık.max(0.0);
+        self
+    }
+
+    pub fn ilerleme_rengi(mut self, renk: impl Into<crate::renk::Renk>) -> Self {
+        self.ilerleme_rengi = Some(renk.into());
         self
     }
 
@@ -2255,6 +2278,11 @@ impl GöstergeSaatiSerisi {
 
     pub fn değer_göster(mut self, göster: bool) -> Self {
         self.değeri_göster = göster;
+        self
+    }
+
+    pub fn değer_animasyonu(mut self, açık: bool) -> Self {
+        self.değer_animasyonu = açık;
         self
     }
 

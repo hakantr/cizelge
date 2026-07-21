@@ -4402,6 +4402,19 @@ fn gauge() -> GrafikSeçenekleri {
         )
 }
 
+fn gauge_simple() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .ipucu(İpucu::yeni().biçimleyici("{a} <br/>{b} : {c}%"))
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("Pressure")
+                .değer(50.0, "SCORE")
+                .ilerleme(true, 10.0)
+                .değer_animasyonu(true)
+                .değer_biçimleyici("{value}"),
+        )
+}
+
 #[cfg(test)]
 #[allow(clippy::indexing_slicing, clippy::panic)]
 mod gauge_testleri {
@@ -4437,6 +4450,19 @@ mod gauge_testleri {
         assert_eq!(seri.değer_merkez_kayması.1, Uzunluk::Yüzde(40.0));
         assert_eq!(seri.değer_boyutu, 30.0);
         assert!(seri.değer_kalın);
+    }
+
+    #[test]
+    fn simple_gauge_progress_ve_detail_deger_animasyonunu_acar() {
+        let seçenekler = gauge_simple();
+        let Seri::GöstergeSaati(seri) = &seçenekler.seriler[0] else {
+            panic!("seri gauge olmalı");
+        };
+        assert!(seri.ilerlemeyi_göster);
+        assert_eq!(seri.ilerleme_kalınlığı, 10.0);
+        assert_eq!(seri.ilerleme_rengi, None);
+        assert!(seri.değer_animasyonu);
+        assert_eq!(seri.veri[0].değer.sayı(), Some(50.0));
     }
 }
 
@@ -11069,6 +11095,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-marker" => Ok(line_marker()),
         "bar-histogram" => Ok(bar_histogram()),
         "gauge" => Ok(gauge()),
+        "gauge-simple" => Ok(gauge_simple()),
         "bar-simple" => Ok(bar_simple()),
         "bar1" => Ok(bar1()),
         "mix-line-bar" => Ok(mix_line_bar()),

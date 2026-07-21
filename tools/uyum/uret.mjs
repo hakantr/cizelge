@@ -221,7 +221,7 @@ const YEREL_FIXTURE = Object.freeze({
   'gauge': 'examples/uyum_fixture.rs#gauge',
   'radar': 'examples/radar.rs',
   'funnel': 'examples/huni.rs',
-  'gauge-simple': 'examples/gosterge_saati.rs',
+  'gauge-simple': 'examples/uyum_fixture.rs#gauge_simple',
   'treemap-simple': 'examples/agac_haritasi.rs',
   'sunburst-simple': 'examples/gunes.rs',
   'tree-basic': 'examples/agac.rs',

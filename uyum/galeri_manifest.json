@@ -2002,7 +2002,7 @@
     "videoEnd": 1000,
     "kaynak": "public/examples/ts/gauge-simple.ts",
     "kaynak_sha256": "4bc7b811a7e2806ba40687c4dcb53a097f3b035a2f8b59f29a4950e0391d2738",
-    "cizelge_fixture": "examples/gosterge_saati.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#gauge_simple",
     "seriler": [
       "gauge"
     ],
@@ -2014,7 +2014,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2027,14 +2027,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 402,
+          "değişen_piksel_oranı": 0.001488888888888889,
+          "ssim": 0.9984308834560329,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/gauge-simple.png",
+            "sha256": "c246b5a4ee7244b6507198c0b601be2376389c35188bf14a6a377662836944fa"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/gauge-simple.png",
+            "sha256": "7777f2a0c641d81b80b45697f831d94d1d32a1a046482c9eb9835ba6660bbc85"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/gauge-simple.png",
+            "sha256": "9020a99ec65dab2e1d6a7dc2c17c93642cfe65fe989dff46c820adc2067a49c0"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/gauge-simple-son.json",
+            "sha256": "856caa1ce3bb2f2c6ded0de41c327993358bbcdda501b891613a68ccf81d0173"
+          }
+        }
+      ]
     }
   },
   {

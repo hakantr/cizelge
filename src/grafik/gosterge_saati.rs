@@ -194,9 +194,14 @@ pub fn gösterge_saati_çiz(
         );
     }
     if seri.değeri_göster {
+        let görüntülenen_değer = if seri.değer_animasyonu {
+            animasyonlu
+        } else {
+            değer
+        };
         let metin = match &seri.değer_biçimleyici {
-            Some(b) => b.uygula(değer, &binlik_ayır(değer)),
-            None => binlik_ayır(değer),
+            Some(b) => b.uygula(görüntülenen_değer, &binlik_ayır(görüntülenen_değer)),
+            None => binlik_ayır(görüntülenen_değer),
         };
         çizici.yazı(
             &metin,
@@ -241,6 +246,18 @@ pub fn gösterge_saati_çiz(
         ));
         ibre.kapat();
         çizici.yol_doldur(&ibre, &Dolgu::Düz(seri.ibre_rengi.unwrap_or(seri_rengi)));
+    }
+
+    if seri.ilerlemeyi_göster && seri.ilerleme_kalınlığı > 0.0 && oran > 0.0 {
+        çizici.dilim(
+            merkez,
+            (yarıçap - seri.ilerleme_kalınlığı).max(0.0),
+            yarıçap,
+            ekran_açısı(orandan_açı(0.0)),
+            ekran_açısı(orandan_açı(oran)),
+            &Dolgu::Düz(seri.ilerleme_rengi.unwrap_or(seri_rengi)),
+            None,
+        );
     }
 
     isabetler.push(İsabetBölgesi {
@@ -316,5 +333,43 @@ mod testler {
         );
         assert!(koyu_yüzey.döküm().starts_with("doldur #232328@1.0"));
         tema::koyu_ayarla(false);
+    }
+
+    #[test]
+    fn progress_yayi_ve_detail_value_animation_ayni_gecis_degerini_izler() {
+        tema::koyu_ayarla(false);
+        let seri = GöstergeSaatiSerisi::yeni()
+            .değer(50.0, "SCORE")
+            .ilerleme(true, 10.0)
+            .değer_animasyonu(true);
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        gösterge_saati_çiz(
+            &mut yüzey,
+            &seri,
+            0,
+            Renk::onaltılık(0x5070dd),
+            Dikdörtgen::yeni(0.0, 0.0, 700.0, 525.0),
+            0.5,
+            &mut Vec::new(),
+        );
+
+        let palet_dolguları = yüzey
+            .komutlar
+            .iter()
+            .filter(|komut| komut.starts_with("doldur #5070dd@1.0"))
+            .collect::<Vec<_>>();
+        assert_eq!(palet_dolguları.len(), 2, "ibre ve progress yayı çizilmeli");
+        let ibre = palet_dolguları.first().expect("ibre dolgusu");
+        let progress = palet_dolguları.last().expect("progress dolgusu");
+        assert!(ibre.contains(" Ç(") && !ibre.contains(" Y("));
+        assert!(progress.contains(" Y("), "progress bir yay yolu olmalı");
+        assert!(
+            yüzey
+                .komutlar
+                .iter()
+                .any(|komut| komut.starts_with("yazı \"25\" (350.0,341.3)")),
+            "detail.valueAnimation yarı karede 25 göstermeli"
+        );
     }
 }
