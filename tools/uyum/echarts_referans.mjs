@@ -107,6 +107,14 @@ function html(id, kaynak, frame, state, width, height) {
   const symbolMorphTikleri = id === 'scatter-symbol-morph' && state.startsWith('shape-')
     ? Number(state.slice('shape-'.length))
     : null;
+  const gaugeZamanlayıcıMs = ({
+    'gauge-stage': 2000,
+    'gauge-multi-title': 2000,
+    'gauge-temperature': 2000,
+    'gauge-ring': 2000,
+    'gauge-barometer': 2000,
+    'gauge-clock': 1000
+  })[id] ?? null;
   const sonEylem = Number.isInteger(kümelemeSırası)
     ? `myChart.dispatchAction({type:'timelineChange', currentIndex:${kümelemeSırası}});`
     : Number.isInteger(symbolMorphTikleri) && symbolMorphTikleri > 0
@@ -124,6 +132,15 @@ function html(id, kaynak, frame, state, width, height) {
             throw new Error('scatter-aggregate-bar 2000 ms zamanlayıcısı yakalanamadı');
           }
           for (let tik = 0; tik < ${aggregateTikleri}; tik += 1) zamanlayıcı.callback();
+        }`
+    : Number.isInteger(gaugeZamanlayıcıMs)
+      ? `{
+          const zamanlayıcı = window.__capturedIntervals[0];
+          if (!zamanlayıcı || zamanlayıcı.ms !== ${gaugeZamanlayıcıMs}) {
+            throw new Error('${id} ${gaugeZamanlayıcıMs} ms zamanlayıcısı yakalanamadı');
+          }
+          // Dinamik gauge galerilerinin resmî ilk setOption güncellemesi.
+          zamanlayıcı.callback();
         }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
@@ -440,7 +457,7 @@ echarts.registerPreprocessor((opt) => {
     for (const item of values) if (item.padding == null) item.padding = 15;
   }
 });
-${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' ? `
+${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' || Number.isInteger(gaugeZamanlayıcıMs) ? `
 // Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
 // ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
 // girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.

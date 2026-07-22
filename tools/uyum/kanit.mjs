@@ -26,6 +26,27 @@ const SENARYOLAR = [
   { id: 'gauge', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-speed', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'gauge-progress', tür: 'statik', genişlik: 800, yükseklik: 600,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  { id: 'gauge-stage', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'gauge-grade', tür: 'statik', genişlik: 800, yükseklik: 600,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  { id: 'gauge-multi-title', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'gauge-temperature', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'gauge-ring', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'gauge-barometer', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'gauge-clock', tür: 'statik', genişlik: 1000, yükseklik: 750,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'gauge-car', tür: 'statik', genişlik: 800, yükseklik: 600,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'line-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'line-markline',

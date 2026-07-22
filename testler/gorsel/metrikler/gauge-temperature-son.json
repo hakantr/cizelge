@@ -1,0 +1,19 @@
+{
+  "id": "gauge-temperature",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 589,
+  "değişen_piksel_oranı": 0.0021814814814814813,
+  "ssim": 0.996992069710219,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/gauge-temperature.png",
+    "gerçek": "testler/gorsel/gerçek/default/gauge-temperature.png",
+    "fark": "testler/gorsel/fark/default/gauge-temperature.png"
+  }
+}

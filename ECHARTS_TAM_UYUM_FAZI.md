@@ -1,7 +1,5 @@
 # Cizelge — ECharts 6.1 Tam Uyum ve Görsel Galeri Faz Planı
 
-Son güncelleme: 2026-07-21
-
 Bu belge, `cizelge` için **normatif tam uyum planıdır**. [FAZ_PLANI.md](FAZ_PLANI.md)
 mevcut uygulama tarihini ve daha önce tamamlanan özellik dilimlerini kaydeder;
 ancak bir işin orada `✅` olması, bu belgedeki ECharts uyum kapıları geçilmeden
@@ -124,7 +122,7 @@ eklenmez. Envanterde açıkça `kapsam_dışı_geo_map` ya da
 
 ### 2.4 Galeri görüntüsü için kapsam sayıları
 
-Sayılar yukarıdaki iki commit'in 2026-07-17 görüntüsüne aittir ve envanter
+Sayılar yukarıdaki iki sabit commit görüntüsüne aittir ve envanter
 aracı tarafından her yenilemede tekrar hesaplanmalıdır:
 
 - Çekirdek katalog: **377** benzersiz kayıt.
@@ -187,7 +185,7 @@ kapsam içi yetenek için eşdeğer yerel çözüm geliştirilir.
 
 ## 4. Mevcut reponun başlangıç noktası
 
-2026-07-17 itibarıyla repo güçlü bir başlangıç sunmaktadır:
+Sabit kaynak görüntüsüne göre repo güçlü bir başlangıç sunmaktadır:
 
 - `src/model/seri.rs` ve `src/grafik/` altında kapsam içi seri ailelerinin
   çoğu için bir model/render dilimi vardır; belirgin eksik çekirdek seri
@@ -545,7 +543,7 @@ kartezyen heatmap ve pictorialBar.
 9. Bu serilerin tooltip, legend, markers, select/blur/emphasis, dataset,
    dataZoom, animation ve export bütünleşmesi.
 
-Gerçekleşen dilim — `bar-gradient` (2026-07-20):
+Doğrulanmış kapsam — `bar-gradient`:
 
 - `../echarts-examples/public/examples/ts/bar-gradient.ts` içindeki 20
   kategori/değer, Çince başlık, İngilizce alt başlık, `showBackground`,
@@ -569,7 +567,7 @@ Gerçekleşen dilim — `bar-gradient` (2026-07-20):
   erişilebilirlik ve performans kapıları tamamlanmadan kart yapay biçimde
   `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `candlestick-large` (2026-07-20):
+Doğrulanmış kapsam — `candlestick-large`:
 
 - Resmî örnek kaynağı
   `../echarts-examples/public/examples/ts/candlestick-large.ts`; seri
@@ -620,7 +618,7 @@ Gerçekleşen dilim — `candlestick-large` (2026-07-20):
   erişilebilirlik ve ölçümlü performans Faz 7/8 kapıları tamamlanmadan kart
   nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `candlestick-sh` (2026-07-20):
+Doğrulanmış kapsam — `candlestick-sh`:
 
 - Resmî örnek ve veri akışı
   `../echarts-examples/public/examples/ts/candlestick-sh.ts` dosyasından
@@ -684,7 +682,7 @@ Gerçekleşen dilim — `candlestick-sh` (2026-07-20):
   kapıları ilgili ileri fazlarda kapanmadan kart nihai `tam_kanıtlı`
   sayılmaz.
 
-Gerçekleşen dilim — `candlestick-brush` (2026-07-20):
+Doğrulanmış kapsam — `candlestick-brush`:
 
 - Resmî örnek ve veri akışı
   `../echarts-examples/public/examples/ts/candlestick-brush.ts` ile
@@ -747,7 +745,7 @@ Gerçekleşen dilim — `candlestick-brush` (2026-07-20):
   erişilebilirlik ve ölçümlü performans kapıları ilgili ileri fazlarda
   kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `candlestick-sh-2015` (2026-07-20):
+Doğrulanmış kapsam — `candlestick-sh-2015`:
 
 - Resmî kaynak
   `../echarts-examples/public/examples/ts/candlestick-sh-2015.ts`
@@ -789,7 +787,7 @@ Gerçekleşen dilim — `candlestick-sh-2015` (2026-07-20):
   kapanışı Faz 5/6 matrisinde `kısmi` kalır; bunlar tamamlanmadan kart nihai
   `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-brush` (2026-07-20):
+Doğrulanmış kapsam — `bar-brush`:
 
 - Resmî örnek ve olay akışı
   `../echarts-examples/public/examples/ts/bar-brush.ts` dosyasından taşındı.
@@ -842,7 +840,7 @@ Gerçekleşen dilim — `bar-brush` (2026-07-20):
   döngüsü, animasyon, erişilebilirlik ve ölçümlü performans kapıları Faz
   5/6/7/8'de kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-polar-label-radial` (2026-07-20):
+Doğrulanmış kapsam — `bar-polar-label-radial`:
 
 - Resmî örnek
   `../echarts-examples/public/examples/ts/bar-polar-label-radial.ts`
@@ -903,7 +901,7 @@ Gerçekleşen dilim — `bar-polar-label-radial` (2026-07-20):
   animasyon, erişilebilirlik ve ölçümlü performans izleyen Faz 3/4/6/7/8
   kartlarıyla kapanmadan bu kart nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-polar-label-tangential` (2026-07-20):
+Doğrulanmış kapsam — `bar-polar-label-tangential`:
 
 - Resmî örnek
   `../echarts-examples/public/examples/ts/bar-polar-label-tangential.ts`
@@ -960,7 +958,7 @@ Gerçekleşen dilim — `bar-polar-label-tangential` (2026-07-20):
   performans izleyen Faz 3/4/6/7/8 kartları kapanmadan bu kart nihai
   `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-polar-stack` (2026-07-20):
+Doğrulanmış kapsam — `bar-polar-stack`:
 
 - Resmî örnek `../echarts-examples/public/examples/ts/bar-polar-stack.ts`
   dosyasından kayıpsız fixture'a taşındı. Kutupsal sütun yerleşimi
@@ -1019,7 +1017,7 @@ Gerçekleşen dilim — `bar-polar-stack` (2026-07-20):
   erişilebilirlik ve ölçümlü performans Faz 3/4/6/7/8 kapılarında
   kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-polar-stack-radial` (2026-07-20):
+Doğrulanmış kapsam — `bar-polar-stack-radial`:
 
 - Resmî örnek
   `../echarts-examples/public/examples/ts/bar-polar-stack-radial.ts`
@@ -1077,7 +1075,7 @@ Gerçekleşen dilim — `bar-polar-stack-radial` (2026-07-20):
   seri odaklı hover, animasyon, erişilebilirlik ile ölçümlü performans ilgili
   Faz 3/4/6/7/8 kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-polar-real-estate` (2026-07-20):
+Doğrulanmış kapsam — `bar-polar-real-estate`:
 
 - Resmî örnek
   `../echarts-examples/public/examples/ts/bar-polar-real-estate.ts`
@@ -1155,7 +1153,7 @@ Gerçekleşen dilim — `bar-polar-real-estate` (2026-07-20):
   performans ilgili Faz 3/4/7/8 kapılarında kapanmadan kart nihai
   `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `polar-roundCap` (2026-07-21):
+Doğrulanmış kapsam — `polar-roundCap`:
 
 - `e2d9bfc`, `../echarts/src/layout/barPolar.ts` içindeki bağımsız
   stack/grup bant hesabını ve `../echarts/src/util/shape/sausage.ts`
@@ -1197,7 +1195,7 @@ Gerçekleşen dilim — `polar-roundCap` (2026-07-21):
   animasyon, erişilebilirlik ve ölçümlü performans ilgili Faz 3/4/7/8
   kapılarında kapanmadan kart nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `polar-endAngle` ve kanıt raporu (2026-07-21):
+Doğrulanmış kapsam — `polar-endAngle` ve kanıt raporu:
 
 - `../echarts/src/coord/polar/polarCreator.ts`, `AngleAxis.ts`,
   `Polar.ts`, `../echarts/src/component/axis/AngleAxisView.ts` ve
@@ -1246,7 +1244,7 @@ Gerçekleşen dilim — `polar-endAngle` ve kanıt raporu (2026-07-21):
   animasyon, etkileşim, erişilebilirlik ve performans kapıları kapanmadan
   nihai `tam_kanıtlı` sayılmaz.
 
-Gerçekleşen dilim — `bar-histogram` (2026-07-21):
+Doğrulanmış kapsam — `bar-histogram`:
 
 - Sabit kaynak `../echarts-examples/public/examples/ts/bar-histogram.ts`
   ile `../echarts-examples/package.json` içindeki `echarts-stat: ^1.2.0`
@@ -1325,116 +1323,70 @@ tamamlamak.
    curve, polyline, label, effect/trail ve clip. Geo
    öntanımı kullanılmaz; kullanıcı kapsam içi koordinatı açıkça seçer.
 
-Gerçekleşen dilim — `gauge` (2026-07-22):
+Gauge doğrulanmış kapsamı:
 
-- Sabit `../echarts-examples/public/examples/ts/gauge.ts` seçeneği;
-  `../echarts/src/chart/gauge/GaugeSeries.ts`, `GaugeView.ts` ve
-  `PointerPath.ts` ile birlikte doğrulandı. Mevcut gösterge çekirdeğinin
-  eski renkli-yay varsayılanı fixture ile örtüştürülmedi; ECharts 6.1'in
-  gerçek seri varsayılanları modele ve ortak çiziciye taşındı.
-- Öntanımlı merkez `%50/%50`, yarıçap `%75`, açı `225..-45`, aralık
-  `0..100`, 10 bölme, tema `neutral10` renginde 10 px axisLine, 10 px
-  uzaklık/uzunlukta 3 px ana bölme çizgileri ve her aralıkta beş adet 6 px
-  ara çentiktir. Boş `renk_bantları` tema belirtecini çalışma anında çözer;
-  böylece aynı option açık ve koyu temada somut bir açık renk taşımadan
-  doğru kalır. Eski renk bantlı kullanıcı örneği bu görünümü artık açıkça
-  seçer.
-- Eksen etiketi uzaklığı ve açıya bağlı yatay/dikey hizalama ECharts
-  `GaugeView` ile aynıdır. İbre, genel seri palet rengini kullanır ve
-  `PointerPath`in dört köşeli ön/yan/arka geometrisini uygular; varsayılan
-  merkez dairesi çizilmez. Veri adı `title.offsetCenter: [0, '20%']`, 16 px
-  ikincil metin; değer `detail.offsetCenter: [0, '40%']`, 30 px kalın
-  birincil metin olarak birbirinden bağımsız boyanır.
-- `GöstergeSaatiSerisi` API'sine merkez/yarıçap/açı, axisLine, ana ve ara
-  çentikler, eksen etiketleri/formatter, ibre, title ve detail görünürlük ve
-  merkez kayması kurucuları eklendi. Resmî fixture `Pressure`, `SCORE: 50`,
-  detail `{value}` ve tooltip `{a} <br/>{b} : {c}%` bağlarını kayıpsız taşır.
-- Yapısal çekirdek testi 700×525 tuvalde merkez `(350; 262,5)`, yarıçap
-  `196,875`, 11 ana + 60 ara çizgi, üst `50` etiketi, `SCORE`/değer
-  konumları ve ibre çokgenini ayrı ayrı kilitler. Böylece ince öğelerin
-  kaybı toplam piksel oranı içinde saklanamaz.
-- Yeni resmî referans yalnız `gauge` için bir kez üretildi; referansa
-  yazmayan hedefli tekrar 1/1, depo çapındaki kilitli koşu 183/183 geçti.
-  600×450 kanıt 399 değişen piksel, `%0,1478` fark ve `0,998441` SSIM
-  üretir. Çekirdek 300/300, fixture 46/46, `cargo check --all-targets`,
-  `cargo check --no-default-features` ve üretilmiş-dosya denetimi geçti.
-- Uyum raporu 332 kartı korur; çalıştırılabilir fixture 147/332, kilitli
-  statik görsel kanıt 136/332 (`%41,0`), tüm kapıları tam kart 0/332'dir.
-  `gauge` kartı artık boş değildir ve statik görsel kapısı
-  `tam_kanıtlı`dır. Progress roundCap/overlap, anchor, özel pointer, çoklu
-  değer ve ileri animasyon yolları sonraki Gauge kartlarında kapatılacaktır.
+- Resmî `gauge`, `gauge-simple`, `gauge-speed`, `gauge-progress`,
+  `gauge-stage`, `gauge-grade`, `gauge-multi-title`, `gauge-temperature`,
+  `gauge-ring`, `gauge-barometer`, `gauge-clock` ve `gauge-car` kaynakları
+  ayrı fixture olarak bağlıdır. Davranış kaynağı
+  `../echarts/src/chart/gauge/GaugeSeries.ts`, `GaugeView.ts`,
+  `PointerPath.ts`, `util/shape/sausage` ve `util/symbol.ts` dosyalarıdır.
+- Model, ECharts 6.1 öntanımlılarıyla birlikte `min/max`, `startAngle`,
+  `endAngle`, `clockwise`, merkez/yarıçap, çoklu veri ve `colorBy: data`
+  paletini taşır. Saat yönü zrender `normalizeArcAngles` kuralıyla
+  normalleştirilir; tam çember ve ters yönlü yaylar ayrıca yapısal testlidir.
+- `axisLine` için görünürlük, çoklu renk bantları, width, roundCap,
+  opacity ve shadow; `splitLine`/`axisTick` için sayı, length, distance,
+  width, `auto` renk ve shadow; `axisLabel` için formatter, inherit/auto
+  renk, font stili ve sayısal/radial/tangential dönüş desteklenir.
+- Pointer; yerleşik `PointerPath` veya tam `path://` SVG, length/width,
+  offsetCenter, keepAspect, showAbove, itemStyle, auto renk ve veri-öğesi
+  yamasını destekler. Anchor; show/showAbove, size, icon, offsetCenter,
+  keepAspect, dolgu/kenarlık/gölge ve doğru katman sırasıyla boyanır.
+- Progress; overlap, clip, roundCap, width, itemStyle, auto renk ve çoklu
+  veride ECharts `z2` değer sırasını uygular. Örtüşmeyen halka düzeninde her
+  veri öğesi kendi şerit kanalına yerleşir. Pointer/progress/itemStyle
+  kalıtımı seri ve veri-öğesi katmanlarında yalnız açık alanları yamalar.
+- `title` ve `detail` görünürlük, formatter, offsetCenter, renk mirası,
+  background/border mirası, width/height/padding/lineHeight, çok satır ve
+  rich koşularını destekler. Açık width hizalama kutusudur; yalnız
+  `overflow: truncate` karşılığı açıkça seçilirse üç noktayla kısaltılır.
+  `detail.precision`, final değeri değiştirmez ve yalnız valueAnimation ara
+  karelerine uygulanır; seri ve veri-öğesi düzeyinde kalıtılır.
+- Dinamik stage, multi-title, temperature, ring ve barometer örneklerinde
+  resmî 2000 ms callback tam bir kez; clock örneğinde sabit Date ile 1000 ms
+  callback tam bir kez çalıştırılır. Mulberry32 akışı ECharts'ın kaynak
+  tüketim sırasını korur. Her yeni referans iki bağımsız üretimde bit düzeyi
+  aynı olduğu doğrulandıktan sonra yalnız bir kez kilitlenir.
+- `gauge-car`, yedi gauge serisini, siyah arka planı, toolbox'ı, birbirinin
+  üstündeki kadranları, ters yönlü sıcaklık yayını, yakıt/sıcaklık SVG
+  anchor'larını, özel ibreleri, Çince çok satırlı title ve rich detail
+  panellerini aynı option bileşiminde doğrular. 800×600 kaynak çekimi resmî
+  600×450 kanıt boyutuna küçültülerek ince yazı raster farkını dengeler;
+  geometri ve metin içeriği ayrıca yapısal kapılardadır.
 
-Gerçekleşen dilim — `gauge-simple` (2026-07-22):
+600×450 kilitli statik kanıt metrikleri:
 
-- Sabit `../echarts-examples/public/examples/ts/gauge-simple.ts`, temel
-  `gauge` seçeneğine ek olarak `progress.show: true` ve
-  `detail.valueAnimation: true` taşır. Daha önce bu karta bağlanan genel
-  `examples/gosterge_saati.rs` kanıt fixture'ı değildi; bağ
-  `examples/uyum_fixture.rs#gauge_simple` olarak kaynakla birebir ayrıldı.
-- `GöstergeSaatiSerisi` progress görünürlüğünü, kalınlığını ve isteğe bağlı
-  item rengini ECharts tarzı kurucularla taşır. Çizici progress sektörünü
-  axisLine'ın dış yarıçapında, değerin kırpılmış oranına kadar ve varsayılan
-  seri palet rengiyle boyar. `detail.valueAnimation` açıkken formatter'a ve
-  metne final değer değil aynı karede ibre/progress tarafından kullanılan
-  geçiş değeri verilir.
-- Yapısal test `50` hedefinin yarım animasyon karesinde progress sektörünü
-  `%25` oranına kadar üretir, pointer ile progress için iki ayrı palet
-  dolgusu bulunduğunu ve detail metninin `25` olduğunu doğrular. Statik
-  referans ECharts ön işlemcisinin animasyonu kapattığı final kareyi taşır;
-  animasyon görsel kapısı Faz 8 tamamlanana kadar kasıtlı olarak `kısmi`dır.
-- Yeni resmî referans yalnız `gauge-simple` için bir kez üretildi;
-  referansa yazmayan tekrar 1/1 ve depo çapındaki kilitli koşu 184/184
-  geçti. 600×450 kanıt 402 değişen piksel, `%0,1489` fark ve `0,998431`
-  SSIM üretir. Çekirdek 301/301, fixture 47/47,
-  `cargo check --all-targets`, `cargo check --no-default-features` ve
-  üretilmiş-dosya denetimi geçti.
-- Uyum raporu 332 kartı korur; fixture sayısı 147/332 olarak kalırken
-  kilitli statik görsel kanıt 137/332 (`%41,3`) oldu. Tüm kapıları tam kart
-  sayısı 0/332'dir; kartın statik görsel kapısı `tam_kanıtlı`, diğer kapıları
-  `kısmi`dır.
+| Örnek | Değişen piksel oranı | SSIM |
+|---|---:|---:|
+| `gauge` | %0,1478 | 0,998441 |
+| `gauge-simple` | %0,1489 | 0,998431 |
+| `gauge-speed` | %0,2204 | 0,996458 |
+| `gauge-progress` | %0,1352 | 0,998724 |
+| `gauge-stage` | %0,2219 | 0,998123 |
+| `gauge-grade` | %0,1170 | 0,999286 |
+| `gauge-multi-title` | %0,1756 | 0,998460 |
+| `gauge-temperature` | %0,2181 | 0,996992 |
+| `gauge-ring` | %0,1544 | 0,999158 |
+| `gauge-barometer` | %0,4022 | 0,998194 |
+| `gauge-clock` | %0,1852 | 0,999049 |
+| `gauge-car` | %0,8907 | 0,994046 |
 
-Gerçekleşen dilim — `gauge-speed` (2026-07-22):
-
-- Sabit `../echarts-examples/public/examples/ts/gauge-speed.ts`; resmî
-  `../echarts/src/chart/gauge/GaugeView.ts`, `GaugeSeries.ts`,
-  `PointerPath.ts`, `util/shape/sausage` ve `util/symbol.ts` yollarıyla
-  karşılaştırıldı. Fixture; `180..0` yarım daireyi, `0..240` aralığını, 12
-  bölmeyi, `#58D9F9` item rengini ve yarı saydam 10 px gölgeyi kaynakla aynı
-  option anlamlarıyla taşır.
-- `GöstergeSaatiSerisi`, `itemStyle`, `axisLine.roundCap`,
-  `progress.roundCap`, eksen/çentik açık renkleri, `pointer.icon`,
-  `pointer.offsetCenter` ve `pointer.keepAspect` alanlarını akıcı API'ye
-  ekledi. Açık item rengi seri palet sırasını tüketmez; pointer ve progress
-  aynı dolgu, opaklık, kenarlık ve gölgeyi miras alır. Yuvarlak axisLine ve
-  progress yolları zrender `Sausage` eşdeğerindeki iki yarım kapakla boyanır.
-- Özel `path://` ibre kesin SVG sınır kutusundan 16 px × `%75` hedef kutuya
-  `createSymbol(..., cover)` gibi ölçeklenir; `[0, '5%']` merkez kaymasıyla
-  birlikte değer açısına döndürülür. Resmî uzun kübik yol fixture'da
-  sadeleştirilmeden çözülür. Böylece ECharts'ın özel ibre geometrisi ve
-  gölgesi genel dörtgen PointerPath'e düşmez.
-- `detail` arka plan/kenarlık/genişlik/yükseklik/satır yüksekliği/köşe
-  yarıçapı ile `rich` koşu haritasına bağlandı. `%60` genişlik gauge
-  yarıçapına göre çözülür; `100` için 50 px kalın `#777`, `km/h` için 20 px
-  `#999` koşuları ayrı çizilir. Zrender'ın `[0, 0, -20, 10]` negatif rich
-  padding'i korunur. `detail.width`, açık `overflow` yokken metni üç
-  noktaya kırpmadığından kutu ve taşabilen rich içerik iki boyama geçişinde
-  üretilir; `valueAnimation` aynı ara değeri formatter'a verir.
-- Yapısal çekirdek testi 13 ana bölme + 36 ara çentiği, axisLine/progress
-  yuvarlak kapaklarını, iki itemStyle gölgesini, kübik SVG pointer yolunu,
-  `%60` detail kutusunu ve iki rich metin koşusunu ayrı ayrı kilitler.
-  Fixture testi resmî option değerlerini ve görünür `100km/h` sonucunu
-  doğrular.
-- Yeni resmî referans yalnız `gauge-speed` için iki üretimli kararlılık
-  kontrolünden sonra bir kez yazıldı; referansa yazmayan hedefli tekrar 1/1
-  ve depo çapındaki kilitli koşu 185/185 geçti. 600×450 kanıt 595 değişen
-  piksel, `%0,2204` fark ve `0,996458` SSIM üretir. Çekirdek 303/303,
-  fixture 48/48, `cargo check --all-targets`,
-  `cargo check --no-default-features` ve üretilmiş-dosya denetimi geçti.
-- Uyum raporu 332 kartı korur; çalıştırılabilir fixture 148/332, kilitli
-  statik görsel kanıt 138/332 (`%41,6`), tüm kapıları tam kart 0/332'dir.
-  `gauge-speed` kartının statik görsel kapısı `tam_kanıtlı`; canlı değer
-  animasyonu, erişilebilirlik ve performans kapıları sonraki fazlar için
-  `kısmi` kalır.
+Tüm on iki Gauge kartının statik görsel kapısı `tam_kanıtlı`dır. Rapor her
+zaman 332 gerçek kartı korur ve bu dilimle kilitli statik görsel kanıt sayısı
+147'dir. Canlı valueAnimation zaman çizelgesi, hover/blur/select,
+erişilebilirlik ve ölçümlü performans kapıları Faz 7/8 tamamlanana kadar ayrı
+`kısmi` durumlar olarak kalır; statik kanıt bunları tamamlanmış saymaz.
 
 Kabul:
 

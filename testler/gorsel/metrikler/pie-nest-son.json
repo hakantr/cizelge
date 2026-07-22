@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 2426,
-  "değişen_piksel_oranı": 0.008985185185185185,
-  "ssim": 0.9956174580171504,
+  "değişen_piksel": 2424,
+  "değişen_piksel_oranı": 0.008977777777777777,
+  "ssim": 0.9956191890494764,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/pie-nest.png",
     "gerçek": "testler/gorsel/gerçek/default/pie-nest.png",

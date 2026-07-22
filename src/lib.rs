@@ -113,11 +113,12 @@ pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, DüzSaçılımVerisi, EtiketYerleşimParametreleri,
     EtiketYerleşimSonucu, EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi,
-    GrafoYerleşimi, GöstergeSaatiSerisi, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
-    IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
-    PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
-    SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi,
-    Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+    GrafoYerleşimi, GöstergeMetinYaması, GöstergeSaatiSerisi, GöstergeVeriÖğesi,
+    GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıSerisi, HuniSerisi,
+    HuniSıralaması, IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut,
+    ParalelSerisi, PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi,
+    Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,
+    ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -227,7 +228,8 @@ pub mod hazir {
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
         EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi,
-        GöstergeSaatiSerisi, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
+        GöstergeMetinYaması, GöstergeSaatiSerisi, GöstergeVeriÖğesi, GöstergeİbreYaması,
+        GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıSerisi, HuniSerisi, HuniSıralaması,
         IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
         PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
         SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,

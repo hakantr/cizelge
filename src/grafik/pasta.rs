@@ -885,7 +885,8 @@ fn zengin_metin_yerleşimi(
         _ => doğal_genişlik,
     };
     for satır in &mut satırlar {
-        if matches!(etiket.yazı.genişlik, Some(Uzunluk::Piksel(_))) {
+        if etiket.yazı.taşmayı_kısalt && matches!(etiket.yazı.genişlik, Some(Uzunluk::Piksel(_)))
+        {
             zengin_satırı_genişliğe_sığdır(çizici, satır, içerik_genişliği);
         }
         // zrender `line.width`i yüzde genişlikli token'lar çözülmeden önce
@@ -970,7 +971,7 @@ fn zengin_etiketi_konturlu_yaz(
         YatayHiza::Orta => YazıYatayHizası::Orta,
         YatayHiza::Sağ => YazıYatayHizası::Sağ,
     };
-    let mut içeriği_çiz = |yüzey: &mut dyn ÇizimYüzeyi| {
+    let içeriği_çiz = |yüzey: &mut dyn ÇizimYüzeyi| {
         zengin_metin_içeriğini_çiz(
             yüzey,
             &yerleşim,
@@ -983,17 +984,10 @@ fn zengin_etiketi_konturlu_yaz(
             dönüş,
         );
     };
-    if etiket.yazı.genişlik.is_some() && dönüş.abs() <= 1e-6 {
-        let kırpma = Dikdörtgen::yeni(
-            konum.0 + kutu_x,
-            konum.1 + kutu_y,
-            yerleşim.genişlik,
-            yerleşim.yükseklik,
-        );
-        çizici.kırpılı(kırpma, &mut içeriği_çiz);
-    } else {
-        içeriği_çiz(çizici);
-    }
+    // zrender'da açık `width`, rich-text koşularının yerleşim kutusunu
+    // belirler; `overflow` ayrıca istenmedikçe taşan koşuları kırpmaz.
+    // Modelde açık overflow seçeneği bulunmadığından öntanımlı taşmayı koru.
+    içeriği_çiz(çizici);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1625,6 +1619,7 @@ fn dış_etiketleri_yerleştir_ve_çiz(
         let mut çizim_etiketi = etiket_stili.clone();
         if let Some(genişlik) = etiket.kısıtlı_genişlik {
             çizim_etiketi.yazı.genişlik = Some(Uzunluk::Piksel(genişlik));
+            çizim_etiketi.yazı.taşmayı_kısalt = true;
         }
         zengin_etiketi_yaz(
             çizici,

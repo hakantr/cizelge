@@ -4477,6 +4477,727 @@ fn gauge_speed() -> Result<GrafikSeçenekleri, String> {
     ))
 }
 
+fn gauge_progress() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni().seri(
+        GöstergeSaatiSerisi::yeni()
+            .veri([70.0])
+            .ilerleme(true, 18.0)
+            .şerit(true, 18.0)
+            .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+            .ana_çentikler(true, 15.0, 10.0, 2.0)
+            .ana_çentik_rengi("#999")
+            .eksen_etiketleri(true, 25.0, 20.0)
+            .eksen_etiket_rengi("#999")
+            .dayanak(true, 25.0)
+            .dayanak_üstte(true)
+            .dayanak_stili(ÖğeStili::yeni().kenarlık_kalınlığı(10.0))
+            .ad_göster(false)
+            .değer_animasyonu(true)
+            .değer_merkez_kayması(0.0, "70%")
+            .değer_stili(YazıStili::yeni().boyut(80.0)),
+    )
+}
+
+fn gauge_stage() -> GrafikSeçenekleri {
+    let mut tohum = 0x5eed_1234;
+    // ECharts PaletteTask, kaynak interval'i çalışmadan önce bir kez
+    // Math.random tüketir; kilitli referans üreticisinin akışını koru.
+    let _ = kanıt_rastgele(&mut tohum);
+    let değer = javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0);
+    GrafikSeçenekleri::yeni().seri(
+        GöstergeSaatiSerisi::yeni()
+            .veri([değer])
+            .şerit(true, 30.0)
+            .renk_bantları([
+                (0.3, Renk::from("#67e0e3")),
+                (0.7, Renk::from("#37a2da")),
+                (1.0, Renk::from("#fd666d")),
+            ])
+            .ibre_rengi_otomatik(true)
+            .ara_çentikler(true, 5, 8.0, -30.0, 2.0)
+            .ara_çentik_rengi("#fff")
+            .ana_çentikler(true, 30.0, -30.0, 4.0)
+            .ana_çentik_rengi("#fff")
+            .eksen_etiketleri(true, 40.0, 20.0)
+            .eksen_etiket_rengi_miras(true)
+            .değer_animasyonu(true)
+            .değer_biçimleyici("{value} km/h")
+            .değer_rengi_miras(true),
+    )
+}
+
+fn gauge_grade() -> Result<GrafikSeçenekleri, String> {
+    let ibre = Sembol::svg_yolu("path://M12.8,0.7l12,40.1H0.7L12.8,0.7z")
+        .map_err(|hata| format!("gauge-grade pointer.icon çözülemedi: {hata}"))?;
+    let etiket = Biçimleyici::İşlev(Arc::new(|değer, _| {
+        if (değer - 0.875).abs() < 1e-9 {
+            "Grade A".to_string()
+        } else if (değer - 0.625).abs() < 1e-9 {
+            "Grade B".to_string()
+        } else if (değer - 0.375).abs() < 1e-9 {
+            "Grade C".to_string()
+        } else if (değer - 0.125).abs() < 1e-9 {
+            "Grade D".to_string()
+        } else {
+            String::new()
+        }
+    }));
+    let ayrıntı = Biçimleyici::İşlev(Arc::new(|değer, _| format!("{:.0}", değer * 100.0)));
+    Ok(GrafikSeçenekleri::yeni().seri(
+        GöstergeSaatiSerisi::yeni()
+            .değer(0.7, "Grade Rating")
+            .açılar(180.0, 0.0)
+            .merkez("50%", "75%")
+            .yarıçap("90%")
+            .aralık(0.0, 1.0)
+            .bölme_sayısı(8)
+            .şerit(true, 6.0)
+            .renk_bantları([
+                (0.25, Renk::from("#FF6E76")),
+                (0.5, Renk::from("#FDDD60")),
+                (0.75, Renk::from("#58D9F9")),
+                (1.0, Renk::from("#7CFFB2")),
+            ])
+            .ibre(true, "12%", 20.0)
+            .ibre_simgesi(ibre)
+            .ibre_merkez_kayması(0.0, "-60%")
+            .ibre_rengi_otomatik(true)
+            .ara_çentikler(true, 5, 12.0, 10.0, 2.0)
+            .ara_çentik_rengi_otomatik(true)
+            .ana_çentikler(true, 20.0, 10.0, 5.0)
+            .ana_çentik_rengi_otomatik(true)
+            .eksen_etiketleri(true, -60.0, 20.0)
+            .eksen_etiket_döndürme(EtiketDöndürme::Teğetsel)
+            .eksen_etiket_rengi("#464646")
+            .etiket_biçimleyici(etiket)
+            .ad_merkez_kayması(0.0, "-10%")
+            .ad_stili(YazıStili::yeni().boyut(20.0))
+            .değer_merkez_kayması(0.0, "-35%")
+            .değer_animasyonu(true)
+            .değer_biçimleyici(ayrıntı)
+            .değer_rengi_miras(true)
+            .değer_stili(YazıStili::yeni().boyut(30.0)),
+    ))
+}
+
+fn gauge_multi_title() -> Result<GrafikSeçenekleri, String> {
+    let ibre = Sembol::svg_yolu(
+        "path://M2.9,0.7L2.9,0.7c1.4,0,2.6,1.2,2.6,2.6v115c0,1.4-1.2,2.6-2.6,2.6c-1.4,0-2.6-1.2-2.6-2.6V3.3C0.3,1.9,1.4,0.7,2.9,0.7z",
+    )
+    .map_err(|hata| format!("gauge-multi-title pointer.icon çözülemedi: {hata}"))?;
+    let mut tohum = 0x5eed_1234;
+    let _ = kanıt_rastgele(&mut tohum);
+    let veri = [
+        (
+            javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0),
+            "Good",
+            "-40%",
+        ),
+        (
+            javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0),
+            "Better",
+            "0%",
+        ),
+        (
+            javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0),
+            "Perfect",
+            "40%",
+        ),
+    ]
+    .into_iter()
+    .map(|(değer, ad, x)| {
+        GöstergeVeriÖğesi::adlı(ad, değer)
+            .başlık(GöstergeMetinYaması::yeni().merkez_kayması(x, "80%"))
+            .ayrıntı(GöstergeMetinYaması::yeni().merkez_kayması(x, "95%"))
+    });
+    Ok(GrafikSeçenekleri::yeni().seri(
+        GöstergeSaatiSerisi::yeni()
+            .gösterge_verisi(veri)
+            .dayanak(true, 18.0)
+            .dayanak_üstte(true)
+            .dayanak_stili(ÖğeStili::yeni().renk("#FAC858"))
+            .ibre(true, "80%", 8.0)
+            .ibre_simgesi(ibre)
+            .ibre_merkez_kayması(0.0, "8%")
+            .ilerleme(true, 10.0)
+            .ilerleme_örtüşmesi(true)
+            .ilerleme_yuvarlak_uç(true)
+            .şerit_yuvarlak_uç(true)
+            .ad_stili(YazıStili::yeni().boyut(14.0))
+            .değer_biçimleyici("{value}%")
+            .değer_rengi_miras(false)
+            .değer_arkaplanı_miras(true)
+            .değer_stili(
+                YazıStili::yeni()
+                    .genişlik(40.0)
+                    .yükseklik(14.0)
+                    .boyut(14.0)
+                    .renk("#fff")
+                    .kenarlık_yarıçapı(3.0),
+            ),
+    ))
+}
+
+fn gauge_temperature() -> GrafikSeçenekleri {
+    let mut tohum = 0x5eed_1234;
+    let _ = kanıt_rastgele(&mut tohum);
+    let değer = javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 60.0);
+    let ortak = || {
+        GöstergeSaatiSerisi::yeni()
+            .veri([değer])
+            .merkez("50%", "60%")
+            .açılar(200.0, -20.0)
+            .aralık(0.0, 60.0)
+            .ibre(false, "60%", 6.0)
+    };
+    GrafikSeçenekleri::yeni()
+        .seri(
+            ortak()
+                .bölme_sayısı(12)
+                .öğe_stili(ÖğeStili::yeni().renk("#FFAB91"))
+                .ilerleme(true, 30.0)
+                .şerit(true, 30.0)
+                .ara_çentikler(true, 5, 6.0, -45.0, 2.0)
+                .ara_çentik_rengi("#999")
+                .ana_çentikler(true, 14.0, -52.0, 3.0)
+                .ana_çentik_rengi("#999")
+                .eksen_etiketleri(true, -20.0, 20.0)
+                .eksen_etiket_rengi("#999")
+                .ad_göster(false)
+                .değer_animasyonu(true)
+                .değer_merkez_kayması(0.0, "-15%")
+                .değer_biçimleyici("{value} °C")
+                .değer_rengi_miras(true)
+                .değer_stili(
+                    YazıStili::yeni()
+                        .genişlik("60%")
+                        .satır_yüksekliği(40.0)
+                        .boyut(60.0)
+                        .kalın(true)
+                        .kenarlık_yarıçapı(8.0),
+                ),
+        )
+        .seri(
+            ortak()
+                .öğe_stili(ÖğeStili::yeni().renk("#FD7347"))
+                .ilerleme(true, 8.0)
+                .şerit(false, 30.0)
+                .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+                .ana_çentikler(false, 10.0, 10.0, 3.0)
+                .eksen_etiketleri(false, 15.0, 12.0)
+                .değer_göster(false),
+        )
+}
+
+fn gauge_ring() -> GrafikSeçenekleri {
+    let mut tohum = 0x5eed_1234;
+    let _ = kanıt_rastgele(&mut tohum);
+    let veri = [
+        (
+            javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0),
+            "Perfect",
+            "-30%",
+            "-20%",
+        ),
+        (
+            javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0),
+            "Good",
+            "0%",
+            "10%",
+        ),
+        (
+            javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0),
+            "Commonly",
+            "30%",
+            "40%",
+        ),
+    ]
+    .into_iter()
+    .map(|(değer, ad, başlık_y, ayrıntı_y)| {
+        GöstergeVeriÖğesi::adlı(ad, değer)
+            .başlık(GöstergeMetinYaması::yeni().merkez_kayması("0%", başlık_y))
+            .ayrıntı(
+                GöstergeMetinYaması::yeni()
+                    .merkez_kayması("0%", ayrıntı_y)
+                    .değer_animasyonu(true),
+            )
+    });
+    GrafikSeçenekleri::yeni().seri(
+        GöstergeSaatiSerisi::yeni()
+            .gösterge_verisi(veri)
+            .açılar(90.0, -270.0)
+            .ibre(false, "60%", 6.0)
+            .ilerleme(true, 10.0)
+            .ilerleme_örtüşmesi(false)
+            .ilerleme_yuvarlak_uç(true)
+            .ilerleme_kırp(false)
+            .ilerleme_stili(
+                ÖğeStili::yeni()
+                    .kenarlık_kalınlığı(1.0)
+                    .kenarlık_rengi("#464646"),
+            )
+            .şerit(true, 40.0)
+            .ana_çentikler(false, 10.0, 0.0, 3.0)
+            .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+            .eksen_etiketleri(false, 50.0, 12.0)
+            .ad_stili(YazıStili::yeni().boyut(14.0))
+            .değer_biçimleyici("{value}%")
+            .değer_rengi_miras(true)
+            .değer_kenarlığı_miras(true)
+            .değer_stili(
+                YazıStili::yeni()
+                    .genişlik(50.0)
+                    .yükseklik(14.0)
+                    .boyut(14.0)
+                    .kenarlık_kalınlığı(1.0)
+                    .kenarlık_yarıçapı(20.0),
+            ),
+    )
+}
+
+fn gauge_barometer() -> Result<GrafikSeçenekleri, String> {
+    let ibre = Sembol::svg_yolu(
+        "path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z",
+    )
+    .map_err(|hata| format!("gauge-barometer pointer.icon çözülemedi: {hata}"))?;
+    let mut tohum = 0x5eed_1234;
+    let _ = kanıt_rastgele(&mut tohum);
+    let değer = javascript_yüzde_bir(kanıt_rastgele(&mut tohum) * 100.0);
+
+    Ok(GrafikSeçenekleri::yeni()
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .değer(değer, "PLP")
+                .aralık(0.0, 100.0)
+                .bölme_sayısı(10)
+                .yarıçap("80%")
+                .şerit(true, 3.0)
+                .renk_bantları([(1.0, Renk::from("#f00"))])
+                .ana_çentikler(true, 18.0, -18.0, 3.0)
+                .ana_çentik_rengi("#f00")
+                .ara_çentikler(true, 5, 10.0, -12.0, 1.0)
+                .ara_çentik_rengi("#f00")
+                .eksen_etiketleri(true, -50.0, 25.0)
+                .eksen_etiket_rengi("#f00")
+                .dayanak(true, 20.0)
+                .dayanak_stili(
+                    ÖğeStili::yeni()
+                        .kenarlık_rengi("#000")
+                        .kenarlık_kalınlığı(2.0),
+                )
+                .ibre(true, "115%", 6.0)
+                .ibre_simgesi(ibre)
+                .ibre_merkez_kayması(0.0, "10%")
+                .ibre_stili(ÖğeStili::yeni().renk("#000"))
+                .değer_animasyonu(true)
+                .değer_duyarlılığı(1)
+                .ad_merkez_kayması(0.0, "-50%"),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .aralık(0.0, 60.0)
+                .bölme_sayısı(6)
+                .şerit(true, 3.0)
+                .renk_bantları([(1.0, Renk::from("#000"))])
+                .ana_çentikler(true, 18.0, -3.0, 3.0)
+                .ana_çentik_rengi("#000")
+                .ara_çentikler(true, 5, 10.0, 0.0, 1.0)
+                .ara_çentik_rengi("#000")
+                .eksen_etiketleri(true, 10.0, 25.0)
+                .eksen_etiket_rengi("#000")
+                .ibre(false, "60%", 6.0)
+                .ad_göster(false)
+                .dayanak(true, 14.0)
+                .dayanak_stili(ÖğeStili::yeni().renk("#000")),
+        ))
+}
+
+fn gauge_clock() -> Result<GrafikSeçenekleri, String> {
+    let ibre = Sembol::svg_yolu(
+        "path://M2.9,0.7L2.9,0.7c1.4,0,2.6,1.2,2.6,2.6v115c0,1.4-1.2,2.6-2.6,2.6c-1.4,0-2.6-1.2-2.6-2.6V3.3C0.3,1.9,1.4,0.7,2.9,0.7z",
+    )
+    .map_err(|hata| format!("gauge-clock pointer.icon çözülemedi: {hata}"))?;
+    let logo = Sembol::svg_yolu(
+        "path://M532.8,70.8C532.8,70.8,532.8,70.8,532.8,70.8L532.8,70.8C532.7,70.8,532.8,70.8,532.8,70.8z M456.1,49.6c-2.2-6.2-8.1-10.6-15-10.6h-37.5v10.6h37.5l0,0c2.9,0,5.3,2.4,5.3,5.3c0,2.9-2.4,5.3-5.3,5.3v0h-22.5c-1.5,0.1-3,0.4-4.3,0.9c-4.5,1.6-8.1,5.2-9.7,9.8c-0.6,1.7-0.9,3.4-0.9,5.3v16h10.6v-16l0,0l0,0c0-2.7,2.1-5,4.7-5.3h10.3l10.4,21.2h11.8l-10.4-21.2h0c6.9,0,12.8-4.4,15-10.6c0.6-1.7,0.9-3.5,0.9-5.3C457,53,456.7,51.2,456.1,49.6z M388.9,92.1h11.3L381,39h-3.6h-11.3L346.8,92v0h11.3l3.9-10.7h7.3h7.7l3.9-10.6h-7.7h-7.3l7.7-21.2v0L388.9,92.1z M301,38.9h-10.6v53.1H301V70.8h28.4l3.7-10.6H301V38.9zM333.2,38.9v10.6v10.7v31.9h10.6V38.9H333.2z M249.5,81.4L249.5,81.4L249.5,81.4c-2.9,0-5.3-2.4-5.3-5.3h0V54.9h0l0,0c0-2.9,2.4-5.3,5.3-5.3l0,0l0,0h33.6l3.9-10.6h-37.5c-1.9,0-3.6,0.3-5.3,0.9c-4.5,1.6-8.1,5.2-9.7,9.7c-0.6,1.7-0.9,3.5-0.9,5.3l0,0v21.3c0,1.9,0.3,3.6,0.9,5.3c1.6,4.5,5.2,8.1,9.7,9.7c1.7,0.6,3.5,0.9,5.3,0.9h33.6l3.9-10.6H249.5z M176.8,38.9v10.6h49.6l3.9-10.6H176.8z M192.7,81.4L192.7,81.4L192.7,81.4c-2.9,0-5.3-2.4-5.3-5.3l0,0v-5.3h38.9l3.9-10.6h-53.4v10.6v5.3l0,0c0,1.9,0.3,3.6,0.9,5.3c1.6,4.5,5.2,8.1,9.7,9.7c1.7,0.6,3.4,0.9,5.3,0.9h23.4h10.2l3.9-10.6l0,0H192.7z M460.1,38.9v10.6h21.4v42.5h10.6V49.6h17.5l3.8-10.6H460.1z M541.6,68.2c-0.2,0.1-0.4,0.3-0.7,0.4C541.1,68.4,541.4,68.3,541.6,68.2L541.6,68.2z M554.3,60.2h-21.6v0l0,0c-2.9,0-5.3-2.4-5.3-5.3c0-2.9,2.4-5.3,5.3-5.3l0,0l0,0h33.6l3.8-10.6h-37.5l0,0c-6.9,0-12.8,4.4-15,10.6c-0.6,1.7-0.9,3.5-0.9,5.3c0,1.9,0.3,3.7,0.9,5.3c2.2,6.2,8.1,10.6,15,10.6h21.6l0,0c2.9,0,5.3,2.4,5.3,5.3c0,2.9-2.4,5.3-5.3,5.3l0,0h-37.5v10.6h37.5c6.9,0,12.8-4.4,15-10.6c0.6,1.7,0.9,3.5,0.9,5.3c0,1.9-0.3,3.7-0.9,5.3C567.2,64.6,561.3,60.2,554.3,60.2z",
+    )
+    .map_err(|hata| format!("gauge-clock anchor.icon çözülemedi: {hata}"))?;
+    let gölgeli_ibre = || {
+        ÖğeStili::yeni()
+            .renk("#C0911F")
+            .gölge_rengi("rgba(0, 0, 0, 0.3)")
+            .gölge_bulanıklığı(8.0)
+            .gölge_kayması(2.0, 4.0)
+    };
+    let ortak = || {
+        GöstergeSaatiSerisi::yeni()
+            .açılar(90.0, -270.0)
+            .saat_yönünde(true)
+            .ad_göster(false)
+            .değer_göster(false)
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .seri(
+            ortak()
+                .ad("hour")
+                .veri([3.0])
+                .aralık(0.0, 12.0)
+                .bölme_sayısı(12)
+                .renk_bantları([(1.0, Renk::from("rgba(0,0,0,0.7)"))])
+                .şerit_çizgi_stili(
+                    ÇizgiStili::yeni()
+                        .kalınlık(15.0)
+                        .gölge_rengi("rgba(0, 0, 0, 0.35)")
+                        .gölge_bulanıklığı(15.0),
+                )
+                .ana_çentik_stili(
+                    ÇizgiStili::yeni()
+                        .kalınlık(3.0)
+                        .gölge_rengi("rgba(0, 0, 0, 0.3)")
+                        .gölge_bulanıklığı(3.0)
+                        .gölge_kayması(1.0, 2.0),
+                )
+                .eksen_etiketleri(true, 25.0, 50.0)
+                .etiket_biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+                    if değer.abs() < 1e-9 {
+                        String::new()
+                    } else {
+                        ondalık_kırp(değer)
+                    }
+                })))
+                .dayanak(true, 120.0)
+                .dayanak_üstte(false)
+                .dayanak_simgesi(logo)
+                .dayanak_merkez_kayması(0.0, "-35%")
+                .dayanak_oranı_koru(true)
+                .dayanak_stili(ÖğeStili::yeni().renk("#707177"))
+                .ibre(true, "55%", 12.0)
+                .ibre_simgesi(ibre.clone())
+                .ibre_merkez_kayması(0.0, "8%")
+                .ibre_stili(gölgeli_ibre()),
+        )
+        .seri(
+            ortak()
+                .ad("minute")
+                .veri([0.0])
+                .aralık(0.0, 60.0)
+                .şerit(false, 10.0)
+                .ana_çentikler(false, 10.0, 10.0, 3.0)
+                .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+                .eksen_etiketleri(false, 15.0, 12.0)
+                .ibre(true, "70%", 8.0)
+                .ibre_simgesi(ibre.clone())
+                .ibre_merkez_kayması(0.0, "8%")
+                .ibre_stili(gölgeli_ibre())
+                .dayanak(true, 20.0)
+                .dayanak_üstte(false)
+                .dayanak_stili(
+                    ÖğeStili::yeni()
+                        .kenarlık_rengi("#C0911F")
+                        .kenarlık_kalınlığı(15.0)
+                        .gölge_rengi("rgba(0, 0, 0, 0.3)")
+                        .gölge_bulanıklığı(8.0)
+                        .gölge_kayması(2.0, 4.0),
+                ),
+        )
+        .seri(
+            ortak()
+                .ad("second")
+                .veri([0.0])
+                .aralık(0.0, 60.0)
+                .şerit(false, 10.0)
+                .ana_çentikler(false, 10.0, 10.0, 3.0)
+                .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+                .eksen_etiketleri(false, 15.0, 12.0)
+                .ibre(true, "85%", 4.0)
+                .ibre_simgesi(ibre)
+                .ibre_merkez_kayması(0.0, "8%")
+                .ibre_stili(gölgeli_ibre())
+                .dayanak(true, 15.0)
+                .dayanak_üstte(true)
+                .dayanak_stili(
+                    ÖğeStili::yeni()
+                        .renk("#C0911F")
+                        .gölge_rengi("rgba(0, 0, 0, 0.3)")
+                        .gölge_bulanıklığı(8.0)
+                        .gölge_kayması(2.0, 4.0),
+                ),
+        ))
+}
+
+fn gauge_car() -> Result<GrafikSeçenekleri, String> {
+    let ibre = Sembol::svg_yolu(
+        "path://M-36.5,23.9L-41,4.4c-0.1-0.4-0.4-0.7-0.7-0.7c-0.5-0.1-1.1,0.2-1.2,0.7l-4.5,19.5c0,0.1,0,0.1,0,0.2v92.3c0,0.6,0.4,1,1,1h9c0.6,0,1-0.4,1-1V24.1C-36.5,24-36.5,23.9-36.5,23.9z M-39.5,114.6h-5v-85h5V114.6z",
+    )
+    .map_err(|hata| format!("gauge-car pointer.icon çözülemedi: {hata}"))?;
+    let yakıt = Sembol::svg_yolu(
+        "path://M1.11979167,1.11111112 C1.11979167,0.497461393 1.61725306,0 2.23090279,0 L12.2309028,0 C12.8445525,1.43824153e-08 13.3420139,0.497461403 13.3420139,1.11111112 L13.3420139,10 L15.5642361,10 C16.7915356,10 17.7864583,10.9949228 17.7864583,12.2222222 L17.7864583,16.6666667 C17.7865523,17.28025 18.2839861,17.7776077 18.8975694,17.7776077 C19.5111527,17.7776077 20.0085866,17.28025 20.0086805,16.6666667 L20.0086805,8.88888888 L17.7864583,8.88888888 C17.1728086,8.88888888 16.6753472,8.3914275 16.6753472,7.77777779 L16.6753472,3.79333333 L15.6197917,2.73777777 C15.1859413,2.30392741 15.1859413,1.60051702 15.6197917,1.16666667 L15.6197917,1.16666667 C16.053642,0.732816318 16.7570524,0.732816318 17.1909028,1.16666667 L21.9053472,5.88111112 C22.1140468,6.08922811 22.2312072,6.37193273 22.2309028,6.66666667 L22.2309028,16.6666667 C22.2309028,18.5076158 20.7385186,20 18.8975695,20 C17.0566203,20 15.5642361,18.5076158 15.5642361,16.6666667 L15.5642361,12.2222222 L13.3420139,12.2222222 L13.3420139,17.7777778 L13.3420139,17.7777778 C13.9556636,17.7777778 14.453125,18.2752392 14.453125,18.8888889 L14.453125,18.8888889 C14.453125,19.5025386 13.9556636,20 13.3420139,20 L1.11979165,20 C0.506141934,20 0.00868054688,19.5025386 0.00868054687,18.8888889 L0.00868054687,18.8888889 C0.00868054688,18.2752392 0.506141934,17.7777778 1.11979165,17.7777778 L1.11979167,17.7777778 L1.11979167,1.11111112 Z M3.34201388,2.22222221 L3.34201388,8.88888888 L11.1197917,8.88888888 L11.1197917,2.22222221 L3.34201388,2.22222221 Z",
+    )
+    .map_err(|hata| format!("gauge-car fuel anchor.icon çözülemedi: {hata}"))?;
+    let sıcaklık = Sembol::svg_yolu(
+        "path://M-34.1-1.1L-34.1-1.1c0-0.3-0.3-0.6-0.6-0.6h-3.6v-1.5c0-0.5-0.2-0.9-0.6-1.1s-0.9-0.2-1.3,0c-0.4,0.2-0.6,0.7-0.6,1.1V7.9c0,0,0,0.1,0,0.1c-0.8,0.5-1.2,1.5-0.9,2.5c0.3,0.9,1.1,1.6,2.1,1.6c1,0,1.8-0.6,2.1-1.5c0.3-0.9,0-1.9-0.8-2.5V6.3h3.5c0.4,0,0.7-0.3,0.7-0.7l0,0c0-0.4-0.3-0.7-0.7-0.7h-3.5V2.9h3.5c0.4,0,0.7-0.3,0.7-0.7l0,0c0-0.4-0.3-0.7-0.7-0.7h-3.5v-2.1h3.6C-34.4-0.5-34.1-0.8-34.1-1.1z M-44.9,11.6c-0.7,0-1.4-0.2-2-0.6c-0.4-0.3-0.9-0.4-1.4-0.4c-0.4,0-0.9,0.2-1.2,0.4c-0.4,0.2-1.4-0.9-0.9-1.3c0.6-0.4,1.3-0.6,2-0.7c0.8,0,1.5,0.2,2.2,0.5c0.4,0.3,0.9,0.4,1.3,0.4c0.6,0,1.1-0.2,1.5-0.6s1.6,0.7,0.9,1.3S-44,11.6-44.9,11.6L-44.9,11.6z M-34.3,11.6c-0.7,0-1.4-0.3-2-0.7c-0.6-0.4,0.5-1.6,0.9-1.3s0.8,0.4,1.2,0.4c0.5,0,1-0.1,1.4-0.4c0.6-0.3,1.3-0.5,2-0.6h0c0.9,0,1.7,0.3,2.4,0.9c0.7,0.5-0.5,1.6-0.9,1.3c-0.4-0.3-1-0.6-1.5-0.6h0c-0.5,0-0.9,0.2-1.3,0.4c-0.6,0.3-1.3,0.5-2,0.6H-34.3z M-33.5,16.3c-0.7,0-1.4-0.3-1.9-0.8c-0.4-0.3-0.6-0.5-1-0.5c-0.4,0-0.7,0.2-1,0.4c-0.6,0.5-1.3,0.7-2,0.7c-0.7,0-1.4-0.3-1.9-0.8c-0.2-0.3-0.6-0.4-0.9-0.4c-0.4,0-0.7,0.1-1.1,0.5c-0.6,0.5-1.3,0.7-2.1,0.7c-0.7-0.1-1.4-0.4-1.9-0.9c-0.4-0.3-0.6-0.5-1-0.5c-0.3,0-0.6,0.2-0.9,0.4s-1.6-0.7-1.1-1.2c0.5-0.5,1.2-0.8,1.9-0.9c1-0.1,1.6,0.4,2.1,0.8c0.3,0.3,0.6,0.5,1,0.5c0.4,0,0.6-0.1,1-0.4c0.6-0.5,1.4-0.8,2.1-0.8c0.7,0,1.4,0.3,1.9,0.8c0.2,0.2,0.6,0.4,0.9,0.4c0.4,0,0.6-0.1,1-0.4c0.6-0.5,1.3-0.7,2-0.7c0.8,0,1.5,0.3,2,0.9c0.4,0.3,0.6,0.4,0.9,0.4c0.3,0,0.7-0.2,1.1-0.5c0.5-0.4,1.2-0.9,2.3-0.8c0.7,0,1.4,0.3,1.9,0.7c0.5,0.4-0.7,1.5-1,1.3s-0.6-0.4-1-0.4c-0.4,0-0.7,0.2-1.2,0.5C-32,15.9-32.7,16.2-33.5,16.3L-33.5,16.3z",
+    )
+    .map_err(|hata| format!("gauge-car temperature anchor.icon çözülemedi: {hata}"))?;
+    let beyaz_arial = |boyut| {
+        YazıStili::yeni()
+            .boyut(boyut)
+            .kalın(true)
+            .aile("Arial")
+            .renk("#fff")
+    };
+    let kırmızı_ibre = || {
+        ÖğeStili::yeni()
+            .renk("#f00")
+            .gölge_rengi("rgba(255, 0, 0, 1)")
+            .gölge_bulanıklığı(5.0)
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .arkaplan("#000")
+        .ipucu(İpucu::yeni().biçimleyici("{a} <br/>{b} : {c}%"))
+        .araç_kutusu(
+            AraçKutusu::yeni()
+                .geri_yükle(true)
+                .png_kaydet(true),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 0")
+                .değer(250.0, "km/h")
+                .aralık(-200.0, 250.0)
+                .açılar(-30.0, -315.0)
+                .bölme_sayısı(9)
+                .yarıçap("35%")
+                .merkez("21%", "55%")
+                .renk_bantları([(1.0, Renk::from("#AE96A6"))])
+                .ana_çentikler(false, 10.0, 10.0, 3.0)
+                .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+                .eksen_etiketleri(false, 15.0, 12.0)
+                .ibre(false, "60%", 6.0)
+                .değer_göster(false)
+                .ad_merkez_kayması(0.0, "-60%")
+                .ad_stili(beyaz_arial(12.0))
+                .ilerleme(true, 3.0)
+                .ilerleme_stili(ÖğeStili::yeni().renk("#fff")),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 1")
+                .değer(0.0, "当前位置：\n \n 中科路")
+                .aralık(0.0, 250.0)
+                .açılar(-140.0, -305.0)
+                .bölme_sayısı(5)
+                .yarıçap("35%")
+                .merkez("21%", "55%")
+                .renk_bantları([(1.0, Renk::from("#AE96A6"))])
+                .ana_çentikler(true, 12.0, -7.0, 4.0)
+                .ana_çentik_rengi("#fff")
+                .ara_çentikler(true, 5, 8.0, -8.0, 2.0)
+                .ara_çentik_rengi("#fff")
+                .eksen_etiketleri(true, 14.0, 18.0)
+                .eksen_etiket_rengi("#fff")
+                .eksen_etiket_stili(beyaz_arial(18.0))
+                .ibre(true, "40%", 5.0)
+                .ibre_simgesi(ibre.clone())
+                .ibre_merkez_kayması(0.0, "-58%")
+                .ibre_stili(kırmızı_ibre().gölge_kayması(0.0, 2.0))
+                .ad_merkez_kayması(0.0, 0.0)
+                .ad_stili(beyaz_arial(14.0))
+                .değer_göster(false),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 2")
+                .değer(0.6, "1/min x 1000")
+                .aralık(0.0, 8.0)
+                .açılar(210.0, -30.0)
+                .bölme_sayısı(8)
+                .yarıçap("50%")
+                .merkez("50%", "50%")
+                .şerit(true, 0.0)
+                .renk_bantları([
+                    (0.825, Renk::from("#fff")),
+                    (1.0, Renk::from("#f00")),
+                ])
+                .ana_çentikler(true, 15.0, 20.0, 4.0)
+                .ana_çentik_rengi_otomatik(true)
+                .ana_çentik_stili(
+                    ÇizgiStili::yeni()
+                        .kalınlık(4.0)
+                        .gölge_rengi("rgba(255, 255, 255, 0.5)")
+                        .gölge_bulanıklığı(15.0)
+                        .gölge_kayması(0.0, -10.0),
+                )
+                .ana_çentik_rengi_otomatik(true)
+                .ara_çentikler(true, 5, 8.0, 20.0, 2.0)
+                .ara_çentik_stili(
+                    ÇizgiStili::yeni()
+                        .kalınlık(2.0)
+                        .gölge_rengi("rgba(255, 255, 255, 1)")
+                        .gölge_bulanıklığı(10.0)
+                        .gölge_kayması(0.0, -10.0),
+                )
+                .ara_çentik_rengi_otomatik(true)
+                .eksen_etiketleri(true, 10.0, 35.0)
+                .eksen_etiket_rengi("#fff")
+                .eksen_etiket_stili(beyaz_arial(35.0))
+                .ibre(true, "75%", 10.0)
+                .ibre_simgesi(ibre)
+                .ibre_merkez_kayması(0.0, "-10%")
+                .ibre_stili(kırmızı_ibre().gölge_kayması(0.0, 3.0))
+                .ad_merkez_kayması(0.0, "-50%")
+                .ad_stili(beyaz_arial(12.0))
+                .değer_göster(false),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 3")
+                .değer(0.0, "")
+                .aralık(0.0, 8.0)
+                .bölme_sayısı(8)
+                .yarıçap("50%")
+                .renk_bantları([(1.0, Renk::from("#000"))])
+                .şerit(true, 14.0)
+                .ana_çentikler(false, 10.0, 10.0, 3.0)
+                .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+                .eksen_etiketleri(false, 15.0, 12.0)
+                .ibre(false, "60%", 6.0)
+                .ad_göster(false)
+                .değer_merkez_kayması("25%", "50%")
+                .değer_biçimleyici("{a|{value}}{b|km/h}")
+                .değer_zengin_stil(
+                    "a",
+                    beyaz_arial(60.0)
+                        .yatay_hiza(YazıYatayHizası::Orta)
+                        .iç_boşluk([0.0, 5.0, 0.0, 0.0]),
+                )
+                .değer_zengin_stil(
+                    "b",
+                    beyaz_arial(14.0).iç_boşluk([0.0, 0.0, 20.0, 0.0]),
+                ),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 4")
+                .değer(250.0, "")
+                .aralık(0.0, 8.0)
+                .açılar(135.0, -150.0)
+                .bölme_sayısı(8)
+                .yarıçap("35%")
+                .merkez("79%", "55%")
+                .renk_bantları([(1.0, Renk::from("#AE96A6"))])
+                .ana_çentikler(false, 10.0, 10.0, 3.0)
+                .ara_çentikler(false, 5, 6.0, 10.0, 1.0)
+                .eksen_etiketleri(false, 15.0, 12.0)
+                .ibre(false, "60%", 6.0)
+                .ilerleme(true, 3.0)
+                .ilerleme_stili(ÖğeStili::yeni().renk("#fff"))
+                .değer_merkez_kayması("-15%", 0.0)
+                .değer_biçimleyici(
+                    "{a|                  00:00}\n{a|行驶时间       0:00}{b| h}\n{a|行驶距离        0.0}{b| km}\n{a|平均耗能        ---}{b| 1/100km}\n{a|平均速度        ---}{b| km/h}",
+                )
+                .değer_zengin_stil(
+                    "a",
+                    beyaz_arial(14.0)
+                        .satır_yüksekliği(22.0)
+                        .yatay_hiza(YazıYatayHizası::Sol),
+                )
+                .değer_zengin_stil(
+                    "b",
+                    YazıStili::yeni()
+                        .boyut(12.0)
+                        .kalın(true)
+                        .aile("Arial")
+                        .renk("#fff")
+                        .satır_yüksekliği(22.0)
+                        .yatay_hiza(YazıYatayHizası::Sol),
+                ),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 5")
+                .değer(0.85, "")
+                .aralık(0.0, 1.0)
+                .açılar(125.0, 55.0)
+                .bölme_sayısı(2)
+                .yarıçap("34%")
+                .merkez("79%", "55.3%")
+                .şerit(true, 9.0)
+                .renk_bantları([
+                    (0.15, Renk::from("#f00")),
+                    (1.0, Renk::from("rgba(255, 0, 0, 0)")),
+                ])
+                .ana_çentikler(true, 16.0, -14.0, 4.0)
+                .ana_çentik_rengi("#fff")
+                .ara_çentikler(true, 5, 10.0, -14.0, 2.0)
+                .ara_çentik_rengi("#fff")
+                .eksen_etiketleri(true, 12.0, 18.0)
+                .eksen_etiket_rengi("#fff")
+                .eksen_etiket_stili(beyaz_arial(18.0))
+                .etiket_biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+                    if (değer - 0.5).abs() < 1e-9 {
+                        "2/4".to_string()
+                    } else if (değer - 1.0).abs() < 1e-9 {
+                        "4/4".to_string()
+                    } else {
+                        ondalık_kırp(değer)
+                    }
+                })))
+                .ilerleme(true, 5.0)
+                .ilerleme_stili(ÖğeStili::yeni().renk("#fff"))
+                .dayanak(true, 18.0)
+                .dayanak_simgesi(yakıt)
+                .dayanak_merkez_kayması("-22%", "-57%")
+                .ibre(false, "60%", 6.0)
+                .değer_merkez_kayması("10%", "-56%")
+                .değer_biçimleyici("{a|831}{b| km}")
+                .değer_zengin_stil("a", beyaz_arial(15.0))
+                .değer_zengin_stil(
+                    "b",
+                    YazıStili::yeni()
+                        .boyut(12.0)
+                        .kalın(true)
+                        .aile("Arial")
+                        .renk("#fff"),
+                ),
+        )
+        .seri(
+            GöstergeSaatiSerisi::yeni()
+                .ad("gauge 6")
+                .değer(-120.0, "")
+                .aralık(-120.0, -60.0)
+                .açılar(230.0, 310.0)
+                .saat_yönünde(false)
+                .bölme_sayısı(2)
+                .yarıçap("35%")
+                .merkez("79%", "55%")
+                .renk_bantları([
+                    (1.0, Renk::from("#AE96A6")),
+                    (1.1, Renk::from("#f00")),
+                ])
+                .ana_çentikler(true, 12.0, -8.0, 4.0)
+                .ana_çentik_rengi("#fff")
+                .ara_çentikler(true, 3, 8.0, -8.0, 2.0)
+                .ara_çentik_rengi("#fff")
+                .eksen_etiketleri(true, 14.0, 18.0)
+                .eksen_etiket_rengi("#fff")
+                .eksen_etiket_stili(beyaz_arial(18.0))
+                .etiket_biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+                    ondalık_kırp(-değer)
+                })))
+                .dayanak(true, 20.0)
+                .dayanak_simgesi(sıcaklık)
+                .dayanak_merkez_kayması(0.0, "55%")
+                .ibre(true, 4.0, 15.0)
+                .ibre_simgesi(Sembol::svg_yolu(
+                    "path://M2.9,0.7L2.9,0.7c1.4,0,2.6,1.2,2.6,2.6v115c0,1.4-1.2,2.6-2.6,2.6c-1.4,0-2.6-1.2-2.6-2.6V3.3C0.3,1.9,1.4,0.7,2.9,0.7z",
+                ).map_err(|hata| format!("gauge-car temperature pointer.icon çözülemedi: {hata}"))?)
+                .ibre_merkez_kayması(0.0, "-90%")
+                .ibre_stili(ÖğeStili::yeni().renk("#f00"))
+                .değer_göster(false),
+        ))
+}
+
 #[cfg(test)]
 #[allow(clippy::indexing_slicing, clippy::panic)]
 mod gauge_testleri {
@@ -4567,6 +5288,97 @@ mod gauge_testleri {
                 .uygula(100.0, "100"),
             "100km/h"
         );
+    }
+
+    #[test]
+    fn gelismis_gauge_ornekleri_ortak_api_yeteneklerini_kayipsiz_tasir() {
+        let progress = gauge_progress();
+        let Seri::GöstergeSaati(progress) = &progress.seriler[0] else {
+            panic!("gauge-progress serisi gauge olmalı");
+        };
+        assert!(progress.ilerlemeyi_göster && progress.dayanağı_göster);
+        assert!(progress.dayanak_üstte);
+        assert_eq!(progress.dayanak_stili.kenarlık_kalınlığı, 10.0);
+        assert_eq!(progress.değer_stili.boyut, Some(80.0));
+
+        let stage = gauge_stage();
+        let Seri::GöstergeSaati(stage) = &stage.seriler[0] else {
+            panic!("gauge-stage serisi gauge olmalı");
+        };
+        assert_eq!(stage.renk_bantları.len(), 3);
+        assert!(stage.ibre_rengi_otomatik);
+        assert!(stage.etiket_rengi_miras && stage.değer_rengi_miras);
+        assert_eq!(stage.veri[0].değer.sayı(), Some(84.18));
+
+        let grade = gauge_grade().expect("gauge-grade fixture");
+        let Seri::GöstergeSaati(grade) = &grade.seriler[0] else {
+            panic!("gauge-grade serisi gauge olmalı");
+        };
+        assert_eq!(grade.renk_bantları.len(), 4);
+        assert!(matches!(grade.etiket_döndürme, EtiketDöndürme::Teğetsel));
+        assert!(grade.çentik_rengi_otomatik && grade.ara_çentik_rengi_otomatik);
+
+        let çoklu = gauge_multi_title().expect("gauge-multi-title fixture");
+        let Seri::GöstergeSaati(çoklu) = &çoklu.seriler[0] else {
+            panic!("gauge-multi-title serisi gauge olmalı");
+        };
+        assert_eq!(çoklu.veri.len(), 3);
+        assert_eq!(çoklu.veri_ayarları.len(), 3);
+        assert_eq!(
+            çoklu.veri_ayarları[2].başlık.merkez_kayması,
+            Some((Uzunluk::Yüzde(40.0), Uzunluk::Yüzde(80.0)))
+        );
+        assert!(çoklu.değer_arkaplanı_miras);
+
+        let sıcaklık = gauge_temperature();
+        assert_eq!(sıcaklık.seriler.len(), 2);
+        let Seri::GöstergeSaati(iç) = &sıcaklık.seriler[1] else {
+            panic!("ikinci temperature serisi gauge olmalı");
+        };
+        assert!(!iç.şeridi_göster && iç.ilerlemeyi_göster);
+        assert_eq!(iç.ilerleme_kalınlığı, 8.0);
+
+        let halka = gauge_ring();
+        let Seri::GöstergeSaati(halka) = &halka.seriler[0] else {
+            panic!("gauge-ring serisi gauge olmalı");
+        };
+        assert_eq!(halka.veri.len(), 3);
+        assert!(!halka.ilerleme_örtüşmesi && !halka.ilerleme_kırp);
+        assert!(halka.ilerleme_yuvarlak_uç);
+        assert!(halka.değer_kenarlığı_miras);
+
+        let barometre = gauge_barometer().expect("gauge-barometer fixture");
+        assert_eq!(barometre.seriler.len(), 2);
+        let Seri::GöstergeSaati(basınç) = &barometre.seriler[0] else {
+            panic!("ilk barometer serisi gauge olmalı");
+        };
+        assert_eq!(basınç.değer_duyarlılığı, Some(1));
+        assert!(basınç.değer_animasyonu && basınç.dayanağı_göster);
+        assert!(matches!(basınç.ibre_simgesi, Some(Sembol::SvgYolu(_))));
+
+        let saat = gauge_clock().expect("gauge-clock fixture");
+        assert_eq!(saat.seriler.len(), 3);
+        let Seri::GöstergeSaati(saniye) = &saat.seriler[2] else {
+            panic!("üçüncü clock serisi gauge olmalı");
+        };
+        assert_eq!((saniye.başlangıç_açısı, saniye.bitiş_açısı), (90.0, -270.0));
+        assert!(saniye.dayanak_üstte);
+        assert_eq!(saniye.ibre_uzunluğu, Uzunluk::Yüzde(85.0));
+
+        let otomobil = gauge_car().expect("gauge-car fixture");
+        assert_eq!(otomobil.seriler.len(), 7);
+        assert!(
+            otomobil
+                .araç_kutusu
+                .as_ref()
+                .is_some_and(|araç| { araç.geri_yükle && araç.png_kaydet })
+        );
+        let Seri::GöstergeSaati(sıcaklık) = &otomobil.seriler[6] else {
+            panic!("yedinci car serisi gauge olmalı");
+        };
+        assert!(!sıcaklık.saat_yönünde);
+        assert_eq!(sıcaklık.ara_çentik_sayısı, 3);
+        assert!(matches!(sıcaklık.dayanak_simgesi, Sembol::SvgYolu(_)));
     }
 }
 
@@ -11201,6 +12013,15 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "gauge" => Ok(gauge()),
         "gauge-simple" => Ok(gauge_simple()),
         "gauge-speed" => gauge_speed(),
+        "gauge-progress" => Ok(gauge_progress()),
+        "gauge-stage" => Ok(gauge_stage()),
+        "gauge-grade" => gauge_grade(),
+        "gauge-multi-title" => gauge_multi_title(),
+        "gauge-temperature" => Ok(gauge_temperature()),
+        "gauge-ring" => Ok(gauge_ring()),
+        "gauge-barometer" => gauge_barometer(),
+        "gauge-clock" => gauge_clock(),
+        "gauge-car" => gauge_car(),
         "bar-simple" => Ok(bar_simple()),
         "bar1" => Ok(bar1()),
         "mix-line-bar" => Ok(mix_line_bar()),

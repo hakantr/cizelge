@@ -5070,11 +5070,12 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
+                let veri_paleti = |sıra: usize| seçenekler.palet_rengi(sıra);
                 gösterge_saati_çiz(
                     yüzey,
                     g,
                     i,
-                    seçenekler.seri_rengi(i),
+                    &veri_paleti,
                     tüm_alan,
                     ilerleme,
                     &mut çıktı.isabetler,

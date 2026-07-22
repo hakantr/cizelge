@@ -1,0 +1,19 @@
+{
+  "id": "gauge-stage",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 599,
+  "değişen_piksel_oranı": 0.0022185185185185185,
+  "ssim": 0.998122532022311,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/gauge-stage.png",
+    "gerçek": "testler/gorsel/gerçek/default/gauge-stage.png",
+    "fark": "testler/gorsel/fark/default/gauge-stage.png"
+  }
+}

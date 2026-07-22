@@ -231,6 +231,9 @@ pub struct YazıStili {
     pub yükseklik: Option<f32>,
     pub yatay_hiza: Option<YazıYatayHizası>,
     pub dikey_hiza: Option<YazıDikeyHizası>,
+    /// `overflow: 'truncate'`; açık değilse ECharts/zrender'ın öntanımlı
+    /// taşan metin davranışı korunur.
+    pub taşmayı_kısalt: bool,
 }
 
 impl YazıStili {
@@ -327,6 +330,11 @@ impl YazıStili {
         self
     }
 
+    pub fn taşmayı_kısalt(mut self, kısalt: bool) -> Self {
+        self.taşmayı_kısalt = kısalt;
+        self
+    }
+
     /// Bir rich-text/veri öğesi yamasını mevcut yazı stilinin üzerine
     /// uygular; yalnız açık alanlar kalıtılan değeri değiştirir.
     pub(crate) fn yama_uygula(&self, yama: &YazıStili) -> YazıStili {
@@ -376,6 +384,9 @@ impl YazıStili {
         }
         if yama.dikey_hiza.is_some() {
             sonuç.dikey_hiza = yama.dikey_hiza;
+        }
+        if yama.taşmayı_kısalt {
+            sonuç.taşmayı_kısalt = true;
         }
         sonuç
     }
