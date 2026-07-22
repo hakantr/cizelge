@@ -3,7 +3,7 @@
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
-use crate::grafik::pasta::zengin_etiketi_yaz;
+use crate::grafik::pasta::{zengin_etiketi_hizalı_yaz, zengin_etiketi_yaz};
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::eksen::EksenTürü;
@@ -108,6 +108,8 @@ pub fn sütun_bant_genişliği(girdiler: &[SütunGirdisi]) -> f32 {
                 .map(move |(sıra, öğe)| sütun_taban_değeri(öğe, sıra, yatay))
         })
         .filter(|değer| değer.is_finite())
+        .map(|değer| taban_ekseni.doğrusal_değer(değer))
+        .filter(|değer| değer.is_finite())
         .collect::<Vec<_>>();
     değerler.sort_by(f64::total_cmp);
     değerler.dedup_by(|a, b| (*a - *b).abs() <= f64::EPSILON);
@@ -121,8 +123,7 @@ pub fn sütun_bant_genişliği(girdiler: &[SütunGirdisi]) -> f32 {
             _ => None,
         })
         .fold(f64::INFINITY, f64::min);
-    let kapsam = taban_ekseni.eşleme_kapsamı();
-    let açıklık = (kapsam[1] - kapsam[0]).abs();
+    let açıklık = taban_ekseni.doğrusal_eşleme_açıklığı();
     if en_küçük_aralık.is_finite() && açıklık.is_finite() && açıklık > 0.0 {
         (taban_ekseni.uzunluk() as f64 * en_küçük_aralık / açıklık).max(1.0) as f32
     } else {
@@ -835,15 +836,30 @@ pub fn sütunları_çiz(
                         }
                     }
                     _ => {
-                        çizici.yazı(
-                            &metin,
-                            nokta,
-                            yatay_hiza,
-                            dikey_hiza,
-                            boyut,
-                            renk,
-                            etiket.yazı.kalın,
-                        );
+                        if let Some(zengin_metin) =
+                            zengin_metin.as_deref().filter(|zengin| *zengin != metin)
+                        {
+                            zengin_etiketi_hizalı_yaz(
+                                çizici,
+                                zengin_metin,
+                                etiket,
+                                nokta,
+                                yatay_hiza,
+                                dikey_hiza,
+                                renk,
+                                0.0,
+                            );
+                        } else {
+                            çizici.yazı(
+                                &metin,
+                                nokta,
+                                yatay_hiza,
+                                dikey_hiza,
+                                boyut,
+                                renk,
+                                etiket.yazı.kalın,
+                            );
+                        }
                     }
                 }
             }
@@ -930,6 +946,64 @@ mod testler {
         assert_eq!(sütun_değeri(ilk, true), Some(10.0));
         assert_eq!(sütun_taban_değeri(ilk, 0, true), 0.0);
         assert!((sütun_bant_genişliği(&[girdi]) - 100.0 / 3.0).abs() < 1e-4);
+    }
+
+    #[test]
+    fn kirik_zaman_ekseni_bant_genisligini_dogrusal_ic_uzaydan_hesaplar() {
+        use crate::model::eksen::EksenKırılması;
+
+        let mut x = ÇalışmaEkseni::yeni(
+            Eksen::zaman().kırılma(EksenKırılması::yeni(120.0, 210.0).boşluk(0)),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 329.0],
+                Some(0.0),
+                Some(329.0),
+                false,
+                5,
+                None,
+                None,
+            )),
+            [10.0, 554.0],
+            EksenKonumu::Alt,
+        );
+        x.eşleme_kapsamı_uygula([-0.5, 329.5]);
+        let y = ÇalışmaEkseni::yeni(
+            Eksen::değer(),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 10.0],
+                Some(0.0),
+                Some(10.0),
+                false,
+                5,
+                None,
+                None,
+            )),
+            [100.0, 0.0],
+            EksenKonumu::Sol,
+        );
+        let seri = SütunSerisi::yeni().veri(
+            (0..=329)
+                .filter(|sıra| *sıra <= 120 || *sıra >= 210)
+                .map(|sıra| [sıra as f64, 1.0]),
+        );
+        let aralıklar = vec![Some((0.0, 1.0)); seri.veri.len()];
+        let girdi = SütunGirdisi {
+            seri: &seri,
+            kartezyen: Kartezyen2B {
+                x,
+                y,
+                alan: Dikdörtgen::yeni(10.0, 0.0, 544.0, 100.0),
+            },
+            genel_sıra: 0,
+            aralıklar: &aralıklar,
+            renk: Renk::onaltılık(0x5070dd),
+            görsel_eşlemeler: Vec::new(),
+            öğe_opaklıkları: None,
+            öğe_renkleri: None,
+        };
+
+        // İç açıklık: 330 - 90 = 240. Bir dakikalık veri bandı 544/240 px.
+        assert!((sütun_bant_genişliği(&[girdi]) - 544.0 / 240.0).abs() < 1e-4);
     }
 
     #[test]

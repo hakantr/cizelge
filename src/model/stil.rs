@@ -582,6 +582,9 @@ impl From<String> for Biçimleyici {
 #[derive(Clone, PartialEq, Debug)]
 pub struct Etiket {
     pub göster: bool,
+    /// Bağlı metnin olay/tooltip hedefini kapatır (`label.silent`). `None`,
+    /// bileşenin resmî otomatik kararını kullanır.
+    pub sessiz: Option<bool>,
     pub konum: EtiketKonumu,
     /// Ana şekille hesaplanan konuma eklenen piksel kayması
     /// (`label.offset: [x, y]`).
@@ -615,6 +618,7 @@ impl Default for Etiket {
     fn default() -> Self {
         Self {
             göster: false,
+            sessiz: None,
             // zrender bağlı metin öntanımlısıdır. Line/Pie/Funnel gibi
             // seriler kendi resmi konum öntanımlarını seri modelinde koyar.
             konum: EtiketKonumu::İç,
@@ -646,6 +650,11 @@ impl Etiket {
 
     pub fn göster(mut self, göster: bool) -> Self {
         self.göster = göster;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = Some(sessiz);
         self
     }
 

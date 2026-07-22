@@ -58,10 +58,11 @@ pub use cizim::pencere::GrafikGörünümü;
 #[cfg(feature = "png")]
 pub use cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use cizim::{
-    AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, OdakKapsamı, Sahne, SahneDüğümü,
-    SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti,
-    SahneŞekli, SihirliSeriTürü, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar,
-    yolu_dönüştür, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
+    AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü,
+    MatrisHücreBölgesi, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
+    SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SihirliSeriTürü,
+    SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
+    İsabetBölgesi, İsabetGeometrisi,
 };
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
@@ -107,6 +108,7 @@ pub use model::kutupsal::KutupsalKoordinat;
 pub use model::matris::{
     MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
     MatrisEtiketiBiçimleyicisi, MatrisGövdeHücresi, MatrisKonumu, MatrisKoordinatı,
+    MatrisİpucuBağlamı, MatrisİpucuBiçimleyicisi,
 };
 pub use model::radar::{
     RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri, RadarŞekli,
@@ -179,10 +181,10 @@ pub mod hazir {
     #[cfg(feature = "png")]
     pub use crate::cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
     pub use crate::cizim::{
-        AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, OdakKapsamı, Sahne,
-        SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
-        Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar,
-        yolu_dönüştür, ÇizimYüzeyi,
+        AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü,
+        MatrisHücreBölgesi, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
+        SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi,
+        YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
     };
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
@@ -228,6 +230,7 @@ pub mod hazir {
     pub use crate::model::matris::{
         MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
         MatrisEtiketiBiçimleyicisi, MatrisGövdeHücresi, MatrisKonumu, MatrisKoordinatı,
+        MatrisİpucuBağlamı, MatrisİpucuBiçimleyicisi,
     };
     pub use crate::model::radar::{
         RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri,

@@ -264,6 +264,28 @@ impl GrafikÖğesi {
         self
     }
 
+    /// Serbest `graphic` metninin CSS `fontFamily` değeri.
+    pub fn yazı_ailesi(mut self, aile: impl Into<String>) -> Self {
+        if let GrafikÖğeİçeriği::Metin(metin) = &mut self.içerik {
+            metin.aile = Some(aile.into());
+        }
+        self
+    }
+
+    /// Serbest `graphic` metninin `textAlign` ve `textVerticalAlign`
+    /// değerleri.
+    pub fn yazı_hizası(
+        mut self,
+        yatay: crate::cizim::YatayHiza,
+        dikey: crate::cizim::DikeyHiza,
+    ) -> Self {
+        if let GrafikÖğeİçeriği::Metin(metin) = &mut self.içerik {
+            metin.yatay = yatay;
+            metin.dikey = dikey;
+        }
+        self
+    }
+
     fn yoksaymayı_ayarla(&mut self, kimlik: &str, yoksay: bool) -> bool {
         if self.kimlik.as_deref() == Some(kimlik) {
             self.yoksay = yoksay;

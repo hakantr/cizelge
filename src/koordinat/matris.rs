@@ -31,6 +31,7 @@ pub struct MatrisHücreYerleşimi {
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
     pub etiket_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    pub imleç: Option<String>,
     pub sessiz: bool,
     pub z2: i32,
 }
@@ -45,6 +46,7 @@ struct BoyutDüğümü {
     öğe_stili: Option<ÖğeStili>,
     etiket: Option<Etiket>,
     etiket_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    imleç: Option<String>,
     sessiz: Option<bool>,
     z2: Option<i32>,
 }
@@ -250,16 +252,21 @@ impl MatrisYerleşimi {
             let Some(kutu) = x_başlık_kutusu(&self.x, düğüm) else {
                 continue;
             };
+            let öğe_stili = düğüm
+                .öğe_stili
+                .clone()
+                .unwrap_or_else(|| seçenek.x.öğe_stili.clone());
+            let sessiz = düğüm
+                .sessiz
+                .or(seçenek.x.sessiz)
+                .unwrap_or(öğe_stili.renk.is_none());
             self.hücreler.push(MatrisHücreYerleşimi {
                 tür: MatrisHücreTürü::XBaşlığı,
                 değer: Some(düğüm.değer.clone()),
                 kutu,
                 x_aralığı: [düğüm.başlangıç as isize, düğüm.bitiş as isize],
                 y_aralığı: düğüm_seviye_konumu(düğüm, seviye_sayısı(&self.x)),
-                öğe_stili: düğüm
-                    .öğe_stili
-                    .clone()
-                    .unwrap_or_else(|| seçenek.x.öğe_stili.clone()),
+                öğe_stili,
                 etiket: düğüm
                     .etiket
                     .clone()
@@ -268,7 +275,8 @@ impl MatrisYerleşimi {
                     .etiket_bağlamlı_biçimleyici
                     .clone()
                     .or_else(|| seçenek.x.etiket_bağlamlı_biçimleyici.clone()),
-                sessiz: düğüm.sessiz.or(seçenek.x.sessiz).unwrap_or(true),
+                imleç: düğüm.imleç.clone().or_else(|| seçenek.x.imleç.clone()),
+                sessiz,
                 z2: düğüm.z2.or(seçenek.x.z2).unwrap_or(50),
             });
         }
@@ -279,16 +287,21 @@ impl MatrisYerleşimi {
             let Some(kutu) = y_başlık_kutusu(&self.y, düğüm) else {
                 continue;
             };
+            let öğe_stili = düğüm
+                .öğe_stili
+                .clone()
+                .unwrap_or_else(|| seçenek.y.öğe_stili.clone());
+            let sessiz = düğüm
+                .sessiz
+                .or(seçenek.y.sessiz)
+                .unwrap_or(öğe_stili.renk.is_none());
             self.hücreler.push(MatrisHücreYerleşimi {
                 tür: MatrisHücreTürü::YBaşlığı,
                 değer: Some(düğüm.değer.clone()),
                 kutu,
                 x_aralığı: düğüm_seviye_konumu(düğüm, seviye_sayısı(&self.y)),
                 y_aralığı: [düğüm.başlangıç as isize, düğüm.bitiş as isize],
-                öğe_stili: düğüm
-                    .öğe_stili
-                    .clone()
-                    .unwrap_or_else(|| seçenek.y.öğe_stili.clone()),
+                öğe_stili,
                 etiket: düğüm
                     .etiket
                     .clone()
@@ -297,7 +310,8 @@ impl MatrisYerleşimi {
                     .etiket_bağlamlı_biçimleyici
                     .clone()
                     .or_else(|| seçenek.y.etiket_bağlamlı_biçimleyici.clone()),
-                sessiz: düğüm.sessiz.or(seçenek.y.sessiz).unwrap_or(true),
+                imleç: düğüm.imleç.clone().or_else(|| seçenek.y.imleç.clone()),
+                sessiz,
                 z2: düğüm.z2.or(seçenek.y.z2).unwrap_or(50),
             });
         }
@@ -327,6 +341,14 @@ impl MatrisYerleşimi {
                     özel.insert((xs, ys));
                 }
             }
+            let öğe_stili = hücre
+                .öğe_stili
+                .clone()
+                .unwrap_or_else(|| seçenek.gövde_stili.clone());
+            let sessiz = hücre
+                .sessiz
+                .or(seçenek.gövde_sessiz)
+                .unwrap_or(öğe_stili.renk.is_none());
             self.hücreler.push(MatrisHücreYerleşimi {
                 tür: if hücre.hücreleri_birleştir {
                     MatrisHücreTürü::BirleşikGövde
@@ -337,10 +359,7 @@ impl MatrisYerleşimi {
                 kutu,
                 x_aralığı: [x[0] as isize, x[1] as isize],
                 y_aralığı: [y[0] as isize, y[1] as isize],
-                öğe_stili: hücre
-                    .öğe_stili
-                    .clone()
-                    .unwrap_or_else(|| seçenek.gövde_stili.clone()),
+                öğe_stili,
                 etiket: hücre
                     .etiket
                     .clone()
@@ -349,10 +368,8 @@ impl MatrisYerleşimi {
                     .etiket_bağlamlı_biçimleyici
                     .clone()
                     .or_else(|| seçenek.gövde_etiketi_bağlamlı_biçimleyici.clone()),
-                sessiz: hücre
-                    .sessiz
-                    .or(seçenek.gövde_sessiz)
-                    .unwrap_or(hücre.değer.is_none()),
+                imleç: hücre.imleç.clone().or_else(|| seçenek.gövde_imleci.clone()),
+                sessiz,
                 z2: hücre
                     .z2
                     .or(seçenek.gövde_z2)
@@ -382,7 +399,10 @@ impl MatrisYerleşimi {
                     etiket_bağlamlı_biçimleyici: seçenek
                         .gövde_etiketi_bağlamlı_biçimleyici
                         .clone(),
-                    sessiz: seçenek.gövde_sessiz.unwrap_or(true),
+                    imleç: seçenek.gövde_imleci.clone(),
+                    sessiz: seçenek
+                        .gövde_sessiz
+                        .unwrap_or(seçenek.gövde_stili.renk.is_none()),
                     z2: seçenek.gövde_z2.unwrap_or(25),
                 });
             }
@@ -425,6 +445,14 @@ impl MatrisYerleşimi {
                     özel.insert((xs, ys));
                 }
             }
+            let öğe_stili = hücre
+                .öğe_stili
+                .clone()
+                .unwrap_or_else(|| seçenek.köşe_stili.clone());
+            let sessiz = hücre
+                .sessiz
+                .or(seçenek.köşe_sessiz)
+                .unwrap_or(öğe_stili.renk.is_none());
             self.hücreler.push(MatrisHücreYerleşimi {
                 tür: if hücre.hücreleri_birleştir {
                     MatrisHücreTürü::BirleşikKöşe
@@ -435,10 +463,7 @@ impl MatrisYerleşimi {
                 kutu,
                 x_aralığı: seviye_indeksini_konuma(x, x_seviye),
                 y_aralığı: seviye_indeksini_konuma(y, y_seviye),
-                öğe_stili: hücre
-                    .öğe_stili
-                    .clone()
-                    .unwrap_or_else(|| seçenek.köşe_stili.clone()),
+                öğe_stili,
                 etiket: hücre
                     .etiket
                     .clone()
@@ -447,10 +472,8 @@ impl MatrisYerleşimi {
                     .etiket_bağlamlı_biçimleyici
                     .clone()
                     .or_else(|| seçenek.köşe_etiketi_bağlamlı_biçimleyici.clone()),
-                sessiz: hücre
-                    .sessiz
-                    .or(seçenek.köşe_sessiz)
-                    .unwrap_or(hücre.değer.is_none()),
+                imleç: hücre.imleç.clone().or_else(|| seçenek.köşe_imleci.clone()),
+                sessiz,
                 z2: hücre
                     .z2
                     .or(seçenek.köşe_z2)
@@ -480,7 +503,10 @@ impl MatrisYerleşimi {
                     etiket_bağlamlı_biçimleyici: seçenek
                         .köşe_etiketi_bağlamlı_biçimleyici
                         .clone(),
-                    sessiz: seçenek.köşe_sessiz.unwrap_or(true),
+                    imleç: seçenek.köşe_imleci.clone(),
+                    sessiz: seçenek
+                        .köşe_sessiz
+                        .unwrap_or(seçenek.köşe_stili.renk.is_none()),
                     z2: seçenek.köşe_z2.unwrap_or(25),
                 });
             }
@@ -580,6 +606,7 @@ fn düğümü_düzleştir(
         öğe_stili: hücre.öğe_stili.clone(),
         etiket: hücre.etiket.clone(),
         etiket_bağlamlı_biçimleyici: hücre.etiket_bağlamlı_biçimleyici.clone(),
+        imleç: hücre.imleç.clone(),
         sessiz: hücre.sessiz,
         z2: hücre.z2,
     });
@@ -964,6 +991,7 @@ fn birleşik_aralığı_genişlet(
 mod testler {
     use super::*;
     use crate::model::matris::{MatrisBoyutHücresi, MatrisGövdeHücresi};
+    use crate::model::stil::ÖğeStili;
 
     #[test]
     fn flat_matrix_data_point_layout_roundtrip() {
@@ -1106,5 +1134,66 @@ mod testler {
         assert!(yer.hücreler.iter().any(|hücre| {
             hücre.değer.as_deref() == Some("B") && hücre.x_aralığı == [1, 1]
         }));
+    }
+
+    #[test]
+    fn cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur() {
+        let seçenek = MatrisKoordinatı::yeni()
+            .x(MatrisBoyutu::yeni()
+                .imleç("pointer")
+                .öğe_stili(ÖğeStili::yeni().renk(0x112233))
+                .veri([
+                    MatrisBoyutHücresi::yeni("A"),
+                    MatrisBoyutHücresi::yeni("B")
+                        .imleç("crosshair")
+                        .sessiz(true),
+                ]))
+            .y(MatrisBoyutu::yeni().veri(["Y"]))
+            .gövde_hücresi(
+                MatrisGövdeHücresi::yeni("A", "Y")
+                    .değer("dolgulu")
+                    .öğe_stili(ÖğeStili::yeni().renk(0xaabbcc))
+                    .imleç("copy"),
+            )
+            .gövde_hücresi(MatrisGövdeHücresi::yeni("B", "Y").değer("dolgusuz"));
+        let yer = MatrisYerleşimi::kur(&seçenek, (400.0, 300.0), (0, 0)).unwrap();
+
+        let a = yer
+            .hücreler
+            .iter()
+            .find(|hücre| {
+                hücre.tür == MatrisHücreTürü::XBaşlığı && hücre.değer.as_deref() == Some("A")
+            })
+            .unwrap();
+        assert_eq!(a.imleç.as_deref(), Some("pointer"));
+        assert!(!a.sessiz, "dolgulu rect varsayılan olarak etkileşimli");
+
+        let b = yer
+            .hücreler
+            .iter()
+            .find(|hücre| {
+                hücre.tür == MatrisHücreTürü::XBaşlığı && hücre.değer.as_deref() == Some("B")
+            })
+            .unwrap();
+        assert_eq!(b.imleç.as_deref(), Some("crosshair"));
+        assert!(b.sessiz, "hücre silent üst modeli geçersiz kılar");
+
+        let dolgulu = yer
+            .hücreler
+            .iter()
+            .find(|hücre| hücre.değer.as_deref() == Some("dolgulu"))
+            .unwrap();
+        assert_eq!(dolgulu.imleç.as_deref(), Some("copy"));
+        assert!(!dolgulu.sessiz);
+
+        let dolgusuz = yer
+            .hücreler
+            .iter()
+            .find(|hücre| hücre.değer.as_deref() == Some("dolgusuz"))
+            .unwrap();
+        assert!(
+            dolgusuz.sessiz,
+            "yalnız kenarlığı olan rect, metni olsa da varsayılan silent kalmalı"
+        );
     }
 }

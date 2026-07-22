@@ -12859,17 +12859,29 @@
     "ts_türü": "ItemStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::arkaplan_stili)",
+    "veri_biçimleri": [
+      "ÖğeStili"
+    ],
+    "koordinat_dalları": [
+      "dolgu",
+      "dış-kenarlık",
+      "yuvarlak-köşe"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 43,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a019bcee2ca5899b2faf",
@@ -12880,17 +12892,30 @@
     "ts_türü": "MatrixBodyOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::gövde_hücresi/gövde_stili/gövde_etiketi/gövde_sessiz/gövde_z2)",
+    "veri_biçimleri": [
+      "MatrisGövdeHücresi[]",
+      "üst-model hücre stili"
+    ],
+    "koordinat_dalları": [
+      "varsayılan-hücre",
+      "özel-hücre",
+      "birleşik-hücre"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 40,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::hierarchy_size_and_merged_cells"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-confusion",
+      "matrix-periodic-table"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "11e7955f1c285edebd63",
@@ -12901,17 +12926,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::kenarlık_z2)",
+    "veri_biçimleri": [
+      "i32"
+    ],
+    "koordinat_dalları": [
+      "hücre-altı",
+      "dış-sınır",
+      "özel-hücre-üstü"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 45,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-confusion"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0e4cc9f553208434d0e2",
@@ -12922,17 +12958,31 @@
     "ts_türü": "MatrixDimensionCellOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutHücresi::çocuk, MatrisBoyutHücresi::çocuklar)",
+    "veri_biçimleri": [
+      "MatrisBoyutHücresi[]"
+    ],
+    "koordinat_dalları": [
+      "yaprak",
+      "dal",
+      "dengesiz-derinlik",
+      "ordinal-aralık"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 182,
       "sembol": "MatrixDimensionCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::hierarchy_size_and_merged_cells",
+      "koordinat::matris::testler::shallow_leaf_spans_remaining_header_levels"
+    ],
+    "galeri_örnekleri": [
+      "matrix-grid-layout",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a6a4e1b46a74db10b771",
@@ -12943,17 +12993,36 @@
     "ts_türü": "MatrixCoordRangeOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKonumu, MatrisAralığı, MatrisGövdeHücresi::yeni)",
+    "veri_biçimleri": [
+      "index",
+      "ordinal value",
+      "[start,end]",
+      "all",
+      "negatif locator"
+    ],
+    "koordinat_dalları": [
+      "tek-hücre",
+      "satır/sütun",
+      "dikdörtgen-aralık",
+      "başlık",
+      "köşe"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 143,
       "sembol": "MatrixBodyCornerCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip",
+      "koordinat::matris::testler::corner_negative_locator_and_point_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-periodic-table",
+      "matrix-mbti",
+      "matrix-mini-bar-data-collection"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7f10a150946f50a529f7",
@@ -12964,17 +13033,29 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisGövdeHücresi::koordinatı_sınırla)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "body",
+      "corner",
+      "geçersiz-uç",
+      "tüm-boyut"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 153,
       "sembol": "MatrixBodyCornerCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::explicit_size_center_and_coord_clamp"
+    ],
+    "galeri_örnekleri": [
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f2e971973d50a517fec4",
@@ -12985,17 +13066,30 @@
     "ts_türü": "MatrixCornerOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::köşe_hücresi/köşe_stili/köşe_etiketi/köşe_sessiz/köşe_z2)",
+    "veri_biçimleri": [
+      "MatrisGövdeHücresi[]",
+      "negatif MatrixXYLocator"
+    ],
+    "koordinat_dalları": [
+      "varsayılan-köşe",
+      "özel-köşe",
+      "birleşik-köşe"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 41,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::corner_negative_locator_and_point_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-grid-layout",
+      "matrix-mbti",
+      "matrix-periodic-table"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a7c60d5af2ba624f83a0",
@@ -13006,17 +13100,29 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (imleç/gövde_imleci/köşe_imleci); src/cizim/pencere.rs (gpui_imleci)",
+    "veri_biçimleri": [
+      "CSS cursor string"
+    ],
+    "koordinat_dalları": [
+      "üst-model-mirası",
+      "hücre-yaması",
+      "gpui CursorStyle"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 228,
       "sembol": "MatrixCellStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur",
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "872c0cbf9801b42fdb69",
@@ -13027,17 +13133,33 @@
     "ts_türü": "MatrixBodyCornerCellOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::veri; MatrisKoordinatı::gövde_hücresi/köşe_hücresi)",
+    "veri_biçimleri": [
+      "string[]",
+      "MatrisBoyutHücresi[]",
+      "MatrisGövdeHücresi[]"
+    ],
+    "koordinat_dalları": [
+      "dimension-data",
+      "body-data",
+      "corner-data",
+      "seri-kategori-toplama"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 109,
       "sembol": "MatrixBodyCornerBaseOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip",
+      "koordinat::matris::testler::corner_negative_locator_and_point_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-periodic-table",
+      "matrix-mini-bar-data-collection"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c60d32d647e29f3e33fc",
@@ -13048,17 +13170,33 @@
     "ts_türü": "MatrixDimensionCellLooseOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::veri; MatrisKoordinatı::gövde_hücresi/köşe_hücresi)",
+    "veri_biçimleri": [
+      "string[]",
+      "MatrisBoyutHücresi[]",
+      "MatrisGövdeHücresi[]"
+    ],
+    "koordinat_dalları": [
+      "dimension-data",
+      "body-data",
+      "corner-data",
+      "seri-kategori-toplama"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 161,
       "sembol": "MatrixDimensionOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip",
+      "koordinat::matris::testler::corner_negative_locator_and_point_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-periodic-table",
+      "matrix-mini-bar-data-collection"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2c8beabd8720aa5188af",
@@ -13069,17 +13207,29 @@
     "ts_türü": "LineStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::ayırıcı)",
+    "veri_biçimleri": [
+      "ÇizgiStili"
+    ],
+    "koordinat_dalları": [
+      "x-ayırıcı",
+      "y-ayırıcı",
+      "borderZ2-altı"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 168,
       "sembol": "MatrixDimensionOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::yapraklar_ve_karsi_baslik_seviyesi_ayni_fiziksel_boyutu_paylasir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-grid-layout",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a7793152d1cf656869fb",
@@ -13090,17 +13240,32 @@
     "ts_türü": "string | ((params: MatrixLabelFormatterParams) => string)",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisEtiketiBiçimleyicisi; etiket_bağlamlı_biçimleyici)",
+    "veri_biçimleri": [
+      "template string",
+      "callback(MatrisEtiketiBağlamı)"
+    ],
+    "koordinat_dalları": [
+      "x",
+      "y",
+      "body",
+      "corner",
+      "name/value/coord"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 200,
       "sembol": "MatrixLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-confusion",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "357073bf6153bd34f8c0",
@@ -13111,17 +13276,32 @@
     "ts_türü": "ItemStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutHücresi/MatrisBoyutu/MatrisGövdeHücresi öğe_stili; gövde/köşe_stili)",
+    "veri_biçimleri": [
+      "ÖğeStili"
+    ],
+    "koordinat_dalları": [
+      "üst-model",
+      "hücre-yaması",
+      "dolgu",
+      "kenarlık",
+      "desen"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 227,
       "sembol": "MatrixCellStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur",
+      "bilesen::matris_cizimi::testler::label_silent_ve_item_style_opacity_shadow_border_type_uygulanir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-confusion",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "91f60581e42a729417fa",
@@ -13132,17 +13312,35 @@
     "ts_türü": "MatrixLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutHücresi/MatrisBoyutu/MatrisGövdeHücresi etiket; gövde/köşe_etiketi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "YazıStili",
+      "padding",
+      "overflow-break/truncate"
+    ],
+    "koordinat_dalları": [
+      "üst-model",
+      "hücre-yaması",
+      "sarım",
+      "kırpma",
+      "çok-satır"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 226,
       "sembol": "MatrixCellStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir",
+      "bilesen::matris_cizimi::testler::label_silent_ve_item_style_opacity_shadow_border_type_uygulanir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-confusion",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "76953f7fecac7fcc2133",
@@ -13153,17 +13351,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::uzunluk)",
+    "veri_biçimleri": [
+      "usize"
+    ],
+    "koordinat_dalları": [
+      "data-yok",
+      "data-öncelikli",
+      "seri-yedeği"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 164,
       "sembol": "MatrixDimensionOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::length_fallback_and_invalid_duplicate"
+    ],
+    "galeri_örnekleri": [
+      "matrix-correlation-heatmap",
+      "matrix-covariance"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0f75c22ac87e03f58996",
@@ -13174,17 +13383,29 @@
     "ts_türü": "(MatrixDimensionLevelOption | NullUndefined)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::seviye_boyutları)",
+    "veri_biçimleri": [
+      "Vec<Option<Uzunluk>>"
+    ],
+    "koordinat_dalları": [
+      "x-seviyeleri",
+      "y-seviyeleri",
+      "null-seviye",
+      "açık-levelSize"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 167,
       "sembol": "MatrixDimensionOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::shallow_leaf_spans_remaining_header_levels"
+    ],
+    "galeri_örnekleri": [
+      "matrix-grid-layout",
+      "matrix-periodic-table"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f9cd0b76f259926d506c",
@@ -13195,17 +13416,31 @@
     "ts_türü": "PositionSizeOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::seviye_boyutu, MatrisBoyutu::seviye_boyutları)",
+    "veri_biçimleri": [
+      "number",
+      "percent",
+      "auto/None"
+    ],
+    "koordinat_dalları": [
+      "varsayılan-seviye",
+      "seviye-yaması",
+      "karşı-boyut-paylaşımı"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 192,
       "sembol": "MatrixDimensionLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::yapraklar_ve_karsi_baslik_seviyesi_ayni_fiziksel_boyutu_paylasir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-grid-layout",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ad6270bd159518ac4bbd",
@@ -13216,17 +13451,30 @@
     "ts_türü": "'matrix'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/secenekler.rs (Seçenekler::matris, Seçenekler::matris_ekle, Seçenekler::tüm_matrisler)",
+    "veri_biçimleri": [
+      "MatrisKoordinatı",
+      "Vec<MatrisKoordinatı>"
+    ],
+    "koordinat_dalları": [
+      "tek-matrix",
+      "çoklu-matrix",
+      "matrixIndex"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 37,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::secenekler::testler::matrixe_bagli_baslik_ve_izgara_index_ile_koordinati_birlikte_dogrular"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-grid-layout",
+      "matrix-correlation-heatmap"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "998719e4d813caefca32",
@@ -13237,17 +13485,30 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisGövdeHücresi::birleştir)",
+    "veri_biçimleri": [
+      "bool",
+      "MatrisAralığı"
+    ],
+    "koordinat_dalları": [
+      "body",
+      "corner",
+      "dataToLayout-genişletme"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 155,
       "sembol": "MatrixBodyCornerCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::hierarchy_size_and_merged_cells"
+    ],
+    "galeri_örnekleri": [
+      "matrix-grid-layout",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8c818809348ed15d5110",
@@ -13258,17 +13519,30 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu::göster)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "x-gizli",
+      "y-gizli",
+      "köşe-bastırma",
+      "gövdeyi-genişletme"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 160,
       "sembol": "MatrixDimensionOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::yapraklar_ve_karsi_baslik_seviyesi_ayni_fiziksel_boyutu_paylasir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-correlation-scatter",
+      "matrix-covariance",
+      "matrix-stock"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0997d1f9d6990733a5ff",
@@ -13279,17 +13553,32 @@
     "ts_türü": "boolean | NullUndefined",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (sessiz/gövde_sessiz/köşe_sessiz); src/koordinat/matris.rs (dolguya bağlı varsayılan)",
+    "veri_biçimleri": [
+      "bool",
+      "null/otomatik"
+    ],
+    "koordinat_dalları": [
+      "dolgulu-rect",
+      "dolgusuz-rect",
+      "üst-model",
+      "hücre-yaması",
+      "etiket-hedefi"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 230,
       "sembol": "MatrixCellStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6aa3c1615babc68b7c08",
@@ -13300,17 +13589,30 @@
     "ts_türü": "PositionSizeOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutHücresi::boyut)",
+    "veri_biçimleri": [
+      "number",
+      "percent",
+      "auto/None"
+    ],
+    "koordinat_dalları": [
+      "x-yaprak-genişliği",
+      "y-yaprak-yüksekliği",
+      "kalanı-eşit-paylaştırma"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 181,
       "sembol": "MatrixDimensionCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::hierarchy_size_and_merged_cells"
+    ],
+    "galeri_örnekleri": [
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7cad27e99f455bd79b9f",
@@ -13321,17 +13623,30 @@
     "ts_türü": "CommonTooltipOption<MatrixTooltipFormatterParams>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::ipucu, MatrisKoordinatı::ipucu_bağlamlı_biçimleyici)",
+    "veri_biçimleri": [
+      "İpucu",
+      "formatter(MatrisİpucuBağlamı)"
+    ],
+    "koordinat_dalları": [
+      "rect-hedefi",
+      "etiket-hedefi",
+      "yerel-formatter"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 46,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir",
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a22cc374eb4b765ee8b8",
@@ -13342,17 +13657,33 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::tetikleme_olayı); src/cizim/olay.rs (GrafikOlayı::MatrisHücresiTıklandı)",
+    "veri_biçimleri": [
+      "bool",
+      "MatrisHedefTürü",
+      "[x,y] MatrixXYLocator"
+    ],
+    "koordinat_dalları": [
+      "x",
+      "y",
+      "body",
+      "corner",
+      "seri-z-sırası"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 47,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-grid-layout"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "201dc3a2a1ad6126ff68",
@@ -13363,17 +13694,27 @@
     "ts_türü": "'category'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutu; ECharts iç invariantı: category)",
+    "veri_biçimleri": [
+      "sabit 'category'"
+    ],
+    "koordinat_dalları": [
+      "ordinal-meta",
+      "index",
+      "string-value"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 159,
       "sembol": "MatrixDimensionOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "00020b0e3c0954be7229",
@@ -13384,17 +13725,31 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutHücresi::yeni; MatrisGövdeHücresi::değer)",
+    "veri_biçimleri": [
+      "String",
+      "null/None"
+    ],
+    "koordinat_dalları": [
+      "dimension-value",
+      "body-value",
+      "corner-value"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 141,
       "sembol": "MatrixBodyCornerCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::length_fallback_and_invalid_duplicate",
+      "koordinat::matris::testler::corner_negative_locator_and_point_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-confusion",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e34b6f9700623270037e",
@@ -13405,17 +13760,31 @@
     "ts_türü": "string | NullUndefined",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisBoyutHücresi::yeni; MatrisGövdeHücresi::değer)",
+    "veri_biçimleri": [
+      "String",
+      "null/None"
+    ],
+    "koordinat_dalları": [
+      "dimension-value",
+      "body-value",
+      "corner-value"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 176,
       "sembol": "MatrixDimensionCellOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::length_fallback_and_invalid_duplicate",
+      "koordinat::matris::testler::corner_negative_locator_and_point_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-confusion",
+      "matrix-periodic-table",
+      "matrix-mbti"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7e02a19194479cfde7fd",
@@ -13426,17 +13795,29 @@
     "ts_türü": "MatrixDimensionOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::x, MatrisBoyutu)",
+    "veri_biçimleri": [
+      "MatrisBoyutu"
+    ],
+    "koordinat_dalları": [
+      "başlık",
+      "hiyerarşik-başlık",
+      "gizli-başlık"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 38,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-grid-layout",
+      "matrix-periodic-table"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "db3508e3db059a0ee524",
@@ -13447,17 +13828,29 @@
     "ts_türü": "MatrixDimensionOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (MatrisKoordinatı::y, MatrisBoyutu)",
+    "veri_biçimleri": [
+      "MatrisBoyutu"
+    ],
+    "koordinat_dalları": [
+      "başlık",
+      "hiyerarşik-başlık",
+      "gizli-başlık"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 39,
       "sembol": "MatrixOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip"
+    ],
+    "galeri_örnekleri": [
+      "matrix-simple",
+      "matrix-mbti",
+      "matrix-covariance"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "747698fef626efcab32c",
@@ -13468,17 +13861,29 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/matris.rs (z2/gövde_z2/köşe_z2)",
+    "veri_biçimleri": [
+      "i32"
+    ],
+    "koordinat_dalları": [
+      "dimension-default-50",
+      "body-default-25",
+      "special-default-100",
+      "borderZ2"
+    ],
     "kaynak": {
       "dosya": "src/coord/matrix/MatrixModel.ts",
       "satır": 232,
       "sembol": "MatrixCellStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir"
+    ],
+    "galeri_örnekleri": [
+      "matrix-confusion",
+      "matrix-periodic-table"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f7a3eef27e89e4a71e61",

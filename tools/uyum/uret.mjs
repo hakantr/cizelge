@@ -158,6 +158,232 @@ const CALENDAR_OPTION_KANITI = Object.freeze({
   }
 });
 
+const MATRIX_OPTION_KANITI = Object.freeze({
+  mainType: {
+    api: 'src/model/secenekler.rs (Seçenekler::matris, Seçenekler::matris_ekle, Seçenekler::tüm_matrisler)',
+    testler: ['model::secenekler::testler::matrixe_bagli_baslik_ve_izgara_index_ile_koordinati_birlikte_dogrular'],
+    örnekler: ['matrix-simple', 'matrix-grid-layout', 'matrix-correlation-heatmap'],
+    veri_biçimleri: ['MatrisKoordinatı', 'Vec<MatrisKoordinatı>'],
+    dallar: ['tek-matrix', 'çoklu-matrix', 'matrixIndex']
+  },
+  x: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::x, MatrisBoyutu)',
+    testler: ['koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip'],
+    örnekler: ['matrix-simple', 'matrix-grid-layout', 'matrix-periodic-table'],
+    veri_biçimleri: ['MatrisBoyutu'],
+    dallar: ['başlık', 'hiyerarşik-başlık', 'gizli-başlık']
+  },
+  y: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::y, MatrisBoyutu)',
+    testler: ['koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip'],
+    örnekler: ['matrix-simple', 'matrix-mbti', 'matrix-covariance'],
+    veri_biçimleri: ['MatrisBoyutu'],
+    dallar: ['başlık', 'hiyerarşik-başlık', 'gizli-başlık']
+  },
+  body: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::gövde_hücresi/gövde_stili/gövde_etiketi/gövde_sessiz/gövde_z2)',
+    testler: ['koordinat::matris::testler::hierarchy_size_and_merged_cells'],
+    örnekler: ['matrix-simple', 'matrix-confusion', 'matrix-periodic-table'],
+    veri_biçimleri: ['MatrisGövdeHücresi[]', 'üst-model hücre stili'],
+    dallar: ['varsayılan-hücre', 'özel-hücre', 'birleşik-hücre']
+  },
+  corner: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::köşe_hücresi/köşe_stili/köşe_etiketi/köşe_sessiz/köşe_z2)',
+    testler: ['koordinat::matris::testler::corner_negative_locator_and_point_roundtrip'],
+    örnekler: ['matrix-grid-layout', 'matrix-mbti', 'matrix-periodic-table'],
+    veri_biçimleri: ['MatrisGövdeHücresi[]', 'negatif MatrixXYLocator'],
+    dallar: ['varsayılan-köşe', 'özel-köşe', 'birleşik-köşe']
+  },
+  backgroundStyle: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::arkaplan_stili)',
+    testler: ['bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir'],
+    örnekler: ['matrix-simple', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['ÖğeStili'],
+    dallar: ['dolgu', 'dış-kenarlık', 'yuvarlak-köşe']
+  },
+  borderZ2: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::kenarlık_z2)',
+    testler: ['bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir'],
+    örnekler: ['matrix-simple', 'matrix-confusion'],
+    veri_biçimleri: ['i32'],
+    dallar: ['hücre-altı', 'dış-sınır', 'özel-hücre-üstü']
+  },
+  tooltip: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::ipucu, MatrisKoordinatı::ipucu_bağlamlı_biçimleyici)',
+    testler: [
+      'cizim::gorunum::yakınlaştırma_yönü_testleri::matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir',
+      'bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir'
+    ],
+    örnekler: ['matrix-simple', 'matrix-mbti'],
+    veri_biçimleri: ['İpucu', 'formatter(MatrisİpucuBağlamı)'],
+    dallar: ['rect-hedefi', 'etiket-hedefi', 'yerel-formatter']
+  },
+  triggerEvent: {
+    api: 'src/model/matris.rs (MatrisKoordinatı::tetikleme_olayı); src/cizim/olay.rs (GrafikOlayı::MatrisHücresiTıklandı)',
+    testler: [
+      'bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir',
+      'cizim::gorunum::yakınlaştırma_yönü_testleri::matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir'
+    ],
+    örnekler: ['matrix-simple', 'matrix-grid-layout'],
+    veri_biçimleri: ['bool', 'MatrisHedefTürü', '[x,y] MatrixXYLocator'],
+    dallar: ['x', 'y', 'body', 'corner', 'seri-z-sırası']
+  },
+  data: {
+    api: 'src/model/matris.rs (MatrisBoyutu::veri; MatrisKoordinatı::gövde_hücresi/köşe_hücresi)',
+    testler: [
+      'koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip',
+      'koordinat::matris::testler::corner_negative_locator_and_point_roundtrip'
+    ],
+    örnekler: ['matrix-simple', 'matrix-periodic-table', 'matrix-mini-bar-data-collection'],
+    veri_biçimleri: ['string[]', 'MatrisBoyutHücresi[]', 'MatrisGövdeHücresi[]'],
+    dallar: ['dimension-data', 'body-data', 'corner-data', 'seri-kategori-toplama']
+  },
+  value: {
+    api: 'src/model/matris.rs (MatrisBoyutHücresi::yeni; MatrisGövdeHücresi::değer)',
+    testler: [
+      'koordinat::matris::testler::length_fallback_and_invalid_duplicate',
+      'koordinat::matris::testler::corner_negative_locator_and_point_roundtrip'
+    ],
+    örnekler: ['matrix-confusion', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['String', 'null/None'],
+    dallar: ['dimension-value', 'body-value', 'corner-value']
+  },
+  coord: {
+    api: 'src/model/matris.rs (MatrisKonumu, MatrisAralığı, MatrisGövdeHücresi::yeni)',
+    testler: [
+      'koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip',
+      'koordinat::matris::testler::corner_negative_locator_and_point_roundtrip'
+    ],
+    örnekler: ['matrix-periodic-table', 'matrix-mbti', 'matrix-mini-bar-data-collection'],
+    veri_biçimleri: ['index', 'ordinal value', '[start,end]', 'all', 'negatif locator'],
+    dallar: ['tek-hücre', 'satır/sütun', 'dikdörtgen-aralık', 'başlık', 'köşe']
+  },
+  coordClamp: {
+    api: 'src/model/matris.rs (MatrisGövdeHücresi::koordinatı_sınırla)',
+    testler: ['koordinat::matris::testler::explicit_size_center_and_coord_clamp'],
+    örnekler: ['matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['bool'],
+    dallar: ['body', 'corner', 'geçersiz-uç', 'tüm-boyut']
+  },
+  mergeCells: {
+    api: 'src/model/matris.rs (MatrisGövdeHücresi::birleştir)',
+    testler: ['koordinat::matris::testler::hierarchy_size_and_merged_cells'],
+    örnekler: ['matrix-grid-layout', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['bool', 'MatrisAralığı'],
+    dallar: ['body', 'corner', 'dataToLayout-genişletme']
+  },
+  show: {
+    api: 'src/model/matris.rs (MatrisBoyutu::göster)',
+    testler: ['koordinat::matris::testler::yapraklar_ve_karsi_baslik_seviyesi_ayni_fiziksel_boyutu_paylasir'],
+    örnekler: ['matrix-correlation-scatter', 'matrix-covariance', 'matrix-stock'],
+    veri_biçimleri: ['bool'],
+    dallar: ['x-gizli', 'y-gizli', 'köşe-bastırma', 'gövdeyi-genişletme']
+  },
+  length: {
+    api: 'src/model/matris.rs (MatrisBoyutu::uzunluk)',
+    testler: ['koordinat::matris::testler::length_fallback_and_invalid_duplicate'],
+    örnekler: ['matrix-correlation-heatmap', 'matrix-covariance'],
+    veri_biçimleri: ['usize'],
+    dallar: ['data-yok', 'data-öncelikli', 'seri-yedeği']
+  },
+  children: {
+    api: 'src/model/matris.rs (MatrisBoyutHücresi::çocuk, MatrisBoyutHücresi::çocuklar)',
+    testler: [
+      'koordinat::matris::testler::hierarchy_size_and_merged_cells',
+      'koordinat::matris::testler::shallow_leaf_spans_remaining_header_levels'
+    ],
+    örnekler: ['matrix-grid-layout', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['MatrisBoyutHücresi[]'],
+    dallar: ['yaprak', 'dal', 'dengesiz-derinlik', 'ordinal-aralık']
+  },
+  size: {
+    api: 'src/model/matris.rs (MatrisBoyutHücresi::boyut)',
+    testler: ['koordinat::matris::testler::hierarchy_size_and_merged_cells'],
+    örnekler: ['matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['number', 'percent', 'auto/None'],
+    dallar: ['x-yaprak-genişliği', 'y-yaprak-yüksekliği', 'kalanı-eşit-paylaştırma']
+  },
+  levels: {
+    api: 'src/model/matris.rs (MatrisBoyutu::seviye_boyutları)',
+    testler: ['koordinat::matris::testler::shallow_leaf_spans_remaining_header_levels'],
+    örnekler: ['matrix-grid-layout', 'matrix-periodic-table'],
+    veri_biçimleri: ['Vec<Option<Uzunluk>>'],
+    dallar: ['x-seviyeleri', 'y-seviyeleri', 'null-seviye', 'açık-levelSize']
+  },
+  levelSize: {
+    api: 'src/model/matris.rs (MatrisBoyutu::seviye_boyutu, MatrisBoyutu::seviye_boyutları)',
+    testler: ['koordinat::matris::testler::yapraklar_ve_karsi_baslik_seviyesi_ayni_fiziksel_boyutu_paylasir'],
+    örnekler: ['matrix-grid-layout', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['number', 'percent', 'auto/None'],
+    dallar: ['varsayılan-seviye', 'seviye-yaması', 'karşı-boyut-paylaşımı']
+  },
+  dividerLineStyle: {
+    api: 'src/model/matris.rs (MatrisBoyutu::ayırıcı)',
+    testler: ['koordinat::matris::testler::yapraklar_ve_karsi_baslik_seviyesi_ayni_fiziksel_boyutu_paylasir'],
+    örnekler: ['matrix-simple', 'matrix-grid-layout', 'matrix-mbti'],
+    veri_biçimleri: ['ÇizgiStili'],
+    dallar: ['x-ayırıcı', 'y-ayırıcı', 'borderZ2-altı']
+  },
+  itemStyle: {
+    api: 'src/model/matris.rs (MatrisBoyutHücresi/MatrisBoyutu/MatrisGövdeHücresi öğe_stili; gövde/köşe_stili)',
+    testler: [
+      'koordinat::matris::testler::cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur',
+      'bilesen::matris_cizimi::testler::label_silent_ve_item_style_opacity_shadow_border_type_uygulanir'
+    ],
+    örnekler: ['matrix-confusion', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['ÖğeStili'],
+    dallar: ['üst-model', 'hücre-yaması', 'dolgu', 'kenarlık', 'desen']
+  },
+  label: {
+    api: 'src/model/matris.rs (MatrisBoyutHücresi/MatrisBoyutu/MatrisGövdeHücresi etiket; gövde/köşe_etiketi)',
+    testler: [
+      'bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir',
+      'bilesen::matris_cizimi::testler::label_silent_ve_item_style_opacity_shadow_border_type_uygulanir'
+    ],
+    örnekler: ['matrix-confusion', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['Etiket', 'YazıStili', 'padding', 'overflow-break/truncate'],
+    dallar: ['üst-model', 'hücre-yaması', 'sarım', 'kırpma', 'çok-satır']
+  },
+  formatter: {
+    api: 'src/model/matris.rs (MatrisEtiketiBiçimleyicisi; etiket_bağlamlı_biçimleyici)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir'],
+    örnekler: ['matrix-confusion', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['template string', 'callback(MatrisEtiketiBağlamı)'],
+    dallar: ['x', 'y', 'body', 'corner', 'name/value/coord']
+  },
+  cursor: {
+    api: 'src/model/matris.rs (imleç/gövde_imleci/köşe_imleci); src/cizim/pencere.rs (gpui_imleci)',
+    testler: [
+      'koordinat::matris::testler::cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur',
+      'bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir'
+    ],
+    örnekler: ['matrix-simple', 'matrix-mbti'],
+    veri_biçimleri: ['CSS cursor string'],
+    dallar: ['üst-model-mirası', 'hücre-yaması', 'gpui CursorStyle']
+  },
+  silent: {
+    api: 'src/model/matris.rs (sessiz/gövde_sessiz/köşe_sessiz); src/koordinat/matris.rs (dolguya bağlı varsayılan)',
+    testler: ['koordinat::matris::testler::cursor_mirası_ve_rect_silent_dolgudan_resmi_kuralla_cozulur'],
+    örnekler: ['matrix-simple', 'matrix-periodic-table', 'matrix-mbti'],
+    veri_biçimleri: ['bool', 'null/otomatik'],
+    dallar: ['dolgulu-rect', 'dolgusuz-rect', 'üst-model', 'hücre-yaması', 'etiket-hedefi']
+  },
+  z2: {
+    api: 'src/model/matris.rs (z2/gövde_z2/köşe_z2)',
+    testler: ['bilesen::matris_cizimi::testler::tooltip_trigger_event_ve_cursor_ayri_rect_etiket_hedefleri_uretir'],
+    örnekler: ['matrix-confusion', 'matrix-periodic-table'],
+    veri_biçimleri: ['i32'],
+    dallar: ['dimension-default-50', 'body-default-25', 'special-default-100', 'borderZ2']
+  },
+  type: {
+    api: 'src/model/matris.rs (MatrisBoyutu; ECharts iç invariantı: category)',
+    testler: ['koordinat::matris::testler::flat_matrix_data_point_layout_roundtrip'],
+    örnekler: ['matrix-simple'],
+    veri_biçimleri: ["sabit 'category'"],
+    dallar: ['ordinal-meta', 'index', 'string-value']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -295,6 +521,19 @@ const YEREL_FIXTURE = Object.freeze({
   'calendar-pie': 'examples/uyum_fixture.rs#calendar_pie',
   'custom-calendar-icon': 'examples/uyum_fixture.rs#custom_calendar_icon',
   'calendar-charts': 'examples/uyum_fixture.rs#calendar_charts',
+  'matrix-simple': 'examples/uyum_fixture.rs#matrix_simple',
+  'matrix-correlation-heatmap': 'examples/uyum_fixture.rs#matrix_correlation_heatmap',
+  'matrix-correlation-scatter': 'examples/uyum_fixture.rs#matrix_correlation_scatter',
+  'matrix-covariance': 'examples/uyum_fixture.rs#matrix_covariance',
+  'matrix-graph': 'examples/uyum_fixture.rs#matrix_graph',
+  'matrix-pie': 'examples/uyum_fixture.rs#matrix_pie',
+  'matrix-confusion': 'examples/uyum_fixture.rs#matrix_confusion',
+  'matrix-grid-layout': 'examples/uyum_fixture.rs#matrix_grid_layout',
+  'matrix-stock': 'examples/uyum_fixture.rs#matrix_stock',
+  'matrix-sparkline': 'examples/uyum_fixture.rs#matrix_sparkline',
+  'matrix-periodic-table': 'examples/uyum_fixture.rs#matrix_periodic_table',
+  'matrix-mbti': 'examples/uyum_fixture.rs#matrix_mbti',
+  'matrix-mini-bar-data-collection': 'examples/uyum_fixture.rs#matrix_mini_bar_data_collection',
   'line-marker': 'examples/uyum_fixture.rs#line_marker',
   'grid-multiple': 'examples/uyum_fixture.rs#grid_multiple',
   'intraday-breaks-1': 'examples/uyum_fixture.rs#intraday_breaks_1',
@@ -476,6 +715,10 @@ function görselKanıtlarıOku() {
     const referans = kanıtDosyası(path.join(KÖK, metrik.dosyalar?.referans ?? ''));
     const gerçek = kanıtDosyası(path.join(KÖK, metrik.dosyalar?.gerçek ?? ''));
     const fark = kanıtDosyası(path.join(KÖK, metrik.dosyalar?.fark ?? ''));
+    const tipografiProfili = metrik.tipografi_normalizasyonu ?? null;
+    const normalizeFark = tipografiProfili
+      ? kanıtDosyası(path.join(KÖK, metrik.dosyalar?.normalize_fark ?? ''))
+      : null;
     const kare = {
       ad: metrik.kare,
       senaryo: metrik.senaryo,
@@ -486,10 +729,22 @@ function görselKanıtlarıOku() {
       referans,
       gerçek,
       fark,
+      ...(metrik.ham ? { ham: metrik.ham } : {}),
+      ...(tipografiProfili
+        ? { tipografi_normalizasyonu: tipografiProfili, normalize_fark: normalizeFark }
+        : {}),
       metrik: kanıtDosyası(tam)
     };
     kare.geçti = kare.geçti
       && [referans, gerçek, fark, kare.metrik].every(Boolean)
+      && (!tipografiProfili || (
+        Number.isFinite(tipografiProfili.gaussian_sigma)
+        && tipografiProfili.gaussian_sigma > 0
+        && Boolean(normalizeFark)
+        && metrik.ham
+        && Number.isFinite(metrik.ham.değişen_piksel_oranı)
+        && Number.isFinite(metrik.ham.ssim)
+      ))
       && Number.isFinite(kare.değişen_piksel_oranı)
       && kare.değişen_piksel_oranı <= 0.01
       && Number.isFinite(kare.ssim)
@@ -643,6 +898,17 @@ function varsayılanlarıTopla(kaynakDosya) {
 function rustKarşılığı(kök, özellik) {
   if (kök.toLowerCase() === 'calendar' && CALENDAR_OPTION_KANITI[özellik]) {
     const kanıt = CALENDAR_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
+  if (kök.toLowerCase() === 'matrix' && MATRIX_OPTION_KANITI[özellik]) {
+    const kanıt = MATRIX_OPTION_KANITI[özellik];
     return {
       api: kanıt.api,
       durum: 'uygulandı_kanıt_bekliyor',

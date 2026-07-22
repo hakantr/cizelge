@@ -110,22 +110,33 @@ fn eksen_etiket_görünürlükleri(
     } else {
         0.0
     };
-    let izdüşümler = çentikler
+    let ölçüler = çentikler
         .iter()
         .enumerate()
         .map(|(sıra, (_, çentik))| {
             let metin = etiket_metni(eksen, çentik, sıra);
-            eksen_yönündeki_metin_boyutu_payla(
-                eksen_metni_ölç(çizici, &metin, boyut),
-                eksen.yatay_mı(),
-                eksen.seçenek.etiket.döndürme,
-                yatay_pay,
-            )
+            let (genişlik, yükseklik) = eksen_metni_ölç(çizici, &metin, boyut);
+            (genişlik + yatay_pay, yükseklik)
         })
         .collect::<Vec<_>>();
     let kesişiyor = |ilk: usize, ikinci: usize, dokunma_eşiği: f32| {
         let uzaklık = (etiket_konumları[ilk] - etiket_konumları[ikinci]).abs();
-        uzaklık < (izdüşümler[ilk] + izdüşümler[ikinci]) / 2.0 - dokunma_eşiği
+        let radyan = eksen.seçenek.etiket.döndürme.to_radians();
+        let kosinüs = radyan.cos().abs();
+        let sinüs = radyan.sin().abs();
+        // Aynı eksendeki etiketler aynı açıyla döner. Yalnız dünya X/Y
+        // izdüşümünü toplamak, 50° gibi açılarda gerçekte birbirinden dik
+        // yönde ayrılmış iki OBB'yi kesişiyor sayar. SAT'ın metin ve çapraz
+        // eksenlerini ayrı sınamak zrender `OrientedBoundingRect.intersect`
+        // davranışını korur.
+        let (metin_uzaklığı, çapraz_uzaklık) = if eksen.yatay_mı() {
+            (uzaklık * kosinüs, uzaklık * sinüs)
+        } else {
+            (uzaklık * sinüs, uzaklık * kosinüs)
+        };
+        let metin_sınırı = (ölçüler[ilk].0 + ölçüler[ikinci].0) / 2.0 - dokunma_eşiği;
+        let çapraz_sınırı = (ölçüler[ilk].1 + ölçüler[ikinci].1) / 2.0 - dokunma_eşiği;
+        metin_uzaklığı < metin_sınırı && çapraz_uzaklık < çapraz_sınırı
     };
 
     // `axisLabel.interval: 0`, AxisBuilder.shouldShowAllLabels üzerinden uç
@@ -1101,5 +1112,34 @@ mod testler {
             .collect::<Vec<_>>();
 
         assert_eq!(değerler, vec![100.0, 200.0]);
+    }
+
+    #[test]
+    fn dondurulmus_deger_etiketleri_obb_caprazinda_ayriksa_max_gizlenmez() {
+        let yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eksen = ÇalışmaEkseni::yeni(
+            Eksen::değer().etiket(EksenEtiketi::yeni().döndür(50.0).aralık(0)),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 70_000.0],
+                Some(0.0),
+                Some(70_000.0),
+                false,
+                7,
+                None,
+                None,
+            )),
+            [0.0, 170.0],
+            EksenKonumu::Alt,
+        );
+        let çentikler = eksen.etiket_çentikleri();
+        let konumlar = eksen_etiket_konumlarını_çöz(&yüzey, &eksen, &çentikler, 12.0);
+        let görünür =
+            eksen_etiket_görünürlükleri(&yüzey, &eksen, &çentikler, &konumlar, 1, None);
+
+        assert_eq!(
+            çentikler.last().map(|(_, çentik)| çentik.değer),
+            Some(70_000.0)
+        );
+        assert_eq!(görünür.last(), Some(&true));
     }
 }

@@ -1,0 +1,199 @@
+{
+  "id": "matrix-mbti",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2054,
+  "değişen_piksel_oranı": 0.007607407407407407,
+  "ssim": 0.9910127280955306,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 7832,
+    "değişen_piksel_oranı": 0.02900740740740741,
+    "ssim": 0.9858451332889879
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "mbti_16x16_hücre_katmanları",
+      "geçti": true,
+      "açıklama": "Dört grup boyunca heatmap tabanı ve iki aria/decal boya katmanı ham karede korunmalı",
+      "örnekler": [
+        {
+          "x": 142,
+          "y": 92,
+          "referans": [
+            78,
+            191,
+            151
+          ],
+          "gerçek": [
+            79,
+            193,
+            152
+          ],
+          "en_büyük_kanal_farkı": 2,
+          "geçti": true
+        },
+        {
+          "x": 210,
+          "y": 136,
+          "referans": [
+            17,
+            174,
+            112
+          ],
+          "gerçek": [
+            19,
+            175,
+            113
+          ],
+          "en_büyük_kanal_farkı": 2,
+          "geçti": true
+        },
+        {
+          "x": 232,
+          "y": 181,
+          "referans": [
+            131,
+            113,
+            184
+          ],
+          "gerçek": [
+            132,
+            114,
+            185
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        },
+        {
+          "x": 300,
+          "y": 226,
+          "referans": [
+            125,
+            80,
+            171
+          ],
+          "gerçek": [
+            125,
+            80,
+            171
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 322,
+          "y": 271,
+          "referans": [
+            91,
+            163,
+            212
+          ],
+          "gerçek": [
+            92,
+            163,
+            212
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        },
+        {
+          "x": 390,
+          "y": 315,
+          "referans": [
+            44,
+            142,
+            201
+          ],
+          "gerçek": [
+            45,
+            143,
+            201
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        },
+        {
+          "x": 412,
+          "y": 360,
+          "referans": [
+            190,
+            157,
+            104
+          ],
+          "gerçek": [
+            191,
+            158,
+            104
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        },
+        {
+          "x": 480,
+          "y": 427,
+          "referans": [
+            210,
+            152,
+            53
+          ],
+          "gerçek": [
+            211,
+            153,
+            53
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        },
+        {
+          "x": 435,
+          "y": 405,
+          "referans": [
+            187,
+            163,
+            133
+          ],
+          "gerçek": [
+            187,
+            164,
+            133
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        },
+        {
+          "x": 187,
+          "y": 383,
+          "referans": [
+            136,
+            180,
+            175
+          ],
+          "gerçek": [
+            137,
+            181,
+            176
+          ],
+          "en_büyük_kanal_farkı": 1,
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/matrix-mbti.png",
+    "gerçek": "testler/gorsel/gerçek/default/matrix-mbti.png",
+    "fark": "testler/gorsel/fark/default/matrix-mbti.png",
+    "normalize_fark": "testler/gorsel/fark/default/matrix-mbti-tipografi.png"
+  }
+}

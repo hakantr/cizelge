@@ -206,6 +206,41 @@ pub struct İsabetBölgesi {
     pub geometri: İsabetGeometrisi,
 }
 
+/// Matrix hücresinin ECharts olayındaki `targetType` alanı.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MatrisHedefTürü {
+    X,
+    Y,
+    Gövde,
+    Köşe,
+}
+
+/// `MatrixView` hücre dikdörtgeni/etiketi için ayrı bileşen isabet kaydı.
+/// Seri isabetlerinden ayrı tutulması, üstteki serinin aynı hücre üzerinde
+/// ECharts z-sırasında önce gelmesini sağlar.
+#[derive(Clone, Debug)]
+pub struct MatrisHücreBölgesi {
+    pub bileşen_sırası: usize,
+    pub hedef_türü: MatrisHedefTürü,
+    pub ad: Option<String>,
+    pub ipucu_adı: Option<String>,
+    pub değer: Option<String>,
+    pub koordinat: [isize; 2],
+    pub geometri: İsabetGeometrisi,
+    pub imleç: Option<String>,
+    pub ipucu: bool,
+    pub olay_tetikle: bool,
+}
+
+impl MatrisHücreBölgesi {
+    pub fn kaydır(&self, dx: f32, dy: f32) -> Self {
+        Self {
+            geometri: self.geometri.kaydır(dx, dy),
+            ..self.clone()
+        }
+    }
+}
+
 /// Grafikten yayımlanan olaylar (ECharts `chart.on(...)` karşılığı).
 /// `GrafikGörünümü`, gpui `EventEmitter<GrafikOlayı>` uygular; şöyle
 /// dinlenir:
@@ -224,6 +259,14 @@ pub enum GrafikOlayı {
         seri_adı: Option<String>,
         ad: Option<String>,
         değer: Option<f64>,
+    },
+    /// `matrix.triggerEvent: true` ile bir matrix hücresine tıklandı.
+    MatrisHücresiTıklandı {
+        bileşen_sırası: usize,
+        hedef_türü: MatrisHedefTürü,
+        ad: Option<String>,
+        değer: Option<String>,
+        koordinat: [isize; 2],
     },
     /// Serbest `graphic` öğesine tıklandı. Kimlik ve ad, ECharts olay
     /// parametresindeki `element.id` / `name` değerleridir.

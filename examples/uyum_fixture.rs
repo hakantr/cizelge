@@ -12932,7 +12932,12 @@ fn matrix_covariance() -> GrafikSeçenekleri {
         )
 }
 
-fn matrix_graph() -> GrafikSeçenekleri {
+fn matrix_graph(genişlik: f32, yükseklik: f32) -> GrafikSeçenekleri {
+    use cizelge::cizim::{DikeyHiza, YatayHiza, YerelDönüşüm};
+
+    let kenar = [150.0, 80.0];
+    let matris_genişliği = genişlik - kenar[1] * 2.0;
+    let matris_yüksekliği = yükseklik - kenar[0] * 2.0;
     let düğümler = [
         ("Intro to Computer Science", "Programming", "1st Year"),
         ("Intro to Data Analysis", "Data Analysis", "2nd Year"),
@@ -12954,7 +12959,7 @@ fn matrix_graph() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
         .yerel(&İNGİLİZCE)
-        .başlık(Başlık::yeni().metin("Course Prerequisites"))
+        .başlık(Başlık::yeni().metin("Course Prerequisites").iç_boşluk(15.0))
         .matris(
             MatrisKoordinatı::yeni()
                 .x(MatrisBoyutu::yeni().veri(["Data Analysis", "Programming", "Algorithms"]))
@@ -12964,14 +12969,46 @@ fn matrix_graph() -> GrafikSeçenekleri {
                 .üst(150)
                 .alt(150),
         )
+        .grafik(
+            GrafikBileşeni::yeni()
+                .öğe(
+                    GrafikÖğesi::metin("Course Categories")
+                        .yazı_boyutu(18.0)
+                        .yazı_rengi("#333")
+                        .kalın(true)
+                        .yazı_hizası(YatayHiza::Orta, DikeyHiza::Alt)
+                        .dönüşüm(
+                            YerelDönüşüm::default()
+                                .ötele(matris_genişliği / 4.0 * 2.5 + kenar[1], kenar[0] - 15.0),
+                        ),
+                )
+                .öğe(
+                    GrafikÖğesi::metin("Course Categories")
+                        .yazı_boyutu(18.0)
+                        .yazı_rengi("#333")
+                        .kalın(true)
+                        .yazı_hizası(YatayHiza::Orta, DikeyHiza::Alt)
+                        .dönüşüm(
+                            YerelDönüşüm::default()
+                                .ötele(kenar[1] - 15.0, matris_yüksekliği / 5.0 * 3.0 + kenar[0])
+                                .döndür(-std::f32::consts::FRAC_PI_2),
+                        ),
+                ),
+        )
         .seri(
             GrafoSerisi::yeni()
                 .matris_sırası(0)
                 .yerleşim(GrafoYerleşimi::Yok)
                 .düğümler(düğümler)
                 .bağlar(bağlar)
-                .etiket_göster(true)
                 .etiket_eşiği(0.0)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .kayma(0.0, -15.0)
+                        .dikey_hiza(YazıDikeyHizası::Alt)
+                        .yazı(YazıStili::yeni().boyut(15.0).renk("#555").kalın(true)),
+                )
                 .hedef_oku(true)
                 .çizgi_stili(
                     ÇizgiStili::yeni()
@@ -13030,8 +13067,9 @@ fn matrix_pie() -> GrafikSeçenekleri {
     seçenekler
 }
 
-fn matrix_confusion() -> GrafikSeçenekleri {
-    use cizelge::cizim::YatayHiza;
+fn matrix_confusion(genişlik: f32) -> GrafikSeçenekleri {
+    use cizelge::cizim::{AfinMatris, DikeyHiza, YatayHiza, YerelDönüşüm};
+    use cizelge::koordinat::Dikdörtgen;
 
     let veri = [
         ("Positive", "Positive", 10.0),
@@ -13073,16 +13111,48 @@ fn matrix_confusion() -> GrafikSeçenekleri {
                     [0.0; 4],
                     None,
                 );
-                let değer = öğe.değer.sayı().unwrap_or_default();
-                uyum_çok_satırlı_yazı(
-                    yüzey,
-                    &format!("{} {y}\n{}", if x == y { "True" } else { "False" }, değer),
-                    kutu.merkez(),
+                let değer = ondalık_kırp(öğe.değer.sayı().unwrap_or_default());
+                let ad = format!("{} {y}", if x == y { "True" } else { "False" });
+                let merkez = kutu.merkez();
+                let ad_genişliği = yüzey.stilli_yazı_ölç(&ad, 18.0, false).0;
+                // zrender rich text yerleşimi: iki koşunun 5'er px padding'i
+                // toplam 54 px'lik bloğu kurar; ilk koşunun backgroundColor
+                // alanı ve textBorderWidth=2 vuruşu şekle bağlı metin olarak
+                // hücrenin merkezine taşınır.
+                yüzey.dikdörtgen(
+                    Dikdörtgen::yeni(
+                        merkez.0 - (ad_genişliği + 10.0) / 2.0,
+                        merkez.1 - 27.0,
+                        ad_genişliği + 10.0,
+                        28.0,
+                    ),
+                    &Dolgu::Düz("#999".into()),
+                    [0.0; 4],
+                    None,
+                );
+                let kontur_dönüşümü = AfinMatris::ötele(merkez.0, merkez.1 + 0.36);
+                yüzey.dönüşümlü_konturlu_yazı(
+                    &ad,
+                    (0.0, -14.0),
                     YatayHiza::Orta,
+                    DikeyHiza::Orta,
                     18.0,
-                    18.0,
+                    "#fff".into(),
+                    false,
+                    "#333".into(),
+                    1.0,
+                    kontur_dönüşümü,
+                );
+                let dönüşüm = AfinMatris::ötele(merkez.0, merkez.1 + 0.2);
+                yüzey.dönüşümlü_yazı(
+                    &değer,
+                    (0.0, 14.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                    16.0,
                     "#444".into(),
                     false,
+                    dönüşüm,
                 );
             }
         });
@@ -13103,6 +13173,34 @@ fn matrix_confusion() -> GrafikSeçenekleri {
                 .üst(80)
                 .genişlik(600)
                 .yatay_ortala(),
+        )
+        .grafik(
+            GrafikBileşeni::yeni()
+                .öğe(
+                    GrafikÖğesi::metin("True Class")
+                        .yazı_boyutu(24.0)
+                        .yazı_ailesi("serif")
+                        .yazı_rengi("#333")
+                        .kalın(true)
+                        .yazı_hizası(YatayHiza::Orta, DikeyHiza::Üst)
+                        .dönüşüm(
+                            YerelDönüşüm::default()
+                                .ötele((genişlik - 600.0) / 2.0 + 600.0 / 6.0 * 4.0, 40.0),
+                        ),
+                )
+                .öğe(
+                    GrafikÖğesi::metin("Predicted Class")
+                        .yazı_boyutu(24.0)
+                        .yazı_ailesi("serif")
+                        .yazı_rengi("#333")
+                        .kalın(true)
+                        .yazı_hizası(YatayHiza::Orta, DikeyHiza::Üst)
+                        .dönüşüm(
+                            YerelDönüşüm::default()
+                                .ötele((genişlik - 600.0) / 2.0 - 50.0, 270.0)
+                                .döndür(-std::f32::consts::FRAC_PI_2),
+                        ),
+                ),
         )
         .seri(özel)
 }
@@ -13851,15 +13949,24 @@ fn mbti_boyutu() -> Vec<MatrisBoyutHücresi> {
         let renk = mbti_rengi(grup, false);
         MatrisBoyutHücresi::yeni(grup)
             .etiket(
-                Etiket::yeni()
-                    .göster(true)
-                    .yazı(YazıStili::yeni().boyut(16.0).renk(renk).kalın(true)),
+                Etiket::yeni().göster(true).yazı(
+                    YazıStili::yeni()
+                        .boyut(16.0)
+                        .renk(renk)
+                        .kalın(true)
+                        .aile("Ubuntu Condensed, sans-serif")
+                        .eş_iç_boşluk(0.0),
+                ),
             )
             .çocuklar(üyeler.map(|üye| {
                 MatrisBoyutHücresi::yeni(üye).etiket(
-                    Etiket::yeni()
-                        .göster(true)
-                        .yazı(YazıStili::yeni().boyut(11.0).renk(renk).kalın(true)),
+                    Etiket::yeni().göster(true).yazı(
+                        YazıStili::yeni()
+                            .boyut(11.0)
+                            .renk(renk)
+                            .kalın(true)
+                            .aile("Ubuntu Condensed, sans-serif"),
+                    ),
                 )
             }))
     })
@@ -13867,7 +13974,7 @@ fn mbti_boyutu() -> Vec<MatrisBoyutHücresi> {
 }
 
 fn matrix_mbti(genişlik: f32, yükseklik: f32) -> Result<GrafikSeçenekleri, String> {
-    use cizelge::cizim::{DikeyHiza, YatayHiza};
+    use cizelge::cizim::{AfinMatris, DikeyHiza, YatayHiza};
 
     let kaynak = theme_river_kaynağını_oku("matrix-mbti.ts")?;
     let mut özgün_bölümde = false;
@@ -13949,6 +14056,8 @@ fn matrix_mbti(genişlik: f32, yükseklik: f32) -> Result<GrafikSeçenekleri, St
         .çizim(|yüzey, bağlam| {
             let Some(matris) = bağlam.matris else { return };
             let zemin = Renk::çöz("#F0F7F9").unwrap_or(Renk::BEYAZ);
+            let seri_tabanı = Renk::çöz("#5070dd").unwrap_or(zemin);
+            let mut hücreler = Vec::with_capacity(bağlam.veri.len());
             for öğe in bağlam.veri {
                 let (
                     Some(VeriDeğeri::Metin(x)),
@@ -13974,38 +14083,73 @@ fn matrix_mbti(genişlik: f32, yükseklik: f32) -> Result<GrafikSeçenekleri, St
                     continue;
                 };
                 let değer = öğe.değer.sayı().unwrap_or_default().clamp(0.0, 1.0) as f32;
-                let arka = zemin.karıştır(Renk::çöz(arka).unwrap_or(zemin), değer);
-                let ön = zemin.karıştır(Renk::çöz(ön).unwrap_or(zemin), değer);
-                yüzey.dikdörtgen(kutu, &Dolgu::Düz(arka), [0.0; 4], None);
-                let x0 = kutu.x.floor() as i32;
-                let x1 = kutu.sağ().ceil() as i32;
-                let y0 = kutu.y.floor() as i32;
-                let y1 = kutu.alt().ceil() as i32;
-                for py in y0..y1 {
-                    for px in x0..x1 {
-                        if (px + py) & 1 == 0 {
-                            yüzey.dikdörtgen(
-                                cizelge::koordinat::Dikdörtgen::yeni(
-                                    px as f32, py as f32, 1.0, 1.0,
-                                ),
-                                &Dolgu::Düz(ön),
-                                [0.0; 4],
-                                None,
-                            );
-                        }
-                    }
+                let rgba = |renk: Renk| {
+                    [
+                        (renk.kırmızı.clamp(0.0, 1.0) * 255.0).round() as u8,
+                        (renk.yeşil.clamp(0.0, 1.0) * 255.0).round() as u8,
+                        (renk.mavi.clamp(0.0, 1.0) * 255.0).round() as u8,
+                        255,
+                    ]
+                };
+                let mut pikseller = Vec::with_capacity(16);
+                for renk in [
+                    Renk::çöz(arka).unwrap_or(zemin),
+                    Renk::çöz(ön).unwrap_or(zemin),
+                    Renk::çöz(ön).unwrap_or(zemin),
+                    Renk::çöz(arka).unwrap_or(zemin),
+                ] {
+                    pikseller.extend_from_slice(&rgba(renk));
                 }
+                let desen = GörüntüDeseni::rgba(2, 2, pikseller, DesenTekrarı::Tekrar)
+                    .expect("2×2 MBTI deseni geçerli olmalı")
+                    .opaklık(değer);
                 let etiket_rengi = Renk::çöz(etiket)
                     .unwrap_or(Renk::BEYAZ)
                     .opaklık(if değer < 0.15 { 0.6 } else { 1.0 });
-                yüzey.yazı(
-                    &format!("{:.0}%", değer * 100.0),
-                    kutu.merkez(),
+                hücreler.push((
+                    kutu,
+                    değer,
+                    desen,
+                    etiket_rengi,
+                    format!("{:.0}%", değer * 100.0),
+                ));
+            }
+            // Ana zrender katmanı: heatmap tabanı ve `_decalEl`. Bütün
+            // hücreler bu katmanda bittikten sonra aria decal katmanı aynı
+            // desenleri bir kez daha boyar; katman sırası hücre sınırlarındaki
+            // kesirli örtüşmeyi belirlediği için geçişler ayrı tutulmalıdır.
+            for (kutu, değer, desen, _, _) in &hücreler {
+                yüzey.dikdörtgen(
+                    *kutu,
+                    &Dolgu::Düz(seri_tabanı.opaklık(*değer)),
+                    [0.0; 4],
+                    None,
+                );
+                yüzey.dikdörtgen(*kutu, &Dolgu::Desen(desen.clone()), [0.0; 4], None);
+            }
+            for (kutu, değer, desen, _, _) in &hücreler {
+                yüzey.dikdörtgen(
+                    *kutu,
+                    &Dolgu::Düz(seri_tabanı.opaklık(*değer)),
+                    [0.0; 4],
+                    None,
+                );
+                yüzey.dikdörtgen(*kutu, &Dolgu::Desen(desen.clone()), [0.0; 4], None);
+            }
+            for (kutu, _, _, etiket_rengi, metin) in hücreler {
+                let merkez = kutu.merkez();
+                // Heatmap etiketi zrender'da hücre Rect'inin `textContent`
+                // öğesidir; saf öteleme matrisi de raster fazını etkiler.
+                yüzey.dönüşümlü_aileli_yazı(
+                    &metin,
+                    (0.0, 0.2),
                     YatayHiza::Orta,
                     DikeyHiza::Orta,
                     12.0,
                     etiket_rengi,
                     true,
+                    "Ubuntu Condensed, sans-serif",
+                    AfinMatris::ötele(merkez.0, merkez.1),
                 );
             }
         });
@@ -14044,10 +14188,6 @@ fn matrix_mbti(genişlik: f32, yükseklik: f32) -> Result<GrafikSeçenekleri, St
                 .y(
                     MatrisBoyutu::yeni()
                         .veri(mbti_boyutu())
-                        .seviye_boyutları([
-                            Some(Uzunluk::Piksel(25.0)),
-                            Some(Uzunluk::Piksel(30.0)),
-                        ])
                         .öğe_stili(görünmez.clone())
                         .ayırıcı(ÇizgiStili::yeni().kalınlık(0.0)),
                 )
@@ -14075,13 +14215,14 @@ fn matrix_ema(veri: &[[f64; 2]], dönem: usize) -> Vec<[f64; 2]> {
     sonuç
 }
 
-fn matrix_stock() -> GrafikSeçenekleri {
-    use cizelge::cizim::{DikeyHiza, YatayHiza};
+fn matrix_stock(genişlik: f32, yükseklik: f32) -> GrafikSeçenekleri {
+    use cizelge::cizim::{DikeyHiza, SahneStili, SahneŞekli, YatayHiza};
 
     const SON_KAPANIŞ: f64 = 50.0;
     const YEŞİL: &str = "#47b262";
     const KIRMIZI: &str = "#eb5454";
     const GRİ: &str = "#888";
+    const MATRİS_KENARI: f32 = 10.0;
     let mut tohum = 0x5eed_1234;
     let mut fiyat = Vec::<[f64; 2]>::new();
     let mut hacim = Vec::<[f64; 2]>::new();
@@ -14177,13 +14318,21 @@ fn matrix_stock() -> GrafikSeçenekleri {
             if alış { "Bid" } else { "Ask" },
             emir_fiyatı
         );
+        let fiyat_stili = if alış { "green" } else { "red" };
+        let etiket = EtiketYaması::yeni()
+            .biçimleyici(format!(
+                "{{name|{}}} {{{fiyat_stili}|{emir_fiyatı:.2}}} {{amount|({miktar:.0})}}",
+                if alış { "Bid" } else { "Ask" },
+            ))
+            .zengin_stil("red", YazıStili::yeni().renk(KIRMIZI))
+            .zengin_stil("green", YazıStili::yeni().renk(YEŞİL))
+            .zengin_stil("amount", YazıStili::yeni().renk("#666"))
+            .zengin_stil("name", YazıStili::yeni().renk("#444").kalın(true));
         emir_adları.push(ad.clone());
         emirler.push(
-            VeriÖğesi::adlı(ad, [miktar, sıra as f64]).stil(ÖğeStili::yeni().renk(if alış {
-                "#e4f3e8"
-            } else {
-                "#fbe4e4"
-            })),
+            VeriÖğesi::adlı(ad, [miktar, sıra as f64])
+                .etiket(etiket)
+                .stil(ÖğeStili::yeni().renk(if alış { "#e4f3e8" } else { "#fbe4e4" })),
         );
     }
     let mut derinlik_yüksek = vec![f64::NAN; 40];
@@ -14212,7 +14361,7 @@ fn matrix_stock() -> GrafikSeçenekleri {
         .çizgi(EksenÇizgisi::yeni().göster(false))
         .çentik(EksenÇentiği::yeni().göster(false))
         .etiket(EksenEtiketi::yeni().göster(false))
-        .bölme_çizgisi_göster(true);
+        .bölme_çizgisi_göster(false);
     let ana_y = Eksen::değer()
         .ızgara_sırası(0)
         .en_az(SON_KAPANIŞ - en_büyük_fark)
@@ -14220,7 +14369,55 @@ fn matrix_stock() -> GrafikSeçenekleri {
         .bölme_sayısı(3)
         .çizgi(EksenÇizgisi::yeni().göster(false))
         .çentik(EksenÇentiği::yeni().göster(false))
-        .etiket(EksenEtiketi::yeni().göster(false));
+        .etiket(EksenEtiketi::yeni().göster(false))
+        .bölme_çizgisi_göster(false);
+
+    let matris_genişliği = genişlik - MATRİS_KENARI * 2.0;
+    let matris_yüksekliği = yükseklik - MATRİS_KENARI * 2.0;
+    let mut ayırıcılar = GrafikBileşeni::yeni();
+    for sıra in 0..3 {
+        let renk = if sıra == 1 { "#bbb" } else { "#eee" };
+        let tür = if sıra == 1 {
+            ÇizgiTürü::Kesikli
+        } else {
+            ÇizgiTürü::Düz
+        };
+        ayırıcılar = ayırıcılar.öğe(
+            GrafikÖğesi::şekil(SahneŞekli::Çizgi {
+                başlangıç: (
+                    MATRİS_KENARI + 1.0,
+                    matris_yüksekliği / 6.0 * (sıra + 1) as f32,
+                ),
+                bitiş: (
+                    matris_genişliği / 5.0 * 4.0 + MATRİS_KENARI,
+                    matris_yüksekliği / 6.0 * (sıra + 1) as f32,
+                ),
+            })
+            .stil(SahneStili {
+                dolgu: None,
+                çizgi_rengi: Some(renk.into()),
+                çizgi_kalınlığı: 1.0,
+                çizgi_türü: tür,
+                ..SahneStili::default()
+            }),
+        );
+    }
+    for sıra in 0..3 {
+        let x = matris_genişliği / 5.0 * (sıra + 1) as f32 + MATRİS_KENARI;
+        ayırıcılar = ayırıcılar.öğe(
+            GrafikÖğesi::şekil(SahneŞekli::Çizgi {
+                başlangıç: (x, MATRİS_KENARI + 1.0),
+                bitiş: (x, yükseklik - MATRİS_KENARI),
+            })
+            .stil(SahneStili {
+                dolgu: None,
+                çizgi_rengi: Some("#eee".into()),
+                çizgi_kalınlığı: 1.0,
+                çizgi_türü: ÇizgiTürü::Düz,
+                ..SahneStili::default()
+            }),
+        );
+    }
 
     let ana_aralık = matris_sıra_aralığı(0, 3);
     let sağ_aralık = matris_sıra_aralığı(4, 4);
@@ -14256,6 +14453,7 @@ fn matrix_stock() -> GrafikSeçenekleri {
                 .üst(10)
                 .alt(10),
         )
+        .grafik(ayırıcılar)
         .başlık_ekle(
             Başlık::yeni()
                 .metin("Volume")
@@ -14379,7 +14577,7 @@ fn matrix_stock() -> GrafikSeçenekleri {
                 .kenar_boşluğu(false)
                 .göster(false),
         )
-        .y_ekseni_ekle(görünmez_eksen(4).ölçekli(true))
+        .y_ekseni_ekle(görünmez_eksen(4).en_az_veri().en_çok_veri())
         .seri(
             ÇizgiSerisi::yeni()
                 .eksenler(0, 0)
@@ -14398,14 +14596,13 @@ fn matrix_stock() -> GrafikSeçenekleri {
             SütunSerisi::yeni()
                 .ad("Volume")
                 .eksenler(1, 1)
-                .genişlik(2.0)
                 .veri(hacim_verisi),
         )
         .seri(
             SütunSerisi::yeni()
                 .ad("MACD")
                 .eksenler(2, 2)
-                .genişlik(2.0)
+                .genişlik("70%")
                 .veri(macd),
         )
         .seri(
@@ -14895,11 +15092,11 @@ fn seçenekler(
         "matrix-correlation-heatmap" => Ok(matrix_correlation_heatmap()),
         "matrix-correlation-scatter" => Ok(matrix_correlation_scatter()),
         "matrix-covariance" => Ok(matrix_covariance()),
-        "matrix-graph" => Ok(matrix_graph()),
+        "matrix-graph" => Ok(matrix_graph(genişlik, yükseklik)),
         "matrix-pie" => Ok(matrix_pie()),
-        "matrix-confusion" => Ok(matrix_confusion()),
+        "matrix-confusion" => Ok(matrix_confusion(genişlik)),
         "matrix-grid-layout" => Ok(matrix_grid_layout(genişlik)),
-        "matrix-stock" => Ok(matrix_stock()),
+        "matrix-stock" => Ok(matrix_stock(genişlik, yükseklik)),
         "matrix-sparkline" => Ok(matrix_sparkline()),
         "matrix-periodic-table" => matrix_periodic_table(),
         "matrix-mbti" => matrix_mbti(genişlik, yükseklik),
@@ -15024,6 +15221,11 @@ fn çalıştır() -> Result<(), String> {
                 "insideStart",
                 "insideStartTop",
                 "insideMiddle / middle",
+                "X1",
+                "1.00",
+                "-0.18",
+                "Actinides",
+                "86%",
             ]
             .map(|metin| (metin, yüzey.yazı_ölç(metin, 12.0).0))
         );

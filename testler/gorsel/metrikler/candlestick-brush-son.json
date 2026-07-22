@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1390,
-  "değişen_piksel_oranı": 0.005148148148148148,
-  "ssim": 0.9901325527048036,
+  "değişen_piksel": 1330,
+  "değişen_piksel_oranı": 0.004925925925925926,
+  "ssim": 0.9914669039960357,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/candlestick-brush.png",
     "gerçek": "testler/gorsel/gerçek/default/candlestick-brush.png",

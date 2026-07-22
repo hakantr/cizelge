@@ -29,6 +29,9 @@ const YAZI_RASTER_ORANI: f32 = 13.42 / 12.0;
 // ab_glyph'in em kutusu taban çizgisini Chromium canvas'a göre iki mantıksal
 // piksel aşağıda bırakır. Bütün hizalarda aynı taban düzeltmesi gerekir.
 const YAZI_TABAN_DÜZELTMESİ: f32 = -1.3;
+// Affine metin tiny-skia ile doğrudan glif dış hatlarından rasterlenir;
+// hint'li ab_glyph maskesinin taban düzeltmesini aynen paylaşmaz.
+const DÖNÜŞÜMLÜ_YAZI_TABAN_DÜZELTMESİ: f32 = -1.3;
 // Chromium/Skia glif maskesi küçük Arial'de düşük örtülü kenar piksellerini
 // ab_glyph'ten daha görünür tutarken gövdeyi yumuşakça doyuma taşır. Aynı
 // dış hatta uygulanan aktarım eğrisi bu gri-ölçek kapsama davranışını taşır.
@@ -205,9 +208,18 @@ fn mac_cjk_glif_çiz(
 }
 
 /// Yazı tipini fontdb ile sistemden yükler; bulunamazsa `None`.
-fn yazı_takımı_yükle() -> Option<YazıTakımı> {
+fn yazı_takımı_yükle(serif: bool) -> Option<YazıTakımı> {
     let mut veritabanı = fontdb::Database::new();
     veritabanı.load_system_fonts();
+    let aileler = if serif {
+        vec![
+            fontdb::Family::Name("Times New Roman"),
+            fontdb::Family::Name("Times"),
+            fontdb::Family::Serif,
+        ]
+    } else {
+        vec![fontdb::Family::Name("Arial"), fontdb::Family::SansSerif]
+    };
     let kimlikten_yüz = |kimlik: fontdb::ID| -> Option<Arc<FontVec>> {
         veritabanı
             .with_face_data(kimlik, |veri, indeks| {
@@ -223,7 +235,7 @@ fn yazı_takımı_yükle() -> Option<YazıTakımı> {
             // macOS'ta Verdana seçilebildiği için etiket ölçüleri ve dolayısıyla
             // bütün yerleşim kayar. Arial bulunmayan sistemlerde genel aile
             // güvenli geri düşüştür; CI profili kullanılan fontu kilitler.
-            families: &[fontdb::Family::Name("Arial"), fontdb::Family::SansSerif],
+            families: &aileler,
             weight: ağırlık,
             ..fontdb::Query::default()
         })?;
@@ -290,6 +302,7 @@ pub struct PikselYüzeyi {
     /// Etkin kırpma maskesi (fiziksel çözünürlükte).
     kırpma: Option<ts::Mask>,
     yazılar: Option<YazıTakımı>,
+    serif_yazılar: Option<YazıTakımı>,
     /// Çizim sırasında yutulan kurtarılabilir sorunlar.
     tanılar: Vec<BilesenTanisi>,
 }
@@ -317,7 +330,11 @@ impl PikselYüzeyi {
             mantıksal: (genişlik, yükseklik),
             ölçek,
             kırpma: None,
-            yazılar: yazı_takımı_yükle(),
+            yazılar: yazı_takımı_yükle(false),
+            // Ölçüm çizimden önce yapılabildiği için serif takımı yüzeyle
+            // birlikte yüklenir; böylece `measureText` ve gerçek glif aynı
+            // aileyi kullanır.
+            serif_yazılar: yazı_takımı_yükle(true),
             tanılar: Vec::new(),
         })
     }
@@ -398,6 +415,74 @@ impl PikselYüzeyi {
                     (kaynak[1] * alfa + eski.green() as f32 * kalan).round() as u8,
                     (kaynak[2] * alfa + eski.blue() as f32 * kalan).round() as u8,
                     (255.0 * alfa + eski.alpha() as f32 * kalan).round() as u8,
+                );
+                if let Some(yeni) = yeni {
+                    *piksel = yeni;
+                }
+            }
+        }
+    }
+
+    /// Canvas `fillRect` üzerinde tekrar eden görüntü desenini, düz renkli
+    /// hızlı yol ile aynı kesirli alan örtüsüyle boyar. Genel tiny-skia yol
+    /// tarayıcısı komşu kesirli hücrelerin ortak kenarında bir pikseli fazla
+    /// soldurabildiğinden yoğun matrix/decal döşemelerinde görünür dikiş
+    /// bırakıyordu.
+    fn desenli_dikdörtgen_doldur(
+        &mut self, d: Dikdörtgen, desen: &crate::renk::GörüntüDeseni
+    ) {
+        let x0 = d.x;
+        let y0 = d.y;
+        let x1 = d.sağ();
+        let y1 = d.alt();
+        let genişlik = self.harita.width() as i32;
+        let yükseklik = self.harita.height() as i32;
+        let ilk_x = (x0.floor() as i32).clamp(0, genişlik);
+        let son_x = (x1.ceil() as i32).clamp(0, genişlik);
+        let ilk_y = (y0.floor() as i32).clamp(0, yükseklik);
+        let son_y = (y1.ceil() as i32).clamp(0, yükseklik);
+        let desen_genişliği = desen.genişlik as i32;
+        let desen_yüksekliği = desen.yükseklik as i32;
+        if ilk_x >= son_x
+            || ilk_y >= son_y
+            || desen_genişliği <= 0
+            || desen_yüksekliği <= 0
+            || desen.opaklık <= 0.0
+        {
+            return;
+        }
+
+        let maske = self.kırpma.as_ref().map(|m| m.data());
+        let veriler = self.harita.pixels_mut();
+        for py in ilk_y..son_y {
+            let örtü_y = (y1.min(py as f32 + 1.0) - y0.max(py as f32)).clamp(0.0, 1.0);
+            let desen_y = py.rem_euclid(desen_yüksekliği) as usize;
+            for px in ilk_x..son_x {
+                let örtü_x = (x1.min(px as f32 + 1.0) - x0.max(px as f32)).clamp(0.0, 1.0);
+                let desen_x = px.rem_euclid(desen_genişliği) as usize;
+                let desen_dizini = (desen_y * desen.genişlik as usize + desen_x) * 4;
+                let Some(kaynak) = desen.pikseller.get(desen_dizini..desen_dizini + 4) else {
+                    continue;
+                };
+                let dizin = (py * genişlik + px) as usize;
+                let maske_alfası =
+                    maske.and_then(|m| m.get(dizin)).copied().unwrap_or(255) as f32 / 255.0;
+                let örtü = örtü_x * örtü_y * desen.opaklık.clamp(0.0, 1.0) * maske_alfası;
+                let kaynak_alfası = kaynak[3] as f32 / 255.0;
+                let alfa = kaynak_alfası * örtü;
+                if alfa <= 0.0 {
+                    continue;
+                }
+                let Some(piksel) = veriler.get_mut(dizin) else {
+                    continue;
+                };
+                let eski = *piksel;
+                let kalan = 1.0 - alfa;
+                let yeni = ts::PremultipliedColorU8::from_rgba(
+                    (kaynak[0] as f32 * örtü + eski.red() as f32 * kalan).round() as u8,
+                    (kaynak[1] as f32 * örtü + eski.green() as f32 * kalan).round() as u8,
+                    (kaynak[2] as f32 * örtü + eski.blue() as f32 * kalan).round() as u8,
+                    (kaynak[3] as f32 * örtü + eski.alpha() as f32 * kalan).round() as u8,
                 );
                 if let Some(yeni) = yeni {
                     *piksel = yeni;
@@ -494,7 +579,17 @@ impl PikselYüzeyi {
     /// merkez ve sağ hizayı kalın yüzün kendi metrikleriyle çözer; normal yüz
     /// genişliğini kullanmak özellikle ortalanmış başlıkları sağa kaydırır.
     fn yazı_ölç_ağırlıklı(&self, metin: &str, boyut: f32, kalın: bool) -> (f32, f32) {
-        if let Some(yazılar) = &self.yazılar {
+        self.yazı_ölç_ağırlıklı_takımla(metin, boyut, kalın, self.yazılar.as_ref())
+    }
+
+    fn yazı_ölç_ağırlıklı_takımla(
+        &self,
+        metin: &str,
+        boyut: f32,
+        kalın: bool,
+        yazılar: Option<&YazıTakımı>,
+    ) -> (f32, f32) {
+        if let Some(yazılar) = yazılar {
             #[cfg(target_os = "macos")]
             let mac_cjk = mac_cjk_yazı_tipi(boyut * self.ölçek, kalın);
             let mut genişlik = 0.0f32;
@@ -531,6 +626,14 @@ impl PikselYüzeyi {
             (metin.chars().count() as f32 * boyut * 0.6, boyut)
         }
     }
+}
+
+fn serif_ailesi_mi(aile: &str) -> bool {
+    let aile = aile.trim().to_ascii_lowercase();
+    aile == "serif"
+        || aile.contains("times")
+        || aile.contains("georgia")
+        || (aile.contains("serif") && !aile.contains("sans-serif"))
 }
 
 /// `Renk` → tiny-skia rengi.
@@ -1157,6 +1260,15 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             self.düz_dikdörtgen_doldur(d, *renk);
             return;
         }
+        if kenarlık.is_none()
+            && yarıçap.iter().all(|yarıçap| yarıçap.abs() <= f32::EPSILON)
+            && (self.ölçek - 1.0).abs() <= f32::EPSILON
+            && let Dolgu::Desen(desen) = dolgu
+            && desen.tekrar == crate::renk::DesenTekrarı::Tekrar
+        {
+            self.desenli_dikdörtgen_doldur(d, desen);
+            return;
+        }
         // Köşe yarıçaplı dikdörtgen yolu (çeyrek yaylar).
         let en_büyük = (d.genişlik.min(d.yükseklik)) / 2.0;
         let [sü, saü, saa, sa] = yarıçap.map(|y| y.clamp(0.0, en_büyük));
@@ -1430,8 +1542,41 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         (genişlik, yükseklik)
     }
 
+    fn aileli_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        aile: &str,
+    ) -> (f32, f32) {
+        if serif_ailesi_mi(aile) && self.serif_yazılar.is_none() {
+            self.serif_yazılar = yazı_takımı_yükle(true);
+        }
+        if serif_ailesi_mi(aile) && self.serif_yazılar.is_some() {
+            std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
+            let sonuç = self.yazı(metin, konum, yatay, dikey, boyut, renk, kalın);
+            std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
+            sonuç
+        } else {
+            self.yazı(metin, konum, yatay, dikey, boyut, renk, kalın)
+        }
+    }
+
     fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32) {
         self.yazı_ölç_ağırlıklı(metin, boyut, false)
+    }
+
+    fn aileli_yazı_ölç(&self, metin: &str, boyut: f32, aile: &str) -> (f32, f32) {
+        let takım = if serif_ailesi_mi(aile) {
+            self.serif_yazılar.as_ref().or(self.yazılar.as_ref())
+        } else {
+            self.yazılar.as_ref()
+        };
+        self.yazı_ölç_ağırlıklı_takımla(metin, boyut, false, takım)
     }
 
     fn stilli_yazı_ölç(&self, metin: &str, boyut: f32, kalın: bool) -> (f32, f32) {
@@ -1497,8 +1642,10 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         let vektör_ölçekli =
             yazı_tipi.as_scaled(ab_glyph::PxScale::from(boyut * YAZI_RASTER_ORANI));
         let satır = vektör_ölçekli.ascent() - vektör_ölçekli.descent();
-        let taban_y =
-            üst + (ölçü.1 - satır) / 2.0 + vektör_ölçekli.ascent() + YAZI_TABAN_DÜZELTMESİ;
+        let taban_y = üst
+            + (ölçü.1 - satır) / 2.0
+            + vektör_ölçekli.ascent()
+            + DÖNÜŞÜMLÜ_YAZI_TABAN_DÜZELTMESİ;
         let ölçek_çarpanı = vektör_ölçekli.scale_factor();
         let mut kalem = x0;
         let mut önceki: Option<(ab_glyph::GlyphId, bool)> = None;
@@ -1604,7 +1751,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         let taban_y = (üst - yerel_en_az.1) * self.ölçek
             + (ölçü.1 * self.ölçek - satır) / 2.0
             + ölçekli.ascent()
-            + YAZI_TABAN_DÜZELTMESİ * self.ölçek;
+            + DÖNÜŞÜMLÜ_YAZI_TABAN_DÜZELTMESİ * self.ölçek;
         let mut kalem = (x0 - yerel_en_az.0) * self.ölçek;
         let mut önceki: Option<(ab_glyph::GlyphId, bool)> = None;
         for karakter in metin.chars() {
@@ -1745,6 +1892,40 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         ölçü
     }
 
+    fn dönüşümlü_aileli_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        aile: &str,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        if serif_ailesi_mi(aile) && self.serif_yazılar.is_none() {
+            self.serif_yazılar = yazı_takımı_yükle(true);
+        }
+        if serif_ailesi_mi(aile) && self.serif_yazılar.is_some() {
+            std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
+            let sonuç = self.dönüşümlü_yazı(
+                metin,
+                (konum.0, konum.1 - 1.0),
+                yatay,
+                dikey,
+                boyut,
+                renk,
+                kalın,
+                dönüşüm,
+            );
+            std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
+            sonuç
+        } else {
+            self.dönüşümlü_yazı(metin, konum, yatay, dikey, boyut, renk, kalın, dönüşüm)
+        }
+    }
+
     fn dönüşümlü_konturlu_yazı(
         &mut self,
         metin: &str,
@@ -1784,7 +1965,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
                 let taban_y = üst
                     + (ölçü.1 - satır) / 2.0
                     + ölçekli.ascent()
-                    + YAZI_TABAN_DÜZELTMESİ
+                    + DÖNÜŞÜMLÜ_YAZI_TABAN_DÜZELTMESİ
                     + KONTURLU_YAZI_TABAN_EKİ;
                 let ölçek_çarpanı = ölçekli.scale_factor();
                 let mut kalem = x0;

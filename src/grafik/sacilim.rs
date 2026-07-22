@@ -555,12 +555,21 @@ fn saçılım_etiketini_yaz(
     kalın: bool,
     kontur: Option<Renk>,
     dönüşüm: Option<AfinMatris>,
+    bağlı_öteleme: bool,
 ) {
+    // Matrix SymbolDraw etiketleri hücre dönüşümüne bağlı Text öğeleridir.
+    // Genel dönüştürülmüş metin tabanı mevcut kartların hinting fazını
+    // korur; Matrix'in zrender fazı dolgu için +0,2, kontur için +0,36 px'tir.
+    let taban = if bağlı_öteleme {
+        if kontur.is_some() { 0.36 } else { 0.2 }
+    } else {
+        0.0
+    };
     match (kontur, dönüşüm) {
         (Some(kontur), Some(dönüşüm)) => {
             çizici.dönüşümlü_konturlu_yazı(
                 metin,
-                konum,
+                (konum.0, konum.1 + taban),
                 yatay,
                 dikey,
                 boyut,
@@ -574,7 +583,7 @@ fn saçılım_etiketini_yaz(
         (Some(kontur), None) => {
             çizici.dönüşümlü_konturlu_yazı(
                 metin,
-                (0.0, 0.0),
+                (0.0, taban),
                 yatay,
                 dikey,
                 boyut,
@@ -586,7 +595,28 @@ fn saçılım_etiketini_yaz(
             );
         }
         (None, Some(dönüşüm)) => {
-            çizici.dönüşümlü_yazı(metin, konum, yatay, dikey, boyut, renk, kalın, dönüşüm);
+            çizici.dönüşümlü_yazı(
+                metin,
+                (konum.0, konum.1 + taban),
+                yatay,
+                dikey,
+                boyut,
+                renk,
+                kalın,
+                dönüşüm,
+            );
+        }
+        (None, None) if bağlı_öteleme => {
+            çizici.dönüşümlü_yazı(
+                metin,
+                (0.0, taban),
+                yatay,
+                dikey,
+                boyut,
+                renk,
+                kalın,
+                AfinMatris::ötele(konum.0, konum.1),
+            );
         }
         (None, None) => {
             çizici.yazı(metin, konum, yatay, dikey, boyut, renk, kalın);
@@ -969,6 +999,7 @@ fn saçılım_etiket_çizgisi_noktaları(
 fn yerleşimli_saçılım_etiketini_çiz(
     çizici: &mut dyn ÇizimYüzeyi,
     etiket: &YerleşimliSaçılımEtiketi,
+    bağlı_öteleme: bool,
 ) {
     let satırlar = etiket.metin.split('\n').collect::<Vec<_>>();
     if satırlar.len() == 1 {
@@ -988,6 +1019,7 @@ fn yerleşimli_saçılım_etiketini_çiz(
                         AfinMatris::ötele(etiket.çapa.0, etiket.çapa.1)
                             .çarp(AfinMatris::döndür(-derece.to_radians())),
                     ),
+                    bağlı_öteleme,
                 );
             }
             _ => saçılım_etiketini_yaz(
@@ -1001,6 +1033,7 @@ fn yerleşimli_saçılım_etiketini_çiz(
                 etiket.kalın,
                 etiket.kontur,
                 None,
+                bağlı_öteleme,
             ),
         }
         return;
@@ -1036,6 +1069,7 @@ fn yerleşimli_saçılım_etiketini_çiz(
                 etiket.kalın,
                 etiket.kontur,
                 Some(dönüşüm),
+                bağlı_öteleme,
             );
         } else {
             saçılım_etiketini_yaz(
@@ -1049,6 +1083,7 @@ fn yerleşimli_saçılım_etiketini_çiz(
                 etiket.kalın,
                 etiket.kontur,
                 None,
+                bağlı_öteleme,
             );
         }
     }
@@ -1060,6 +1095,7 @@ fn yerleşimli_saçılım_etiketlerini_çiz(
     noktalar: &[SaçılımNoktası],
     opaklık: f32,
     nokta_rengi: &dyn Fn(&SaçılımNoktası) -> Renk,
+    bağlı_öteleme: bool,
 ) {
     let mut etiketler = Vec::new();
     for nokta in noktalar {
@@ -1263,7 +1299,7 @@ fn yerleşimli_saçılım_etiketlerini_çiz(
         }
     }
     for etiket in etiketler.iter().filter(|etiket| !etiket.gizli) {
-        yerleşimli_saçılım_etiketini_çiz(çizici, etiket);
+        yerleşimli_saçılım_etiketini_çiz(çizici, etiket, bağlı_öteleme);
     }
 }
 
@@ -1365,6 +1401,61 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
     vurgulu: Option<usize>,
     görsel_eşlemeler: &[SaçılımGörselEşlemesi<'_>],
     palet: &[Renk],
+) {
+    saçılım_çiz_çoklu_eşlemeli_kipli(
+        çizici,
+        seri,
+        noktalar,
+        seri_rengi,
+        ilerleme,
+        zaman_sn,
+        vurgulu,
+        görsel_eşlemeler,
+        palet,
+        false,
+    );
+}
+
+/// Matrix hücresine bağlı SymbolDraw metninin saf öteleme/raster fazını
+/// koruyan dahili çizim girişi.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn matris_saçılım_çiz_çoklu_eşlemeli(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    noktalar: &[SaçılımNoktası],
+    seri_rengi: Renk,
+    ilerleme: f32,
+    zaman_sn: f32,
+    vurgulu: Option<usize>,
+    görsel_eşlemeler: &[SaçılımGörselEşlemesi<'_>],
+    palet: &[Renk],
+) {
+    saçılım_çiz_çoklu_eşlemeli_kipli(
+        çizici,
+        seri,
+        noktalar,
+        seri_rengi,
+        ilerleme,
+        zaman_sn,
+        vurgulu,
+        görsel_eşlemeler,
+        palet,
+        true,
+    );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn saçılım_çiz_çoklu_eşlemeli_kipli(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    noktalar: &[SaçılımNoktası],
+    seri_rengi: Renk,
+    ilerleme: f32,
+    zaman_sn: f32,
+    vurgulu: Option<usize>,
+    görsel_eşlemeler: &[SaçılımGörselEşlemesi<'_>],
+    palet: &[Renk],
+    bağlı_öteleme: bool,
 ) {
     let ilerleme = if seri.animasyon_eşiğinde_mi() {
         ilerleme
@@ -1505,7 +1596,14 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
     // etiketini miras alır; açık align/verticalAlign/rotate değerleri
     // zrender bağlı metin yerleşimine aktarılır.
     if seri.etiket_yerleşimi.is_some() || seri.etiket_çizgisi.is_some() {
-        yerleşimli_saçılım_etiketlerini_çiz(çizici, seri, noktalar, opaklık, &nokta_rengi);
+        yerleşimli_saçılım_etiketlerini_çiz(
+            çizici,
+            seri,
+            noktalar,
+            opaklık,
+            &nokta_rengi,
+            bağlı_öteleme,
+        );
     } else {
         for nokta in noktalar {
             let renk = nokta_rengi(nokta);
@@ -1627,6 +1725,7 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
                                 AfinMatris::ötele(çapa.0, çapa.1)
                                     .çarp(AfinMatris::döndür(-derece.to_radians())),
                             ),
+                            bağlı_öteleme,
                         );
                     }
                     _ => {
@@ -1641,6 +1740,7 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
                             etiket.yazı.kalın,
                             etiket_konturu,
                             None,
+                            bağlı_öteleme,
                         );
                     }
                 }
@@ -1679,6 +1779,7 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
                         etiket.yazı.kalın,
                         etiket_konturu,
                         Some(dönüşüm),
+                        bağlı_öteleme,
                     );
                 } else {
                     saçılım_etiketini_yaz(
@@ -1692,6 +1793,7 @@ pub fn saçılım_çiz_çoklu_eşlemeli(
                         etiket.yazı.kalın,
                         etiket_konturu,
                         None,
+                        bağlı_öteleme,
                     );
                 }
             }

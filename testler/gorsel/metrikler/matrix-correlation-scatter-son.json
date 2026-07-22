@@ -1,0 +1,19 @@
+{
+  "id": "matrix-correlation-scatter",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2647,
+  "değişen_piksel_oranı": 0.009803703703703703,
+  "ssim": 0.9938157834722462,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/matrix-correlation-scatter.png",
+    "gerçek": "testler/gorsel/gerçek/default/matrix-correlation-scatter.png",
+    "fark": "testler/gorsel/fark/default/matrix-correlation-scatter.png"
+  }
+}

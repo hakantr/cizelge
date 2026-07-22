@@ -44,6 +44,53 @@ fn denetleyici_zemini(eşleme: &GörselEşleme) -> Renk {
         .unwrap_or_else(tema::devre_dışı)
 }
 
+/// `VisualMapModel.completeVisualOption` ile
+/// `ContinuousModel.completeVisualOption` tarafından kurulan denetleyici
+/// `symbolSize` uçları. Hedef sembol boyutu önce `itemWidth` içine
+/// normalleştirilir; değişken bir kanalda düşük uç, okunabilir bir yamuk için
+/// yüksek ucun üçte birine sabitlenir.
+fn denetleyici_sembol_uçları(eşleme: &GörselEşleme, öğe_genişliği: f32) -> [f32; 2] {
+    let öğe_genişliği = öğe_genişliği.max(0.1);
+    let Some([düşük, yüksek]) = eşleme.sembol_boyutu.or(eşleme.aralık_dışı_sembol_boyutu)
+    else {
+        return [öğe_genişliği; 2];
+    };
+    if (düşük - yüksek).abs() <= f32::EPSILON {
+        return [öğe_genişliği; 2];
+    }
+    let en_büyük = düşük.max(yüksek);
+    let yüksek = if en_büyük > f32::EPSILON {
+        öğe_genişliği * yüksek / en_büyük
+    } else {
+        öğe_genişliği
+    };
+    [yüksek / 3.0, yüksek]
+}
+
+/// zrender `Path.getInsideTextFill/getInsideTextStroke` karşılığı. Açık
+/// path dolgusunda koyu metin kontursuzdur; orta/koyu dolguda seçilen açık
+/// metin yalnız arka plan kipiyle aynı parlaklık sınıfındaysa path rengiyle
+/// 2 px otomatik kontur alır.
+fn ısı_iç_etiket_stili(açık_renk: Option<Renk>, dolgu: Renk) -> (Renk, Option<Renk>) {
+    let parlaklık = 0.299 * dolgu.kırmızı + 0.587 * dolgu.yeşil + 0.114 * dolgu.mavi;
+    let metin = açık_renk.unwrap_or_else(|| {
+        if parlaklık > 0.5 {
+            Renk::onaltılık(0x333333)
+        } else if parlaklık > 0.2 {
+            Renk::onaltılık(0xeeeeee)
+        } else {
+            Renk::onaltılık(0xcccccc)
+        }
+    });
+    if açık_renk.is_some() {
+        return (metin, None);
+    }
+    let metin_parlaklığı = 0.299 * metin.kırmızı + 0.587 * metin.yeşil + 0.114 * metin.mavi;
+    let koyu_metin = metin_parlaklığı < 0.4;
+    let kontur = (tema::koyu_mu() == koyu_metin).then_some(dolgu);
+    (metin, kontur)
+}
+
 /// Isı haritası serisinin değer kapsamı (görsel eşleme için).
 pub fn ısı_değer_kapsamı(seri: &IsıHaritasıSerisi) -> [f64; 2] {
     let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
@@ -194,30 +241,34 @@ pub fn ısı_haritası_çiz(
 
         if seri.etiket.göster {
             let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            // HeatmapView'in görsel renge göre otomatik iç etiket karşıtı:
-            // açık hücrede legacy `#333`, koyu hücrede `#eee`.
-            let parlaklık = 0.299 * renk.kırmızı + 0.587 * renk.yeşil + 0.114 * renk.mavi;
-            let yazı_rengi = seri.etiket.yazı.renk.unwrap_or(if parlaklık < 0.55 {
-                Renk::onaltılık(0xeeeeee)
+            let (yazı_rengi, kontur) = ısı_iç_etiket_stili(seri.etiket.yazı.renk, renk);
+            let dönüşüm = AfinMatris::ötele(d.merkez().0, d.merkez().1 + 0.5);
+            let metin = ısı_etiket_metni(seri, öğe, değer);
+            if let Some(kontur) = kontur {
+                çizici.dönüşümlü_konturlu_yazı(
+                    &metin,
+                    (0.0, 0.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                    boyut,
+                    yazı_rengi,
+                    false,
+                    kontur,
+                    2.0,
+                    dönüşüm,
+                );
             } else {
-                Renk::onaltılık(0x333333)
-            });
-            // HeatmapView, otomatik etiket dolgusunun altına hücrenin
-            // görsel rengiyle 2 px `textBorder` koyar. Bu, rakamın
-            // kenarındaki alt-piksel örtüşmenin komşu hücre/eksen
-            // rengine karışmasını engeller.
-            çizici.dönüşümlü_konturlu_yazı(
-                &ısı_etiket_metni(seri, öğe, değer),
-                (0.0, 0.0),
-                YatayHiza::Orta,
-                DikeyHiza::Orta,
-                boyut,
-                yazı_rengi,
-                false,
-                renk,
-                2.0,
-                AfinMatris::ötele(d.merkez().0, d.merkez().1 + 0.5),
-            );
+                çizici.dönüşümlü_yazı(
+                    &metin,
+                    (0.0, 0.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                    boyut,
+                    yazı_rengi,
+                    false,
+                    dönüşüm,
+                );
+            }
         }
 
         isabetler.push(İsabetBölgesi {
@@ -356,27 +407,38 @@ pub fn matris_ısı_haritası_çiz(
         );
         if seri.etiket.göster {
             let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
-            let parlaklık = 0.299 * renk.kırmızı + 0.587 * renk.yeşil + 0.114 * renk.mavi;
-            let yazı_rengi = seri.etiket.yazı.renk.unwrap_or(if parlaklık < 0.55 {
-                Renk::onaltılık(0xeeeeee)
+            let (yazı_rengi, kontur) = ısı_iç_etiket_stili(seri.etiket.yazı.renk, renk);
+            // Matrix HeatmapView etiketi hücrenin ham merkezine bağlar;
+            // Matrix bileşeninin alt-piksel çizgileri seri etiketini ayrıca
+            // yarım piksel aşağı taşımaz.
+            let metin = ısı_etiket_metni(seri, öğe, değer);
+            if let Some(kontur) = kontur {
+                let dönüşüm = AfinMatris::ötele(kutu.merkez().0, kutu.merkez().1 + 0.36);
+                çizici.dönüşümlü_konturlu_yazı(
+                    &metin,
+                    (0.0, 0.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                    boyut,
+                    yazı_rengi,
+                    seri.etiket.yazı.kalın,
+                    kontur,
+                    2.0,
+                    dönüşüm,
+                );
             } else {
-                Renk::onaltılık(0x333333)
-            });
-            çizici.dönüşümlü_konturlu_yazı(
-                &ısı_etiket_metni(seri, öğe, değer),
-                (0.0, 0.0),
-                YatayHiza::Orta,
-                DikeyHiza::Orta,
-                boyut,
-                yazı_rengi,
-                seri.etiket.yazı.kalın,
-                renk,
-                2.0,
-                // Matrix HeatmapView etiketi hücrenin ham merkezine bağlar;
-                // Matrix bileşeninin alt-piksel çizgileri seri etiketini
-                // ayrıca yarım piksel aşağı taşımaz.
-                AfinMatris::ötele(kutu.merkez().0, kutu.merkez().1),
-            );
+                let dönüşüm = AfinMatris::ötele(kutu.merkez().0, kutu.merkez().1 + 0.2);
+                çizici.dönüşümlü_yazı(
+                    &metin,
+                    (0.0, 0.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                    boyut,
+                    yazı_rengi,
+                    seri.etiket.yazı.kalın,
+                    dönüşüm,
+                );
+            }
         }
         isabetler.push(İsabetBölgesi {
             seri_sırası: genel_sıra,
@@ -716,21 +778,8 @@ pub fn görsel_eşleme_çiz(
             || eşleme.sol == YatayKonum::Sağ
             || sayısal_sol.is_some_and(|sol| sol > çizici.genişlik() / 2.0);
 
-        // ControllerModel, değişken hedef symbolSize kanalını itemWidth'e
-        // normalleştirir ve okunaklı bir yamuğa ulaşmak için küçük ucu büyük
-        // ucun üçte birine tamamlar.
-        let değişken_sembol = eşleme
-            .sembol_boyutu
-            .is_some_and(|[düşük, yüksek]| (düşük - yüksek).abs() > f32::EPSILON);
-        let denetleyici_boyutu = |oran: f32| {
-            if değişken_sembol {
-                şerit_genişliği / 3.0 + şerit_genişliği * (2.0 / 3.0) * oran
-            } else {
-                şerit_genişliği
-            }
-        };
-        let alt_uç_boyutu = denetleyici_boyutu(0.0);
-        let üst_uç_boyutu = denetleyici_boyutu(1.0);
+        let [alt_uç_boyutu, üst_uç_boyutu] = denetleyici_sembol_uçları(eşleme, şerit_genişliği);
+        let denetleyici_boyutu = |oran: f32| alt_uç_boyutu + (üst_uç_boyutu - alt_uç_boyutu) * oran;
         let yerel_başlangıç = |uç_boyutu: f32| {
             if sağa_yaslı {
                 0.0
@@ -942,18 +991,28 @@ pub fn görsel_eşleme_çiz(
         const İÇ_BOŞLUK: f32 = 15.0;
         let şerit_genişliği = eşleme.öğe_yüksekliği.unwrap_or(140.0).max(0.1);
         let şerit_yüksekliği = eşleme.öğe_genişliği.unwrap_or(20.0).max(0.1);
-        let tutamaç_genişliği = şerit_yüksekliği * (7.793_104 / 20.0);
-        let tutamaç_yüksekliği = şerit_yüksekliği * (26.0 / 20.0);
+        let [alt_uç_boyutu, üst_uç_boyutu] = denetleyici_sembol_uçları(eşleme, şerit_yüksekliği);
+        let denetleyici_boyutu = |oran: f32| alt_uç_boyutu + (üst_uç_boyutu - alt_uç_boyutu) * oran;
+        let tutamaç_taban_genişliği = şerit_yüksekliği * (7.793_104 / 20.0);
+        let tutamaç_taban_yüksekliği = şerit_yüksekliği * (26.0 / 20.0);
+        let tutamaç_boyutu = |uç_boyutu: f32| {
+            let ölçek = uç_boyutu / şerit_yüksekliği;
+            (
+                tutamaç_taban_genişliği * ölçek,
+                tutamaç_taban_yüksekliği * ölçek,
+            )
+        };
         let boyut = tema::YAZI_KÜÇÜK;
         let seçili = eşleme.seçili_kapsam(kapsam);
         let düşük = görsel_eşleme_değer_metni(seçili[0], eşleme.hassasiyet);
         let yüksek = görsel_eşleme_değer_metni(seçili[1], eşleme.hassasiyet);
         let düşük_genişliği = çizici.yazı_ölç(&düşük, boyut).0;
         let yüksek_genişliği = çizici.yazı_ölç(&yüksek, boyut).0;
-        let yarım_tutamaç = tutamaç_genişliği / 2.0;
-        let içerik_solu = (-düşük_genişliği / 2.0).min(-yarım_tutamaç);
-        let içerik_sağı =
-            (şerit_genişliği + yüksek_genişliği / 2.0).max(şerit_genişliği + yarım_tutamaç);
+        let (alt_tutamaç_genişliği, alt_tutamaç_yüksekliği) = tutamaç_boyutu(alt_uç_boyutu);
+        let (üst_tutamaç_genişliği, üst_tutamaç_yüksekliği) = tutamaç_boyutu(üst_uç_boyutu);
+        let içerik_solu = (-düşük_genişliği / 2.0).min(-alt_tutamaç_genişliği / 2.0);
+        let içerik_sağı = (şerit_genişliği + yüksek_genişliği / 2.0)
+            .max(şerit_genişliği + üst_tutamaç_genişliği / 2.0);
         let dış_solu = içerik_solu - İÇ_BOŞLUK;
         let dış_sağı = içerik_sağı + İÇ_BOŞLUK;
         let dış_genişlik = dış_sağı - dış_solu;
@@ -972,7 +1031,9 @@ pub fn görsel_eşleme_çiz(
         // tutamaç ve 15 px padding'in oluşturduğu bütün dış kutuya uygulanır.
         const ETİKET_BOŞLUĞU: f32 = 14.0;
         const ETİKET_YARI_YÜKSEKLİĞİ: f32 = 6.0;
-        let tutamaç_taşması = (tutamaç_yüksekliği - şerit_yüksekliği) / 2.0;
+        let tutamaç_taşması =
+            ((alt_tutamaç_yüksekliği.max(üst_tutamaç_yüksekliği) - şerit_yüksekliği) / 2.0)
+                .max(0.0);
         let dış_yükseklik = 2.0 * İÇ_BOŞLUK
             + şerit_yüksekliği
             + tutamaç_taşması
@@ -998,43 +1059,57 @@ pub fn görsel_eşleme_çiz(
             };
         let duraklar = denetleyici_durakları(eşleme);
         let şerit = Dikdörtgen::yeni(şerit_x, şerit_y, şerit_genişliği, şerit_yüksekliği);
-        çizici.dikdörtgen(
-            şerit,
-            &Dolgu::Düz(denetleyici_zemini(eşleme)),
-            [3.0; 4],
-            None,
-        );
+        let uç_üstü = |uç_boyutu: f32| {
+            if etiket_altta {
+                şerit.alt() - uç_boyutu
+            } else {
+                şerit.y
+            }
+        };
+        let yamuk = |sol_x: f32, sol_boyut: f32, sağ_x: f32, sağ_boyut: f32| {
+            let mut yol = Yol::yeni();
+            yol.taşı((sol_x, uç_üstü(sol_boyut)));
+            yol.çiz((sol_x, uç_üstü(sol_boyut) + sol_boyut));
+            yol.çiz((sağ_x, uç_üstü(sağ_boyut) + sağ_boyut));
+            yol.çiz((sağ_x, uç_üstü(sağ_boyut)));
+            yol.kapat();
+            yol
+        };
+        let dış_yamuk = yamuk(şerit.x, alt_uç_boyutu, şerit.sağ(), üst_uç_boyutu);
+        çizici.yol_doldur(&dış_yamuk, &Dolgu::Düz(denetleyici_zemini(eşleme)));
         let açıklık = (kapsam[1] - kapsam[0]).max(f64::EPSILON);
         let oran = |değer: f64| ((değer - kapsam[0]) / açıklık).clamp(0.0, 1.0) as f32;
         let alt_oran = oran(seçili[0]);
         let üst_oran = oran(seçili[1]);
+        let alt_boyut = denetleyici_boyutu(alt_oran);
+        let üst_boyut = denetleyici_boyutu(üst_oran);
         let seçili_kutu = Dikdörtgen::yeni(
             şerit.x + alt_oran * şerit.genişlik,
             şerit.y,
             ((üst_oran - alt_oran) * şerit.genişlik).max(0.1),
             şerit.yükseklik,
         );
-        çizici.kırpılı(seçili_kutu, &mut |yüzey| {
-            yüzey.dikdörtgen(
-                şerit,
-                &crate::renk::Dolgu::doğrusal(0.0, 0.0, 1.0, 0.0, duraklar.clone()),
-                [3.0; 4],
-                None,
-            );
-        });
+        let seçili_yamuk = yamuk(seçili_kutu.x, alt_boyut, seçili_kutu.sağ(), üst_boyut);
+        çizici.yol_doldur(
+            &seçili_yamuk,
+            &crate::renk::Dolgu::doğrusal(0.0, 0.0, 1.0, 0.0, duraklar),
+        );
 
-        let tutamaç_y = şerit_y - (tutamaç_yüksekliği - şerit_yüksekliği) / 2.0;
+        let (alt_tutamaç_genişliği, alt_tutamaç_yüksekliği) = tutamaç_boyutu(alt_boyut);
+        let (üst_tutamaç_genişliği, üst_tutamaç_yüksekliği) = tutamaç_boyutu(üst_boyut);
+        let alt_merkez_y = uç_üstü(alt_boyut) + alt_boyut / 2.0;
+        let üst_merkez_y = uç_üstü(üst_boyut) + üst_boyut / 2.0;
         let alt_tutamaç = Dikdörtgen::yeni(
-            şerit.x + alt_oran * şerit.genişlik - yarım_tutamaç,
-            tutamaç_y,
-            tutamaç_genişliği,
-            tutamaç_yüksekliği,
+            şerit.x + alt_oran * şerit.genişlik - alt_tutamaç_genişliği / 2.0,
+            alt_merkez_y - alt_tutamaç_yüksekliği / 2.0,
+            alt_tutamaç_genişliği,
+            alt_tutamaç_yüksekliği,
         );
         let üst_tutamaç = Dikdörtgen::yeni(
-            şerit.x + üst_oran * şerit.genişlik - yarım_tutamaç,
-            tutamaç_y,
-            tutamaç_genişliği,
-            tutamaç_yüksekliği,
+            şerit.x + üst_oran * şerit.genişlik - üst_tutamaç_genişliği / 2.0,
+            üst_merkez_y - üst_tutamaç_yüksekliği / 2.0,
+            üst_tutamaç_genişliği,
+            üst_tutamaç_yüksekliği,
         );
         for (oran, tutamaç) in [(alt_oran, alt_tutamaç), (üst_oran, üst_tutamaç)] {
             çizici.dikdörtgen(
@@ -1049,9 +1124,17 @@ pub fn görsel_eşleme_çiz(
         } else {
             şerit_y - ETİKET_BOŞLUĞU
         };
+        let uç_etiket_y = |uç_boyutu: f32| {
+            let küçük_uç_düzeltmesi = (şerit_yüksekliği - uç_boyutu) * 0.2;
+            if etiket_altta {
+                etiket_y - küçük_uç_düzeltmesi
+            } else {
+                etiket_y + küçük_uç_düzeltmesi
+            }
+        };
         çizici.yazı(
             &düşük,
-            (şerit.x + alt_oran * şerit.genişlik, etiket_y),
+            (şerit.x + alt_oran * şerit.genişlik, uç_etiket_y(alt_boyut)),
             YatayHiza::Orta,
             DikeyHiza::Orta,
             boyut,
@@ -1060,7 +1143,7 @@ pub fn görsel_eşleme_çiz(
         );
         çizici.yazı(
             &yüksek,
-            (şerit.x + üst_oran * şerit.genişlik, etiket_y),
+            (şerit.x + üst_oran * şerit.genişlik, uç_etiket_y(üst_boyut)),
             YatayHiza::Orta,
             DikeyHiza::Orta,
             boyut,
@@ -1272,6 +1355,30 @@ mod sürekli_bölge_testleri {
     }
 
     #[test]
+    fn heatmap_otomatik_ic_etiket_kontrast_ve_konturu_zrenderi_izler() {
+        tema::koyu_ayarla(false);
+
+        let (açık_metin, açık_kontur) = ısı_iç_etiket_stili(None, Renk::onaltılık(0xd1daf6));
+        assert_eq!(açık_metin, Renk::onaltılık(0x333333));
+        assert_eq!(açık_kontur, None);
+
+        let orta_dolgu = Renk::onaltılık(0x5070dd);
+        let (orta_metin, orta_kontur) = ısı_iç_etiket_stili(None, orta_dolgu);
+        assert_eq!(orta_metin, Renk::onaltılık(0xeeeeee));
+        assert_eq!(orta_kontur, Some(orta_dolgu));
+
+        let koyu_dolgu = Renk::onaltılık(0x000000);
+        let (koyu_metin, koyu_kontur) = ısı_iç_etiket_stili(None, koyu_dolgu);
+        assert_eq!(koyu_metin, Renk::onaltılık(0xcccccc));
+        assert_eq!(koyu_kontur, Some(koyu_dolgu));
+
+        let açıkça_kırmızı = Renk::onaltılık(0xff0000);
+        let (metin, kontur) = ısı_iç_etiket_stili(Some(açıkça_kırmızı), orta_dolgu);
+        assert_eq!(metin, açıkça_kırmızı);
+        assert_eq!(kontur, None);
+    }
+
+    #[test]
     fn tutamaçlar_seçili_şeritten_önce_isabet_alır() {
         let bölge = bölge();
 
@@ -1421,5 +1528,36 @@ mod sürekli_bölge_testleri {
         let yüksek = kayıt.find("yazı \"1000\"").expect("üst uç etiketi");
         assert!(düşük < yüksek);
         assert!(kayıt[düşük..].contains("(274.7,52.0)"));
+    }
+
+    #[test]
+    fn yatay_sembol_boyutu_denetcisi_yamuk_ve_orantili_tutamac_cizer() {
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eşleme = GörselEşleme::yeni()
+            .en_az(-1.0)
+            .en_çok(1.0)
+            .renkler(["#313695", "#a50026"])
+            .sembol_boyutu(15.0, 40.0)
+            .hesaplanabilir(true)
+            .yön(Yön::Yatay)
+            .sol("center")
+            .üst(5);
+
+        let çıktı = görsel_eşleme_çiz(&mut yüzey, &eşleme, [-1.0, 1.0]);
+        let bölge = çıktı.sürekli.expect("yatay isabet bölgesi");
+
+        assert!(!bölge.dikey);
+        assert!((bölge.alt_tutamaç.genişlik * 3.0 - bölge.üst_tutamaç.genişlik).abs() < 1e-4);
+        assert!((bölge.alt_tutamaç.yükseklik * 3.0 - bölge.üst_tutamaç.yükseklik).abs() < 1e-4);
+        assert!(bölge.alt_tutamaç.y > bölge.üst_tutamaç.y);
+        let kayıt = yüzey.döküm();
+        assert!(kayıt.contains("doldur #cfd2d7@1.0 | T("), "{kayıt}");
+        assert!(kayıt.contains("doldur doğrusal"), "{kayıt}");
+
+        // Controller sembol boyutu önce hedef kanalın en büyük değerine
+        // göre `itemWidth` içine normalleştirilir; sonra ilk uç ikinci ucun
+        // üçte birine tamamlanır.
+        let ters = GörselEşleme::yeni().sembol_boyutu(40.0, 15.0);
+        assert_eq!(denetleyici_sembol_uçları(&ters, 20.0), [2.5, 7.5]);
     }
 }

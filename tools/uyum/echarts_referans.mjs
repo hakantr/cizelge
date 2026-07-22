@@ -793,7 +793,7 @@ async function çalıştır() {
           });
         });
         chart.getModel().eachSeries((model) => {
-          if (model.subType !== 'heatmap') return;
+          if (model.subType !== 'heatmap' && model.subType !== 'scatter') return;
           const view = chart.getViewOfSeriesModel(model);
           const öğeler = [];
           view?.group?.traverse?.((öğe) => {
@@ -807,6 +807,7 @@ async function çalıştır() {
             const bağlıDünya = bağlıYerel?.clone?.();
             const bağlıDönüşüm = bağlıMetin?.getComputedTransform?.();
             if (bağlıDünya && bağlıDönüşüm) bağlıDünya.applyTransform(bağlıDönüşüm);
+            const desenÖğesi = öğe.getDecalElement?.();
             öğeler.push({
               tür: öğe.type,
               şekil: öğe.shape,
@@ -815,8 +816,16 @@ async function çalıştır() {
                 fill: öğe.style.fill,
                 stroke: öğe.style.stroke,
                 lineWidth: öğe.style.lineWidth,
+                opacity: öğe.style.opacity,
                 shadowBlur: öğe.style.shadowBlur,
                 shadowColor: öğe.style.shadowColor
+              } : null,
+              desenStili: desenÖğesi?.style ? {
+                opacity: desenÖğesi.style.opacity,
+                fillOpacity: desenÖğesi.style.fillOpacity,
+                dolguDeseni: Boolean(desenÖğesi.style.fill?.image),
+                stroke: desenÖğesi.style.stroke,
+                lineWidth: desenÖğesi.style.lineWidth
               } : null,
               etiket: bağlıMetin ? {
                 metin: bağlıMetin.style?.text,
@@ -1002,6 +1011,10 @@ async function çalıştır() {
               offset: veri.getLayout('offset'),
               size: veri.getLayout('size')
             },
+            örnekDesenler: Array.from(
+              {length: Math.min(veri.count?.() || 0, 32)},
+              (_, sıra) => veri.getItemVisual?.(sıra, 'decal')
+            ),
             örnekNokta: koordinat?.dataToPoint?.([419, 0]),
             pastaÖğeleri
           });
@@ -1052,6 +1065,8 @@ async function çalıştır() {
               metin: öğe.style?.text,
               font: öğe.style?.font,
               dolgu: öğe.style?.fill,
+              kontur: öğe.style?.stroke,
+              konturKalınlığı: öğe.style?.lineWidth,
               x: öğe.x,
               y: öğe.y,
               hiza: öğe.style?.align,

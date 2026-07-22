@@ -10,8 +10,8 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use gpui::{
-    Bounds, Context, EventEmitter, MouseButton, MouseDownEvent, MouseMoveEvent, MouseUpEvent,
-    Pixels, Render, ScrollWheelEvent, Window, canvas, div, prelude::*,
+    Bounds, Context, CursorStyle, EventEmitter, MouseButton, MouseDownEvent, MouseMoveEvent,
+    MouseUpEvent, Pixels, Render, ScrollWheelEvent, Window, canvas, div, prelude::*,
 };
 
 use crate::bilesen::grafik::GrafikSahnesi;
@@ -24,7 +24,7 @@ use crate::cizim::gorunum::{
     AraçTürü, BoyamaGirdisi, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya, gösterge_adları,
     İçYakınlaştırmaAlanı,
 };
-use crate::cizim::olay::{GrafikOlayı, İsabetBölgesi};
+use crate::cizim::olay::{GrafikOlayı, MatrisHücreBölgesi, İsabetBölgesi};
 use crate::grafik::isi::{GörselEşlemeSürgüParçası, SürekliGörselEşlemeBölgesi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
@@ -65,6 +65,35 @@ type KırıntıKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
 /// Son boyamadaki `graphic` sahnesi ve pencere-mutlak tuval kökeni.
 type GrafikSahneKaydı = Rc<RefCell<Option<(GrafikSahnesi, (f32, f32))>>>;
 
+/// Matrix bileşen hücrelerinin pencere-mutlak etkileşim kayıtları.
+type MatrisHücreKayıtları = Rc<RefCell<Vec<MatrisHücreBölgesi>>>;
+
+fn gpui_imleci(ad: &str) -> CursorStyle {
+    match ad.trim().to_ascii_lowercase().as_str() {
+        "pointer" => CursorStyle::PointingHand,
+        "text" => CursorStyle::IBeam,
+        "vertical-text" => CursorStyle::IBeamCursorForVerticalLayout,
+        "crosshair" => CursorStyle::Crosshair,
+        "grab" | "open-hand" => CursorStyle::OpenHand,
+        "grabbing" | "closed-hand" | "move" => CursorStyle::ClosedHand,
+        "not-allowed" | "no-drop" => CursorStyle::OperationNotAllowed,
+        "alias" => CursorStyle::DragLink,
+        "copy" => CursorStyle::DragCopy,
+        "context-menu" => CursorStyle::ContextualMenu,
+        "col-resize" => CursorStyle::ResizeColumn,
+        "row-resize" => CursorStyle::ResizeRow,
+        "ew-resize" => CursorStyle::ResizeLeftRight,
+        "ns-resize" => CursorStyle::ResizeUpDown,
+        "nesw-resize" => CursorStyle::ResizeUpRightDownLeft,
+        "nwse-resize" => CursorStyle::ResizeUpLeftDownRight,
+        "n-resize" => CursorStyle::ResizeUp,
+        "e-resize" => CursorStyle::ResizeRight,
+        "s-resize" => CursorStyle::ResizeDown,
+        "w-resize" => CursorStyle::ResizeLeft,
+        _ => CursorStyle::Arrow,
+    }
+}
+
 /// Zaman şeridi (timeline) durumu: kare listesi + oynatma.
 struct Film {
     kareler: Vec<Arc<GrafikSeçenekleri>>,
@@ -88,6 +117,8 @@ pub struct GrafikGörünümü {
     gösterge_kutuları: GöstergeKutuları,
     /// Pencere-mutlak isabet bölgeleri (tıklama olayları için).
     isabetler: Rc<RefCell<Vec<İsabetBölgesi>>>,
+    /// Matrix bileşeninin tooltip/triggerEvent/cursor hedefleri.
+    matris_hücreleri: MatrisHücreKayıtları,
     /// Boyama sırasında biriken, bir sonraki karede olay olarak yayımlanacak
     /// tanılar.
     bekleyen_tanılar: Rc<RefCell<Vec<BilesenTanisi>>>,
@@ -185,6 +216,7 @@ impl GrafikGörünümü {
             kapalı,
             gösterge_kutuları: Rc::new(RefCell::new(Vec::new())),
             isabetler: Rc::new(RefCell::new(Vec::new())),
+            matris_hücreleri: Rc::new(RefCell::new(Vec::new())),
             bekleyen_tanılar: Rc::new(RefCell::new(Vec::new())),
             sürgü_bölgeleri: Rc::new(RefCell::new(Vec::new())),
             eşleme_kutuları: Rc::new(RefCell::new(Vec::new())),
@@ -543,6 +575,20 @@ impl Render for GrafikGörünümü {
         let zaman_sn = self.başlangıç.elapsed().as_secs_f32();
 
         let fare = self.fare;
+        let etkin_imleç = fare
+            .and_then(|fare| {
+                self.matris_hücreleri
+                    .try_borrow()
+                    .ok()
+                    .and_then(|bölgeler| {
+                        bölgeler
+                            .iter()
+                            .rev()
+                            .find(|bölge| bölge.geometri.içeriyor_mu(fare))
+                            .and_then(|bölge| bölge.imleç.as_deref().map(gpui_imleci))
+                    })
+            })
+            .unwrap_or(CursorStyle::Arrow);
         let kapalı = self.kapalı.clone();
         let gösterge_sayfası = self.gösterge_sayfası;
         let mut fırça_alanları = self.fırça_alanları.clone();
@@ -551,6 +597,7 @@ impl Render for GrafikGörünümü {
         }
         let gösterge_kutuları = self.gösterge_kutuları.clone();
         let isabetler = self.isabetler.clone();
+        let matris_hücreleri = self.matris_hücreleri.clone();
         let tanılar = self.bekleyen_tanılar.clone();
         let sürgüler = self.sürgü_bölgeleri.clone();
         let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
@@ -633,6 +680,18 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             Err(_) => tanı_bildir("isabet_bölgeleri"),
+                        }
+                        match matris_hücreleri.try_borrow_mut() {
+                            Ok(mut bölgeler) => {
+                                bölgeler.clear();
+                                bölgeler.extend(
+                                    çıktı
+                                        .matris_hücreleri
+                                        .iter()
+                                        .map(|bölge| bölge.kaydır(köken.0, köken.1)),
+                                );
+                            }
+                            Err(_) => tanı_bildir("matris_hücreleri"),
                         }
                         let kaydırılmış = |d: Dikdörtgen| {
                             Dikdörtgen::yeni(d.x + köken.0, d.y + köken.1, d.genişlik, d.yükseklik)
@@ -735,7 +794,8 @@ impl Render for GrafikGörünümü {
                         }
                     },
                 )
-                .size_full(),
+                .size_full()
+                .cursor(etkin_imleç),
             )
             .on_mouse_move(cx.listener(|bu, olay: &MouseMoveEvent, _, cx| {
                 let yeni = (f32::from(olay.position.x), f32::from(olay.position.y));
@@ -1331,6 +1391,19 @@ impl Render for GrafikGörünümü {
                             return;
                         }
                     };
+                    let matris_bölgesi = if bölge.is_none() {
+                        bu.matris_hücreleri.try_borrow().ok().and_then(|bölgeler| {
+                            bölgeler
+                                .iter()
+                                .rev()
+                                .find(|bölge| {
+                                    bölge.olay_tetikle && bölge.geometri.içeriyor_mu(nokta)
+                                })
+                                .cloned()
+                        })
+                    } else {
+                        None
+                    };
                     if let Some(b) = bölge {
                         match bu.seçenekler.seriler.get(b.seri_sırası) {
                             // Ağaç haritası / güneş patlaması: dala in (odakla).
@@ -1355,6 +1428,14 @@ impl Render for GrafikGörünümü {
                             seri_adı: b.seri_adı,
                             ad: b.ad,
                             değer: b.değer,
+                        });
+                    } else if let Some(b) = matris_bölgesi {
+                        cx.emit(GrafikOlayı::MatrisHücresiTıklandı {
+                            bileşen_sırası: b.bileşen_sırası,
+                            hedef_türü: b.hedef_türü,
+                            ad: b.ad,
+                            değer: b.değer,
+                            koordinat: b.koordinat,
                         });
                     } else if bu
                         .seçenekler

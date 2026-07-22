@@ -22,7 +22,10 @@ pub mod yuzey;
 pub use cizici::Çizici;
 pub use donusum::AfinMatris;
 pub use kayit::KayıtYüzeyi;
-pub use olay::{GrafikOlayı, SihirliSeriTürü, İsabetBölgesi, İsabetGeometrisi};
+pub use olay::{
+    GrafikOlayı, MatrisHedefTürü, MatrisHücreBölgesi, SihirliSeriTürü, İsabetBölgesi,
+    İsabetGeometrisi,
+};
 #[cfg(feature = "png")]
 pub use piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use sahne::{

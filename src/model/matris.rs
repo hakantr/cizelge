@@ -3,6 +3,7 @@
 use std::{fmt, sync::Arc};
 
 use crate::model::Uzunluk;
+use crate::model::bilesen::İpucu;
 use crate::model::stil::{Etiket, ÇizgiStili, ÖğeStili};
 use crate::renk::Renk;
 
@@ -46,6 +47,44 @@ impl PartialEq for MatrisEtiketiBiçimleyicisi {
     }
 }
 
+/// `matrix.tooltip.formatter(params)` işlevinin resmî bileşen bağlamı.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MatrisİpucuBağlamı {
+    pub bileşen_sırası: usize,
+    pub ad: String,
+    pub koordinat: [isize; 2],
+}
+
+type MatrisİpucuBiçimleyiciİşlevi = dyn Fn(&MatrisİpucuBağlamı) -> String + Send + Sync;
+
+/// Klonlanabilir `matrix.tooltip.formatter(params)` sarmalayıcısı.
+#[derive(Clone)]
+pub struct MatrisİpucuBiçimleyicisi(Arc<MatrisİpucuBiçimleyiciİşlevi>);
+
+impl MatrisİpucuBiçimleyicisi {
+    pub fn yeni(
+        biçimleyici: impl Fn(&MatrisİpucuBağlamı) -> String + Send + Sync + 'static,
+    ) -> Self {
+        Self(Arc::new(biçimleyici))
+    }
+
+    pub fn uygula(&self, bağlam: &MatrisİpucuBağlamı) -> String {
+        (self.0)(bağlam)
+    }
+}
+
+impl fmt::Debug for MatrisİpucuBiçimleyicisi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("MatrisİpucuBiçimleyicisi(..)")
+    }
+}
+
+impl PartialEq for MatrisİpucuBiçimleyicisi {
+    fn eq(&self, diğer: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &diğer.0)
+    }
+}
+
 /// Hiyerarşik x/y başlık hücresi. Yapraklar gövde satır/sütunlarını belirler.
 #[derive(Clone, Debug, PartialEq)]
 pub struct MatrisBoyutHücresi {
@@ -55,6 +94,7 @@ pub struct MatrisBoyutHücresi {
     pub öğe_stili: Option<ÖğeStili>,
     pub etiket: Option<Etiket>,
     pub etiket_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    pub imleç: Option<String>,
     pub sessiz: Option<bool>,
     pub z2: Option<i32>,
 }
@@ -68,6 +108,7 @@ impl MatrisBoyutHücresi {
             öğe_stili: None,
             etiket: None,
             etiket_bağlamlı_biçimleyici: None,
+            imleç: None,
             sessiz: None,
             z2: None,
         }
@@ -106,6 +147,11 @@ impl MatrisBoyutHücresi {
         self
     }
 
+    pub fn imleç(mut self, imleç: impl Into<String>) -> Self {
+        self.imleç = Some(imleç.into());
+        self
+    }
+
     pub fn sessiz(mut self, sessiz: bool) -> Self {
         self.sessiz = Some(sessiz);
         self
@@ -139,6 +185,7 @@ pub struct MatrisBoyutu {
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
     pub etiket_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    pub imleç: Option<String>,
     pub ayırıcı: ÇizgiStili,
     pub sessiz: Option<bool>,
     pub z2: Option<i32>,
@@ -158,6 +205,7 @@ impl Default for MatrisBoyutu {
                 .kenarlık_kalınlığı(1.0),
             etiket: Etiket::yeni().göster(true).uzaklık(0.0),
             etiket_bağlamlı_biçimleyici: None,
+            imleç: None,
             ayırıcı: ÇizgiStili::yeni()
                 // `tokens.color.border`.
                 .renk(Renk::onaltılık(0xb7b9be))
@@ -216,6 +264,11 @@ impl MatrisBoyutu {
         biçimleyici: impl Fn(&MatrisEtiketiBağlamı) -> String + Send + Sync + 'static,
     ) -> Self {
         self.etiket_bağlamlı_biçimleyici = Some(MatrisEtiketiBiçimleyicisi::yeni(biçimleyici));
+        self
+    }
+
+    pub fn imleç(mut self, imleç: impl Into<String>) -> Self {
+        self.imleç = Some(imleç.into());
         self
     }
 
@@ -288,6 +341,7 @@ pub struct MatrisGövdeHücresi {
     pub öğe_stili: Option<ÖğeStili>,
     pub etiket: Option<Etiket>,
     pub etiket_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    pub imleç: Option<String>,
     pub sessiz: Option<bool>,
     pub koordinatı_sınırla: bool,
     pub z2: Option<i32>,
@@ -303,6 +357,7 @@ impl MatrisGövdeHücresi {
             öğe_stili: None,
             etiket: None,
             etiket_bağlamlı_biçimleyici: None,
+            imleç: None,
             sessiz: None,
             koordinatı_sınırla: false,
             z2: None,
@@ -342,6 +397,11 @@ impl MatrisGövdeHücresi {
         self
     }
 
+    pub fn imleç(mut self, imleç: impl Into<String>) -> Self {
+        self.imleç = Some(imleç.into());
+        self
+    }
+
     pub fn sessiz(mut self, sessiz: bool) -> Self {
         self.sessiz = Some(sessiz);
         self
@@ -370,16 +430,20 @@ pub struct MatrisKoordinatı {
     pub gövde_stili: ÖğeStili,
     pub gövde_etiketi: Etiket,
     pub gövde_etiketi_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    pub gövde_imleci: Option<String>,
     pub gövde_sessiz: Option<bool>,
     pub gövde_z2: Option<i32>,
     pub köşe_verisi: Vec<MatrisGövdeHücresi>,
     pub köşe_stili: ÖğeStili,
     pub köşe_etiketi: Etiket,
     pub köşe_etiketi_bağlamlı_biçimleyici: Option<MatrisEtiketiBiçimleyicisi>,
+    pub köşe_imleci: Option<String>,
     pub köşe_sessiz: Option<bool>,
     pub köşe_z2: Option<i32>,
     pub arkaplan_stili: ÖğeStili,
     pub kenarlık_z2: Option<i32>,
+    pub ipucu: Option<İpucu>,
+    pub ipucu_bağlamlı_biçimleyici: Option<MatrisİpucuBiçimleyicisi>,
     pub tetikleme_olayı: bool,
 }
 
@@ -403,12 +467,14 @@ impl Default for MatrisKoordinatı {
                 .kenarlık_kalınlığı(1.0),
             gövde_etiketi: Etiket::yeni().göster(true).uzaklık(0.0),
             gövde_etiketi_bağlamlı_biçimleyici: None,
+            gövde_imleci: None,
             gövde_sessiz: None,
             gövde_z2: None,
             köşe_verisi: Vec::new(),
             köşe_stili: ÖğeStili::yeni(),
             köşe_etiketi: Etiket::yeni().göster(true).uzaklık(0.0),
             köşe_etiketi_bağlamlı_biçimleyici: None,
+            köşe_imleci: None,
             köşe_sessiz: None,
             köşe_z2: None,
             arkaplan_stili: ÖğeStili::yeni()
@@ -416,6 +482,8 @@ impl Default for MatrisKoordinatı {
                 .kenarlık_rengi(Renk::onaltılık(0x54555a))
                 .kenarlık_kalınlığı(1.0),
             kenarlık_z2: None,
+            ipucu: None,
+            ipucu_bağlamlı_biçimleyici: None,
             tetikleme_olayı: false,
         }
     }
@@ -465,6 +533,11 @@ impl MatrisKoordinatı {
         self
     }
 
+    pub fn gövde_imleci(mut self, imleç: impl Into<String>) -> Self {
+        self.gövde_imleci = Some(imleç.into());
+        self
+    }
+
     pub fn gövde_sessiz(mut self, sessiz: bool) -> Self {
         self.gövde_sessiz = Some(sessiz);
         self
@@ -494,6 +567,11 @@ impl MatrisKoordinatı {
         self
     }
 
+    pub fn köşe_imleci(mut self, imleç: impl Into<String>) -> Self {
+        self.köşe_imleci = Some(imleç.into());
+        self
+    }
+
     pub fn köşe_sessiz(mut self, sessiz: bool) -> Self {
         self.köşe_sessiz = Some(sessiz);
         self
@@ -511,6 +589,21 @@ impl MatrisKoordinatı {
 
     pub fn kenarlık_z2(mut self, z2: i32) -> Self {
         self.kenarlık_z2 = Some(z2);
+        self
+    }
+
+    /// Bileşene özel `matrix.tooltip` seçeneği. Global seri ipucundan
+    /// bağımsız olarak başlık/gövde/köşe hücrelerine bağlanır.
+    pub fn ipucu(mut self, ipucu: İpucu) -> Self {
+        self.ipucu = Some(ipucu);
+        self
+    }
+
+    pub fn ipucu_bağlamlı_biçimleyici(
+        mut self,
+        biçimleyici: impl Fn(&MatrisİpucuBağlamı) -> String + Send + Sync + 'static,
+    ) -> Self {
+        self.ipucu_bağlamlı_biçimleyici = Some(MatrisİpucuBiçimleyicisi::yeni(biçimleyici));
         self
     }
 

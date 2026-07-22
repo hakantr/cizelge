@@ -32,6 +32,20 @@ impl Kök {
                     değer.map(|d| d.to_string()).unwrap_or_else(|| "-".into())
                 )
                 .into(),
+                GrafikOlayı::MatrisHücresiTıklandı {
+                    bileşen_sırası,
+                    hedef_türü,
+                    ad,
+                    değer,
+                    koordinat: [x, y],
+                } => format!(
+                    "Matrix {bileşen_sırası} → {hedef_türü:?} [{}, {}], ad: {}, değer: {}",
+                    x,
+                    y,
+                    ad.as_deref().unwrap_or("-"),
+                    değer.as_deref().unwrap_or("-")
+                )
+                .into(),
                 GrafikOlayı::GrafikÖğesiTıklandı { kimlik, ad } => format!(
                     "Graphic tıklandı → kimlik: {}, ad: {}",
                     kimlik.as_deref().unwrap_or("-"),

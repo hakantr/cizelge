@@ -6,9 +6,10 @@
 use std::collections::HashMap;
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
-use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
+use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::koordinat::{Dikdörtgen, MatrisYerleşimi, TakvimYerleşimi};
 use crate::model::seri::{GrafoSerisi, GrafoYerleşimi};
+use crate::model::stil::{EtiketDöndürme, EtiketKonumu, YazıDikeyHizası, YazıYatayHizası};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
@@ -282,16 +283,112 @@ pub fn grafo_çiz(
             )
         });
         çizici.daire(konum, boyut / 2.0, Some(&dolgu), kenarlık);
-        if seri.etiket_göster && düğüm.boyut >= seri.etiket_eşiği {
-            çizici.yazı(
-                &düğüm.ad,
-                (konum.0, konum.1 + boyut / 2.0 + 3.0),
-                YatayHiza::Orta,
-                DikeyHiza::Üst,
-                tema::YAZI_KÜÇÜK,
-                tema::ikincil_metin(),
-                false,
-            );
+        if (seri.etiket_göster || seri.etiket.göster) && düğüm.boyut >= seri.etiket_eşiği {
+            let etiket = &seri.etiket;
+            let uzaklık = etiket.uzaklık;
+            let yarıçap = boyut / 2.0;
+            let (mut çapa, doğal_yatay, doğal_dikey) = match etiket.konum {
+                EtiketKonumu::Üst | EtiketKonumu::Dış => (
+                    (konum.0, konum.1 - yarıçap - uzaklık),
+                    YatayHiza::Orta,
+                    DikeyHiza::Alt,
+                ),
+                EtiketKonumu::Alt => (
+                    (konum.0, konum.1 + yarıçap + uzaklık),
+                    YatayHiza::Orta,
+                    DikeyHiza::Üst,
+                ),
+                EtiketKonumu::Sol => (
+                    (konum.0 - yarıçap - uzaklık, konum.1),
+                    YatayHiza::Sağ,
+                    DikeyHiza::Orta,
+                ),
+                EtiketKonumu::Sağ => (
+                    (konum.0 + yarıçap + uzaklık, konum.1),
+                    YatayHiza::Sol,
+                    DikeyHiza::Orta,
+                ),
+                EtiketKonumu::İçÜst => (
+                    (konum.0, konum.1 - yarıçap / 2.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                ),
+                EtiketKonumu::İçAlt => (
+                    (konum.0, konum.1 + yarıçap / 2.0),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                ),
+                EtiketKonumu::İçSol => (
+                    (konum.0 - yarıçap / 2.0, konum.1),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                ),
+                EtiketKonumu::İçSağ => (
+                    (konum.0 + yarıçap / 2.0, konum.1),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                ),
+                _ => (konum, YatayHiza::Orta, DikeyHiza::Orta),
+            };
+            çapa.0 += etiket.kayma.0;
+            çapa.1 += etiket.kayma.1;
+            let yatay = etiket
+                .yatay_hiza
+                .map(|hiza| match hiza {
+                    YazıYatayHizası::Sol => YatayHiza::Sol,
+                    YazıYatayHizası::Orta => YatayHiza::Orta,
+                    YazıYatayHizası::Sağ => YatayHiza::Sağ,
+                })
+                .unwrap_or(doğal_yatay);
+            let dikey = etiket
+                .dikey_hiza
+                .map(|hiza| match hiza {
+                    YazıDikeyHizası::Üst => DikeyHiza::Üst,
+                    YazıDikeyHizası::Orta => DikeyHiza::Orta,
+                    YazıDikeyHizası::Alt => DikeyHiza::Alt,
+                })
+                .unwrap_or(doğal_dikey);
+            let metin = etiket
+                .biçimleyici
+                .as_ref()
+                .map(|biçimleyici| {
+                    biçimleyici.uygula_bağlamla(
+                        düğüm.değer.unwrap_or_default(),
+                        &düğüm.ad,
+                        seri.ad.as_deref().unwrap_or_default(),
+                        &düğüm.ad,
+                    )
+                })
+                .unwrap_or_else(|| düğüm.ad.clone());
+            let satırlar = metin.split('\n').collect::<Vec<_>>();
+            let yazı_boyutu = etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+            let satır_yüksekliği = etiket.yazı.satır_yüksekliği.unwrap_or(yazı_boyutu);
+            let toplam_yükseklik = satır_yüksekliği * satırlar.len() as f32;
+            let ilk_satır_y = match dikey {
+                DikeyHiza::Üst => yazı_boyutu / 2.0,
+                DikeyHiza::Orta => -toplam_yükseklik / 2.0 + yazı_boyutu / 2.0,
+                DikeyHiza::Alt => -toplam_yükseklik + yazı_boyutu / 2.0,
+            };
+            let dönüşüm = match etiket.döndürme {
+                EtiketDöndürme::Derece(derece) => AfinMatris::ötele(çapa.0, çapa.1)
+                    .çarp(AfinMatris::döndür(-derece.to_radians())),
+                _ => AfinMatris::ötele(çapa.0, çapa.1),
+            };
+            for (sıra, satır) in satırlar.into_iter().enumerate() {
+                if satır.is_empty() {
+                    continue;
+                }
+                çizici.dönüşümlü_yazı(
+                    satır,
+                    (0.0, ilk_satır_y + sıra as f32 * satır_yüksekliği),
+                    yatay,
+                    DikeyHiza::Orta,
+                    yazı_boyutu,
+                    etiket.yazı.renk.unwrap_or_else(tema::ikincil_metin),
+                    etiket.yazı.kalın,
+                    dönüşüm,
+                );
+            }
         }
         isabetler.push(İsabetBölgesi {
             seri_sırası: genel_sıra,

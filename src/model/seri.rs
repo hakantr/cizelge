@@ -3975,6 +3975,10 @@ pub struct GrafoSerisi {
     pub etiket_eşiği: f32,
     /// Normal durumda etiket çizilir mi (`label.show`).
     pub etiket_göster: bool,
+    /// Düğüm etiketi seçenekleri (`label`). Eski `etiket_göster` alanı
+    /// kaynak uyumu için korunur; çizim ikisinden herhangi biri açıksa
+    /// etiketi üretir.
+    pub etiket: Etiket,
     /// Takvim koordinatına bağlıysa `calendarIndex`.
     pub takvim_sırası: Option<usize>,
     /// Matrix koordinatına bağlıysa `matrixIndex`.
@@ -4003,6 +4007,7 @@ impl Default for GrafoSerisi {
             kenar_uzunluğu: 1.0,
             etiket_eşiği: 12.0,
             etiket_göster: false,
+            etiket: Etiket::yeni(),
             takvim_sırası: None,
             matris_sırası: None,
             z: 2,
@@ -4044,6 +4049,13 @@ impl GrafoSerisi {
 
     pub fn etiket_göster(mut self, göster: bool) -> Self {
         self.etiket_göster = göster;
+        self.etiket.göster = göster;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket_göster = etiket.göster;
+        self.etiket = etiket;
         self
     }
 

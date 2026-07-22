@@ -1,0 +1,199 @@
+{
+  "id": "matrix-periodic-table",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2530,
+  "değişen_piksel_oranı": 0.009370370370370371,
+  "ssim": 0.9933536962426698,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 5916,
+    "değişen_piksel_oranı": 0.02191111111111111,
+    "ssim": 0.9874441715970785
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "periyodik_tablo_hücre_geometrisi",
+      "geçti": true,
+      "açıklama": "s/p/d/f bloklarının ham hücre dolguları resmî koordinatlarda aynı kalmalı",
+      "örnekler": [
+        {
+          "x": 4,
+          "y": 115,
+          "referans": [
+            255,
+            136,
+            136
+          ],
+          "gerçek": [
+            255,
+            136,
+            136
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 4,
+          "y": 146,
+          "referans": [
+            255,
+            135,
+            135
+          ],
+          "gerçek": [
+            255,
+            135,
+            135
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 73,
+          "y": 180,
+          "referans": [
+            136,
+            187,
+            254
+          ],
+          "gerçek": [
+            136,
+            187,
+            254
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 112,
+          "y": 214,
+          "referans": [
+            136,
+            187,
+            255
+          ],
+          "gerçek": [
+            136,
+            187,
+            255
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 448,
+          "y": 302,
+          "referans": [
+            136,
+            187,
+            254
+          ],
+          "gerçek": [
+            136,
+            187,
+            254
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 459,
+          "y": 115,
+          "referans": [
+            255,
+            255,
+            136
+          ],
+          "gerçek": [
+            255,
+            255,
+            136
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 500,
+          "y": 146,
+          "referans": [
+            255,
+            255,
+            135
+          ],
+          "gerçek": [
+            255,
+            255,
+            135
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 73,
+          "y": 345,
+          "referans": [
+            136,
+            255,
+            136
+          ],
+          "gerçek": [
+            136,
+            255,
+            136
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 110,
+          "y": 377,
+          "referans": [
+            135,
+            255,
+            135
+          ],
+          "gerçek": [
+            135,
+            255,
+            135
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        },
+        {
+          "x": 550,
+          "y": 400,
+          "referans": [
+            136,
+            255,
+            136
+          ],
+          "gerçek": [
+            136,
+            255,
+            136
+          ],
+          "en_büyük_kanal_farkı": 0,
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/matrix-periodic-table.png",
+    "gerçek": "testler/gorsel/gerçek/default/matrix-periodic-table.png",
+    "fark": "testler/gorsel/fark/default/matrix-periodic-table.png",
+    "normalize_fark": "testler/gorsel/fark/default/matrix-periodic-table-tipografi.png"
+  }
+}

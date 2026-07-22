@@ -62,11 +62,36 @@ impl ÇalışmaEkseni {
         self.eşleme_kapsamı =
             (kapsam[0].is_finite() && kapsam[1].is_finite() && kapsam[1] > kapsam[0])
                 .then_some(kapsam);
+        // ECharts `Scale#setExtent2(SCALE_EXTENT_KIND_MAPPING)` kırık ölçek
+        // eşleyicisinin iç kapsamını da yeniler. Aksi halde `containShape`
+        // için eklenen yarım bar bandı kırık eksenlerde veri→piksel
+        // dönüşümüne hiç ulaşmaz ve uç barlar eksen çizgisinin üstüne biner.
+        self.kırılma_eşleyici =
+            KırılmaEşleyici::kur(&self.seçenek.kırılmalar, self.eşleme_kapsamı());
     }
 
     /// Piksel dönüşümünde kullanılan etkin veri kapsamı.
     pub fn eşleme_kapsamı(&self) -> [f64; 2] {
         self.eşleme_kapsamı.unwrap_or_else(|| self.ölçek.kapsam())
+    }
+
+    /// ECharts ölçek eşleyicisinin en iç doğrusal uzayındaki değer.
+    /// `axisStatistics.liPosMinGap` ve `axisBand.calcBandWidth`, kırık
+    /// eksenlerde ham veri aralığını değil bu dönüşmüş uzayı kullanır.
+    pub fn doğrusal_değer(&self, değer: f64) -> f64 {
+        if let Some(eşleyici) = &self.kırılma_eşleyici {
+            eşleyici.içe(değer)
+        } else if let Ölçek::Log(ölçek) = &self.ölçek {
+            crate::olcek::LogÖlçeği::log_dönüşümü(değer, ölçek.taban)
+        } else {
+            değer
+        }
+    }
+
+    /// Piksel eşlemesinin en iç doğrusal uzaydaki açıklığı.
+    pub fn doğrusal_eşleme_açıklığı(&self) -> f64 {
+        let kapsam = self.eşleme_kapsamı();
+        (self.doğrusal_değer(kapsam[1]) - self.doğrusal_değer(kapsam[0])).abs()
     }
 
     /// Yakınlaştırma penceresini oranlarla (0..=1) uygular; yalnız kategorik
@@ -497,6 +522,44 @@ mod testler {
         for değer in [0.0, 4.5, 10.0] {
             let dönüş = eksen.pikselden_veriye(eksen.veriden_piksele(değer));
             assert!((dönüş - değer).abs() < 1e-9);
+        }
+    }
+
+    #[test]
+    fn kirik_eksende_sekil_kapsama_eslemesi_ic_esleyiciyi_yeniler() {
+        let seçenek = Eksen::değer()
+            .en_az(0.0)
+            .en_çok(100.0)
+            .kırılma(EksenKırılması::yeni(20.0, 40.0).boşluk(5.0));
+        let ölçek = Ölçek::Aralık(AralıkÖlçeği::kur(
+            [0.0, 100.0],
+            Some(0.0),
+            Some(100.0),
+            false,
+            5,
+            None,
+            None,
+        ));
+        let mut eksen = ÇalışmaEkseni::yeni(seçenek, ölçek, [0.0, 100.0], EksenKonumu::Alt);
+
+        eksen.eşleme_kapsamı_uygula([-5.0, 105.0]);
+
+        assert_eq!(
+            eksen
+                .kırılma_eşleyici
+                .as_ref()
+                .expect("kırık eşleyici")
+                .kapsam(),
+            [-5.0, 105.0]
+        );
+        // 110 ham birimden 20 birimlik kırık çıkar, 5 birim boşluk eklenir:
+        // doğrusal eşleme açıklığı 95'tir. Veri uçları yarım bant içeridedir.
+        assert!((eksen.doğrusal_eşleme_açıklığı() - 95.0).abs() < 1e-9);
+        assert!((eksen.veriden_piksele(0.0) - 100.0 * 5.0 / 95.0).abs() < 1e-5);
+        assert!((eksen.veriden_piksele(100.0) - 100.0 * 90.0 / 95.0).abs() < 1e-5);
+        for değer in [0.0, 20.0, 40.0, 100.0] {
+            let dönüş = eksen.pikselden_veriye(eksen.veriden_piksele(değer));
+            assert!((dönüş - değer).abs() < 1e-5, "{değer} -> {dönüş}");
         }
     }
 

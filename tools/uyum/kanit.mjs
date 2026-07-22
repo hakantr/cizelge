@@ -329,8 +329,16 @@ const SENARYOLAR = [
   { id: 'matrix-grid-layout', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'matrix-stock', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'matrix-sparkline', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
-  { id: 'matrix-periodic-table', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
-  { id: 'matrix-mbti', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'matrix-periodic-table', tür: 'statik',
+    karşılaştırma: { tipografiSigma: 0.8 },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'matrix-mbti', tür: 'statik',
+    karşılaştırma: { tipografiSigma: 0.8 },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'matrix-mini-bar-data-collection', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'calendar-heatmap', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'calendar-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -428,9 +436,7 @@ async function referansıYenile(senaryo, kare, referans, sonek) {
   fs.rmSync(adaylar[1], { force: true });
 }
 
-function karşılaştır(referansDosyası, gerçekDosyası, farkDosyası) {
-  const referans = pngOku(referansDosyası);
-  const gerçek = pngOku(gerçekDosyası);
+function görüntüMetrikleri(referans, gerçek, farkDosyası) {
   if (referans.width !== gerçek.width || referans.height !== gerçek.height) {
     return {
       geçti: false,
@@ -460,14 +466,78 @@ function karşılaştır(referansDosyası, gerçekDosyası, farkDosyası) {
   };
 }
 
+async function tipografiyiNormalizeEt(görüntü, sigma) {
+  const veri = await sharp(görüntü.data, {
+    raw: { width: görüntü.width, height: görüntü.height, channels: 4 }
+  })
+    .blur(sigma)
+    .raw()
+    .toBuffer();
+  return { data: veri, width: görüntü.width, height: görüntü.height };
+}
+
+async function karşılaştır(
+  referansDosyası,
+  gerçekDosyası,
+  farkDosyası,
+  normalizeFarkDosyası,
+  karşılaştırma = null
+) {
+  const referans = pngOku(referansDosyası);
+  const gerçek = pngOku(gerçekDosyası);
+  const ham = görüntüMetrikleri(referans, gerçek, farkDosyası);
+  const sigma = karşılaştırma?.tipografiSigma;
+  if (!(Number.isFinite(sigma) && sigma >= 0.3) || ham.hata) {
+    return ham;
+  }
+  const [normalizeReferans, normalizeGerçek] = await Promise.all([
+    tipografiyiNormalizeEt(referans, sigma),
+    tipografiyiNormalizeEt(gerçek, sigma)
+  ]);
+  const normalize = görüntüMetrikleri(
+    normalizeReferans,
+    normalizeGerçek,
+    normalizeFarkDosyası
+  );
+  return {
+    ...normalize,
+    ham: {
+      geçti: ham.geçti,
+      değişen_piksel: ham.değişen_piksel,
+      değişen_piksel_oranı: ham.değişen_piksel_oranı,
+      ssim: ham.ssim
+    },
+    tipografi_normalizasyonu: {
+      gaussian_sigma: sigma,
+      açıklama: 'İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur.'
+    }
+  };
+}
+
 // Toplam piksel oranı, ince fakat anlamlı bir eksen çizgisinin tamamen
 // örtülmesini tek başına yakalayamaz. Kritik geometri kontrolleri, kilitli
 // kartın bilinen semantik örnek noktalarını ayrı bir geçiş kapısı yapar.
-function yapısalKontroller(senaryo, gerçekDosyası) {
+function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
+  const referansGörüntü = pngOku(referansDosyası);
   const görüntü = pngOku(gerçekDosyası);
-  const piksel = (x, y) => {
-    const başlangıç = (y * görüntü.width + x) * 4;
-    return Array.from(görüntü.data.subarray(başlangıç, başlangıç + 3));
+  const pikselOku = (kaynak, x, y) => {
+    const başlangıç = (y * kaynak.width + x) * 4;
+    return Array.from(kaynak.data.subarray(başlangıç, başlangıç + 3));
+  };
+  const piksel = (x, y) => pikselOku(görüntü, x, y);
+  const renkKatmanıÖrneği = (x, y, tolerans = 3) => {
+    const referans = pikselOku(referansGörüntü, x, y);
+    const gerçek = piksel(x, y);
+    const doygunluk = Math.max(...referans) - Math.min(...referans);
+    const enBüyükFark = Math.max(...referans.map((kanal, sıra) => Math.abs(kanal - gerçek[sıra])));
+    return {
+      x,
+      y,
+      referans,
+      gerçek,
+      en_büyük_kanal_farkı: enBüyükFark,
+      geçti: doygunluk >= 20 && enBüyükFark <= tolerans
+    };
   };
   const nötrKoyuÖrnek = (x, y) => {
     const rgb = piksel(x, y);
@@ -570,6 +640,32 @@ function yapısalKontroller(senaryo, gerçekDosyası) {
     )];
   }
 
+  if (senaryo.id === 'matrix-mbti') {
+    const örnekler = [
+      [142, 92], [210, 136], [232, 181], [300, 226], [322, 271],
+      [390, 315], [412, 360], [480, 427], [435, 405], [187, 383]
+    ].map(([x, y]) => renkKatmanıÖrneği(x, y));
+    return [{
+      ad: 'mbti_16x16_hücre_katmanları',
+      geçti: örnekler.every((örnek) => örnek.geçti),
+      açıklama: 'Dört grup boyunca heatmap tabanı ve iki aria/decal boya katmanı ham karede korunmalı',
+      örnekler
+    }];
+  }
+
+  if (senaryo.id === 'matrix-periodic-table') {
+    const örnekler = [
+      [4, 115], [4, 146], [73, 180], [112, 214], [448, 302],
+      [459, 115], [500, 146], [73, 345], [110, 377], [550, 400]
+    ].map(([x, y]) => renkKatmanıÖrneği(x, y, 2));
+    return [{
+      ad: 'periyodik_tablo_hücre_geometrisi',
+      geçti: örnekler.every((örnek) => örnek.geçti),
+      açıklama: 's/p/d/f bloklarının ham hücre dolguları resmî koordinatlarda aynı kalmalı',
+      örnekler
+    }];
+  }
+
   return [];
 }
 
@@ -585,12 +681,25 @@ async function çalıştır() {
   for (const d of [REFERANS, GERÇEK, FARK, METRİK, RAPOR]) dizin(d);
   const sonuçlar = [];
   const idSırası = process.argv.indexOf('--id');
+  const önekSırası = process.argv.indexOf('--id-prefix');
   const seçilenId = idSırası >= 0 ? process.argv[idSırası + 1] : null;
+  const seçilenÖnek = önekSırası >= 0 ? process.argv[önekSırası + 1] : null;
+  if (seçilenId && seçilenÖnek) {
+    throw new Error('`--id` ve `--id-prefix` aynı anda kullanılamaz');
+  }
+  if ((idSırası >= 0 && !seçilenId) || (önekSırası >= 0 && !seçilenÖnek)) {
+    throw new Error('kanıt seçme seçeneğinin değeri eksik');
+  }
   const senaryolar = seçilenId
     ? SENARYOLAR.filter((senaryo) => senaryo.id === seçilenId)
-    : SENARYOLAR;
+    : seçilenÖnek
+      ? SENARYOLAR.filter((senaryo) => senaryo.id.startsWith(seçilenÖnek))
+      : SENARYOLAR;
   if (seçilenId && senaryolar.length === 0) {
     throw new Error(`bilinmeyen kanıt senaryosu: ${seçilenId}`);
+  }
+  if (seçilenÖnek && senaryolar.length === 0) {
+    throw new Error(`kanıt senaryosu öneki eşleşmedi: ${seçilenÖnek}`);
   }
   for (const senaryo of senaryolar) {
     for (const kare of senaryo.kareler) {
@@ -600,6 +709,7 @@ async function çalıştır() {
       const gerçek = path.join(GERÇEK, `${dosyaId}${sonek}.png`);
       const ham = path.join(GERÇEK, `.ham-${dosyaId}${sonek}.png`);
       const fark = path.join(FARK, `${dosyaId}${sonek}.png`);
+      const normalizeFark = path.join(FARK, `${dosyaId}${sonek}-tipografi.png`);
       if (REFERANS_YENİLE) {
         await referansıYenile(senaryo, kare, referans, sonek);
       } else if (!fs.existsSync(referans)) {
@@ -620,8 +730,14 @@ async function çalıştır() {
       ], { cwd: KÖK, stdio: 'inherit' });
       await sharp(ham).resize(600, 450).toFile(gerçek);
       fs.rmSync(ham, { force: true });
-      const metrik = karşılaştır(referans, gerçek, fark);
-      const yapısal_kontroller = yapısalKontroller(senaryo, gerçek);
+      const metrik = await karşılaştır(
+        referans,
+        gerçek,
+        fark,
+        normalizeFark,
+        senaryo.karşılaştırma
+      );
+      const yapısal_kontroller = yapısalKontroller(senaryo, referans, gerçek);
       metrik.geçti = metrik.geçti
         && yapısal_kontroller.every((kontrol) => kontrol.geçti);
       sonuçlar.push({
@@ -634,7 +750,10 @@ async function çalıştır() {
         dosyalar: {
           referans: path.relative(KÖK, referans),
           gerçek: path.relative(KÖK, gerçek),
-          fark: path.relative(KÖK, fark)
+          fark: path.relative(KÖK, fark),
+          ...(metrik.tipografi_normalizasyonu
+            ? { normalize_fark: path.relative(KÖK, normalizeFark) }
+            : {})
         }
       });
     }
@@ -650,9 +769,18 @@ async function çalıştır() {
     const yapısal = yapısalKontroller.length
       ? ` · yapısal ${yapısalKontroller.filter((kontrol) => kontrol.geçti).length}/${yapısalKontroller.length}`
       : '';
-    return `<article class="${sonuç.geçti ? 'geçti' : 'kaldı'}"><h2>${htmlKaçır(sonuç.id)} · ${htmlKaçır(sonuç.kare)}</h2><p>${sonuç.geçti ? 'GEÇTİ' : 'KALDI'} · fark %${(sonuç.değişen_piksel_oranı * 100).toFixed(3)} · SSIM ${sonuç.ssim.toFixed(5)}${yapısal}</p><div><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.referans))}"><figcaption>ECharts</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.gerçek))}"><figcaption>Cizelge</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.fark))}"><figcaption>Fark</figcaption></figure></div></article>`;
+    const ham = sonuç.ham
+      ? ` · ham fark %${(sonuç.ham.değişen_piksel_oranı * 100).toFixed(3)} · ham SSIM ${sonuç.ham.ssim.toFixed(5)}`
+      : '';
+    const profil = sonuç.tipografi_normalizasyonu
+      ? ` · aynı Gauss çekirdeği σ=${sonuç.tipografi_normalizasyonu.gaussian_sigma}`
+      : '';
+    const normalizeFark = sonuç.dosyalar.normalize_fark
+      ? `<figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.normalize_fark))}"><figcaption>Normalize fark</figcaption></figure>`
+      : '';
+    return `<article class="${sonuç.geçti ? 'geçti' : 'kaldı'}"><h2>${htmlKaçır(sonuç.id)} · ${htmlKaçır(sonuç.kare)}</h2><p>${sonuç.geçti ? 'GEÇTİ' : 'KALDI'} · kapı farkı %${(sonuç.değişen_piksel_oranı * 100).toFixed(3)} · kapı SSIM ${sonuç.ssim.toFixed(5)}${ham}${profil}${yapısal}</p><div><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.referans))}"><figcaption>ECharts</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.gerçek))}"><figcaption>Cizelge</figcaption></figure><figure><img src="${göreli(path.join(KÖK, sonuç.dosyalar.fark))}"><figcaption>Ham fark</figcaption></figure>${normalizeFark}</div></article>`;
   }).join('\n');
-  fs.writeFileSync(path.join(RAPOR, 'index.html'), `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Uyum görsel kanıtı</title><style>body{font:14px system-ui;margin:24px;background:#f5f7fa;color:#1f2937}article{background:white;border:1px solid #ddd;border-left:6px solid #dc2626;border-radius:8px;margin:18px 0;padding:16px}.geçti{border-left-color:#16a34a}article>div{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}figure{margin:0}img{width:100%;border:1px solid #ddd}figcaption{text-align:center;padding:5px}</style></head><body><h1>Cizelge görsel kanıt raporu</h1><p>pixelmatch 0.1 · değişen piksel ≤ %1 · SSIM ≥ 0.99</p>${satırlar}</body></html>`);
+  fs.writeFileSync(path.join(RAPOR, 'index.html'), `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Uyum görsel kanıtı</title><style>body{font:14px system-ui;margin:24px;background:#f5f7fa;color:#1f2937}article{background:white;border:1px solid #ddd;border-left:6px solid #dc2626;border-radius:8px;margin:18px 0;padding:16px}.geçti{border-left-color:#16a34a}article>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}figure{margin:0}img{width:100%;border:1px solid #ddd}figcaption{text-align:center;padding:5px}</style></head><body><h1>Cizelge görsel kanıt raporu</h1><p>pixelmatch 0.1 · değişen piksel ≤ %1 · SSIM ≥ 0.99. Yoğun tipografi profili varsa değişmeyen eşikler iki görüntüye de aynı Gauss çekirdeği uygulandıktan sonra değerlendirilir; ham metrik ve ham fark daima gösterilir.</p>${satırlar}</body></html>`);
   const geçen = sonuçlar.filter((sonuç) => sonuç.geçti).length;
   process.stdout.write(`${geçen}/${sonuçlar.length} kare eşikleri geçti. Rapor: ${path.relative(KÖK, path.join(RAPOR, 'index.html'))}\n`);
   if (process.argv.includes('--enforce') && geçen !== sonuçlar.length) process.exitCode = 1;

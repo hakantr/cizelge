@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1534,
-  "değişen_piksel_oranı": 0.005681481481481482,
-  "ssim": 0.9907077213581218,
+  "değişen_piksel": 1361,
+  "değişen_piksel_oranı": 0.005040740740740741,
+  "ssim": 0.9964673848659606,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/heatmap-cartesian-başlangıç.png",
     "gerçek": "testler/gorsel/gerçek/default/heatmap-cartesian-başlangıç.png",

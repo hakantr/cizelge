@@ -280,6 +280,24 @@ pub trait ÇizimYüzeyi {
         kalın: bool,
     ) -> (f32, f32);
 
+    /// Açık CSS yazı tipi ailesiyle metin boyar (`fontFamily`). Aile
+    /// seçimini desteklemeyen yüzeyler öntanımlı yazı tipine düşer.
+    #[allow(clippy::too_many_arguments)]
+    fn aileli_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        aile: &str,
+    ) -> (f32, f32) {
+        let _ = aile;
+        self.yazı(metin, konum, yatay, dikey, boyut, renk, kalın)
+    }
+
     /// Yerel metni tam affine dönüşümle boyar. Renderer bunu doğrudan
     /// desteklemiyorsa konum ve ortalama ölçek yine doğru uygulanır.
     #[allow(clippy::too_many_arguments)]
@@ -297,6 +315,25 @@ pub trait ÇizimYüzeyi {
         let konum = dönüşüm.noktayı_dönüştür(konum);
         let ölçek = ((dönüşüm.x_ölçeği() + dönüşüm.y_ölçeği()) / 2.0).max(0.0);
         self.yazı(metin, konum, yatay, dikey, boyut * ölçek, renk, kalın)
+    }
+
+    /// Açık yazı tipi ailesini tam affine dönüşümle birlikte korur.
+    #[allow(clippy::too_many_arguments)]
+    fn dönüşümlü_aileli_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        aile: &str,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        let konum = dönüşüm.noktayı_dönüştür(konum);
+        let ölçek = ((dönüşüm.x_ölçeği() + dönüşüm.y_ölçeği()) / 2.0).max(0.0);
+        self.aileli_yazı(metin, konum, yatay, dikey, boyut * ölçek, renk, kalın, aile)
     }
 
     /// Yerel metni önce kontur, ardından dolgu ile affine dönüşüm altında
@@ -344,6 +381,12 @@ pub trait ÇizimYüzeyi {
 
     /// Yazının kaplayacağı `(genişlik, yükseklik)` boyutunu ölçer.
     fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32);
+
+    /// Açık aileyle yazı ölçer; aile çözmeyen yüzeylerde genel ölçüme düşer.
+    fn aileli_yazı_ölç(&self, metin: &str, boyut: f32, aile: &str) -> (f32, f32) {
+        let _ = aile;
+        self.yazı_ölç(metin, boyut)
+    }
 
     /// Yazıyı gerçekten çizilecek ağırlıkla ölçer. Basit yüzeyler normal
     /// metriklere düşebilir; yazı tipi şekillendiren yüzeyler kalın yüzün

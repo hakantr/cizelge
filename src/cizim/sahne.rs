@@ -361,6 +361,8 @@ pub struct SahneMetni {
     pub boyut: f32,
     pub renk: Renk,
     pub kalın: bool,
+    /// CSS `fontFamily`; `None` yüzeyin sans-serif öntanımlısını kullanır.
+    pub aile: Option<String>,
 }
 
 impl SahneMetni {
@@ -373,6 +375,7 @@ impl SahneMetni {
             boyut: 12.0,
             renk: Renk::SİYAH,
             kalın: false,
+            aile: None,
         }
     }
 
@@ -816,16 +819,30 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
             }
         }
         SahneÖğesi::Metin(metin) => {
-            let _ = yüzey.dönüşümlü_yazı(
-                &metin.metin,
-                metin.konum,
-                metin.yatay,
-                metin.dikey,
-                metin.boyut,
-                metin.renk.opaklık(stil.opaklık),
-                metin.kalın,
-                kayıt.dünya,
-            );
+            if let Some(aile) = metin.aile.as_deref() {
+                let _ = yüzey.dönüşümlü_aileli_yazı(
+                    &metin.metin,
+                    metin.konum,
+                    metin.yatay,
+                    metin.dikey,
+                    metin.boyut,
+                    metin.renk.opaklık(stil.opaklık),
+                    metin.kalın,
+                    aile,
+                    kayıt.dünya,
+                );
+            } else {
+                let _ = yüzey.dönüşümlü_yazı(
+                    &metin.metin,
+                    metin.konum,
+                    metin.yatay,
+                    metin.dikey,
+                    metin.boyut,
+                    metin.renk.opaklık(stil.opaklık),
+                    metin.kalın,
+                    kayıt.dünya,
+                );
+            }
         }
         SahneÖğesi::Resim(resim) => {
             let yol = yolu_dönüştür(
@@ -1021,7 +1038,7 @@ fn noktaların_yolu(noktalar: &[(f32, f32)], kapalı: bool) -> Yol {
     yol
 }
 
-fn yuvarlak_dikdörtgen_yolu(kutu: Dikdörtgen, yarıçap: [f32; 4]) -> Yol {
+pub(crate) fn yuvarlak_dikdörtgen_yolu(kutu: Dikdörtgen, yarıçap: [f32; 4]) -> Yol {
     let en_büyük = kutu.genişlik.min(kutu.yükseklik).max(0.0) / 2.0;
     let [sol_üst, sağ_üst, sağ_alt, sol_alt] = yarıçap.map(|r| r.clamp(0.0, en_büyük));
     let mut yol = Yol::yeni();

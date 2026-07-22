@@ -183,28 +183,24 @@ Durum değerleri yalnız şunlardır:
 "örnekte kullanılmıyor" veya "yaklaşık benziyor" kapanış gerekçesi değildir;
 kapsam içi yetenek için eşdeğer yerel çözüm geliştirilir.
 
-## 4. Mevcut reponun başlangıç noktası
+## 4. Repo durumu ve kanıtın yorumu
 
-Sabit kaynak görüntüsüne göre repo güçlü bir başlangıç sunmaktadır:
+Bu plan tarihsel bir devir günlüğü tutmaz. Geçerli durum yalnız çalışma
+ağacındaki model/render kaynakları ile yeniden üretilebilen
+`uyum/galeri_manifest.json`, `uyum/ozellik_matrisi.json`,
+`uyum/senaryolar/`, görsel metrikler ve test çıktılarından okunur. Eski örnek,
+test veya dosya sayıları belge içinde “mevcut durum” diye dondurulmaz.
 
-- `src/model/seri.rs` ve `src/grafik/` altında kapsam içi seri ailelerinin
-  çoğu için bir model/render dilimi vardır; belirgin eksik çekirdek seri
-  `lines`tır. `effectScatter` ve `pictorialBar` bugün ayrı seri yerine mevcut
-  modellerde özellik olarak temsil edilmektedir.
-- Kartezyen, polar, radar, singleAxis benzeri akış, takvim ve paralel
-  yerleşimlerin başlangıçları vardır; ECharts 6 `matrix` koordinatı yoktur.
-- [examples/galeri.rs](examples/galeri.rs) 27 elle yazılmış galeri girdisi
-  sunar; repoda 28 örnek dosyası vardır.
-- `testler/altin.rs` içinde 48 test ve `testler/altin/` altında 38 komut
-  golden dosyası vardır.
-- Kayıt, SVG ve piksel yüzeyleri; PNG/SVG dışa aktarım; gpui görünümü,
-  temel olaylar ve çeşitli etkileşimler hazırdır.
-
-Bu varlıklar korunacak ve yeni altyapıya taşınacaktır. Bununla birlikte,
-27 yerel galeri girdisi ile 261 resmi kapsam içi galeri örneği arasındaki fark
-ve ECharts seçenek yüzeyinin derinliği nedeniyle mevcut işaretlerin tamamı
-Faz 0'da yeniden denetlenir. Eski "faz tamam" işaretleri yeni matrise otomatik
-olarak aktarılmaz.
+- [FAZ_PLANI.md](FAZ_PLANI.md), eski commit mesajları ya da önceki bir
+  checkpointteki tamam işareti bu planın kanıt kapılarının yerine geçmez.
+- Kayıt, SVG, piksel ve gerçek GPUI yüzeyleri aynı seçenek/model davranışını
+  tüketir; yalnız bir renderer'da görünen destek tam uyum sayılmaz.
+- `effectScatter`/`pictorialBar` gibi ortak modelle temsil edilen türler ve
+  `matrix` gibi ayrı koordinatlar, resmi option/seri semantiğine göre
+  özellik matrisinde ayrı ayrı kanıtlanır; Rust enum biçimi kapsamı daraltmaz.
+- Sayısal ilerleme ve galeri adetleri elle yazılmış nottan değil, sabit kaynak
+  commitleriyle çalışan üreticiden alınır. Üretilmiş dosya denetimi farklılık
+  bulursa belge veya rapordaki sayı geçersiz sayılır.
 
 ## 5. Üretilecek uyum envanteri
 
@@ -364,6 +360,26 @@ Resmi `compareImage.js` yaklaşımı başlangıç alınır:
 - Çizim komutlarında veri geometrisi, eksen kapsamı, seri/öğe sayısı, metin
   içeriği ve kırpma sınırları ayrıca karşılaştırılır; kritik geometrik sapma
   bir mantıksal pikseli aşamaz.
+- Eksen veya kategori taban çizgisi bulunan her kartta çizginin iki ucu,
+  sürekliliği, rengi/kalınlığı ve seri dolgularına göre z-sırası ham karede
+  ayrı yapısal kapıdır. Sütun ya da hücre dolgusunun taban çizgisini örttüğü
+  tek piksellik hata, toplam fark oranı `%1` altında kalsa bile kartı düşürür.
+
+Yoğun küçük yazı içeren ve ham geometri/renk kapıları geçen açık profillerde
+renderer'a bağlı glif raster farkı ayrıca sınıflandırılabilir. Bu yol yalnız
+manifestte örnek kimliğiyle tanımlanır ve şu değiştirilemez kurallara uyar:
+
+- Referans ve Cizelge görüntüsünün **ikisine birden** aynı Gauss çekirdeği
+  (`sigma = 0.8`, bir mantıksal pikselden küçük) uygulanır; pixelmatch
+  eşiği `0.1`, `%1` piksel oranı ve `SSIM >= 0.99` değiştirilmez.
+- Bu işlem maske değildir. Ham referans, ham gerçek, ham fark, normalize fark,
+  ham/normalize metrikleri ve profil açıklaması birlikte saklanır; tümü rapor
+  ve manifestte hash'lenir.
+- Hücre dolguları, desen/decal katmanları, sınırlar, taban çizgileri ve temsilî
+  renk örnekleri yalnız ham kare üzerinde denetlenir. Yapısal kapı geçmeden
+  tipografi profili sonucu kanıt sayılamaz.
+- Profil şu anda yalnız `matrix-mbti` ve `matrix-periodic-table` için açıktır;
+  başka karta otomatik yayılmaz ve referans yenileme gerekçesi oluşturmaz.
 
 Referansın iki ardışık üretimi önce kendi içinde kararlılık kontrolünden
 geçmelidir. Sistem fontu, rastlantı veya zaman yüzünden kararsız olan örnek
@@ -1667,6 +1683,97 @@ erişilebilirlik, koyu profil ve ölçümlü performans kapıları Faz 7/8/9'da
 kapanana kadar genel kart ve option durumu
 `uygulandı_kanıt_bekliyor` olarak kalır; statik kanıt bunları tamamlanmış
 saymaz.
+
+Matrix doğrulanmış kapsamı:
+
+- Resmî `matrix-simple`, `matrix-correlation-heatmap`,
+  `matrix-correlation-scatter`, `matrix-covariance`, `matrix-graph`,
+  `matrix-pie`, `matrix-confusion`, `matrix-grid-layout`, `matrix-stock`,
+  `matrix-sparkline`, `matrix-periodic-table`, `matrix-mbti` ve keşif
+  sayfasında `noExplore` ile gizlenen `matrix-mini-bar-data-collection`
+  kaynakları ayrı Rust fixture'larına bağlıdır. Görünür kategori sayısı 12,
+  gizli conformance girdisi 1'dir. Yalnız Geo gömen
+  `matrix-mini-bar-geo`, değiştirilemez kapsam kuralıyla dışarıdadır.
+- Option ve koordinat davranışı için
+  `../echarts/src/coord/matrix/MatrixModel.ts`, `Matrix.ts`, `MatrixDim.ts`,
+  `MatrixBodyCorner.ts` ve `matrixHelper.ts`; görünüm/etkileşim için
+  `../echarts/src/component/matrix/MatrixView.ts` normatiftir. Bağlı Heatmap,
+  Scatter, Graph, Pie, Line/Bar, Candlestick, Custom ve çekirdek Lines
+  kaynakları kendi seri dalları için ayrıca izlenir.
+- `MatrisKoordinatı`, body/corner ile x/y başlıklarını; piksel/yüzde/dinamik
+  kutu yerleşimini; `data` veya `length` ile ordinal boyutu; hiyerarşik
+  `children`; yaprak `size`; varsayılan ve seviye başına `levelSize`;
+  `show`; `dividerLineStyle`; arka plan/dış sınır ve `borderZ2` katmanını
+  taşır. Yapraklarla karşı başlık seviyeleri resmî
+  `layOutUnitsOnDimension` sırasıyla aynı fiziksel alanı paylaşır; dengesiz
+  ağaçtaki sığ yaprak kalan başlık seviyelerini kaplar.
+- Gövde ve köşe hücreleri index, ordinal değer, kapsayıcı aralık ve tüm-boyut
+  koordinatlarını kabul eder. Negatif `MatrixXYLocator` başlık/köşe alanını,
+  `coordClamp` geçersiz ucu sınıra kıstırmayı, `mergeCells` hem boyamayı hem
+  `dataToLayout/dataToPoint` sonucunu genişletmeyi sağlar. Hücre, üst modelden
+  `itemStyle`, `label`, `formatter`, `cursor`, `silent` ve `z2` miras alır;
+  açık hücre alanı yalnız ilgili değeri geçersiz kılar.
+- Hücre etiketi resmî `name/value/coord/componentIndex` bağlamlı şablon veya
+  callback formatter'ı, çok satır/sarım, padding, clipping, renk/aile/kalınlık
+  ve hücre içine bağlı dönüşümlü metin fazını uygular. Body/corner özel
+  kenarlıkları dış sınırın altında ya da açık `z2` ile üstünde kalabilir;
+  `itemStyle` opaklığı dolgu/kenarlığı birlikte etkiler; gölge ile
+  düz/kesikli/noktalı yuvarlatılmış kenarlık aynı hücre geometrisini izler.
+  Desen/decal ve iki katmanlı MBTI hücreleri ham piksel kontrollerindedir.
+- `matrix.tooltip`, global seri tooltip'inden bağımsızdır ve resmî
+  `matrixIndex/name/xyLocator` bağlamını verir. `cursor` hücre → body/corner
+  veya x/y üst modeli sırasıyla miras alınır ve CSS cursor değerleri GPUI
+  `CursorStyle` karşılığına çevrilir. `silent` belirtilmezse dolgulu rect
+  etkileşimli, yalnız kenarlığı olan rect etkileşimsizdir; etiket tooltip ya
+  da `triggerEvent` için ayrı ölçülmüş hedef olarak kalır. `triggerEvent`,
+  x/y/body/corner türünü ve koordinatı taşıyan
+  `GrafikOlayı::MatrisHücresiTıklandı` üretir; üstteki seri isabeti önce gelir.
+- Bağlı seri kanıtları yalnız tek bir ısı haritasıyla sınırlı değildir:
+  korelasyon/covariance tabloları Heatmap ve Scatter'ı, MBTI ile periyodik
+  tablo Custom/Heatmap/decal bileşimini, graph/pie/grid-layout kendi gömülü
+  koordinatlarını, stock Candlestick/Bar/Line'ı, sparkline Line'ı ve gizli
+  veri-toplama örneği seri verisinden otomatik x/y kategori çıkarımını aynı
+  `MatrisYerleşimi` üzerinde doğrular.
+- Özellik matrisindeki 30 `matrix.*` satırının tamamı gerçek Rust API'sine,
+  birim testine, veri biçimine, koordinat dalına ve resmî örnek kimliğine
+  bağlanmıştır. `mainType`/çoklu `matrixIndex`, body/corner/data/value,
+  coord/clamp/merge, children/size/levels/levelSize, show/type,
+  itemStyle/label/formatter, cursor/silent/z2, background/border, tooltip ve
+  triggerEvent satırlarının hiçbiri `yok` veya genel bir sahte eşlemeye
+  düşmez.
+
+600×450 kilitli Matrix statik kanıt metrikleri:
+
+| Örnek | Değişen piksel oranı | SSIM | Ham oran / SSIM | Yapısal kapı |
+|---|---:|---:|---:|---:|
+| `matrix-confusion` | %0,9089 | 0,991307 | aynı | — |
+| `matrix-correlation-heatmap` | %0,3696 | 0,992069 | aynı | — |
+| `matrix-correlation-scatter` | %0,9804 | 0,993816 | aynı | — |
+| `matrix-covariance` | %0,0581 | 0,999076 | aynı | — |
+| `matrix-graph` | %0,5148 | 0,997802 | aynı | — |
+| `matrix-grid-layout` | %0,7985 | 0,992557 | aynı | — |
+| `matrix-mbti` | %0,7607 | 0,991013 | %2,9007 / 0,985845 | 10/10 |
+| `matrix-mini-bar-data-collection` | %0,9963 | 0,992739 | aynı | — |
+| `matrix-periodic-table` | %0,9370 | 0,993354 | %2,1911 / 0,987444 | 10/10 |
+| `matrix-pie` | %0,3070 | 0,997986 | aynı | — |
+| `matrix-simple` | %0,4537 | 0,992199 | aynı | — |
+| `matrix-sparkline` | %0,8974 | 0,990813 | aynı | — |
+| `matrix-stock` | %0,4193 | 0,993747 | aynı | — |
+
+13 Matrix senaryosunun 13/13 karesi genel eşiği geçer. MBTI ve periyodik
+tablo için tabloda birincil değer, iki görüntüye aynı `sigma=0.8` profili
+uygulandıktan sonraki sonuçtur; ham metrik ve ham fark gizlenmez. Her iki
+kartta dört renk ailesini/hücre katmanlarını temsil eden onar ham örnek de
+kanal toleransını geçer. Böylece 332 kart korunurken statik görsel kanıtlı
+kart sayısı 171 olur. Varsayılan özellikli çekirdek testlerin 344/344'ü,
+uyum fixture testlerinin 55/55'i, `cargo check --all-targets`, no-default
+çekirdek ve no-default PNG derlemeleri geçer. Matrix'e özel koşu 13/13,
+ortak eksen/yazı regresyonlarını da içeren depo çapındaki koşu 218/218
+karedir. Koyu kip, klavye/ARIA, bütün
+programatik hover/select/blur yükleri, canlı animasyon ve ölçümlü performans
+kapıları kapanana kadar kartların ve option satırlarının genel durumu
+`uygulandı_kanıt_bekliyor` kalır; 13 statik görüntü nihai tamlık iddiası
+değildir.
 
 Kabul:
 
