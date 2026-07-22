@@ -329,7 +329,7 @@
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/calendar-simple-son.json",
-            "sha256": "41be83f4be3a7748d93a46efb0fe63fb5e17526da4e85d9c995dc656f05460ad"
+            "sha256": "021354383cfd9e92ed488997fdf7785a33cef56ae22948c647c45f5e536bb799"
           }
         }
       ]

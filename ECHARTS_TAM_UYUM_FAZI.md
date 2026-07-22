@@ -1454,7 +1454,7 @@ kilitli statik kanıt sayısı 151 olur. Çekirdek 311/311 ve uyum fixture
 dosya denetimi geçmiştir. Kilitli depo görsel koşusu, `dataset-encode0`
 taban çizgisi yapısal kontrolü dâhil 198/198 kareyi yeniden doğrulamıştır.
 Eski golden'lar yenilenmemiştir; `cargo test --all-targets` önceden kayıtlı
-33 `testler/altin.rs` uyuşmazlığında kalır. Blur/focus eylemleri,
+34 `testler/altin.rs` uyuşmazlığında kalır. Blur/focus eylemleri,
 erişilebilirlik, koyu profil ve ölçümlü performans kapıları kapanana kadar
 kartların genel durumu `uygulandı_kanıt_bekliyor` kalır; statik kanıt bu
 kapıları tamamlanmış saymaz.
@@ -1583,6 +1583,90 @@ kontrolleri dâhil 205/205 kareyi doğrular. Eski golden'lar yenilenmez;
 animasyonun ara kareleri, erişilebilirlik, koyu profil ve ölçümlü performans
 kapıları Faz 7/8/9 tamamlanana kadar kartların genel durumunu
 `uygulandı_kanıt_bekliyor` olarak tutar.
+
+Calendar doğrulanmış kapsamı:
+
+- Resmî `calendar-simple`, `calendar-heatmap`, `calendar-vertical`,
+  `calendar-horizontal`, `calendar-graph`, `calendar-lunar`, `calendar-pie`,
+  `custom-calendar-icon` ve `calendar-charts` kategori kartları ile çapraz
+  `calendar-effectscatter` örneği ayrı Rust fixture'larına bağlıdır. Option,
+  koordinat ve görünüm davranışı için
+  `../echarts/src/coord/calendar/CalendarModel.ts`, `Calendar.ts` ve
+  `../echarts/src/component/calendar/CalendarView.ts`; bağlı seri dalları
+  için ilgili Heatmap, Scatter, EffectScatter, Graph, Lines, Pie ve Custom
+  kaynakları normatiftir.
+- `TakvimKoordinatı`; ECharts 6.1 öntanımlı `left: 80`, `top: 60`,
+  `cellSize: 20`, yatay yön, Pazar başlangıcı, görünür gün/ay/yıl
+  etiketleri, görünür ay ayırıcısı ve bir piksellik gün hücresi kenarını
+  taşır. Piksel/yüzde sol-sağ-üst-alt ve width/height, tek veya iki boyutlu
+  sayısal/otomatik hücre boyutu, yatay/dikey yön, birden fazla takvim ve
+  bütün bağlı serilerde `calendarIndex` doğrulanır.
+- `TakvimAralığı`, tam yıl ve kapsayıcı iki Unix-ms ucu kabul eder; ay ve
+  keyfî gün aralığı aynı uçlarla kayıpsız ifade edilir. Resmî
+  `_initRangeOption` gibi ters verilen iki uç kronolojik sıraya çevrilir;
+  sonlu olmayan değerler ve aralık dışındaki veri koordinat dönüşümünde
+  tipli hata/yok sonucu üretir. `dataToPoint`, `pointToData`, yatay/dikey
+  hafta hesabı ve ilk gün kayması tersinir testlerle kilitlidir.
+- `dayLabel` için show, `firstDay`, start/end position, hücre boyutuna göre
+  çözülen sayı/yüzde margin, açık `nameMap` dizisi ve etkin yerel;
+  `monthLabel` için show, start/end, left/center hizası, margin, `nameMap`
+  ve formatter; `yearLabel` için show, otomatik/top/bottom/left/right,
+  margin ve formatter uygulanır. Ay şablonları `{nameMap}`, `{yyyy}`,
+  `{yy}`, `{MM}`, `{M}`; yıl şablonları `{nameMap}`, `{start}`, `{end}`
+  alanlarını çözer. İşlev biçimindeki formatter'lar da aynı resmî bağlamın
+  bütün alanlarını klonlanabilir tipli Rust parametreleriyle alır.
+- `splitLine.show` ayırıcıları stil kalınlığını sıfıra düşürmeye gerek
+  bırakmadan bütünüyle kapatır; lineStyle renk, opaklık, kalınlık ve türünü
+  korur. Calendar itemStyle hücre dolgu/kenarlığını belirler; heatmap
+  `contentRect`, resmî `dataToLayout` gibi bu kenarlığın yarısı kadar içeri
+  alınır. Katman sırası hücre zemini → seri → ayırıcı/yıl/ay/gün etiketidir;
+  bu nedenle seri hücreleri ay sınırlarını örtemez.
+- Heatmap, scatter/effectScatter, graph, custom, Geo dışı lines ve takvim
+  merkezli pie bağları aynı `TakvimYerleşimi` dönüşümünü paylaşır. Çoklu
+  takvim, çoklu seri, görsel eşleme, tooltip/isabet, legend, custom ikon,
+  ay takvimi, ay evreleri ve birleşik pie/scatter/graph çizimleri resmî
+  örnek bileşimlerinde ayrı ayrı çalışır. `calendar-effectscatter` ile
+  `calendar-charts` beşer ara kare üzerinden gerçek animasyon senaryosudur.
+- Genel pixelmatch/SSIM kapısına ek olarak `calendar-simple` üst ve alt
+  dış sınırı yedişer nokta boyunca, ay ayırıcı merdivenleri ise yedi bağımsız
+  semantik pikselde denetlenir. Böylece ince sınırın tamamen seri altında
+  kalması toplam piksel oranı küçük olsa bile kanıtı düşürür. Referanslar
+  yenilenmemiş; mevcut ECharts commit kilidiyle Cizelge çıktıları yeniden
+  üretilmiştir.
+
+600×450 kilitli Calendar kanıt metrikleri:
+
+| Örnek | Kare | En yüksek değişen piksel oranı | En düşük SSIM | Yapısal kapı |
+|---|---:|---:|---:|---:|
+| `calendar-simple` | 1 | %0,0511 | 0,999505 | 3/3 |
+| `calendar-heatmap` | 1 | %0,1359 | 0,999317 | — |
+| `calendar-vertical` | 1 | %0,1893 | 0,998345 | — |
+| `calendar-horizontal` | 1 | %0,2196 | 0,998160 | — |
+| `calendar-effectscatter` | 5 | %0,5781 | 0,997125 | — |
+| `calendar-graph` | 1 | %0,1133 | 0,998996 | — |
+| `calendar-lunar` | 1 | %0,7578 | 0,991538 | — |
+| `calendar-pie` | 1 | %0,6074 | 0,996919 | — |
+| `custom-calendar-icon` | 1 | %0,1126 | 0,998767 | — |
+| `calendar-charts` | 5 | %0,0204 | 0,999630 | — |
+
+On Calendar senaryosunun 18/18 karesi geçer; dokuz Calendar kategori
+kartının ve çapraz effectScatter kartının statik görsel kapısı
+`tam_kanıtlı`dır. Option matrisindeki dokuz `calendar.*` satırı gerçek
+`src/model/takvim.rs` API'lerine, testlere, veri biçimlerine, koordinat
+dallarına ve galeri örneklerine bağlanmıştır. Çekirdek 319/319 ve uyum
+fixture 54/54 testi, `cargo check --all-targets` ve üretilmiş-dosya
+denetimi geçer. Depo çapındaki kilitli koşu 205/205 kareyi; kategori taban
+çizgisi, ThemeRiver ve Calendar kontrollerinden oluşan 7/7 yapısal kapıyı
+birlikte doğrular. Rapor 332 galeri kartını ve 205 görsel kanıt karesini
+eksiksiz üretir. Varsayılan özellikli çekirdek testlerin 322/322'si geçer;
+eski golden dosyaları yenilenmediği için ayrı `testler/altin.rs` kapısında
+14/48 geçiş ve güncel davranışla uyuşmayan 34 kayıtlı snapshot kalır. Ortak
+etiket stilinin kalan çapraz seçenekleri,
+programatik hover/blur/select olay yükleri,
+erişilebilirlik, koyu profil ve ölçümlü performans kapıları Faz 7/8/9'da
+kapanana kadar genel kart ve option durumu
+`uygulandı_kanıt_bekliyor` olarak kalır; statik kanıt bunları tamamlanmış
+saymaz.
 
 Kabul:
 

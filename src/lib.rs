@@ -129,7 +129,9 @@ pub use model::stil::{
     YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü, ÖğeStili,
 };
 pub use model::takvim::{
-    TakvimAralığı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
+    TakvimAralığı, TakvimAyEtiketiBağlamı, TakvimAyEtiketiBiçimleyicisi, TakvimEtiketTarafı,
+    TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiBağlamı, TakvimYılEtiketiBiçimleyicisi,
+    TakvimYılEtiketiKonumu,
 };
 pub use model::tek_eksen::{TekEksen, TekEksenKonumu, TekEksenYönü};
 pub use model::veri_kumesi::{
@@ -249,7 +251,9 @@ pub mod hazir {
         EtiketYaması, YazıDikeyHizası, YazıStili, YazıYatayHizası, ÇizgiStili, ÇizgiTürü, ÖğeStili,
     };
     pub use crate::model::takvim::{
-        TakvimAralığı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
+        TakvimAralığı, TakvimAyEtiketiBağlamı, TakvimAyEtiketiBiçimleyicisi, TakvimEtiketTarafı,
+        TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiBağlamı, TakvimYılEtiketiBiçimleyicisi,
+        TakvimYılEtiketiKonumu,
     };
     pub use crate::model::tek_eksen::{TekEksen, TekEksenKonumu, TekEksenYönü};
     pub use crate::model::veri_kumesi::{

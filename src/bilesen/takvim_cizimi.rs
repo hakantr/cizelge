@@ -4,7 +4,8 @@ use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::TakvimYerleşimi;
 use crate::model::stil::{Biçimleyici, YazıDikeyHizası, YazıYatayHizası};
 use crate::model::takvim::{
-    TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü, TakvimYılEtiketiKonumu,
+    TakvimAyEtiketiBağlamı, TakvimEtiketTarafı, TakvimKoordinatı, TakvimYönü,
+    TakvimYılEtiketiBağlamı, TakvimYılEtiketiKonumu,
 };
 use crate::renk::Dolgu;
 use crate::tema;
@@ -172,6 +173,9 @@ fn ayırıcıları_çiz(
     yerleşim: &TakvimYerleşimi,
     sınırlar: &[AySınırı],
 ) {
+    if !seçenek.ayırıcı_göster {
+        return;
+    }
     let kalınlık = seçenek.ayırıcı.kalınlık.max(0.0);
     if kalınlık <= 0.0 || sınırlar.len() < 2 {
         return;
@@ -225,6 +229,39 @@ fn ayırıcıları_çiz(
     }
 }
 
+fn ay_etiketini_biçimle(
+    seçenek: &TakvimKoordinatı,
+    tarih: TakvimAnı,
+    varsayılan_metin: &str,
+) -> String {
+    let bağlam = TakvimAyEtiketiBağlamı {
+        ad: varsayılan_metin.to_owned(),
+        yıl: tarih.yıl.to_string(),
+        kısa_yıl: format!("{:02}", tarih.yıl.rem_euclid(100)),
+        sıfır_dolgulu_ay: format!("{:02}", tarih.ay),
+        ay: tarih.ay,
+    };
+    if let Some(biçimleyici) = seçenek.ay_etiketi_bağlamlı_biçimleyici.as_ref() {
+        return biçimleyici.uygula(&bağlam);
+    }
+    seçenek
+        .ay_etiketi
+        .biçimleyici
+        .as_ref()
+        .map(|biçimleyici| match biçimleyici {
+            Biçimleyici::Şablon(şablon) => şablon
+                .replace("{nameMap}", &bağlam.ad)
+                .replace("{yyyy}", &bağlam.yıl)
+                .replace("{yy}", &bağlam.kısa_yıl)
+                .replace("{MM}", &bağlam.sıfır_dolgulu_ay)
+                .replace("{M}", &bağlam.ay.to_string()),
+            // Ortak iki argümanlı geri çağrı geriye uyumluluk için ay
+            // numarası ile varsayılan ay adını almaya devam eder.
+            Biçimleyici::İşlev(işlev) => işlev(bağlam.ay as f64, &bağlam.ad),
+        })
+        .unwrap_or_else(|| bağlam.ad.clone())
+}
+
 fn ay_etiketlerini_çiz(
     yüzey: &mut dyn ÇizimYüzeyi,
     seçenek: &TakvimKoordinatı,
@@ -243,12 +280,13 @@ fn ay_etiketlerini_çiz(
     let başlangıçta = seçenek.ay_etiketi_tarafı == TakvimEtiketTarafı::Başlangıç;
     for (sınır, sonraki) in sınırlar.iter().zip(sınırlar.iter().skip(1)) {
         let tarih = andan_takvime(sınır.zaman_ms);
-        let metin = seçenek
+        let varsayılan_metin = seçenek
             .ay_adları
             .as_ref()
             .and_then(|adlar| adlar.get(tarih.ay.saturating_sub(1) as usize))
             .map(String::as_str)
             .unwrap_or_else(|| ay_kısaltması(tarih.ay));
+        let metin = ay_etiketini_biçimle(seçenek, tarih, varsayılan_metin);
         let (konum, doğal_yatay, doğal_dikey) = match yerleşim.yön {
             TakvimYönü::Yatay => {
                 let x = if seçenek.ay_etiketi_ortala {
@@ -306,7 +344,7 @@ fn ay_etiketlerini_çiz(
             }
         };
         yüzey.yazı(
-            metin,
+            &metin,
             konum,
             yatay_hiza(seçenek.ay_etiketi.yatay_hiza, doğal_yatay),
             dikey_hiza(seçenek.ay_etiketi.dikey_hiza, doğal_dikey),
@@ -424,18 +462,27 @@ fn yıl_etiketini_çiz(
     } else {
         başlangıç.to_string()
     };
-    let metin = seçenek
-        .yıl_etiketi
-        .biçimleyici
-        .as_ref()
-        .map(|biçimleyici| match biçimleyici {
-            Biçimleyici::Şablon(şablon) => şablon
-                .replace("{start}", &başlangıç.to_string())
-                .replace("{end}", &bitiş.to_string())
-                .replace("{nameMap}", &varsayılan_metin),
-            Biçimleyici::İşlev(işlev) => işlev(başlangıç as f64, &varsayılan_metin),
-        })
-        .unwrap_or(varsayılan_metin);
+    let bağlam = TakvimYılEtiketiBağlamı {
+        başlangıç: başlangıç.to_string(),
+        bitiş: bitiş.to_string(),
+        ad: varsayılan_metin,
+    };
+    let metin = if let Some(biçimleyici) = seçenek.yıl_etiketi_bağlamlı_biçimleyici.as_ref() {
+        biçimleyici.uygula(&bağlam)
+    } else {
+        seçenek
+            .yıl_etiketi
+            .biçimleyici
+            .as_ref()
+            .map(|biçimleyici| match biçimleyici {
+                Biçimleyici::Şablon(şablon) => şablon
+                    .replace("{start}", &bağlam.başlangıç)
+                    .replace("{end}", &bağlam.bitiş)
+                    .replace("{nameMap}", &bağlam.ad),
+                Biçimleyici::İşlev(işlev) => işlev(başlangıç as f64, &bağlam.ad),
+            })
+            .unwrap_or_else(|| bağlam.ad.clone())
+    };
     let konum = match seçenek.yıl_etiketi_konumu {
         TakvimYılEtiketiKonumu::Otomatik if seçenek.yön == TakvimYönü::Yatay => {
             TakvimYılEtiketiKonumu::Sol
@@ -581,5 +628,91 @@ mod testler {
             kayıt.contains("dönüşümlü-yazı \"2017  1st · 2017 · 2017\""),
             "{kayıt}"
         );
+    }
+
+    #[test]
+    fn ay_etiketi_echarts_yer_tutucularını_çözer() {
+        crate::yerel::yerel_ayarla(&crate::yerel::İNGİLİZCE);
+        let seçenek = TakvimKoordinatı::yıl(2017)
+            .ay_etiketi(
+                crate::model::stil::Etiket::yeni()
+                    .göster(true)
+                    .biçimleyici("{yyyy}|{yy}|{MM}|{M}|{nameMap}"),
+            )
+            .gün_etiketi(crate::model::stil::Etiket::yeni().göster(false))
+            .yıl_etiketi(crate::model::stil::Etiket::yeni().göster(false));
+        let yerleşim = TakvimYerleşimi::kur(&seçenek, (700.0, 525.0)).unwrap();
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        takvim_üst_katmanı_çiz(&mut yüzey, &seçenek, &yerleşim);
+
+        let kayıt = yüzey.döküm();
+        assert!(kayıt.contains("yazı \"2017|17|01|1|Jan\""), "{kayıt}");
+        assert!(kayıt.contains("yazı \"2017|17|12|12|Dec\""), "{kayıt}");
+    }
+
+    #[test]
+    fn ay_ve_yıl_etiketi_bağlamlı_geri_çağrıları_tüm_resmi_alanları_taşır() {
+        crate::yerel::yerel_ayarla(&crate::yerel::İNGİLİZCE);
+        let başlangıç = takvimden_ana(TakvimAnı {
+            yıl: 2017,
+            ay: 12,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let bitiş = takvimden_ana(TakvimAnı {
+            yıl: 2018,
+            ay: 1,
+            gün: 31,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let seçenek = TakvimKoordinatı::yeni(crate::model::takvim::TakvimAralığı::yeni(
+            başlangıç,
+            bitiş,
+        ))
+        .ay_etiketi_bağlamlı_biçimleyici(|bağlam| {
+            format!(
+                "{}|{}|{}|{}|{}",
+                bağlam.yıl, bağlam.kısa_yıl, bağlam.sıfır_dolgulu_ay, bağlam.ay, bağlam.ad
+            )
+        })
+        .yıl_etiketi_bağlamlı_biçimleyici(|bağlam| {
+            format!("{}|{}|{}", bağlam.başlangıç, bağlam.bitiş, bağlam.ad)
+        })
+        .gün_etiketi(crate::model::stil::Etiket::yeni().göster(false));
+        let yerleşim = TakvimYerleşimi::kur(&seçenek, (700.0, 525.0)).unwrap();
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        takvim_üst_katmanı_çiz(&mut yüzey, &seçenek, &yerleşim);
+
+        let kayıt = yüzey.döküm();
+        assert!(kayıt.contains("yazı \"2017|17|12|12|Dec\""), "{kayıt}");
+        assert!(kayıt.contains("yazı \"2018|18|01|1|Jan\""), "{kayıt}");
+        assert!(
+            kayıt.contains("dönüşümlü-yazı \"2017|2018|2017-2018\""),
+            "{kayıt}"
+        );
+    }
+
+    #[test]
+    fn split_line_show_false_ay_ayırıcılarını_tamamen_gizler() {
+        let gizli = crate::model::stil::Etiket::yeni().göster(false);
+        let seçenek = TakvimKoordinatı::yıl(2017)
+            .ayırıcı_göster(false)
+            .gün_etiketi(gizli.clone())
+            .ay_etiketi(gizli.clone())
+            .yıl_etiketi(gizli);
+        let yerleşim = TakvimYerleşimi::kur(&seçenek, (700.0, 525.0)).unwrap();
+        let mut yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+
+        takvim_üst_katmanı_çiz(&mut yüzey, &seçenek, &yerleşim);
+
+        assert!(yüzey.komutlar.is_empty(), "{}", yüzey.döküm());
     }
 }

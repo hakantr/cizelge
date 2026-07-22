@@ -2759,17 +2759,31 @@
     "ts_türü": "number | 'auto' | (number | 'auto')[]",
     "zorunlu": false,
     "echarts_varsayılanı": "20",
-    "rust_api": "src/model/bilesen.rs (calendar.cellSize)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (TakvimKoordinatı::hücre_boyutu)",
+    "veri_biçimleri": [
+      "number",
+      "auto",
+      "[number|auto, number|auto]"
+    ],
+    "koordinat_dalları": [
+      "horizontal",
+      "vertical"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 71,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::takvim::testler::resmi_2016_isı_haritası_kutusu_ve_hücreleri_çözülür",
+      "koordinat::takvim::testler::dikey_otomatik_hücre_alt_kenara_kadar_sığar"
+    ],
+    "galeri_örnekleri": [
+      "calendar-heatmap",
+      "calendar-vertical",
+      "calendar-horizontal"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "af56a911f9ede1476e41",
@@ -2780,17 +2794,32 @@
     "ts_türü": "Omit<LabelOption, 'position'> & {\n        /**\n         * First day of week.\n         */\n        firstDay?: number\n\n        /**\n         * Margin between day label and axis line.\n         * Can be percent string of cell size.\n         */\n        margin?: number | string\n\n        /**\n         * Position of week, at the beginning or end of the range.\n         */\n        position?: 'start' | 'end'\n\n        /**\n         * Week text content\n         *\n         * defaults to auto-detected locale by the browser or the specified locale by `echarts.init` function.\n         * It supports any registered locale name (case-sensitive) or customized array.\n         * index 0 always means Sunday.\n         */\n        nameMap?: string | string[]\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n\n            firstDay: 0,\n\n            // start end\n            position: 'start',\n            margin: tokens.size.s,\n            color: tokens.color.secondary\n        }",
-    "rust_api": "src/model/bilesen.rs (calendar.dayLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (gün_etiketi, ilk_gün, gün_etiketi_tarafı, gün_etiketi_kenar_boşluğu, gün_adları)",
+    "veri_biçimleri": [
+      "Etiket",
+      "nameMap:String[]",
+      "margin:number|percent"
+    ],
+    "koordinat_dalları": [
+      "start",
+      "end",
+      "firstDay",
+      "yerel"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 92,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "bilesen::takvim_cizimi::testler::yıl_takvimi_ay_sınırları_ve_tek_harfli_günleri_çizer"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-horizontal",
+      "calendar-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a29a5aeb6a90ecb2db78",
@@ -2801,17 +2830,28 @@
     "ts_türü": "ItemStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            color: tokens.color.neutral00,\n            borderWidth: 1,\n            borderColor: tokens.color.neutral10\n        }",
-    "rust_api": "src/model/bilesen.rs (calendar.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (TakvimKoordinatı::öğe_stili)",
+    "veri_biçimleri": [
+      "ÖğeStili"
+    ],
+    "koordinat_dalları": [
+      "arka-plan",
+      "contentRect-iç-pay"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 79,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::takvim::testler::resmi_2016_isı_haritası_kutusu_ve_hücreleri_çözülür"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-heatmap",
+      "calendar-lunar"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c374ac20592db9586c50",
@@ -2822,17 +2862,29 @@
     "ts_türü": "'calendar'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (calendar.mainType)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/secenekler.rs (Seçenekler::takvim, Seçenekler::takvimler)",
+    "veri_biçimleri": [
+      "TakvimKoordinatı",
+      "Vec<TakvimKoordinatı>"
+    ],
+    "koordinat_dalları": [
+      "tek-takvim",
+      "çoklu-takvim"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 69,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::secenekler::testler::takvime_bağlı_scatter_eksik_calendar_index_değerini_reddeder"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-vertical",
+      "calendar-charts"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "5a6b6a8f139349d357f9",
@@ -2843,17 +2895,34 @@
     "ts_türü": "Omit<LabelOption, 'position'> & {\n        /**\n         * Margin between month label and axis line.\n         */\n        margin?: number\n\n        /**\n         * Position of month label, at the beginning or end of the range.\n         */\n        position?: 'start' | 'end'\n\n        /**\n         * Month text content\n         *\n         * defaults to auto-detected locale by the browser or the specified locale by `echarts.init` function.\n         * It supports any registered locale name (case-sensitive) or customized array.\n         * index 0 always means Jan.\n         */\n        nameMap?: string | string[]\n\n        formatter?: string | ((params: CalendarMonthLabelFormatterCallbackParams) => string)\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n\n            // start end\n            position: 'start',\n            margin: tokens.size.s,\n\n            // center or left\n            align: 'center',\n\n            formatter: null,\n            color: tokens.color.secondary\n        }",
-    "rust_api": "src/model/bilesen.rs (calendar.monthLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (ay_etiketi, ay_adları, ay_etiketi_bağlamlı_biçimleyici)",
+    "veri_biçimleri": [
+      "Etiket",
+      "nameMap:String[]",
+      "formatter:string|callback"
+    ],
+    "koordinat_dalları": [
+      "start",
+      "end",
+      "left",
+      "center",
+      "yerel"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 119,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "bilesen::takvim_cizimi::testler::ay_etiketi_echarts_yer_tutucularını_çözer",
+      "bilesen::takvim_cizimi::testler::ay_ve_yıl_etiketi_bağlamlı_geri_çağrıları_tüm_resmi_alanları_taşır"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-horizontal",
+      "calendar-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4050b2534a3bdb04f703",
@@ -2864,17 +2933,28 @@
     "ts_türü": "LayoutOrient",
     "zorunlu": false,
     "echarts_varsayılanı": "'horizontal'",
-    "rust_api": "src/model/bilesen.rs (calendar.orient)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (TakvimKoordinatı::yön)",
+    "veri_biçimleri": [
+      "TakvimYönü::Yatay",
+      "TakvimYönü::Dikey"
+    ],
+    "koordinat_dalları": [
+      "horizontal",
+      "vertical"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 72,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::takvim::testler::yatay_ve_dikey_tarih_dönüşümü_tersinir"
+    ],
+    "galeri_örnekleri": [
+      "calendar-horizontal",
+      "calendar-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "04098d911021778339a0",
@@ -2885,17 +2965,32 @@
     "ts_türü": "OptionDataValueDate | (OptionDataValueDate)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (calendar.range)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (TakvimAralığı, TakvimKoordinatı::aralık)",
+    "veri_biçimleri": [
+      "Unix ms başlangıç/bitiş",
+      "tam yıl"
+    ],
+    "koordinat_dalları": [
+      "yıl",
+      "ay",
+      "gün-aralığı",
+      "ters-uç-normalizasyonu"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 90,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::takvim::testler::iki_uçlu_ters_aralık_resmi_calendar_gibi_kronolojik_sıralanır",
+      "koordinat::takvim::testler::aralık_dışı_tarih_yoktur"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-pie",
+      "calendar-charts"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1f57525415e3880935fc",
@@ -2906,17 +3001,31 @@
     "ts_türü": "{\n        show?: boolean\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            lineStyle: {\n                color: tokens.color.axisLine,\n                width: 1,\n                type: 'solid'\n            }\n        }",
-    "rust_api": "src/model/bilesen.rs (calendar.splitLine)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (TakvimKoordinatı::ayırıcı_göster, TakvimKoordinatı::ayırıcı)",
+    "veri_biçimleri": [
+      "show:boolean",
+      "ÇizgiStili"
+    ],
+    "koordinat_dalları": [
+      "horizontal",
+      "vertical",
+      "seri-üstü-katman"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 74,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "bilesen::takvim_cizimi::testler::split_line_show_false_ay_ayırıcılarını_tamamen_gizler",
+      "calendar-simple::takvim_ay_ayırıcıları"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-heatmap",
+      "calendar-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d740498731ab12bff1fa",
@@ -2927,17 +3036,33 @@
     "ts_türü": "Omit<LabelOption, 'position'> & {\n        /**\n         * Margin between year label and axis line.\n         */\n        margin?: number\n\n        /**\n         * Position of year label, at the beginning or end of the range.\n         */\n        position?: 'top' | 'bottom' | 'left' | 'right'\n\n        formatter?: string | ((params: CalendarYearLabelFormatterCallbackParams) => string)\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n\n            // top bottom left right\n            position: null,\n            margin: tokens.size.xl,\n            formatter: null,\n            color: tokens.color.quaternary,\n            fontFamily: 'sans-serif',\n            fontWeight: 'bolder',\n            fontSize: 20\n        }",
-    "rust_api": "src/model/bilesen.rs (calendar.yearLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/takvim.rs (yıl_etiketi, yıl_etiketi_konumu, yıl_etiketi_bağlamlı_biçimleyici)",
+    "veri_biçimleri": [
+      "Etiket",
+      "formatter:string|callback"
+    ],
+    "koordinat_dalları": [
+      "auto",
+      "top",
+      "bottom",
+      "left",
+      "right"
+    ],
     "kaynak": {
       "dosya": "src/coord/calendar/CalendarModel.ts",
       "satır": 142,
       "sembol": "CalendarOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "bilesen::takvim_cizimi::testler::yıl_etiketi_echarts_start_end_ve_name_map_yer_tutucularını_çözer",
+      "bilesen::takvim_cizimi::testler::ay_ve_yıl_etiketi_bağlamlı_geri_çağrıları_tüm_resmi_alanları_taşır"
+    ],
+    "galeri_örnekleri": [
+      "calendar-simple",
+      "calendar-horizontal",
+      "calendar-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b3f6807304a656eaea50",

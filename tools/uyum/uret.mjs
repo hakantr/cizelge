@@ -72,6 +72,92 @@ const RUST_SERİLERİ = new Set([
   'chord', 'sankey', 'parallel', 'funnel', 'gauge', 'themeRiver', 'custom'
 ]);
 
+// Otomatik TypeScript envanteri yalnız option adını bulabilir; aile portu
+// tamamlandıkça gerçek Rust yüzeyi ile onu kanıtlayan test/örnek bağlantısı
+// burada açıkça kilitlenir. `uygulandı_kanıt_bekliyor`, API ve statik
+// eşdeğerliğin mevcut olduğunu fakat ortak davranış/erişilebilirlik/
+// performans kapılarının henüz tümüyle kapanmadığını ifade eder.
+const CALENDAR_OPTION_KANITI = Object.freeze({
+  mainType: {
+    api: 'src/model/secenekler.rs (Seçenekler::takvim, Seçenekler::takvimler)',
+    testler: ['model::secenekler::testler::takvime_bağlı_scatter_eksik_calendar_index_değerini_reddeder'],
+    örnekler: ['calendar-simple', 'calendar-vertical', 'calendar-charts'],
+    veri_biçimleri: ['TakvimKoordinatı', 'Vec<TakvimKoordinatı>'],
+    dallar: ['tek-takvim', 'çoklu-takvim']
+  },
+  cellSize: {
+    api: 'src/model/takvim.rs (TakvimKoordinatı::hücre_boyutu)',
+    testler: [
+      'koordinat::takvim::testler::resmi_2016_isı_haritası_kutusu_ve_hücreleri_çözülür',
+      'koordinat::takvim::testler::dikey_otomatik_hücre_alt_kenara_kadar_sığar'
+    ],
+    örnekler: ['calendar-heatmap', 'calendar-vertical', 'calendar-horizontal'],
+    veri_biçimleri: ['number', 'auto', '[number|auto, number|auto]'],
+    dallar: ['horizontal', 'vertical']
+  },
+  orient: {
+    api: 'src/model/takvim.rs (TakvimKoordinatı::yön)',
+    testler: ['koordinat::takvim::testler::yatay_ve_dikey_tarih_dönüşümü_tersinir'],
+    örnekler: ['calendar-horizontal', 'calendar-vertical'],
+    veri_biçimleri: ['TakvimYönü::Yatay', 'TakvimYönü::Dikey'],
+    dallar: ['horizontal', 'vertical']
+  },
+  splitLine: {
+    api: 'src/model/takvim.rs (TakvimKoordinatı::ayırıcı_göster, TakvimKoordinatı::ayırıcı)',
+    testler: [
+      'bilesen::takvim_cizimi::testler::split_line_show_false_ay_ayırıcılarını_tamamen_gizler',
+      'calendar-simple::takvim_ay_ayırıcıları'
+    ],
+    örnekler: ['calendar-simple', 'calendar-heatmap', 'calendar-vertical'],
+    veri_biçimleri: ['show:boolean', 'ÇizgiStili'],
+    dallar: ['horizontal', 'vertical', 'seri-üstü-katman']
+  },
+  itemStyle: {
+    api: 'src/model/takvim.rs (TakvimKoordinatı::öğe_stili)',
+    testler: ['koordinat::takvim::testler::resmi_2016_isı_haritası_kutusu_ve_hücreleri_çözülür'],
+    örnekler: ['calendar-simple', 'calendar-heatmap', 'calendar-lunar'],
+    veri_biçimleri: ['ÖğeStili'],
+    dallar: ['arka-plan', 'contentRect-iç-pay']
+  },
+  range: {
+    api: 'src/model/takvim.rs (TakvimAralığı, TakvimKoordinatı::aralık)',
+    testler: [
+      'model::takvim::testler::iki_uçlu_ters_aralık_resmi_calendar_gibi_kronolojik_sıralanır',
+      'koordinat::takvim::testler::aralık_dışı_tarih_yoktur'
+    ],
+    örnekler: ['calendar-simple', 'calendar-pie', 'calendar-charts'],
+    veri_biçimleri: ['Unix ms başlangıç/bitiş', 'tam yıl'],
+    dallar: ['yıl', 'ay', 'gün-aralığı', 'ters-uç-normalizasyonu']
+  },
+  dayLabel: {
+    api: 'src/model/takvim.rs (gün_etiketi, ilk_gün, gün_etiketi_tarafı, gün_etiketi_kenar_boşluğu, gün_adları)',
+    testler: ['bilesen::takvim_cizimi::testler::yıl_takvimi_ay_sınırları_ve_tek_harfli_günleri_çizer'],
+    örnekler: ['calendar-simple', 'calendar-horizontal', 'calendar-vertical'],
+    veri_biçimleri: ['Etiket', 'nameMap:String[]', 'margin:number|percent'],
+    dallar: ['start', 'end', 'firstDay', 'yerel']
+  },
+  monthLabel: {
+    api: 'src/model/takvim.rs (ay_etiketi, ay_adları, ay_etiketi_bağlamlı_biçimleyici)',
+    testler: [
+      'bilesen::takvim_cizimi::testler::ay_etiketi_echarts_yer_tutucularını_çözer',
+      'bilesen::takvim_cizimi::testler::ay_ve_yıl_etiketi_bağlamlı_geri_çağrıları_tüm_resmi_alanları_taşır'
+    ],
+    örnekler: ['calendar-simple', 'calendar-horizontal', 'calendar-vertical'],
+    veri_biçimleri: ['Etiket', 'nameMap:String[]', 'formatter:string|callback'],
+    dallar: ['start', 'end', 'left', 'center', 'yerel']
+  },
+  yearLabel: {
+    api: 'src/model/takvim.rs (yıl_etiketi, yıl_etiketi_konumu, yıl_etiketi_bağlamlı_biçimleyici)',
+    testler: [
+      'bilesen::takvim_cizimi::testler::yıl_etiketi_echarts_start_end_ve_name_map_yer_tutucularını_çözer',
+      'bilesen::takvim_cizimi::testler::ay_ve_yıl_etiketi_bağlamlı_geri_çağrıları_tüm_resmi_alanları_taşır'
+    ],
+    örnekler: ['calendar-simple', 'calendar-horizontal', 'calendar-vertical'],
+    veri_biçimleri: ['Etiket', 'formatter:string|callback'],
+    dallar: ['auto', 'top', 'bottom', 'left', 'right']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -555,6 +641,17 @@ function varsayılanlarıTopla(kaynakDosya) {
 }
 
 function rustKarşılığı(kök, özellik) {
+  if (kök.toLowerCase() === 'calendar' && CALENDAR_OPTION_KANITI[özellik]) {
+    const kanıt = CALENDAR_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
   if (kök.toLowerCase() === 'visualmap' && özellik === 'categories') {
     return { api: 'src/model/gorsel_esleme.rs (GörselEşleme::kategoriler)', durum: 'kısmi' };
   }
@@ -644,15 +741,15 @@ function özellikMatrisi() {
             zorunlu: !üye.questionToken,
             echarts_varsayılanı: kısaVarsayılan,
             rust_api: eşleme.api,
-            veri_biçimleri: [],
-            koordinat_dalları: [],
+            veri_biçimleri: eşleme.veri_biçimleri ?? [],
+            koordinat_dalları: eşleme.koordinat_dalları ?? [],
             kaynak: {
               dosya: göreli(dosya, ECHARTS),
               satır: konum.line + 1,
               sembol: düğüm.name.text
             },
-            testler: [],
-            galeri_örnekleri: [],
+            testler: eşleme.testler ?? [],
+            galeri_örnekleri: eşleme.galeri_örnekleri ?? [],
             durum: eşleme.durum
           };
           if (!DURUMLAR.has(satır.durum)) hata(`geçersiz matris durumu: ${satır.durum}`);

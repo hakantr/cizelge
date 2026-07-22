@@ -479,6 +479,38 @@ function yapısalKontroller(senaryo, gerçekDosyası) {
     }];
   }
 
+  if (senaryo.id === 'calendar-simple') {
+    const aySınırıÖrnekleri = [
+      [154, 77],
+      [222, 85],
+      [291, 94],
+      [360, 120],
+      [428, 137],
+      [514, 145],
+      [582, 128]
+    ].map(([x, y]) => nötrKoyuÖrnek(x, y));
+    return [
+      tabanÇizgisi(
+        'takvim_üst_sınırı',
+        'Takvim üst sınırı ısı hücrelerinin altında kalmadan tüm genişlikte görünmeli',
+        51,
+        [69, 100, 200, 300, 400, 500, 598]
+      ),
+      tabanÇizgisi(
+        'takvim_alt_sınırı',
+        'Takvim alt sınırı ısı hücrelerinin altında kalmadan tüm genişlikte görünmeli',
+        171,
+        [69, 100, 200, 300, 400, 500, 598]
+      ),
+      {
+        ad: 'takvim_ay_ayırıcıları',
+        geçti: aySınırıÖrnekleri.every((örnek) => örnek.geçti),
+        açıklama: 'Ay ayırıcılarının merdiven vuruşları seri hücrelerinin üstünde görünmeli',
+        örnekler: aySınırıÖrnekleri
+      }
+    ];
+  }
+
   if (senaryo.id === 'themeRiver-basic') {
     const beklenenRenkler = [
       [80, 112, 221],
