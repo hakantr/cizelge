@@ -30,6 +30,10 @@ pub struct ÇalışmaEkseni {
     /// Pencerenin seri verisine uygulanma biçimi (`dataZoom.filterMode`).
     /// Pencere yokken bu değer etkisizdir.
     pub yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi,
+    /// ECharts `SCALE_EXTENT_KIND_MAPPING`: bar/candlestick gibi şekilleri
+    /// uçlarda içeren, çentik üretimindeki ham ölçek kapsamından bağımsız
+    /// eşleme kapsamı. `None` olduğunda `ölçek.kapsam()` kullanılır.
+    pub eşleme_kapsamı: Option<[f64; 2]>,
     /// Etkin kapsam için çözülmüş ECharts 6 kırık ölçek katmanı.
     pub kırılma_eşleyici: Option<KırılmaEşleyici>,
 }
@@ -47,8 +51,22 @@ impl ÇalışmaEkseni {
             pencere: None,
             yakınlaştırma_oranları: None,
             yakınlaştırma_süzme_kipi: YakınlaştırmaSüzmeKipi::Yok,
+            eşleme_kapsamı: None,
             kırılma_eşleyici,
         }
+    }
+
+    /// Ham ölçek/çentik kapsamını değiştirmeden piksel eşleme kapsamını
+    /// uygular. Geçersiz ya da ters kapsam temizlenir.
+    pub fn eşleme_kapsamı_uygula(&mut self, kapsam: [f64; 2]) {
+        self.eşleme_kapsamı =
+            (kapsam[0].is_finite() && kapsam[1].is_finite() && kapsam[1] > kapsam[0])
+                .then_some(kapsam);
+    }
+
+    /// Piksel dönüşümünde kullanılan etkin veri kapsamı.
+    pub fn eşleme_kapsamı(&self) -> [f64; 2] {
+        self.eşleme_kapsamı.unwrap_or_else(|| self.ölçek.kapsam())
     }
 
     /// Yakınlaştırma penceresini oranlarla (0..=1) uygular; yalnız kategorik
@@ -105,7 +123,10 @@ impl ÇalışmaEkseni {
                     let n = self.ölçek.kategori_sayısı().max(1) as f64;
                     (değer + 0.5) / n
                 }
-                (None, false) => self.ölçek.oranla(değer),
+                (None, false) => match self.eşleme_kapsamı {
+                    Some(kapsam) => doğrusal_eşle(değer, kapsam, [0.0, 1.0], false),
+                    None => self.ölçek.oranla(değer),
+                },
             }
         };
         // Pencere dışı değerler ızgara dışına taşar; çizim kırpılır.
@@ -140,7 +161,10 @@ impl ÇalışmaEkseni {
                 let n = self.ölçek.kategori_sayısı().max(1) as f64;
                 (oran * n - 0.5).round().clamp(0.0, n - 1.0)
             }
-            (None, false) => self.ölçek.orandan(oran),
+            (None, false) => match self.eşleme_kapsamı {
+                Some(kapsam) => doğrusal_eşle(oran, [0.0, 1.0], kapsam, false),
+                None => self.ölçek.orandan(oran),
+            },
         }
     }
 
@@ -434,6 +458,46 @@ mod testler {
         assert!(eksen.veri_penceresinde_mi(2.0));
         eksen.yakınlaştırma_süzme_kipi = YakınlaştırmaSüzmeKipi::Süz;
         assert!(!eksen.veri_penceresinde_mi(2.0));
+    }
+
+    #[test]
+    fn sekil_kapsama_eslemesi_ham_olcek_centiklerini_degistirmez() {
+        let ölçek = Ölçek::Aralık(AralıkÖlçeği::kur(
+            [0.0, 10.0],
+            Some(0.0),
+            Some(10.0),
+            false,
+            5,
+            None,
+            None,
+        ));
+        let mut eksen =
+            ÇalışmaEkseni::yeni(Eksen::değer(), ölçek, [0.0, 120.0], EksenKonumu::Alt);
+        let ham_çentikler = eksen
+            .ölçek
+            .çentikler()
+            .into_iter()
+            .map(|çentik| çentik.değer)
+            .collect::<Vec<_>>();
+
+        eksen.eşleme_kapsamı_uygula([-1.0, 11.0]);
+
+        assert_eq!(eksen.ölçek.kapsam(), [0.0, 10.0]);
+        assert_eq!(
+            eksen
+                .ölçek
+                .çentikler()
+                .into_iter()
+                .map(|çentik| çentik.değer)
+                .collect::<Vec<_>>(),
+            ham_çentikler
+        );
+        assert!((eksen.veriden_piksele(0.0) - 10.0).abs() < 1e-5);
+        assert!((eksen.veriden_piksele(10.0) - 110.0).abs() < 1e-5);
+        for değer in [0.0, 4.5, 10.0] {
+            let dönüş = eksen.pikselden_veriye(eksen.veriden_piksele(değer));
+            assert!((dönüş - değer).abs() < 1e-9);
+        }
     }
 
     #[test]

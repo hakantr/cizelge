@@ -56,7 +56,16 @@ fn eksen_yönündeki_metin_boyutu(
     yatay_eksen: bool,
     döndürme_derecesi: f32,
 ) -> f32 {
-    let genişlik = ölçü.0 + 6.0;
+    eksen_yönündeki_metin_boyutu_payla(ölçü, yatay_eksen, döndürme_derecesi, 6.0)
+}
+
+fn eksen_yönündeki_metin_boyutu_payla(
+    ölçü: (f32, f32),
+    yatay_eksen: bool,
+    döndürme_derecesi: f32,
+    yatay_pay: f32,
+) -> f32 {
+    let genişlik = ölçü.0 + yatay_pay;
     let yükseklik = ölçü.1;
     let radyan = döndürme_derecesi.to_radians();
     let kosinüs = radyan.cos().abs();
@@ -66,6 +75,178 @@ fn eksen_yönündeki_metin_boyutu(
     } else {
         genişlik * sinüs + yükseklik * kosinüs
     }
+}
+
+/// `AxisBuilder.fixMinMaxLabelShow` ve `hideOverlap` görünürlük çözümü.
+/// Bütün etiketler aynı sabit eksen çizgisine bağlı olduğundan zrender OBB
+/// kesişimi, eksen doğrultusundaki döndürülmüş izdüşümlere indirgenebilir.
+fn eksen_etiket_görünürlükleri(
+    çizici: &dyn ÇizimYüzeyi,
+    eksen: &ÇalışmaEkseni,
+    çentikler: &[(f32, Çentik)],
+    etiket_konumları: &[f32],
+    adım: usize,
+    görünür_kategori_sıraları: Option<&[usize]>,
+) -> Vec<bool> {
+    let mut görünür = çentikler
+        .iter()
+        .enumerate()
+        .map(|(sıra, (_, çentik))| {
+            görünür_kategori_sıraları.is_none_or(|sıralar| {
+                let değer = çentik.değer.round();
+                değer >= 0.0
+                    && değer <= usize::MAX as f64
+                    && sıralar.binary_search(&(değer as usize)).is_ok()
+            }) && (görünür_kategori_sıraları.is_some() || sıra % adım == 0)
+        })
+        .collect::<Vec<_>>();
+    if görünür.len() < 2 {
+        return görünür;
+    }
+
+    let boyut = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+    let yatay_pay = if eksen.seçenek.etiket.örtüşmeyi_gizle {
+        6.0
+    } else {
+        0.0
+    };
+    let izdüşümler = çentikler
+        .iter()
+        .enumerate()
+        .map(|(sıra, (_, çentik))| {
+            let metin = etiket_metni(eksen, çentik, sıra);
+            eksen_yönündeki_metin_boyutu_payla(
+                eksen_metni_ölç(çizici, &metin, boyut),
+                eksen.yatay_mı(),
+                eksen.seçenek.etiket.döndürme,
+                yatay_pay,
+            )
+        })
+        .collect::<Vec<_>>();
+    let kesişiyor = |ilk: usize, ikinci: usize, dokunma_eşiği: f32| {
+        let uzaklık = (etiket_konumları[ilk] - etiket_konumları[ikinci]).abs();
+        uzaklık < (izdüşümler[ilk] + izdüşümler[ikinci]) / 2.0 - dokunma_eşiği
+    };
+
+    // `axisLabel.interval: 0`, AxisBuilder.shouldShowAllLabels üzerinden uç
+    // düzeltmesini atlar; açık hideOverlap yine aşağıda uygulanır.
+    let bütün_kategori_etiketleri =
+        eksen.ölçek.kategorik_mi() && eksen.seçenek.etiket.aralık == Some(0);
+    if !bütün_kategori_etiketleri {
+        let son = görünür.len() - 1;
+        if eksen.seçenek.etiket.en_az_etiketini_göster != Some(false)
+            && görünür[0]
+            && görünür[1]
+            && kesişiyor(0, 1, 0.1)
+        {
+            if eksen.seçenek.etiket.en_az_etiketini_göster == Some(true) {
+                görünür[1] = false;
+            } else {
+                görünür[0] = false;
+            }
+        }
+        if eksen.seçenek.etiket.en_çok_etiketini_göster != Some(false)
+            && görünür[son]
+            && görünür[son - 1]
+            && kesişiyor(son, son - 1, 0.1)
+        {
+            if eksen.seçenek.etiket.en_çok_etiketini_göster == Some(true) {
+                görünür[son - 1] = false;
+            } else {
+                görünür[son] = false;
+            }
+        }
+    }
+
+    if eksen.seçenek.etiket.örtüşmeyi_gizle {
+        let mut korunanlar = Vec::new();
+        for sıra in 0..görünür.len() {
+            if !görünür[sıra] {
+                continue;
+            }
+            if korunanlar
+                .iter()
+                .copied()
+                .any(|önceki| kesişiyor(önceki, sıra, 0.0))
+            {
+                görünür[sıra] = false;
+            } else {
+                korunanlar.push(sıra);
+            }
+        }
+    }
+    görünür
+}
+
+fn eksen_etiket_konumlarını_çöz(
+    çizici: &dyn ÇizimYüzeyi,
+    eksen: &ÇalışmaEkseni,
+    çentikler: &[(f32, Çentik)],
+    boyut: f32,
+) -> Vec<f32> {
+    let mut konumlar = çentikler
+        .iter()
+        .map(|(konum, _)| *konum)
+        .collect::<Vec<_>>();
+    if !eksen.seçenek.kırılma_etiketi_örtüşmesini_taşı {
+        return konumlar;
+    }
+
+    for (başlangıç_sırası, (_, başlangıç_çentiği)) in çentikler.iter().enumerate() {
+        let Some(başlangıç_bilgisi) = başlangıç_çentiği.kırılma else {
+            continue;
+        };
+        if başlangıç_bilgisi.tür != crate::model::eksen::EksenKırılmaUcu::Başlangıç {
+            continue;
+        }
+        let Some((bitiş_sırası, (_, bitiş_çentiği))) =
+            çentikler.iter().enumerate().find(|(_, (_, çentik))| {
+                çentik.kırılma.is_some_and(|bilgi| {
+                    bilgi.tür == crate::model::eksen::EksenKırılmaUcu::Bitiş
+                        && (bilgi.başlangıç - başlangıç_bilgisi.başlangıç).abs() <= 1e-9
+                        && (bilgi.bitiş - başlangıç_bilgisi.bitiş).abs() <= 1e-9
+                })
+            })
+        else {
+            continue;
+        };
+        let başlangıç_metni = etiket_metni(eksen, başlangıç_çentiği, başlangıç_sırası);
+        let bitiş_metni = etiket_metni(eksen, bitiş_çentiği, bitiş_sırası);
+        let başlangıç_boyutu = eksen_yönündeki_metin_boyutu(
+            eksen_metni_ölç(çizici, &başlangıç_metni, boyut),
+            eksen.yatay_mı(),
+            eksen.seçenek.etiket.döndürme,
+        );
+        let bitiş_boyutu = eksen_yönündeki_metin_boyutu(
+            eksen_metni_ölç(çizici, &bitiş_metni, boyut),
+            eksen.yatay_mı(),
+            eksen.seçenek.etiket.döndürme,
+        );
+        if başlangıç_boyutu <= 0.0 || bitiş_boyutu <= 0.0 {
+            continue;
+        }
+        let (Some(ilk), Some(ikinci)) = (
+            konumlar.get(başlangıç_sırası).copied(),
+            konumlar.get(bitiş_sırası).copied(),
+        ) else {
+            continue;
+        };
+        let yön = if ikinci >= ilk { 1.0 } else { -1.0 };
+        let geçerli_uzaklık = (ikinci - ilk).abs();
+        // ECharts `labelIntersect(..., {touchThreshold: 0})` ile yalnız
+        // gerçek kesişme kadar ayırır; değen kutulara ek boşluk eklemez.
+        let gerekli_uzaklık = (başlangıç_boyutu + bitiş_boyutu) / 2.0;
+        if geçerli_uzaklık < gerekli_uzaklık {
+            let taşıma = (gerekli_uzaklık - geçerli_uzaklık) / 2.0;
+            if let Some(konum) = konumlar.get_mut(başlangıç_sırası) {
+                *konum -= yön * taşıma;
+            }
+            if let Some(konum) = konumlar.get_mut(bitiş_sırası) {
+                *konum += yön * taşıma;
+            }
+        }
+    }
+    konumlar
 }
 
 /// Kategori ekseninin otomatik `axisLabel.interval` çizim adımı. Çizgi
@@ -580,6 +761,18 @@ fn eksenleri_çiz_iç(
         // çentikler `interval` mantığıyla atlanır (ECharts davranışı).
         let adım = kategori_etiket_adımı(çizici, eksen);
         let görünür_kategori_sıraları = kategori_görünür_sıraları(eksen, adım);
+        let etiket_boyutu = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+        let etiket_çentikleri = eksen.etiket_çentikleri();
+        let etiket_konumları =
+            eksen_etiket_konumlarını_çöz(çizici, eksen, &etiket_çentikleri, etiket_boyutu);
+        let etiket_görünürlükleri = eksen_etiket_görünürlükleri(
+            çizici,
+            eksen,
+            &etiket_çentikleri,
+            &etiket_konumları,
+            adım,
+            görünür_kategori_sıraları.as_deref(),
+        );
 
         // 2) Çentikler.
         if çentik_göster {
@@ -589,12 +782,14 @@ fn eksenleri_çiz_iç(
                 .renk
                 .unwrap_or_else(tema::eksen_çentiği);
             let uzunluk = eksen.seçenek.çentik.uzunluk;
-            for (i, konum) in eksen
-                .çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala)
-                .into_iter()
-                .enumerate()
-            {
-                if i % adım != 0 {
+            let çizgi_çentikleri = eksen.çizgi_çentikleri(eksen.seçenek.çentik.etiketle_hizala);
+            let etiketlerle_bire_bir = çizgi_çentikleri.len() == etiket_görünürlükleri.len();
+            for (i, konum) in çizgi_çentikleri.into_iter().enumerate() {
+                if i % adım != 0
+                    || (eksen.seçenek.etiket.göster
+                        && etiketlerle_bire_bir
+                        && !etiket_görünürlükleri.get(i).copied().unwrap_or(false))
+                {
                     continue;
                 }
                 let konum = keskin(konum);
@@ -646,7 +841,7 @@ fn eksenleri_çiz_iç(
 
         // 3) Etiketler.
         if eksen.seçenek.etiket.göster {
-            let boyut = eksen.seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+            let boyut = etiket_boyutu;
             let renk = eksen
                 .seçenek
                 .etiket
@@ -654,83 +849,8 @@ fn eksenleri_çiz_iç(
                 .renk
                 .unwrap_or(tema::eksen_etiketi());
             let boşluk = eksen.seçenek.etiket.boşluk;
-            let çentikler = eksen.etiket_çentikleri();
-            let mut etiket_konumları = çentikler
-                .iter()
-                .map(|(konum, _)| *konum)
-                .collect::<Vec<_>>();
-
-            if eksen.seçenek.kırılma_etiketi_örtüşmesini_taşı {
-                for (başlangıç_sırası, (_, başlangıç_çentiği)) in çentikler.iter().enumerate()
-                {
-                    let Some(başlangıç_bilgisi) = başlangıç_çentiği.kırılma else {
-                        continue;
-                    };
-                    if başlangıç_bilgisi.tür != crate::model::eksen::EksenKırılmaUcu::Başlangıç
-                    {
-                        continue;
-                    }
-                    let Some((bitiş_sırası, (_, bitiş_çentiği))) =
-                        çentikler.iter().enumerate().find(|(_, (_, çentik))| {
-                            çentik.kırılma.is_some_and(|bilgi| {
-                                bilgi.tür == crate::model::eksen::EksenKırılmaUcu::Bitiş
-                                    && (bilgi.başlangıç - başlangıç_bilgisi.başlangıç).abs() <= 1e-9
-                                    && (bilgi.bitiş - başlangıç_bilgisi.bitiş).abs() <= 1e-9
-                            })
-                        })
-                    else {
-                        continue;
-                    };
-                    let başlangıç_metni = etiket_metni(eksen, başlangıç_çentiği, başlangıç_sırası);
-                    let bitiş_metni = etiket_metni(eksen, bitiş_çentiği, bitiş_sırası);
-                    let başlangıç_ölçüsü = eksen_metni_ölç(çizici, &başlangıç_metni, boyut);
-                    let bitiş_ölçüsü = eksen_metni_ölç(çizici, &bitiş_metni, boyut);
-                    let başlangıç_boyutu = eksen_yönündeki_metin_boyutu(
-                        başlangıç_ölçüsü,
-                        eksen.yatay_mı(),
-                        eksen.seçenek.etiket.döndürme,
-                    );
-                    let bitiş_boyutu = eksen_yönündeki_metin_boyutu(
-                        bitiş_ölçüsü,
-                        eksen.yatay_mı(),
-                        eksen.seçenek.etiket.döndürme,
-                    );
-                    if başlangıç_boyutu <= 0.0 || bitiş_boyutu <= 0.0 {
-                        continue;
-                    }
-                    let (Some(ilk), Some(ikinci)) = (
-                        etiket_konumları.get(başlangıç_sırası).copied(),
-                        etiket_konumları.get(bitiş_sırası).copied(),
-                    ) else {
-                        continue;
-                    };
-                    let yön = if ikinci >= ilk { 1.0 } else { -1.0 };
-                    let geçerli_uzaklık = (ikinci - ilk).abs();
-                    // ECharts `labelIntersect(..., {touchThreshold: 0})` ile
-                    // yalnız gerçek kesişme kadar ayırır; iki kutu birbirine
-                    // değdiğinde ek bir görsel boşluk bırakmaz.
-                    let gerekli_uzaklık = (başlangıç_boyutu + bitiş_boyutu) / 2.0;
-                    if geçerli_uzaklık < gerekli_uzaklık {
-                        let taşıma = (gerekli_uzaklık - geçerli_uzaklık) / 2.0;
-                        if let Some(konum) = etiket_konumları.get_mut(başlangıç_sırası) {
-                            *konum -= yön * taşıma;
-                        }
-                        if let Some(konum) = etiket_konumları.get_mut(bitiş_sırası) {
-                            *konum += yön * taşıma;
-                        }
-                    }
-                }
-            }
-
-            for (i, (konum, çentik)) in çentikler.iter().enumerate() {
-                let kategori_görünür = görünür_kategori_sıraları.as_ref().is_none_or(|sıralar| {
-                    let değer = çentik.değer.round();
-                    değer >= 0.0
-                        && değer <= usize::MAX as f64
-                        && sıralar.binary_search(&(değer as usize)).is_ok()
-                });
-                if !kategori_görünür || (görünür_kategori_sıraları.is_none() && i % adım != 0)
-                {
+            for (i, (konum, çentik)) in etiket_çentikleri.iter().enumerate() {
+                if !etiket_görünürlükleri.get(i).copied().unwrap_or(false) {
                     continue;
                 }
                 let metin = etiket_metni(eksen, çentik, i);
@@ -893,6 +1013,9 @@ fn eksenleri_çiz_iç(
 #[cfg(test)]
 mod testler {
     use super::*;
+    use crate::cizim::KayıtYüzeyi;
+    use crate::model::eksen::{Eksen, EksenEtiketi};
+    use crate::olcek::{AralıkÖlçeği, Ölçek};
 
     #[test]
     fn kirilma_zikzaklari_zrender_fazini_ve_sabit_araligi_izler() {
@@ -918,5 +1041,65 @@ mod testler {
         assert!((eksen_yönündeki_metin_boyutu(ölçü, false, 0.0) - 12.0).abs() < 1e-6);
         assert!((eksen_yönündeki_metin_boyutu(ölçü, true, 90.0) - 12.0).abs() < 1e-5);
         assert!((eksen_yönündeki_metin_boyutu(ölçü, false, 90.0) - 36.0).abs() < 1e-5);
+    }
+
+    #[test]
+    fn hide_overlap_resmi_dar_yatay_eksen_etiketlerini_korur() {
+        let yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eksen = ÇalışmaEkseni::yeni(
+            Eksen::değer().etiket(EksenEtiketi::yeni().örtüşmeyi_gizle(true)),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 100.0],
+                Some(0.0),
+                Some(100.0),
+                false,
+                5,
+                None,
+                None,
+            )),
+            [52.333_984, 145.0],
+            EksenKonumu::Alt,
+        );
+        let çentikler = eksen.etiket_çentikleri();
+        let konumlar = eksen_etiket_konumlarını_çöz(&yüzey, &eksen, &çentikler, 12.0);
+        let görünür =
+            eksen_etiket_görünürlükleri(&yüzey, &eksen, &çentikler, &konumlar, 1, None);
+        let değerler = çentikler
+            .iter()
+            .zip(görünür)
+            .filter_map(|((_, çentik), görünür)| görünür.then_some(çentik.değer))
+            .collect::<Vec<_>>();
+
+        assert_eq!(değerler, vec![0.0, 20.0, 60.0]);
+    }
+
+    #[test]
+    fn min_max_duzeltmesi_kisa_eksende_yalniz_uclari_gizler() {
+        let yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let eksen = ÇalışmaEkseni::yeni(
+            Eksen::değer().bölme_sayısı(3),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 300.0],
+                Some(0.0),
+                Some(300.0),
+                false,
+                3,
+                None,
+                None,
+            )),
+            [15.0, 0.0],
+            EksenKonumu::Sol,
+        );
+        let çentikler = eksen.etiket_çentikleri();
+        let konumlar = eksen_etiket_konumlarını_çöz(&yüzey, &eksen, &çentikler, 12.0);
+        let görünür =
+            eksen_etiket_görünürlükleri(&yüzey, &eksen, &çentikler, &konumlar, 1, None);
+        let değerler = çentikler
+            .iter()
+            .zip(görünür)
+            .filter_map(|((_, çentik), görünür)| görünür.then_some(çentik.değer))
+            .collect::<Vec<_>>();
+
+        assert_eq!(değerler, vec![100.0, 200.0]);
     }
 }

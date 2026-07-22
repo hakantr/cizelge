@@ -94,7 +94,14 @@ impl ZamanÖlçeği {
 
         let mut birim = ZamanBirimi::Milisaniye;
         let mut birim_adımı = hedef_adım.max(1.0);
-        if (31.0 * GÜN..=YIL_YAKLAŞIK).contains(&hedef_adım) {
+        if hedef_adım > 7.5 * GÜN && hedef_adım < 31.0 * GÜN {
+            // ECharts `getDateInterval`: ay seviyesine geçmeden önce günlük
+            // alt seviyeyi 7/16 günlük aralıkla korur. Leveled time axis bu
+            // sayede kısa çok-haftalı kapsamlarda ay sınırlarıyla birlikte
+            // haftalık etiketleri de üretir.
+            birim = ZamanBirimi::Gün;
+            birim_adımı = if hedef_adım > 16.0 * GÜN { 16.0 } else { 7.0 };
+        } else if (31.0 * GÜN..=YIL_YAKLAŞIK).contains(&hedef_adım) {
             // ECharts `TimeScale`, yaklaşık aralık ay düzeyine ulaştığında
             // bir üst sabit milisaniye adayını doğrudan kullanmaz;
             // `getMonthInterval` ile takvim ayı adımını 1/2/3/6 seçer. Bu
@@ -146,6 +153,9 @@ impl ZamanÖlçeği {
     }
 
     pub fn çentikler(&self) -> Vec<Çentik> {
+        if self.birim == ZamanBirimi::Gün && (self.birim_adımı - 7.0).abs() < f64::EPSILON {
+            return haftalık_kademeli_çentikler(self.kapsam);
+        }
         let mut sonuç = Vec::new();
         let güvenlik_sınırı = 1000;
         match self.birim {
@@ -249,7 +259,13 @@ impl ZamanÖlçeği {
                     ay_adı.to_string()
                 }
             }
-            ZamanBirimi::Gün => format!("{} {}", t.gün, ay_adı),
+            ZamanBirimi::Gün => {
+                if t.gün == 1 {
+                    ay_adı.to_string()
+                } else {
+                    t.gün.to_string()
+                }
+            }
             ZamanBirimi::Saat | ZamanBirimi::Dakika => {
                 if t.saat == 0 && t.dakika == 0 {
                     format!("{} {}", t.gün, ay_adı)
@@ -263,6 +279,111 @@ impl ZamanÖlçeği {
                 t.saat, t.dakika, t.saniye, t.milisaniye
             ),
         }
+    }
+}
+
+/// ECharts `createIntervalTicks`in week → month iki seviyeli kısa kapsamı.
+/// Her ayın 1'i üst seviye, 8/15/22/29'u alt seviye olur; önceki ayın son
+/// haftası yeni aya taşıyorsa ilk taşan gün de korunur. ECharts ham kapsam
+/// uçlarını `notNice` olarak üretip öntanımlı `showMinLabel/showMaxLabel`
+/// çözümünde etiketi ve ona bağlı ana çentiği gizlediğinden, görünür çentik
+/// listesine yalnız nice seviyeler alınır.
+fn haftalık_kademeli_çentikler(kapsam: [f64; 2]) -> Vec<Çentik> {
+    let başlangıç = andan_takvime(kapsam[0]);
+    let bitiş = andan_takvime(kapsam[1]);
+    let mut yıl = başlangıç.yıl;
+    let mut ay = başlangıç.ay;
+    let mut ilk_ay = true;
+    let mut sonuç = Vec::new();
+    loop {
+        let ay_başı = takvimden_ana(TakvimAnı {
+            yıl,
+            ay,
+            gün: 1,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        if ay_başı > kapsam[1] {
+            break;
+        }
+        if ay_başı >= kapsam[0] {
+            sonuç.push(Çentik {
+                değer: ay_başı,
+                kırılma: None,
+            });
+        }
+
+        if !ilk_ay {
+            let (önceki_yıl, önceki_ay) = if ay == 1 {
+                (yıl - 1, 12)
+            } else {
+                (yıl, ay - 1)
+            };
+            let önceki_gün_sayısı = aydaki_gün_sayısı(önceki_yıl, önceki_ay);
+            let önceki_son_hafta = 1 + ((önceki_gün_sayısı - 1) / 7) * 7;
+            let taşan_gün = önceki_son_hafta + 7 - önceki_gün_sayısı;
+            if taşan_gün > 1 {
+                let değer = takvimden_ana(TakvimAnı {
+                    yıl,
+                    ay,
+                    gün: taşan_gün,
+                    saat: 0,
+                    dakika: 0,
+                    saniye: 0,
+                    milisaniye: 0,
+                });
+                if değer >= kapsam[0] && değer <= kapsam[1] {
+                    sonuç.push(Çentik {
+                        değer,
+                        kırılma: None,
+                    });
+                }
+            }
+        }
+
+        let gün_sayısı = aydaki_gün_sayısı(yıl, ay);
+        for gün in (8..=gün_sayısı).step_by(7) {
+            let değer = takvimden_ana(TakvimAnı {
+                yıl,
+                ay,
+                gün,
+                saat: 0,
+                dakika: 0,
+                saniye: 0,
+                milisaniye: 0,
+            });
+            if değer >= kapsam[0] && değer <= kapsam[1] {
+                sonuç.push(Çentik {
+                    değer,
+                    kırılma: None,
+                });
+            }
+        }
+
+        if yıl == bitiş.yıl && ay == bitiş.ay {
+            break;
+        }
+        ay += 1;
+        if ay > 12 {
+            ay = 1;
+            yıl += 1;
+        }
+        ilk_ay = false;
+    }
+    sonuç.sort_by(|a, b| a.değer.total_cmp(&b.değer));
+    sonuç.dedup_by(|a, b| (a.değer - b.değer).abs() <= f64::EPSILON);
+    sonuç
+}
+
+fn aydaki_gün_sayısı(yıl: i32, ay: u32) -> u32 {
+    match ay {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 if yıl % 400 == 0 || (yıl % 4 == 0 && yıl % 100 != 0) => 29,
+        2 => 28,
+        _ => 30,
     }
 }
 
@@ -333,5 +454,56 @@ mod testler {
         assert!(tarihler.contains(&(1998, 4, 1)));
         assert!(tarihler.contains(&(1999, 10, 1)));
         assert_eq!(tarihler.last(), Some(&(2000, 4, 1)));
+    }
+
+    #[test]
+    fn iki_aylik_kapsam_hafta_ve_ay_seviyelerini_birlikte_uretir() {
+        let başlangıç = takvimden_ana(TakvimAnı {
+            yıl: 2025,
+            ay: 5,
+            gün: 5,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let bitiş = takvimden_ana(TakvimAnı {
+            yıl: 2025,
+            ay: 7,
+            gün: 7,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let ölçek = ZamanÖlçeği::kur([başlangıç, bitiş], 6);
+
+        assert_eq!(ölçek.birim, ZamanBirimi::Gün);
+        assert_eq!(ölçek.birim_adımı, 7.0);
+        let tarihler = ölçek
+            .çentikler()
+            .into_iter()
+            .map(|çentik| {
+                let an = andan_takvime(çentik.değer);
+                (an.ay, an.gün)
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            tarihler,
+            vec![
+                (5, 8),
+                (5, 15),
+                (5, 22),
+                (5, 29),
+                (6, 1),
+                (6, 5),
+                (6, 8),
+                (6, 15),
+                (6, 22),
+                (6, 29),
+                (7, 1),
+                (7, 6),
+            ]
+        );
     }
 }

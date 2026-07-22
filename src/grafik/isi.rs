@@ -287,10 +287,14 @@ pub fn matris_ısı_haritası_çiz(
         let değer = *dizi.get(2)?;
         let mut kutu = matris.veriden_yerleşime(&x, &y, true)?;
         let boşluk = seri.hücre_boşluğu.max(0.0);
-        kutu.x += boşluk / 2.0 - 0.25;
-        kutu.y += boşluk / 2.0 - 0.25;
-        kutu.genişlik = (kutu.genişlik - boşluk + 0.5).max(1.0);
-        kutu.yükseklik = (kutu.yükseklik - boşluk + 0.5).max(1.0);
+        // ECharts Matrix üzerindeki heatmap için `dataToLayout(...).rect`
+        // sonucunu değiştirmeden kullanır. Kartezyen heatmap'e özgü yarım
+        // piksel taşması burada uygulanmaz; aksi halde seri hücreleri Matrix
+        // bileşeninin taban çizgilerinden çeyrek piksel kayar.
+        kutu.x += boşluk / 2.0;
+        kutu.y += boşluk / 2.0;
+        kutu.genişlik = (kutu.genişlik - boşluk).max(1.0);
+        kutu.yükseklik = (kutu.yükseklik - boşluk).max(1.0);
         Some((kutu, değer))
     };
     let vurgulu = fare.and_then(|fare| {
@@ -368,7 +372,10 @@ pub fn matris_ısı_haritası_çiz(
                 seri.etiket.yazı.kalın,
                 renk,
                 2.0,
-                AfinMatris::ötele(kutu.merkez().0, kutu.merkez().1 + 0.5),
+                // Matrix HeatmapView etiketi hücrenin ham merkezine bağlar;
+                // Matrix bileşeninin alt-piksel çizgileri seri etiketini
+                // ayrıca yarım piksel aşağı taşımaz.
+                AfinMatris::ötele(kutu.merkez().0, kutu.merkez().1),
             );
         }
         isabetler.push(İsabetBölgesi {
@@ -954,9 +961,9 @@ pub fn görsel_eşleme_çiz(
             çizici.genişlik() - sağ.çöz(çizici.genişlik()) - dış_genişlik - dış_solu
         } else {
             match eşleme.sol {
-                YatayKonum::Sol => 10.0 - dış_solu,
+                YatayKonum::Sol => -dış_solu,
                 YatayKonum::Orta => (çizici.genişlik() - dış_genişlik) / 2.0 - dış_solu,
-                YatayKonum::Sağ => çizici.genişlik() - 10.0 - dış_genişlik - dış_solu,
+                YatayKonum::Sağ => çizici.genişlik() - dış_genişlik - dış_solu,
                 YatayKonum::Değer(uzunluk) => uzunluk.çöz(çizici.genişlik()) - dış_solu,
             }
         };

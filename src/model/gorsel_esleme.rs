@@ -277,7 +277,8 @@ impl Default for GörselEşleme {
             öğe_genişliği: None,
             öğe_yüksekliği: None,
             metin_boşluğu: 10.0,
-            sol: YatayKonum::Değer(Uzunluk::Piksel(10.0)),
+            // `VisualMapModel.defaultOption.left`.
+            sol: YatayKonum::Değer(Uzunluk::Piksel(0.0)),
             sağ: None,
             üst: None,
             dikey_konum: None,

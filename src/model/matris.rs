@@ -153,12 +153,14 @@ impl Default for MatrisBoyutu {
             seviye_boyutları: Vec::new(),
             seviye_boyutu: None,
             öğe_stili: ÖğeStili::yeni()
-                .kenarlık_rengi(Renk::onaltılık(0xe0e6f1))
+                // `tokens.color.borderTint`.
+                .kenarlık_rengi(Renk::onaltılık(0xcfd2d7))
                 .kenarlık_kalınlığı(1.0),
             etiket: Etiket::yeni().göster(true).uzaklık(0.0),
             etiket_bağlamlı_biçimleyici: None,
             ayırıcı: ÇizgiStili::yeni()
-                .renk(Renk::onaltılık(0xb7c1d0))
+                // `tokens.color.border`.
+                .renk(Renk::onaltılık(0xb7b9be))
                 .kalınlık(1.0),
             sessiz: None,
             z2: None,
@@ -396,7 +398,8 @@ impl Default for MatrisKoordinatı {
             y: MatrisBoyutu::default(),
             gövde_verisi: Vec::new(),
             gövde_stili: ÖğeStili::yeni()
-                .kenarlık_rengi(Renk::onaltılık(0xe0e6f1))
+                // `tokens.color.borderTint`.
+                .kenarlık_rengi(Renk::onaltılık(0xcfd2d7))
                 .kenarlık_kalınlığı(1.0),
             gövde_etiketi: Etiket::yeni().göster(true).uzaklık(0.0),
             gövde_etiketi_bağlamlı_biçimleyici: None,
@@ -409,7 +412,8 @@ impl Default for MatrisKoordinatı {
             köşe_sessiz: None,
             köşe_z2: None,
             arkaplan_stili: ÖğeStili::yeni()
-                .kenarlık_rengi(Renk::onaltılık(0x6e7e92))
+                // `tokens.color.axisLine`.
+                .kenarlık_rengi(Renk::onaltılık(0x54555a))
                 .kenarlık_kalınlığı(1.0),
             kenarlık_z2: None,
             tetikleme_olayı: false,

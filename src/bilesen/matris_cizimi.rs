@@ -6,6 +6,32 @@ use crate::model::matris::{MatrisEtiketiBağlamı, MatrisKoordinatı};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
+/// ECharts MatrixView `createMatrixRect` ile aynı yönde alt-piksel hizası.
+/// Başlangıç ve bitiş kenarlarını ayrı ayrı hizalamak, komşu hücrelerle
+/// dış sınırın aynı fiziksel piksel üzerinde üst üste gelmesini sağlar.
+fn matris_konumunu_keskinleştir(konum: f32, kalınlık: f32) -> f32 {
+    let iki_kat = (konum * 2.0).round();
+    if ((iki_kat as i64 + kalınlık.round() as i64).rem_euclid(2)) == 0 {
+        iki_kat / 2.0
+    } else {
+        (iki_kat + 1.0) / 2.0
+    }
+}
+
+fn matris_kutusunu_keskinleştir(
+    kutu: crate::koordinat::Dikdörtgen,
+    kalınlık: f32,
+) -> crate::koordinat::Dikdörtgen {
+    if kalınlık <= 0.0 {
+        return kutu;
+    }
+    let x = matris_konumunu_keskinleştir(kutu.x, kalınlık);
+    let y = matris_konumunu_keskinleştir(kutu.y, kalınlık);
+    let sağ = matris_konumunu_keskinleştir(kutu.sağ(), kalınlık);
+    let alt = matris_konumunu_keskinleştir(kutu.alt(), kalınlık);
+    crate::koordinat::Dikdörtgen::yeni(x, y, sağ - x, alt - y)
+}
+
 /// Çözümlenmiş matrix gövdesini, hiyerarşik başlıklarını ve özel/birleşik
 /// hücrelerini boyar. Yerleşim ayrıca matrix'e bağlı serilerce paylaşılır.
 pub fn matris_çiz(
@@ -35,18 +61,20 @@ pub fn matris_çiz(
     // MatrixView dış sınırı ve x/y başlık ayırıcılarını normal hücre
     // kenarlıklarının üstünde, açık yüksek-z2 hücrelerin altında tutar.
     if seçenek.x.göster && seçenek.x.ayırıcı.kalınlık > 0.0 {
+        let y = matris_konumunu_keskinleştir(yerleşim.gövde_kutusu.y, seçenek.x.ayırıcı.kalınlık);
         yüzey.çizgi(
-            (yerleşim.dış_kutu.x, yerleşim.gövde_kutusu.y),
-            (yerleşim.dış_kutu.sağ(), yerleşim.gövde_kutusu.y),
+            (yerleşim.dış_kutu.x, y),
+            (yerleşim.dış_kutu.sağ(), y),
             seçenek.x.ayırıcı.kalınlık,
             seçenek.x.ayırıcı.renk.unwrap_or_else(tema::nötr_40),
             seçenek.x.ayırıcı.tür,
         );
     }
     if seçenek.y.göster && seçenek.y.ayırıcı.kalınlık > 0.0 {
+        let x = matris_konumunu_keskinleştir(yerleşim.gövde_kutusu.x, seçenek.y.ayırıcı.kalınlık);
         yüzey.çizgi(
-            (yerleşim.gövde_kutusu.x, yerleşim.dış_kutu.y),
-            (yerleşim.gövde_kutusu.x, yerleşim.dış_kutu.alt()),
+            (x, yerleşim.dış_kutu.y),
+            (x, yerleşim.dış_kutu.alt()),
             seçenek.y.ayırıcı.kalınlık,
             seçenek.y.ayırıcı.renk.unwrap_or_else(tema::nötr_40),
             seçenek.y.ayırıcı.tür,
@@ -58,8 +86,12 @@ pub fn matris_çiz(
         .map(|renk| (seçenek.arkaplan_stili.kenarlık_kalınlığı.max(0.0), renk))
         .filter(|(kalınlık, _)| *kalınlık > 0.0);
     if arkaplan_kenarlığı.is_some() {
-        yüzey.dikdörtgen(
+        let kenarlık_kutusu = matris_kutusunu_keskinleştir(
             yerleşim.dış_kutu,
+            seçenek.arkaplan_stili.kenarlık_kalınlığı,
+        );
+        yüzey.dikdörtgen(
+            kenarlık_kutusu,
             &Dolgu::Düz(Renk::SAYDAM),
             seçenek.arkaplan_stili.kenarlık_yarıçapı,
             arkaplan_kenarlığı,
@@ -86,12 +118,10 @@ fn hücre_çiz(
         .kenarlık_rengi
         .map(|renk| (hücre.öğe_stili.kenarlık_kalınlığı.max(0.0), renk))
         .filter(|(kalınlık, _)| *kalınlık > 0.0);
-    yüzey.dikdörtgen(
-        hücre.kutu,
-        &dolgu,
-        hücre.öğe_stili.kenarlık_yarıçapı,
-        kenarlık,
-    );
+    let kutu = kenarlık
+        .map(|(kalınlık, _)| matris_kutusunu_keskinleştir(hücre.kutu, kalınlık))
+        .unwrap_or(hücre.kutu);
+    yüzey.dikdörtgen(kutu, &dolgu, hücre.öğe_stili.kenarlık_yarıçapı, kenarlık);
 
     if !hücre.etiket.göster {
         return;
@@ -118,20 +148,19 @@ fn hücre_çiz(
     } else {
         değer.to_owned()
     };
-    let merkez = hücre.kutu.merkez();
+    let merkez = kutu.merkez();
     let boyut = hücre.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
     let satır_yüksekliği = hücre.etiket.yazı.satır_yüksekliği.unwrap_or(boyut).max(0.0);
     let mut satırlar = metni_satırlara_sar(
         yüzey,
         &metin,
-        // Matrix label kutusu varsayılan olarak ek yatay padding uygulamaz.
-        // Yalnız raster sınırına taşmayı önleyen birer piksellik pay bırak.
-        (hücre.kutu.genişlik - 2.0).max(0.0),
+        // ECharts `defaultLabelOption.padding: [2, 3, 2, 3]`.
+        (kutu.genişlik - 6.0).max(0.0),
         boyut,
         hücre.etiket.yazı.kalın,
     );
     let en_çok_satır =
-        (((hücre.kutu.yükseklik - 4.0).max(0.0) / satır_yüksekliği).floor() as usize).max(1);
+        (((kutu.yükseklik - 4.0).max(0.0) / satır_yüksekliği).floor() as usize).max(1);
     satırlar.truncate(en_çok_satır);
     let ilk_y = merkez.1 + hücre.etiket.kayma.1
         - satır_yüksekliği * satırlar.len().saturating_sub(1) as f32 / 2.0;

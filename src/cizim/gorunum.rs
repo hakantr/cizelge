@@ -59,7 +59,8 @@ use crate::grafik::sacilim::{
 };
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{
-    SütunGirdisi, sütun_görsel_kapsamı, sütunları_çiz, yerleşim_hesapla
+    SütunGirdisi, sütun_bant_genişliği, sütun_değeri, sütun_görsel_kapsamı, sütun_taban_değeri,
+    sütun_yatay_mı, sütunları_çiz, yerleşim_hesapla,
 };
 use crate::grafik::takvim_isi::{takvim_değer_kapsamı, takvim_koordinatında_çiz, takvim_çiz};
 use crate::grafik::tema_nehri::{
@@ -87,7 +88,9 @@ use crate::olcek::{
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 use crate::yardimci::bicim::binlik_ayır;
-use crate::yerlesim::yigin::{YığınAralığı, yığın_aralıkları};
+use crate::yerlesim::yigin::{
+    YığınAralığı, yığın_aralıkları, yığın_aralıkları_seçici
+};
 
 /// Toolbox'ın 0..60 civarındaki resmi SVG yol koordinatını 15 px simge
 /// kutusuna, en-boy oranını koruyarak ortalar.
@@ -541,6 +544,16 @@ fn seri_fırça_noktası(
                 (veri_sırası as f64, ortanca)
             }
         }
+        Seri::Sütun(_) => {
+            let yatay = sütun_yatay_mı(kartezyen);
+            let değer = sütun_değeri(öğe, yatay)?;
+            let taban = sütun_taban_değeri(öğe, veri_sırası, yatay);
+            if yatay {
+                (değer, taban)
+            } else {
+                (taban, değer)
+            }
+        }
         _ => {
             let değer = öğe.değer.sayı()?;
             if y_kategorik && !x_kategorik {
@@ -552,7 +565,7 @@ fn seri_fırça_noktası(
     };
     let mut nokta = kartezyen.nokta(x, y);
     if matches!(seri, Seri::Sütun(_)) {
-        if y_kategorik && !x_kategorik {
+        if sütun_yatay_mı(kartezyen) {
             nokta.1 += sütun_merkez_kayması;
         } else {
             nokta.0 += sütun_merkez_kayması;
@@ -561,14 +574,26 @@ fn seri_fırça_noktası(
     Some(nokta)
 }
 
+/// Model aşamasındaki ECharts `Cartesian2D.getBaseAxis` seçimi. Çalışma
+/// eksenleri kurulmadan önce yığın ve kapsam boyutunu aynı kuralla seçer.
+fn sütun_tabanı_y_mi(x: &Eksen, y: &Eksen) -> bool {
+    if x.tür == EksenTürü::Kategori {
+        false
+    } else if y.tür == EksenTürü::Kategori {
+        true
+    } else if x.tür == EksenTürü::Zaman {
+        false
+    } else {
+        y.tür == EksenTürü::Zaman
+    }
+}
+
 fn sütun_grup_anahtarı(seri: &Seri, kurulum: &KartezyenKurulum) -> (bool, usize) {
     let bağ = seri.eksen_bağı();
-    let y_kategorik = kurulum
-        .y_eksenler
-        .get(bağ.y)
-        .map(|eksen| eksen.ölçek.kategorik_mi())
-        .unwrap_or(false);
-    if y_kategorik {
+    let yatay = kurulum
+        .seri_kartezyeni(seri)
+        .is_some_and(|kartezyen| sütun_yatay_mı(&kartezyen));
+    if yatay {
         (false, bağ.y)
     } else {
         (true, bağ.x)
@@ -621,13 +646,7 @@ fn sütun_fırça_merkez_kaymaları(
 
     let mut kaymalar = HashMap::new();
     for (_, grup) in gruplar {
-        let Some(ilk) = grup.first() else { continue };
-        let yatay = ilk.kartezyen.y.ölçek.kategorik_mi() && !ilk.kartezyen.x.ölçek.kategorik_mi();
-        let bant = if yatay {
-            ilk.kartezyen.y.bant_genişliği()
-        } else {
-            ilk.kartezyen.x.bant_genişliği()
-        };
+        let bant = sütun_bant_genişliği(&grup);
         for (girdi, konum) in grup.iter().zip(yerleşim_hesapla(&grup, bant)) {
             kaymalar.insert(girdi.genel_sıra, konum.kaydırma + konum.genişlik / 2.0);
         }
@@ -1749,15 +1768,15 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
             }
             let etkin_açıklık = KırılmaEşleyici::kur(&seçenek.kırılmalar, kırılma_kapsamı)
                 .map(|eşleyici| eşleyici.etkin_açıklık());
-            let ölçek = if let Some(etkin_açıklık) = etkin_açıklık {
+            let mut ölçek = if let Some(etkin_açıklık) = etkin_açıklık {
                 AralıkÖlçeği::kur_etkin_açıklıkla(
                     kapsam,
                     en_az,
                     en_çok,
                     seçenek.sıfırı_içer,
                     seçenek.bölme_sayısı,
-                    seçenek.aralık.or(seçenek.en_küçük_adım),
-                    seçenek.aralık.or(seçenek.en_büyük_adım),
+                    seçenek.en_küçük_adım,
+                    seçenek.en_büyük_adım,
                     etkin_açıklık,
                 )
             } else {
@@ -1767,10 +1786,13 @@ fn ölçek_kur(seçenek: &Eksen, kategoriler: Vec<String>, kapsam: [f64; 2]) -> 
                     en_çok,
                     seçenek.sıfırı_içer,
                     seçenek.bölme_sayısı,
-                    seçenek.aralık.or(seçenek.en_küçük_adım),
-                    seçenek.aralık.or(seçenek.en_büyük_adım),
+                    seçenek.en_küçük_adım,
+                    seçenek.en_büyük_adım,
                 )
             };
+            if let Some(aralık) = seçenek.aralık {
+                ölçek.açık_aralık_uygula(aralık);
+            }
             Ölçek::Aralık(ölçek)
         }
         EksenTürü::Zaman => {
@@ -2051,7 +2073,18 @@ fn kartezyen_kur_matrisli(
     let ızgara_seçenekleri = seçenekler.etkin_ızgaralar();
     let ızgara_sayısı = ızgara_seçenekleri.len();
 
-    let aralıklar = yığın_aralıkları(&seçenekler.seriler, &görünürler);
+    let aralıklar =
+        yığın_aralıkları_seçici(&seçenekler.seriler, &görünürler, |_, seri, _, öğe| {
+            let Seri::Sütun(_) = seri else {
+                return öğe.değer.sayı();
+            };
+            let bağ = seri.eksen_bağı();
+            let yatay = x_seçenekler
+                .get(bağ.x)
+                .zip(y_seçenekler.get(bağ.y))
+                .is_some_and(|(x, y)| sütun_tabanı_y_mi(x, y));
+            sütun_değeri(öğe, yatay)
+        });
 
     let kapsa = |kapsam: &mut [f64; 2], v: f64| {
         if v.is_finite() {
@@ -2163,6 +2196,7 @@ fn kartezyen_kur_matrisli(
         }
 
         let sütun_mu = matches!(seri, Seri::Sütun(_));
+        let sütun_taban_y = sütun_mu && sütun_tabanı_y_mi(x_seçenek, y_seçenek);
         // Bir XY öğesinin karşı boyutu NaN olsa da sonlu x değeri eksen
         // kapsamına katılır. ECharts bunu özellikle çizgiyi kesen
         // `[timestamp, NaN]` satırlarında korur; son zaman çentiği ve eksen
@@ -2181,19 +2215,22 @@ fn kartezyen_kur_matrisli(
             let Some((taban, tepe)) = aralık else {
                 continue;
             };
-            // Yatay yerleşim (y kategorik, x değer): değerler x'e akar.
-            let değer_kapsamı: &mut [f64; 2] = if y_kategorik && !x_kategorik {
-                x_kapsam
+            // Bar taban ekseni y olduğunda (kategori yanında zaman da)
+            // değerler x'e akar. Çizginin tarihsel y-kategori davranışı aynı
+            // seçimle korunur.
+            let değer_yatay = if sütun_mu {
+                sütun_taban_y
             } else {
-                y_kapsam
+                y_kategorik && !x_kategorik
             };
+            let değer_kapsamı: &mut [f64; 2] = if değer_yatay { x_kapsam } else { y_kapsam };
             kapsa(değer_kapsamı, *tepe);
             // Bar'ın geometrik tabanı her zaman sıfırdır; ancak `scale: true`
             // (`sıfırı_içer: false`) değer ekseninin veri kapsamına sıfırı
             // katmaz. ECharts tabanı ölçek dışında eşleyip grid'de kırpar.
             // Yığılmış serinin sıfırdan farklı tabanı ise gerçek veri
             // kapsamıdır ve her iki kipte de korunmalıdır.
-            let değer_ekseni_sıfırı_içer = if y_kategorik && !x_kategorik {
+            let değer_ekseni_sıfırı_içer = if değer_yatay {
                 x_seçenek.sıfırı_içer
             } else {
                 y_seçenek.sıfırı_içer
@@ -2201,7 +2238,20 @@ fn kartezyen_kur_matrisli(
             if taban.abs() > 1e-12 || (sütun_mu && değer_ekseni_sıfırı_içer) {
                 kapsa(değer_kapsamı, *taban);
             }
-            if x_kategorik || !y_kategorik {
+            if sütun_mu {
+                let taban_değeri = seri
+                    .veri()
+                    .get(j)
+                    .map(|öğe| sütun_taban_değeri(öğe, j, sütun_taban_y))
+                    .unwrap_or(j as f64);
+                if sütun_taban_y {
+                    if !y_kategorik {
+                        kapsa(y_kapsam, taban_değeri);
+                    }
+                } else if !x_kategorik {
+                    kapsa(x_kapsam, taban_değeri);
+                }
+            } else if x_kategorik || !y_kategorik {
                 let x_değeri = seri
                     .veri()
                     .get(j)
@@ -2211,6 +2261,65 @@ fn kartezyen_kur_matrisli(
             }
         }
     }
+
+    // ECharts 6 `axisBand` sayısal/zaman tabanında pozitif en küçük veri
+    // aralığından bant üretir ve `containShape` eşleme kapsamını iki uçta
+    // yarım bant genişletir. Böylece ilk/son bar koordinat alanında tam
+    // görünür; kategori ekseninin boundaryGap davranışının sayısal eşidir.
+    let mut x_sütun_tabanları = vec![Vec::<f64>::new(); x_seçenekler.len()];
+    let mut y_sütun_tabanları = vec![Vec::<f64>::new(); y_seçenekler.len()];
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        if !görünürler.get(seri_sırası).copied().unwrap_or(false) || !matches!(seri, Seri::Sütun(_))
+        {
+            continue;
+        }
+        let bağ = seri.eksen_bağı();
+        let Some((x, y)) = x_seçenekler.get(bağ.x).zip(y_seçenekler.get(bağ.y)) else {
+            continue;
+        };
+        let yatay = sütun_tabanı_y_mi(x, y);
+        let hedef = if yatay {
+            if y.tür == EksenTürü::Kategori {
+                continue;
+            }
+            y_sütun_tabanları.get_mut(bağ.y)
+        } else {
+            if x.tür == EksenTürü::Kategori {
+                continue;
+            }
+            x_sütun_tabanları.get_mut(bağ.x)
+        };
+        let Some(hedef) = hedef else { continue };
+        hedef.extend(
+            seri.veri()
+                .iter()
+                .enumerate()
+                .map(|(sıra, öğe)| sütun_taban_değeri(öğe, sıra, yatay))
+                .filter(|değer| değer.is_finite()),
+        );
+    }
+    let en_küçük_pozitif_aralık = |değerler: &mut Vec<f64>| -> Option<f64> {
+        değerler.sort_by(f64::total_cmp);
+        değerler.dedup_by(|a, b| (*a - *b).abs() <= f64::EPSILON);
+        değerler
+            .windows(2)
+            .filter_map(|çift| match çift {
+                [a, b] => {
+                    let fark = b - a;
+                    (fark > 0.0 && fark.is_finite()).then_some(fark)
+                }
+                _ => None,
+            })
+            .min_by(f64::total_cmp)
+    };
+    let x_sütun_taban_aralıkları = x_sütun_tabanları
+        .iter_mut()
+        .map(&en_küçük_pozitif_aralık)
+        .collect::<Vec<_>>();
+    let y_sütun_taban_aralıkları = y_sütun_tabanları
+        .iter_mut()
+        .map(en_küçük_pozitif_aralık)
+        .collect::<Vec<_>>();
 
     // Kategorik eksen verisi: eksen verisi ya da bağlı serilerden türetilir.
     let kategoriler_derle = |eksen: &Eksen, x_mi: bool, eksen_sırası: usize| -> Vec<String> {
@@ -2522,6 +2631,7 @@ fn kartezyen_kur_matrisli(
             }
 
             let sütun_mu = matches!(seri, Seri::Sütun(_));
+            let sütun_taban_y = sütun_mu && sütun_tabanı_y_mi(x_seçenek, y_seçenek);
             let Some(seri_aralıkları) = aralıklar.get(seri_sırası) else {
                 continue;
             };
@@ -2534,23 +2644,33 @@ fn kartezyen_kur_matrisli(
                     .get(veri_sırası)
                     .and_then(|öğe| öğe.değer.x())
                     .unwrap_or(veri_sırası as f64);
-                let (x_değerleri, y_değerleri) = if y_kategorik && !x_kategorik {
-                    ([*tepe], [veri_sırası as f64])
+                let taban_değeri = seri
+                    .veri()
+                    .get(veri_sırası)
+                    .map(|öğe| sütun_taban_değeri(öğe, veri_sırası, sütun_taban_y))
+                    .unwrap_or(veri_sırası as f64);
+                let değer_yatay = if sütun_mu {
+                    sütun_taban_y
                 } else {
-                    ([x_değeri], [*tepe])
+                    y_kategorik && !x_kategorik
+                };
+                let (x_değerleri, y_değerleri) = if değer_yatay {
+                    ([*tepe], [taban_değeri])
+                } else {
+                    ([if sütun_mu { taban_değeri } else { x_değeri }], [*tepe])
                 };
                 if !pencereden_geçer(x_penceresi, &x_değerleri)
                     || !pencereden_geçer(y_penceresi, &y_değerleri)
                 {
                     continue;
                 }
-                let değer_kapsamı = if y_kategorik && !x_kategorik {
+                let değer_kapsamı = if değer_yatay {
                     &mut *x_kapsam
                 } else {
                     &mut *y_kapsam
                 };
                 kapsa(değer_kapsamı, *tepe);
-                let değer_ekseni_sıfırı_içer = if y_kategorik && !x_kategorik {
+                let değer_ekseni_sıfırı_içer = if değer_yatay {
                     x_seçenek.sıfırı_içer
                 } else {
                     y_seçenek.sıfırı_içer
@@ -2558,7 +2678,15 @@ fn kartezyen_kur_matrisli(
                 if taban.abs() > 1e-12 || (sütun_mu && değer_ekseni_sıfırı_içer) {
                     kapsa(değer_kapsamı, *taban);
                 }
-                if x_kategorik || !y_kategorik {
+                if sütun_mu {
+                    if sütun_taban_y {
+                        if !y_kategorik {
+                            kapsa(y_kapsam, taban_değeri);
+                        }
+                    } else if !x_kategorik {
+                        kapsa(x_kapsam, taban_değeri);
+                    }
+                } else if x_kategorik || !y_kategorik {
                     kapsa(x_kapsam, x_değeri);
                 }
             }
@@ -2616,7 +2744,7 @@ fn kartezyen_kur_matrisli(
                 if let Some((yi, y_seçenek)) = y_seçenekler
                     .iter()
                     .enumerate()
-                    .find(|(_, e)| e.ızgara_sırası == g)
+                    .find(|(_, e)| e.ızgara_sırası == g && e.etiket.göster && !e.etiket.içeride)
                 {
                     let y_boyut = y_seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
                     let kapsam = y_kapsamlar.get(yi).copied().unwrap_or([0.0, 1.0]);
@@ -2649,7 +2777,10 @@ fn kartezyen_kur_matrisli(
                     sol += sol_etiket_payı;
                     genişlik = (genişlik - sol_etiket_payı).max(1.0);
                 }
-                if let Some(x_seçenek) = x_seçenekler.iter().find(|e| e.ızgara_sırası == g) {
+                if let Some(x_seçenek) = x_seçenekler
+                    .iter()
+                    .find(|e| e.ızgara_sırası == g && e.etiket.göster && !e.etiket.içeride)
+                {
                     let x_boyut = x_seçenek.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
                     // Tek satırlı eksen etiketi için zrender sınır kutusu
                     // font boyudur; genel rich-text satır oranı burada
@@ -2779,6 +2910,23 @@ fn kartezyen_kur_matrisli(
             });
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.x, alan.sağ()], konum);
+            if pencere.is_none()
+                && seçenek.tür != EksenTürü::Kategori
+                && let Some(aralık) = x_sütun_taban_aralıkları.get(xi).copied().flatten()
+            {
+                let ham = eksen.ölçek.kapsam();
+                let alt = if seçenek.en_az.is_none() && !seçenek.en_az_veri {
+                    ham[0] - aralık / 2.0
+                } else {
+                    ham[0]
+                };
+                let üst = if seçenek.en_çok.is_none() && !seçenek.en_çok_veri {
+                    ham[1] + aralık / 2.0
+                } else {
+                    ham[1]
+                };
+                eksen.eşleme_kapsamı_uygula([alt, üst]);
+            }
             if let Some(([p0, p1], oranlar)) = pencere {
                 eksen.yakınlaştırma_oranları = Some(oranlar);
                 if let Some(yakınlaştırma) = yakınlaştırma {
@@ -2852,6 +3000,23 @@ fn kartezyen_kur_matrisli(
             // Dikey eksen piksel aralığı alttan yukarı doğrudur.
             let mut eksen =
                 ÇalışmaEkseni::yeni(seçenek.clone(), ölçek, [alan.alt(), alan.y], konum);
+            if pencere.is_none()
+                && seçenek.tür != EksenTürü::Kategori
+                && let Some(aralık) = y_sütun_taban_aralıkları.get(yi).copied().flatten()
+            {
+                let ham = eksen.ölçek.kapsam();
+                let alt = if seçenek.en_az.is_none() && !seçenek.en_az_veri {
+                    ham[0] - aralık / 2.0
+                } else {
+                    ham[0]
+                };
+                let üst = if seçenek.en_çok.is_none() && !seçenek.en_çok_veri {
+                    ham[1] + aralık / 2.0
+                } else {
+                    ham[1]
+                };
+                eksen.eşleme_kapsamı_uygula([alt, üst]);
+            }
             if let Some(([p0, p1], oranlar)) = pencere {
                 eksen.yakınlaştırma_oranları = Some(oranlar);
                 if let Some(yakınlaştırma) = yakınlaştırma {
@@ -4283,11 +4448,7 @@ pub fn grafiği_boya(
                         .iter()
                         .find(|(aday, _)| *aday == anahtar)
                         .and_then(|(_, girdiler)| {
-                            let bant_genişliği = if kartezyen.x.ölçek.kategorik_mi() {
-                                kartezyen.x.bant_genişliği()
-                            } else {
-                                kartezyen.y.bant_genişliği()
-                            };
+                            let bant_genişliği = sütun_bant_genişliği(girdiler);
                             let konumlar = yerleşim_hesapla(girdiler, bant_genişliği);
                             girdiler
                                 .iter()
@@ -6321,6 +6482,36 @@ mod yakınlaştırma_yönü_testleri {
         assert!((alan.y - 288.75).abs() < 1e-4, "{alan:?}");
         assert!((alan.genişlik - 266.0).abs() < 1e-4, "{alan:?}");
         assert!((alan.yükseklik - 199.5).abs() < 1e-4, "{alan:?}");
+    }
+
+    #[test]
+    fn contain_label_gizli_ve_icerideki_eksen_etiketlerine_alan_ayirmaz() {
+        let gizli = GrafikSeçenekleri::yeni()
+            .ızgara_ekle(
+                crate::model::bilesen::Izgara::yeni()
+                    .sol(10)
+                    .sağ(10)
+                    .üst(10)
+                    .alt(10)
+                    .etiketi_kapsa(true),
+            )
+            .x_ekseni(
+                Eksen::değer().etiket(crate::model::eksen::EksenEtiketi::yeni().göster(false)),
+            )
+            .y_ekseni(
+                Eksen::değer().etiket(crate::model::eksen::EksenEtiketi::yeni().içeride(true)),
+            )
+            .seri(crate::model::seri::SaçılımSerisi::yeni().veri([[1.0, 2.0]]));
+        let yüzey = crate::cizim::KayıtYüzeyi::yeni(200.0, 100.0);
+
+        let kurulum =
+            kartezyen_kur(&yüzey, &gizli, &HashSet::new()).expect("kartezyen kurulum üretilmeli");
+        let alan = kurulum.ızgara_alanları[0];
+
+        assert!((alan.x - 10.0).abs() < 1e-4, "{alan:?}");
+        assert!((alan.y - 10.0).abs() < 1e-4, "{alan:?}");
+        assert!((alan.genişlik - 180.0).abs() < 1e-4, "{alan:?}");
+        assert!((alan.yükseklik - 80.0).abs() < 1e-4, "{alan:?}");
     }
 
     #[test]

@@ -12785,6 +12785,7 @@ fn matrix_correlation_heatmap() -> GrafikSeçenekleri {
             GörselEşleme::yeni()
                 .en_az(-1.0)
                 .en_çok(1.0)
+                .boyut(2usize)
                 .hesaplanabilir(true)
                 .yön(Yön::Yatay)
                 .üst(5)
@@ -12793,6 +12794,10 @@ fn matrix_correlation_heatmap() -> GrafikSeçenekleri {
         .seri(
             IsıHaritasıSerisi::yeni()
                 .matris_sırası(0)
+                // ECharts Matrix heatmap hücreyi `dataToLayout` kutusuyla
+                // boşluksuz boyar; bu eski Cizelge hücre aralığı seçeneğini
+                // resmî örnek için açıkça kapat.
+                .hücre_boşluğu(0.0)
                 .matris_koordinatları(koordinatlar)
                 .etiket(
                     Etiket::yeni()
@@ -12831,6 +12836,7 @@ fn matrix_correlation_scatter() -> GrafikSeçenekleri {
             GörselEşleme::yeni()
                 .en_az(-1.0)
                 .en_çok(1.0)
+                .boyut(2usize)
                 .hesaplanabilir(true)
                 .yön(Yön::Yatay)
                 .üst(5)
@@ -12920,6 +12926,7 @@ fn matrix_covariance() -> GrafikSeçenekleri {
         .seri(
             IsıHaritasıSerisi::yeni()
                 .matris_sırası(0)
+                .hücre_boşluğu(0.0)
                 .matris_koordinatları(koordinatlar)
                 .veri(veri),
         )
@@ -12984,7 +12991,14 @@ fn matrix_pie() -> GrafikSeçenekleri {
     let mut seçenekler = GrafikSeçenekleri::yeni()
         .animasyon(false)
         .yerel(&İNGİLİZCE)
-        .gösterge(Gösterge::yeni().alt(40).veri(["Male", "Female"]))
+        // Kanıt koşucusu, resmî örnekte belirtilmeyen legend padding'ini
+        // ECharts ön işlemcisinde 15 px'e sabitler.
+        .gösterge(
+            Gösterge::yeni()
+                .alt(40)
+                .iç_boşluk(15.0)
+                .veri(["Male", "Female"]),
+        )
         .matris(
             MatrisKoordinatı::yeni()
                 .x(MatrisBoyutu::yeni().veri([birincil, lise]))
@@ -13128,6 +13142,46 @@ fn matrix_tek_seri_verisi(
         .collect()
 }
 
+// Kaynak UTC başlangıcını önce `{yyyy}-{MM}-{dd}` metnine, ardından yerel
+// tarihe çevirir. Bütün noktalar aynı saat dilimi kadar kaydığı için UTC
+// gece yarısına normallemek göreli koordinatı ve görünen günü aynen korur.
+const MATRIX_BAŞLANGIÇ_ZAMANI: f64 = 1_746_403_200_000.0;
+const MATRIX_YEDİ_GÜN: f64 = 7.0 * 24.0 * 60.0 * 60.0 * 1000.0;
+
+/// `generateSingleSeriesData` tarih metinlerini ECharts zaman ekseninin
+/// çözdüğü haftalık milisaniye değerlerine dönüştürür. Rastgele akış önce
+/// yukarıdaki ortak yordamda tüketildiği için kaynak örnekteki dört serinin
+/// Mulberry32 sırası değişmez.
+fn matrix_zaman_verisine_dönüştür(veri: Vec<VeriÖğesi>) -> Vec<VeriÖğesi> {
+    veri.into_iter()
+        .enumerate()
+        .filter_map(|(sıra, öğe)| {
+            öğe.değer.sayı().map(|değer| {
+                VeriÖğesi::from([
+                    MATRIX_BAŞLANGIÇ_ZAMANI + sıra as f64 * MATRIX_YEDİ_GÜN,
+                    değer,
+                ])
+            })
+        })
+        .collect()
+}
+
+/// Kaynağın yatay bar için ters çevirdiği `[değer, tarih]` çiftinde haftalık
+/// sıra koordinatını gerçek zaman boyutuna taşır.
+fn matrix_ters_zaman_verisine_dönüştür(veri: Vec<VeriÖğesi>) -> Vec<VeriÖğesi> {
+    veri.into_iter()
+        .enumerate()
+        .filter_map(|(sıra, öğe)| {
+            öğe.değer.x().map(|değer| {
+                VeriÖğesi::from([
+                    değer,
+                    MATRIX_BAŞLANGIÇ_ZAMANI + sıra as f64 * MATRIX_YEDİ_GÜN,
+                ])
+            })
+        })
+        .collect()
+}
+
 fn matrix_grid_layout(genişlik: f32) -> GrafikSeçenekleri {
     let dar = genişlik < 500.0;
     let görünmez_stil = ÖğeStili::yeni()
@@ -13135,10 +13189,14 @@ fn matrix_grid_layout(genişlik: f32) -> GrafikSeçenekleri {
         .kenarlık_kalınlığı(0.0);
     let görünmez_ayırıcı = ÇizgiStili::yeni().kalınlık(0.0);
     let mut tohum = 0x5eed_1234;
-    let üst_veri = matrix_tek_seri_verisi(100, false, &mut tohum);
-    let yan_veri = matrix_tek_seri_verisi(10, true, &mut tohum);
-    let ana_veri = matrix_tek_seri_verisi(100, false, &mut tohum);
-    let alt_veri = matrix_tek_seri_verisi(10, false, &mut tohum);
+    let üst_veri =
+        matrix_zaman_verisine_dönüştür(matrix_tek_seri_verisi(100, false, &mut tohum));
+    let yan_veri =
+        matrix_ters_zaman_verisine_dönüştür(matrix_tek_seri_verisi(10, true, &mut tohum));
+    let ana_veri =
+        matrix_zaman_verisine_dönüştür(matrix_tek_seri_verisi(100, false, &mut tohum));
+    let alt_veri =
+        matrix_zaman_verisine_dönüştür(matrix_tek_seri_verisi(10, false, &mut tohum));
 
     let (başlık_x, başlık_y, üst_x, üst_y, yan_x, yan_y, ana_x, ana_y, alt_x, alt_y): (
         MatrisAralığı,
@@ -13208,7 +13266,7 @@ fn matrix_grid_layout(genişlik: f32) -> GrafikSeçenekleri {
                 .sol("center")
                 .üst(10)
                 .iç_boşluk(15.0)
-                .yazı(YazıStili::yeni().boyut(20.0).kalın(true)),
+                .yazı(YazıStili::yeni().boyut(18.0).kalın(true)),
         )
         .başlık_ekle(
             Başlık::yeni()
@@ -13250,68 +13308,83 @@ fn matrix_grid_layout(genişlik: f32) -> GrafikSeçenekleri {
     for ızgara in [
         Izgara::yeni()
             .matris_hücresi(0, üst_x, üst_y)
-            .üst(30)
+            .üst(36)
             .alt(40)
-            .sol(50)
-            .sağ(10),
+            .sol(51.021_484)
+            .sağ(20),
         Izgara::yeni()
             .matris_hücresi(0, yan_x, yan_y)
             .üst(50)
-            .alt(42)
-            .sol(40)
+            .alt(40)
+            .sol(52.333_984)
             .sağ(30),
         Izgara::yeni()
             .matris_hücresi(0, ana_x, ana_y)
             .üst(50)
             .alt(40)
-            .sol(45)
-            .sağ(10),
+            .sol(44.347_656)
+            .sağ(20),
         Izgara::yeni()
             .matris_hücresi(0, alt_x, alt_y)
             .üst(50)
-            .alt(35)
-            .sol(60)
+            .alt(40)
+            .sol(51.021_484)
             .sağ(20),
     ] {
         seçenekler = seçenekler.ızgara_ekle(ızgara);
     }
     seçenekler
-        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(0).bölme_sayısı(6))
-        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0).bölme_sayısı(2))
-        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(1).bölme_çizgisi_göster(false))
+        .x_ekseni_ekle(Eksen::zaman().ızgara_sırası(0))
         .y_ekseni_ekle(
-            Eksen::kategori()
-                .ızgara_sırası(1)
-                .veri(["8", "15", "22", "29", "Jun", "5", "15", "22", "29", "6"]),
+            Eksen::değer()
+                .ızgara_sırası(0)
+                .bölme_sayısı(2)
+                .bölme_çizgisi_göster(false),
         )
-        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(2).bölme_sayısı(6))
-        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(2).bölme_sayısı(4))
-        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(3).bölme_sayısı(8))
-        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(3).bölme_sayısı(2))
+        .x_ekseni_ekle(
+            Eksen::değer()
+                .ızgara_sırası(1)
+                .bölme_çizgisi_göster(false)
+                .etiket(EksenEtiketi::yeni().örtüşmeyi_gizle(true)),
+        )
+        .y_ekseni_ekle(
+            Eksen::zaman()
+                .ızgara_sırası(1)
+                .etiket(EksenEtiketi::yeni().örtüşmeyi_gizle(true)),
+        )
+        .x_ekseni_ekle(Eksen::zaman().ızgara_sırası(2))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(2))
+        .x_ekseni_ekle(Eksen::zaman().ızgara_sırası(3))
+        .y_ekseni_ekle(
+            Eksen::değer()
+                .ızgara_sırası(3)
+                .bölme_sayısı(2)
+                .bölme_çizgisi_göster(false),
+        )
         .seri(
             ÇizgiSerisi::yeni()
                 .eksenler(0, 0)
                 .sembol_göster(false)
-                .çizgi_stili(ÇizgiStili::yeni().renk("#5470c6").kalınlık(2.0))
+                .çizgi_stili(ÇizgiStili::yeni().renk("#5070dd").kalınlık(2.0))
                 .veri(üst_veri),
         )
         .seri(
             SütunSerisi::yeni()
                 .eksenler(1, 1)
-                .öğe_stili(ÖğeStili::yeni().renk("#b6d92b"))
+                .öğe_stili(ÖğeStili::yeni().renk("#b6d634"))
                 .veri(yan_veri),
         )
         .seri(
             ÇizgiSerisi::yeni()
                 .eksenler(2, 2)
                 .sembol_göster(false)
-                .çizgi_stili(ÇizgiStili::yeni().renk("#525a7a").kalınlık(2.0))
+                .çizgi_stili(ÇizgiStili::yeni().renk("#505372").kalınlık(2.0))
                 .veri(ana_veri),
         )
         .seri(
             SütunSerisi::yeni()
                 .eksenler(3, 3)
-                .öğe_stili(ÖğeStili::yeni().renk("#ff9f4a"))
+                .öğe_stili(ÖğeStili::yeni().renk("#ff994d"))
                 .veri(alt_veri),
         )
 }
@@ -13422,7 +13495,7 @@ fn matrix_sparkline() -> GrafikSeçenekleri {
                         .etiketi_kapsa(true),
                 )
                 .x_ekseni_ekle(
-                    Eksen::değer()
+                    Eksen::kategori()
                         .ızgara_sırası(sıra)
                         .ölçekli(true)
                         .çizgi(EksenÇizgisi::yeni().göster(false))
@@ -13434,7 +13507,7 @@ fn matrix_sparkline() -> GrafikSeçenekleri {
                     Eksen::değer()
                         .ızgara_sırası(sıra)
                         .ölçekli(true)
-                        .bölme_sayısı(1)
+                        .aralık(9_007_199_254_740_991.0)
                         .çizgi(EksenÇizgisi::yeni().göster(false))
                         .çentik(EksenÇentiği::yeni().göster(false))
                         .etiket(
@@ -13447,7 +13520,6 @@ fn matrix_sparkline() -> GrafikSeçenekleri {
                     ÇizgiSerisi::yeni()
                         .eksenler(sıra, sıra)
                         .sembol_göster(false)
-                        .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0))
                         .veri(matrix_tek_seri_verisi(365, false, &mut tohum)),
                 );
         }

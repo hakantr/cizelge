@@ -5,6 +5,8 @@ use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::pasta::zengin_etiketi_yaz;
 use crate::koordinat::{Dikdörtgen, Kartezyen2B};
+use crate::model::deger::{VeriDeğeri, VeriÖğesi};
+use crate::model::eksen::EksenTürü;
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::seri::SütunSerisi;
 use crate::model::stil::{
@@ -34,6 +36,98 @@ pub struct SütunGirdisi<'s> {
     pub öğe_opaklıkları: Option<&'s [f32]>,
     /// Brush `inBrush.color` / `outOfBrush.color` sabit görselleri.
     pub öğe_renkleri: Option<&'s [Option<Dolgu>]>,
+}
+
+/// ECharts `Cartesian2D.getBaseAxis`: ordinal eksen, ardından zaman ekseni,
+/// son olarak x ekseni tabandır. Y ekseni tabansa bar yatay çizilir.
+pub fn sütun_yatay_mı(kartezyen: &Kartezyen2B) -> bool {
+    let x = kartezyen.x.seçenek.tür;
+    let y = kartezyen.y.seçenek.tür;
+    if x == EksenTürü::Kategori {
+        false
+    } else if y == EksenTürü::Kategori {
+        true
+    } else if x == EksenTürü::Zaman {
+        false
+    } else {
+        y == EksenTürü::Zaman
+    }
+}
+
+/// Bar öğesinin değer eksenindeki boyutu. Y tabanlı `[değer, taban]`
+/// çiftlerinde değer ilk boyuttadır; diğer kartezyen serilerde ikinci boyut
+/// birincil değer olmaya devam eder.
+pub fn sütun_değeri(öğe: &VeriÖğesi, yatay: bool) -> Option<f64> {
+    if yatay {
+        match öğe.değer {
+            VeriDeğeri::Çift([değer, _]) => Some(değer),
+            _ => öğe.değer.sayı(),
+        }
+    } else {
+        öğe.değer.sayı()
+    }
+}
+
+/// Bar öğesinin taban eksenindeki koordinatı. Skaler seri verisi tarihsel
+/// sıra tabanını, açık XY çifti ise gerçek kategori/zaman/değer boyutunu
+/// kullanır.
+pub fn sütun_taban_değeri(öğe: &VeriÖğesi, sıra: usize, yatay: bool) -> f64 {
+    match (&öğe.değer, yatay) {
+        (VeriDeğeri::Çift([_, taban]), true) => *taban,
+        (VeriDeğeri::Çift([taban, _]), false) => *taban,
+        _ => sıra as f64,
+    }
+}
+
+/// `axisBand.calcBandWidth`: kategori ekseninde normal bant genişliği;
+/// sayısal/zaman tabanında ardışık geçerli veri koordinatlarının en küçük
+/// pozitif aralığının ölçek açıklığına oranı. Tekil değer için resmî 0,8
+/// geri düşüşü kullanılır.
+pub fn sütun_bant_genişliği(girdiler: &[SütunGirdisi]) -> f32 {
+    let Some(ilk) = girdiler.first() else {
+        return 0.0;
+    };
+    let yatay = sütun_yatay_mı(&ilk.kartezyen);
+    let taban_ekseni = if yatay {
+        &ilk.kartezyen.y
+    } else {
+        &ilk.kartezyen.x
+    };
+    if taban_ekseni.ölçek.kategorik_mi() {
+        return taban_ekseni.bant_genişliği();
+    }
+
+    let mut değerler = girdiler
+        .iter()
+        .flat_map(|girdi| {
+            girdi
+                .seri
+                .veri
+                .iter()
+                .enumerate()
+                .map(move |(sıra, öğe)| sütun_taban_değeri(öğe, sıra, yatay))
+        })
+        .filter(|değer| değer.is_finite())
+        .collect::<Vec<_>>();
+    değerler.sort_by(f64::total_cmp);
+    değerler.dedup_by(|a, b| (*a - *b).abs() <= f64::EPSILON);
+    let en_küçük_aralık = değerler
+        .windows(2)
+        .filter_map(|çift| match çift {
+            [a, b] => {
+                let fark = b - a;
+                (fark > 0.0 && fark.is_finite()).then_some(fark)
+            }
+            _ => None,
+        })
+        .fold(f64::INFINITY, f64::min);
+    let kapsam = taban_ekseni.eşleme_kapsamı();
+    let açıklık = (kapsam[1] - kapsam[0]).abs();
+    if en_küçük_aralık.is_finite() && açıklık.is_finite() && açıklık > 0.0 {
+        (taban_ekseni.uzunluk() as f64 * en_küçük_aralık / açıklık).max(1.0) as f32
+    } else {
+        (taban_ekseni.uzunluk() * 0.8).max(1.0)
+    }
 }
 
 fn sütun_görsel_değeri(
@@ -312,10 +406,14 @@ fn büyük_sütun_çiz(
         let Some((taban, tepe)) = aralık else {
             continue;
         };
-        if !bant_ekseni.pencerede_mi(sıra as f64) {
+        let Some(veri_öğesi) = seri.veri.get(sıra) else {
+            continue;
+        };
+        let taban_değeri = sütun_taban_değeri(veri_öğesi, sıra, yatay);
+        if !bant_ekseni.pencerede_mi(taban_değeri) {
             continue;
         }
-        let bant_merkezi = bant_ekseni.veriden_piksele(sıra as f64);
+        let bant_merkezi = bant_ekseni.veriden_piksele(taban_değeri);
         let kenar = bant_merkezi + konum.kaydırma;
         let taban_p = değer_ekseni.veriden_piksele(*taban);
         let tepe_p = değer_ekseni.veriden_piksele(*tepe);
@@ -411,13 +509,13 @@ pub fn sütunları_çiz(
         return;
     };
     let ilk_kartezyen = &ilk_girdi.kartezyen;
-    let yatay = ilk_kartezyen.y.ölçek.kategorik_mi() && !ilk_kartezyen.x.ölçek.kategorik_mi();
+    let yatay = sütun_yatay_mı(ilk_kartezyen);
     let bant_ekseni = if yatay {
         &ilk_kartezyen.y
     } else {
         &ilk_kartezyen.x
     };
-    let konumlar = yerleşim_hesapla(girdiler, bant_ekseni.bant_genişliği());
+    let konumlar = yerleşim_hesapla(girdiler, sütun_bant_genişliği(girdiler));
 
     for (girdi, konum) in girdiler.iter().zip(&konumlar) {
         let seri = girdi.seri;
@@ -442,7 +540,11 @@ pub fn sütunları_çiz(
             let Some(veri_öğesi) = seri.veri.get(i) else {
                 continue;
             };
-            let bant_merkezi = bant_ekseni.veriden_piksele(i as f64);
+            let taban_değeri = sütun_taban_değeri(veri_öğesi, i, yatay);
+            if !bant_ekseni.pencerede_mi(taban_değeri) {
+                continue;
+            }
+            let bant_merkezi = bant_ekseni.veriden_piksele(taban_değeri);
             let kenar = bant_merkezi + konum.kaydırma;
 
             let taban_p = değer_ekseni.veriden_piksele(*taban);
@@ -754,8 +856,10 @@ mod testler {
     use super::*;
     use crate::cizim::gorunum::{BoyamaGirdisi, grafiği_boya};
     use crate::cizim::kayit::KayıtYüzeyi;
-    use crate::model::eksen::Eksen;
+    use crate::koordinat::ÇalışmaEkseni;
+    use crate::model::eksen::{Eksen, EksenKonumu};
     use crate::model::secenekler::GrafikSeçenekleri;
+    use crate::olcek::{AralıkÖlçeği, Ölçek};
 
     #[test]
     fn iç_yazı_rengi_zrender_parlaklık_eşiklerini_izler() {
@@ -771,6 +875,61 @@ mod testler {
             otomatik_iç_yazı_rengi(Renk::onaltılık(0x111111)),
             Renk::onaltılık(0xcccccc)
         );
+    }
+
+    #[test]
+    fn zaman_y_ekseni_sutun_tabanini_deger_boyutundan_ayirir() {
+        let x = ÇalışmaEkseni::yeni(
+            Eksen::değer(),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 30.0],
+                Some(0.0),
+                Some(30.0),
+                false,
+                5,
+                None,
+                None,
+            )),
+            [0.0, 120.0],
+            EksenKonumu::Alt,
+        );
+        let mut y = ÇalışmaEkseni::yeni(
+            Eksen::zaman(),
+            Ölçek::Aralık(AralıkÖlçeği::kur(
+                [0.0, 20.0],
+                Some(0.0),
+                Some(20.0),
+                false,
+                5,
+                None,
+                None,
+            )),
+            [100.0, 0.0],
+            EksenKonumu::Sol,
+        );
+        y.eşleme_kapsamı_uygula([-5.0, 25.0]);
+        let seri = SütunSerisi::yeni().veri([[10.0, 0.0], [20.0, 10.0], [30.0, 20.0]]);
+        let aralıklar = [Some((0.0, 10.0)), Some((0.0, 20.0)), Some((0.0, 30.0))];
+        let girdi = SütunGirdisi {
+            seri: &seri,
+            kartezyen: Kartezyen2B {
+                x,
+                y,
+                alan: Dikdörtgen::yeni(0.0, 0.0, 120.0, 100.0),
+            },
+            genel_sıra: 0,
+            aralıklar: &aralıklar,
+            renk: Renk::onaltılık(0x5070dd),
+            görsel_eşlemeler: Vec::new(),
+            öğe_opaklıkları: None,
+            öğe_renkleri: None,
+        };
+
+        assert!(sütun_yatay_mı(&girdi.kartezyen));
+        let ilk = seri.veri.first().expect("ilk sütun öğesi");
+        assert_eq!(sütun_değeri(ilk, true), Some(10.0));
+        assert_eq!(sütun_taban_değeri(ilk, 0, true), 0.0);
+        assert!((sütun_bant_genişliği(&[girdi]) - 100.0 / 3.0).abs() < 1e-4);
     }
 
     #[test]

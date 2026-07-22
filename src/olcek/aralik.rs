@@ -91,6 +91,18 @@ pub struct AralıkÖlçeği {
 }
 
 impl AralıkÖlçeği {
+    /// Kullanıcının açık `axis.interval` değerini, otomatik nice kapsam
+    /// hesabından sonra uygular. ECharts tarihsel davranışında açık interval
+    /// kapsamı genişletmez; yalnız çentik adımı ve nice uçları değiştirir.
+    pub fn açık_aralık_uygula(&mut self, aralık: f64) {
+        if !aralık.is_finite() || aralık <= 0.0 {
+            return;
+        }
+        self.adım = aralık;
+        self.adım_hassasiyeti = adım_hassasiyeti(aralık);
+        self.güzel_kapsam = self.kapsam;
+    }
+
     /// Verilen bölme sayısına HİZALI ölçek kurar (`alignTicks`): adım,
     /// kapsamı tam `bölme` aralığa bölen güzel bir değere yükseltilir;
     /// böylece aynı ızgaradaki değer eksenlerinin bölme çizgileri üst üste
@@ -360,6 +372,22 @@ mod testler {
         assert_eq!(ö.adım, 50.0);
         let ç: Vec<f64> = ö.çentikler().iter().map(|t| t.değer).collect();
         assert_eq!(ç, vec![0.0, 50.0, 100.0, 150.0, 200.0, 250.0]);
+    }
+
+    #[test]
+    fn acik_interval_ontanimli_nice_kapsami_genisletmez() {
+        let mut ölçek = AralıkÖlçeği::kur([0.0, 243.0], None, None, true, 5, None, None);
+        ölçek.açık_aralık_uygula(9_007_199_254_740_991.0);
+
+        assert_eq!(ölçek.kapsam, [0.0, 250.0]);
+        assert_eq!(
+            ölçek
+                .çentikler()
+                .into_iter()
+                .map(|çentik| çentik.değer)
+                .collect::<Vec<_>>(),
+            vec![0.0, 250.0]
+        );
     }
 
     #[test]

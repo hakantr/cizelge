@@ -453,6 +453,8 @@ pub struct EksenEtiketi {
     /// `axisLabel.showMinLabel` / `showMaxLabel`; `None` tür öntanımlısıdır.
     pub en_az_etiketini_göster: Option<bool>,
     pub en_çok_etiketini_göster: Option<bool>,
+    /// Çakışan eksen etiketlerini gizler (`axisLabel.hideOverlap`).
+    pub örtüşmeyi_gizle: bool,
 }
 
 impl Default for EksenEtiketi {
@@ -468,6 +470,7 @@ impl Default for EksenEtiketi {
             aralık: None,
             en_az_etiketini_göster: None,
             en_çok_etiketini_göster: None,
+            örtüşmeyi_gizle: false,
         }
     }
 }
@@ -533,6 +536,11 @@ impl EksenEtiketi {
 
     pub fn en_çok_etiketini_göster(mut self, göster: bool) -> Self {
         self.en_çok_etiketini_göster = Some(göster);
+        self
+    }
+
+    pub fn örtüşmeyi_gizle(mut self, gizle: bool) -> Self {
+        self.örtüşmeyi_gizle = gizle;
         self
     }
 }
