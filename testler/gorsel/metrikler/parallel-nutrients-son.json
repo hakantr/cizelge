@@ -1,0 +1,2063 @@
+{
+  "id": "parallel-nutrients",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 13708,
+  "değişen_piksel_oranı": 0.05077037037037037,
+  "ssim": 0.948539830148118,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 14320,
+    "değişen_piksel_oranı": 0.053037037037037035,
+    "ssim": 0.9466890985638977
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "parallel_axis_yatay_taban_cizgileri",
+      "geçti": true,
+      "açıklama": "On beş dikey-layout parallelAxis tabanı 7.637 yumuşak çizginin üstünde kesintisiz görünmeli",
+      "örnekler": [
+        {
+          "x": 260,
+          "y": 17,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 17,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 17,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 17,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 17,
+            "rgb": [
+              153,
+              170,
+              155
+            ],
+            "arkaplan": [
+              51,
+              133,
+              135.5
+            ],
+            "kontrast": 102,
+            "parlaklık": 159.33333333333334,
+            "nötrlük_sapması": 17,
+            "nötr_puan": 23.333333333333343
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 17,
+            "rgb": [
+              153,
+              157,
+              155
+            ],
+            "arkaplan": [
+              60.5,
+              126.5,
+              122.5
+            ],
+            "kontrast": 92.5,
+            "parlaklık": 155,
+            "nötrlük_sapması": 4,
+            "nötr_puan": 6
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 17,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 17,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              50,
+              50,
+              50
+            ],
+            "kontrast": 103,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 17,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              50.5,
+              50.5,
+              50.5
+            ],
+            "kontrast": 102.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 44,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 1,
+            "x": 260,
+            "y": 45,
+            "rgb": [
+              150,
+              132,
+              187
+            ],
+            "arkaplan": [
+              101,
+              114.5,
+              215.5
+            ],
+            "kontrast": 49,
+            "parlaklık": 156.33333333333334,
+            "nötrlük_sapması": 55,
+            "nötr_puan": 58.33333333333334
+          },
+          "gerçek": {
+            "kayma": 1,
+            "x": 260,
+            "y": 45,
+            "rgb": [
+              159,
+              148,
+              182
+            ],
+            "arkaplan": [
+              118,
+              131,
+              197
+            ],
+            "kontrast": 41,
+            "parlaklık": 163,
+            "nötrlük_sapması": 34,
+            "nötr_puan": 44
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 44,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 1,
+            "x": 410,
+            "y": 45,
+            "rgb": [
+              116,
+              114,
+              118
+            ],
+            "arkaplan": [
+              57,
+              55,
+              60
+            ],
+            "kontrast": 59,
+            "parlaklık": 116,
+            "nötrlük_sapması": 4,
+            "nötr_puan": 41
+          },
+          "gerçek": {
+            "kayma": 1,
+            "x": 410,
+            "y": 45,
+            "rgb": [
+              117,
+              115,
+              117
+            ],
+            "arkaplan": [
+              58.5,
+              57.5,
+              61.5
+            ],
+            "kontrast": 58.5,
+            "parlaklık": 116.33333333333333,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 38.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 44,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 44,
+            "rgb": [
+              114,
+              114,
+              114
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 63,
+            "parlaklık": 114,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 39
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 44,
+            "rgb": [
+              114,
+              114,
+              114
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 63,
+            "parlaklık": 114,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 39
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 72,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 260,
+            "y": 71,
+            "rgb": [
+              153,
+              154,
+              153
+            ],
+            "arkaplan": [
+              85,
+              87,
+              69
+            ],
+            "kontrast": 84,
+            "parlaklık": 153.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 1.3333333333333428
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 260,
+            "y": 71,
+            "rgb": [
+              154,
+              155,
+              154
+            ],
+            "arkaplan": [
+              92,
+              93.5,
+              78.5
+            ],
+            "kontrast": 75.5,
+            "parlaklık": 154.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 2.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 72,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 410,
+            "y": 71,
+            "rgb": [
+              155,
+              155,
+              155
+            ],
+            "arkaplan": [
+              50.5,
+              50.5,
+              50.5
+            ],
+            "kontrast": 104.5,
+            "parlaklık": 155,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 2
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 410,
+            "y": 71,
+            "rgb": [
+              155,
+              155,
+              155
+            ],
+            "arkaplan": [
+              50.5,
+              50.5,
+              50.5
+            ],
+            "kontrast": 104.5,
+            "parlaklık": 155,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 2
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 72,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 570,
+            "y": 71,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 570,
+            "y": 71,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 99,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 99,
+            "rgb": [
+              129,
+              128,
+              119
+            ],
+            "arkaplan": [
+              94,
+              86,
+              76
+            ],
+            "kontrast": 43,
+            "parlaklık": 125.33333333333333,
+            "nötrlük_sapması": 10,
+            "nötr_puan": 37.66666666666667
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 99,
+            "rgb": [
+              130,
+              131,
+              124
+            ],
+            "arkaplan": [
+              101,
+              97,
+              86.5
+            ],
+            "kontrast": 37.5,
+            "parlaklık": 128.33333333333334,
+            "nötrlük_sapması": 7,
+            "nötr_puan": 31.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 99,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 410,
+            "y": 98,
+            "rgb": [
+              117,
+              117,
+              117
+            ],
+            "arkaplan": [
+              50,
+              51,
+              52
+            ],
+            "kontrast": 67,
+            "parlaklık": 117,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 36
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 410,
+            "y": 98,
+            "rgb": [
+              116,
+              116,
+              116
+            ],
+            "arkaplan": [
+              50,
+              50.5,
+              52
+            ],
+            "kontrast": 66,
+            "parlaklık": 116,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 37
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 99,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 570,
+            "y": 98,
+            "rgb": [
+              114,
+              114,
+              114
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 63,
+            "parlaklık": 114,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 39
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 570,
+            "y": 98,
+            "rgb": [
+              114,
+              114,
+              114
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 63,
+            "parlaklık": 114,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 39
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 126,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 126,
+            "rgb": [
+              156,
+              161,
+              164
+            ],
+            "arkaplan": [
+              80.5,
+              119.5,
+              135.5
+            ],
+            "kontrast": 75.5,
+            "parlaklık": 160.33333333333334,
+            "nötrlük_sapması": 8,
+            "nötr_puan": 15.333333333333343
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 126,
+            "rgb": [
+              158,
+              163,
+              165
+            ],
+            "arkaplan": [
+              90,
+              128.5,
+              142.5
+            ],
+            "kontrast": 68,
+            "parlaklık": 162,
+            "nötrlük_sapması": 7,
+            "nötr_puan": 16
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 126,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 126,
+            "rgb": [
+              158,
+              157,
+              157
+            ],
+            "arkaplan": [
+              54,
+              52.5,
+              53
+            ],
+            "kontrast": 104.5,
+            "parlaklık": 157.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 5.333333333333343
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 126,
+            "rgb": [
+              156,
+              155,
+              155
+            ],
+            "arkaplan": [
+              55.5,
+              53,
+              55
+            ],
+            "kontrast": 102,
+            "parlaklık": 155.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 3.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 126,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 126,
+            "rgb": [
+              153,
+              153,
+              152
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 152.66666666666666,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 1.3333333333333428
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 126,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 153,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 153,
+            "rgb": [
+              133,
+              134,
+              133
+            ],
+            "arkaplan": [
+              65,
+              67.5,
+              59.5
+            ],
+            "kontrast": 73.5,
+            "parlaklık": 133.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 20.666666666666657
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 153,
+            "rgb": [
+              132,
+              134,
+              134
+            ],
+            "arkaplan": [
+              70,
+              69.5,
+              64.5
+            ],
+            "kontrast": 69.5,
+            "parlaklık": 133.33333333333334,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 21.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 153,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 153,
+            "rgb": [
+              131,
+              131,
+              131
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 80,
+            "parlaklık": 131,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 22
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 153,
+            "rgb": [
+              131,
+              131,
+              131
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 80,
+            "parlaklık": 131,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 22
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 153,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 153,
+            "rgb": [
+              131,
+              131,
+              131
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 80,
+            "parlaklık": 131,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 22
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 153,
+            "rgb": [
+              131,
+              131,
+              131
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 80,
+            "parlaklık": 131,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 22
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 181,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 260,
+            "y": 180,
+            "rgb": [
+              158,
+              163,
+              164
+            ],
+            "arkaplan": [
+              93,
+              73,
+              152.5
+            ],
+            "kontrast": 90,
+            "parlaklık": 161.66666666666666,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 14.666666666666657
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 260,
+            "y": 180,
+            "rgb": [
+              159,
+              164,
+              163
+            ],
+            "arkaplan": [
+              102.5,
+              87,
+              134
+            ],
+            "kontrast": 77,
+            "parlaklık": 162,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 14
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 181,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 410,
+            "y": 180,
+            "rgb": [
+              154,
+              154,
+              154
+            ],
+            "arkaplan": [
+              52,
+              52.5,
+              53.5
+            ],
+            "kontrast": 102,
+            "parlaklık": 154,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 1
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 410,
+            "y": 180,
+            "rgb": [
+              155,
+              155,
+              155
+            ],
+            "arkaplan": [
+              52,
+              52.5,
+              53
+            ],
+            "kontrast": 103,
+            "parlaklık": 155,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 2
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 181,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 570,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 570,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 208,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 260,
+            "y": 207,
+            "rgb": [
+              146,
+              158,
+              144
+            ],
+            "arkaplan": [
+              98.5,
+              166,
+              87
+            ],
+            "kontrast": 57,
+            "parlaklık": 149.33333333333334,
+            "nötrlük_sapması": 14,
+            "nötr_puan": 17.666666666666657
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 260,
+            "y": 207,
+            "rgb": [
+              148,
+              156,
+              148
+            ],
+            "arkaplan": [
+              116.5,
+              164.5,
+              103
+            ],
+            "kontrast": 45,
+            "parlaklık": 150.66666666666666,
+            "nötrlük_sapması": 8,
+            "nötr_puan": 10.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 208,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 410,
+            "y": 207,
+            "rgb": [
+              137,
+              130,
+              140
+            ],
+            "arkaplan": [
+              87,
+              83,
+              135.5
+            ],
+            "kontrast": 50,
+            "parlaklık": 135.66666666666666,
+            "nötrlük_sapması": 10,
+            "nötr_puan": 27.333333333333343
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 410,
+            "y": 207,
+            "rgb": [
+              138,
+              133,
+              142
+            ],
+            "arkaplan": [
+              101.5,
+              97.5,
+              143.5
+            ],
+            "kontrast": 36.5,
+            "parlaklık": 137.66666666666666,
+            "nötrlük_sapması": 9,
+            "nötr_puan": 24.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 208,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 570,
+            "y": 207,
+            "rgb": [
+              131,
+              139,
+              141
+            ],
+            "arkaplan": [
+              51,
+              51,
+              54
+            ],
+            "kontrast": 88,
+            "parlaklık": 137,
+            "nötrlük_sapması": 10,
+            "nötr_puan": 26
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 570,
+            "y": 207,
+            "rgb": [
+              133,
+              140,
+              141
+            ],
+            "arkaplan": [
+              51.5,
+              51.5,
+              54.5
+            ],
+            "kontrast": 88.5,
+            "parlaklık": 138,
+            "nötrlük_sapması": 8,
+            "nötr_puan": 23
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 235,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 235,
+            "rgb": [
+              156,
+              157,
+              153
+            ],
+            "arkaplan": [
+              125,
+              115,
+              194
+            ],
+            "kontrast": 42,
+            "parlaklık": 155.33333333333334,
+            "nötrlük_sapması": 4,
+            "nötr_puan": 6.333333333333343
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 235,
+            "rgb": [
+              160,
+              161,
+              159
+            ],
+            "arkaplan": [
+              140.5,
+              131.5,
+              181.5
+            ],
+            "kontrast": 29.5,
+            "parlaklık": 160,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 9
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 235,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 235,
+            "rgb": [
+              145,
+              145,
+              148
+            ],
+            "arkaplan": [
+              67.5,
+              76.5,
+              76
+            ],
+            "kontrast": 77.5,
+            "parlaklık": 146,
+            "nötrlük_sapması": 3,
+            "nötr_puan": 10
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 235,
+            "rgb": [
+              147,
+              146,
+              148
+            ],
+            "arkaplan": [
+              72.5,
+              81.5,
+              81
+            ],
+            "kontrast": 74.5,
+            "parlaklık": 147,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 8
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 235,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 235,
+            "rgb": [
+              145,
+              146,
+              147
+            ],
+            "arkaplan": [
+              51,
+              52,
+              52
+            ],
+            "kontrast": 95,
+            "parlaklık": 146,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 9
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 235,
+            "rgb": [
+              146,
+              146,
+              148
+            ],
+            "arkaplan": [
+              51.5,
+              52,
+              51.5
+            ],
+            "kontrast": 96.5,
+            "parlaklık": 146.66666666666666,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 8.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 262,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 262,
+            "rgb": [
+              153,
+              163,
+              179
+            ],
+            "arkaplan": [
+              91,
+              113.5,
+              161
+            ],
+            "kontrast": 62,
+            "parlaklık": 165,
+            "nötrlük_sapması": 26,
+            "nötr_puan": 38
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 262,
+            "rgb": [
+              159,
+              165,
+              177
+            ],
+            "arkaplan": [
+              109,
+              129.5,
+              166.5
+            ],
+            "kontrast": 50,
+            "parlaklık": 167,
+            "nötrlük_sapması": 18,
+            "nötr_puan": 32
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 262,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 262,
+            "rgb": [
+              147,
+              153,
+              149
+            ],
+            "arkaplan": [
+              57,
+              78.5,
+              60.5
+            ],
+            "kontrast": 90,
+            "parlaklık": 149.66666666666666,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 9.333333333333343
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 262,
+            "rgb": [
+              148,
+              154,
+              152
+            ],
+            "arkaplan": [
+              60.5,
+              81.5,
+              70
+            ],
+            "kontrast": 87.5,
+            "parlaklık": 151.33333333333334,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 7.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 262,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 262,
+            "rgb": [
+              147,
+              145,
+              146
+            ],
+            "arkaplan": [
+              49,
+              49.5,
+              50.5
+            ],
+            "kontrast": 98,
+            "parlaklık": 146,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 9
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 262,
+            "rgb": [
+              147,
+              146,
+              147
+            ],
+            "arkaplan": [
+              49.5,
+              49.5,
+              50.5
+            ],
+            "kontrast": 97.5,
+            "parlaklık": 146.66666666666666,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 7.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 290,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 290,
+            "rgb": [
+              147,
+              153,
+              171
+            ],
+            "arkaplan": [
+              90,
+              118,
+              135.5
+            ],
+            "kontrast": 57,
+            "parlaklık": 157,
+            "nötrlük_sapması": 24,
+            "nötr_puan": 28
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 260,
+            "y": 289,
+            "rgb": [
+              138,
+              138,
+              145
+            ],
+            "arkaplan": [
+              126,
+              120.5,
+              192
+            ],
+            "kontrast": 47,
+            "parlaklık": 140.33333333333334,
+            "nötrlük_sapması": 7,
+            "nötr_puan": 19.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 290,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 290,
+            "rgb": [
+              134,
+              137,
+              139
+            ],
+            "arkaplan": [
+              101,
+              102,
+              137.5
+            ],
+            "kontrast": 35,
+            "parlaklık": 136.66666666666666,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 21.333333333333343
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 290,
+            "rgb": [
+              137,
+              140,
+              142
+            ],
+            "arkaplan": [
+              115,
+              118,
+              149.5
+            ],
+            "kontrast": 22,
+            "parlaklık": 139.66666666666666,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 18.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 290,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 290,
+            "rgb": [
+              135,
+              139,
+              131
+            ],
+            "arkaplan": [
+              50.5,
+              50,
+              49.5
+            ],
+            "kontrast": 89,
+            "parlaklık": 135,
+            "nötrlük_sapması": 8,
+            "nötr_puan": 26
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 290,
+            "rgb": [
+              137,
+              138,
+              132
+            ],
+            "arkaplan": [
+              50,
+              53,
+              53
+            ],
+            "kontrast": 87,
+            "parlaklık": 135.66666666666666,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 23.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 317,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 260,
+            "y": 316,
+            "rgb": [
+              162,
+              169,
+              187
+            ],
+            "arkaplan": [
+              74,
+              107,
+              101.5
+            ],
+            "kontrast": 88,
+            "parlaklık": 172.66666666666666,
+            "nötrlük_sapması": 25,
+            "nötr_puan": 44.66666666666666
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 260,
+            "y": 316,
+            "rgb": [
+              165,
+              166,
+              183
+            ],
+            "arkaplan": [
+              85.5,
+              107,
+              104
+            ],
+            "kontrast": 79.5,
+            "parlaklık": 171.33333333333334,
+            "nötrlük_sapması": 18,
+            "nötr_puan": 36.33333333333334
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 317,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 410,
+            "y": 316,
+            "rgb": [
+              148,
+              147,
+              154
+            ],
+            "arkaplan": [
+              88,
+              84.5,
+              118
+            ],
+            "kontrast": 62.5,
+            "parlaklık": 149.66666666666666,
+            "nötrlük_sapması": 7,
+            "nötr_puan": 10.333333333333343
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 410,
+            "y": 316,
+            "rgb": [
+              150,
+              150,
+              157
+            ],
+            "arkaplan": [
+              98,
+              92.5,
+              125
+            ],
+            "kontrast": 57.5,
+            "parlaklık": 152.33333333333334,
+            "nötrlük_sapması": 7,
+            "nötr_puan": 7.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 317,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 570,
+            "y": 316,
+            "rgb": [
+              145,
+              145,
+              145
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 94,
+            "parlaklık": 145,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 8
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 570,
+            "y": 316,
+            "rgb": [
+              145,
+              145,
+              145
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 94,
+            "parlaklık": 145,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 8
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 344,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 344,
+            "rgb": [
+              147,
+              153,
+              159
+            ],
+            "arkaplan": [
+              116.5,
+              97,
+              187
+            ],
+            "kontrast": 56,
+            "parlaklık": 153,
+            "nötrlük_sapması": 12,
+            "nötr_puan": 12
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 344,
+            "rgb": [
+              151,
+              159,
+              163
+            ],
+            "arkaplan": [
+              126.5,
+              120.5,
+              175
+            ],
+            "kontrast": 38.5,
+            "parlaklık": 157.66666666666666,
+            "nötrlük_sapması": 12,
+            "nötr_puan": 16.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 344,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 344,
+            "rgb": [
+              132,
+              131,
+              131
+            ],
+            "arkaplan": [
+              55,
+              54.5,
+              51.5
+            ],
+            "kontrast": 79.5,
+            "parlaklık": 131.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 22.666666666666657
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 344,
+            "rgb": [
+              132,
+              131,
+              131
+            ],
+            "arkaplan": [
+              55.5,
+              56.5,
+              52.5
+            ],
+            "kontrast": 78.5,
+            "parlaklık": 131.33333333333334,
+            "nötrlük_sapması": 1,
+            "nötr_puan": 22.666666666666657
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 344,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 344,
+            "rgb": [
+              131,
+              131,
+              131
+            ],
+            "arkaplan": [
+              51.5,
+              51,
+              51
+            ],
+            "kontrast": 80,
+            "parlaklık": 131,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 22
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 344,
+            "rgb": [
+              131,
+              131,
+              131
+            ],
+            "arkaplan": [
+              51,
+              51.5,
+              51
+            ],
+            "kontrast": 80,
+            "parlaklık": 131,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 22
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 371,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 260,
+            "y": 371,
+            "rgb": [
+              160,
+              164,
+              171
+            ],
+            "arkaplan": [
+              98.5,
+              117.5,
+              153
+            ],
+            "kontrast": 61.5,
+            "parlaklık": 165,
+            "nötrlük_sapması": 11,
+            "nötr_puan": 23
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 260,
+            "y": 371,
+            "rgb": [
+              163,
+              165,
+              171
+            ],
+            "arkaplan": [
+              120,
+              134.5,
+              159
+            ],
+            "kontrast": 43,
+            "parlaklık": 166.33333333333334,
+            "nötrlük_sapması": 8,
+            "nötr_puan": 21.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 371,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 410,
+            "y": 371,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              53.5,
+              52,
+              52
+            ],
+            "kontrast": 101,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 410,
+            "y": 371,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              53.5,
+              52.5,
+              52.5
+            ],
+            "kontrast": 100.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 371,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 570,
+            "y": 371,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 570,
+            "y": 371,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 260,
+          "y": 399,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 260,
+            "y": 398,
+            "rgb": [
+              130,
+              134,
+              140
+            ],
+            "arkaplan": [
+              74.5,
+              80.5,
+              97
+            ],
+            "kontrast": 55.5,
+            "parlaklık": 134.66666666666666,
+            "nötrlük_sapması": 10,
+            "nötr_puan": 28.333333333333343
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 260,
+            "y": 398,
+            "rgb": [
+              137,
+              145,
+              152
+            ],
+            "arkaplan": [
+              85,
+              89.5,
+              102
+            ],
+            "kontrast": 55.5,
+            "parlaklık": 144.66666666666666,
+            "nötrlük_sapması": 15,
+            "nötr_puan": 23.333333333333343
+          },
+          "geçti": true
+        },
+        {
+          "x": 410,
+          "y": 399,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 410,
+            "y": 398,
+            "rgb": [
+              120,
+              119,
+              118
+            ],
+            "arkaplan": [
+              52.5,
+              52,
+              51.5
+            ],
+            "kontrast": 67.5,
+            "parlaklık": 119,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 36
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 410,
+            "y": 398,
+            "rgb": [
+              118,
+              117,
+              116
+            ],
+            "arkaplan": [
+              51,
+              50.5,
+              49.5
+            ],
+            "kontrast": 67,
+            "parlaklık": 117,
+            "nötrlük_sapması": 2,
+            "nötr_puan": 38
+          },
+          "geçti": true
+        },
+        {
+          "x": 570,
+          "y": 399,
+          "yön": "yatay",
+          "referans": {
+            "kayma": -1,
+            "x": 570,
+            "y": 398,
+            "rgb": [
+              114,
+              114,
+              114
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 63,
+            "parlaklık": 114,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 39
+          },
+          "gerçek": {
+            "kayma": -1,
+            "x": 570,
+            "y": 398,
+            "rgb": [
+              114,
+              114,
+              114
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 63,
+            "parlaklık": 114,
+            "nötrlük_sapması": 0,
+            "nötr_puan": 39
+          },
+          "geçti": true
+        }
+      ]
+    },
+    {
+      "ad": "parallel_sahne_özeti",
+      "geçti": true,
+      "açıklama": "7.637 Polyline; 229.110 koordinat, RGB, width, opacity ve smooth ile eşleşmeli",
+      "alanlar": [
+        {
+          "alan": "şema_sürümü",
+          "beklenen": 1,
+          "gerçek": 1,
+          "geçti": true
+        },
+        {
+          "alan": "çizgi_sayısı",
+          "beklenen": 7637,
+          "gerçek": 7637,
+          "geçti": true
+        },
+        {
+          "alan": "nokta_sayısı",
+          "beklenen": 114555,
+          "gerçek": 114555,
+          "geçti": true
+        },
+        {
+          "alan": "koordinat_sayısı",
+          "beklenen": 229110,
+          "gerçek": 229110,
+          "geçti": true
+        },
+        {
+          "alan": "koordinat_adımı",
+          "beklenen": 0.001,
+          "gerçek": 0.001,
+          "geçti": true
+        },
+        {
+          "alan": "fnv1a_64",
+          "beklenen": "d3f9efb47fd5e2d7",
+          "gerçek": "d3f9efb47fd5e2d7",
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/parallel-nutrients.png",
+    "gerçek": "testler/gorsel/gerçek/default/parallel-nutrients.png",
+    "fark": "testler/gorsel/fark/default/parallel-nutrients.png",
+    "normalize_fark": "testler/gorsel/fark/default/parallel-nutrients-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/parallel-nutrients.json"
+  }
+}

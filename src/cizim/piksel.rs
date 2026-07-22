@@ -1124,6 +1124,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         };
         let mut boya = ts::Paint {
             anti_alias: true,
+            force_hq_pipeline: renk.alfa < 1.0,
             ..ts::Paint::default()
         };
         boya.set_color(renk_çevir(renk));
@@ -2118,6 +2119,12 @@ mod testler {
                 RenkDurağı::yeni(1.0, 0x0000ffu32),
             ],
         )
+    }
+
+    #[test]
+    fn yarim_piksel_vurusu_resmi_genisligi_korur() {
+        assert!((vuruş_yap(0.5, ÇizgiTürü::Düz).width - 0.5).abs() < f32::EPSILON);
+        assert!((vuruş_yap(1.0, ÇizgiTürü::Düz).width - 1.0).abs() < f32::EPSILON);
     }
 
     #[test]

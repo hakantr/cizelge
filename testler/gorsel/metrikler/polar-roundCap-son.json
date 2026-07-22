@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1470,
-  "değişen_piksel_oranı": 0.0054444444444444445,
-  "ssim": 0.9919712441151038,
+  "değişen_piksel": 1473,
+  "değişen_piksel_oranı": 0.0054555555555555555,
+  "ssim": 0.9919671615865564,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/polar-roundCap.png",
     "gerçek": "testler/gorsel/gerçek/default/polar-roundCap.png",

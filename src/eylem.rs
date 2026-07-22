@@ -589,6 +589,157 @@ pub fn fırça_eylemini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), Bi
     )
 }
 
+/// `axisAreaSelect` ve `parallelAxisExpand` eylemlerini kaydeder.
+pub fn paralel_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "axisAreaSelect",
+        "axisAreaSelected",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| {
+            let eksen_sırası = isteğe_bağlı_sıra(yük, "parallelAxisIndex")?;
+            let eksen_kimliği = yük.al("parallelAxisId").and_then(EylemDeğeri::metin);
+            let aralıklar = paralel_aralıklarını_oku(yük.al("intervals").ok_or_else(|| {
+                BilesenHatasi::GeçersizSeçenek {
+                    alan: "axisAreaSelect.intervals",
+                    ayrıntı: "iki sayılı aralıklardan oluşan dizi gerekli".to_owned(),
+                }
+            })?)?;
+            let hedefler = çalışma.paralel_eksen_aralıklarını_ayarla(
+                eksen_sırası,
+                eksen_kimliği,
+                aralıklar.clone(),
+                true,
+            )?;
+            let ilk = hedefler.first().copied();
+            Ok(vec![OlayYükü {
+                bileşen_türü: Some("parallelAxis".to_owned()),
+                bileşen_sırası: ilk,
+                bileşen_kimliği: eksen_kimliği.map(str::to_owned),
+                alanlar: BTreeMap::from([
+                    (
+                        "parallelAxisIndex".to_owned(),
+                        EylemDeğeri::Dizi(hedefler.into_iter().map(EylemDeğeri::from).collect()),
+                    ),
+                    (
+                        "intervals".to_owned(),
+                        EylemDeğeri::Dizi(
+                            aralıklar
+                                .iter()
+                                .map(|aralık| {
+                                    EylemDeğeri::Dizi(
+                                        aralık.iter().copied().map(EylemDeğeri::from).collect(),
+                                    )
+                                })
+                                .collect(),
+                        ),
+                    ),
+                ]),
+                ..OlayYükü::default()
+            }])
+        },
+    )?;
+
+    kayıt.kaydet(
+        "parallelAxisExpand",
+        "parallelAxisExpand",
+        EylemGüncellemesi::Tam,
+        |çalışma, yük| {
+            let paralel_sırası = isteğe_bağlı_sıra(yük, "parallelIndex")?;
+            let paralel_kimliği = yük.al("parallelId").and_then(EylemDeğeri::metin);
+            let pencere =
+                paralel_penceresini_oku(yük.al("axisExpandWindow").ok_or_else(|| {
+                    BilesenHatasi::GeçersizSeçenek {
+                        alan: "parallelAxisExpand.axisExpandWindow",
+                        ayrıntı: "iki sayılı pencere gerekli".to_owned(),
+                    }
+                })?)?;
+            let hedefler = çalışma.paralel_genişletme_penceresini_ayarla(
+                paralel_sırası,
+                paralel_kimliği,
+                pencere,
+                true,
+            )?;
+            let ilk = hedefler.first().copied();
+            Ok(vec![OlayYükü {
+                bileşen_türü: Some("parallel".to_owned()),
+                bileşen_sırası: ilk,
+                bileşen_kimliği: paralel_kimliği.map(str::to_owned),
+                alanlar: BTreeMap::from([
+                    (
+                        "parallelIndex".to_owned(),
+                        EylemDeğeri::Dizi(hedefler.into_iter().map(EylemDeğeri::from).collect()),
+                    ),
+                    (
+                        "axisExpandWindow".to_owned(),
+                        EylemDeğeri::Dizi(pencere.into_iter().map(EylemDeğeri::from).collect()),
+                    ),
+                ]),
+                ..OlayYükü::default()
+            }])
+        },
+    )
+}
+
+fn paralel_aralıklarını_oku(değer: &EylemDeğeri) -> Result<Vec<[f64; 2]>, BilesenHatasi> {
+    değer
+        .dizi()
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "axisAreaSelect.intervals",
+            ayrıntı: "intervals bir dizi olmalı".to_owned(),
+        })?
+        .iter()
+        .enumerate()
+        .map(|(sıra, değer)| {
+            let uçlar = değer
+                .dizi()
+                .filter(|uçlar| uçlar.len() == 2)
+                .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                    alan: "axisAreaSelect.intervals",
+                    ayrıntı: format!("{sıra}. aralık tam iki uç içermeli"),
+                })?;
+            let ilk = uçlar.first().and_then(EylemDeğeri::sayı);
+            let ikinci = uçlar.get(1).and_then(EylemDeğeri::sayı);
+            match (ilk, ikinci) {
+                (Some(ilk), Some(ikinci)) if ilk.is_finite() && ikinci.is_finite() => {
+                    Ok([ilk, ikinci])
+                }
+                _ => Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "axisAreaSelect.intervals",
+                    ayrıntı: format!("{sıra}. aralığın uçları sonlu sayı olmalı"),
+                }),
+            }
+        })
+        .collect()
+}
+
+fn paralel_penceresini_oku(değer: &EylemDeğeri) -> Result<[f32; 2], BilesenHatasi> {
+    let uçlar = değer
+        .dizi()
+        .filter(|uçlar| uçlar.len() == 2)
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "parallelAxisExpand.axisExpandWindow",
+            ayrıntı: "axisExpandWindow tam iki uç içermeli".to_owned(),
+        })?;
+    let ilk = uçlar.first().and_then(EylemDeğeri::sayı);
+    let ikinci = uçlar.get(1).and_then(EylemDeğeri::sayı);
+    match (ilk, ikinci) {
+        (Some(ilk), Some(ikinci))
+            if ilk.is_finite()
+                && ikinci.is_finite()
+                && ilk >= f32::MIN as f64
+                && ilk <= f32::MAX as f64
+                && ikinci >= f32::MIN as f64
+                && ikinci <= f32::MAX as f64 =>
+        {
+            Ok([ilk as f32, ikinci as f32])
+        }
+        _ => Err(BilesenHatasi::GeçersizSeçenek {
+            alan: "parallelAxisExpand.axisExpandWindow",
+            ayrıntı: "pencere uçları sonlu f32 olmalı".to_owned(),
+        }),
+    }
+}
+
 fn fırça_alanlarını_oku(
     değer: &EylemDeğeri,
 ) -> Result<Vec<FırçaSeçimAlanı>, BilesenHatasi> {
@@ -1155,6 +1306,7 @@ pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<
     append_data_eylemini_kaydet(kayıt)?;
     veri_yakınlaştırma_eylemini_kaydet(kayıt)?;
     fırça_eylemini_kaydet(kayıt)?;
+    paralel_eylemlerini_kaydet(kayıt)?;
     eksen_kırılma_eylemlerini_kaydet(kayıt)?;
     görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
@@ -1353,8 +1505,9 @@ mod testler {
     use crate::model::bilesen::{Başlık, Fırça, Gösterge, GöstergeSeçimKipi, Izgara};
     use crate::model::eksen::{Eksen, EksenKırılması};
     use crate::model::gorsel_esleme::GörselEşleme;
+    use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
     use crate::model::secenekler::GrafikSeçenekleri;
-    use crate::model::seri::ÇizgiSerisi;
+    use crate::model::seri::{ParalelSerisi, ÇizgiSerisi};
     use crate::model::yakinlastirma::VeriYakınlaştırma;
 
     fn çalışma() -> GrafikÇalışmaZamanı {
@@ -1713,6 +1866,72 @@ mod testler {
                 .and_then(|seçili| seçili.get("1"))
                 .and_then(EylemDeğeri::mantıksal),
             Some(false)
+        );
+    }
+
+    #[test]
+    fn parallel_actionlari_axis_araliklarini_ve_genisletme_penceresini_gunceller() {
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .paralel(
+                ParalelKoordinatı::yeni()
+                    .kimlik("p")
+                    .eksen_genişletilebilir(true)
+                    .eksen_genişletme_sayısı(2),
+            )
+            .paralel_eksenleri([
+                ParalelEkseni::yeni(0).kimlik("a"),
+                ParalelEkseni::yeni(1),
+                ParalelEkseni::yeni(2),
+                ParalelEkseni::yeni(3),
+            ])
+            .seri(
+                ParalelSerisi::yeni()
+                    .boyutlar(["A", "B", "C", "D"])
+                    .veri([vec![1.0, 2.0, 3.0, 4.0]]),
+            );
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        paralel_eylemlerini_kaydet(&mut kayıt).unwrap();
+
+        let aralıklar = EylemDeğeri::Dizi(vec![
+            EylemDeğeri::Dizi(vec![20.0.into(), 10.0.into()]),
+            EylemDeğeri::Dizi(vec![30.0.into(), 40.0.into()]),
+        ]);
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("axisAreaSelect")
+                    .alan("parallelAxisId", "a")
+                    .alan("intervals", aralıklar),
+            )
+            .unwrap();
+        assert_eq!(olaylar[0].tür, "axisAreaSelected");
+        assert_eq!(
+            çalışma.seçenekleri_al().unwrap().paralel_eksenleri[0].etkin_aralıklar,
+            vec![[10.0, 20.0], [30.0, 40.0]]
+        );
+
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("parallelAxisExpand")
+                    .alan("parallelId", "p")
+                    .alan(
+                        "axisExpandWindow",
+                        EylemDeğeri::Dizi(vec![50.0.into(), 150.0.into()]),
+                    ),
+            )
+            .unwrap();
+        assert_eq!(olaylar[0].tür, "parallelAxisExpand");
+        assert_eq!(
+            çalışma
+                .seçenekleri_al()
+                .unwrap()
+                .paralel
+                .unwrap()
+                .eksen_genişletme_penceresi,
+            Some([50.0, 150.0])
         );
     }
 

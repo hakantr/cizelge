@@ -141,6 +141,7 @@ fn veri_metni(değer: &VeriDeğeri) -> String {
             .map(ToString::to_string)
             .collect::<Vec<_>>()
             .join(", "),
+        VeriDeğeri::KarmaDizi(dizi) => dizi.iter().map(veri_metni).collect::<Vec<_>>().join(", "),
         VeriDeğeri::Metin(metin) => metin.clone(),
         VeriDeğeri::Mantıksal(değer) => değer.to_string(),
         VeriDeğeri::Zaman(ms) => ms.to_string(),

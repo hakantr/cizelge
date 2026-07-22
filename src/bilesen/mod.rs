@@ -7,5 +7,6 @@ pub mod gosterge;
 pub mod grafik;
 pub mod ipucu;
 pub mod matris_cizimi;
+pub mod paralel_cizimi;
 pub mod takvim_cizimi;
 pub mod zaman_seridi;

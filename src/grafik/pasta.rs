@@ -1365,6 +1365,11 @@ fn veri_değeri_metni(değer: &VeriDeğeri) -> String {
             .map(|sayı| crate::yardimci::bicim::ondalık_kırp(*sayı))
             .collect::<Vec<_>>()
             .join(","),
+        VeriDeğeri::KarmaDizi(dizi) => dizi
+            .iter()
+            .map(veri_değeri_metni)
+            .collect::<Vec<_>>()
+            .join(","),
         VeriDeğeri::Metin(metin) => metin.clone(),
         VeriDeğeri::Mantıksal(değer) => değer.to_string(),
         VeriDeğeri::Zaman(ms) => ms.to_string(),

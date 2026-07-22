@@ -7294,17 +7294,32 @@
     "ts_türü": "ParallelComponentOption | ParallelComponentOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle)",
+    "veri_biçimleri": [
+      "ParalelKoordinatı",
+      "Vec<ParalelKoordinatı>"
+    ],
+    "koordinat_dalları": [
+      "tekil",
+      "dizi",
+      "setOption-merge",
+      "replaceMerge"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 275,
       "sembol": "EChartsOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "calisma_zamani::testler::parallel_ve_parallel_axis_set_option_kokleri_bagimsiz_birlesir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients",
+      "doc-example/parallel-all"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "517f1a85fa8a7073579f",
@@ -7315,17 +7330,32 @@
     "ts_türü": "ParallelAxisComponentOption | ParallelAxisComponentOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/secenekler.rs (GrafikSeçenekleri::paralel_ekseni, paralel_eksenleri)",
+    "veri_biçimleri": [
+      "ParalelEkseni",
+      "Vec<ParalelEkseni>"
+    ],
+    "koordinat_dalları": [
+      "value",
+      "category",
+      "time",
+      "log",
+      "çoklu-dim"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 276,
       "sembol": "EChartsOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "calisma_zamani::testler::parallel_ve_parallel_axis_set_option_kokleri_bagimsiz_birlesir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c4e71ec5309b86c4876f",
@@ -14188,17 +14218,28 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "false",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandable)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletilebilir)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "kapalı",
+      "geniş-eksen",
+      "dar-eksen",
+      "etiket-gizleme"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 49,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "757966cfc2cb9051199c",
@@ -14209,17 +14250,27 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandCenter)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_merkezi)",
+    "veri_biçimleri": [
+      "Option<f32>"
+    ],
+    "koordinat_dalları": [
+      "otomatik-merkez",
+      "açık-merkez",
+      "sınır-normalizasyonu"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 50,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1b121d487b88190ead08",
@@ -14230,17 +14281,27 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandCount)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_sayısı)",
+    "veri_biçimleri": [
+      "usize"
+    ],
+    "koordinat_dalları": [
+      "sıfır",
+      "kısmi-pencere",
+      "tüm-eksenler"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 51,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c447a6d95ca328bed889",
@@ -14251,17 +14312,26 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "50",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandDebounce)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_gecikmesi_ms); src/cizim/pencere.rs (GPUI zamanlayıcı/iptal belirteci)",
+    "veri_biçimleri": [
+      "u64 ms"
+    ],
+    "koordinat_dalları": [
+      "jump-gecikmesi",
+      "son-girdi-kazanır"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 58,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "60cf263ccac11bd56672",
@@ -14272,17 +14342,26 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "17",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandRate)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_oranı); src/cizim/pencere.rs (fixRate)",
+    "veri_biçimleri": [
+      "f32 milisaniye oranı"
+    ],
+    "koordinat_dalları": [
+      "slide",
+      "hız-sınırlama"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 56,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "eefb936510c4db3d3feb",
@@ -14293,17 +14372,27 @@
     "ts_türü": "[number, number, number]",
     "zorunlu": false,
     "echarts_varsayılanı": "[-0.15, 0.05, 0.4]",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandSlideTriggerArea)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_kaydırma_tetik_alanı)",
+    "veri_biçimleri": [
+      "[Option<f32>; 3]"
+    ],
+    "koordinat_dalları": [
+      "merkez-yok",
+      "kenar-slide",
+      "dış-jump"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 62,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d640c8daadc78a4c39c4",
@@ -14314,17 +14403,28 @@
     "ts_türü": "'click' | 'mousemove'",
     "zorunlu": false,
     "echarts_varsayılanı": "'click'",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandTriggerOn)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelGenişletmeTetikleyicisi); src/cizim/pencere.rs (click/mousemove GPUI yolu)",
+    "veri_biçimleri": [
+      "Tıklama",
+      "FareHareketi"
+    ],
+    "koordinat_dalları": [
+      "click",
+      "mousemove",
+      "5px-tıklama-eşiği"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 53,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1bdaf3b744913e38481e",
@@ -14335,17 +14435,27 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "50",
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandWidth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_genişliği)",
+    "veri_biçimleri": [
+      "f32 piksel"
+    ],
+    "koordinat_dalları": [
+      "50px-öntanım",
+      "özel-genişlik",
+      "daralan-aralık"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 52,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "939ffe17a09d5d5db8ef",
@@ -14356,17 +14466,30 @@
     "ts_türü": "number[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (parallel.axisExpandWindow)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_penceresi); src/eylem.rs (parallelAxisExpand)",
+    "veri_biçimleri": [
+      "[f32; 2]",
+      "parallelAxisExpand action"
+    ],
+    "koordinat_dalları": [
+      "başlangıç-penceresi",
+      "slide",
+      "jump",
+      "kapsama-sınırlama"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 64,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular",
+      "eylem::testler::parallel_actionlari_axis_araliklarini_ve_genisletme_penceresini_gunceller"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ba600a9b88185414b1b8",
@@ -14377,17 +14500,28 @@
     "ts_türü": "ParallelLayoutDirection",
     "zorunlu": false,
     "echarts_varsayılanı": "'horizontal'",
-    "rust_api": "src/model/bilesen.rs (parallel.layout)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::yerleşim, ParalelYerleşim)",
+    "veri_biçimleri": [
+      "ParalelYerleşim::Yatay",
+      "ParalelYerleşim::Dikey"
+    ],
+    "koordinat_dalları": [
+      "horizontal",
+      "vertical"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 47,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "koordinat::paralel::testler::dikey_yerlesimde_eksenleri_y_boyutuna_dizer"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6ef8071d90cb03e3e33b",
@@ -14398,17 +14532,32 @@
     "ts_türü": "'parallel'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/bilesen.rs (parallel.mainType)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle, tüm_paraleller)",
+    "veri_biçimleri": [
+      "ParalelKoordinatı",
+      "Vec<ParalelKoordinatı>"
+    ],
+    "koordinat_dalları": [
+      "örtük-koordinat",
+      "tek-parallel",
+      "çoklu-parallel",
+      "parallelId/index"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 45,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::secenekler::testler::parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients",
+      "doc-example/parallel-all"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "57259635d4b1e683f27f",
@@ -14419,17 +14568,33 @@
     "ts_türü": "ParallelAxisOption",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/bilesen.rs (parallel.parallelAxisDefault)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/paralel.rs (ParalelKoordinatı::eksen_varsayılanı, ParalelEkseni::çöz)",
+    "veri_biçimleri": [
+      "Eksen",
+      "alan-bazlı ParalelEkseni yaması"
+    ],
+    "koordinat_dalları": [
+      "value",
+      "category",
+      "time",
+      "log",
+      "ad/stil mirası",
+      "z=10"
+    ],
     "kaynak": {
       "dosya": "src/coord/parallel/ParallelModel.ts",
       "satır": 66,
       "sembol": "ParallelCoordinateSystemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_seri_axis_default_ortuk_koordinata_miras_kalir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-aqi",
+      "parallel-nutrients",
+      "doc-example/parallel-all"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a77cfb7bf3beb0c02732",
@@ -15427,17 +15592,29 @@
     "ts_türü": "ParallelSeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Paralel, From<ParalelSerisi>)",
+    "veri_biçimleri": [
+      "ParalelSerisi"
+    ],
+    "koordinat_dalları": [
+      "kayıt",
+      "boyama",
+      "olay/isabet"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 246,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "grafik::paralel::testler::resmi_seri_varsayilanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "53059c15f0795ff5959d",
@@ -24331,17 +24508,26 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "1",
-    "rust_api": "src/model/seri.rs (parallel.activeOpacity)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::aktif_opaklık)",
+    "veri_biçimleri": [
+      "f32 0..1"
+    ],
+    "koordinat_dalları": [
+      "normal",
+      "active"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 76,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur"
+    ],
+    "galeri_örnekleri": [
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a6681df3e346a9cf94aa",
@@ -24352,17 +24538,26 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": "'parallel'",
-    "rust_api": "src/model/seri.rs (parallel.coordinateSystem)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Paralel; sabit parallel koordinatı)",
+    "veri_biçimleri": [
+      "sabit 'parallel'"
+    ],
+    "koordinat_dalları": [
+      "örtük",
+      "açık-bileşen"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 71,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::secenekler::testler::parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "cae157a14f7efa13f33c",
@@ -24373,17 +24568,32 @@
     "ts_türü": "(ParallelSeriesDataValue | ParallelSeriesDataItemOption)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::veri, karma_veri); src/model/deger.rs (KarmaDizi)",
+    "veri_biçimleri": [
+      "number[]",
+      "(number|string|boolean|null|time)[]",
+      "VeriÖğesi"
+    ],
+    "koordinat_dalları": [
+      "sayısal",
+      "kategori",
+      "boş-boyut",
+      "7.637-satır"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 85,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_resmi_karma_satirlari_eksenleri_ve_ust_axis_katmanini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "51097611b23c276b4bbf",
@@ -24394,17 +24604,27 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0.05",
-    "rust_api": "src/model/seri.rs (parallel.inactiveOpacity)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::etkin_değil_opaklık)",
+    "veri_biçimleri": [
+      "f32 0..1"
+    ],
+    "koordinat_dalları": [
+      "normal",
+      "inactive",
+      "sıfır-opaklık"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 75,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur"
+    ],
+    "galeri_örnekleri": [
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0ad7d62a7dc2e70ca41b",
@@ -24415,17 +24635,30 @@
     "ts_türü": "SeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: false\n        }",
-    "rust_api": "src/model/seri.rs (parallel.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (etiket ve durum EtiketYaması alanları); src/grafik/paralel.rs (paralel_etiketini_çiz)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "formatter"
+    ],
+    "koordinat_dalları": [
+      "normal",
+      "emphasis",
+      "select",
+      "öğe-yaması"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 55,
       "sembol": "ParallelStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::paralel::testler::sessiz_seri_hit_uretmez_ama_programatik_durum_etiketini_cizer"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "06b8bb5ffe8eeff301e3",
@@ -24436,17 +24669,32 @@
     "ts_türü": "LineStyleOption<(TCbParams extends never ? never : (params: TCbParams) => ZRColor) | ZRColor>",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            width: 1,\n            opacity: 0.45,\n            type: 'solid'\n        }",
-    "rust_api": "src/model/seri.rs (parallel.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (çizgi_stili/vurgu_çizgi_stili/bulanık_çizgi_stili/seçili_çizgi_stili)",
+    "veri_biçimleri": [
+      "ÇizgiStili",
+      "öğe ÖğeStili"
+    ],
+    "koordinat_dalları": [
+      "normal",
+      "emphasis",
+      "blur",
+      "select",
+      "öğe-rengi"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 54,
       "sembol": "ParallelStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::paralel::testler::resmi_seri_varsayilanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1b916868b64a44c6b048",
@@ -24457,17 +24705,26 @@
     "ts_türü": "ParallelAxisOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.parallelAxisDefault)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::eksen_varsayılanı)",
+    "veri_biçimleri": [
+      "Eksen"
+    ],
+    "koordinat_dalları": [
+      "örtük-parallel",
+      "bileşen-varsayılanı"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 82,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_seri_axis_default_ortuk_koordinata_miras_kalir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "5b750343583439896882",
@@ -24478,17 +24735,26 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.parallelId)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::paralel_kimliği)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "kimlik-bağı",
+      "eksik-kimlik-doğrulaması"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 73,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "93f1e75f9cb432d4f412",
@@ -24499,17 +24765,26 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0",
-    "rust_api": "src/model/seri.rs (parallel.parallelIndex)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::paralel_sırası)",
+    "veri_biçimleri": [
+      "usize"
+    ],
+    "koordinat_dalları": [
+      "sıra-bağı",
+      "çoklu-parallel"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 72,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::secenekler::testler::parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8a74713ac9d32417d8e9",
@@ -24520,17 +24795,26 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.realtime)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::gerçek_zamanlı); src/cizim/pencere.rs (axisAreaSelect güncellemesi)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "sürüklerken",
+      "sürükleme-sonunda"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 79,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::parallel_actionlari_axis_araliklarini_ve_genisletme_penceresini_gunceller"
+    ],
+    "galeri_örnekleri": [
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3afb8012104dc92accc2",
@@ -24541,17 +24825,28 @@
     "ts_türü": "boolean | number",
     "zorunlu": false,
     "echarts_varsayılanı": "false",
-    "rust_api": "src/model/seri.rs (parallel.smooth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::yumuşak/yumuşaklık); src/grafik/paralel.rs (Bezier yolu)",
+    "veri_biçimleri": [
+      "bool",
+      "f32 0..1"
+    ],
+    "koordinat_dalları": [
+      "polyline",
+      "Bezier",
+      "boş-boyut"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 78,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::paralel::testler::kategori_bos_deger_smooth_ve_coklu_cizgi_hitini_destekler"
+    ],
+    "galeri_örnekleri": [
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "dc476849af9c69d4a403",
@@ -24562,17 +24857,29 @@
     "ts_türü": "SeriesTooltipOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.tooltip)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (ParalelSerisi::ipucu); src/grafik/paralel.rs (paralel_ipucu_değerleri)",
+    "veri_biçimleri": [
+      "İpucu",
+      "boyut adı/değer satırları"
+    ],
+    "koordinat_dalları": [
+      "global",
+      "seri-yaması",
+      "silent"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 80,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_resmi_karma_satirlari_eksenleri_ve_ust_axis_katmanini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "parallel-aqi",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e8e12beca5011c2a26e0",
@@ -24583,17 +24890,28 @@
     "ts_türü": "'parallel'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Paralel, ParalelSerisi)",
+    "veri_biçimleri": [
+      "sabit 'parallel'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "örtük-parallel"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 69,
       "sembol": "ParallelSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::paralel::testler::resmi_seri_varsayilanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi",
+      "parallel-nutrients"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "18c48472bb70df0a7aef",
@@ -24604,17 +24922,29 @@
     "ts_türü": "ParallelSeriesDataValue",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (parallel.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/deger.rs (VeriDeğeri::Dizi, KarmaDizi); src/model/deger.rs (VeriÖğesi)",
+    "veri_biçimleri": [
+      "ParallelSeriesDataValue",
+      "data item value"
+    ],
+    "koordinat_dalları": [
+      "nesne-öğesi",
+      "yalın-dizi",
+      "öğe-stili/etiketi"
+    ],
     "kaynak": {
       "dosya": "src/chart/parallel/ParallelSeries.ts",
       "satır": 60,
       "sembol": "ParallelSeriesDataItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::paralel::testler::kategori_bos_deger_smooth_ve_coklu_cizgi_hitini_destekler"
+    ],
+    "galeri_örnekleri": [
+      "parallel-simple",
+      "parallel-aqi"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "37ba3e10815c6fe5c594",

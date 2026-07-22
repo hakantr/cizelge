@@ -14,6 +14,9 @@ pub enum VeriDeğeri {
     /// Çok değerli öğe: mum `[açılış, kapanış, en düşük, en yüksek]`,
     /// kutu `[en düşük, Ç1, ortanca, Ç3, en yüksek]`.
     Dizi(Vec<f64>),
+    /// Türleri birbirinden farklı boyutlardan oluşan ECharts veri satırı.
+    /// Özellikle `parallel` değer + kategori eksenlerini aynı satırda taşır.
+    KarmaDizi(Vec<VeriDeğeri>),
     Metin(String),
     Mantıksal(bool),
     /// Unix milisaniyesi olarak zaman. Ayrı tür tutulması, sayı sütunuyla
@@ -29,6 +32,7 @@ impl VeriDeğeri {
             VeriDeğeri::Sayı(s) => Some(*s),
             VeriDeğeri::Çift([_, y]) => Some(*y),
             VeriDeğeri::Dizi(_) => None,
+            VeriDeğeri::KarmaDizi(_) => None,
             VeriDeğeri::Metin(m) => m.parse().ok(),
             VeriDeğeri::Mantıksal(değer) => Some(if *değer { 1.0 } else { 0.0 }),
             VeriDeğeri::Zaman(ms) => Some(*ms as f64),
@@ -40,6 +44,14 @@ impl VeriDeğeri {
     pub fn dizi(&self) -> Option<&[f64]> {
         match self {
             VeriDeğeri::Dizi(d) => Some(d),
+            _ => None,
+        }
+    }
+
+    /// Karma türde çok boyutlu satır içeriği.
+    pub fn karma_dizi(&self) -> Option<&[VeriDeğeri]> {
+        match self {
+            VeriDeğeri::KarmaDizi(d) => Some(d),
             _ => None,
         }
     }
@@ -58,6 +70,7 @@ impl VeriDeğeri {
             VeriDeğeri::Sayı(s) => s.is_nan(),
             VeriDeğeri::Çift([x, y]) => x.is_nan() || y.is_nan(),
             VeriDeğeri::Dizi(d) => d.is_empty() || d.iter().any(|v| v.is_nan()),
+            VeriDeğeri::KarmaDizi(d) => d.is_empty(),
             VeriDeğeri::Metin(_) | VeriDeğeri::Mantıksal(_) | VeriDeğeri::Zaman(_) => false,
         }
     }
@@ -216,6 +229,12 @@ impl From<[f64; 5]> for VeriDeğeri {
 impl From<Vec<f64>> for VeriDeğeri {
     fn from(d: Vec<f64>) -> Self {
         VeriDeğeri::Dizi(d)
+    }
+}
+
+impl From<Vec<VeriDeğeri>> for VeriDeğeri {
+    fn from(d: Vec<VeriDeğeri>) -> Self {
+        VeriDeğeri::KarmaDizi(d)
     }
 }
 

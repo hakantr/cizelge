@@ -7,7 +7,9 @@ use std::sync::Arc;
 use crate::cizim::{SvgYolHatası, Yol};
 use crate::koordinat::Dikdörtgen;
 use crate::model::Uzunluk;
-use crate::model::deger::{VeriÖğesi, veri_listesi};
+use crate::model::bilesen::İpucu;
+use crate::model::deger::{VeriDeğeri, VeriÖğesi, veri_listesi};
+use crate::model::eksen::Eksen;
 pub use crate::model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
 };
@@ -4170,6 +4172,13 @@ impl ParalelBoyut {
 #[derive(Clone, Debug)]
 pub struct ParalelSerisi {
     pub ad: Option<String>,
+    /// SeriesModel varsayılanı `z: 2`.
+    pub z: i32,
+    pub sessiz: bool,
+    /// Bağlı `parallel` bileşeninin sırası (`parallelIndex`).
+    pub paralel_sırası: usize,
+    /// İndekse alternatif `parallelId` bağı.
+    pub paralel_kimliği: Option<String>,
     pub boyutlar: Vec<ParalelBoyut>,
     /// Her öğe, boyut sayısı kadar değerli bir dizidir.
     pub veri: Vec<VeriÖğesi>,
@@ -4178,12 +4187,34 @@ pub struct ParalelSerisi {
     pub genişlik: Uzunluk,
     pub yükseklik: Uzunluk,
     pub çizgi_stili: ÇizgiStili,
+    pub vurgu_çizgi_stili: Option<ÇizgiStili>,
+    pub bulanık_çizgi_stili: Option<ÇizgiStili>,
+    pub seçili_çizgi_stili: Option<ÇizgiStili>,
+    pub etiket: Etiket,
+    pub vurgu_etiketi: Option<EtiketYaması>,
+    pub bulanık_etiketi: Option<EtiketYaması>,
+    pub seçili_etiketi: Option<EtiketYaması>,
+    pub aktif_opaklık: f32,
+    pub etkin_değil_opaklık: f32,
+    /// `smooth: true` için 0.3, kapalı için 0; sayısal smooth doğrudan.
+    pub yumuşaklık: f32,
+    pub gerçek_zamanlı: bool,
+    pub ipucu: Option<İpucu>,
+    /// `series.parallel.parallelAxisDefault`; örtük koordinat üretiminde
+    /// parallel bileşeninin eksen varsayılanına aktarılır.
+    pub eksen_varsayılanı: Option<Eksen>,
+    /// Artımlı çizim parça boyutu (`progressive`, varsayılan 300).
+    pub ilerlemeli: usize,
 }
 
 impl Default for ParalelSerisi {
     fn default() -> Self {
         ParalelSerisi {
             ad: None,
+            z: 2,
+            sessiz: false,
+            paralel_sırası: 0,
+            paralel_kimliği: None,
             boyutlar: Vec::new(),
             veri: Vec::new(),
             sol: Uzunluk::Yüzde(8.0),
@@ -4192,8 +4223,23 @@ impl Default for ParalelSerisi {
             yükseklik: Uzunluk::Yüzde(70.0),
             çizgi_stili: ÇizgiStili {
                 kalınlık: 1.0,
+                opaklık: 0.45,
                 ..Default::default()
             },
+            vurgu_çizgi_stili: None,
+            bulanık_çizgi_stili: None,
+            seçili_çizgi_stili: None,
+            etiket: Etiket::yeni().göster(false),
+            vurgu_etiketi: Some(EtiketYaması::yeni().göster(false)),
+            bulanık_etiketi: None,
+            seçili_etiketi: None,
+            aktif_opaklık: 1.0,
+            etkin_değil_opaklık: 0.05,
+            yumuşaklık: 0.0,
+            gerçek_zamanlı: true,
+            ipucu: None,
+            eksen_varsayılanı: None,
+            ilerlemeli: 300,
         }
     }
 }
@@ -4208,6 +4254,26 @@ impl ParalelSerisi {
         self
     }
 
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
+        self
+    }
+
+    pub fn paralel_sırası(mut self, sıra: usize) -> Self {
+        self.paralel_sırası = sıra;
+        self
+    }
+
+    pub fn paralel_kimliği(mut self, kimlik: impl Into<String>) -> Self {
+        self.paralel_kimliği = Some(kimlik.into());
+        self
+    }
+
     pub fn boyutlar<S: Into<String>>(mut self, boyutlar: impl IntoIterator<Item = S>) -> Self {
         self.boyutlar = boyutlar.into_iter().map(ParalelBoyut::yeni).collect();
         self
@@ -4215,6 +4281,103 @@ impl ParalelSerisi {
 
     pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
         self.veri = veri_listesi(veri);
+        self
+    }
+
+    /// Sayı, metin, zaman ve boş değerleri aynı ECharts veri satırında taşır.
+    pub fn karma_veri<R, T>(mut self, veri: impl IntoIterator<Item = R>) -> Self
+    where
+        R: IntoIterator<Item = T>,
+        T: Into<VeriDeğeri>,
+    {
+        self.veri = veri
+            .into_iter()
+            .map(|satır| {
+                VeriÖğesi::yeni(VeriDeğeri::KarmaDizi(
+                    satır.into_iter().map(Into::into).collect(),
+                ))
+            })
+            .collect();
+        self
+    }
+
+    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.çizgi_stili = stil;
+        self
+    }
+
+    pub fn vurgu_çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.vurgu_çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn bulanık_çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.bulanık_çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn seçili_çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.seçili_çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    pub fn vurgu_etiketi(mut self, etiket: EtiketYaması) -> Self {
+        self.vurgu_etiketi = Some(etiket);
+        self
+    }
+
+    pub fn bulanık_etiketi(mut self, etiket: EtiketYaması) -> Self {
+        self.bulanık_etiketi = Some(etiket);
+        self
+    }
+
+    pub fn seçili_etiketi(mut self, etiket: EtiketYaması) -> Self {
+        self.seçili_etiketi = Some(etiket);
+        self
+    }
+
+    pub fn aktif_opaklık(mut self, opaklık: f32) -> Self {
+        self.aktif_opaklık = opaklık.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn etkin_değil_opaklık(mut self, opaklık: f32) -> Self {
+        self.etkin_değil_opaklık = opaklık.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn yumuşak(mut self, açık: bool) -> Self {
+        self.yumuşaklık = if açık { 0.3 } else { 0.0 };
+        self
+    }
+
+    pub fn yumuşaklık(mut self, yumuşaklık: f32) -> Self {
+        self.yumuşaklık = yumuşaklık.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn gerçek_zamanlı(mut self, açık: bool) -> Self {
+        self.gerçek_zamanlı = açık;
+        self
+    }
+
+    pub fn ipucu(mut self, ipucu: İpucu) -> Self {
+        self.ipucu = Some(ipucu);
+        self
+    }
+
+    pub fn eksen_varsayılanı(mut self, eksen: Eksen) -> Self {
+        self.eksen_varsayılanı = Some(eksen);
+        self
+    }
+
+    pub fn ilerlemeli(mut self, parça_boyutu: usize) -> Self {
+        self.ilerlemeli = parça_boyutu;
         self
     }
 }

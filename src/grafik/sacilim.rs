@@ -33,7 +33,10 @@ fn eksen_değeri(
         VeriDeğeri::Sayı(değer) => crate::yardimci::bicim::ondalık_kırp(*değer),
         VeriDeğeri::Zaman(değer) => değer.to_string(),
         VeriDeğeri::Mantıksal(değer) => değer.to_string(),
-        VeriDeğeri::Boş | VeriDeğeri::Çift(_) | VeriDeğeri::Dizi(_) => return None,
+        VeriDeğeri::Boş | VeriDeğeri::Çift(_) | VeriDeğeri::Dizi(_) | VeriDeğeri::KarmaDizi(_) =>
+        {
+            return None;
+        }
     };
     eksen.ölçek.kategori_sırası(&ad)
 }
@@ -1124,6 +1127,28 @@ fn yerleşimli_saçılım_etiketlerini_çiz(
                 .map(|değer| ondalık_kırp(*değer))
                 .collect::<Vec<_>>()
                 .join(","),
+            VeriDeğeri::KarmaDizi(değerler) => değerler
+                .iter()
+                .filter_map(|değer| match değer {
+                    VeriDeğeri::Boş => None,
+                    VeriDeğeri::Sayı(değer) => Some(ondalık_kırp(*değer)),
+                    VeriDeğeri::Metin(metin) => Some(metin.clone()),
+                    VeriDeğeri::Zaman(ms) => Some(ms.to_string()),
+                    VeriDeğeri::Mantıksal(değer) => Some(değer.to_string()),
+                    VeriDeğeri::Çift([x, y]) => {
+                        Some(format!("{},{}", ondalık_kırp(*x), ondalık_kırp(*y)))
+                    }
+                    VeriDeğeri::Dizi(değerler) => Some(
+                        değerler
+                            .iter()
+                            .map(|değer| ondalık_kırp(*değer))
+                            .collect::<Vec<_>>()
+                            .join(","),
+                    ),
+                    VeriDeğeri::KarmaDizi(_) => None,
+                })
+                .collect::<Vec<_>>()
+                .join(","),
             VeriDeğeri::Boş => continue,
         };
         let biçim_değeri = etiket_değeri.sayı().unwrap_or(nokta.y_değeri);
@@ -1629,6 +1654,28 @@ fn saçılım_çiz_çoklu_eşlemeli_kipli(
                 VeriDeğeri::Dizi(değerler) => değerler
                     .iter()
                     .map(|değer| ondalık_kırp(*değer))
+                    .collect::<Vec<_>>()
+                    .join(","),
+                VeriDeğeri::KarmaDizi(değerler) => değerler
+                    .iter()
+                    .filter_map(|değer| match değer {
+                        VeriDeğeri::Boş => None,
+                        VeriDeğeri::Sayı(değer) => Some(ondalık_kırp(*değer)),
+                        VeriDeğeri::Metin(metin) => Some(metin.clone()),
+                        VeriDeğeri::Zaman(ms) => Some(ms.to_string()),
+                        VeriDeğeri::Mantıksal(değer) => Some(değer.to_string()),
+                        VeriDeğeri::Çift([x, y]) => {
+                            Some(format!("{},{}", ondalık_kırp(*x), ondalık_kırp(*y)))
+                        }
+                        VeriDeğeri::Dizi(değerler) => Some(
+                            değerler
+                                .iter()
+                                .map(|değer| ondalık_kırp(*değer))
+                                .collect::<Vec<_>>()
+                                .join(","),
+                        ),
+                        VeriDeğeri::KarmaDizi(_) => None,
+                    })
                     .collect::<Vec<_>>()
                     .join(","),
                 VeriDeğeri::Boş => continue,

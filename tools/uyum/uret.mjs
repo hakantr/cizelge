@@ -384,6 +384,197 @@ const MATRIX_OPTION_KANITI = Object.freeze({
   }
 });
 
+const PARALLEL_OPTION_KANITI = Object.freeze({
+  mainType: {
+    api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle, tüm_paraleller)',
+    testler: ['model::secenekler::testler::parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular'],
+    örnekler: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients', 'doc-example/parallel-all'],
+    veri_biçimleri: ['ParalelKoordinatı', 'Vec<ParalelKoordinatı>'],
+    dallar: ['örtük-koordinat', 'tek-parallel', 'çoklu-parallel', 'parallelId/index']
+  },
+  layout: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::yerleşim, ParalelYerleşim)',
+    testler: ['koordinat::paralel::testler::dikey_yerlesimde_eksenleri_y_boyutuna_dizer'],
+    örnekler: ['parallel-simple', 'parallel-nutrients'],
+    veri_biçimleri: ['ParalelYerleşim::Yatay', 'ParalelYerleşim::Dikey'],
+    dallar: ['horizontal', 'vertical']
+  },
+  axisExpandable: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletilebilir)',
+    testler: ['koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['bool'],
+    dallar: ['kapalı', 'geniş-eksen', 'dar-eksen', 'etiket-gizleme']
+  },
+  axisExpandCenter: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_merkezi)',
+    testler: ['koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['Option<f32>'],
+    dallar: ['otomatik-merkez', 'açık-merkez', 'sınır-normalizasyonu']
+  },
+  axisExpandCount: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_sayısı)',
+    testler: ['koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['usize'],
+    dallar: ['sıfır', 'kısmi-pencere', 'tüm-eksenler']
+  },
+  axisExpandWidth: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_genişliği)',
+    testler: ['koordinat::paralel::testler::genisletme_penceresi_disindaki_eksenleri_daraltir'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['f32 piksel'],
+    dallar: ['50px-öntanım', 'özel-genişlik', 'daralan-aralık']
+  },
+  axisExpandTriggerOn: {
+    api: 'src/model/paralel.rs (ParalelGenişletmeTetikleyicisi); src/cizim/pencere.rs (click/mousemove GPUI yolu)',
+    testler: ['koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['Tıklama', 'FareHareketi'],
+    dallar: ['click', 'mousemove', '5px-tıklama-eşiği']
+  },
+  axisExpandRate: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_oranı); src/cizim/pencere.rs (fixRate)',
+    testler: ['koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['f32 milisaniye oranı'],
+    dallar: ['slide', 'hız-sınırlama']
+  },
+  axisExpandDebounce: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_gecikmesi_ms); src/cizim/pencere.rs (GPUI zamanlayıcı/iptal belirteci)',
+    testler: ['koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['u64 ms'],
+    dallar: ['jump-gecikmesi', 'son-girdi-kazanır']
+  },
+  axisExpandSlideTriggerArea: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_kaydırma_tetik_alanı)',
+    testler: ['koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['[Option<f32>; 3]'],
+    dallar: ['merkez-yok', 'kenar-slide', 'dış-jump']
+  },
+  axisExpandWindow: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_genişletme_penceresi); src/eylem.rs (parallelAxisExpand)',
+    testler: [
+      'koordinat::paralel::testler::genisletme_faresi_resmi_merkez_slide_ve_jump_kurallarini_uygular',
+      'eylem::testler::parallel_actionlari_axis_araliklarini_ve_genisletme_penceresini_gunceller'
+    ],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['[f32; 2]', 'parallelAxisExpand action'],
+    dallar: ['başlangıç-penceresi', 'slide', 'jump', 'kapsama-sınırlama']
+  },
+  parallelAxisDefault: {
+    api: 'src/model/paralel.rs (ParalelKoordinatı::eksen_varsayılanı, ParalelEkseni::çöz)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_seri_axis_default_ortuk_koordinata_miras_kalir'],
+    örnekler: ['parallel-aqi', 'parallel-nutrients', 'doc-example/parallel-all'],
+    veri_biçimleri: ['Eksen', 'alan-bazlı ParalelEkseni yaması'],
+    dallar: ['value', 'category', 'time', 'log', 'ad/stil mirası', 'z=10']
+  }
+});
+
+const PARALLEL_SERIES_OPTION_KANITI = Object.freeze({
+  type: {
+    api: 'src/model/seri.rs (Seri::Paralel, ParalelSerisi)',
+    testler: ['grafik::paralel::testler::resmi_seri_varsayilanlarini_korur'],
+    örnekler: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients'],
+    veri_biçimleri: ["sabit 'parallel'"],
+    dallar: ['kayıtlı-seri', 'örtük-parallel']
+  },
+  coordinateSystem: {
+    api: 'src/model/seri.rs (Seri::Paralel; sabit parallel koordinatı)',
+    testler: ['model::secenekler::testler::parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ["sabit 'parallel'"],
+    dallar: ['örtük', 'açık-bileşen']
+  },
+  data: {
+    api: 'src/model/seri.rs (ParalelSerisi::veri, karma_veri); src/model/deger.rs (KarmaDizi)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_resmi_karma_satirlari_eksenleri_ve_ust_axis_katmanini_uretir'],
+    örnekler: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients'],
+    veri_biçimleri: ['number[]', '(number|string|boolean|null|time)[]', 'VeriÖğesi'],
+    dallar: ['sayısal', 'kategori', 'boş-boyut', '7.637-satır']
+  },
+  value: {
+    api: 'src/model/deger.rs (VeriDeğeri::Dizi, KarmaDizi); src/model/deger.rs (VeriÖğesi)',
+    testler: ['grafik::paralel::testler::kategori_bos_deger_smooth_ve_coklu_cizgi_hitini_destekler'],
+    örnekler: ['parallel-simple', 'parallel-aqi'],
+    veri_biçimleri: ['ParallelSeriesDataValue', 'data item value'],
+    dallar: ['nesne-öğesi', 'yalın-dizi', 'öğe-stili/etiketi']
+  },
+  lineStyle: {
+    api: 'src/model/seri.rs (çizgi_stili/vurgu_çizgi_stili/bulanık_çizgi_stili/seçili_çizgi_stili)',
+    testler: ['grafik::paralel::testler::resmi_seri_varsayilanlarini_korur'],
+    örnekler: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients'],
+    veri_biçimleri: ['ÇizgiStili', 'öğe ÖğeStili'],
+    dallar: ['normal', 'emphasis', 'blur', 'select', 'öğe-rengi']
+  },
+  label: {
+    api: 'src/model/seri.rs (etiket ve durum EtiketYaması alanları); src/grafik/paralel.rs (paralel_etiketini_çiz)',
+    testler: ['grafik::paralel::testler::sessiz_seri_hit_uretmez_ama_programatik_durum_etiketini_cizer'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['Etiket', 'EtiketYaması', 'formatter'],
+    dallar: ['normal', 'emphasis', 'select', 'öğe-yaması']
+  },
+  activeOpacity: {
+    api: 'src/model/seri.rs (ParalelSerisi::aktif_opaklık)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur'],
+    örnekler: ['parallel-nutrients'],
+    veri_biçimleri: ['f32 0..1'],
+    dallar: ['normal', 'active']
+  },
+  inactiveOpacity: {
+    api: 'src/model/seri.rs (ParalelSerisi::etkin_değil_opaklık)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur'],
+    örnekler: ['parallel-nutrients'],
+    veri_biçimleri: ['f32 0..1'],
+    dallar: ['normal', 'inactive', 'sıfır-opaklık']
+  },
+  smooth: {
+    api: 'src/model/seri.rs (ParalelSerisi::yumuşak/yumuşaklık); src/grafik/paralel.rs (Bezier yolu)',
+    testler: ['grafik::paralel::testler::kategori_bos_deger_smooth_ve_coklu_cizgi_hitini_destekler'],
+    örnekler: ['parallel-nutrients'],
+    veri_biçimleri: ['bool', 'f32 0..1'],
+    dallar: ['polyline', 'Bezier', 'boş-boyut']
+  },
+  realtime: {
+    api: 'src/model/seri.rs (ParalelSerisi::gerçek_zamanlı); src/cizim/pencere.rs (axisAreaSelect güncellemesi)',
+    testler: ['eylem::testler::parallel_actionlari_axis_araliklarini_ve_genisletme_penceresini_gunceller'],
+    örnekler: ['parallel-nutrients'],
+    veri_biçimleri: ['bool'],
+    dallar: ['sürüklerken', 'sürükleme-sonunda']
+  },
+  tooltip: {
+    api: 'src/model/seri.rs (ParalelSerisi::ipucu); src/grafik/paralel.rs (paralel_ipucu_değerleri)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_resmi_karma_satirlari_eksenleri_ve_ust_axis_katmanini_uretir'],
+    örnekler: ['parallel-aqi', 'parallel-nutrients'],
+    veri_biçimleri: ['İpucu', 'boyut adı/değer satırları'],
+    dallar: ['global', 'seri-yaması', 'silent']
+  },
+  parallelAxisDefault: {
+    api: 'src/model/seri.rs (ParalelSerisi::eksen_varsayılanı)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_seri_axis_default_ortuk_koordinata_miras_kalir'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['Eksen'],
+    dallar: ['örtük-parallel', 'bileşen-varsayılanı']
+  },
+  parallelId: {
+    api: 'src/model/seri.rs (ParalelSerisi::paralel_kimliği)',
+    testler: ['cizim::gorunum::yakınlaştırma_yönü_testleri::parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['String'],
+    dallar: ['kimlik-bağı', 'eksik-kimlik-doğrulaması']
+  },
+  parallelIndex: {
+    api: 'src/model/seri.rs (ParalelSerisi::paralel_sırası)',
+    testler: ['model::secenekler::testler::parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular'],
+    örnekler: ['parallel-simple'],
+    veri_biçimleri: ['usize'],
+    dallar: ['sıra-bağı', 'çoklu-parallel']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -552,6 +743,10 @@ const YEREL_FIXTURE = Object.freeze({
   'radar-custom': 'examples/uyum_fixture.rs#radar_custom',
   'radar2': 'examples/uyum_fixture.rs#radar2',
   'radar-multiple': 'examples/uyum_fixture.rs#radar_multiple',
+  'parallel-simple': 'examples/uyum_fixture.rs#parallel_simple',
+  'parallel-aqi': 'examples/uyum_fixture.rs#parallel_aqi',
+  'parallel-nutrients': 'examples/uyum_fixture.rs#parallel_nutrients',
+  'doc-example/parallel-all': 'examples/uyum_fixture.rs#parallel_all',
   'themeRiver-basic': 'examples/uyum_fixture.rs#theme_river_basic',
   'themeRiver-lastfm': 'examples/uyum_fixture.rs#theme_river_lastfm',
   'gauge': 'examples/uyum_fixture.rs#gauge',
@@ -571,8 +766,7 @@ const YEREL_FIXTURE = Object.freeze({
   'tree-basic': 'examples/agac.rs',
   'sankey-simple': 'examples/sankey.rs',
   'graph-simple': 'examples/grafo.rs',
-  'chord-simple': 'examples/kiris.rs',
-  'parallel-simple': 'examples/paralel.rs'
+  'chord-simple': 'examples/kiris.rs'
 });
 
 function hata(mesaj) {
@@ -719,6 +913,9 @@ function görselKanıtlarıOku() {
     const normalizeFark = tipografiProfili
       ? kanıtDosyası(path.join(KÖK, metrik.dosyalar?.normalize_fark ?? ''))
       : null;
+    const sahne = metrik.dosyalar?.sahne
+      ? kanıtDosyası(path.join(KÖK, metrik.dosyalar.sahne))
+      : null;
     const kare = {
       ad: metrik.kare,
       senaryo: metrik.senaryo,
@@ -733,10 +930,12 @@ function görselKanıtlarıOku() {
       ...(tipografiProfili
         ? { tipografi_normalizasyonu: tipografiProfili, normalize_fark: normalizeFark }
         : {}),
+      ...(sahne ? { sahne } : {}),
       metrik: kanıtDosyası(tam)
     };
     kare.geçti = kare.geçti
       && [referans, gerçek, fark, kare.metrik].every(Boolean)
+      && (!metrik.dosyalar?.sahne || Boolean(sahne))
       && (!tipografiProfili || (
         Number.isFinite(tipografiProfili.gaussian_sigma)
         && tipografiProfili.gaussian_sigma > 0
@@ -896,6 +1095,58 @@ function varsayılanlarıTopla(kaynakDosya) {
 }
 
 function rustKarşılığı(kök, özellik) {
+  if (kök.toLowerCase() === 'parallel' && PARALLEL_OPTION_KANITI[özellik]) {
+    const kanıt = PARALLEL_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
+  if (kök.toLowerCase() === 'series.parallel' && PARALLEL_SERIES_OPTION_KANITI[özellik]) {
+    const kanıt = PARALLEL_SERIES_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
+  if (kök.toLowerCase() === 'echarts' && özellik === 'parallel') {
+    return {
+      api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: ['calisma_zamani::testler::parallel_ve_parallel_axis_set_option_kokleri_bagimsiz_birlesir'],
+      galeri_örnekleri: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients', 'doc-example/parallel-all'],
+      veri_biçimleri: ['ParalelKoordinatı', 'Vec<ParalelKoordinatı>'],
+      koordinat_dalları: ['tekil', 'dizi', 'setOption-merge', 'replaceMerge']
+    };
+  }
+  if (kök.toLowerCase() === 'echarts' && özellik === 'parallelAxis') {
+    return {
+      api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel_ekseni, paralel_eksenleri)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: ['calisma_zamani::testler::parallel_ve_parallel_axis_set_option_kokleri_bagimsiz_birlesir'],
+      galeri_örnekleri: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients'],
+      veri_biçimleri: ['ParalelEkseni', 'Vec<ParalelEkseni>'],
+      koordinat_dalları: ['value', 'category', 'time', 'log', 'çoklu-dim']
+    };
+  }
+  if (kök.toLowerCase() === 'registered' && özellik === 'parallel') {
+    return {
+      api: 'src/model/seri.rs (Seri::Paralel, From<ParalelSerisi>)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: ['grafik::paralel::testler::resmi_seri_varsayilanlarini_korur'],
+      galeri_örnekleri: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients'],
+      veri_biçimleri: ['ParalelSerisi'],
+      koordinat_dalları: ['kayıt', 'boyama', 'olay/isabet']
+    };
+  }
   if (kök.toLowerCase() === 'calendar' && CALENDAR_OPTION_KANITI[özellik]) {
     const kanıt = CALENDAR_OPTION_KANITI[özellik];
     return {

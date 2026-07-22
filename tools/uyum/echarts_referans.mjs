@@ -1015,7 +1015,9 @@ async function çalıştır() {
               {length: Math.min(veri.count?.() || 0, 32)},
               (_, sıra) => veri.getItemVisual?.(sıra, 'decal')
             ),
-            örnekNokta: koordinat?.dataToPoint?.([419, 0]),
+            örnekNokta: model.subType === 'parallel'
+              ? null
+              : koordinat?.dataToPoint?.([419, 0]),
             pastaÖğeleri
           });
         });

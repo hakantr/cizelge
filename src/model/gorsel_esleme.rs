@@ -282,7 +282,8 @@ impl Default for GörselEşleme {
             sağ: None,
             üst: None,
             dikey_konum: None,
-            alt: Uzunluk::Piksel(10.0),
+            // `VisualMapModel.defaultOption.bottom` (ECharts 6.1).
+            alt: Uzunluk::Piksel(0.0),
             metin: None,
             göster: true,
             hesaplanabilir: false,
@@ -602,7 +603,10 @@ impl GörselEşleme {
             VeriDeğeri::Sayı(sayı) => Cow::Owned(sayı.to_string()),
             VeriDeğeri::Zaman(ms) => Cow::Owned(ms.to_string()),
             VeriDeğeri::Mantıksal(mantıksal) => Cow::Owned(mantıksal.to_string()),
-            VeriDeğeri::Boş | VeriDeğeri::Çift(_) | VeriDeğeri::Dizi(_) => return None,
+            VeriDeğeri::Boş
+            | VeriDeğeri::Çift(_)
+            | VeriDeğeri::Dizi(_)
+            | VeriDeğeri::KarmaDizi(_) => return None,
         };
         self.kategoriler
             .iter()
@@ -954,6 +958,14 @@ fn renk_dizisi_karıştır(renkler: &[Renk], oran: f32) -> Renk {
 )]
 mod testler {
     use super::*;
+
+    #[test]
+    fn resmi_bilesen_konumu_solda_ve_alt_sifirdir() {
+        let eşleme = GörselEşleme::yeni();
+        assert_eq!(eşleme.sol, YatayKonum::Değer(Uzunluk::Piksel(0.0)));
+        assert_eq!(eşleme.alt, Uzunluk::Piksel(0.0));
+        assert!(eşleme.üst.is_none());
+    }
 
     #[test]
     fn uç_renkler() {

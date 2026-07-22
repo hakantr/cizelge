@@ -22,6 +22,7 @@ use crate::model::grafik_bileseni::GrafikBileşeni;
 use crate::model::hatlar::HatVerisi;
 use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::matris::MatrisKoordinatı;
+use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
 use crate::model::radar::RadarKoordinatı;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::Seri;
@@ -50,6 +51,8 @@ pub enum SeçenekAlanı {
     Radar,
     Kutupsal,
     Matris,
+    Paralel,
+    ParalelEksenleri,
     Takvimler,
     TekEksenler,
     VeriKümesi,
@@ -68,7 +71,7 @@ pub enum SeçenekAlanı {
     AnimasyonEğrisi,
 }
 
-const TÜM_ALANLAR: [SeçenekAlanı; 30] = [
+const TÜM_ALANLAR: [SeçenekAlanı; 32] = [
     SeçenekAlanı::Başlık,
     SeçenekAlanı::Gösterge,
     SeçenekAlanı::Izgara,
@@ -83,6 +86,8 @@ const TÜM_ALANLAR: [SeçenekAlanı; 30] = [
     SeçenekAlanı::Radar,
     SeçenekAlanı::Kutupsal,
     SeçenekAlanı::Matris,
+    SeçenekAlanı::Paralel,
+    SeçenekAlanı::ParalelEksenleri,
     SeçenekAlanı::Takvimler,
     SeçenekAlanı::TekEksenler,
     SeçenekAlanı::VeriKümesi,
@@ -460,6 +465,33 @@ impl SeçenekYaması {
         self.değer.matris = None;
         self.değer.matrisler.clear();
         self.sağlanan.insert(SeçenekAlanı::Matris);
+        self
+    }
+
+    pub fn paralel(mut self, paralel: ParalelKoordinatı) -> Self {
+        self.değer.paralel = Some(paralel);
+        self.değer.paraleller.clear();
+        self.sağlanan.insert(SeçenekAlanı::Paralel);
+        self
+    }
+
+    pub fn paraleller(mut self, paraleller: impl IntoIterator<Item = ParalelKoordinatı>) -> Self {
+        self.değer.paralel = None;
+        self.değer.paraleller = paraleller.into_iter().collect();
+        self.sağlanan.insert(SeçenekAlanı::Paralel);
+        self
+    }
+
+    pub fn paraleli_kaldır(mut self) -> Self {
+        self.değer.paralel = None;
+        self.değer.paraleller.clear();
+        self.sağlanan.insert(SeçenekAlanı::Paralel);
+        self
+    }
+
+    pub fn paralel_eksenleri(mut self, eksenler: impl IntoIterator<Item = ParalelEkseni>) -> Self {
+        self.değer.paralel_eksenleri = eksenler.into_iter().collect();
+        self.sağlanan.insert(SeçenekAlanı::ParalelEksenleri);
         self
     }
 
@@ -912,6 +944,14 @@ pub enum ÇalışmaOlayı {
     GöstergeDeğişti {
         seçili: BTreeMap<String, bool>,
     },
+    ParalelAlanSeçildi {
+        eksen_sıraları: Vec<usize>,
+        aralıklar: Vec<[f64; 2]>,
+    },
+    ParalelEksenGenişletildi {
+        paralel_sıraları: Vec<usize>,
+        pencere: [f32; 2],
+    },
     EksenKırılmasıDeğişti {
         değişiklikler: Vec<EksenKırılmaDeğişikliği>,
     },
@@ -1032,6 +1072,135 @@ impl GrafikÇalışmaZamanı {
 
     pub fn yeniden_çizim_bekliyor_mu(&self) -> bool {
         self.yeniden_çizim_bekliyor
+    }
+
+    /// `axisAreaSelect` model güncellemesi. Kimlik verilirse `parallelAxisId`,
+    /// aksi halde `parallelAxisIndex` sorgusu uygulanır; aralık uçları
+    /// ECharts `setActiveIntervals` gibi küçükten büyüğe normalleştirilir.
+    pub fn paralel_eksen_aralıklarını_ayarla(
+        &mut self,
+        eksen_sırası: Option<usize>,
+        eksen_kimliği: Option<&str>,
+        mut aralıklar: Vec<[f64; 2]>,
+        sessiz: bool,
+    ) -> Result<Vec<usize>, BilesenHatasi> {
+        self.açık_mı("dispatchAction.axisAreaSelect")?;
+        if eksen_sırası.is_none() && eksen_kimliği.is_none() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "axisAreaSelect.parallelAxis",
+                ayrıntı: "parallelAxisId veya parallelAxisIndex gerekli".to_owned(),
+            });
+        }
+        if aralıklar.iter().flatten().any(|değer| !değer.is_finite()) {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "axisAreaSelect.intervals",
+                ayrıntı: "bütün aralık uçları sonlu sayı olmalı".to_owned(),
+            });
+        }
+        for aralık in &mut aralıklar {
+            if aralık[0] > aralık[1] {
+                aralık.swap(0, 1);
+            }
+        }
+
+        let mut aday = self.seçenekler.clone();
+        let hedefler = aday
+            .paralel_eksenleri
+            .iter()
+            .enumerate()
+            .filter_map(|(sıra, eksen)| {
+                let uyuyor = eksen_kimliği
+                    .map(|kimlik| eksen.kimlik.as_deref() == Some(kimlik))
+                    .unwrap_or_else(|| eksen_sırası == Some(sıra));
+                uyuyor.then_some(sıra)
+            })
+            .collect::<Vec<_>>();
+        if hedefler.is_empty() {
+            return Err(BilesenHatasi::EksikVeri {
+                bileşen: "parallelAxis",
+                sıra: eksen_sırası.unwrap_or(aday.paralel_eksenleri.len()),
+            });
+        }
+        for sıra in &hedefler {
+            if let Some(eksen) = aday.paralel_eksenleri.get_mut(*sıra) {
+                eksen.etkin_aralıklar = aralıklar.clone();
+            }
+        }
+        seçenekleri_doğrula(&aday)?;
+        self.seçenekler = aday;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::ParalelAlanSeçildi {
+                eksen_sıraları: hedefler.clone(),
+                aralıklar,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(hedefler)
+    }
+
+    /// `parallelAxisExpand` model güncellemesi. `parallelId`/`parallelIndex`
+    /// sorgusuyla eşleşen bütün koordinat bileşenlerini atomik günceller.
+    pub fn paralel_genişletme_penceresini_ayarla(
+        &mut self,
+        paralel_sırası: Option<usize>,
+        paralel_kimliği: Option<&str>,
+        pencere: [f32; 2],
+        sessiz: bool,
+    ) -> Result<Vec<usize>, BilesenHatasi> {
+        self.açık_mı("dispatchAction.parallelAxisExpand")?;
+        if !pencere.iter().all(|değer| değer.is_finite()) || pencere[1] < pencere[0] {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "parallelAxisExpand.axisExpandWindow",
+                ayrıntı: "artan iki sonlu sayı gerekli".to_owned(),
+            });
+        }
+        let mut aday = self.seçenekler.clone();
+        let tekil = aday.paraleller.is_empty();
+        let toplam = if tekil {
+            usize::from(aday.paralel.is_some())
+        } else {
+            aday.paraleller.len()
+        };
+        let hedefler = (0..toplam)
+            .filter(|sıra| {
+                let koordinat = if tekil {
+                    aday.paralel.as_ref()
+                } else {
+                    aday.paraleller.get(*sıra)
+                };
+                koordinat.is_some_and(|koordinat| {
+                    paralel_kimliği
+                        .map(|kimlik| koordinat.kimlik.as_deref() == Some(kimlik))
+                        .unwrap_or_else(|| paralel_sırası.map_or(true, |hedef| hedef == *sıra))
+                })
+            })
+            .collect::<Vec<_>>();
+        if hedefler.is_empty() {
+            return Err(BilesenHatasi::EksikVeri {
+                bileşen: "parallel",
+                sıra: paralel_sırası.unwrap_or(toplam),
+            });
+        }
+        for sıra in &hedefler {
+            let koordinat = if tekil {
+                aday.paralel.as_mut()
+            } else {
+                aday.paraleller.get_mut(*sıra)
+            };
+            if let Some(koordinat) = koordinat {
+                koordinat.eksen_genişletme_penceresi = Some(pencere);
+            }
+        }
+        seçenekleri_doğrula(&aday)?;
+        self.seçenekler = aday;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::ParalelEksenGenişletildi {
+                paralel_sıraları: hedefler.clone(),
+                pencere,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(hedefler)
     }
 
     /// ECharts 6 `expandAxisBreak`, `collapseAxisBreak` ve
@@ -1810,6 +1979,14 @@ fn yamayı_uygula(
         hedef.matris = öntanımlı.matris.clone();
         hedef.matrisler = öntanımlı.matrisler.clone();
     }
+    if yama.sağlandı_mı(SeçenekAlanı::Paralel) {
+        hedef.paralel = yama.değer.paralel.clone();
+        hedef.paraleller = yama.değer.paraleller.clone();
+    } else if kip.değiştirerek_birleştir.contains(&SeçenekAlanı::Paralel) {
+        hedef.paralel = öntanımlı.paralel.clone();
+        hedef.paraleller = öntanımlı.paraleller.clone();
+    }
+    alanı_uygula!(paralel_eksenleri, SeçenekAlanı::ParalelEksenleri);
     alanı_uygula!(takvimler, SeçenekAlanı::Takvimler);
     alanı_uygula!(tek_eksenler, SeçenekAlanı::TekEksenler);
     alanı_uygula!(veri_kümesi, SeçenekAlanı::VeriKümesi);
@@ -2071,6 +2248,7 @@ mod testler {
     use crate::model::deger::VeriDeğeri;
     use crate::model::eksen::EksenKırılmaAlanı;
     use crate::model::grafik_bileseni::{GrafikBileşeni, GrafikÖğesi};
+    use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı, ParalelYerleşim};
     use crate::model::seri::{PastaSerisi, ÇizgiSerisi};
 
     fn çalışma(seçenekler: GrafikSeçenekleri) -> GrafikÇalışmaZamanı {
@@ -2105,6 +2283,41 @@ mod testler {
         assert_eq!(ilk_değer(&sonuç, 1), 20.0);
         assert_eq!(ilk_değer(&sonuç, 2), 30.0);
         assert_eq!(sonuç.seri_kimliği(0), Some("a"));
+    }
+
+    #[test]
+    fn parallel_ve_parallel_axis_set_option_kokleri_bagimsiz_birlesir() {
+        let başlangıç = GrafikSeçenekleri::yeni()
+            .paralel(ParalelKoordinatı::yeni().kimlik("ilk"))
+            .paralel_eksenleri([ParalelEkseni::yeni(0), ParalelEkseni::yeni(1)]);
+        let mut çalışma = çalışma(başlangıç);
+
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni().paralel(
+                    ParalelKoordinatı::yeni()
+                        .kimlik("yeni")
+                        .yerleşim(ParalelYerleşim::Dikey),
+                ),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .unwrap();
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        assert_eq!(
+            sonuç.paralel.as_ref().unwrap().kimlik.as_deref(),
+            Some("yeni")
+        );
+        assert_eq!(sonuç.paralel_eksenleri.len(), 2);
+
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni(),
+                SeçenekAyarlamaKipi::default().değiştirerek(SeçenekAlanı::ParalelEksenleri),
+            )
+            .unwrap();
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        assert!(sonuç.paralel_eksenleri.is_empty());
+        assert_eq!(sonuç.paralel.unwrap().yerleşim, ParalelYerleşim::Dikey);
     }
 
     #[test]

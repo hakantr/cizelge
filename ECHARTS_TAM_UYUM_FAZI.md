@@ -378,8 +378,10 @@ manifestte örnek kimliğiyle tanımlanır ve şu değiştirilemez kurallara uya
 - Hücre dolguları, desen/decal katmanları, sınırlar, taban çizgileri ve temsilî
   renk örnekleri yalnız ham kare üzerinde denetlenir. Yapısal kapı geçmeden
   tipografi profili sonucu kanıt sayılamaz.
-- Profil şu anda yalnız `matrix-mbti` ve `matrix-periodic-table` için açıktır;
-  başka karta otomatik yayılmaz ve referans yenileme gerekçesi oluşturmaz.
+- Profil yalnız kimliği açıkça kayıtlı `matrix-mbti`,
+  `matrix-periodic-table`, `parallel-aqi`, `parallel-nutrients` ve
+  `doc-example/parallel-all` kartlarında açıktır; başka karta otomatik
+  yayılmaz ve referans yenileme gerekçesi oluşturmaz.
 
 Referansın iki ardışık üretimi önce kendi içinde kararlılık kontrolünden
 geçmelidir. Sistem fontu, rastlantı veya zaman yüzünden kararsız olan örnek
@@ -1537,6 +1539,79 @@ Beş Radar kartının statik görsel kapısı `tam_kanıtlı`dır. Eski golden'l
 yenilenmez; animasyon, programatik hover/blur/select, erişilebilirlik, koyu
 profil ve ölçümlü performans kapıları Faz 7/8/9 tamamlanana kadar kartların
 genel durumunu `uygulandı_kanıt_bekliyor` olarak tutar.
+
+Parallel doğrulanmış kapsamı:
+
+- Resmî `parallel-simple`, `parallel-aqi`, `parallel-nutrients` ve keşif
+  sayfasında `noExplore` ile gizlenen `doc-example/parallel-all` kaynakları
+  ayrı Rust fixture'larına bağlıdır. Seri davranışı için
+  `../echarts/src/chart/parallel/ParallelSeries.ts`, `ParallelView.ts` ve
+  `parallelVisual.ts`; bileşen/eksen görünümü için
+  `../echarts/src/component/parallel/ParallelView.ts`; koordinat sistemi için
+  `../echarts/src/coord/parallel/ParallelModel.ts`, `Parallel.ts`,
+  `ParallelAxis.ts`, `AxisModel.ts`, `parallelCreator.ts` ve
+  `parallelPreprocessor.ts` normatiftir.
+- `ParalelKoordinatı`; piksel/yüzde `left/right/top/bottom/width/height`,
+  yatay/dikey yerleşim, `parallelAxisDefault`, çoklu `parallelIndex`,
+  genişletilebilir eksen penceresi, merkez/slide/jump davranışı,
+  genişletme oranı/gecikmesi ve `click`/`mousemove` tetikleyicisini taşır.
+  Alanı açıkça verilmeyen seri için resmî ön işlemci gibi örtük koordinat ve
+  eksenler üretilir; aynı seçeneklerde birden fazla bağımsız Parallel kutusu
+  seri bağıyla ayrılır.
+- `ParalelEkseni`; bir veya birden fazla veri boyutu, value/category/time/log
+  ölçeği, kategori sırası, min/max/scale/inverse, ad/etiket/çentik/bölme
+  stilleri, ad kısaltması, `realtime`, z katmanı ve çok aralıklı
+  `areaSelectStyle` seçimini uygular. `parallelAxisDefault`, yalnız eksende
+  açıkça verilmemiş alanları tamamlar; eksen çizgileri seri polyline'larının
+  üstünde boyanır.
+- `VeriDeğeri::KarmaDizi`, aynı satırdaki sayı, kategori, zaman, mantıksal ve
+  boş hücreleri kayıpsız taşır. Dataset/encode boyutları ile doğrudan karma
+  satırlar aynı koordinat yolunda çözülür; boş değer yalnız ilgili eksen
+  parçasını keser. Seri `smooth`, `lineStyle`, item style, normal/emphasis/
+  select/inactive durumları, label, silent, clip animasyonu, progressive
+  eşiği, legend ve sayısal/kategorik visualMap kanallarını uygular.
+- Smooth çizgi, zrender `graphic/helper/smoothBezier` ve `Polyline.buildPath`
+  kontrol noktalarının doğrudan portudur; Kartezyen Line eğrisiyle
+  karıştırılmaz. Vuruş butt cap, miter join ve limit 10 ile çizilir. Gerçek
+  polyline geometrisi isabet/tooltip hedefidir; tooltip bütün eksen adlarını
+  ve karma değerleri korur.
+- Eksen seçim sürüklemesi `axisAreaSelect` eylemini, son durum
+  `axisAreaSelected` olayını üretir; bütün eksen aralıklarının kesişimi
+  active/inactive veri durumunu belirler. Genişletme etkileşimi
+  `parallelAxisExpand` ile tipli çalışma zamanı olayına çevrilir. `setOption`
+  birleştirme/değiştirme yolu `parallel` ve `parallelAxis` köklerini diğer
+  bileşenlerle aynı kimlik/index kurallarıyla işler.
+- `parallel-nutrients`, `../echarts-examples` içindeki 7.637×17 resmî JSON'u,
+  ilk görülme sırasındaki 25 grubu, 15 ekseni ve resmî HSL paletini eksiksiz
+  okur. Pinned ECharts sahnesindeki 7.637 Polyline'ın 229.110 koordinatı,
+  çizgi sırası, 25 RGB rengi ve width/opacity/smooth değerleri 0,001 mantıksal
+  piksel çözünürlüklü kanonik FNV-1a özetiyle birebir eşleşir:
+  `d3f9efb47fd5e2d7`.
+- Toplam fark oranının ince eksenleri saklamaması için her Parallel kartında
+  her eksen üç ayrı noktada ham kareden denetlenir. Nutrients'in yoğun renkli
+  eğrileri en yüksek kontrastla eksen sanılmaz; açık `#aaa` axisLine için
+  nötr renk hedefi kullanılır. Böylece simple 12/12, AQI 24/24, gizli all
+  24/24 ve nutrients 45/45 eksen örneği geçmeden kanıt başarılı sayılamaz.
+
+600×450 kilitli Parallel statik kanıt metrikleri:
+
+| Örnek | Değişen piksel oranı | SSIM | Ham oran / SSIM | Yapısal kapı | Durum |
+|---|---:|---:|---:|---:|---|
+| `parallel-simple` | %0,3093 | 0,995626 | aynı | 12/12 | geçti |
+| `parallel-aqi` | %0,7581 | 0,991426 | %1,4215 / 0,986990 | 24/24 | geçti |
+| `doc-example/parallel-all` | %0,2985 | 0,993425 | %0,6767 / 0,989702 | 24/24 | geçti |
+| `parallel-nutrients` | %5,0770 | 0,948540 | %5,3037 / 0,946689 | 45/45 + sahne özeti | kanıt bekliyor |
+
+Üç Parallel kartının statik görsel kapısı `tam_kanıtlı`dır ve depo özeti
+`174/332` kilitli statik kanıta yükselmiştir. `parallel-nutrients` veri,
+geometri, renk, stil ve eksen kapılarında geçmesine rağmen Chrome Canvas ile
+tiny-skia'nın 0,5 px, %5 opak, yoğun kübik eğrileri rasterleştirme farkı genel
+`%1 / 0,99` kapısını aşar. Eşik, maske, renk veya opaklık telafisi uygulanmaz;
+ham referans/gerçek/fark ile normalize metrikler raporda tutulur ve kart
+`kısmi` kalır. Kullanıcının son görsel incelemesi ya da renderer düzeltmesi
+olmadan bu kart `tam_kanıtlı` sayılmaz. Koyu profil, klavye/ARIA, bütün
+programatik durum geçişleri ve ölçümlü progressive performans kapıları da
+Faz 7/8/9'da kapanacaktır.
 
 ThemeRiver doğrulanmış kapsamı:
 

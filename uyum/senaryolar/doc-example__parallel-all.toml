@@ -1,18 +1,18 @@
 # Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
 id = "doc-example/parallel-all"
-kapsam_durumu = "yok"
+kapsam_durumu = "uygulandı_kanıt_bekliyor"
 sahip_faz = 4
 resmi_kaynak = "public/examples/ts/doc-example/parallel-all.js"
-fixture = ""
+fixture = "examples/uyum_fixture.rs#parallel_all"
 viewport_genişlik = 700
 viewport_yükseklik = 525
 shot_delay_ms = 0
 profiller = ["açık", "koyu"]
 
 [kanıt]
-api = "yok"
-statik_görsel = "yok"
-animasyon = "yok"
-etkileşim = "yok"
-erişilebilirlik = "yok"
-performans = "yok"
+api = "kısmi"
+statik_görsel = "tam_kanıtlı"
+animasyon = "kısmi"
+etkileşim = "kısmi"
+erişilebilirlik = "kısmi"
+performans = "kısmi"

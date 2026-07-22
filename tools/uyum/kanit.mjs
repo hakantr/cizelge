@@ -17,6 +17,7 @@ const REFERANS = path.join(TABAN, 'referans', COMMIT, 'default');
 const GERÇEK = path.join(TABAN, 'gerçek', 'default');
 const FARK = path.join(TABAN, 'fark', 'default');
 const METRİK = path.join(TABAN, 'metrikler');
+const SAHNE = path.join(TABAN, 'sahneler');
 const RAPOR = path.join(TABAN, 'rapor');
 const EŞİK = Object.freeze({ pixelmatch: 0.1, değişenPikselOranı: 0.01, ssim: 0.99 });
 const REFERANS_YENİLE = process.argv.includes('--referans-yenile');
@@ -41,6 +42,32 @@ const SENARYOLAR = [
   { id: 'radar-custom', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'radar2', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'radar-multiple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'parallel-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'parallel-aqi', tür: 'statik',
+    karşılaştırma: { tipografiSigma: 0.8 },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'parallel-nutrients', tür: 'statik',
+    karşılaştırma: {
+      tipografiSigma: 0.8,
+      sahneÖzeti: {
+        şema_sürümü: 1,
+        çizgi_sayısı: 7637,
+        nokta_sayısı: 114555,
+        koordinat_sayısı: 229110,
+        koordinat_adımı: 0.001,
+        fnv1a_64: 'd3f9efb47fd5e2d7'
+      }
+    },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'doc-example/parallel-all', tür: 'statik',
+    karşılaştırma: { tipografiSigma: 0.8 },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'themeRiver-lastfm', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -549,6 +576,72 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
     const örnekler = xler.map((x) => nötrKoyuÖrnek(x, y));
     return { ad, geçti: örnekler.every((örnek) => örnek.geçti), açıklama, örnekler };
   };
+  // Bir piksellik eksenler toplam fark oranında kolayca kaybolur. Referans
+  // ve gerçek görüntüde beklenen konumun ±2 px çevresindeki en yüksek yerel
+  // kontrastı ayrı ölçerek eksen katmanını zorunlu kapı yapar. Arka plan,
+  // çizginin normalinde ±5 px örneklenir; bu hem açık hem koyu temada çalışır.
+  const eksenÇizgisiÖrneği = (x, y, dikey, nötrHedef = null) => {
+    const tek = (kaynak) => {
+      const adaylar = [];
+      for (let kayma = -2; kayma <= 2; kayma += 1) {
+        const px = x + (dikey ? kayma : 0);
+        const py = y + (dikey ? 0 : kayma);
+        const rgb = pikselOku(kaynak, px, py);
+        const önce = pikselOku(kaynak, px + (dikey ? -5 : 0), py + (dikey ? 0 : -5));
+        const sonra = pikselOku(kaynak, px + (dikey ? 5 : 0), py + (dikey ? 0 : 5));
+        const arkaplan = önce.map((kanal, sıra) => (kanal + sonra[sıra]) / 2);
+        const kontrast = Math.max(...rgb.map((kanal, sıra) => Math.abs(kanal - arkaplan[sıra])));
+        const parlaklık = rgb.reduce((toplam, kanal) => toplam + kanal, 0) / rgb.length;
+        const nötrlükSapması = Math.max(...rgb) - Math.min(...rgb);
+        const nötrPuan = Number.isFinite(nötrHedef)
+          ? Math.abs(parlaklık - nötrHedef) + nötrlükSapması
+          : null;
+        adaylar.push({
+          kayma,
+          x: px,
+          y: py,
+          rgb,
+          arkaplan,
+          kontrast,
+          parlaklık,
+          nötrlük_sapması: nötrlükSapması,
+          ...(nötrPuan === null ? {} : { nötr_puan: nötrPuan })
+        });
+      }
+      return adaylar.sort((a, b) => (
+        Number.isFinite(nötrHedef)
+          ? a.nötr_puan - b.nötr_puan || b.kontrast - a.kontrast
+          : b.kontrast - a.kontrast
+      ))[0];
+    };
+    const referans = tek(referansGörüntü);
+    const gerçek = tek(görüntü);
+    return {
+      x,
+      y,
+      yön: dikey ? 'dikey' : 'yatay',
+      referans,
+      gerçek,
+      geçti: referans.kontrast >= 18
+        && gerçek.kontrast >= 18
+        && Math.abs(referans.kayma - gerçek.kayma) <= 2
+    };
+  };
+  const paralelEksenKapısı = (
+    ad,
+    açıklama,
+    konumlar,
+    örnekKonumlar,
+    dikey,
+    nötrHedef = null
+  ) => {
+    const örnekler = konumlar.flatMap((konum) => örnekKonumlar.map((örnekKonum) => (
+      dikey
+        ? eksenÇizgisiÖrneği(konum, örnekKonum, true, nötrHedef)
+        : eksenÇizgisiÖrneği(örnekKonum, konum, false, nötrHedef)
+    )));
+    return { ad, geçti: örnekler.every((örnek) => örnek.geçti), açıklama, örnekler };
+  };
 
   if (senaryo.id === 'dataset-encode0') {
     const x = 172;
@@ -592,6 +685,47 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
         örnekler: aySınırıÖrnekleri
       }
     ];
+  }
+
+  if (senaryo.id === 'parallel-simple') {
+    return [paralelEksenKapısı(
+      'parallel_axis_taban_cizgileri',
+      'Dört parallelAxis çizgisi seri polylinelerinin üstünde ve tüm boyda görünmeli',
+      [69, 223, 377, 531],
+      [90, 225, 360],
+      true
+    )];
+  }
+
+  if (senaryo.id === 'parallel-aqi') {
+    return [paralelEksenKapısı(
+      'parallel_axis_taban_cizgileri',
+      'Koyu zemindeki sekiz parallelAxis çizgisi yoğun AQI çizgilerinin üstünde kalmalı',
+      [30, 96, 162, 228, 294, 360, 426, 492],
+      [80, 180, 290],
+      true
+    )];
+  }
+
+  if (senaryo.id === 'doc-example/parallel-all') {
+    return [paralelEksenKapısı(
+      'parallel_axis_taban_cizgileri',
+      'Gizli resmî örneğin sekiz parallelAxis çizgisi seri katmanı tarafından örtülmemeli',
+      [30, 100, 171, 241, 311, 381, 452, 522],
+      [120, 240, 370],
+      true
+    )];
+  }
+
+  if (senaryo.id === 'parallel-nutrients') {
+    return [paralelEksenKapısı(
+      'parallel_axis_yatay_taban_cizgileri',
+      'On beş dikey-layout parallelAxis tabanı 7.637 yumuşak çizginin üstünde kesintisiz görünmeli',
+      [17, 44, 72, 99, 126, 153, 181, 208, 235, 262, 290, 317, 344, 371, 399],
+      [260, 410, 570],
+      false,
+      153
+    )];
   }
 
   if (senaryo.id === 'themeRiver-basic') {
@@ -669,6 +803,33 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
   return [];
 }
 
+function sahneÖzetiKontrolleri(senaryo, sahneDosyası) {
+  const beklenen = senaryo.karşılaştırma?.sahneÖzeti;
+  if (!beklenen) return [];
+  if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
+    return [{
+      ad: 'parallel_sahne_özeti',
+      geçti: false,
+      açıklama: 'Renderer bağımsız veri/geometri/renk sahne özeti üretilmelidir',
+      beklenen,
+      hata: 'sahne özeti dosyası eksik'
+    }];
+  }
+  const gerçek = JSON.parse(fs.readFileSync(sahneDosyası, 'utf8'));
+  const alanlar = Object.keys(beklenen).map((alan) => ({
+    alan,
+    beklenen: beklenen[alan],
+    gerçek: gerçek[alan],
+    geçti: gerçek[alan] === beklenen[alan]
+  }));
+  return [{
+    ad: 'parallel_sahne_özeti',
+    geçti: alanlar.every((alan) => alan.geçti),
+    açıklama: '7.637 Polyline; 229.110 koordinat, RGB, width, opacity ve smooth ile eşleşmeli',
+    alanlar
+  }];
+}
+
 function htmlKaçır(değer) {
   return String(değer).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
@@ -678,7 +839,7 @@ function göreli(dosya) {
 }
 
 async function çalıştır() {
-  for (const d of [REFERANS, GERÇEK, FARK, METRİK, RAPOR]) dizin(d);
+  for (const d of [REFERANS, GERÇEK, FARK, METRİK, SAHNE, RAPOR]) dizin(d);
   const sonuçlar = [];
   const idSırası = process.argv.indexOf('--id');
   const önekSırası = process.argv.indexOf('--id-prefix');
@@ -710,6 +871,9 @@ async function çalıştır() {
       const ham = path.join(GERÇEK, `.ham-${dosyaId}${sonek}.png`);
       const fark = path.join(FARK, `${dosyaId}${sonek}.png`);
       const normalizeFark = path.join(FARK, `${dosyaId}${sonek}-tipografi.png`);
+      const sahne = senaryo.karşılaştırma?.sahneÖzeti
+        ? path.join(SAHNE, `${dosyaId}${sonek}.json`)
+        : null;
       if (REFERANS_YENİLE) {
         await referansıYenile(senaryo, kare, referans, sonek);
       } else if (!fs.existsSync(referans)) {
@@ -718,7 +882,7 @@ async function çalıştır() {
           + '`--referans-yenile` yalnız açık snapshot yenilemesinde kullanılmalıdır'
         );
       }
-      execFileSync('cargo', [
+      const fixtureArgümanları = [
         'run', '--quiet', '--no-default-features', '--features', 'png',
         '--example', 'uyum_fixture', '--',
         '--id', senaryo.id,
@@ -727,7 +891,9 @@ async function çalıştır() {
         '--state', kare.durum,
         '--width', String(senaryo.genişlik ?? 700),
         '--height', String(senaryo.yükseklik ?? 525)
-      ], { cwd: KÖK, stdio: 'inherit' });
+      ];
+      if (sahne) fixtureArgümanları.push('--scene-output', sahne);
+      execFileSync('cargo', fixtureArgümanları, { cwd: KÖK, stdio: 'inherit' });
       await sharp(ham).resize(600, 450).toFile(gerçek);
       fs.rmSync(ham, { force: true });
       const metrik = await karşılaştır(
@@ -737,7 +903,10 @@ async function çalıştır() {
         normalizeFark,
         senaryo.karşılaştırma
       );
-      const yapısal_kontroller = yapısalKontroller(senaryo, referans, gerçek);
+      const yapısal_kontroller = [
+        ...yapısalKontroller(senaryo, referans, gerçek),
+        ...sahneÖzetiKontrolleri(senaryo, sahne)
+      ];
       metrik.geçti = metrik.geçti
         && yapısal_kontroller.every((kontrol) => kontrol.geçti);
       sonuçlar.push({
@@ -753,7 +922,8 @@ async function çalıştır() {
           fark: path.relative(KÖK, fark),
           ...(metrik.tipografi_normalizasyonu
             ? { normalize_fark: path.relative(KÖK, normalizeFark) }
-            : {})
+            : {}),
+          ...(sahne ? { sahne: path.relative(KÖK, sahne) } : {})
         }
       });
     }

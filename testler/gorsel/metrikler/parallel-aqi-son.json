@@ -1,0 +1,1047 @@
+{
+  "id": "parallel-aqi",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2047,
+  "değişen_piksel_oranı": 0.007581481481481482,
+  "ssim": 0.9914262475047645,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 3838,
+    "değişen_piksel_oranı": 0.014214814814814816,
+    "ssim": 0.9869902534859863
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "parallel_axis_taban_cizgileri",
+      "geçti": true,
+      "açıklama": "Koyu zemindeki sekiz parallelAxis çizgisi yoğun AQI çizgilerinin üstünde kalmalı",
+      "örnekler": [
+        {
+          "x": 30,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 2,
+            "x": 32,
+            "y": 80,
+            "rgb": [
+              125,
+              145,
+              104
+            ],
+            "arkaplan": [
+              50,
+              50,
+              50.5
+            ],
+            "kontrast": 95,
+            "parlaklık": 124.66666666666667,
+            "nötrlük_sapması": 41
+          },
+          "gerçek": {
+            "kayma": 2,
+            "x": 32,
+            "y": 80,
+            "rgb": [
+              125,
+              146,
+              106
+            ],
+            "arkaplan": [
+              50,
+              50,
+              50.5
+            ],
+            "kontrast": 96,
+            "parlaklık": 125.66666666666667,
+            "nötrlük_sapması": 40
+          },
+          "geçti": true
+        },
+        {
+          "x": 30,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 30,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              73,
+              68.5,
+              50
+            ],
+            "kontrast": 103,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 30,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              73,
+              68,
+              50
+            ],
+            "kontrast": 103,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 30,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 30,
+            "y": 290,
+            "rgb": [
+              150,
+              151,
+              152
+            ],
+            "arkaplan": [
+              73.5,
+              58.5,
+              55
+            ],
+            "kontrast": 97,
+            "parlaklık": 151,
+            "nötrlük_sapması": 2
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 30,
+            "y": 290,
+            "rgb": [
+              150,
+              151,
+              152
+            ],
+            "arkaplan": [
+              73.5,
+              59,
+              55.5
+            ],
+            "kontrast": 96.5,
+            "parlaklık": 151,
+            "nötrlük_sapması": 2
+          },
+          "geçti": true
+        },
+        {
+          "x": 96,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 96,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 96,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 96,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 96,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              94,
+              60,
+              60
+            ],
+            "kontrast": 93,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 96,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              94,
+              60.5,
+              60.5
+            ],
+            "kontrast": 92.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 96,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 96,
+            "y": 290,
+            "rgb": [
+              166,
+              165,
+              155
+            ],
+            "arkaplan": [
+              110.5,
+              122,
+              84.5
+            ],
+            "kontrast": 70.5,
+            "parlaklık": 162,
+            "nötrlük_sapması": 11
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 96,
+            "y": 290,
+            "rgb": [
+              166,
+              165,
+              155
+            ],
+            "arkaplan": [
+              112,
+              122.5,
+              86
+            ],
+            "kontrast": 69,
+            "parlaklık": 162,
+            "nötrlük_sapması": 11
+          },
+          "geçti": true
+        },
+        {
+          "x": 162,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 162,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 162,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 162,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 162,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 162,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 162,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 162,
+            "y": 290,
+            "rgb": [
+              154,
+              154,
+              153
+            ],
+            "arkaplan": [
+              107.5,
+              104.5,
+              62.5
+            ],
+            "kontrast": 90.5,
+            "parlaklık": 153.66666666666666,
+            "nötrlük_sapması": 1
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 162,
+            "y": 290,
+            "rgb": [
+              154,
+              154,
+              153
+            ],
+            "arkaplan": [
+              107.5,
+              104,
+              63.5
+            ],
+            "kontrast": 89.5,
+            "parlaklık": 153.66666666666666,
+            "nötrlük_sapması": 1
+          },
+          "geçti": true
+        },
+        {
+          "x": 228,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 228,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 228,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 228,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 228,
+            "y": 180,
+            "rgb": [
+              152,
+              152,
+              153
+            ],
+            "arkaplan": [
+              91.5,
+              76.5,
+              53.5
+            ],
+            "kontrast": 99.5,
+            "parlaklık": 152.33333333333334,
+            "nötrlük_sapması": 1
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 228,
+            "y": 180,
+            "rgb": [
+              152,
+              152,
+              153
+            ],
+            "arkaplan": [
+              91.5,
+              76.5,
+              54
+            ],
+            "kontrast": 99,
+            "parlaklık": 152.33333333333334,
+            "nötrlük_sapması": 1
+          },
+          "geçti": true
+        },
+        {
+          "x": 228,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 228,
+            "y": 290,
+            "rgb": [
+              160,
+              159,
+              154
+            ],
+            "arkaplan": [
+              94.5,
+              89.5,
+              55.5
+            ],
+            "kontrast": 98.5,
+            "parlaklık": 157.66666666666666,
+            "nötrlük_sapması": 6
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 228,
+            "y": 290,
+            "rgb": [
+              160,
+              159,
+              154
+            ],
+            "arkaplan": [
+              94.5,
+              89.5,
+              56
+            ],
+            "kontrast": 98,
+            "parlaklık": 157.66666666666666,
+            "nötrlük_sapması": 6
+          },
+          "geçti": true
+        },
+        {
+          "x": 294,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 294,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 294,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 294,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 294,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              50,
+              50,
+              51
+            ],
+            "kontrast": 103,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 294,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              50,
+              50,
+              51
+            ],
+            "kontrast": 103,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 294,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 294,
+            "y": 290,
+            "rgb": [
+              166,
+              163,
+              153
+            ],
+            "arkaplan": [
+              106.5,
+              94.5,
+              53
+            ],
+            "kontrast": 100,
+            "parlaklık": 160.66666666666666,
+            "nötrlük_sapması": 13
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 294,
+            "y": 290,
+            "rgb": [
+              166,
+              163,
+              153
+            ],
+            "arkaplan": [
+              106.5,
+              95,
+              54.5
+            ],
+            "kontrast": 98.5,
+            "parlaklık": 160.66666666666666,
+            "nötrlük_sapması": 13
+          },
+          "geçti": true
+        },
+        {
+          "x": 360,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 360,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 360,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 360,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 360,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              89,
+              76.5,
+              52.5
+            ],
+            "kontrast": 100.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 360,
+            "y": 180,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              89,
+              76.5,
+              53
+            ],
+            "kontrast": 100,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 360,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 360,
+            "y": 290,
+            "rgb": [
+              152,
+              152,
+              152
+            ],
+            "arkaplan": [
+              73.5,
+              83.5,
+              73
+            ],
+            "kontrast": 79,
+            "parlaklık": 152,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 360,
+            "y": 290,
+            "rgb": [
+              152,
+              152,
+              152
+            ],
+            "arkaplan": [
+              73.5,
+              83.5,
+              73
+            ],
+            "kontrast": 79,
+            "parlaklık": 152,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 426,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 426,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 426,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              51,
+              51,
+              51
+            ],
+            "kontrast": 102,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 426,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 426,
+            "y": 180,
+            "rgb": [
+              148,
+              148,
+              152
+            ],
+            "arkaplan": [
+              62,
+              59,
+              51
+            ],
+            "kontrast": 101,
+            "parlaklık": 149.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 426,
+            "y": 180,
+            "rgb": [
+              147,
+              148,
+              152
+            ],
+            "arkaplan": [
+              62,
+              59.5,
+              51
+            ],
+            "kontrast": 101,
+            "parlaklık": 149,
+            "nötrlük_sapması": 5
+          },
+          "geçti": true
+        },
+        {
+          "x": 426,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 426,
+            "y": 290,
+            "rgb": [
+              166,
+              165,
+              158
+            ],
+            "arkaplan": [
+              99,
+              80,
+              58.5
+            ],
+            "kontrast": 99.5,
+            "parlaklık": 163,
+            "nötrlük_sapması": 8
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 426,
+            "y": 290,
+            "rgb": [
+              167,
+              166,
+              158
+            ],
+            "arkaplan": [
+              99,
+              79.5,
+              59.5
+            ],
+            "kontrast": 98.5,
+            "parlaklık": 163.66666666666666,
+            "nötrlük_sapması": 9
+          },
+          "geçti": true
+        },
+        {
+          "x": 492,
+          "y": 80,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 492,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              50,
+              50,
+              50
+            ],
+            "kontrast": 103,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 492,
+            "y": 80,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              50.5,
+              50.5,
+              50.5
+            ],
+            "kontrast": 102.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 492,
+          "y": 180,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 2,
+            "x": 494,
+            "y": 180,
+            "rgb": [
+              52,
+              52,
+              52
+            ],
+            "arkaplan": [
+              149.5,
+              101.5,
+              92.5
+            ],
+            "kontrast": 97.5,
+            "parlaklık": 52,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 2,
+            "x": 494,
+            "y": 180,
+            "rgb": [
+              52,
+              52,
+              52
+            ],
+            "arkaplan": [
+              149,
+              101.5,
+              92.5
+            ],
+            "kontrast": 97,
+            "parlaklık": 52,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        },
+        {
+          "x": 492,
+          "y": 290,
+          "yön": "dikey",
+          "referans": {
+            "kayma": 0,
+            "x": 492,
+            "y": 290,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              91,
+              100.5,
+              77.5
+            ],
+            "kontrast": 75.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 492,
+            "y": 290,
+            "rgb": [
+              153,
+              153,
+              153
+            ],
+            "arkaplan": [
+              91.5,
+              101,
+              78.5
+            ],
+            "kontrast": 74.5,
+            "parlaklık": 153,
+            "nötrlük_sapması": 0
+          },
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/parallel-aqi.png",
+    "gerçek": "testler/gorsel/gerçek/default/parallel-aqi.png",
+    "fark": "testler/gorsel/fark/default/parallel-aqi.png",
+    "normalize_fark": "testler/gorsel/fark/default/parallel-aqi-tipografi.png"
+  }
+}

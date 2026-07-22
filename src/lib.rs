@@ -59,17 +59,17 @@ pub use cizim::pencere::GrafikGörünümü;
 pub use cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use cizim::{
     AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü,
-    MatrisHücreBölgesi, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
-    SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SihirliSeriTürü,
-    SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
-    İsabetBölgesi, İsabetGeometrisi,
+    MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, Sahne,
+    SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
+    Sahneİsabeti, SahneŞekli, SihirliSeriTürü, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol,
+    svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
 };
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, eksen_imleci_eylemini_kaydet,
     eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
-    görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet,
-    öntanımlı_eylemleri_kaydet,
+    görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+    veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -109,6 +109,10 @@ pub use model::matris::{
     MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
     MatrisEtiketiBiçimleyicisi, MatrisGövdeHücresi, MatrisKonumu, MatrisKoordinatı,
     MatrisİpucuBağlamı, MatrisİpucuBiçimleyicisi,
+};
+pub use model::paralel::{
+    ParalelAlanSeçimStili, ParalelEkseni, ParalelGenişletmeTetikleyicisi, ParalelKoordinatı,
+    ParalelYerleşim,
 };
 pub use model::radar::{
     RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri, RadarŞekli,
@@ -182,16 +186,17 @@ pub mod hazir {
     pub use crate::cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
     pub use crate::cizim::{
         AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü,
-        MatrisHücreBölgesi, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
-        SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi,
-        YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
+        MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, Sahne,
+        SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
+        Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar,
+        yolu_dönüştür, ÇizimYüzeyi,
     };
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
         eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
         geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-        veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+        paralel_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
     pub use crate::genisletme::{
         Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -231,6 +236,10 @@ pub mod hazir {
         MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
         MatrisEtiketiBiçimleyicisi, MatrisGövdeHücresi, MatrisKonumu, MatrisKoordinatı,
         MatrisİpucuBağlamı, MatrisİpucuBiçimleyicisi,
+    };
+    pub use crate::model::paralel::{
+        ParalelAlanSeçimStili, ParalelEkseni, ParalelGenişletmeTetikleyicisi, ParalelKoordinatı,
+        ParalelYerleşim,
     };
     pub use crate::model::radar::{
         RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri,

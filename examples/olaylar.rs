@@ -71,6 +71,21 @@ impl Kök {
                     seçili.len()
                 )
                 .into(),
+                GrafikOlayı::ParalelAlanSeçildi {
+                    eksen_sırası,
+                    aralıklar,
+                } => format!(
+                    "ParallelAxis {eksen_sırası} → {} etkin aralık",
+                    aralıklar.len()
+                )
+                .into(),
+                GrafikOlayı::ParalelEksenGenişletildi {
+                    paralel_sırası,
+                    pencere: [başlangıç, bitiş],
+                } => format!(
+                    "Parallel {paralel_sırası} → genişletme penceresi {başlangıç:.1}–{bitiş:.1}"
+                )
+                .into(),
                 GrafikOlayı::FırçaSeçildi { öğeler } => {
                     format!("Fırça → {} öğe seçildi", öğeler.len()).into()
                 }

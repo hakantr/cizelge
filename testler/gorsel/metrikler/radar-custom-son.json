@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 1313,
   "değişen_piksel_oranı": 0.004862962962962963,
-  "ssim": 0.996951236147204,
+  "ssim": 0.9969505180605731,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar-custom.png",
     "gerçek": "testler/gorsel/gerçek/default/radar-custom.png",

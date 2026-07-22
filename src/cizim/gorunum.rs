@@ -18,11 +18,15 @@ use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
 use crate::bilesen::grafik::{GrafikSahnesi, grafik_sahnesi_hazırla};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::bilesen::matris_cizimi::matris_çiz;
+use crate::bilesen::paralel_cizimi::paralel_eksenlerini_çiz;
 use crate::bilesen::takvim_cizimi::{takvim_arka_planı_çiz, takvim_üst_katmanı_çiz};
 use crate::bilesen::zaman_seridi::{
     ZamanŞeridiEylemi, seçenekli_zaman_şeridi_çiz, zaman_şeridi_çiz,
 };
-use crate::cizim::olay::{MatrisHücreBölgesi, İsabetBölgesi, İsabetGeometrisi};
+use crate::cizim::olay::{
+    MatrisHücreBölgesi, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, İsabetBölgesi,
+    İsabetGeometrisi,
+};
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::cizim::{AfinMatris, Yol, yolu_dönüştür};
 use crate::grafik::agac::ağaç_çiz;
@@ -43,7 +47,7 @@ use crate::grafik::kutupsal::{
     KutupsalDüzen, kutupsal_ağ_çiz, kutupsal_kur, kutupsal_serileri_çiz,
 };
 use crate::grafik::mum::{kutu_çiz, mum_çiz};
-use crate::grafik::paralel::paralel_çiz;
+use crate::grafik::paralel::{paralel_görsel_kapsamı, paralel_ipucu_değerleri, paralel_çiz};
 use crate::grafik::pasta::{
     Dilim, boş_pasta_çiz_merkezle, dilim_değer_metni, pasta_yerleşimi_merkezle, pasta_çiz,
 };
@@ -67,7 +71,8 @@ use crate::grafik::tema_nehri::{
     tema_nehri_katman_adları, tema_nehri_katman_dolgusu, tema_nehri_çiz,
 };
 use crate::koordinat::{
-    Dikdörtgen, Kartezyen2B, TakvimYerleşimi, TekEksenYerleşimi, ÇalışmaEkseni,
+    Dikdörtgen, Kartezyen2B, ParalelYerleşimi, TakvimYerleşimi, TekEksenYerleşimi,
+    paralel_seri_bağlı_mı, ÇalışmaEkseni,
 };
 use crate::model::bilesen::{
     AraçKutusuÖzelliği, FırçaAracıTürü, FırçaBağı, FırçaKoordinatAralığı, FırçaKoordinatı,
@@ -946,6 +951,10 @@ pub struct BoyamaÇıktısı {
     /// Matrix bileşen hücrelerinin seri dışı tooltip/triggerEvent/cursor
     /// hedefleri; çizim z-sırasıyla saklanır.
     pub matris_hücreleri: Vec<MatrisHücreBölgesi>,
+    /// `parallelAxis` doğrusal alan seçim hedefleri.
+    pub paralel_eksenleri: Vec<ParalelEksenBölgesi>,
+    /// `parallel.axisExpandable` tıklama/fare hareketi hedefleri.
+    pub paralel_genişletmeleri: Vec<ParalelGenişletmeBölgesi>,
     /// Programatik brush alanlarının ham veri seçimi. Dış sıra
     /// `seriesIndex`, iç değerler `dataIndex` karşılığıdır.
     pub fırça_seçimleri: Vec<Vec<usize>>,
@@ -3379,6 +3388,7 @@ pub fn grafiği_boya(
     // katmandaki tooltip penceresine veri bırakır.
     let mut bekleyen_ipucu: Option<Bekleyenİpucu> = None;
     let mut bekleyen_matris_ipucu: Option<(usize, Bekleyenİpucu)> = None;
+    let mut bekleyen_paralel_ipucu: Option<(İpucu, Bekleyenİpucu)> = None;
 
     // 1) Arka plan (koyu temada zemin, açıkça verilmemişse de doldurulur).
     let zemin = seçenekler
@@ -5428,6 +5438,7 @@ pub fn grafiği_boya(
                 Seri::Takvim(takvim) => Some(takvim_değer_kapsamı(takvim)),
                 Seri::Saçılım(saçılım) => Some(saçılım_görsel_kapsamı(saçılım, eşleme)),
                 Seri::Radar(_) => Some(radar_görsel_kapsamı(seçenekler, eşleme)),
+                Seri::Paralel(paralel) => Some(paralel_görsel_kapsamı(paralel, eşleme)),
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
@@ -5772,6 +5783,53 @@ pub fn grafiği_boya(
         }
     }
 
+    // Parallel preprocessor: açık bileşen yoksa ilk parallel serisi için
+    // öntanımlı koordinat üretir. Her bileşenin ölçeği yalnız kendisine
+    // `parallelIndex`/`parallelId` ile bağlı ve legend'de görünür serilerden
+    // beslenir.
+    let mut paralel_modelleri = seçenekler.tüm_paraleller().cloned().collect::<Vec<_>>();
+    if paralel_modelleri.is_empty()
+        && seçenekler
+            .seriler
+            .iter()
+            .any(|seri| matches!(seri, Seri::Paralel(_)))
+    {
+        let mut örtük = crate::model::paralel::ParalelKoordinatı::default();
+        if let Some(varsayılan) = seçenekler.seriler.iter().find_map(|seri| match seri {
+            Seri::Paralel(paralel) => paralel.eksen_varsayılanı.clone(),
+            _ => None,
+        }) {
+            örtük.eksen_varsayılanı = varsayılan;
+        }
+        paralel_modelleri.push(örtük);
+    }
+    let paralel_yerleşimleri = paralel_modelleri
+        .iter()
+        .enumerate()
+        .map(|(paralel_sırası, koordinat)| {
+            let bağlı_seriler = seçenekler
+                .seriler
+                .iter()
+                .filter_map(|seri| match seri {
+                    Seri::Paralel(paralel)
+                        if paralel_seri_bağlı_mı(paralel, koordinat, paralel_sırası)
+                            && ad_görünür(seri.ad(), kapalı) =>
+                    {
+                        Some(paralel)
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>();
+            ParalelYerleşimi::kur(
+                koordinat,
+                paralel_sırası,
+                &seçenekler.paralel_eksenleri,
+                &bağlı_seriler,
+                (yüzey.genişlik(), yüzey.yükseklik()),
+            )
+        })
+        .collect::<Vec<_>>();
+
     // 5b) Huni, gösterge saati ve radar serileri.
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         match seri {
@@ -6023,15 +6081,53 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
-                paralel_çiz(
+                let paralel_sırası = s
+                    .paralel_kimliği
+                    .as_ref()
+                    .and_then(|kimlik| {
+                        paralel_modelleri
+                            .iter()
+                            .position(|koordinat| koordinat.kimlik.as_ref() == Some(kimlik))
+                    })
+                    .unwrap_or(s.paralel_sırası);
+                let Some(Some(yerleşim)) = paralel_yerleşimleri.get(paralel_sırası) else {
+                    continue;
+                };
+                let eşlemeler = seçenekler.seri_görsel_eşlemeleri(i).collect::<Vec<_>>();
+                let vurgu = paralel_çiz(
                     yüzey,
                     s,
                     i,
-                    tüm_alan,
+                    yerleşim,
                     seçenekler.seri_rengi(i),
+                    &eşlemeler,
                     ilerleme,
+                    fare,
+                    girdi
+                        .ipucu_öğesi
+                        .filter(|(seri_sırası, _)| *seri_sırası == i)
+                        .map(|(_, veri_sırası)| veri_sırası),
                     &mut çıktı.isabetler,
                 );
+                let ipucu = s
+                    .ipucu
+                    .as_ref()
+                    .filter(|ipucu| ipucu.göster)
+                    .or(ipucu_seçeneği.as_ref());
+                if let (Some(veri_sırası), Some(ipucu), Some(konum)) = (vurgu, ipucu, fare)
+                    && !s.sessiz
+                    && ipucu.tetikleme != Tetikleme::Kapalı
+                {
+                    let satırlar = paralel_ipucu_değerleri(s, yerleşim, veri_sırası)
+                        .into_iter()
+                        .map(|(ad, değer)| İpucuSatırı {
+                            im_rengi: Some(seçenekler.seri_rengi(i)),
+                            ad,
+                            değer,
+                        })
+                        .collect();
+                    bekleyen_paralel_ipucu = Some((ipucu.clone(), (s.ad.clone(), satırlar, konum)));
+                }
             }
             Seri::Grafo(g) => {
                 // Takvim bileşeninden daha yüksek z değerleri aşağıdaki üst
@@ -6235,6 +6331,18 @@ pub fn grafiği_boya(
         }
     }
 
+    // ParallelAxisView öntanımlı z=10 ile parallel seri çizgilerinin
+    // üstündedir. Alan seçim örtüleri ve etkileşim şeritleri de bu ortak
+    // bileşen geçişinde bir kez üretilir.
+    for yerleşim in paralel_yerleşimleri.iter().flatten() {
+        if let Some(bölge) = ParalelGenişletmeBölgesi::yeni(yerleşim) {
+            çıktı.paralel_genişletmeleri.push(bölge);
+        }
+        çıktı
+            .paralel_eksenleri
+            .extend(paralel_eksenlerini_çiz(yüzey, yerleşim));
+    }
+
     // CalendarView ayırıcı ve metinleri z2=20/30 ile seri şekillerinin
     // üstünde tutar. Gün zemini ise serilerden önce çizilmişti.
     for (takvim, yerleşim) in seçenekler.takvimler.iter().zip(&takvim_yerleşimleri) {
@@ -6406,7 +6514,11 @@ pub fn grafiği_boya(
 
     // 6) İpucu penceresi (her şeyin üstüne). `formatter` verilmişse
     // satırlar şablonla yeniden yazılır.
-    if let (Some(ipucu), Some((başlık, satırlar, konum))) = (&ipucu_seçeneği, bekleyen_ipucu) {
+    if let Some((ipucu, (başlık, satırlar, konum))) = bekleyen_paralel_ipucu {
+        let satırlar = ipucu_satırlarını_biçimle(&ipucu, başlık.as_deref(), satırlar);
+        ipucu_çiz(yüzey, &ipucu, konum, başlık.as_deref(), &satırlar);
+    } else if let (Some(ipucu), Some((başlık, satırlar, konum))) = (&ipucu_seçeneği, bekleyen_ipucu)
+    {
         let satırlar = ipucu_satırlarını_biçimle(ipucu, başlık.as_deref(), satırlar);
         ipucu_çiz(yüzey, ipucu, konum, başlık.as_deref(), &satırlar);
     } else if let Some((matris_sırası, (başlık, satırlar, konum))) = bekleyen_matris_ipucu
@@ -7373,5 +7485,130 @@ mod yakınlaştırma_yönü_testleri {
                 Some(Dolgu::Düz(Renk::onaltılık(0xcfd2d7))),
             ])]
         );
+    }
+
+    #[test]
+    fn parallel_resmi_karma_satirlari_eksenleri_ve_ust_axis_katmanini_uretir() {
+        use crate::model::deger::VeriDeğeri;
+        use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
+        use crate::model::seri::ParalelSerisi;
+
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .paralel(ParalelKoordinatı::yeni())
+            .paralel_eksenleri([
+                ParalelEkseni::yeni(0).ad("Price"),
+                ParalelEkseni::yeni(1).ad("Net Weight"),
+                ParalelEkseni::yeni(2).ad("Amount"),
+                ParalelEkseni::yeni(3).ad("Score").kategori().veri([
+                    "Excellent",
+                    "Good",
+                    "OK",
+                    "Bad",
+                ]),
+            ])
+            .seri(ParalelSerisi::yeni().karma_veri([
+                vec![12.99.into(), 100.into(), 82.into(), "Good".into()],
+                vec![9.99.into(), 80.into(), 77.into(), "OK".into()],
+                vec![20.into(), 120.into(), 60.into(), "Excellent".into()],
+                vec![15.into(), VeriDeğeri::Boş, 70.into(), "Bad".into()],
+            ]));
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.paralel_eksenleri.len(), 4);
+        assert_eq!(çıktı.isabetler.len(), 4);
+        assert!(
+            çıktı
+                .isabetler
+                .iter()
+                .all(|bölge| matches!(bölge.geometri, İsabetGeometrisi::ÇokluÇizgi { .. }))
+        );
+        let seri_sırası = yüzey
+            .komutlar
+            .iter()
+            .position(|komut| komut.matches("Ç(").count() >= 3)
+            .expect("parallel seri çoklu çizgisi");
+        let üst_eksen = yüzey.komutlar[seri_sırası + 1..]
+            .iter()
+            .any(|komut| komut.starts_with("çiz ") && komut.matches("Ç(").count() == 1);
+        assert!(üst_eksen, "parallelAxis çizgileri seri üstünde olmalı");
+    }
+
+    #[test]
+    fn parallel_coklu_koordinat_secim_opakligi_ve_expand_hedefini_korur() {
+        use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
+        use crate::model::seri::ParalelSerisi;
+
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .paralel_ekle(
+                ParalelKoordinatı::yeni()
+                    .kimlik("sol")
+                    .sağ("55%")
+                    .eksen_genişletilebilir(true)
+                    .eksen_genişletme_sayısı(2),
+            )
+            .paralel_ekle(ParalelKoordinatı::yeni().kimlik("sağ").sol("55%"))
+            .paralel_eksenleri([
+                ParalelEkseni::yeni(0)
+                    .paralel_kimliği("sol")
+                    .etkin_aralık(0.0, 5.0),
+                ParalelEkseni::yeni(1).paralel_kimliği("sol"),
+                ParalelEkseni::yeni(2).paralel_kimliği("sol"),
+                ParalelEkseni::yeni(3).paralel_kimliği("sol"),
+                ParalelEkseni::yeni(0).paralel_kimliği("sağ"),
+                ParalelEkseni::yeni(1).paralel_kimliği("sağ"),
+            ])
+            .seri(
+                ParalelSerisi::yeni()
+                    .paralel_kimliği("sol")
+                    .veri([vec![2.0, 3.0, 4.0, 5.0], vec![8.0, 7.0, 6.0, 5.0]]),
+            )
+            .seri(
+                ParalelSerisi::yeni()
+                    .paralel_kimliği("sağ")
+                    .veri([vec![1.0, 2.0]]),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(900.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.paralel_eksenleri.len(), 6);
+        assert_eq!(çıktı.paralel_genişletmeleri.len(), 1);
+        assert_eq!(çıktı.isabetler.len(), 3);
+        assert!(
+            yüzey.döküm().contains("@0.1"),
+            "etkin olmayan çizgi inactiveOpacity=0.05 yuvarlamasıyla görünmeli"
+        );
+    }
+
+    #[test]
+    fn parallel_seri_axis_default_ortuk_koordinata_miras_kalir() {
+        use crate::model::eksen::{Eksen, EksenÇentiği, EksenÇizgisi};
+        use crate::model::seri::ParalelSerisi;
+        use crate::model::stil::YazıStili;
+
+        let eksen_varsayılanı = Eksen::değer()
+            .ad("seri varsayılanı")
+            .ad_boşluğu(27.0)
+            .ad_yazı(YazıStili::yeni().boyut(14.0).renk("#ffffff"))
+            .çizgi(EksenÇizgisi::yeni().renk("#aaaaaa"))
+            .çentik(EksenÇentiği::yeni().renk("#777777"))
+            .bölme_çizgisi_göster(false);
+        let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+            ParalelSerisi::yeni()
+                .boyutlar(["A", "B"])
+                .eksen_varsayılanı(eksen_varsayılanı)
+                .veri([vec![10.0, 20.0]]),
+        );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.paralel_eksenleri.len(), 2);
+        let döküm = yüzey.döküm();
+        assert!(döküm.contains("yazı \"A\""));
+        assert!(döküm.contains("b=14.0 #ffffff@1.0"));
+        assert!(döküm.contains("#aaaaaa@1.0"));
+        assert!(döküm.contains("#777777@1.0"));
     }
 }

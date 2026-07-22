@@ -16,8 +16,8 @@ use base64::Engine as _;
 use cizelge::animasyon::Yumuşatma;
 use cizelge::hazir::*;
 use cizelge::yardimci::bicim::ondalık_kırp;
-use serde::Deserialize;
 use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 
 #[path = "uyum_veri/area_rainfall.rs"]
 mod area_rainfall_verisi;
@@ -31,6 +31,7 @@ mod perlin;
 struct Girdi {
     id: String,
     çıktı: PathBuf,
+    sahne_çıktısı: Option<PathBuf>,
     kare: f32,
     durum: String,
     genişlik: f32,
@@ -48,6 +49,7 @@ fn kanıt_rastgele(tohum: &mut u32) -> f64 {
 fn argümanları_oku() -> Result<Girdi, String> {
     let mut id = None;
     let mut çıktı = None;
+    let mut sahne_çıktısı = None;
     let mut kare = 1.0_f32;
     let mut durum = String::from("başlangıç");
     let mut genişlik = 700.0_f32;
@@ -57,6 +59,7 @@ fn argümanları_oku() -> Result<Girdi, String> {
         match argüman.as_str() {
             "--id" => id = argümanlar.next(),
             "--output" => çıktı = argümanlar.next().map(PathBuf::from),
+            "--scene-output" => sahne_çıktısı = argümanlar.next().map(PathBuf::from),
             "--frame" => {
                 let ham = argümanlar
                     .next()
@@ -90,6 +93,7 @@ fn argümanları_oku() -> Result<Girdi, String> {
     Ok(Girdi {
         id: id.ok_or_else(|| "--id zorunludur".to_string())?,
         çıktı: çıktı.ok_or_else(|| "--output zorunludur".to_string())?,
+        sahne_çıktısı,
         kare: kare.clamp(0.0, 1.0),
         durum,
         genişlik: genişlik.max(1.0),
@@ -14722,6 +14726,428 @@ fn matrix_stock(genişlik: f32, yükseklik: f32) -> GrafikSeçenekleri {
         )
 }
 
+fn paralel_json_değeri(değer: serde_json::Value) -> VeriDeğeri {
+    match değer {
+        serde_json::Value::Null => VeriDeğeri::Boş,
+        serde_json::Value::Bool(değer) => değer.into(),
+        serde_json::Value::Number(değer) => {
+            değer.as_f64().map(Into::into).unwrap_or(VeriDeğeri::Boş)
+        }
+        serde_json::Value::String(değer) => değer.into(),
+        _ => VeriDeğeri::Boş,
+    }
+}
+
+fn paralel_resmi_satırlar(kaynak: &str, belirteç: &str) -> Result<Vec<Vec<VeriDeğeri>>, String> {
+    let ham: Vec<Vec<serde_json::Value>> = resmi_javascript_dizisi(kaynak, belirteç)?;
+    Ok(ham
+        .into_iter()
+        .map(|satır| satır.into_iter().map(paralel_json_değeri).collect())
+        .collect())
+}
+
+fn paralel_aqi_eksenleri() -> Vec<ParalelEkseni> {
+    vec![
+        ParalelEkseni::yeni(0)
+            .ad("日期")
+            .ters(true)
+            .en_çok(31.0)
+            .ad_konumu(EksenAdKonumu::Başlangıç),
+        ParalelEkseni::yeni(1).ad("AQI"),
+        ParalelEkseni::yeni(2).ad("PM2.5"),
+        ParalelEkseni::yeni(3).ad("PM10"),
+        ParalelEkseni::yeni(4).ad(" CO"),
+        ParalelEkseni::yeni(5).ad("NO2"),
+        ParalelEkseni::yeni(6).ad("SO2"),
+        ParalelEkseni::yeni(7).ad("等级").kategori().veri([
+            "优",
+            "良",
+            "轻度污染",
+            "中度污染",
+            "重度污染",
+            "严重污染",
+        ]),
+    ]
+}
+
+fn paralel_aqi_eksen_varsayılanı(koyu: bool) -> Eksen {
+    let yazı_rengi = koyu.then_some(Renk::from("#fff"));
+    let mut ad_yazısı = YazıStili::yeni().boyut(12.0);
+    let mut etiket_yazısı = YazıStili::yeni();
+    if let Some(renk) = yazı_rengi {
+        ad_yazısı = ad_yazısı.renk(renk);
+        etiket_yazısı = etiket_yazısı.renk(renk);
+    }
+    let mut eksen = Eksen::değer()
+        .ad("AQI指数")
+        .ad_konumu(EksenAdKonumu::Bitiş)
+        .ad_boşluğu(20.0)
+        .ad_yazı(ad_yazısı)
+        .etiket(EksenEtiketi::yeni().yazı(etiket_yazısı));
+    if koyu {
+        eksen = eksen
+            .çizgi(EksenÇizgisi::yeni().renk("#aaa"))
+            .çentik(EksenÇentiği::yeni().renk("#777"))
+            .bölme_çizgisi_göster(false);
+    }
+    eksen
+}
+
+fn parallel_simple() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .paralel(ParalelKoordinatı::yeni())
+        .paralel_eksenleri([
+            ParalelEkseni::yeni(0).ad("Price"),
+            ParalelEkseni::yeni(1).ad("Net Weight"),
+            ParalelEkseni::yeni(2).ad("Amount"),
+            ParalelEkseni::yeni(3)
+                .ad("Score")
+                .kategori()
+                .veri(["Excellent", "Good", "OK", "Bad"]),
+        ])
+        .seri(
+            ParalelSerisi::yeni()
+                .çizgi_stili(ÇizgiStili::yeni().kalınlık(4.0).opaklık(0.45))
+                .karma_veri([
+                    vec![
+                        VeriDeğeri::from(12.99),
+                        VeriDeğeri::from(100),
+                        VeriDeğeri::from(82),
+                        VeriDeğeri::from("Good"),
+                    ],
+                    vec![
+                        VeriDeğeri::from(9.99),
+                        VeriDeğeri::from(80),
+                        VeriDeğeri::from(77),
+                        VeriDeğeri::from("OK"),
+                    ],
+                    vec![
+                        VeriDeğeri::from(20),
+                        VeriDeğeri::from(120),
+                        VeriDeğeri::from(60),
+                        VeriDeğeri::from("Excellent"),
+                    ],
+                ]),
+        )
+}
+
+fn parallel_aqi() -> Result<GrafikSeçenekleri, String> {
+    let kaynak = theme_river_kaynağını_oku("parallel-aqi.ts")?;
+    let beijing = paralel_resmi_satırlar(&kaynak, "const dataBJ")?;
+    let guangzhou = paralel_resmi_satırlar(&kaynak, "var dataGZ")?;
+    let shanghai = paralel_resmi_satırlar(&kaynak, "var dataSH")?;
+    let çizgi = ÇizgiStili::yeni().kalınlık(1.0).opaklık(0.5);
+    let seri = |ad: &str, veri: Vec<Vec<VeriDeğeri>>| {
+        ParalelSerisi::yeni()
+            .ad(ad)
+            .çizgi_stili(çizgi.clone())
+            .karma_veri(veri)
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .koyu(true)
+        .arkaplan("#333")
+        .gösterge(
+            Gösterge::yeni()
+                .alt(30)
+                .iç_boşluk(15.0)
+                .öğe_boşluğu(20.0)
+                .yazı(YazıStili::yeni().renk("#fff").boyut(14.0))
+                .veri(["Beijing", "Shanghai", "Guangzhou"]),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .arkaplan("#222")
+                .yazı(YazıStili::yeni().renk("#fff")),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(150.0)
+                .boyut(2usize)
+                .renkler(["#50a3ba", "#eac736", "#d94e5d"]),
+        )
+        .paralel(
+            ParalelKoordinatı::yeni()
+                .sol("5%")
+                .sağ("18%")
+                .alt(100)
+                .eksen_varsayılanı(paralel_aqi_eksen_varsayılanı(true)),
+        )
+        .paralel_eksenleri(paralel_aqi_eksenleri())
+        .seri(seri("Beijing", beijing))
+        .seri(seri("Shanghai", shanghai))
+        .seri(seri("Guangzhou", guangzhou)))
+}
+
+fn parallel_all() -> Result<GrafikSeçenekleri, String> {
+    let kaynak = theme_river_kaynağını_oku("doc-example/parallel-all.js")?;
+    let beijing = paralel_resmi_satırlar(&kaynak, "var dataBJ")?;
+    let guangzhou = paralel_resmi_satırlar(&kaynak, "var dataGZ")?;
+    let shanghai = paralel_resmi_satırlar(&kaynak, "var dataSH")?;
+    let çizgi = ÇizgiStili::yeni().kalınlık(1.0).opaklık(0.5);
+    let seri = |ad: &str, veri: Vec<Vec<VeriDeğeri>>| {
+        ParalelSerisi::yeni()
+            .ad(ad)
+            .çizgi_stili(çizgi.clone())
+            .karma_veri(veri)
+    };
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .palet(["#c23531", "#91c7ae", "#dd8668"])
+        .gösterge(
+            Gösterge::yeni()
+                .üst(10)
+                .iç_boşluk(15.0)
+                .öğe_boşluğu(20.0)
+                .veri(["北京", "上海", "广州"]),
+        )
+        .paralel(
+            ParalelKoordinatı::yeni()
+                .sol("5%")
+                .sağ("13%")
+                .alt("10%")
+                .üst("20%")
+                .eksen_varsayılanı(paralel_aqi_eksen_varsayılanı(false)),
+        )
+        .paralel_eksenleri(paralel_aqi_eksenleri())
+        .seri(seri("北京", beijing))
+        .seri(seri("上海", shanghai))
+        .seri(seri("广州", guangzhou)))
+}
+
+fn parallel_nutrients() -> Result<GrafikSeçenekleri, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/nutrients.json");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    let ham: Vec<Vec<serde_json::Value>> = serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", dosya.display()))?;
+    let mut gruplar = Vec::<String>::new();
+    let mut veri: Vec<Vec<VeriDeğeri>> = Vec::with_capacity(ham.len());
+    for (satır_sırası, satır) in ham.into_iter().enumerate() {
+        let grup = satır
+            .get(1)
+            .and_then(serde_json::Value::as_str)
+            .ok_or_else(|| format!("nutrients satır {satır_sırası} grup adı değil"))?;
+        if !gruplar.iter().any(|aday| aday == grup) {
+            gruplar.push(grup.to_owned());
+        }
+        let satır = satır
+            .into_iter()
+            .enumerate()
+            .map(|(boyut, değer)| {
+                if matches!(boyut, 0 | 1 | 16) {
+                    paralel_json_değeri(değer)
+                } else {
+                    // Resmî normalizeData: besin boyutlarında null ve
+                    // parse edilemeyen değerler sıfıra çevrilir.
+                    VeriDeğeri::Sayı(
+                        değer
+                            .as_f64()
+                            .or_else(|| değer.as_str().and_then(|metin| metin.parse().ok()))
+                            .unwrap_or(0.0),
+                    )
+                }
+            })
+            .collect();
+        veri.push(satır);
+    }
+    let ton_adımı = (300.0 / (gruplar.len().saturating_sub(1).max(1) as f32)).round();
+    let grup_renkleri = (0..gruplar.len())
+        .map(|sıra| Renk::from("#5A94DF").ton_ile(ton_adımı * sıra as f32))
+        .collect::<Vec<_>>();
+    let eksen_varsayılanı = Eksen::değer()
+        .ad("nutrients")
+        .ad_konumu(EksenAdKonumu::Bitiş)
+        .ad_boşluğu(20.0)
+        .ad_yazı(YazıStili::yeni().renk("#fff").boyut(14.0))
+        .çizgi(EksenÇizgisi::yeni().renk("#aaa"))
+        .çentik(EksenÇentiği::yeni().renk("#777"))
+        .bölme_çizgisi_göster(false)
+        .etiket(EksenEtiketi::yeni().yazı(YazıStili::yeni().renk("#fff")));
+    let şema = [
+        (16, "id"),
+        (2, "protein"),
+        (4, "sodium"),
+        (3, "calcium"),
+        (5, "fiber"),
+        (6, "vitaminc"),
+        (7, "potassium"),
+        (8, "carbohydrate"),
+        (9, "sugars"),
+        (10, "fat"),
+        (11, "water"),
+        (12, "calories"),
+        (13, "saturated"),
+        (14, "monounsat"),
+        (15, "polyunsat"),
+    ];
+    let eksenler = şema.into_iter().map(|(boyut, ad)| {
+        let eksen = ParalelEkseni::yeni(boyut)
+            .ad(ad)
+            .ad_konumu(EksenAdKonumu::Bitiş)
+            .gerçek_zamanlı(false);
+        if boyut == 16 {
+            eksen.ölçekli(true)
+        } else {
+            eksen
+        }
+    });
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .koyu(true)
+        .arkaplan("#333")
+        .başlık(
+            Başlık::yeni()
+                .metin("Groups")
+                .sol(0.0)
+                .üst(0)
+                .yazı(YazıStili::yeni().renk("#fff")),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .arkaplan("#222")
+                .yazı(YazıStili::yeni().renk("#fff")),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .kategoriler(gruplar)
+                .boyut(1usize)
+                .renkler(grup_renkleri)
+                .aralık_dışı_renk("#ccc")
+                .üst(20)
+                .gerçek_zamanlı(false),
+        )
+        .paralel(
+            ParalelKoordinatı::yeni()
+                .sol(280)
+                .üst(20)
+                .genişlik(400)
+                .yerleşim(ParalelYerleşim::Dikey)
+                .eksen_varsayılanı(eksen_varsayılanı),
+        )
+        .paralel_eksenleri(eksenler)
+        .seri(
+            ParalelSerisi::yeni()
+                .ad("nutrients")
+                .çizgi_stili(ÇizgiStili::yeni().kalınlık(0.5).opaklık(0.05))
+                .etkin_değil_opaklık(0.0)
+                .aktif_opaklık(0.01)
+                .ilerlemeli(500)
+                .yumuşak(true)
+                .karma_veri(veri),
+        ))
+}
+
+#[derive(Serialize)]
+struct ParalelSahneÖzeti {
+    şema_sürümü: u8,
+    çizgi_sayısı: usize,
+    nokta_sayısı: usize,
+    koordinat_sayısı: usize,
+    koordinat_adımı: f64,
+    fnv1a_64: String,
+}
+
+fn fnv_bayt(özet: &mut u64, bayt: u8) {
+    *özet ^= u64::from(bayt);
+    *özet = özet.wrapping_mul(0x0000_0100_0000_01b3);
+}
+
+fn fnv_u64(özet: &mut u64, değer: u64) {
+    for bayt in değer.to_le_bytes() {
+        fnv_bayt(özet, bayt);
+    }
+}
+
+fn paralel_sahne_özeti(
+    seçenekler: &GrafikSeçenekleri,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<ParalelSahneÖzeti, String> {
+    let seri = seçenekler
+        .seriler
+        .iter()
+        .find_map(|seri| match seri {
+            Seri::Paralel(seri) => Some(seri),
+            _ => None,
+        })
+        .ok_or_else(|| "sahne özeti için parallel serisi bulunamadı".to_owned())?;
+    let koordinat = seçenekler
+        .paralel
+        .as_ref()
+        .ok_or_else(|| "sahne özeti için parallel koordinatı bulunamadı".to_owned())?;
+    let yerleşim = cizelge::koordinat::ParalelYerleşimi::kur(
+        koordinat,
+        0,
+        &seçenekler.paralel_eksenleri,
+        &[seri],
+        (genişlik, yükseklik),
+    )
+    .ok_or_else(|| "parallel sahne yerleşimi kurulamadı".to_owned())?;
+    let eşleme = seçenekler
+        .görsel_eşleme
+        .as_ref()
+        .ok_or_else(|| "parallel sahne özeti visualMap gerektirir".to_owned())?;
+    let kategori_boyutu = match eşleme.boyut.as_ref() {
+        Some(BoyutSeçici::Sıra(sıra)) => *sıra,
+        _ => return Err("parallel sahne özeti kategorik sıra boyutu gerektirir".to_owned()),
+    };
+    let çizgiler = seri
+        .veri
+        .iter()
+        .filter_map(|öğe| {
+            let noktalar = yerleşim
+                .eksenler
+                .iter()
+                .filter_map(|eksen| yerleşim.veriden_noktaya(öğe, eksen))
+                .collect::<Vec<_>>();
+            let kategori = öğe
+                .değer
+                .karma_dizi()
+                .and_then(|satır| satır.get(kategori_boyutu))?;
+            let renk = eşleme.kategori_rengi_uygula(kategori, Renk::onaltılık(0));
+            (noktalar.len() >= 2).then_some((noktalar, renk))
+        })
+        .collect::<Vec<_>>();
+    let mut özet = 0xcbf2_9ce4_8422_2325_u64;
+    fnv_u64(&mut özet, çizgiler.len() as u64);
+    let mut nokta_sayısı = 0_usize;
+    for (noktalar, renk) in &çizgiler {
+        fnv_u64(&mut özet, noktalar.len() as u64);
+        nokta_sayısı = nokta_sayısı.saturating_add(noktalar.len());
+        for &(x, y) in noktalar {
+            fnv_u64(&mut özet, ((f64::from(x) * 1_000.0).round() as i64) as u64);
+            fnv_u64(&mut özet, ((f64::from(y) * 1_000.0).round() as i64) as u64);
+        }
+        for kanal in [renk.kırmızı, renk.yeşil, renk.mavi] {
+            fnv_bayt(&mut özet, (kanal * 255.0).round() as u8);
+        }
+        fnv_u64(
+            &mut özet,
+            (seri.çizgi_stili.kalınlık * 1_000.0).round() as u64,
+        );
+        fnv_u64(
+            &mut özet,
+            (seri.çizgi_stili.opaklık * 1_000.0).round() as u64,
+        );
+        fnv_u64(&mut özet, (seri.yumuşaklık * 1_000.0).round() as u64);
+    }
+    Ok(ParalelSahneÖzeti {
+        şema_sürümü: 1,
+        çizgi_sayısı: çizgiler.len(),
+        nokta_sayısı,
+        koordinat_sayısı: nokta_sayısı.saturating_mul(2),
+        koordinat_adımı: 0.001,
+        fnv1a_64: format!("{özet:016x}"),
+    })
+}
+
 fn theme_river_kaynağını_oku(dosya_adı: &str) -> Result<String, String> {
     let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../echarts-examples/public/examples/ts")
@@ -14860,6 +15286,117 @@ fn theme_river_lastfm() -> Result<GrafikSeçenekleri, String> {
 
 #[cfg(test)]
 #[allow(clippy::expect_used, clippy::panic)]
+mod parallel_fixture_testleri {
+    use super::*;
+
+    #[test]
+    fn simple_resmi_dort_ekseni_ve_uc_karma_satiri_tasir() {
+        let seçenekler = parallel_simple();
+        assert_eq!(seçenekler.paralel_eksenleri.len(), 4);
+        let Seri::Paralel(seri) = &seçenekler.seriler[0] else {
+            panic!("parallel serisi bekleniyordu");
+        };
+        assert_eq!(seri.veri.len(), 3);
+        assert_eq!(seri.çizgi_stili.kalınlık, 4.0);
+        assert!(matches!(
+            &seri.veri[0].değer,
+            VeriDeğeri::KarmaDizi(satır)
+                if satır.len() == 4 && satır[3] == VeriDeğeri::from("Good")
+        ));
+        seçenekler.doğrula().expect("simple bağları geçerli olmalı");
+    }
+
+    #[test]
+    fn aqi_resmi_uc_kentin_tum_satirlarini_kaynaktan_okur() {
+        let seçenekler = parallel_aqi().expect("AQI fixture kurulmalı");
+        assert_eq!(seçenekler.paralel_eksenleri.len(), 8);
+        assert_eq!(seçenekler.seriler.len(), 3);
+        assert!(
+            seçenekler
+                .seriler
+                .iter()
+                .all(|seri| { matches!(seri, Seri::Paralel(paralel) if paralel.veri.len() == 31) })
+        );
+        assert_eq!(
+            seçenekler
+                .görsel_eşleme
+                .as_ref()
+                .and_then(|eşleme| eşleme.boyut.as_ref())
+                .and_then(|boyut| match boyut {
+                    BoyutSeçici::Sıra(sıra) => Some(*sıra),
+                    _ => None,
+                }),
+            Some(2)
+        );
+        seçenekler.doğrula().expect("AQI bağları geçerli olmalı");
+    }
+
+    #[test]
+    fn nutrients_resmi_veriyi_gruplari_ve_dikey_eksen_sirasini_korur() {
+        let seçenekler = parallel_nutrients().expect("nutrients fixture kurulmalı");
+        assert_eq!(seçenekler.paralel_eksenleri.len(), 15);
+        assert_eq!(seçenekler.paralel_eksenleri[0].boyutlar, [16]);
+        assert_eq!(seçenekler.paralel_eksenleri[1].boyutlar, [2]);
+        assert_eq!(seçenekler.paralel_eksenleri[2].boyutlar, [4]);
+        assert_eq!(
+            seçenekler.paralel.as_ref().map(|p| p.yerleşim),
+            Some(ParalelYerleşim::Dikey)
+        );
+        let eşleme = seçenekler.görsel_eşleme.as_ref().expect("visualMap");
+        assert_eq!(eşleme.kategoriler.len(), 25);
+        assert_eq!(eşleme.renkler.len(), 25);
+        assert_eq!(eşleme.kategoriler[0], "Dairy and Egg Products");
+        assert_eq!(eşleme.kategoriler[24], "Restaurant Foods");
+        let Seri::Paralel(seri) = &seçenekler.seriler[0] else {
+            panic!("parallel serisi bekleniyordu");
+        };
+        assert_eq!(seri.veri.len(), 7_637);
+        assert_eq!(seri.ilerlemeli, 500);
+        assert_eq!(seri.yumuşaklık, 0.3);
+        assert_eq!(seri.etkin_değil_opaklık, 0.0);
+        assert_eq!(seri.aktif_opaklık, 0.01);
+        seçenekler
+            .doğrula()
+            .expect("nutrients bağları geçerli olmalı");
+    }
+
+    #[test]
+    fn nutrients_tum_resmi_cizgi_sahnesinin_ozetini_korur() {
+        let seçenekler = parallel_nutrients().expect("nutrients fixture kurulmalı");
+        let özet = paralel_sahne_özeti(&seçenekler, 700.0, 525.0)
+            .expect("parallel sahne özeti üretilmeli");
+
+        // Pinned ECharts sahnesindeki 7.637 Polyline'ın 229.110 koordinatı,
+        // RGB rengi, width/opacity/smooth değerleri aynı kanonik akışla
+        // özetlenmiştir. Raster motorundan bağımsız geometri kapısıdır.
+        assert_eq!(özet.çizgi_sayısı, 7_637);
+        assert_eq!(özet.nokta_sayısı, 114_555);
+        assert_eq!(özet.koordinat_sayısı, 229_110);
+        assert_eq!(özet.fnv1a_64, "d3f9efb47fd5e2d7");
+    }
+
+    #[test]
+    fn hidden_parallel_all_resmi_eski_paleti_ve_turkce_olmayan_adlari_korur() {
+        let seçenekler = parallel_all().expect("parallel-all fixture kurulmalı");
+        assert_eq!(
+            seçenekler.palet,
+            [
+                Renk::from("#c23531"),
+                Renk::from("#91c7ae"),
+                Renk::from("#dd8668")
+            ]
+        );
+        assert_eq!(seçenekler.seriler[0].ad(), Some("北京"));
+        assert_eq!(seçenekler.seriler[1].ad(), Some("上海"));
+        assert_eq!(seçenekler.seriler[2].ad(), Some("广州"));
+        seçenekler
+            .doğrula()
+            .expect("parallel-all bağları geçerli olmalı");
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
 mod theme_river_fixture_testleri {
     use super::*;
 
@@ -14969,6 +15506,10 @@ fn seçenekler(
         "radar-custom" => Ok(radar_custom()),
         "radar2" => Ok(radar2()),
         "radar-multiple" => Ok(radar_multiple()),
+        "parallel-simple" => Ok(parallel_simple()),
+        "parallel-aqi" => parallel_aqi(),
+        "parallel-nutrients" => parallel_nutrients(),
+        "doc-example/parallel-all" => parallel_all(),
         "themeRiver-basic" => theme_river_basic(),
         "themeRiver-lastfm" => theme_river_lastfm(),
         "gauge" => Ok(gauge()),
@@ -15134,6 +15675,16 @@ fn seçenekler(
 fn çalıştır() -> Result<(), String> {
     let girdi = argümanları_oku()?;
     let seçenekler = seçenekler(&girdi.id, &girdi.durum, girdi.genişlik, girdi.yükseklik)?;
+    if let Some(sahne_çıktısı) = &girdi.sahne_çıktısı {
+        let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+        if let Some(üst) = sahne_çıktısı.parent() {
+            std::fs::create_dir_all(üst).map_err(|hata| format!("sahne dizini: {hata}"))?;
+        }
+        let json = serde_json::to_vec_pretty(&özet)
+            .map_err(|hata| format!("sahne özeti kodlanamadı: {hata}"))?;
+        std::fs::write(sahne_çıktısı, json)
+            .map_err(|hata| format!("sahne özeti yazılamadı: {hata}"))?;
+    }
     let kanıt_faresi = if girdi.id == "dataset-link" && girdi.durum == "son" {
         Some((323.75, 400.0))
     } else if girdi.id == "dynamic-data2" && girdi.durum == "ipucu" {

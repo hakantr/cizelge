@@ -7,7 +7,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, HashSet};
 use std::rc::Rc;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use gpui::{
     Bounds, Context, CursorStyle, EventEmitter, MouseButton, MouseDownEvent, MouseMoveEvent,
@@ -24,10 +24,14 @@ use crate::cizim::gorunum::{
     AraçTürü, BoyamaGirdisi, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya, gösterge_adları,
     İçYakınlaştırmaAlanı,
 };
-use crate::cizim::olay::{GrafikOlayı, MatrisHücreBölgesi, İsabetBölgesi};
+use crate::cizim::olay::{
+    GrafikOlayı, MatrisHücreBölgesi, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, İsabetBölgesi,
+};
 use crate::grafik::isi::{GörselEşlemeSürgüParçası, SürekliGörselEşlemeBölgesi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
+use crate::koordinat::ParalelGenişletmeDavranışı;
+use crate::model::paralel::ParalelGenişletmeTetikleyicisi;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::Seri;
 
@@ -67,6 +71,12 @@ type GrafikSahneKaydı = Rc<RefCell<Option<(GrafikSahnesi, (f32, f32))>>>;
 
 /// Matrix bileşen hücrelerinin pencere-mutlak etkileşim kayıtları.
 type MatrisHücreKayıtları = Rc<RefCell<Vec<MatrisHücreBölgesi>>>;
+
+/// Parallel eksen brush şeritlerinin pencere-mutlak kayıtları.
+type ParalelEksenKayıtları = Rc<RefCell<Vec<ParalelEksenBölgesi>>>;
+
+/// `parallel.axisExpandable` koordinat alanlarının pencere-mutlak kayıtları.
+type ParalelGenişletmeKayıtları = Rc<RefCell<Vec<ParalelGenişletmeBölgesi>>>;
 
 fn gpui_imleci(ad: &str) -> CursorStyle {
     match ad.trim().to_ascii_lowercase().as_str() {
@@ -119,6 +129,14 @@ pub struct GrafikGörünümü {
     isabetler: Rc<RefCell<Vec<İsabetBölgesi>>>,
     /// Matrix bileşeninin tooltip/triggerEvent/cursor hedefleri.
     matris_hücreleri: MatrisHücreKayıtları,
+    /// `parallelAxis` doğrusal seçim hedefleri.
+    paralel_eksenleri: ParalelEksenKayıtları,
+    /// `parallel.axisExpandable` tıklama/fare hareketi hedefleri.
+    paralel_genişletmeleri: ParalelGenişletmeKayıtları,
+    /// `axisExpandRate` sabit oran sınırlayıcısının son gönderimi.
+    son_paralel_genişletme: Option<Instant>,
+    /// Gecikmeli `jump` çağrılarını iptal eden monoton belirteç.
+    paralel_genişletme_nesli: u64,
     /// Boyama sırasında biriken, bir sonraki karede olay olarak yayımlanacak
     /// tanılar.
     bekleyen_tanılar: Rc<RefCell<Vec<BilesenTanisi>>>,
@@ -197,6 +215,19 @@ enum Sürükleme {
         başlangıç_ekseni: f32,
         bölge: SürekliGörselEşlemeBölgesi,
     },
+    /// ParallelAxis BrushController `lineX` sürüklemesi.
+    ParalelEksen {
+        eksen_sırası: usize,
+        başlangıç: f64,
+        son: f64,
+        gerçek_zamanlı: bool,
+        taşındı: bool,
+    },
+    /// `axisExpandTriggerOn: 'click'` için tıklama eşiği kaydı.
+    ParalelGenişletme {
+        paralel_sırası: usize,
+        başlangıç: (f32, f32),
+    },
 }
 
 impl EventEmitter<GrafikOlayı> for GrafikGörünümü {}
@@ -217,6 +248,10 @@ impl GrafikGörünümü {
             gösterge_kutuları: Rc::new(RefCell::new(Vec::new())),
             isabetler: Rc::new(RefCell::new(Vec::new())),
             matris_hücreleri: Rc::new(RefCell::new(Vec::new())),
+            paralel_eksenleri: Rc::new(RefCell::new(Vec::new())),
+            paralel_genişletmeleri: Rc::new(RefCell::new(Vec::new())),
+            son_paralel_genişletme: None,
+            paralel_genişletme_nesli: 0,
             bekleyen_tanılar: Rc::new(RefCell::new(Vec::new())),
             sürgü_bölgeleri: Rc::new(RefCell::new(Vec::new())),
             eşleme_kutuları: Rc::new(RefCell::new(Vec::new())),
@@ -445,6 +480,107 @@ impl GrafikGörünümü {
         cx.notify();
     }
 
+    /// `axisAreaSelect` eyleminin model ve olay karşılığı.
+    fn paralel_aralığını_güncelle(
+        &mut self,
+        eksen_sırası: usize,
+        mut aralıklar: Vec<[f64; 2]>,
+        olay_yayınla: bool,
+        cx: &mut Context<Self>,
+    ) {
+        for aralık in &mut aralıklar {
+            if aralık[0] > aralık[1] {
+                aralık.swap(0, 1);
+            }
+        }
+        let seçenekler = Arc::make_mut(&mut self.seçenekler);
+        let Some(eksen) = seçenekler.paralel_eksenleri.get_mut(eksen_sırası) else {
+            return;
+        };
+        let değişti = eksen.etkin_aralıklar != aralıklar;
+        if değişti {
+            eksen.etkin_aralıklar = aralıklar.clone();
+        }
+        if olay_yayınla {
+            cx.emit(GrafikOlayı::ParalelAlanSeçildi {
+                eksen_sırası,
+                aralıklar,
+            });
+        }
+        if değişti {
+            cx.notify();
+        }
+    }
+
+    /// `parallelAxisExpand` eyleminin model ve GPUI olay karşılığı.
+    fn paralel_penceresini_güncelle(
+        &mut self,
+        paralel_sırası: usize,
+        pencere: [f32; 2],
+        cx: &mut Context<Self>,
+    ) {
+        let seçenekler = Arc::make_mut(&mut self.seçenekler);
+        let koordinat = if seçenekler.paraleller.is_empty() {
+            (paralel_sırası == 0)
+                .then_some(())
+                .and_then(|_| seçenekler.paralel.as_mut())
+        } else {
+            seçenekler.paraleller.get_mut(paralel_sırası)
+        };
+        let Some(koordinat) = koordinat else { return };
+        if koordinat.eksen_genişletme_penceresi == Some(pencere) {
+            return;
+        }
+        koordinat.eksen_genişletme_penceresi = Some(pencere);
+        self.son_paralel_genişletme = Some(Instant::now());
+        cx.emit(GrafikOlayı::ParalelEksenGenişletildi {
+            paralel_sırası,
+            pencere,
+        });
+        cx.notify();
+    }
+
+    /// `axisExpandTriggerOn: 'mousemove'` için fixRate + jump debounce
+    /// davranışı. Yeni fare örneği gecikmiş bir jump çağrısını nesil
+    /// belirteciyle iptal eder.
+    fn paralel_fare_genişletmesini_güncelle(
+        &mut self,
+        bölge: ParalelGenişletmeBölgesi,
+        nokta: (f32, f32),
+        cx: &mut Context<Self>,
+    ) {
+        let sonuç = bölge.pencereyi_çöz(nokta);
+        self.paralel_genişletme_nesli = self.paralel_genişletme_nesli.saturating_add(1);
+        let nesil = self.paralel_genişletme_nesli;
+        match sonuç.davranış {
+            ParalelGenişletmeDavranışı::Yok => {}
+            ParalelGenişletmeDavranışı::Kaydır => {
+                let bekleme = Duration::from_secs_f32((bölge.oran_ms.max(0.0)) / 1000.0);
+                if self
+                    .son_paralel_genişletme
+                    .is_none_or(|son| son.elapsed() >= bekleme)
+                {
+                    self.paralel_penceresini_güncelle(bölge.paralel_sırası, sonuç.pencere, cx);
+                }
+            }
+            ParalelGenişletmeDavranışı::Atla => {
+                let gecikme = Duration::from_millis(bölge.gecikme_ms);
+                let paralel_sırası = bölge.paralel_sırası;
+                let pencere = sonuç.pencere;
+                cx.spawn(async move |bu, cx| {
+                    cx.background_executor().timer(gecikme).await;
+                    bu.update(cx, |bu, cx| {
+                        if bu.paralel_genişletme_nesli == nesil {
+                            bu.paralel_penceresini_güncelle(paralel_sırası, pencere, cx);
+                        }
+                    })
+                    .ok();
+                })
+                .detach();
+            }
+        }
+    }
+
     /// Seçenekleri değiştirir (ECharts `setOption` karşılığı). Yeni
     /// seçenekler önce doğrulanır: geçersizse **işlem geri alınır** (mevcut
     /// seçenekler korunur), hata tanı olayı olarak yayımlanır ve `Err`
@@ -598,6 +734,8 @@ impl Render for GrafikGörünümü {
         let gösterge_kutuları = self.gösterge_kutuları.clone();
         let isabetler = self.isabetler.clone();
         let matris_hücreleri = self.matris_hücreleri.clone();
+        let paralel_eksenleri = self.paralel_eksenleri.clone();
+        let paralel_genişletmeleri = self.paralel_genişletmeleri.clone();
         let tanılar = self.bekleyen_tanılar.clone();
         let sürgüler = self.sürgü_bölgeleri.clone();
         let iç_alanlar = self.iç_yakınlaştırma_alanları.clone();
@@ -692,6 +830,30 @@ impl Render for GrafikGörünümü {
                                 );
                             }
                             Err(_) => tanı_bildir("matris_hücreleri"),
+                        }
+                        match paralel_eksenleri.try_borrow_mut() {
+                            Ok(mut bölgeler) => {
+                                bölgeler.clear();
+                                bölgeler.extend(
+                                    çıktı
+                                        .paralel_eksenleri
+                                        .iter()
+                                        .map(|bölge| bölge.kaydır(köken.0, köken.1)),
+                                );
+                            }
+                            Err(_) => tanı_bildir("paralel_eksenleri"),
+                        }
+                        match paralel_genişletmeleri.try_borrow_mut() {
+                            Ok(mut bölgeler) => {
+                                bölgeler.clear();
+                                bölgeler.extend(
+                                    çıktı
+                                        .paralel_genişletmeleri
+                                        .iter()
+                                        .map(|bölge| bölge.kaydır(köken.0, köken.1)),
+                                );
+                            }
+                            Err(_) => tanı_bildir("paralel_genişletmeleri"),
                         }
                         let kaydırılmış = |d: Dikdörtgen| {
                             Dikdörtgen::yeni(d.x + köken.0, d.y + köken.1, d.genişlik, d.yükseklik)
@@ -913,10 +1075,77 @@ impl Render for GrafikGörünümü {
                             }
                             return;
                         }
+                        Some(Sürükleme::ParalelEksen {
+                            eksen_sırası,
+                            başlangıç,
+                            son,
+                            gerçek_zamanlı,
+                            taşındı,
+                        }) => {
+                            let bölge =
+                                bu.paralel_eksenleri.try_borrow().ok().and_then(|bölgeler| {
+                                    bölgeler
+                                        .iter()
+                                        .find(|bölge| {
+                                            bölge.eksen_bileşen_sırası == Some(eksen_sırası)
+                                        })
+                                        .cloned()
+                                });
+                            let Some(bölge) = bölge else { return };
+                            let değer = bölge.pikselden_veriye(yeni);
+                            if !değer.is_finite() {
+                                return;
+                            }
+                            let taşındı = taşındı || (değer - başlangıç).abs() > 1e-9;
+                            bu.sürükleme = Some(Sürükleme::ParalelEksen {
+                                eksen_sırası,
+                                başlangıç,
+                                son: değer,
+                                gerçek_zamanlı,
+                                taşındı,
+                            });
+                            if taşındı && (değer - son).abs() > 1e-9 {
+                                bu.paralel_aralığını_güncelle(
+                                    eksen_sırası,
+                                    vec![[başlangıç, değer]],
+                                    gerçek_zamanlı,
+                                    cx,
+                                );
+                            }
+                            return;
+                        }
+                        Some(Sürükleme::ParalelGenişletme { .. }) => {
+                            // Resmî ParallelView, tıklama adayı sürerken
+                            // mousemove genişletmesini tamamen bastırır.
+                            return;
+                        }
                         None => {}
                     }
                 } else if bu.sürükleme.is_some() {
                     bu.sürükleme = None;
+                }
+                if olay.pressed_button.is_none() {
+                    let genişletme =
+                        bu.paralel_genişletmeleri
+                            .try_borrow()
+                            .ok()
+                            .and_then(|bölgeler| {
+                                bölgeler
+                                    .iter()
+                                    .rev()
+                                    .find(|bölge| {
+                                        bölge.tetikleyici
+                                            == ParalelGenişletmeTetikleyicisi::FareHareketi
+                                            && bölge.içeriyor_mu(yeni)
+                                    })
+                                    .cloned()
+                            });
+                    if let Some(bölge) = genişletme {
+                        bu.paralel_fare_genişletmesini_güncelle(bölge, yeni, cx);
+                    } else {
+                        // Alan dışına çıkmak bekleyen jump çağrısını iptal eder.
+                        bu.paralel_genişletme_nesli = bu.paralel_genişletme_nesli.saturating_add(1);
+                    }
                 }
                 if bu.fare != Some(yeni) {
                     bu.fare = Some(yeni);
@@ -986,8 +1215,63 @@ impl Render for GrafikGörünümü {
             }))
             .on_mouse_up(
                 MouseButton::Left,
-                cx.listener(|bu, _: &MouseUpEvent, _, cx| {
-                    bu.sürükleme = None;
+                cx.listener(|bu, olay: &MouseUpEvent, _, cx| {
+                    let sürükleme = bu.sürükleme.take();
+                    if let Some(Sürükleme::ParalelEksen {
+                        eksen_sırası,
+                        başlangıç,
+                        son,
+                        gerçek_zamanlı,
+                        taşındı,
+                    }) = sürükleme
+                    {
+                        if taşındı {
+                            if !gerçek_zamanlı {
+                                bu.paralel_aralığını_güncelle(
+                                    eksen_sırası,
+                                    vec![[başlangıç, son]],
+                                    true,
+                                    cx,
+                                );
+                            }
+                        } else {
+                            // BrushController `removeOnClick: true`.
+                            bu.paralel_aralığını_güncelle(eksen_sırası, Vec::new(), true, cx);
+                        }
+                        return;
+                    }
+                    if let Some(Sürükleme::ParalelGenişletme {
+                        paralel_sırası,
+                        başlangıç,
+                    }) = sürükleme
+                    {
+                        let bitiş = (f32::from(olay.position.x), f32::from(olay.position.y));
+                        let uzaklık_kare =
+                            (başlangıç.0 - bitiş.0).powi(2) + (başlangıç.1 - bitiş.1).powi(2);
+                        if uzaklık_kare <= 5.0 {
+                            let bölge =
+                                bu.paralel_genişletmeleri
+                                    .try_borrow()
+                                    .ok()
+                                    .and_then(|bölgeler| {
+                                        bölgeler
+                                            .iter()
+                                            .find(|bölge| bölge.paralel_sırası == paralel_sırası)
+                                            .cloned()
+                                    });
+                            if let Some(bölge) = bölge {
+                                let sonuç = bölge.pencereyi_çöz(bitiş);
+                                if sonuç.davranış != ParalelGenişletmeDavranışı::Yok {
+                                    bu.paralel_penceresini_güncelle(
+                                        paralel_sırası,
+                                        sonuç.pencere,
+                                        cx,
+                                    );
+                                }
+                            }
+                        }
+                        return;
+                    }
                     if let Some(alan) = bu.fırça_seçimi.take() {
                         if alan.geçerli_mi() {
                             let çoklu = bu
@@ -1245,6 +1529,54 @@ impl Render for GrafikGörünümü {
                         cx.emit(GrafikOlayı::GrafikÖğesiTıklandı {
                             kimlik: bilgi.kimlik,
                             ad: bilgi.ad,
+                        });
+                        return;
+                    }
+                    // 0f) ParallelAxis doğrusal alan seçimi. Eksen şeridi,
+                    // genel kartezyen brush aracından bağımsız ve daha dar
+                    // bir hedef olduğundan önce yakalanır.
+                    let paralel_vuruşu =
+                        bu.paralel_eksenleri.try_borrow().ok().and_then(|bölgeler| {
+                            bölgeler
+                                .iter()
+                                .rev()
+                                .find(|bölge| bölge.içeriyor_mu(konum))
+                                .cloned()
+                        });
+                    if let Some(bölge) = paralel_vuruşu
+                        && let Some(eksen_sırası) = bölge.eksen_bileşen_sırası
+                    {
+                        let değer = bölge.pikselden_veriye(konum);
+                        if değer.is_finite() {
+                            bu.sürükleme = Some(Sürükleme::ParalelEksen {
+                                eksen_sırası,
+                                başlangıç: değer,
+                                son: değer,
+                                gerçek_zamanlı: bölge.gerçek_zamanlı,
+                                taşındı: false,
+                            });
+                        }
+                        return;
+                    }
+                    let genişletme_vuruşu =
+                        bu.paralel_genişletmeleri
+                            .try_borrow()
+                            .ok()
+                            .and_then(|bölgeler| {
+                                bölgeler
+                                    .iter()
+                                    .rev()
+                                    .find(|bölge| {
+                                        bölge.tetikleyici
+                                            == ParalelGenişletmeTetikleyicisi::Tıklama
+                                            && bölge.içeriyor_mu(konum)
+                                    })
+                                    .cloned()
+                            });
+                    if let Some(bölge) = genişletme_vuruşu {
+                        bu.sürükleme = Some(Sürükleme::ParalelGenişletme {
+                            paralel_sırası: bölge.paralel_sırası,
+                            başlangıç: konum,
                         });
                         return;
                     }

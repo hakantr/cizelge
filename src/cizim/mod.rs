@@ -23,8 +23,8 @@ pub use cizici::Çizici;
 pub use donusum::AfinMatris;
 pub use kayit::KayıtYüzeyi;
 pub use olay::{
-    GrafikOlayı, MatrisHedefTürü, MatrisHücreBölgesi, SihirliSeriTürü, İsabetBölgesi,
-    İsabetGeometrisi,
+    GrafikOlayı, MatrisHedefTürü, MatrisHücreBölgesi, ParalelEksenBölgesi,
+    ParalelGenişletmeBölgesi, SihirliSeriTürü, İsabetBölgesi, İsabetGeometrisi,
 };
 #[cfg(feature = "png")]
 pub use piksel::{PikselYüzeyi, png_dışa_aktar};

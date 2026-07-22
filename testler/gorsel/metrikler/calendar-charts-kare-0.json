@@ -10,7 +10,7 @@
   "geçti": true,
   "değişen_piksel": 55,
   "değişen_piksel_oranı": 0.0002037037037037037,
-  "ssim": 0.9996358887191378,
+  "ssim": 0.9996364263576841,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-charts-kare-0.png",
     "gerçek": "testler/gorsel/gerçek/default/calendar-charts-kare-0.png",

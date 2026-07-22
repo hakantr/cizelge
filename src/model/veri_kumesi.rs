@@ -2623,6 +2623,7 @@ fn boyut_türünü_bul(sütun: &[VeriDeğeri]) -> BoyutTürü {
             VeriDeğeri::Metin(_) => BoyutTürü::Sıralı,
             VeriDeğeri::Mantıksal(_) => BoyutTürü::Mantıksal,
             VeriDeğeri::Zaman(_) => BoyutTürü::Zaman,
+            VeriDeğeri::KarmaDizi(_) => BoyutTürü::Bilinmeyen,
             VeriDeğeri::Boş => continue,
         };
         if tür == BoyutTürü::Bilinmeyen {
@@ -2710,6 +2711,12 @@ fn değer_metin(değer: &VeriDeğeri) -> Option<String> {
         VeriDeğeri::Dizi(dizi) => Some(
             dizi.iter()
                 .map(|sayı| crate::yardimci::bicim::ondalık_kırp(*sayı))
+                .collect::<Vec<_>>()
+                .join(","),
+        ),
+        VeriDeğeri::KarmaDizi(dizi) => Some(
+            dizi.iter()
+                .filter_map(değer_metin)
                 .collect::<Vec<_>>()
                 .join(","),
         ),

@@ -9,6 +9,7 @@ use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::grafik_bileseni::GrafikBileşeni;
 use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::matris::MatrisKoordinatı;
+use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
 use crate::model::radar::RadarKoordinatı;
 use crate::model::seri::Seri;
 use crate::model::takvim::TakvimKoordinatı;
@@ -69,6 +70,13 @@ pub struct GrafikSeçenekleri {
     /// Çoklu `matrix: []` koordinat bileşenleri. Boşsa geriye uyumlu
     /// `matris` alanı kullanılır.
     pub matrisler: Vec<MatrisKoordinatı>,
+    /// ECharts `parallel` koordinat bileşeni.
+    pub paralel: Option<ParalelKoordinatı>,
+    /// Çoklu `parallel: []` koordinat bileşenleri.
+    pub paraleller: Vec<ParalelKoordinatı>,
+    /// `parallelAxis: []` bileşenleri; her eksen `parallelIndex`/`parallelId`
+    /// ile bir koordinata bağlanır.
+    pub paralel_eksenleri: Vec<ParalelEkseni>,
     /// Birden çok ECharts `calendar` koordinat bileşeni.
     pub takvimler: Vec<TakvimKoordinatı>,
     /// Birden çok ECharts `singleAxis` koordinat bileşeni.
@@ -129,6 +137,9 @@ impl Default for GrafikSeçenekleri {
             kutupsallar: Vec::new(),
             matris: None,
             matrisler: Vec::new(),
+            paralel: None,
+            paraleller: Vec::new(),
+            paralel_eksenleri: Vec::new(),
             takvimler: Vec::new(),
             tek_eksenler: Vec::new(),
             veri_kümesi: None,
@@ -417,6 +428,43 @@ impl GrafikSeçenekleri {
 
     pub fn matris_sayısı(&self) -> usize {
         self.tüm_matrisler().count()
+    }
+
+    pub fn paralel(mut self, koordinat: ParalelKoordinatı) -> Self {
+        self.paralel = Some(koordinat);
+        self.paraleller.clear();
+        self
+    }
+
+    pub fn paralel_ekle(mut self, koordinat: ParalelKoordinatı) -> Self {
+        if self.paraleller.is_empty()
+            && let Some(tekil) = self.paralel.take()
+        {
+            self.paraleller.push(tekil);
+        }
+        self.paraleller.push(koordinat);
+        self
+    }
+
+    pub fn tüm_paraleller(&self) -> impl Iterator<Item = &ParalelKoordinatı> {
+        self.paralel
+            .iter()
+            .filter(|_| self.paraleller.is_empty())
+            .chain(self.paraleller.iter())
+    }
+
+    pub fn paralel_sayısı(&self) -> usize {
+        self.tüm_paraleller().count()
+    }
+
+    pub fn paralel_ekseni(mut self, eksen: ParalelEkseni) -> Self {
+        self.paralel_eksenleri.push(eksen);
+        self
+    }
+
+    pub fn paralel_eksenleri(mut self, eksenler: impl IntoIterator<Item = ParalelEkseni>) -> Self {
+        self.paralel_eksenleri = eksenler.into_iter().collect();
+        self
     }
 
     pub fn takvim(mut self, koordinat: TakvimKoordinatı) -> Self {
@@ -1055,6 +1103,162 @@ impl GrafikSeçenekleri {
                 }
             }
         }
+        let paralel_koordinatları = self.tüm_paraleller().collect::<Vec<_>>();
+        let örtük_paralel = paralel_koordinatları.is_empty()
+            && self
+                .seriler
+                .iter()
+                .any(|seri| matches!(seri, Seri::Paralel(_)));
+        let paralel_adedi = if örtük_paralel {
+            1
+        } else {
+            paralel_koordinatları.len()
+        };
+        let mut paralel_kimlikleri = std::collections::HashSet::new();
+        for (sıra, koordinat) in paralel_koordinatları.iter().enumerate() {
+            if let Some(kimlik) = koordinat.kimlik.as_deref()
+                && !paralel_kimlikleri.insert(kimlik)
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "parallel.id",
+                    ayrıntı: format!("{sıra}. bileşenin `{kimlik}` kimliği yinelendi"),
+                });
+            }
+            for (alan, değer) in [
+                (
+                    "parallel.axisExpandCenter",
+                    koordinat.eksen_genişletme_merkezi,
+                ),
+                (
+                    "parallel.axisExpandWidth",
+                    Some(koordinat.eksen_genişletme_genişliği),
+                ),
+                (
+                    "parallel.axisExpandRate",
+                    Some(koordinat.eksen_genişletme_oranı),
+                ),
+            ] {
+                if değer.is_some_and(|değer| !değer.is_finite() || değer < 0.0) {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan,
+                        ayrıntı: format!(
+                            "parallel[{sıra}] değeri sonlu ve negatif olmayan olmalı"
+                        ),
+                    });
+                }
+            }
+            if let Some([başlangıç, bitiş]) = koordinat.eksen_genişletme_penceresi
+                && (!başlangıç.is_finite() || !bitiş.is_finite() || başlangıç > bitiş)
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "parallel.axisExpandWindow",
+                    ayrıntı: format!(
+                        "parallel[{sıra}] penceresi sonlu ve başlangıç <= bitiş olmalı"
+                    ),
+                });
+            }
+        }
+
+        let paralel_sırasını_çöz = |sıra: usize, kimlik: Option<&str>| -> Option<usize> {
+            if let Some(kimlik) = kimlik {
+                paralel_koordinatları
+                    .iter()
+                    .position(|koordinat| koordinat.kimlik.as_deref() == Some(kimlik))
+            } else {
+                (sıra < paralel_adedi).then_some(sıra)
+            }
+        };
+        let örtük_varsayılan = crate::model::paralel::ParalelKoordinatı::default();
+        let mut çözülmüş_paralel_eksenler = Vec::with_capacity(self.paralel_eksenleri.len());
+        let mut görülen_paralel_boyutlar = std::collections::HashSet::new();
+        for (eksen_sırası, eksen) in self.paralel_eksenleri.iter().enumerate() {
+            let Some(paralel_sırası) =
+                paralel_sırasını_çöz(eksen.paralel_sırası, eksen.paralel_kimliği.as_deref())
+            else {
+                if let Some(kimlik) = &eksen.paralel_kimliği {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "parallelAxis.parallelId",
+                        ayrıntı: format!("{eksen_sırası}. eksenin `{kimlik}` koordinatı yok"),
+                    });
+                }
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "parallel",
+                    sıra: eksen.paralel_sırası,
+                });
+            };
+            if eksen.boyutlar.is_empty() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "parallelAxis.dim",
+                    ayrıntı: format!("{eksen_sırası}. eksen en az bir boyut taşımalı"),
+                });
+            }
+            for boyut in &eksen.boyutlar {
+                if !görülen_paralel_boyutlar.insert((paralel_sırası, *boyut)) {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "parallelAxis.dim",
+                        ayrıntı: format!(
+                            "parallel[{paralel_sırası}] içinde {boyut}. boyut birden çok eksene bağlı"
+                        ),
+                    });
+                }
+            }
+            let stil = &eksen.alan_seçim_stili;
+            if !stil.genişlik.is_finite()
+                || stil.genişlik < 0.0
+                || !stil.kenarlık_kalınlığı.is_finite()
+                || stil.kenarlık_kalınlığı < 0.0
+                || !stil.opaklık.is_finite()
+                || !(0.0..=1.0).contains(&stil.opaklık)
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "parallelAxis.areaSelectStyle",
+                    ayrıntı: format!("{eksen_sırası}. eksenin seçim stili geçerli değil"),
+                });
+            }
+            for (aralık_sırası, aralık) in eksen.etkin_aralıklar.iter().enumerate() {
+                if !aralık[0].is_finite() || !aralık[1].is_finite() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "parallelAxis.activeIntervals",
+                        ayrıntı: format!(
+                            "{eksen_sırası}. eksenin {aralık_sırası}. aralığı sonlu olmalı"
+                        ),
+                    });
+                }
+            }
+            let koordinat = paralel_koordinatları
+                .get(paralel_sırası)
+                .copied()
+                .unwrap_or(&örtük_varsayılan);
+            çözülmüş_paralel_eksenler.push(eksen.çöz(&koordinat.eksen_varsayılanı));
+        }
+        for (seri_sırası, seri) in self.seriler.iter().enumerate() {
+            let Seri::Paralel(paralel) = seri else {
+                continue;
+            };
+            if paralel_sırasını_çöz(paralel.paralel_sırası, paralel.paralel_kimliği.as_deref())
+                .is_none()
+            {
+                if let Some(kimlik) = &paralel.paralel_kimliği {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.parallel.parallelId",
+                        ayrıntı: format!("{seri_sırası}. serinin `{kimlik}` koordinatı yok"),
+                    });
+                }
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "parallel",
+                    sıra: paralel.paralel_sırası,
+                });
+            }
+            if !(0.0..=1.0).contains(&paralel.aktif_opaklık)
+                || !(0.0..=1.0).contains(&paralel.etkin_değil_opaklık)
+                || !(0.0..=1.0).contains(&paralel.yumuşaklık)
+            {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "series.parallel.opacity/smooth",
+                    ayrıntı: format!("{seri_sırası}. parallel seri oranları 0..=1 olmalı"),
+                });
+            }
+        }
         for eksen in x_eksenler
             .iter()
             .chain(y_eksenler.iter())
@@ -1063,6 +1267,16 @@ impl GrafikSeçenekleri {
                 self.tüm_kutupsallar()
                     .flat_map(|kutupsal| [&kutupsal.açısal_eksen, &kutupsal.radyal_eksen]),
             )
+            .chain(
+                paralel_koordinatları
+                    .iter()
+                    .map(|paralel| &paralel.eksen_varsayılanı),
+            )
+            .chain(self.seriler.iter().filter_map(|seri| match seri {
+                Seri::Paralel(paralel) => paralel.eksen_varsayılanı.as_ref(),
+                _ => None,
+            }))
+            .chain(çözülmüş_paralel_eksenler.iter())
         {
             if let (Some(en_az), Some(en_çok)) = (eksen.en_az, eksen.en_çok)
                 && en_az >= en_çok
@@ -1355,8 +1569,8 @@ impl GrafikSeçenekleri {
         let t = t.clamp(0.0, 1.0) as f64;
         let mut sonuç = yeni.clone();
 
-        let öğe_karıştır = |e: &VeriÖğesi, y: &VeriÖğesi| -> VeriÖğesi {
-            let değer = match (&e.değer, &y.değer) {
+        fn değeri_karıştır(eski: &VeriDeğeri, yeni: &VeriDeğeri, t: f64) -> VeriDeğeri {
+            match (eski, yeni) {
                 (VeriDeğeri::Sayı(a), VeriDeğeri::Sayı(b)) => {
                     VeriDeğeri::Sayı(a + (b - a) * t)
                 }
@@ -1371,8 +1585,20 @@ impl GrafikSeçenekleri {
                             .collect(),
                     )
                 }
-                _ => y.değer.clone(),
-            };
+                (VeriDeğeri::KarmaDizi(a), VeriDeğeri::KarmaDizi(b)) if a.len() == b.len() => {
+                    VeriDeğeri::KarmaDizi(
+                        a.iter()
+                            .zip(b.iter())
+                            .map(|(eski, yeni)| değeri_karıştır(eski, yeni, t))
+                            .collect(),
+                    )
+                }
+                _ => yeni.clone(),
+            }
+        }
+
+        let öğe_karıştır = |e: &VeriÖğesi, y: &VeriÖğesi| -> VeriÖğesi {
+            let değer = değeri_karıştır(&e.değer, &y.değer, t);
             VeriÖğesi {
                 değer, ..y.clone()
             }
@@ -1990,6 +2216,68 @@ mod testler {
             kategorik.doğrula(),
             Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
                 alan: "axis.breaks",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn parallel_serisi_ortuk_koordinati_kabul_eder_ve_acik_baglari_dogrular() {
+        let örtük = GrafikSeçenekleri::yeni().seri(
+            crate::model::seri::ParalelSerisi::yeni()
+                .boyutlar(["A", "B"])
+                .veri([vec![1.0, 2.0]]),
+        );
+        assert!(örtük.doğrula().is_ok());
+
+        let geçerli = GrafikSeçenekleri::yeni()
+            .paralel(crate::model::paralel::ParalelKoordinatı::yeni().kimlik("ikinci"))
+            .paralel_ekseni(crate::model::paralel::ParalelEkseni::yeni(0).paralel_kimliği("ikinci"))
+            .paralel_ekseni(crate::model::paralel::ParalelEkseni::yeni(1).paralel_kimliği("ikinci"))
+            .seri(
+                crate::model::seri::ParalelSerisi::yeni()
+                    .paralel_kimliği("ikinci")
+                    .karma_veri([vec![VeriDeğeri::from(1), VeriDeğeri::from("A")]]),
+            );
+        assert!(geçerli.doğrula().is_ok());
+
+        let eksik = GrafikSeçenekleri::yeni()
+            .paralel(crate::model::paralel::ParalelKoordinatı::yeni())
+            .seri(
+                crate::model::seri::ParalelSerisi::yeni()
+                    .paralel_sırası(1)
+                    .veri([vec![1.0, 2.0]]),
+            );
+        assert!(matches!(
+            eksik.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "parallel",
+                sıra: 1
+            })
+        ));
+    }
+
+    #[test]
+    fn parallel_axis_dim_tekrarini_ve_gecersiz_expand_penceresini_reddeder() {
+        let yinelenen = GrafikSeçenekleri::yeni()
+            .paralel(crate::model::paralel::ParalelKoordinatı::yeni())
+            .paralel_ekseni(crate::model::paralel::ParalelEkseni::yeni(0))
+            .paralel_ekseni(crate::model::paralel::ParalelEkseni::yeni(0));
+        assert!(matches!(
+            yinelenen.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "parallelAxis.dim",
+                ..
+            })
+        ));
+
+        let mut koordinat = crate::model::paralel::ParalelKoordinatı::yeni();
+        koordinat.eksen_genişletme_penceresi = Some([20.0, 10.0]);
+        let pencere = GrafikSeçenekleri::yeni().paralel(koordinat);
+        assert!(matches!(
+            pencere.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "parallel.axisExpandWindow",
                 ..
             })
         ));

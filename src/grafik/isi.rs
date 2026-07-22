@@ -698,7 +698,17 @@ pub fn görsel_eşleme_çiz(
         } else {
             içerik_solu
         };
-        for (satır, (i, parça)) in parçalar.iter().enumerate().rev().enumerate() {
+        // Sayısal piecewise, düşükten yükseğe iç sırayı görselde ters çevirip
+        // yüksek parçayı üste koyar. `categories` ise ECharts
+        // PiecewiseModel'in kullanıcı sıra düzenini yukarıdan aşağıya aynen
+        // korur (parallel-nutrients'ta grup/rengin eşleşmesi buna bağlıdır).
+        let görsel_sıra = if eşleme.kategorik_mi() {
+            (0..n).collect::<Vec<_>>()
+        } else {
+            (0..n).rev().collect::<Vec<_>>()
+        };
+        for (satır, i) in görsel_sıra.into_iter().enumerate() {
+            let parça = &parçalar[i];
             let y = üst + satır as f32 * (KUTU_YÜKSEKLİĞİ + ÖĞE_BOŞLUĞU);
             let açık = eşleme.parça_açık_mı(i);
             let renk = if açık {
@@ -1454,6 +1464,42 @@ mod sürekli_bölge_testleri {
         assert!(çıktı.parça_kutuları[0].0.x < çıktı.parça_kutuları[4].0.x);
         let kayıt = yüzey.döküm();
         assert!(kayıt.find("0 - 2000").unwrap() < kayıt.find("8000 - 10000").unwrap());
+    }
+
+    #[test]
+    fn dikey_kategorik_piecewise_kaynak_sirasini_sayisal_kipten_farkli_korur() {
+        let mut kategorik_yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let kategorik = GörselEşleme::yeni()
+            .kategoriler(["ilk", "orta", "son"])
+            .renkler(["#ff0000", "#00ff00", "#0000ff"])
+            .üst(0);
+        let çıktı = görsel_eşleme_çiz(&mut kategorik_yüzey, &kategorik, [0.0, 1.0]);
+        assert_eq!(
+            çıktı
+                .parça_kutuları
+                .iter()
+                .map(|(_, sıra)| *sıra)
+                .collect::<Vec<_>>(),
+            [0, 1, 2]
+        );
+        let kayıt = kategorik_yüzey.döküm();
+        assert!(kayıt.find("yazı \"ilk\"").unwrap() < kayıt.find("yazı \"son\"").unwrap());
+
+        let mut sayısal_yüzey = KayıtYüzeyi::yeni(700.0, 525.0);
+        let sayısal = GörselEşleme::yeni()
+            .en_az(0.0)
+            .en_çok(3.0)
+            .bölme_sayısı(3)
+            .üst(0);
+        let çıktı = görsel_eşleme_çiz(&mut sayısal_yüzey, &sayısal, [0.0, 3.0]);
+        assert_eq!(
+            çıktı
+                .parça_kutuları
+                .iter()
+                .map(|(_, sıra)| *sıra)
+                .collect::<Vec<_>>(),
+            [2, 1, 0]
+        );
     }
 
     #[test]

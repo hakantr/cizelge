@@ -5,7 +5,91 @@
 
 use std::collections::BTreeMap;
 
-use crate::koordinat::Dikdörtgen;
+use crate::koordinat::{
+    Dikdörtgen, ParalelGenişletmeSonucu, ParalelYerleşimi, ÇalışmaEkseni
+};
+use crate::model::paralel::ParalelGenişletmeTetikleyicisi;
+
+/// `parallel.axisExpandable` için koordinat alanının etkileşim kaydı.
+#[derive(Clone, Debug)]
+pub struct ParalelGenişletmeBölgesi {
+    pub paralel_sırası: usize,
+    pub alan: Dikdörtgen,
+    pub tetikleyici: ParalelGenişletmeTetikleyicisi,
+    pub oran_ms: f32,
+    pub gecikme_ms: u64,
+    yerleşim: ParalelYerleşimi,
+    kayma: (f32, f32),
+}
+
+impl ParalelGenişletmeBölgesi {
+    pub fn yeni(yerleşim: &ParalelYerleşimi) -> Option<Self> {
+        yerleşim.genişletilebilir.then(|| Self {
+            paralel_sırası: yerleşim.bileşen_sırası,
+            alan: yerleşim.alan,
+            tetikleyici: yerleşim.genişletme_tetikleyicisi,
+            oran_ms: yerleşim.genişletme_oranı,
+            gecikme_ms: yerleşim.genişletme_gecikmesi_ms,
+            yerleşim: yerleşim.clone(),
+            kayma: (0.0, 0.0),
+        })
+    }
+
+    pub fn içeriyor_mu(&self, nokta: (f32, f32)) -> bool {
+        self.alan.içeriyor_mu(nokta)
+    }
+
+    pub fn pencereyi_çöz(&self, nokta: (f32, f32)) -> ParalelGenişletmeSonucu {
+        self.yerleşim
+            .genişletme_penceresini_çöz((nokta.0 - self.kayma.0, nokta.1 - self.kayma.1))
+    }
+
+    pub fn kaydır(&self, dx: f32, dy: f32) -> Self {
+        let mut sonuç = self.clone();
+        sonuç.alan.x += dx;
+        sonuç.alan.y += dy;
+        sonuç.kayma.0 += dx;
+        sonuç.kayma.1 += dy;
+        sonuç
+    }
+}
+
+/// `parallelAxis` çizgisi çevresindeki doğrusal brush hedefi.
+#[derive(Clone, Debug)]
+pub struct ParalelEksenBölgesi {
+    pub paralel_sırası: usize,
+    pub eksen_bileşen_sırası: Option<usize>,
+    pub boyut: usize,
+    pub şerit: Dikdörtgen,
+    pub dikey: bool,
+    pub gerçek_zamanlı: bool,
+    pub eksen: ÇalışmaEkseni,
+}
+
+impl ParalelEksenBölgesi {
+    pub fn içeriyor_mu(&self, nokta: (f32, f32)) -> bool {
+        self.şerit.içeriyor_mu(nokta)
+    }
+
+    pub fn pikselden_veriye(&self, nokta: (f32, f32)) -> f64 {
+        self.eksen
+            .pikselden_veriye(if self.dikey { nokta.1 } else { nokta.0 })
+    }
+
+    pub fn kaydır(&self, dx: f32, dy: f32) -> Self {
+        let mut sonuç = self.clone();
+        sonuç.şerit.x += dx;
+        sonuç.şerit.y += dy;
+        if sonuç.dikey {
+            sonuç.eksen.piksel[0] += dy;
+            sonuç.eksen.piksel[1] += dy;
+        } else {
+            sonuç.eksen.piksel[0] += dx;
+            sonuç.eksen.piksel[1] += dx;
+        }
+        sonuç
+    }
+}
 
 /// Bir veri öğesinin tıklama/isabet geometrisi.
 #[derive(Clone, Debug)]
@@ -298,6 +382,17 @@ pub enum GrafikOlayı {
         sıra: usize,
         /// Düşükten yükseğe parça sırası → seçili durumu.
         seçili: BTreeMap<usize, bool>,
+    },
+    /// `parallelAxis` doğrusal alan seçimi (`axisareaselected`).
+    ParalelAlanSeçildi {
+        /// `paralel_eksenleri` içindeki bileşen sırası.
+        eksen_sırası: usize,
+        aralıklar: Vec<[f64; 2]>,
+    },
+    /// `parallelAxisExpand` ile geniş eksen penceresi değişti.
+    ParalelEksenGenişletildi {
+        paralel_sırası: usize,
+        pencere: [f32; 2],
     },
     /// Fırça seçimi tamamlandı (`'brushselected'`): kapsanan öğeler.
     FırçaSeçildi {
