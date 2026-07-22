@@ -105,8 +105,8 @@ pub use model::imleyici::{
 };
 pub use model::kutupsal::KutupsalKoordinat;
 pub use model::matris::{
-    MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisGövdeHücresi, MatrisKonumu,
-    MatrisKoordinatı,
+    MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
+    MatrisEtiketiBiçimleyicisi, MatrisGövdeHücresi, MatrisKonumu, MatrisKoordinatı,
 };
 pub use model::radar::{
     RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri, RadarŞekli,
@@ -226,8 +226,8 @@ pub mod hazir {
     };
     pub use crate::model::kutupsal::KutupsalKoordinat;
     pub use crate::model::matris::{
-        MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisGövdeHücresi, MatrisKonumu,
-        MatrisKoordinatı,
+        MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
+        MatrisEtiketiBiçimleyicisi, MatrisGövdeHücresi, MatrisKonumu, MatrisKoordinatı,
     };
     pub use crate::model::radar::{
         RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri,

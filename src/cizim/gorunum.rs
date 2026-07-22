@@ -9,7 +9,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use crate::bilesen::baslik::başlık_çiz;
+use crate::bilesen::baslik::{başlık_çiz, başlık_çiz_alanda};
 use crate::bilesen::eksen_cizimi::{
     bölme_çizgilerini_çiz, eksenleri_çiz, eksenleri_çiz_katman,
     kategori_taban_çizgilerini_üstte_çiz, kırılma_alanlarını_çiz,
@@ -35,7 +35,8 @@ use crate::grafik::hatlar::hatlar_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
 use crate::grafik::imleyici::{im_alanlarını_çiz, im_çizgi_ve_noktalarını_çiz};
 use crate::grafik::isi::{
-    SürekliGörselEşlemeBölgesi, görsel_eşleme_çiz, ısı_değer_kapsamı, ısı_haritası_çiz,
+    SürekliGörselEşlemeBölgesi, görsel_eşleme_çiz, matris_ısı_haritası_çiz, ısı_değer_kapsamı,
+    ısı_haritası_çiz,
 };
 use crate::grafik::kiris::kiriş_çiz;
 use crate::grafik::kutupsal::{
@@ -52,8 +53,9 @@ use crate::grafik::radar::{
 };
 use crate::grafik::sacilim::{
     BüyükSaçılımNoktaları, SaçılımNoktası, büyük_saçılım_noktaları, büyük_saçılım_çiz,
-    saçılım_görsel_kapsamı, saçılım_nokta_boyutlarını_eşle, saçılım_noktaları, saçılım_xy,
-    saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları, tek_eksen_saçılım_noktaları,
+    matris_saçılım_noktaları, saçılım_görsel_kapsamı, saçılım_nokta_boyutlarını_eşle,
+    saçılım_noktaları, saçılım_xy, saçılım_çiz_çoklu_eşlemeli, takvim_saçılım_noktaları,
+    tek_eksen_saçılım_noktaları,
 };
 use crate::grafik::sankey::sankey_çiz;
 use crate::grafik::sutun::{
@@ -1135,6 +1137,86 @@ fn takvim_saçılım_serisini_çiz(
     ))
 }
 
+#[allow(clippy::too_many_arguments)]
+fn matris_saçılım_serisini_çiz(
+    yüzey: &mut dyn ÇizimYüzeyi,
+    seri: &SaçılımSerisi,
+    seri_sırası: usize,
+    yerleşim: &crate::koordinat::MatrisYerleşimi,
+    seri_rengi: Renk,
+    palet: &[Renk],
+    görsel_eşlemeler: &[&crate::model::gorsel_esleme::GörselEşleme],
+    ilerleme: f32,
+    zaman_sn: f32,
+    ipucu_seçeneği: Option<&İpucu>,
+    fare: Option<(f32, f32)>,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) -> Option<Bekleyenİpucu> {
+    let eşlemeler = görsel_eşlemeler
+        .iter()
+        .map(|eşleme| (*eşleme, saçılım_görsel_kapsamı(seri, eşleme)))
+        .collect::<Vec<_>>();
+    let mut noktalar = matris_saçılım_noktaları(seri, yerleşim);
+    saçılım_nokta_boyutlarını_eşle(seri, &mut noktalar, &eşlemeler);
+    let vurgu = match (seri.sessiz, ipucu_seçeneği, fare) {
+        (true, _, _) => None,
+        (false, Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => noktalar
+            .iter()
+            .filter(|nokta| {
+                let dx = nokta.konum.0 - f.0;
+                let dy = nokta.konum.1 - f.1;
+                let yarıçap = (nokta.boyut / 2.0 + 3.0).max(8.0);
+                dx * dx + dy * dy <= yarıçap * yarıçap
+            })
+            .min_by(|a, b| {
+                let da = (a.konum.0 - f.0).powi(2) + (a.konum.1 - f.1).powi(2);
+                let db = (b.konum.0 - f.0).powi(2) + (b.konum.1 - f.1).powi(2);
+                da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+            })
+            .map(|nokta| nokta.sıra),
+        _ => None,
+    };
+    saçılım_çiz_çoklu_eşlemeli(
+        yüzey,
+        seri,
+        &noktalar,
+        seri_rengi,
+        ilerleme,
+        zaman_sn,
+        vurgu,
+        &eşlemeler,
+        palet,
+    );
+    if !seri.sessiz {
+        for nokta in &noktalar {
+            isabetler.push(İsabetBölgesi {
+                seri_sırası,
+                veri_sırası: nokta.sıra,
+                seri_adı: seri.ad.clone(),
+                ad: seri.veri.get(nokta.sıra).and_then(|öğe| öğe.ad.clone()),
+                değer: Some(nokta.y_değeri),
+                geometri: İsabetGeometrisi::Daire {
+                    merkez: nokta.konum,
+                    yarıçap: (nokta.boyut / 2.0 + 3.0).max(8.0),
+                },
+            });
+        }
+    }
+    let (Some(veri_sırası), Some(f)) = (vurgu, fare) else {
+        return None;
+    };
+    let nokta = noktalar.iter().find(|nokta| nokta.sıra == veri_sırası)?;
+    Some((
+        seri.ad.clone(),
+        vec![İpucuSatırı {
+            im_rengi: Some(seri_rengi),
+            ad: binlik_ayır(nokta.x_değeri),
+            değer: binlik_ayır(nokta.y_değeri),
+        }],
+        f,
+    ))
+}
+
 /// `singleAxis` bileşenlerini ve bunlara bağlı scatter/effectScatter
 /// serilerini ECharts katman sırasıyla boyar: bölme çizgileri, eksen, seri.
 /// Başlıklar daha yüksek `z` değerinde olduğundan çağıran bu katmanı başlık
@@ -1347,6 +1429,7 @@ fn grafo_serisini_çiz(
     görünüm: (f32, f32, f32),
     kaymalar: &[(usize, f32, f32)],
     takvim: Option<&TakvimYerleşimi>,
+    matris: Option<&crate::koordinat::MatrisYerleşimi>,
     ipucu_seçeneği: Option<&İpucu>,
     fare: Option<(f32, f32)>,
     isabetler: &mut Vec<İsabetBölgesi>,
@@ -1363,6 +1446,7 @@ fn grafo_serisini_çiz(
         görünüm,
         kaymalar,
         takvim,
+        matris,
         isabetler,
     );
     let (Some(ipucu), Some(f)) = (ipucu_seçeneği, fare) else {
@@ -1795,12 +1879,153 @@ fn matris_hat_aralığı(değer: &HatKoordinatı) -> Option<MatrisAralığı> {
     }
 }
 
+#[derive(Default)]
+struct MatrisKategoriToplayıcı {
+    adlar: Vec<String>,
+    en_büyük_sıra: Option<usize>,
+}
+
+impl MatrisKategoriToplayıcı {
+    fn ad_ekle(&mut self, ad: &str) {
+        if !ad.is_empty() && !self.adlar.iter().any(|aday| aday == ad) {
+            self.adlar.push(ad.to_owned());
+        }
+    }
+
+    fn sıra_ekle(&mut self, sıra: f64) {
+        if sıra.is_finite() && sıra >= 0.0 {
+            let sıra = sıra.round() as usize;
+            self.en_büyük_sıra = Some(self.en_büyük_sıra.map_or(sıra, |önceki| önceki.max(sıra)));
+        }
+    }
+
+    fn aralık_ekle(&mut self, aralık: &MatrisAralığı) {
+        let mut konum_ekle = |konum: &MatrisKonumu| match konum {
+            MatrisKonumu::Sıra(sıra) if *sıra >= 0 => self.sıra_ekle(*sıra as f64),
+            MatrisKonumu::Değer(ad) => self.ad_ekle(ad),
+            MatrisKonumu::Sıra(_) => {}
+        };
+        match aralık {
+            MatrisAralığı::Tek(konum) => konum_ekle(konum),
+            MatrisAralığı::Aralık(baş, son) => {
+                konum_ekle(baş);
+                konum_ekle(son);
+            }
+            MatrisAralığı::Tümü => {}
+        }
+    }
+
+    fn bitir(mut self) -> Vec<String> {
+        if self.adlar.is_empty()
+            && let Some(en_büyük) = self.en_büyük_sıra
+        {
+            self.adlar = (0..=en_büyük).map(|sıra| sıra.to_string()).collect();
+        }
+        self.adlar
+    }
+}
+
+fn matris_seri_kategorilerini_topla(
+    seçenekler: &GrafikSeçenekleri,
+    matris_sırası: usize,
+) -> (Vec<String>, Vec<String>) {
+    let mut x = MatrisKategoriToplayıcı::default();
+    let mut y = MatrisKategoriToplayıcı::default();
+    for seri in &seçenekler.seriler {
+        match seri {
+            Seri::Isı(ısı) if ısı.matris_sırası == Some(matris_sırası) => {
+                for (sıra, öğe) in ısı.veri.iter().enumerate() {
+                    if let Some(Some((mx, my))) = ısı.matris_koordinatları.get(sıra) {
+                        x.aralık_ekle(mx);
+                        y.aralık_ekle(my);
+                    } else if let Some(dizi) = öğe.değer.dizi() {
+                        if let Some(değer) = dizi.first() {
+                            x.sıra_ekle(*değer);
+                        }
+                        if let Some(değer) = dizi.get(1) {
+                            y.sıra_ekle(*değer);
+                        }
+                    }
+                }
+            }
+            Seri::Saçılım(saçılım) if saçılım.matris_sırası == Some(matris_sırası) => {
+                for (sıra, öğe) in saçılım.veri.iter().enumerate() {
+                    if let Some(Some((mx, my))) = saçılım.matris_koordinatları.get(sıra) {
+                        x.aralık_ekle(mx);
+                        y.aralık_ekle(my);
+                    } else if let Some(dizi) = öğe.değer.dizi() {
+                        if let Some(değer) = dizi.first() {
+                            x.sıra_ekle(*değer);
+                        }
+                        if let Some(değer) = dizi.get(1) {
+                            y.sıra_ekle(*değer);
+                        }
+                    }
+                }
+            }
+            Seri::Grafo(grafo) if grafo.matris_sırası == Some(matris_sırası) => {
+                for düğüm in &grafo.düğümler {
+                    if let Some((mx, my)) = &düğüm.matris_koordinatı {
+                        x.aralık_ekle(mx);
+                        y.aralık_ekle(my);
+                    }
+                }
+            }
+            Seri::Pasta(pasta) if pasta.matris_sırası == Some(matris_sırası) => {
+                if let Some((mx, my)) = &pasta.matris_merkezi {
+                    x.aralık_ekle(mx);
+                    y.aralık_ekle(my);
+                }
+            }
+            Seri::Özel(özel) if özel.matris_sırası == Some(matris_sırası) => {
+                for ad in &özel.matris_x_kategorileri {
+                    x.ad_ekle(ad);
+                }
+                for ad in &özel.matris_y_kategorileri {
+                    y.ad_ekle(ad);
+                }
+            }
+            Seri::Hatlar(hatlar)
+                if hatlar.koordinat_sistemi == HatKoordinatSistemi::Matris
+                    && hatlar.matris_sırası == matris_sırası =>
+            {
+                for hat in &hatlar.veri {
+                    for nokta in &hat.koordinatlar {
+                        match &nokta.x {
+                            HatKoordinatı::Metin(ad) => x.ad_ekle(ad),
+                            HatKoordinatı::Sayı(değer) => x.sıra_ekle(*değer),
+                            HatKoordinatı::Zaman(değer) => x.sıra_ekle(*değer as f64),
+                        }
+                        match &nokta.y {
+                            HatKoordinatı::Metin(ad) => y.ad_ekle(ad),
+                            HatKoordinatı::Sayı(değer) => y.sıra_ekle(*değer),
+                            HatKoordinatı::Zaman(değer) => y.sıra_ekle(*değer as f64),
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    (x.bitir(), y.bitir())
+}
+
 /// Kartezyen koordinat sistemlerini kurar: her eksen için kapsam/ölçek,
 /// her ızgara için alan.
+#[cfg(test)]
 fn kartezyen_kur(
     yüzey: &dyn ÇizimYüzeyi,
     seçenekler: &GrafikSeçenekleri,
     kapalı: &HashSet<String>,
+) -> Option<KartezyenKurulum> {
+    kartezyen_kur_matrisli(yüzey, seçenekler, kapalı, &[])
+}
+
+fn kartezyen_kur_matrisli(
+    yüzey: &dyn ÇizimYüzeyi,
+    seçenekler: &GrafikSeçenekleri,
+    kapalı: &HashSet<String>,
+    matris_yerleşimleri: &[Option<crate::koordinat::MatrisYerleşimi>],
 ) -> Option<KartezyenKurulum> {
     let görünürler: Vec<bool> = seçenekler
         .seriler
@@ -2345,33 +2570,47 @@ fn kartezyen_kur(
         .iter()
         .enumerate()
         .map(|(g, ızgara)| {
-            let sol_boşluk = ızgara.sol.çöz(yüzey.genişlik());
+            let ana_alan = ızgara
+                .matris_sırası
+                .zip(ızgara.matris_koordinatı.as_ref())
+                .and_then(|(sıra, (x, y))| {
+                    matris_yerleşimleri
+                        .get(sıra)?
+                        .as_ref()?
+                        .veriden_yerleşime(x, y, true)
+                })
+                .unwrap_or_else(|| {
+                    Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik())
+                });
+            let sol_boşluk = ızgara.sol.çöz(ana_alan.genişlik);
             // `containLabel`, yatay eksenin uç etiketini grid'in içine
             // zorlamaz; ECharts açık `right` mesafesini aynen korur ve uç
             // kategori etiketi tuval kenarına kadar uzanabilir.
-            let sağ_boşluk = ızgara.sağ.çöz(yüzey.genişlik());
-            let üst_boşluk = ızgara.üst.çöz(yüzey.yükseklik());
-            let alt_boşluk = ızgara.alt.çöz(yüzey.yükseklik());
-            let açık_genişlik = ızgara.genişlik.map(|uzunluk| uzunluk.çöz(yüzey.genişlik()));
+            let sağ_boşluk = ızgara.sağ.çöz(ana_alan.genişlik);
+            let üst_boşluk = ızgara.üst.çöz(ana_alan.yükseklik);
+            let alt_boşluk = ızgara.alt.çöz(ana_alan.yükseklik);
+            let açık_genişlik = ızgara
+                .genişlik
+                .map(|uzunluk| uzunluk.çöz(ana_alan.genişlik));
             let açık_yükseklik = ızgara
                 .yükseklik
-                .map(|uzunluk| uzunluk.çöz(yüzey.yükseklik()));
+                .map(|uzunluk| uzunluk.çöz(ana_alan.yükseklik));
             let mut genişlik = açık_genişlik
-                .unwrap_or_else(|| yüzey.genişlik() - sol_boşluk - sağ_boşluk)
+                .unwrap_or_else(|| ana_alan.genişlik - sol_boşluk - sağ_boşluk)
                 .max(1.0);
             let mut yükseklik = açık_yükseklik
-                .unwrap_or_else(|| yüzey.yükseklik() - üst_boşluk - alt_boşluk)
+                .unwrap_or_else(|| ana_alan.yükseklik - üst_boşluk - alt_boşluk)
                 .max(1.0);
             let mut sol = if açık_genişlik.is_some() && ızgara.sağ_açık && !ızgara.sol_açık
             {
-                yüzey.genişlik() - sağ_boşluk - genişlik
+                ana_alan.x + ana_alan.genişlik - sağ_boşluk - genişlik
             } else {
-                sol_boşluk
+                ana_alan.x + sol_boşluk
             };
             let üst = if açık_yükseklik.is_some() && ızgara.alt_açık && !ızgara.üst_açık {
-                yüzey.yükseklik() - alt_boşluk - yükseklik
+                ana_alan.y + ana_alan.yükseklik - alt_boşluk - yükseklik
             } else {
-                üst_boşluk
+                ana_alan.y + üst_boşluk
             };
             if ızgara.etiketi_kapsa {
                 if let Some((yi, y_seçenek)) = y_seçenekler
@@ -2982,18 +3221,28 @@ pub fn grafiği_boya(
         yüzey.dikdörtgen(tümü, &dolgu, [0.0; 4], None);
     }
 
-    // Matrix koordinatı seri katmanlarının altında ortak bir bileşendir.
-    // Veri sayısı bilinmiyorsa dimension.length/data kendi gövdesini belirler.
-    let matris_yerleşimi = seçenekler.matris.as_ref().and_then(|matris| {
-        crate::koordinat::MatrisYerleşimi::kur(
-            matris,
-            (yüzey.genişlik(), yüzey.yükseklik()),
-            (0, 0),
-        )
-        .ok()
-    });
-    if let (Some(matris), Some(yerleşim)) = (&seçenekler.matris, &matris_yerleşimi) {
-        matris_çiz(yüzey, matris, yerleşim);
+    // Matrix koordinatları seri katmanlarının altında ortak bileşenlerdir.
+    // x/y.data boşsa ordinal kategoriler bağlı serilerin veri/encode
+    // girdilerinden ECharts'ın toplama aşaması gibi çıkarılır.
+    let matrisler = seçenekler.tüm_matrisler().collect::<Vec<_>>();
+    let matris_yerleşimleri = matrisler
+        .iter()
+        .enumerate()
+        .map(|(sıra, matris)| {
+            let (x, y) = matris_seri_kategorilerini_topla(seçenekler, sıra);
+            crate::koordinat::MatrisYerleşimi::kur_adlarla_sıralı(
+                matris,
+                (yüzey.genişlik(), yüzey.yükseklik()),
+                (&x, &y),
+                sıra,
+            )
+            .ok()
+        })
+        .collect::<Vec<_>>();
+    for (matris, yerleşim) in matrisler.iter().zip(&matris_yerleşimleri) {
+        if let Some(yerleşim) = yerleşim {
+            matris_çiz(yüzey, matris, yerleşim);
+        }
     }
     let takvim_yerleşimleri: Vec<Option<TakvimYerleşimi>> = seçenekler
         .takvimler
@@ -3027,13 +3276,29 @@ pub fn grafiği_boya(
     }
 
     // 2) Başlık.
+    let başlığı_çiz = |yüzey: &mut dyn ÇizimYüzeyi, başlık: &crate::model::bilesen::Başlık| {
+        let matris_alanı = başlık
+            .matris_sırası
+            .zip(başlık.matris_koordinatı.as_ref())
+            .and_then(|(sıra, (x, y))| {
+                matris_yerleşimleri
+                    .get(sıra)?
+                    .as_ref()?
+                    .veriden_yerleşime(x, y, true)
+            });
+        if let Some(alan) = matris_alanı {
+            başlık_çiz_alanda(yüzey, başlık, alan);
+        } else if başlık.matris_sırası.is_none() {
+            başlık_çiz(yüzey, başlık);
+        }
+    };
     if seçenekler.başlıklar.is_empty() {
         if let Some(başlık) = &seçenekler.başlık {
-            başlık_çiz(yüzey, başlık);
+            başlığı_çiz(yüzey, başlık);
         }
     } else {
         for başlık in &seçenekler.başlıklar {
-            başlık_çiz(yüzey, başlık);
+            başlığı_çiz(yüzey, başlık);
         }
     }
 
@@ -3380,7 +3645,7 @@ pub fn grafiği_boya(
     }
 
     // 4) Kartezyen bölüm (çoklu ızgara/eksen).
-    let kurulum = kartezyen_kur(yüzey, seçenekler, kapalı);
+    let kurulum = kartezyen_kur_matrisli(yüzey, seçenekler, kapalı, &matris_yerleşimleri);
     let hazır_fırça = kurulum
         .as_ref()
         .map(|kurulum| fırçayı_hazırla(seçenekler, kurulum))
@@ -3929,6 +4194,7 @@ pub fn grafiği_boya(
                                     alan: kartezyen.alan,
                                     kartezyen: Some(&kartezyen),
                                     takvim: None,
+                                    matris: None,
                                     veri: &s.veri,
                                     renk: seçenekler.seri_rengi(i),
                                     ilerleme,
@@ -5037,7 +5303,127 @@ pub fn grafiği_boya(
         kutupsal_ağ_çiz(yüzey, koordinat, düzen, true);
     }
 
-    // 4d) Calendar ve matrix üzerindeki çekirdek (GL olmayan) lines.
+    // 4d) Matrix'e doğrudan bağlı heatmap/scatter/graph/custom serileri.
+    for (i, seri) in seçenekler.seriler.iter().enumerate() {
+        if !ad_görünür(seri.ad(), kapalı) {
+            continue;
+        }
+        match seri {
+            Seri::Isı(ısı) => {
+                let Some(matris_sırası) = ısı.matris_sırası else {
+                    continue;
+                };
+                let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                    continue;
+                };
+                let eşleme = seçenekler
+                    .seri_görsel_eşlemesi(i)
+                    .cloned()
+                    .unwrap_or_default();
+                let kapsam = eşleme.kapsam_çöz(ısı_değer_kapsamı(ısı));
+                let vurgulu = matris_ısı_haritası_çiz(
+                    yüzey,
+                    ısı,
+                    i,
+                    yerleşim,
+                    &eşleme,
+                    kapsam,
+                    ilerleme,
+                    fare,
+                    &mut çıktı.isabetler,
+                );
+                if let (Some(veri_sırası), Some(f), Some(ipucu)) =
+                    (vurgulu, fare, ipucu_seçeneği.as_ref())
+                    && ipucu.tetikleme == Tetikleme::Öğe
+                    && let Some(öğe) = ısı.veri.get(veri_sırası)
+                    && let Some(değer) = öğe.değer.dizi().and_then(|dizi| dizi.get(2)).copied()
+                {
+                    bekleyen_ipucu = Some((
+                        ısı.ad.clone(),
+                        vec![İpucuSatırı {
+                            im_rengi: Some(eşleme.renk_çöz(değer, kapsam)),
+                            ad: öğe.ad.clone().unwrap_or_default(),
+                            değer: binlik_ayır(değer),
+                        }],
+                        f,
+                    ));
+                }
+            }
+            Seri::Saçılım(saçılım) => {
+                let Some(matris_sırası) = saçılım.matris_sırası else {
+                    continue;
+                };
+                let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                    continue;
+                };
+                let eşlemeler = seçenekler.seri_görsel_eşlemeleri(i).collect::<Vec<_>>();
+                if let Some(ipucu) = matris_saçılım_serisini_çiz(
+                    yüzey,
+                    saçılım,
+                    i,
+                    yerleşim,
+                    seçenekler.seri_rengi(i),
+                    &seçenekler.palet,
+                    &eşlemeler,
+                    ilerleme,
+                    zaman_sn,
+                    ipucu_seçeneği.as_ref(),
+                    fare,
+                    &mut çıktı.isabetler,
+                ) {
+                    bekleyen_ipucu = Some(ipucu);
+                }
+            }
+            Seri::Grafo(grafo) => {
+                let Some(matris_sırası) = grafo.matris_sırası else {
+                    continue;
+                };
+                let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                    continue;
+                };
+                if let Some(ipucu) = grafo_serisini_çiz(
+                    yüzey,
+                    grafo,
+                    i,
+                    yerleşim.dış_kutu,
+                    seçenekler,
+                    ilerleme,
+                    girdi.grafo_görünümü,
+                    &girdi.grafo_kaymaları,
+                    None,
+                    Some(yerleşim),
+                    ipucu_seçeneği.as_ref(),
+                    fare,
+                    &mut çıktı.isabetler,
+                ) {
+                    bekleyen_ipucu = Some(ipucu);
+                }
+            }
+            Seri::Özel(özel) => {
+                let Some(matris_sırası) = özel.matris_sırası else {
+                    continue;
+                };
+                let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                    continue;
+                };
+                if let Some(çizim) = &özel.çizim {
+                    let bağlam = ÖzelBağlam {
+                        alan: yerleşim.dış_kutu,
+                        kartezyen: None,
+                        takvim: None,
+                        matris: Some(yerleşim),
+                        veri: &özel.veri,
+                        renk: seçenekler.seri_rengi(i),
+                        ilerleme,
+                    };
+                    çizim(yüzey, &bağlam);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // 4e) Calendar ve matrix üzerindeki çekirdek (GL olmayan) lines.
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         let Seri::Hatlar(hatlar) = seri else {
             continue;
@@ -5072,12 +5458,7 @@ pub fn grafiği_boya(
                 }
             }
             HatKoordinatSistemi::Matris => {
-                // Şimdiki kök model tek matrix taşır; sıfır dışındaki açık
-                // indeks sessizce başka matrix'e düşürülmez.
-                if hatlar.matris_sırası != 0 {
-                    continue;
-                }
-                let Some(yerleşim) = &matris_yerleşimi else {
+                let Some(Some(yerleşim)) = matris_yerleşimleri.get(hatlar.matris_sırası) else {
                     continue;
                 };
                 let çiz = |yüzey: &mut dyn ÇizimYüzeyi, isabetler: &mut Vec<İsabetBölgesi>| {
@@ -5118,25 +5499,38 @@ pub fn grafiği_boya(
         if !ad_görünür(seri.ad(), kapalı) {
             continue;
         }
-        let takvim_merkezi = match p.takvim_sırası {
-            Some(takvim_sırası) => {
-                let Some(tarih) = p.takvim_merkez_tarihi else {
-                    continue;
-                };
-                let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
-                    continue;
-                };
-                let Some(merkez) = yerleşim.veriden_noktaya(tarih) else {
-                    continue;
-                };
-                Some(merkez)
+        let koordinat_merkezi = if let Some(matris_sırası) = p.matris_sırası {
+            let Some((x, y)) = &p.matris_merkezi else {
+                continue;
+            };
+            let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                continue;
+            };
+            let Some(merkez) = yerleşim.veriden_noktaya(x.clone(), y.clone()) else {
+                continue;
+            };
+            Some(merkez)
+        } else {
+            match p.takvim_sırası {
+                Some(takvim_sırası) => {
+                    let Some(tarih) = p.takvim_merkez_tarihi else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+                        continue;
+                    };
+                    let Some(merkez) = yerleşim.veriden_noktaya(tarih) else {
+                        continue;
+                    };
+                    Some(merkez)
+                }
+                None => None,
             }
-            None => None,
         };
         let dilimler: Vec<Dilim> =
-            pasta_yerleşimi_merkezle(p, seçenekler, tüm_alan, kapalı, ilerleme, takvim_merkezi);
+            pasta_yerleşimi_merkezle(p, seçenekler, tüm_alan, kapalı, ilerleme, koordinat_merkezi);
         if dilimler.is_empty() {
-            boş_pasta_çiz_merkezle(yüzey, p, tüm_alan, takvim_merkezi);
+            boş_pasta_çiz_merkezle(yüzey, p, tüm_alan, koordinat_merkezi);
         }
 
         // Öğe ipucu: fare hangi dilimde?
@@ -5443,7 +5837,10 @@ pub fn grafiği_boya(
             Seri::Grafo(g) => {
                 // Takvim bileşeninden daha yüksek z değerleri aşağıdaki üst
                 // katman geçişinde çizilir.
-                if (g.takvim_sırası.is_some() && g.z > 2) || !ad_görünür(seri.ad(), kapalı) {
+                if g.matris_sırası.is_some()
+                    || (g.takvim_sırası.is_some() && g.z > 2)
+                    || !ad_görünür(seri.ad(), kapalı)
+                {
                     continue;
                 }
                 let takvim = g
@@ -5463,6 +5860,7 @@ pub fn grafiği_boya(
                     girdi.grafo_görünümü,
                     &girdi.grafo_kaymaları,
                     takvim,
+                    None,
                     ipucu_seçeneği.as_ref(),
                     fare,
                     &mut çıktı.isabetler,
@@ -5609,7 +6007,7 @@ pub fn grafiği_boya(
                 }
             }
             Seri::Özel(s) if !s.kartezyen_gerekli => {
-                if !ad_görünür(seri.ad(), kapalı) {
+                if s.matris_sırası.is_some() || !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
                 if let Some(çizim) = &s.çizim {
@@ -5626,6 +6024,7 @@ pub fn grafiği_boya(
                         alan,
                         kartezyen: None,
                         takvim,
+                        matris: None,
                         veri: &s.veri,
                         renk: seçenekler.seri_rengi(i),
                         ilerleme,
@@ -5707,6 +6106,7 @@ pub fn grafiği_boya(
             girdi.grafo_görünümü,
             &girdi.grafo_kaymaları,
             Some(yerleşim),
+            None,
             ipucu_seçeneği.as_ref(),
             fare,
             &mut çıktı.isabetler,

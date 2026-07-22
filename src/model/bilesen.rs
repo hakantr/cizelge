@@ -6,6 +6,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::model::deger::VeriDeğeri;
+use crate::model::matris::MatrisAralığı;
 use crate::model::stil::{Biçimleyici, YazıStili};
 use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
 use crate::renk::{Dolgu, Renk};
@@ -53,6 +54,10 @@ pub struct Başlık {
     pub kenarlık_yarıçapı: [f32; 4],
     pub yazı: YazıStili,
     pub alt_yazı: YazıStili,
+    /// `coordinateSystem: 'matrix'` kullanımındaki bağlı bileşen.
+    pub matris_sırası: Option<usize>,
+    /// Başlığın yerleşeceği Matrix hücresi/aralığı (`coord`).
+    pub matris_koordinatı: Option<(MatrisAralığı, MatrisAralığı)>,
 }
 
 impl Default for Başlık {
@@ -75,6 +80,8 @@ impl Default for Başlık {
             kenarlık_yarıçapı: [0.0; 4],
             yazı: YazıStili::default(),
             alt_yazı: YazıStili::default(),
+            matris_sırası: None,
+            matris_koordinatı: None,
         }
     }
 }
@@ -172,6 +179,17 @@ impl Başlık {
 
     pub fn alt_yazı(mut self, yazı: YazıStili) -> Self {
         self.alt_yazı = yazı;
+        self
+    }
+
+    pub fn matris_hücresi(
+        mut self,
+        matris_sırası: usize,
+        x: impl Into<MatrisAralığı>,
+        y: impl Into<MatrisAralığı>,
+    ) -> Self {
+        self.matris_sırası = Some(matris_sırası);
+        self.matris_koordinatı = Some((x.into(), y.into()));
         self
     }
 }
@@ -949,6 +967,10 @@ pub struct Izgara {
     pub yükseklik: Option<Uzunluk>,
     /// Eksen etiketleri ızgara alanına dahil edilsin mi (`containLabel`)?
     pub etiketi_kapsa: bool,
+    /// `coordinateSystem: 'matrix'` kullanıldığında bağlı bileşen.
+    pub matris_sırası: Option<usize>,
+    /// Izgaranın yerleşeceği Matrix hücresi ya da birleşik aralık (`coord`).
+    pub matris_koordinatı: Option<(MatrisAralığı, MatrisAralığı)>,
 }
 
 impl Default for Izgara {
@@ -966,6 +988,8 @@ impl Default for Izgara {
             genişlik: None,
             yükseklik: None,
             etiketi_kapsa: false,
+            matris_sırası: None,
+            matris_koordinatı: None,
         }
     }
 }
@@ -1011,6 +1035,19 @@ impl Izgara {
 
     pub fn etiketi_kapsa(mut self, kapsa: bool) -> Self {
         self.etiketi_kapsa = kapsa;
+        self
+    }
+
+    /// Izgarayı Matrix hücresi/aralığı içine yerleştirir. `left/right/top/
+    /// bottom/width/height` bundan sonra hücre kutusuna göre çözülür.
+    pub fn matris_hücresi(
+        mut self,
+        matris_sırası: usize,
+        x: impl Into<MatrisAralığı>,
+        y: impl Into<MatrisAralığı>,
+    ) -> Self {
+        self.matris_sırası = Some(matris_sırası);
+        self.matris_koordinatı = Some((x.into(), y.into()));
         self
     }
 }

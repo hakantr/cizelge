@@ -53,10 +53,20 @@ fn çok_satırlı_yazı(
 
 /// Başlığı çizer.
 pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
+    let alan = Dikdörtgen::yeni(0.0, 0.0, çizici.genişlik(), çizici.yükseklik());
+    başlık_çiz_alanda(çizici, başlık, alan);
+}
+
+/// Matrix gibi başka bir koordinat sisteminin verdiği yerel kutu içinde
+/// başlık yerleşimi. `left/right/top/bottom` bu kutuya göre çözülür.
+pub fn başlık_çiz_alanda(
+    çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık, alan: Dikdörtgen
+) {
     if !başlık.göster {
         return;
     }
-    let tuval_genişliği = çizici.genişlik();
+    let tuval_genişliği = alan.genişlik;
+    let tuval_yüksekliği = alan.yükseklik;
 
     let metin_boyutu = başlık.yazı.boyut.unwrap_or(tema::BAŞLIK_BOYUTU);
     let alt_boyut = başlık.alt_yazı.boyut.unwrap_or(tema::ALT_BAŞLIK_BOYUTU);
@@ -93,15 +103,16 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
     // `TitleView`, açık width seçeneğini `groupRect.width` ile değiştirir;
     // sağ/alt çözümü bu ölçülen içerik boyutuna ve padding'e göre yapılır.
     let sağdan = başlık.sağ.map(|u| u.çöz(tuval_genişliği));
-    let x = sağdan.map_or_else(
-        || match başlık.sol {
-            YatayKonum::Sol => başlık.iç_boşluk,
-            YatayKonum::Orta => (tuval_genişliği - blok_genişliği) / 2.0,
-            YatayKonum::Sağ => tuval_genişliği - blok_genişliği - başlık.iç_boşluk,
-            YatayKonum::Değer(u) => u.çöz(tuval_genişliği) + başlık.iç_boşluk,
-        },
-        |sağ| tuval_genişliği - sağ - başlık.iç_boşluk - blok_genişliği,
-    );
+    let x = alan.x
+        + sağdan.map_or_else(
+            || match başlık.sol {
+                YatayKonum::Sol => başlık.iç_boşluk,
+                YatayKonum::Orta => (tuval_genişliği - blok_genişliği) / 2.0,
+                YatayKonum::Sağ => tuval_genişliği - blok_genişliği - başlık.iç_boşluk,
+                YatayKonum::Değer(u) => u.çöz(tuval_genişliği) + başlık.iç_boşluk,
+            },
+            |sağ| tuval_genişliği - sağ - başlık.iç_boşluk - blok_genişliği,
+        );
     let açık_hiza = başlık.metin_hizası.map(|hiza| match hiza {
         BaşlıkMetinHizası::Sol => YatayHiza::Sol,
         BaşlıkMetinHizası::Orta => YatayHiza::Orta,
@@ -134,9 +145,9 @@ pub fn başlık_çiz(çizici: &mut dyn ÇizimYüzeyi, başlık: &Başlık) {
     };
 
     let mut y = if let Some(alt) = başlık.alt {
-        çizici.yükseklik() - alt.çöz(çizici.yükseklik()) - başlık.iç_boşluk - blok_yüksekliği
+        alan.y + tuval_yüksekliği - alt.çöz(tuval_yüksekliği) - başlık.iç_boşluk - blok_yüksekliği
     } else {
-        başlık.üst.map(|u| u.çöz(çizici.yükseklik())).unwrap_or(0.0) + başlık.iç_boşluk
+        alan.y + başlık.üst.map(|u| u.çöz(tuval_yüksekliği)).unwrap_or(0.0) + başlık.iç_boşluk
     };
 
     let kutu_solu = match hiza {

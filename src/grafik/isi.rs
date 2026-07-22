@@ -4,9 +4,10 @@
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
-use crate::koordinat::{Dikdörtgen, Kartezyen2B};
+use crate::koordinat::{Dikdörtgen, Kartezyen2B, MatrisYerleşimi};
 use crate::model::bilesen::Yön;
 use crate::model::gorsel_esleme::GörselEşleme;
+use crate::model::matris::MatrisAralığı;
 use crate::model::seri::IsıHaritasıSerisi;
 use crate::model::stil::ÖğeStili;
 use crate::model::{DikeyKonum, YatayKonum};
@@ -206,7 +207,7 @@ pub fn ısı_haritası_çiz(
             // kenarındaki alt-piksel örtüşmenin komşu hücre/eksen
             // rengine karışmasını engeller.
             çizici.dönüşümlü_konturlu_yazı(
-                &binlik_ayır(değer),
+                &ısı_etiket_metni(seri, öğe, değer),
                 (0.0, 0.0),
                 YatayHiza::Orta,
                 DikeyHiza::Orta,
@@ -226,6 +227,157 @@ pub fn ısı_haritası_çiz(
             ad: öğe.ad.clone(),
             değer: Some(değer),
             geometri: İsabetGeometrisi::Dikdörtgen(d),
+        });
+    }
+    vurgulu
+}
+
+fn ısı_etiket_metni(
+    seri: &IsıHaritasıSerisi,
+    öğe: &crate::model::deger::VeriÖğesi,
+    değer: f64,
+) -> String {
+    let ham = binlik_ayır(değer);
+    seri.etiket
+        .biçimleyici
+        .as_ref()
+        .map(|biçimleyici| {
+            biçimleyici.uygula_bağlamla(
+                değer,
+                &ham,
+                seri.ad.as_deref().unwrap_or_default(),
+                öğe.ad.as_deref().unwrap_or_default(),
+            )
+        })
+        .unwrap_or(ham)
+}
+
+/// Matrix koordinatına bağlı ısı haritası. Her öğe açık
+/// `matris_koordinatları` ile ya da `[x,y,value]` gövde sıra dizisiyle bir
+/// hücre/aralığa yerleşir.
+#[allow(clippy::too_many_arguments)]
+pub fn matris_ısı_haritası_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    seri: &IsıHaritasıSerisi,
+    genel_sıra: usize,
+    matris: &MatrisYerleşimi,
+    eşleme: &GörselEşleme,
+    eşleme_kapsamı: [f64; 2],
+    ilerleme: f32,
+    fare: Option<(f32, f32)>,
+    isabetler: &mut Vec<İsabetBölgesi>,
+) -> Option<usize> {
+    let hücre = |sıra: usize, öğe: &crate::model::deger::VeriÖğesi| {
+        let dizi = öğe.değer.dizi()?;
+        let açık = seri.matris_koordinatları.get(sıra).and_then(Option::as_ref);
+        let (x, y) = match açık {
+            Some((x, y)) => (x.clone(), y.clone()),
+            None => {
+                let x = *dizi.first()?;
+                let y = *dizi.get(1)?;
+                if !x.is_finite() || !y.is_finite() || x < 0.0 || y < 0.0 {
+                    return None;
+                }
+                (
+                    MatrisAralığı::from(x.round() as usize),
+                    MatrisAralığı::from(y.round() as usize),
+                )
+            }
+        };
+        let değer = *dizi.get(2)?;
+        let mut kutu = matris.veriden_yerleşime(&x, &y, true)?;
+        let boşluk = seri.hücre_boşluğu.max(0.0);
+        kutu.x += boşluk / 2.0 - 0.25;
+        kutu.y += boşluk / 2.0 - 0.25;
+        kutu.genişlik = (kutu.genişlik - boşluk + 0.5).max(1.0);
+        kutu.yükseklik = (kutu.yükseklik - boşluk + 0.5).max(1.0);
+        Some((kutu, değer))
+    };
+    let vurgulu = fare.and_then(|fare| {
+        seri.veri.iter().enumerate().find_map(|(sıra, öğe)| {
+            let (kutu, değer) = hücre(sıra, öğe)?;
+            (değer.is_finite()
+                && eşleme.seçili_mi(değer, eşleme_kapsamı)
+                && kutu.içeriyor_mu(fare))
+            .then_some(sıra)
+        })
+    });
+
+    for (sıra, öğe) in seri.veri.iter().enumerate() {
+        let Some((kutu, değer)) = hücre(sıra, öğe) else {
+            continue;
+        };
+        if !değer.is_finite() || !eşleme.seçili_mi(değer, eşleme_kapsamı) {
+            continue;
+        }
+        if eşleme.parçalı_mı()
+            && !matches!(
+                eşleme.parça_bul_kapsamda(değer, eşleme_kapsamı),
+                Some(parça) if eşleme.parça_açık_mı(parça)
+            )
+        {
+            continue;
+        }
+        let vurgu = vurgulu == Some(sıra);
+        let normal = &seri.öğe_stili;
+        let vurgu_stili = &seri.vurgu_öğe_stili;
+        let stil_opaklığı = if vurgu {
+            vurgu_stili.opaklık.or(normal.opaklık)
+        } else {
+            normal.opaklık
+        }
+        .unwrap_or(1.0);
+        let renk = eşleme
+            .renk_çöz(değer, eşleme_kapsamı)
+            .opaklık(ilerleme.clamp(0.0, 1.0) * stil_opaklığı);
+        let kenarlık_rengi = if vurgu {
+            vurgu_stili.kenarlık_rengi.or(normal.kenarlık_rengi)
+        } else {
+            normal.kenarlık_rengi
+        };
+        let kenarlık_kalınlığı = if vurgu && vurgu_stili.kenarlık_kalınlığı > 0.0 {
+            vurgu_stili.kenarlık_kalınlığı
+        } else {
+            normal.kenarlık_kalınlığı
+        };
+        çizici.dikdörtgen(
+            kutu,
+            &Dolgu::Düz(renk),
+            if vurgu && vurgu_stili.kenarlık_yarıçapı.iter().any(|r| *r > 0.0) {
+                vurgu_stili.kenarlık_yarıçapı
+            } else {
+                normal.kenarlık_yarıçapı
+            },
+            kenarlık_rengi.map(|renk| (kenarlık_kalınlığı.max(1.0), renk)),
+        );
+        if seri.etiket.göster {
+            let boyut = seri.etiket.yazı.boyut.unwrap_or(tema::YAZI_KÜÇÜK);
+            let parlaklık = 0.299 * renk.kırmızı + 0.587 * renk.yeşil + 0.114 * renk.mavi;
+            let yazı_rengi = seri.etiket.yazı.renk.unwrap_or(if parlaklık < 0.55 {
+                Renk::onaltılık(0xeeeeee)
+            } else {
+                Renk::onaltılık(0x333333)
+            });
+            çizici.dönüşümlü_konturlu_yazı(
+                &ısı_etiket_metni(seri, öğe, değer),
+                (0.0, 0.0),
+                YatayHiza::Orta,
+                DikeyHiza::Orta,
+                boyut,
+                yazı_rengi,
+                seri.etiket.yazı.kalın,
+                renk,
+                2.0,
+                AfinMatris::ötele(kutu.merkez().0, kutu.merkez().1 + 0.5),
+            );
+        }
+        isabetler.push(İsabetBölgesi {
+            seri_sırası: genel_sıra,
+            veri_sırası: sıra,
+            seri_adı: seri.ad.clone(),
+            ad: öğe.ad.clone(),
+            değer: Some(değer),
+            geometri: İsabetGeometrisi::Dikdörtgen(kutu),
         });
     }
     vurgulu

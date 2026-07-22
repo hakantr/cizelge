@@ -12692,6 +12692,1767 @@ fn mix_zoom_on_value(son: bool) -> Result<GrafikSeçenekleri, String> {
         .seri(SütunSerisi::yeni().ad("Budget 2012").veri(bütçe_2012)))
 }
 
+fn matrix_ısı_öğesi(
+    x: impl Into<MatrisAralığı>,
+    y: impl Into<MatrisAralığı>,
+    değer: f64,
+) -> (VeriÖğesi, Option<(MatrisAralığı, MatrisAralığı)>) {
+    (
+        VeriÖğesi::from([0.0, 0.0, değer]),
+        Some((x.into(), y.into())),
+    )
+}
+
+fn matrix_simple() -> GrafikSeçenekleri {
+    let satırlar = [
+        ("A1", "U", 10.0),
+        ("A1", "V", 20.0),
+        ("A2", "U", 30.0),
+        ("A2", "V", 40.0),
+        ("A31", "U", 50.0),
+        ("A3", "V", 60.0),
+    ];
+    let (veri, koordinatlar): (Vec<_>, Vec<_>) = satırlar
+        .into_iter()
+        .map(|(x, y, değer)| matrix_ısı_öğesi(x, y, değer))
+        .unzip();
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(
+                    MatrisBoyutu::yeni().veri([MatrisBoyutHücresi::yeni("A").çocuklar([
+                        MatrisBoyutHücresi::yeni("A1"),
+                        MatrisBoyutHücresi::yeni("A2"),
+                        MatrisBoyutHücresi::yeni("A3").çocuklar([
+                            MatrisBoyutHücresi::yeni("A31"),
+                            MatrisBoyutHücresi::yeni("A32"),
+                        ]),
+                    ])]),
+                )
+                .y(MatrisBoyutu::yeni().veri(["U", "V"]))
+                .üst(150)
+                .alt(150),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(80.0)
+                .hesaplanabilir(true)
+                .üst("center"),
+        )
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .matris_sırası(0)
+                .matris_koordinatları(koordinatlar)
+                .etiket(Etiket::yeni().göster(true))
+                .veri(veri),
+        )
+}
+
+fn matrix_correlation_heatmap() -> GrafikSeçenekleri {
+    let x = (1..=8).map(|sıra| format!("X{sıra}")).collect::<Vec<_>>();
+    let y = (1..=8).map(|sıra| format!("Y{sıra}")).collect::<Vec<_>>();
+    let mut tohum = 0x5eed_1234;
+    let mut veri = Vec::new();
+    let mut koordinatlar = Vec::<Option<(MatrisAralığı, MatrisAralığı)>>::new();
+    for i in 1..=8 {
+        for j in 1..=8 {
+            if i >= j {
+                let değer = if i == j {
+                    1.0
+                } else {
+                    kanıt_rastgele(&mut tohum) * 2.0 - 1.0
+                };
+                let (öğe, koordinat) =
+                    matrix_ısı_öğesi(format!("X{i}"), format!("Y{j}"), değer);
+                veri.push(öğe);
+                koordinatlar.push(koordinat);
+            }
+        }
+    }
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().veri(x))
+                .y(MatrisBoyutu::yeni().veri(y))
+                .üst(80),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(-1.0)
+                .en_çok(1.0)
+                .hesaplanabilir(true)
+                .yön(Yön::Yatay)
+                .üst(5)
+                .sol("center"),
+        )
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .matris_sırası(0)
+                .matris_koordinatları(koordinatlar)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+                            format!("{değer:.2}")
+                        }))),
+                )
+                .veri(veri),
+        )
+}
+
+fn matrix_correlation_scatter() -> GrafikSeçenekleri {
+    let x = (1..=10).map(|sıra| format!("X{sıra}")).collect::<Vec<_>>();
+    let y = (1..=6).map(|sıra| format!("Y{sıra}")).collect::<Vec<_>>();
+    let mut tohum = 0x5eed_1234;
+    let mut veri = Vec::new();
+    let mut koordinatlar = Vec::<Option<(MatrisAralığı, MatrisAralığı)>>::new();
+    for i in 1..=10 {
+        for j in 1..=6 {
+            let değer = kanıt_rastgele(&mut tohum) * 2.0 - 1.0;
+            veri.push(VeriÖğesi::from([i as f64 - 1.0, j as f64 - 1.0, değer]));
+            koordinatlar.push(Some((format!("X{i}").into(), format!("Y{j}").into())));
+        }
+    }
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().veri(x))
+                .y(MatrisBoyutu::yeni().veri(y))
+                .üst(80),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(-1.0)
+                .en_çok(1.0)
+                .hesaplanabilir(true)
+                .yön(Yön::Yatay)
+                .üst(5)
+                .sol("center")
+                .renkler([
+                    "#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090",
+                    "#fdae61", "#f46d43", "#d73027", "#a50026",
+                ])
+                .sembol_boyutu(15.0, 40.0),
+        )
+        .seri(
+            SaçılımSerisi::yeni()
+                .matris_sırası(0)
+                .matris_koordinatları(koordinatlar)
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .biçimleyici(Biçimleyici::İşlev(Arc::new(|değer, _| {
+                            format!("{değer:.2}")
+                        }))),
+                )
+                .öğe_stili(ÖğeStili::yeni().opaklık(1.0))
+                .veri(veri),
+        )
+}
+
+fn matrix_covariance() -> GrafikSeçenekleri {
+    let boyut = |önek: &str| {
+        (0..5)
+            .map(|i| {
+                MatrisBoyutHücresi::yeni(format!("{önek}{}", i + 1)).çocuklar(
+                    (0..5).map(|j| MatrisBoyutHücresi::yeni((i * 5 + j + 1).to_string())),
+                )
+            })
+            .collect::<Vec<_>>()
+    };
+    let mut tohum = 0x5eed_1234;
+    let mut önceki = BTreeMap::<(usize, usize), f64>::new();
+    let mut veri = Vec::with_capacity(625);
+    let mut koordinatlar = Vec::<Option<(MatrisAralığı, MatrisAralığı)>>::with_capacity(625);
+    for i in 1..=25 {
+        for j in 1..=25 {
+            let mut taban = if i == j { 100.0 } else { 20.0 };
+            let i_grup = (i + 4) / 5;
+            let j_grup = (j + 4) / 5;
+            taban += (3isize - (i_grup as isize - j_grup as isize).abs()) as f64 * 35.0;
+            if i % 5 == j % 5 {
+                taban += 20.0;
+            }
+            if kanıt_rastgele(&mut tohum) > 0.9 {
+                taban += kanıt_rastgele(&mut tohum) * 40.0;
+            }
+            let değer = if i > j {
+                *önceki.get(&(j, i)).unwrap_or(&0.0)
+            } else {
+                let değer = (kanıt_rastgele(&mut tohum) * 0.5 + 0.5) * taban;
+                önceki.insert((i, j), değer);
+                değer
+            };
+            veri.push(VeriÖğesi::from([i as f64 - 1.0, j as f64 - 1.0, değer]));
+            koordinatlar.push(Some((i.to_string().into(), j.to_string().into())));
+        }
+    }
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().veri(boyut("X")).göster(false))
+                .y(MatrisBoyutu::yeni().veri(boyut("Y")).göster(false))
+                .genişlik(500)
+                .yükseklik(500)
+                .yatay_ortala(),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(15.0)
+                .en_çok(120.0)
+                .hesaplanabilir(true)
+                .yön(Yön::Yatay)
+                .üst(5)
+                .sol("center")
+                .renkler([
+                    "#313695", "#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090",
+                    "#fdae61", "#f46d43", "#d73027", "#a50026",
+                ]),
+        )
+        .seri(
+            IsıHaritasıSerisi::yeni()
+                .matris_sırası(0)
+                .matris_koordinatları(koordinatlar)
+                .veri(veri),
+        )
+}
+
+fn matrix_graph() -> GrafikSeçenekleri {
+    let düğümler = [
+        ("Intro to Computer Science", "Programming", "1st Year"),
+        ("Intro to Data Analysis", "Data Analysis", "2nd Year"),
+        ("Intro to Algorithms", "Algorithms", "2nd Year"),
+        ("Advanced Programming", "Programming", "2nd Year"),
+        ("Data Structures\nand Algorithms", "Algorithms", "4th Year"),
+        ("Statistics for Data Analysis", "Data Analysis", "3rd Year"),
+        ("Software Development", "Programming", "3rd Year"),
+    ]
+    .into_iter()
+    .map(|(ad, x, y)| {
+        GrafoDüğümü::yeni(ad, 15.0)
+            .değerli(1.0)
+            .matris_koordinatı(x, y)
+    })
+    .collect::<Vec<_>>();
+    let bağlar = [(1, 0), (2, 0), (3, 0), (4, 3), (4, 2), (5, 1), (6, 3)]
+        .map(|(kaynak, hedef)| (düğümler[kaynak].ad.clone(), düğümler[hedef].ad.clone()));
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .başlık(Başlık::yeni().metin("Course Prerequisites"))
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().veri(["Data Analysis", "Programming", "Algorithms"]))
+                .y(MatrisBoyutu::yeni().veri(["1st Year", "2nd Year", "3rd Year", "4th Year"]))
+                .sol(80)
+                .sağ(80)
+                .üst(150)
+                .alt(150),
+        )
+        .seri(
+            GrafoSerisi::yeni()
+                .matris_sırası(0)
+                .yerleşim(GrafoYerleşimi::Yok)
+                .düğümler(düğümler)
+                .bağlar(bağlar)
+                .etiket_göster(true)
+                .etiket_eşiği(0.0)
+                .hedef_oku(true)
+                .çizgi_stili(
+                    ÇizgiStili::yeni()
+                        .renk("#99aaff")
+                        .kalınlık(2.0)
+                        .opaklık(1.0),
+                ),
+        )
+}
+
+fn matrix_pie() -> GrafikSeçenekleri {
+    let birincil = MatrisBoyutHücresi::yeni("Primary School")
+        .çocuklar((1..=5).map(|i| MatrisBoyutHücresi::yeni(format!("Grade {i}"))));
+    let lise = MatrisBoyutHücresi::yeni("High School")
+        .çocuklar((6..=9).map(|i| MatrisBoyutHücresi::yeni(format!("Grade {i}"))));
+    let mut tohum = 0x5eed_1234;
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .gösterge(Gösterge::yeni().alt(40).veri(["Male", "Female"]))
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().veri([birincil, lise]))
+                .y(MatrisBoyutu::yeni().veri((1..=6).map(|i| format!("Class {i}"))))
+                .üst(80)
+                .alt(80),
+        );
+    for i in 1..=9 {
+        for j in 1..=6 {
+            seçenekler = seçenekler.seri(
+                PastaSerisi::yeni()
+                    .ad(if (i, j) == (1, 1) { "Male" } else { "" })
+                    .matris_merkezi(format!("Grade {i}"), format!("Class {j}"))
+                    .yarıçap(18)
+                    .etiket(Etiket::yeni().göster(false))
+                    .veri([
+                        VeriÖğesi::adlı(
+                            "Male",
+                            (kanıt_rastgele(&mut tohum) * 10.0).round() + 10.0,
+                        ),
+                        VeriÖğesi::adlı(
+                            "Female",
+                            (kanıt_rastgele(&mut tohum) * 10.0).round() + 10.0,
+                        ),
+                    ]),
+            );
+        }
+    }
+    seçenekler
+}
+
+fn matrix_confusion() -> GrafikSeçenekleri {
+    use cizelge::cizim::YatayHiza;
+
+    let veri = [
+        ("Positive", "Positive", 10.0),
+        ("Positive", "Negative", 2.0),
+        ("Negative", "Positive", 3.0),
+        ("Negative", "Negative", 5.0),
+    ]
+    .into_iter()
+    .map(|(x, y, değer)| {
+        VeriÖğesi::yeni(değer).boyutlar([
+            ("x".to_owned(), VeriDeğeri::Metin(x.to_owned())),
+            ("y".to_owned(), VeriDeğeri::Metin(y.to_owned())),
+        ])
+    })
+    .collect::<Vec<_>>();
+    let özel = ÖzelSeri::yeni()
+        .matris_sırası(0)
+        .veri(veri)
+        .çizim(|yüzey, bağlam| {
+            let Some(matris) = bağlam.matris else { return };
+            for öğe in bağlam.veri {
+                let (Some(VeriDeğeri::Metin(x)), Some(VeriDeğeri::Metin(y))) =
+                    (öğe.boyut("x"), öğe.boyut("y"))
+                else {
+                    continue;
+                };
+                let Some(kutu) =
+                    matris.veriden_yerleşime(&x.clone().into(), &y.clone().into(), true)
+                else {
+                    continue;
+                };
+                yüzey.dikdörtgen(
+                    kutu,
+                    &Dolgu::Düz(if x == y {
+                        "#88ff88".into()
+                    } else {
+                        "#ff8888".into()
+                    }),
+                    [0.0; 4],
+                    None,
+                );
+                let değer = öğe.değer.sayı().unwrap_or_default();
+                uyum_çok_satırlı_yazı(
+                    yüzey,
+                    &format!("{} {y}\n{}", if x == y { "True" } else { "False" }, değer),
+                    kutu.merkez(),
+                    YatayHiza::Orta,
+                    18.0,
+                    18.0,
+                    "#444".into(),
+                    false,
+                );
+            }
+        });
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().veri(["Positive", "Negative"]).etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().boyut(16.0).renk("#555")),
+                ))
+                .y(MatrisBoyutu::yeni().veri(["Positive", "Negative"]).etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().boyut(16.0).renk("#555")),
+                ))
+                .üst(80)
+                .genişlik(600)
+                .yatay_ortala(),
+        )
+        .seri(özel)
+}
+
+fn matris_sıra_aralığı(başlangıç: isize, bitiş: isize) -> MatrisAralığı {
+    MatrisAralığı::Aralık(MatrisKonumu::Sıra(başlangıç), MatrisKonumu::Sıra(bitiş))
+}
+
+fn matrix_tek_seri_verisi(
+    gün_sayısı: usize, ters_xy: bool, tohum: &mut u32
+) -> Vec<VeriÖğesi> {
+    let mut son_değer = (kanıt_rastgele(tohum) * 300.0).round();
+    let mut dönüş_sırası = None::<isize>;
+    let mut işaret = -1.0_f64;
+    (0..gün_sayısı)
+        .map(|sıra| {
+            if dönüş_sırası.is_none_or(|dönüş| sıra as isize >= dönüş) {
+                let sapma = gün_sayısı as f64 / 4.0 * ((kanıt_rastgele(tohum) - 0.5) * 0.1);
+                // JavaScript `Math.round`, negatif yarımları +∞ yönüne yuvarlar.
+                dönüş_sırası = Some(sıra as isize + (sapma + 0.5).floor() as isize);
+                işaret = -işaret;
+            }
+            let genlik = 50.0;
+            let fark =
+                (kanıt_rastgele(tohum) * genlik - genlik / 2.0 + işaret * genlik / 3.0).round();
+            // Kaynak örnek yalnız dışarı verilen `val` değerini sıfıra
+            // kıstırır; rastgele yürüyüşün iç durumu negatif kalabilir.
+            // `son_değer = max(...)` yapmak sonraki bütün noktaları kaydırır.
+            son_değer += fark;
+            let değer = son_değer.max(0.0);
+            if ters_xy {
+                VeriÖğesi::from([değer, sıra as f64])
+            } else {
+                VeriÖğesi::from([sıra as f64, değer])
+            }
+        })
+        .collect()
+}
+
+fn matrix_grid_layout(genişlik: f32) -> GrafikSeçenekleri {
+    let dar = genişlik < 500.0;
+    let görünmez_stil = ÖğeStili::yeni()
+        .kenarlık_rengi("transparent")
+        .kenarlık_kalınlığı(0.0);
+    let görünmez_ayırıcı = ÇizgiStili::yeni().kalınlık(0.0);
+    let mut tohum = 0x5eed_1234;
+    let üst_veri = matrix_tek_seri_verisi(100, false, &mut tohum);
+    let yan_veri = matrix_tek_seri_verisi(10, true, &mut tohum);
+    let ana_veri = matrix_tek_seri_verisi(100, false, &mut tohum);
+    let alt_veri = matrix_tek_seri_verisi(10, false, &mut tohum);
+
+    let (başlık_x, başlık_y, üst_x, üst_y, yan_x, yan_y, ana_x, ana_y, alt_x, alt_y): (
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+        MatrisAralığı,
+    ) = if dar {
+        (
+            0usize.into(),
+            0usize.into(),
+            0usize.into(),
+            matris_sıra_aralığı(1, 2),
+            0usize.into(),
+            matris_sıra_aralığı(3, 4),
+            0usize.into(),
+            matris_sıra_aralığı(5, 7),
+            0usize.into(),
+            matris_sıra_aralığı(8, 9),
+        )
+    } else {
+        (
+            matris_sıra_aralığı(0, 3),
+            0usize.into(),
+            matris_sıra_aralığı(0, 3),
+            matris_sıra_aralığı(1, 2),
+            0usize.into(),
+            matris_sıra_aralığı(3, 9),
+            matris_sıra_aralığı(1, 3),
+            matris_sıra_aralığı(3, 7),
+            matris_sıra_aralığı(1, 3),
+            matris_sıra_aralığı(8, 9),
+        )
+    };
+
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni()
+                    .uzunluk(if dar { 1 } else { 4 })
+                    .göster(false)
+                    .öğe_stili(görünmez_stil.clone())
+                    .ayırıcı(görünmez_ayırıcı.clone()))
+                .y(MatrisBoyutu::yeni()
+                    .uzunluk(10)
+                    .göster(false)
+                    .öğe_stili(görünmez_stil.clone())
+                    .ayırıcı(görünmez_ayırıcı))
+                .gövde_stili(görünmez_stil.clone())
+                .arkaplan_stili(görünmez_stil)
+                .sol(0)
+                .sağ(0)
+                .üst(0)
+                .alt(0),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Resize the Canvas to Check the Responsiveness")
+                .matris_hücresi(0, başlık_x, başlık_y)
+                .sol("center")
+                .üst(10)
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(20.0).kalın(true)),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Header Section")
+                .matris_hücresi(0, üst_x.clone(), üst_y.clone())
+                .sol("center")
+                .üst(5)
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(14.0).kalın(true)),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Sidebar Section")
+                .matris_hücresi(0, yan_x.clone(), yan_y.clone())
+                .sol("center")
+                .üst(15)
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(14.0).kalın(true)),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Main Content Area")
+                .matris_hücresi(0, ana_x.clone(), ana_y.clone())
+                .sol("center")
+                .üst(15)
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(14.0).kalın(true)),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Footer Section")
+                .matris_hücresi(0, alt_x.clone(), alt_y.clone())
+                .sol("center")
+                .üst(15)
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().boyut(14.0).kalın(true)),
+        );
+
+    for ızgara in [
+        Izgara::yeni()
+            .matris_hücresi(0, üst_x, üst_y)
+            .üst(30)
+            .alt(40)
+            .sol(50)
+            .sağ(10),
+        Izgara::yeni()
+            .matris_hücresi(0, yan_x, yan_y)
+            .üst(50)
+            .alt(42)
+            .sol(40)
+            .sağ(30),
+        Izgara::yeni()
+            .matris_hücresi(0, ana_x, ana_y)
+            .üst(50)
+            .alt(40)
+            .sol(45)
+            .sağ(10),
+        Izgara::yeni()
+            .matris_hücresi(0, alt_x, alt_y)
+            .üst(50)
+            .alt(35)
+            .sol(60)
+            .sağ(20),
+    ] {
+        seçenekler = seçenekler.ızgara_ekle(ızgara);
+    }
+    seçenekler
+        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(0).bölme_sayısı(6))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(0).bölme_sayısı(2))
+        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(1).bölme_çizgisi_göster(false))
+        .y_ekseni_ekle(
+            Eksen::kategori()
+                .ızgara_sırası(1)
+                .veri(["8", "15", "22", "29", "Jun", "5", "15", "22", "29", "6"]),
+        )
+        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(2).bölme_sayısı(6))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(2).bölme_sayısı(4))
+        .x_ekseni_ekle(Eksen::değer().ızgara_sırası(3).bölme_sayısı(8))
+        .y_ekseni_ekle(Eksen::değer().ızgara_sırası(3).bölme_sayısı(2))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .eksenler(0, 0)
+                .sembol_göster(false)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#5470c6").kalınlık(2.0))
+                .veri(üst_veri),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .eksenler(1, 1)
+                .öğe_stili(ÖğeStili::yeni().renk("#b6d92b"))
+                .veri(yan_veri),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .eksenler(2, 2)
+                .sembol_göster(false)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#525a7a").kalınlık(2.0))
+                .veri(ana_veri),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .eksenler(3, 3)
+                .öğe_stili(ÖğeStili::yeni().renk("#ff9f4a"))
+                .veri(alt_veri),
+        )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn uyum_çok_satırlı_yazı(
+    yüzey: &mut dyn cizelge::cizim::ÇizimYüzeyi,
+    metin: &str,
+    konum: (f32, f32),
+    yatay: cizelge::cizim::YatayHiza,
+    boyut: f32,
+    satır_yüksekliği: f32,
+    renk: Renk,
+    kalın: bool,
+) {
+    use cizelge::cizim::DikeyHiza;
+
+    let satırlar = metin.split('\n').collect::<Vec<_>>();
+    let ilk_y = konum.1 - satır_yüksekliği * satırlar.len().saturating_sub(1) as f32 / 2.0;
+    for (sıra, satır) in satırlar.into_iter().enumerate() {
+        yüzey.yazı(
+            satır,
+            (konum.0, ilk_y + sıra as f32 * satır_yüksekliği),
+            yatay,
+            DikeyHiza::Orta,
+            boyut,
+            renk,
+            kalın,
+        );
+    }
+}
+
+fn matrix_sparkline() -> GrafikSeçenekleri {
+    let x_değerleri = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+    let y_değerleri = [
+        "8:00\n~\n10:00",
+        "10:00\n~\n12:00",
+        "12:00\n~\n14:00",
+        "14:00\n~\n16:00",
+        "16:00\n~\n18:00",
+        "18:00\n~\n20:00",
+    ];
+    let y_hücreleri = y_değerleri.into_iter().enumerate().map(|(sıra, değer)| {
+        let hücre = MatrisBoyutHücresi::yeni(değer);
+        if sıra == 2 { hücre.boyut(55) } else { hücre }
+    });
+    let kırık = MatrisGövdeHücresi::yeni(MatrisAralığı::Tümü, 2usize)
+        .koordinatı_sınırla(true)
+        .birleştir(true)
+        .değer("Break")
+        .etiket(
+            Etiket::yeni()
+                .göster(true)
+                .yazı(YazıStili::yeni().boyut(16.0).renk("#999")),
+        );
+    let köşe = MatrisGövdeHücresi::yeni(-1isize, -1isize)
+        .değer("Time")
+        .etiket(
+            Etiket::yeni()
+                .göster(true)
+                .yazı(YazıStili::yeni().boyut(16.0).renk("#777")),
+        );
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni()
+                    .veri(x_değerleri)
+                    .seviye_boyutu(40)
+                    .etiket(
+                        Etiket::yeni()
+                            .göster(true)
+                            .yazı(YazıStili::yeni().boyut(16.0).renk("#555")),
+                    ))
+                .y(MatrisBoyutu::yeni()
+                    .veri(y_hücreleri)
+                    .seviye_boyutu(70)
+                    .etiket(
+                        Etiket::yeni()
+                            .göster(true)
+                            .yazı(YazıStili::yeni().boyut(14.0).renk("#777")),
+                    ))
+                .köşe_hücresi(köşe)
+                .gövde_hücresi(kırık)
+                .üst(30)
+                .alt(80)
+                .genişlik("90%")
+                .yatay_ortala(),
+        );
+    let mut tohum = 0x5eed_1234;
+    let mut x_eksen_sıraları = Vec::new();
+    for (y_sırası, y) in y_değerleri.into_iter().enumerate() {
+        if y_sırası == 2 {
+            continue;
+        }
+        for x in x_değerleri {
+            let sıra = x_eksen_sıraları.len();
+            x_eksen_sıraları.push(sıra);
+            seçenekler = seçenekler
+                .ızgara_ekle(
+                    Izgara::yeni()
+                        .matris_hücresi(0, x, y)
+                        .üst(10)
+                        .alt(10)
+                        .sol("5%")
+                        .genişlik("90%")
+                        .etiketi_kapsa(true),
+                )
+                .x_ekseni_ekle(
+                    Eksen::değer()
+                        .ızgara_sırası(sıra)
+                        .ölçekli(true)
+                        .çizgi(EksenÇizgisi::yeni().göster(false))
+                        .çentik(EksenÇentiği::yeni().göster(false))
+                        .etiket(EksenEtiketi::yeni().göster(false))
+                        .bölme_çizgisi_göster(false),
+                )
+                .y_ekseni_ekle(
+                    Eksen::değer()
+                        .ızgara_sırası(sıra)
+                        .ölçekli(true)
+                        .bölme_sayısı(1)
+                        .çizgi(EksenÇizgisi::yeni().göster(false))
+                        .çentik(EksenÇentiği::yeni().göster(false))
+                        .etiket(
+                            EksenEtiketi::yeni()
+                                .yazı(YazıStili::yeni().boyut(9.0))
+                                .en_çok_etiketini_göster(true),
+                        ),
+                )
+                .seri(
+                    ÇizgiSerisi::yeni()
+                        .eksenler(sıra, sıra)
+                        .sembol_göster(false)
+                        .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0))
+                        .veri(matrix_tek_seri_verisi(365, false, &mut tohum)),
+                );
+        }
+    }
+    seçenekler
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::sürgü()
+                .x_eksenleri(x_eksen_sıraları.clone())
+                .sol("10%")
+                .genişlik("80%")
+                .alt(30)
+                .yükseklik(30),
+        )
+        .veri_yakınlaştırma(
+            VeriYakınlaştırma::iç()
+                .x_eksenleri(x_eksen_sıraları)
+                .göster(false),
+        )
+}
+
+fn matrix_mini_bar_serisi(
+    sütun: &'static str, tarihler: &[String], değerler: &[f64]
+) -> ÖzelSeri {
+    use cizelge::cizim::{DikeyHiza, YatayHiza};
+
+    let veri = tarihler
+        .iter()
+        .zip(değerler)
+        .map(|(tarih, değer)| {
+            VeriÖğesi::yeni(*değer).boyutlar([
+                ("x".to_owned(), VeriDeğeri::Metin(sütun.to_owned())),
+                ("y".to_owned(), VeriDeğeri::Metin(tarih.clone())),
+            ])
+        })
+        .collect::<Vec<_>>();
+    ÖzelSeri::yeni()
+        .matris_sırası(0)
+        .matris_kategorileri([sütun], tarihler.iter().cloned())
+        .veri(veri)
+        .çizim(|yüzey, bağlam| {
+            let Some(matris) = bağlam.matris else { return };
+            for öğe in bağlam.veri {
+                let (Some(VeriDeğeri::Metin(x)), Some(VeriDeğeri::Metin(y))) =
+                    (öğe.boyut("x"), öğe.boyut("y"))
+                else {
+                    continue;
+                };
+                let Some(kutu) = matris.veriden_yerleşime(
+                    &MatrisAralığı::from(x.clone()),
+                    &MatrisAralığı::from(y.clone()),
+                    true,
+                ) else {
+                    continue;
+                };
+                let değer = öğe.değer.sayı().unwrap_or_default().clamp(0.0, 10_000.0);
+                let bar_yüksekliği = kutu.yükseklik * 0.2;
+                let bar_y = kutu.y + (kutu.yükseklik - bar_yüksekliği) * 0.75;
+                let bar_x = kutu.x + kutu.genişlik * 0.15;
+                let bar_genişliği = kutu.genişlik * 0.5 * (değer / 10_000.0) as f32;
+                yüzey.dikdörtgen(
+                    cizelge::koordinat::Dikdörtgen::yeni(
+                        bar_x,
+                        bar_y,
+                        bar_genişliği,
+                        bar_yüksekliği,
+                    ),
+                    &Dolgu::Düz("#0ca8df".into()),
+                    [0.0; 4],
+                    None,
+                );
+                yüzey.yazı(
+                    &format!("{değer:.0}"),
+                    (bar_x, kutu.y + kutu.yükseklik * 0.375),
+                    YatayHiza::Sol,
+                    DikeyHiza::Orta,
+                    12.0,
+                    "#333".into(),
+                    false,
+                );
+            }
+        })
+}
+
+fn matrix_mini_bar_data_collection() -> GrafikSeçenekleri {
+    let tarihler = (1..=10)
+        .map(|gün| format!("2021-02-{gün:02}"))
+        .collect::<Vec<_>>();
+    let tutar = [
+        1212., 7181., 2763., 6122., 4221., 7221., 5121., 6121., 7121., 8121.,
+    ];
+    let dosya = [
+        2321., 2114., 4212., 2942., 3411., 5121., 4121., 3121., 2121., 1121.,
+    ];
+    let q = [
+        1412., 1402., 8172., 6121., 1987., 1303., 1819., 2303., 3303., 4303.,
+    ];
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni().x(MatrisBoyutu::yeni()
+                .seviye_boyutu(50)
+                .öğe_stili(ÖğeStili::yeni().renk("#f0f8ff"))
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().kalın(true)),
+                )),
+        )
+        .seri(matrix_mini_bar_serisi("amount", &tarihler, &tutar))
+        .seri(matrix_mini_bar_serisi("file", &tarihler, &dosya))
+        .seri(matrix_mini_bar_serisi("Q", &tarihler, &q))
+}
+
+fn tek_tırnak_alanları(satır: &str) -> Vec<&str> {
+    satır.split('\'').skip(1).step_by(2).collect()
+}
+
+fn matrix_periodic_table() -> Result<GrafikSeçenekleri, String> {
+    use cizelge::cizim::YatayHiza;
+
+    let kaynak = theme_river_kaynağını_oku("matrix-periodic-table.ts")?;
+    let mut veri = Vec::new();
+    for satır in kaynak.lines().map(str::trim) {
+        if !satır.starts_with("['") || !satır.contains("colors.") {
+            continue;
+        }
+        let alanlar = tek_tırnak_alanları(satır);
+        let (x, y, atom, simge, öğe_mi) = if satır.contains(", null,") {
+            let [x, y, simge] = alanlar.as_slice() else {
+                continue;
+            };
+            (*x, *y, 0.0, *simge, false)
+        } else {
+            let [x, y, atom, simge] = alanlar.as_slice() else {
+                continue;
+            };
+            let atom = atom
+                .parse::<f64>()
+                .map_err(|hata| format!("periodik tablo atom numarası `{atom}`: {hata}"))?;
+            (*x, *y, atom, *simge, true)
+        };
+        let renk = if satır.contains("colors.red") {
+            "#f88"
+        } else if satır.contains("colors.green") {
+            "#8f8"
+        } else if satır.contains("colors.blue") {
+            "#8bf"
+        } else {
+            "#ff8"
+        };
+        veri.push(VeriÖğesi::yeni(atom).boyutlar([
+            ("x".to_owned(), VeriDeğeri::Metin(x.to_owned())),
+            ("y".to_owned(), VeriDeğeri::Metin(y.to_owned())),
+            ("simge".to_owned(), VeriDeğeri::Metin(simge.to_owned())),
+            ("renk".to_owned(), VeriDeğeri::Metin(renk.to_owned())),
+            ("öğe".to_owned(), VeriDeğeri::Mantıksal(öğe_mi)),
+        ]));
+    }
+    if veri.len() != 120 {
+        return Err(format!(
+            "matrix-periodic-table resmî kaynağından 120 yerine {} hücre okundu",
+            veri.len()
+        ));
+    }
+    let özel = ÖzelSeri::yeni()
+        .matris_sırası(0)
+        .veri(veri)
+        .çizim(|yüzey, bağlam| {
+            let Some(matris) = bağlam.matris else { return };
+            for öğe in bağlam.veri {
+                let (
+                    Some(VeriDeğeri::Metin(x)),
+                    Some(VeriDeğeri::Metin(y)),
+                    Some(VeriDeğeri::Metin(simge)),
+                    Some(VeriDeğeri::Metin(renk)),
+                    Some(VeriDeğeri::Mantıksal(öğe_mi)),
+                ) = (
+                    öğe.boyut("x"),
+                    öğe.boyut("y"),
+                    öğe.boyut("simge"),
+                    öğe.boyut("renk"),
+                    öğe.boyut("öğe"),
+                )
+                else {
+                    continue;
+                };
+                let Some(kutu) = matris.veriden_yerleşime(
+                    &MatrisAralığı::from(x.clone()),
+                    &MatrisAralığı::from(y.clone()),
+                    true,
+                ) else {
+                    continue;
+                };
+                let dolgu = Renk::çöz(renk).unwrap_or(Renk::SAYDAM).opaklık(if *öğe_mi {
+                    1.0
+                } else {
+                    0.5
+                });
+                yüzey.dikdörtgen(
+                    cizelge::koordinat::Dikdörtgen::yeni(
+                        kutu.x + 2.0,
+                        kutu.y + 2.0,
+                        (kutu.genişlik - 4.0).max(0.0),
+                        (kutu.yükseklik - 4.0).max(0.0),
+                    ),
+                    &Dolgu::Düz(dolgu),
+                    [0.0; 4],
+                    (*öğe_mi).then_some((1.0, "#aaa".into())),
+                );
+                let atom = öğe.değer.sayı().unwrap_or_default();
+                let metin = if *öğe_mi {
+                    format!("{atom:.0}\n{simge}")
+                } else {
+                    simge.clone()
+                };
+                uyum_çok_satırlı_yazı(
+                    yüzey,
+                    &metin,
+                    kutu.merkez(),
+                    YatayHiza::Orta,
+                    if *öğe_mi { 14.0 } else { 12.0 },
+                    if *öğe_mi { 14.0 } else { 12.0 },
+                    if *öğe_mi { "#555" } else { "#777" }.into(),
+                    false,
+                );
+            }
+
+            for (x, y, metin, dx, dy) in [
+                ("2", "9", "Lanthanides", 20.0, 0.0),
+                ("2", "10", "Actinides", 20.0, 0.0),
+                ("1", "1", "Nonmetals", -70.0, 0.0),
+                ("1", "2", "Metals", -70.0, 0.0),
+                ("19", "1", "Noble gases", 0.0, -40.0),
+                (
+                    "9",
+                    "3",
+                    "Transition metals\n(somtimes excl. group 12)",
+                    -25.0,
+                    0.0,
+                ),
+                ("1", "8", "s-block\n(incl. He)", 20.0, -3.0),
+                ("3", "8", "f-block", 0.0, -10.0),
+                ("9", "8", "d-block", -25.0, -10.0),
+                ("17", "8", "p-block (excl. He)", -25.0, -10.0),
+                (
+                    "16",
+                    "1",
+                    "Some elements near\nthe dashed staircase are\nsometimes called metalloids",
+                    0.0,
+                    0.0,
+                ),
+            ] {
+                let Some((px, py)) = matris.veriden_noktaya(x, y) else {
+                    continue;
+                };
+                uyum_çok_satırlı_yazı(
+                    yüzey,
+                    metin,
+                    (px + dx, py + dy),
+                    YatayHiza::Orta,
+                    14.0,
+                    14.0,
+                    "#333".into(),
+                    true,
+                );
+            }
+        });
+    let görünmez = ÖğeStili::yeni()
+        .kenarlık_rengi("transparent")
+        .kenarlık_kalınlığı(0.0);
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni()
+                    .veri((1..=19).map(|sıra| sıra.to_string()))
+                    .etiket(Etiket::yeni().göster(false))
+                    .öğe_stili(görünmez.clone())
+                    .ayırıcı(ÇizgiStili::yeni().kalınlık(0.0)))
+                .y(MatrisBoyutu::yeni()
+                    .veri((1..=10).map(|sıra| sıra.to_string()))
+                    .etiket(Etiket::yeni().göster(false))
+                    .öğe_stili(görünmez.clone())
+                    .ayırıcı(ÇizgiStili::yeni().kalınlık(0.0)))
+                .gövde_stili(görünmez.clone())
+                .arkaplan_stili(görünmez)
+                .genişlik(900)
+                .yatay_ortala(),
+        )
+        .seri(özel))
+}
+
+fn mbti_grubu(ad: &str) -> &'static str {
+    if ad.contains("NF") {
+        "NF"
+    } else if ad.contains("NT") {
+        "NT"
+    } else if ad.as_bytes().get(1) == Some(&b'S') && ad.as_bytes().get(3) == Some(&b'J') {
+        "SJ"
+    } else {
+        "SP"
+    }
+}
+
+fn mbti_rengi(ad: &str, koyu: bool) -> &'static str {
+    match (mbti_grubu(ad), koyu) {
+        ("NF", false) => "#2D9A69",
+        ("NF", true) => "#0FB369",
+        ("NT", false) => "#7D568F",
+        ("NT", true) => "#854AA0",
+        ("SJ", false) => "#3A8DAB",
+        ("SJ", true) => "#2298C3",
+        (_, false) => "#E0A433",
+        (_, true) => "#F2A30D",
+    }
+}
+
+fn mbti_boyutu() -> Vec<MatrisBoyutHücresi> {
+    [
+        ("NF", ["INFJ", "INFP", "ENFJ", "ENFP"]),
+        ("NT", ["INTJ", "INTP", "ENTJ", "ENTP"]),
+        ("SJ", ["ISFJ", "ISTJ", "ESFJ", "ESTJ"]),
+        ("SP", ["ISFP", "ISTP", "ESFP", "ESTP"]),
+    ]
+    .into_iter()
+    .map(|(grup, üyeler)| {
+        let renk = mbti_rengi(grup, false);
+        MatrisBoyutHücresi::yeni(grup)
+            .etiket(
+                Etiket::yeni()
+                    .göster(true)
+                    .yazı(YazıStili::yeni().boyut(16.0).renk(renk).kalın(true)),
+            )
+            .çocuklar(üyeler.map(|üye| {
+                MatrisBoyutHücresi::yeni(üye).etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .yazı(YazıStili::yeni().boyut(11.0).renk(renk).kalın(true)),
+                )
+            }))
+    })
+    .collect()
+}
+
+fn matrix_mbti(genişlik: f32, yükseklik: f32) -> Result<GrafikSeçenekleri, String> {
+    use cizelge::cizim::{DikeyHiza, YatayHiza};
+
+    let kaynak = theme_river_kaynağını_oku("matrix-mbti.ts")?;
+    let mut özgün_bölümde = false;
+    let mut özgün = BTreeMap::<(String, String), f64>::new();
+    for satır in kaynak.lines().map(str::trim) {
+        if satır.starts_with("const originalData = [") {
+            özgün_bölümde = true;
+            continue;
+        }
+        if özgün_bölümde && satır == "];" {
+            break;
+        }
+        if !özgün_bölümde || !satır.starts_with("['") {
+            continue;
+        }
+        let gövde = satır
+            .trim_end_matches(',')
+            .trim_start_matches('[')
+            .trim_end_matches(']');
+        let parçalar = gövde.split(',').map(str::trim).collect::<Vec<_>>();
+        let [a, b, değer] = parçalar.as_slice() else {
+            continue;
+        };
+        let a = a.trim_matches('\'').to_owned();
+        let b = b.trim_matches('\'').to_owned();
+        let değer = değer
+            .parse::<f64>()
+            .map_err(|hata| format!("MBTI uyum değeri `{değer}`: {hata}"))?;
+        özgün.insert((a, b), değer);
+    }
+    if özgün.len() < 130 {
+        return Err(format!(
+            "matrix-mbti resmî kaynağından beklenen veri okunamadı: {} çift",
+            özgün.len()
+        ));
+    }
+    let mbti = [
+        "ENFJ", "ENFP", "ENTJ", "ENTP", "ESFJ", "ESFP", "ESTJ", "ESTP", "INFJ", "INFP", "INTJ",
+        "INTP", "ISFJ", "ISFP", "ISTJ", "ISTP",
+    ];
+    let mut veri = Vec::with_capacity(256);
+    for a in mbti {
+        for b in mbti {
+            let değer = özgün
+                .get(&(a.to_owned(), b.to_owned()))
+                .or_else(|| özgün.get(&(b.to_owned(), a.to_owned())))
+                .copied()
+                .unwrap_or(0.0);
+            veri.push(
+                VeriÖğesi::yeni(değer).boyutlar([
+                    ("x".to_owned(), VeriDeğeri::Metin(a.to_owned())),
+                    ("y".to_owned(), VeriDeğeri::Metin(b.to_owned())),
+                    (
+                        "ön".to_owned(),
+                        VeriDeğeri::Metin(mbti_rengi(a, true).to_owned()),
+                    ),
+                    (
+                        "arka".to_owned(),
+                        VeriDeğeri::Metin(mbti_rengi(b, true).to_owned()),
+                    ),
+                    (
+                        "etiket".to_owned(),
+                        VeriDeğeri::Metin(
+                            if değer < 0.2 {
+                                mbti_rengi(b, false)
+                            } else {
+                                "#fff"
+                            }
+                            .to_owned(),
+                        ),
+                    ),
+                ]),
+            );
+        }
+    }
+    let özel = ÖzelSeri::yeni()
+        .matris_sırası(0)
+        .veri(veri)
+        .çizim(|yüzey, bağlam| {
+            let Some(matris) = bağlam.matris else { return };
+            let zemin = Renk::çöz("#F0F7F9").unwrap_or(Renk::BEYAZ);
+            for öğe in bağlam.veri {
+                let (
+                    Some(VeriDeğeri::Metin(x)),
+                    Some(VeriDeğeri::Metin(y)),
+                    Some(VeriDeğeri::Metin(ön)),
+                    Some(VeriDeğeri::Metin(arka)),
+                    Some(VeriDeğeri::Metin(etiket)),
+                ) = (
+                    öğe.boyut("x"),
+                    öğe.boyut("y"),
+                    öğe.boyut("ön"),
+                    öğe.boyut("arka"),
+                    öğe.boyut("etiket"),
+                )
+                else {
+                    continue;
+                };
+                let Some(kutu) = matris.veriden_yerleşime(
+                    &MatrisAralığı::from(x.clone()),
+                    &MatrisAralığı::from(y.clone()),
+                    true,
+                ) else {
+                    continue;
+                };
+                let değer = öğe.değer.sayı().unwrap_or_default().clamp(0.0, 1.0) as f32;
+                let arka = zemin.karıştır(Renk::çöz(arka).unwrap_or(zemin), değer);
+                let ön = zemin.karıştır(Renk::çöz(ön).unwrap_or(zemin), değer);
+                yüzey.dikdörtgen(kutu, &Dolgu::Düz(arka), [0.0; 4], None);
+                let x0 = kutu.x.floor() as i32;
+                let x1 = kutu.sağ().ceil() as i32;
+                let y0 = kutu.y.floor() as i32;
+                let y1 = kutu.alt().ceil() as i32;
+                for py in y0..y1 {
+                    for px in x0..x1 {
+                        if (px + py) & 1 == 0 {
+                            yüzey.dikdörtgen(
+                                cizelge::koordinat::Dikdörtgen::yeni(
+                                    px as f32, py as f32, 1.0, 1.0,
+                                ),
+                                &Dolgu::Düz(ön),
+                                [0.0; 4],
+                                None,
+                            );
+                        }
+                    }
+                }
+                let etiket_rengi = Renk::çöz(etiket)
+                    .unwrap_or(Renk::BEYAZ)
+                    .opaklık(if değer < 0.15 { 0.6 } else { 1.0 });
+                yüzey.yazı(
+                    &format!("{:.0}%", değer * 100.0),
+                    kutu.merkez(),
+                    YatayHiza::Orta,
+                    DikeyHiza::Orta,
+                    12.0,
+                    etiket_rengi,
+                    true,
+                );
+            }
+        });
+    let boyut = genişlik.min(yükseklik).mul_add(0.9, 0.0).round();
+    let görünmez = ÖğeStili::yeni()
+        .kenarlık_rengi("transparent")
+        .kenarlık_kalınlığı(0.0);
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .arkaplan("#F0F7F9")
+        .başlık(
+            Başlık::yeni()
+                .metin("MBTI Partner Compatibility")
+                .alt_metin(
+                    "Data from: https://www.personalitydata.org/16-types/enfj-relationships#partner-matrix",
+                )
+                .sol("center")
+                .üst(5)
+                .iç_boşluk(15.0)
+                .öğe_boşluğu(5.0)
+                .yazı(YazıStili::yeni().boyut(20.0).renk("#57576A").kalın(true)),
+        )
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(
+                    MatrisBoyutu::yeni()
+                        .veri(mbti_boyutu())
+                        .seviye_boyutları([
+                            Some(Uzunluk::Piksel(25.0)),
+                            Some(Uzunluk::Piksel(30.0)),
+                        ])
+                        .öğe_stili(görünmez.clone())
+                        .ayırıcı(ÇizgiStili::yeni().kalınlık(0.0)),
+                )
+                .y(
+                    MatrisBoyutu::yeni()
+                        .veri(mbti_boyutu())
+                        .seviye_boyutları([
+                            Some(Uzunluk::Piksel(25.0)),
+                            Some(Uzunluk::Piksel(30.0)),
+                        ])
+                        .öğe_stili(görünmez.clone())
+                        .ayırıcı(ÇizgiStili::yeni().kalınlık(0.0)),
+                )
+                .gövde_stili(görünmez.clone())
+                .arkaplan_stili(görünmez)
+                .genişlik(boyut)
+                .yükseklik(boyut)
+                .sol((genişlik - boyut) / 2.0)
+                .üst(50),
+        )
+        .seri(özel))
+}
+
+fn matrix_ema(veri: &[[f64; 2]], dönem: usize) -> Vec<[f64; 2]> {
+    if veri.len() < dönem || dönem == 0 {
+        return Vec::new();
+    }
+    let katsayı = 2.0 / (dönem as f64 + 1.0);
+    let ilk = veri.iter().take(dönem).map(|satır| satır[1]).sum::<f64>() / dönem as f64;
+    let mut sonuç = vec![[veri[dönem - 1][0], ilk]];
+    for satır in veri.iter().skip(dönem) {
+        let önceki = sonuç.last().map(|satır| satır[1]).unwrap_or(ilk);
+        sonuç.push([satır[0], satır[1] * katsayı + önceki * (1.0 - katsayı)]);
+    }
+    sonuç
+}
+
+fn matrix_stock() -> GrafikSeçenekleri {
+    use cizelge::cizim::{DikeyHiza, YatayHiza};
+
+    const SON_KAPANIŞ: f64 = 50.0;
+    const YEŞİL: &str = "#47b262";
+    const KIRMIZI: &str = "#eb5454";
+    const GRİ: &str = "#888";
+    let mut tohum = 0x5eed_1234;
+    let mut fiyat = Vec::<[f64; 2]>::new();
+    let mut hacim = Vec::<[f64; 2]>::new();
+    let mut ortalama = Vec::<[f64; 2]>::new();
+    let mut fiyat_toplamı = 0.0;
+    let mut hacim_toplamı = 0.0;
+    let mut zaman = 0_i32;
+    let mut son_fiyat = 0.0;
+    let mut yön = 1.0;
+    let mut en_büyük_fark = 0.0_f64;
+    while zaman < 330 {
+        let anlık_hacim = kanıt_rastgele(&mut tohum) * 1000.0 + 500.0;
+        hacim.push([zaman as f64, anlık_hacim]);
+        hacim_toplamı += anlık_hacim;
+        if zaman == 0 {
+            yön = if kanıt_rastgele(&mut tohum) < 0.5 {
+                1.0
+            } else {
+                -1.0
+            };
+            son_fiyat = SON_KAPANIŞ * (1.0 + (kanıt_rastgele(&mut tohum) - 0.5) * 0.02);
+        } else {
+            if kanıt_rastgele(&mut tohum) >= 0.8 {
+                yön = -yön;
+            }
+            son_fiyat =
+                ((son_fiyat + yön * kanıt_rastgele(&mut tohum) * 0.1) * 100.0).round() / 100.0;
+        }
+        fiyat.push([zaman as f64, son_fiyat]);
+        fiyat_toplamı += son_fiyat * anlık_hacim;
+        ortalama.push([zaman as f64, fiyat_toplamı / hacim_toplamı]);
+        en_büyük_fark = en_büyük_fark.max((son_fiyat - SON_KAPANIŞ).abs());
+        zaman = if zaman == 120 { 210 } else { zaman + 1 };
+    }
+
+    let kısa = matrix_ema(&fiyat, 12)
+        .into_iter()
+        .map(|[zaman, değer]| (zaman as i32, değer))
+        .collect::<BTreeMap<_, _>>();
+    let uzun = matrix_ema(&fiyat, 26)
+        .into_iter()
+        .map(|[zaman, değer]| (zaman as i32, değer))
+        .collect::<BTreeMap<_, _>>();
+    let dif = fiyat
+        .iter()
+        .skip(25)
+        .filter_map(|satır| {
+            let zaman = satır[0] as i32;
+            Some([satır[0], kısa.get(&zaman)? - uzun.get(&zaman)?])
+        })
+        .collect::<Vec<_>>();
+    let dea = matrix_ema(&dif, 9);
+    let dif_haritası = dif
+        .iter()
+        .map(|[zaman, değer]| (*zaman as i32, *değer))
+        .collect::<BTreeMap<_, _>>();
+    let dea_haritası = dea
+        .iter()
+        .map(|[zaman, değer]| (*zaman as i32, *değer))
+        .collect::<BTreeMap<_, _>>();
+    let ortak_zamanlar = dif_haritası
+        .keys()
+        .filter(|zaman| dea_haritası.contains_key(zaman))
+        .copied()
+        .collect::<Vec<_>>();
+    let macd_dif = ortak_zamanlar
+        .iter()
+        .map(|zaman| [*zaman as f64, dif_haritası[zaman]])
+        .collect::<Vec<_>>();
+    let macd_dea = ortak_zamanlar
+        .iter()
+        .map(|zaman| [*zaman as f64, dea_haritası[zaman]])
+        .collect::<Vec<_>>();
+    let macd =
+        ortak_zamanlar
+            .iter()
+            .map(|zaman| {
+                let değer = dif_haritası[zaman] - dea_haritası[zaman];
+                VeriÖğesi::from([*zaman as f64, değer])
+                    .stil(ÖğeStili::yeni().renk(if değer > 0.0 { KIRMIZI } else { YEŞİL }))
+            })
+            .collect::<Vec<_>>();
+
+    let mut emirler = Vec::new();
+    let mut emir_adları = Vec::new();
+    let mut emir_fiyatı = son_fiyat - 0.05;
+    for sıra in 0..10 {
+        emir_fiyatı += 0.01;
+        let miktar = (kanıt_rastgele(&mut tohum) * 200.0).round() + 10.0;
+        let alış = emir_fiyatı < son_fiyat;
+        let ad = format!(
+            "{} {:.2} ({miktar:.0})",
+            if alış { "Bid" } else { "Ask" },
+            emir_fiyatı
+        );
+        emir_adları.push(ad.clone());
+        emirler.push(
+            VeriÖğesi::adlı(ad, [miktar, sıra as f64]).stil(ÖğeStili::yeni().renk(if alış {
+                "#e4f3e8"
+            } else {
+                "#fbe4e4"
+            })),
+        );
+    }
+    let mut derinlik_yüksek = vec![f64::NAN; 40];
+    let mut derinlik_düşük = vec![f64::NAN; 40];
+    let mut yüksek_toplam = 0.0;
+    let mut düşük_toplam = 0.0;
+    for sıra in 0..20 {
+        derinlik_yüksek[20 + sıra] = yüksek_toplam;
+        yüksek_toplam += (kanıt_rastgele(&mut tohum) * 1000.0).round();
+        derinlik_düşük[19 - sıra] = düşük_toplam;
+        düşük_toplam += (kanıt_rastgele(&mut tohum) * 1000.0).round();
+    }
+
+    let görünmez_eksen = |ızgara: usize| {
+        Eksen::değer()
+            .ızgara_sırası(ızgara)
+            .çizgi(EksenÇizgisi::yeni().göster(false))
+            .çentik(EksenÇentiği::yeni().göster(false))
+            .etiket(EksenEtiketi::yeni().göster(false))
+            .bölme_çizgisi_göster(false)
+    };
+    let ana_x = Eksen::zaman()
+        .ızgara_sırası(0)
+        .kırılma(EksenKırılması::yeni(120.0, 210.0).boşluk(0))
+        .kırılma_alanı(EksenKırılmaAlanı::yeni().göster(false))
+        .çizgi(EksenÇizgisi::yeni().göster(false))
+        .çentik(EksenÇentiği::yeni().göster(false))
+        .etiket(EksenEtiketi::yeni().göster(false))
+        .bölme_çizgisi_göster(true);
+    let ana_y = Eksen::değer()
+        .ızgara_sırası(0)
+        .en_az(SON_KAPANIŞ - en_büyük_fark)
+        .en_çok(SON_KAPANIŞ + en_büyük_fark)
+        .bölme_sayısı(3)
+        .çizgi(EksenÇizgisi::yeni().göster(false))
+        .çentik(EksenÇentiği::yeni().göster(false))
+        .etiket(EksenEtiketi::yeni().göster(false));
+
+    let ana_aralık = matris_sıra_aralığı(0, 3);
+    let sağ_aralık = matris_sıra_aralığı(4, 4);
+    let derinlik_y_aralığı = matris_sıra_aralığı(4, 5);
+    let ana_y_aralığı = matris_sıra_aralığı(0, 3);
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .yerel(&İNGİLİZCE)
+        .matris(
+            MatrisKoordinatı::yeni()
+                .x(MatrisBoyutu::yeni().uzunluk(5).göster(false))
+                .y(MatrisBoyutu::yeni().uzunluk(6).göster(false))
+                .gövde_hücresi(
+                    MatrisGövdeHücresi::yeni(ana_aralık.clone(), ana_y_aralığı.clone())
+                        .birleştir(true),
+                )
+                .gövde_hücresi(
+                    MatrisGövdeHücresi::yeni(ana_aralık.clone(), 5usize).birleştir(true),
+                )
+                .gövde_hücresi(
+                    MatrisGövdeHücresi::yeni(ana_aralık.clone(), 4usize).birleştir(true),
+                )
+                .gövde_hücresi(
+                    MatrisGövdeHücresi::yeni(sağ_aralık.clone(), ana_y_aralığı.clone())
+                        .birleştir(true),
+                )
+                .gövde_hücresi(
+                    MatrisGövdeHücresi::yeni(sağ_aralık.clone(), derinlik_y_aralığı.clone())
+                        .birleştir(true),
+                )
+                .sol(10)
+                .sağ(10)
+                .üst(10)
+                .alt(10),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Volume")
+                .alt_metin(format!("{}B", (hacim_toplamı / 1000.0).round()))
+                .matris_hücresi(0, ana_aralık.clone(), 5usize)
+                .sol(2.0)
+                .üst(2)
+                .iç_boşluk(0.0)
+                .öğe_boşluğu(0.0)
+                .yazı(YazıStili::yeni().boyut(12.0).renk("#444").kalın(true))
+                .alt_yazı(YazıStili::yeni().boyut(10.0).renk("#666")),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("MACD")
+                .matris_hücresi(0, ana_aralık.clone(), 4usize)
+                .sol(2.0)
+                .üst(2)
+                .iç_boşluk(0.0)
+                .yazı(YazıStili::yeni().boyut(12.0).renk("#444").kalın(true)),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Order Book")
+                .matris_hücresi(0, sağ_aralık.clone(), ana_y_aralığı.clone())
+                .sol(2.0)
+                .üst(2)
+                .iç_boşluk(0.0)
+                .yazı(YazıStili::yeni().boyut(12.0).renk("#444").kalın(true)),
+        )
+        .başlık_ekle(
+            Başlık::yeni()
+                .metin("Depth")
+                .matris_hücresi(0, sağ_aralık.clone(), derinlik_y_aralığı.clone())
+                .sol(2.0)
+                .üst(2)
+                .iç_boşluk(0.0)
+                .yazı(YazıStili::yeni().boyut(12.0).renk("#444").kalın(true)),
+        );
+    for ızgara in [
+        Izgara::yeni()
+            .matris_hücresi(0, ana_aralık.clone(), ana_y_aralığı.clone())
+            .sol(0)
+            .sağ(0)
+            .üst(0)
+            .alt(0),
+        Izgara::yeni()
+            .matris_hücresi(0, ana_aralık.clone(), 5usize)
+            .sol(0)
+            .sağ(0)
+            .üst(20)
+            .alt(0),
+        Izgara::yeni()
+            .matris_hücresi(0, ana_aralık, 4usize)
+            .sol(0)
+            .sağ(0)
+            .üst(20)
+            .alt(0),
+        Izgara::yeni()
+            .matris_hücresi(0, sağ_aralık.clone(), ana_y_aralığı.clone())
+            .sol(2)
+            .sağ(2)
+            .üst(15)
+            .alt(2),
+        Izgara::yeni()
+            .matris_hücresi(0, sağ_aralık, derinlik_y_aralığı)
+            .sol(0)
+            .sağ(0)
+            .üst(15)
+            .alt(0),
+    ] {
+        seçenekler = seçenekler.ızgara_ekle(ızgara);
+    }
+    let fiyat_verisi = fiyat
+        .iter()
+        .copied()
+        .map(VeriÖğesi::from)
+        .collect::<Vec<_>>();
+    let hacim_verisi = hacim
+        .iter()
+        .enumerate()
+        .map(|(sıra, satır)| {
+            let renk = if sıra == 0 {
+                GRİ
+            } else if fiyat[sıra][1] > fiyat[sıra - 1][1] {
+                KIRMIZI
+            } else {
+                YEŞİL
+            };
+            VeriÖğesi::from(*satır).stil(ÖğeStili::yeni().renk(renk))
+        })
+        .collect::<Vec<_>>();
+    seçenekler
+        .x_ekseni_ekle(ana_x)
+        .y_ekseni_ekle(ana_y)
+        .x_ekseni_ekle(
+            Eksen::zaman()
+                .ızgara_sırası(1)
+                .kırılma(EksenKırılması::yeni(120.0, 210.0).boşluk(0))
+                .göster(false),
+        )
+        .y_ekseni_ekle(görünmez_eksen(1))
+        .x_ekseni_ekle(
+            Eksen::zaman()
+                .ızgara_sırası(2)
+                .kırılma(EksenKırılması::yeni(120.0, 210.0).boşluk(0))
+                .göster(false),
+        )
+        .y_ekseni_ekle(görünmez_eksen(2).ölçekli(true))
+        .x_ekseni_ekle(görünmez_eksen(3).en_çok_veri())
+        .y_ekseni_ekle(
+            Eksen::kategori()
+                .ızgara_sırası(3)
+                .veri(emir_adları)
+                .göster(false),
+        )
+        .x_ekseni_ekle(
+            Eksen::kategori()
+                .ızgara_sırası(4)
+                .veri((0..40).map(|sıra| sıra.to_string()))
+                .kenar_boşluğu(false)
+                .göster(false),
+        )
+        .y_ekseni_ekle(görünmez_eksen(4).ölçekli(true))
+        .seri(
+            ÇizgiSerisi::yeni()
+                .eksenler(0, 0)
+                .sembol_göster(false)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#5470c6").kalınlık(2.0))
+                .veri(fiyat_verisi),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .eksenler(0, 0)
+                .sembol_göster(false)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#d8c600").kalınlık(1.0))
+                .veri(ortalama),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Volume")
+                .eksenler(1, 1)
+                .genişlik(2.0)
+                .veri(hacim_verisi),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("MACD")
+                .eksenler(2, 2)
+                .genişlik(2.0)
+                .veri(macd),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("DIF")
+                .eksenler(2, 2)
+                .sembol_göster(false)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#FFC458").kalınlık(1.0))
+                .veri(macd_dif),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("DEA")
+                .eksenler(2, 2)
+                .sembol_göster(false)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#333").kalınlık(1.0))
+                .veri(macd_dea),
+        )
+        .seri(
+            SütunSerisi::yeni()
+                .ad("Order Book")
+                .eksenler(3, 3)
+                .genişlik("90%")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .konum(EtiketKonumu::İçSol)
+                        .biçimleyici("{b}"),
+                )
+                .veri(emirler),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Depth High")
+                .eksenler(4, 4)
+                .sembol_göster(false)
+                .basamak(Basamak::Son)
+                .çizgi_stili(ÇizgiStili::yeni().renk(KIRMIZI).kalınlık(2.0))
+                .alan_stili(AlanStili::yeni().renk("rgba(235,84,84,0.2)").opaklık(1.0))
+                .veri(derinlik_yüksek),
+        )
+        .seri(
+            ÇizgiSerisi::yeni()
+                .ad("Depth Low")
+                .eksenler(4, 4)
+                .sembol_göster(false)
+                .basamak(Basamak::Son)
+                .çizgi_stili(ÇizgiStili::yeni().renk(YEŞİL).kalınlık(2.0))
+                .alan_stili(AlanStili::yeni().renk("rgba(71,178,98,0.2)").opaklık(1.0))
+                .veri(derinlik_düşük),
+        )
+        .seri(
+            ÖzelSeri::yeni()
+                .matris_sırası(0)
+                .çizim(move |yüzey, bağlam| {
+                    let Some(matris) = bağlam.matris else { return };
+                    let Some(kutu) = matris.veriden_yerleşime(
+                        &matris_sıra_aralığı(0, 3),
+                        &matris_sıra_aralığı(0, 3),
+                        true,
+                    ) else {
+                        return;
+                    };
+                    for (metin, x, y, yatay, dikey, renk) in [
+                        (
+                            format!("{:.2}", SON_KAPANIŞ + en_büyük_fark),
+                            kutu.x,
+                            kutu.y,
+                            YatayHiza::Sol,
+                            DikeyHiza::Üst,
+                            KIRMIZI,
+                        ),
+                        (
+                            format!("{:.2}", SON_KAPANIŞ),
+                            kutu.x,
+                            kutu.merkez().1,
+                            YatayHiza::Sol,
+                            DikeyHiza::Orta,
+                            GRİ,
+                        ),
+                        (
+                            format!("{:.2}", SON_KAPANIŞ - en_büyük_fark),
+                            kutu.x,
+                            kutu.alt(),
+                            YatayHiza::Sol,
+                            DikeyHiza::Alt,
+                            YEŞİL,
+                        ),
+                        (
+                            format!("{:.2}%", en_büyük_fark / SON_KAPANIŞ * 100.0),
+                            kutu.sağ(),
+                            kutu.y,
+                            YatayHiza::Sağ,
+                            DikeyHiza::Üst,
+                            KIRMIZI,
+                        ),
+                        (
+                            "0%".to_owned(),
+                            kutu.sağ(),
+                            kutu.merkez().1,
+                            YatayHiza::Sağ,
+                            DikeyHiza::Orta,
+                            GRİ,
+                        ),
+                        (
+                            format!("-{:.2}%", en_büyük_fark / SON_KAPANIŞ * 100.0),
+                            kutu.sağ(),
+                            kutu.alt(),
+                            YatayHiza::Sağ,
+                            DikeyHiza::Alt,
+                            YEŞİL,
+                        ),
+                    ] {
+                        yüzey.yazı(&metin, (x, y), yatay, dikey, 12.0, renk.into(), false);
+                    }
+                }),
+        )
+}
+
 fn theme_river_kaynağını_oku(dosya_adı: &str) -> Result<String, String> {
     let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../echarts-examples/public/examples/ts")
@@ -12873,7 +14634,58 @@ mod theme_river_fixture_testleri {
     }
 }
 
-fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod matrix_fixture_testleri {
+    use super::*;
+
+    fn değerler(veri: &[VeriÖğesi], sıralar: &[usize], ters_xy: bool) -> Vec<i64> {
+        sıralar
+            .iter()
+            .map(|sıra| {
+                let değer = if ters_xy {
+                    veri[*sıra].değer.x()
+                } else {
+                    veri[*sıra].değer.sayı()
+                };
+                değer.expect("matrix fixture değeri sayısal olmalı").round() as i64
+            })
+            .collect()
+    }
+
+    #[test]
+    fn mulberry32_akisi_resmi_matrix_ornekleriyle_ayni_degerleri_uretir() {
+        let mut tohum = 0x5eed_1234;
+        let üst = matrix_tek_seri_verisi(100, false, &mut tohum);
+        let yan = matrix_tek_seri_verisi(10, true, &mut tohum);
+        let ana = matrix_tek_seri_verisi(100, false, &mut tohum);
+        let alt = matrix_tek_seri_verisi(10, false, &mut tohum);
+        assert_eq!(
+            değerler(&üst, &[0, 1, 10, 20, 40, 60, 80, 99], false),
+            [125, 84, 133, 192, 82, 168, 66, 2]
+        );
+        assert_eq!(değerler(&yan, &[0, 1, 9], true), [80, 57, 59]);
+        assert_eq!(
+            değerler(&ana, &[0, 1, 10, 20, 40, 60, 80, 99], false),
+            [48, 16, 35, 10, 13, 2, 0, 0]
+        );
+        assert_eq!(değerler(&alt, &[0, 1, 9], false), [265, 241, 215]);
+
+        let mut tohum = 0x5eed_1234;
+        let kıvılcım = matrix_tek_seri_verisi(365, false, &mut tohum);
+        assert_eq!(
+            değerler(&kıvılcım, &[0, 20, 40, 80, 120, 180, 240, 300, 364], false,),
+            [125, 125, 201, 7, 0, 0, 0, 0, 0]
+        );
+    }
+}
+
+fn seçenekler(
+    id: &str,
+    durum: &str,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<GrafikSeçenekleri, String> {
     match id {
         "line-simple" => Ok(line_simple()),
         "line-markline" => Ok(line_markline()),
@@ -13007,6 +14819,19 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "heatmap-cartesian" => Ok(heatmap_cartesian(durum == "aralık")),
         "heatmap-large" => Ok(heatmap_large()),
         "heatmap-large-piecewise" => Ok(heatmap_large_piecewise(durum == "parça")),
+        "matrix-simple" => Ok(matrix_simple()),
+        "matrix-correlation-heatmap" => Ok(matrix_correlation_heatmap()),
+        "matrix-correlation-scatter" => Ok(matrix_correlation_scatter()),
+        "matrix-covariance" => Ok(matrix_covariance()),
+        "matrix-graph" => Ok(matrix_graph()),
+        "matrix-pie" => Ok(matrix_pie()),
+        "matrix-confusion" => Ok(matrix_confusion()),
+        "matrix-grid-layout" => Ok(matrix_grid_layout(genişlik)),
+        "matrix-stock" => Ok(matrix_stock()),
+        "matrix-sparkline" => Ok(matrix_sparkline()),
+        "matrix-periodic-table" => matrix_periodic_table(),
+        "matrix-mbti" => matrix_mbti(genişlik, yükseklik),
+        "matrix-mini-bar-data-collection" => Ok(matrix_mini_bar_data_collection()),
         "calendar-heatmap" => Ok(calendar_heatmap()),
         "calendar-simple" => Ok(calendar_simple()),
         "calendar-vertical" => Ok(calendar_vertical()),
@@ -13039,7 +14864,7 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
 
 fn çalıştır() -> Result<(), String> {
     let girdi = argümanları_oku()?;
-    let seçenekler = seçenekler(&girdi.id, &girdi.durum)?;
+    let seçenekler = seçenekler(&girdi.id, &girdi.durum, girdi.genişlik, girdi.yükseklik)?;
     let kanıt_faresi = if girdi.id == "dataset-link" && girdi.durum == "son" {
         Some((323.75, 400.0))
     } else if girdi.id == "dynamic-data2" && girdi.durum == "ipucu" {

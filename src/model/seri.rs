@@ -12,6 +12,7 @@ pub use crate::model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
 };
 use crate::model::imleyici::{İmAlanı, İmNoktası, İmleyiciler, İmÇizgisi};
+use crate::model::matris::MatrisAralığı;
 use crate::model::stil::{
     AlanStili, Biçimleyici, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması, YazıStili,
     ÇizgiStili, ÖğeStili,
@@ -874,6 +875,10 @@ pub struct PastaSerisi {
     pub takvim_sırası: Option<usize>,
     /// `coordinateSystem: 'calendar'` kullanımındaki tarih merkezidir.
     pub takvim_merkez_tarihi: Option<f64>,
+    /// Matrix koordinatına bağlıysa `matrixIndex`.
+    pub matris_sırası: Option<usize>,
+    /// `coordinateSystem: 'matrix'` kullanımındaki hücre/aralık merkezi.
+    pub matris_merkezi: Option<(MatrisAralığı, MatrisAralığı)>,
     /// Seri görünüm kutusu (`left/right/top/bottom/width/height`). Yüzdeler
     /// ana çizim alanına göre çözülür.
     pub sol: Uzunluk,
@@ -928,6 +933,8 @@ impl Default for PastaSerisi {
             veri: Vec::new(),
             takvim_sırası: None,
             takvim_merkez_tarihi: None,
+            matris_sırası: None,
+            matris_merkezi: None,
             sol: Uzunluk::Piksel(0.0),
             sağ: Uzunluk::Piksel(0.0),
             üst: Uzunluk::Piksel(0.0),
@@ -998,6 +1005,8 @@ impl PastaSerisi {
     /// Pastayı belirtilen `calendarIndex` bileşenine bağlar.
     pub fn takvim_sırası(mut self, sıra: usize) -> Self {
         self.takvim_sırası = Some(sıra);
+        self.matris_sırası = None;
+        self.matris_merkezi = None;
         self
     }
 
@@ -1006,6 +1015,29 @@ impl PastaSerisi {
     pub fn takvim_merkezi(mut self, tarih_ms: f64) -> Self {
         self.takvim_sırası.get_or_insert(0);
         self.takvim_merkez_tarihi = Some(tarih_ms);
+        self.matris_sırası = None;
+        self.matris_merkezi = None;
+        self
+    }
+
+    /// Pastayı belirtilen `matrixIndex` bileşenine bağlar.
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self.takvim_sırası = None;
+        self.takvim_merkez_tarihi = None;
+        self
+    }
+
+    /// Pasta merkezini Matrix hücresi ya da birleşik aralığına bağlar.
+    pub fn matris_merkezi(
+        mut self,
+        x: impl Into<MatrisAralığı>,
+        y: impl Into<MatrisAralığı>,
+    ) -> Self {
+        self.matris_sırası.get_or_insert(0);
+        self.matris_merkezi = Some((x.into(), y.into()));
+        self.takvim_sırası = None;
+        self.takvim_merkez_tarihi = None;
         self
     }
 
@@ -1406,6 +1438,11 @@ pub struct IsıHaritasıSerisi {
     pub etiket: Etiket,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
+    /// Matrix koordinatına bağlıysa `matrixIndex`; `None`, kartezyendir.
+    pub matris_sırası: Option<usize>,
+    /// Veri sırasıyla eşleşen açık Matrix hücre/aralık koordinatları.
+    /// Boş girişlerde `[x,y,value]` dizisinin ilk iki sayısal boyutu kullanılır.
+    pub matris_koordinatları: Vec<Option<(MatrisAralığı, MatrisAralığı)>>,
 }
 
 impl Default for IsıHaritasıSerisi {
@@ -1418,6 +1455,8 @@ impl Default for IsıHaritasıSerisi {
             hücre_boşluğu: 1.0,
             etiket: Etiket::default(),
             eksen_bağı: EksenBağı::default(),
+            matris_sırası: None,
+            matris_koordinatları: Vec::new(),
         }
     }
 }
@@ -1430,6 +1469,28 @@ impl IsıHaritasıSerisi {
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
     pub fn eksenler(mut self, x: usize, y: usize) -> Self {
         self.eksen_bağı = EksenBağı { x, y };
+        self.matris_sırası = None;
+        self
+    }
+
+    /// Seriyi Matrix koordinatına bağlar (`coordinateSystem: 'matrix'`).
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self
+    }
+
+    pub fn matris_koordinatları<X, Y>(
+        mut self,
+        koordinatlar: impl IntoIterator<Item = Option<(X, Y)>>,
+    ) -> Self
+    where
+        X: Into<MatrisAralığı>,
+        Y: Into<MatrisAralığı>,
+    {
+        self.matris_koordinatları = koordinatlar
+            .into_iter()
+            .map(|koordinat| koordinat.map(|(x, y)| (x.into(), y.into())))
+            .collect();
         self
     }
 
@@ -1549,6 +1610,10 @@ pub struct SaçılımSerisi {
     /// Takvim koordinatına bağlıysa `calendarIndex`; `None`, kartezyen ya da
     /// başka bir koordinat sistemindeki saçılım demektir.
     pub takvim_sırası: Option<usize>,
+    /// Matrix koordinatına bağlıysa `matrixIndex`.
+    pub matris_sırası: Option<usize>,
+    /// Veri sırasıyla eşleşen açık Matrix hücre/aralık koordinatları.
+    pub matris_koordinatları: Vec<Option<(MatrisAralığı, MatrisAralığı)>>,
     /// Tek eksenli koordinata bağlıysa `singleAxisIndex`.
     pub tek_eksen_sırası: Option<usize>,
     /// ZRender tuval katmanı (`zlevel`). Takvim bileşeninde pozitif değer,
@@ -1605,6 +1670,8 @@ impl Default for SaçılımSerisi {
             kutupsal: false,
             kutupsal_sırası: 0,
             takvim_sırası: None,
+            matris_sırası: None,
+            matris_koordinatları: Vec::new(),
             tek_eksen_sırası: None,
             z_seviyesi: 0,
             sessiz: false,
@@ -1652,6 +1719,7 @@ impl SaçılımSerisi {
         if açık {
             self.takvim_sırası = None;
             self.tek_eksen_sırası = None;
+            self.matris_sırası = None;
         }
         self
     }
@@ -1662,6 +1730,7 @@ impl SaçılımSerisi {
         self.kutupsal_sırası = sıra;
         self.takvim_sırası = None;
         self.tek_eksen_sırası = None;
+        self.matris_sırası = None;
         self
     }
 
@@ -1670,6 +1739,7 @@ impl SaçılımSerisi {
     pub fn takvim_sırası(mut self, sıra: usize) -> Self {
         self.takvim_sırası = Some(sıra);
         self.tek_eksen_sırası = None;
+        self.matris_sırası = None;
         self.kutupsal = false;
         self
     }
@@ -1679,7 +1749,32 @@ impl SaçılımSerisi {
     pub fn tek_eksen_sırası(mut self, sıra: usize) -> Self {
         self.tek_eksen_sırası = Some(sıra);
         self.takvim_sırası = None;
+        self.matris_sırası = None;
         self.kutupsal = false;
+        self
+    }
+
+    /// Seriyi Matrix koordinatına bağlar (`coordinateSystem: 'matrix'`).
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self.takvim_sırası = None;
+        self.tek_eksen_sırası = None;
+        self.kutupsal = false;
+        self
+    }
+
+    pub fn matris_koordinatları<X, Y>(
+        mut self,
+        koordinatlar: impl IntoIterator<Item = Option<(X, Y)>>,
+    ) -> Self
+    where
+        X: Into<MatrisAralığı>,
+        Y: Into<MatrisAralığı>,
+    {
+        self.matris_koordinatları = koordinatlar
+            .into_iter()
+            .map(|koordinat| koordinat.map(|(x, y)| (x.into(), y.into())))
+            .collect();
         self
     }
 
@@ -1703,6 +1798,7 @@ impl SaçılımSerisi {
         self.eksen_bağı = EksenBağı { x, y };
         self.takvim_sırası = None;
         self.tek_eksen_sırası = None;
+        self.matris_sırası = None;
         self.kutupsal = false;
         self
     }
@@ -3451,6 +3547,8 @@ pub struct ÖzelBağlam<'a> {
     pub kartezyen: Option<&'a crate::koordinat::Kartezyen2B>,
     /// Takvim koordinat sistemi (`coordinateSystem: 'calendar'` ise).
     pub takvim: Option<&'a crate::koordinat::TakvimYerleşimi>,
+    /// Matrix koordinat sistemi (`coordinateSystem: 'matrix'` ise).
+    pub matris: Option<&'a crate::koordinat::MatrisYerleşimi>,
     pub veri: &'a [VeriÖğesi],
     /// Paletten çözülen seri rengi.
     pub renk: crate::renk::Renk,
@@ -3472,6 +3570,11 @@ pub struct ÖzelSeri {
     pub kartezyen_gerekli: bool,
     /// Bağlı takvim (`calendarIndex`); doluysa kartezyen kurulmaz.
     pub takvim_sırası: Option<usize>,
+    /// Bağlı Matrix (`matrixIndex`); doluysa kartezyen kurulmaz.
+    pub matris_sırası: Option<usize>,
+    /// `matrix.x/y.data` boşken bu seriden toplanacak ordinal boyutlar.
+    pub matris_x_kategorileri: Vec<String>,
+    pub matris_y_kategorileri: Vec<String>,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
 }
@@ -3483,6 +3586,7 @@ impl fmt::Debug for ÖzelSeri {
             .field("veri", &self.veri.len())
             .field("kartezyen_gerekli", &self.kartezyen_gerekli)
             .field("takvim_sırası", &self.takvim_sırası)
+            .field("matris_sırası", &self.matris_sırası)
             .finish()
     }
 }
@@ -3495,6 +3599,9 @@ impl Default for ÖzelSeri {
             çizim: None,
             kartezyen_gerekli: true,
             takvim_sırası: None,
+            matris_sırası: None,
+            matris_x_kategorileri: Vec::new(),
+            matris_y_kategorileri: Vec::new(),
             eksen_bağı: EksenBağı::default(),
         }
     }
@@ -3510,6 +3617,7 @@ impl ÖzelSeri {
         self.eksen_bağı = EksenBağı { x, y };
         self.kartezyen_gerekli = true;
         self.takvim_sırası = None;
+        self.matris_sırası = None;
         self
     }
 
@@ -3536,6 +3644,7 @@ impl ÖzelSeri {
         self.kartezyen_gerekli = gerekli;
         if gerekli {
             self.takvim_sırası = None;
+            self.matris_sırası = None;
         }
         self
     }
@@ -3545,7 +3654,28 @@ impl ÖzelSeri {
     /// taşır; tarihleri piksele çevirmek için `veriden_noktaya` kullanılabilir.
     pub fn takvim_sırası(mut self, sıra: usize) -> Self {
         self.takvim_sırası = Some(sıra);
+        self.matris_sırası = None;
         self.kartezyen_gerekli = false;
+        self
+    }
+
+    /// Seriyi bir Matrix koordinatına bağlar. Çizim bağlamındaki `matris`
+    /// üzerinden `veriden_noktaya` ve `veriden_yerleşime` kullanılabilir.
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self.takvim_sırası = None;
+        self.kartezyen_gerekli = false;
+        self
+    }
+
+    /// Dataset `encode.x/y` ordinal toplamasının açık Rust karşılığı.
+    pub fn matris_kategorileri<X: Into<String>, Y: Into<String>>(
+        mut self,
+        x: impl IntoIterator<Item = X>,
+        y: impl IntoIterator<Item = Y>,
+    ) -> Self {
+        self.matris_x_kategorileri = x.into_iter().map(Into::into).collect();
+        self.matris_y_kategorileri = y.into_iter().map(Into::into).collect();
         self
     }
 }
@@ -3767,6 +3897,8 @@ pub struct GrafoDüğümü {
     pub değer: Option<f64>,
     /// Takvim koordinatındaki tarih (`data[i][0]`, Unix milisaniyesi).
     pub takvim_tarihi_ms: Option<f64>,
+    /// Matrix koordinatındaki hücre ya da aralık.
+    pub matris_koordinatı: Option<(MatrisAralığı, MatrisAralığı)>,
     /// Sembol çapı (`symbolSize`).
     pub boyut: f32,
     /// Renk grubu (palet sırası); `None` düğüm sırasını kullanır.
@@ -3779,6 +3911,7 @@ impl GrafoDüğümü {
             ad: ad.into(),
             değer: None,
             takvim_tarihi_ms: None,
+            matris_koordinatı: None,
             boyut,
             kategori: None,
         }
@@ -3797,6 +3930,17 @@ impl GrafoDüğümü {
     /// Düğümü takvim koordinatındaki bir güne bağlar.
     pub fn takvim_tarihi(mut self, tarih_ms: f64) -> Self {
         self.takvim_tarihi_ms = Some(tarih_ms);
+        self.matris_koordinatı = None;
+        self
+    }
+
+    pub fn matris_koordinatı(
+        mut self,
+        x: impl Into<MatrisAralığı>,
+        y: impl Into<MatrisAralığı>,
+    ) -> Self {
+        self.matris_koordinatı = Some((x.into(), y.into()));
+        self.takvim_tarihi_ms = None;
         self
     }
 }
@@ -3804,6 +3948,8 @@ impl GrafoDüğümü {
 /// Grafo yerleşimi (`graph.layout`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum GrafoYerleşimi {
+    /// Veri/koordinat sisteminin verdiği konum (`null` / `'none'`).
+    Yok,
     /// Kuvvet yönlendirmeli (`'force'`) — belirlenimci.
     #[default]
     Kuvvet,
@@ -3831,6 +3977,8 @@ pub struct GrafoSerisi {
     pub etiket_göster: bool,
     /// Takvim koordinatına bağlıysa `calendarIndex`.
     pub takvim_sırası: Option<usize>,
+    /// Matrix koordinatına bağlıysa `matrixIndex`.
+    pub matris_sırası: Option<usize>,
     /// Seri çizim sırası (`z`); CalendarView öntanımlı z=2'dir.
     pub z: i32,
     /// Düğüm `itemStyle`ı.
@@ -3856,6 +4004,7 @@ impl Default for GrafoSerisi {
             etiket_eşiği: 12.0,
             etiket_göster: false,
             takvim_sırası: None,
+            matris_sırası: None,
             z: 2,
             öğe_stili: ÖğeStili::default(),
             çizgi_stili: ÇizgiStili::yeni().kalınlık(1.0).opaklık(0.5),
@@ -3905,6 +4054,13 @@ impl GrafoSerisi {
 
     pub fn takvim_sırası(mut self, sıra: usize) -> Self {
         self.takvim_sırası = Some(sıra);
+        self.matris_sırası = None;
+        self
+    }
+
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self.takvim_sırası = None;
         self
     }
 
@@ -4331,12 +4487,12 @@ impl Seri {
                 | Seri::Sütun(_)
                 | Seri::Mum(_)
                 | Seri::Kutu(_)
-                | Seri::Isı(_)
                 | Seri::Hatlar(HatlarSerisi {
                     koordinat_sistemi: HatKoordinatSistemi::Kartezyen2B,
                     ..
                 })
-        ) || matches!(self, Seri::Saçılım(s) if s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none())
+        ) || matches!(self, Seri::Isı(s) if s.matris_sırası.is_none())
+            || matches!(self, Seri::Saçılım(s) if s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none() && s.matris_sırası.is_none())
             || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
     }
 

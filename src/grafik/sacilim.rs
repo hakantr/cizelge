@@ -5,10 +5,11 @@ use std::borrow::Cow;
 use crate::cizim::{AfinMatris, DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
 use crate::grafik::sembol_stilli_çiz;
 use crate::koordinat::{
-    Dikdörtgen, Kartezyen2B, TakvimYerleşimi, TekEksenYerleşimi, ÇalışmaEkseni,
+    Dikdörtgen, Kartezyen2B, MatrisYerleşimi, TakvimYerleşimi, TekEksenYerleşimi, ÇalışmaEkseni,
 };
 use crate::model::deger::{VeriDeğeri, VeriÖğesi};
 use crate::model::gorsel_esleme::GörselEşleme;
+use crate::model::matris::MatrisAralığı;
 use crate::model::seri::{
     EtiketYerleşimParametreleri, EtiketYerleşimSonucu, EtiketÖrtüşmeKaydırması, SaçılımSerisi,
 };
@@ -335,6 +336,51 @@ pub fn takvim_saçılım_noktaları(
                 boyut: seri.sembol_boyutu.bağlamla_çöz(öğe, sıra),
                 x_değeri: tarih,
                 y_değeri: değer,
+                palet_sırası: None,
+            })
+        })
+        .collect()
+}
+
+/// Matrix koordinatına bağlı scatter/effectScatter noktalarını üretir.
+/// Açık `matris_koordinatları` yoksa `[x, y, value]` dizisinin ilk iki
+/// boyutu gövde sıra numarası kabul edilir.
+pub fn matris_saçılım_noktaları(
+    seri: &SaçılımSerisi,
+    matris: &MatrisYerleşimi,
+) -> Vec<SaçılımNoktası> {
+    seri.veri
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, öğe)| {
+            let sayısal = öğe.değer.dizi();
+            let açık = seri.matris_koordinatları.get(sıra).and_then(Option::as_ref);
+            let (x, y) = match açık {
+                Some((x, y)) => (x.clone(), y.clone()),
+                None => {
+                    let dizi = sayısal?;
+                    let x = *dizi.first()?;
+                    let y = *dizi.get(1)?;
+                    if !x.is_finite() || !y.is_finite() || x < 0.0 || y < 0.0 {
+                        return None;
+                    }
+                    (
+                        MatrisAralığı::from(x.round() as usize),
+                        MatrisAralığı::from(y.round() as usize),
+                    )
+                }
+            };
+            let görsel_değer = sayısal
+                .and_then(|dizi| dizi.get(2).copied().or_else(|| dizi.get(1).copied()))
+                .or_else(|| öğe.değer.sayı())?;
+            Some(SaçılımNoktası {
+                sıra,
+                konum: matris.veriden_noktaya(x, y)?,
+                boyut: seri.sembol_boyutu.bağlamla_çöz(öğe, sıra),
+                x_değeri: sayısal
+                    .and_then(|dizi| dizi.first().copied())
+                    .unwrap_or(sıra as f64),
+                y_değeri: görsel_değer,
                 palet_sırası: None,
             })
         })

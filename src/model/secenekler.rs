@@ -66,6 +66,9 @@ pub struct GrafikSeçenekleri {
     pub kutupsallar: Vec<KutupsalKoordinat>,
     /// ECharts 6.1 `matrix` koordinat sistemi.
     pub matris: Option<MatrisKoordinatı>,
+    /// Çoklu `matrix: []` koordinat bileşenleri. Boşsa geriye uyumlu
+    /// `matris` alanı kullanılır.
+    pub matrisler: Vec<MatrisKoordinatı>,
     /// Birden çok ECharts `calendar` koordinat bileşeni.
     pub takvimler: Vec<TakvimKoordinatı>,
     /// Birden çok ECharts `singleAxis` koordinat bileşeni.
@@ -125,6 +128,7 @@ impl Default for GrafikSeçenekleri {
             kutupsal: None,
             kutupsallar: Vec::new(),
             matris: None,
+            matrisler: Vec::new(),
             takvimler: Vec::new(),
             tek_eksenler: Vec::new(),
             veri_kümesi: None,
@@ -390,7 +394,29 @@ impl GrafikSeçenekleri {
 
     pub fn matris(mut self, koordinat: MatrisKoordinatı) -> Self {
         self.matris = Some(koordinat);
+        self.matrisler.clear();
         self
+    }
+
+    pub fn matris_ekle(mut self, koordinat: MatrisKoordinatı) -> Self {
+        if self.matrisler.is_empty()
+            && let Some(tekil) = self.matris.take()
+        {
+            self.matrisler.push(tekil);
+        }
+        self.matrisler.push(koordinat);
+        self
+    }
+
+    pub fn tüm_matrisler(&self) -> impl Iterator<Item = &MatrisKoordinatı> {
+        self.matris
+            .iter()
+            .filter(|_| self.matrisler.is_empty())
+            .chain(self.matrisler.iter())
+    }
+
+    pub fn matris_sayısı(&self) -> usize {
+        self.tüm_matrisler().count()
     }
 
     pub fn takvim(mut self, koordinat: TakvimKoordinatı) -> Self {
@@ -1098,7 +1124,71 @@ impl GrafikSeçenekleri {
                 });
             }
         }
+        let başlıklar = self
+            .başlık
+            .iter()
+            .filter(|_| self.başlıklar.is_empty())
+            .chain(self.başlıklar.iter());
+        for başlık in başlıklar {
+            if let Some(matris_sırası) = başlık.matris_sırası {
+                if self.tüm_matrisler().nth(matris_sırası).is_none() {
+                    return Err(BilesenHatasi::EksikVeri {
+                        bileşen: "matrix",
+                        sıra: matris_sırası,
+                    });
+                }
+                if başlık.matris_koordinatı.is_none() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "title.coord",
+                        ayrıntı: "Matrix başlığı bir hücre/aralık koordinatı taşımalı".to_owned(),
+                    });
+                }
+            } else if başlık.matris_koordinatı.is_some() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "title.coordinateSystem",
+                    ayrıntı: "Matrix başlık koordinatı bir matrixIndex ile bağlanmalı".to_owned(),
+                });
+            }
+        }
+        for ızgara in self.etkin_ızgaralar() {
+            if let Some(matris_sırası) = ızgara.matris_sırası {
+                if self.tüm_matrisler().nth(matris_sırası).is_none() {
+                    return Err(BilesenHatasi::EksikVeri {
+                        bileşen: "matrix",
+                        sıra: matris_sırası,
+                    });
+                }
+                if ızgara.matris_koordinatı.is_none() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "grid.coord",
+                        ayrıntı: "Matrix ızgarası bir hücre/aralık koordinatı taşımalı"
+                            .to_owned(),
+                    });
+                }
+            } else if ızgara.matris_koordinatı.is_some() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "grid.coordinateSystem",
+                    ayrıntı: "Matrix ızgara koordinatı bir matrixIndex ile bağlanmalı".to_owned(),
+                });
+            }
+        }
         for seri in &self.seriler {
+            let matris_sırası = match seri {
+                Seri::Isı(ısı) => ısı.matris_sırası,
+                Seri::Saçılım(saçılım) => saçılım.matris_sırası,
+                Seri::Pasta(pasta) => pasta.matris_sırası,
+                Seri::Grafo(grafo) => grafo.matris_sırası,
+                Seri::Özel(özel) => özel.matris_sırası,
+                _ => None,
+            };
+            if let Some(matris_sırası) = matris_sırası
+                && self.tüm_matrisler().nth(matris_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "matrix",
+                    sıra: matris_sırası,
+                });
+            }
             if let Seri::Radar(radar) = seri
                 && self.tüm_radarlar().nth(radar.radar_sırası).is_none()
             {
@@ -1175,6 +1265,12 @@ impl GrafikSeçenekleri {
                         });
                     }
                 }
+                if p.matris_sırası.is_some() && p.matris_merkezi.is_none() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.pie.center",
+                        ayrıntı: "Matrix pastası bir hücre/aralık merkezi taşımalı".to_owned(),
+                    });
+                }
                 let açılar = [
                     ("series.pie.startAngle", Some(p.başlangıç_açısı)),
                     ("series.pie.endAngle", p.bitiş_açısı),
@@ -1225,7 +1321,7 @@ impl GrafikSeçenekleri {
                         });
                     }
                     crate::model::hatlar::HatKoordinatSistemi::Matris
-                        if hatlar.matris_sırası != 0 || self.matris.is_none() =>
+                        if self.tüm_matrisler().nth(hatlar.matris_sırası).is_none() =>
                     {
                         return Err(BilesenHatasi::EksikVeri {
                             bileşen: "matrix",
@@ -1766,6 +1862,37 @@ mod testler {
         let geçerli = GrafikSeçenekleri::yeni()
             .tek_eksen(TekEksen::yeni())
             .seri(crate::model::seri::TemaNehriSerisi::yeni().veri([(0.0, 1.0, "A")]));
+        assert!(geçerli.doğrula().is_ok());
+    }
+
+    #[test]
+    fn matrixe_bagli_baslik_ve_izgara_index_ile_koordinati_birlikte_dogrular() {
+        let eksik_matris =
+            GrafikSeçenekleri::yeni().başlık(Başlık::yeni().matris_hücresi(1, 0usize, 0usize));
+        assert!(matches!(
+            eksik_matris.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "matrix",
+                sıra: 1
+            })
+        ));
+
+        let mut başlık = Başlık::yeni().matris_hücresi(0, 0usize, 0usize);
+        başlık.matris_koordinatı = None;
+        let eksik_koordinat = GrafikSeçenekleri::yeni()
+            .matris(MatrisKoordinatı::yeni())
+            .başlık(başlık);
+        assert!(matches!(
+            eksik_koordinat.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "title.coord",
+                ..
+            })
+        ));
+
+        let geçerli = GrafikSeçenekleri::yeni()
+            .matris(MatrisKoordinatı::yeni())
+            .ızgara(Izgara::yeni().matris_hücresi(0, 0usize, 0usize));
         assert!(geçerli.doğrula().is_ok());
     }
 

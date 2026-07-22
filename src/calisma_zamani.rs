@@ -444,12 +444,21 @@ impl SeçenekYaması {
 
     pub fn matris(mut self, matris: MatrisKoordinatı) -> Self {
         self.değer.matris = Some(matris);
+        self.değer.matrisler.clear();
+        self.sağlanan.insert(SeçenekAlanı::Matris);
+        self
+    }
+
+    pub fn matrisler(mut self, matrisler: impl IntoIterator<Item = MatrisKoordinatı>) -> Self {
+        self.değer.matris = None;
+        self.değer.matrisler = matrisler.into_iter().collect();
         self.sağlanan.insert(SeçenekAlanı::Matris);
         self
     }
 
     pub fn matrisi_kaldır(mut self) -> Self {
         self.değer.matris = None;
+        self.değer.matrisler.clear();
         self.sağlanan.insert(SeçenekAlanı::Matris);
         self
     }
@@ -1794,7 +1803,13 @@ fn yamayı_uygula(
         hedef.kutupsal = öntanımlı.kutupsal.clone();
         hedef.kutupsallar = öntanımlı.kutupsallar.clone();
     }
-    alanı_uygula!(matris, SeçenekAlanı::Matris);
+    if yama.sağlandı_mı(SeçenekAlanı::Matris) {
+        hedef.matris = yama.değer.matris.clone();
+        hedef.matrisler = yama.değer.matrisler.clone();
+    } else if kip.değiştirerek_birleştir.contains(&SeçenekAlanı::Matris) {
+        hedef.matris = öntanımlı.matris.clone();
+        hedef.matrisler = öntanımlı.matrisler.clone();
+    }
     alanı_uygula!(takvimler, SeçenekAlanı::Takvimler);
     alanı_uygula!(tek_eksenler, SeçenekAlanı::TekEksenler);
     alanı_uygula!(veri_kümesi, SeçenekAlanı::VeriKümesi);

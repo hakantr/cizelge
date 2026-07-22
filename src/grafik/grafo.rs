@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use crate::cizim::olay::{İsabetBölgesi, İsabetGeometrisi};
 use crate::cizim::{DikeyHiza, YatayHiza, Yol, ÇizimYüzeyi};
-use crate::koordinat::{Dikdörtgen, TakvimYerleşimi};
+use crate::koordinat::{Dikdörtgen, MatrisYerleşimi, TakvimYerleşimi};
 use crate::model::seri::{GrafoSerisi, GrafoYerleşimi};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
@@ -24,6 +24,7 @@ pub fn grafo_çiz(
     görünüm: (f32, f32, f32),
     kaymalar: &[(usize, f32, f32)],
     takvim: Option<&TakvimYerleşimi>,
+    matris: Option<&MatrisYerleşimi>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) {
     if seri.düğümler.is_empty() {
@@ -65,6 +66,17 @@ pub fn grafo_çiz(
                     .unwrap_or((f32::NAN, f32::NAN))
             })
             .collect()
+    } else if let Some(matris) = matris {
+        seri.düğümler
+            .iter()
+            .map(|düğüm| {
+                düğüm
+                    .matris_koordinatı
+                    .as_ref()
+                    .and_then(|(x, y)| matris.veriden_noktaya(x.clone(), y.clone()))
+                    .unwrap_or((f32::NAN, f32::NAN))
+            })
+            .collect()
     } else {
         (0..n)
             .map(|i| {
@@ -79,7 +91,7 @@ pub fn grafo_çiz(
     };
 
     // 2) Kuvvet yerleşimi (Fruchterman–Reingold benzeri, sabit yineleme).
-    if takvim.is_none() && seri.yerleşim == GrafoYerleşimi::Kuvvet && n > 1 {
+    if takvim.is_none() && matris.is_none() && seri.yerleşim == GrafoYerleşimi::Kuvvet && n > 1 {
         let k = (yarıçap * yarıçap * std::f32::consts::PI / n as f32)
             .sqrt()
             .max(8.0);
@@ -150,13 +162,14 @@ pub fn grafo_çiz(
     } else {
         1.0
     };
-    if takvim.is_none() && (ölçek != 1.0 || kayma_x != 0.0 || kayma_y != 0.0) {
+    if takvim.is_none() && matris.is_none() && (ölçek != 1.0 || kayma_x != 0.0 || kayma_y != 0.0)
+    {
         for konum in konumlar.iter_mut() {
             konum.0 = merkez.0 + (konum.0 - merkez.0) * ölçek + kayma_x;
             konum.1 = merkez.1 + (konum.1 - merkez.1) * ölçek + kayma_y;
         }
     }
-    if takvim.is_none() {
+    if takvim.is_none() && matris.is_none() {
         for (sıra, dx, dy) in kaymalar {
             if let Some(konum) = konumlar.get_mut(*sıra) {
                 konum.0 += dx;
@@ -334,6 +347,7 @@ mod testler {
             (0.0, 0.0, 1.0),
             &[],
             Some(&yerleşim),
+            None,
             &mut isabetler,
         );
 
