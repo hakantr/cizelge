@@ -7,6 +7,9 @@ use std::sync::Arc;
 use crate::cizim::{SvgYolHatası, Yol};
 use crate::koordinat::Dikdörtgen;
 use crate::model::Uzunluk;
+use crate::model::agac::{
+    AğaçGezinmesi, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü
+};
 use crate::model::bilesen::İpucu;
 use crate::model::deger::{VeriDeğeri, VeriÖğesi, veri_listesi};
 use crate::model::eksen::Eksen;
@@ -20,7 +23,7 @@ use crate::model::stil::{
     ÇizgiStili, ÖğeStili,
 };
 use crate::model::veri_kumesi::SeriYerleşimi;
-use crate::renk::Dolgu;
+use crate::renk::{Dolgu, Renk};
 
 /// Sembol biçimi (`symbol`).
 #[derive(Clone, PartialEq, Debug, Default)]
@@ -3781,28 +3784,115 @@ impl GüneşPatlamasıSerisi {
     }
 }
 
-/// Ağaç serisi (`series-tree`): soldan sağa düzenli yerleşim.
+/// Ağaç serisi (`series-tree`): ECharts'ın orthogonal/radial Tree modeli.
 #[derive(Clone, Debug)]
 pub struct AğaçSerisi {
+    pub kimlik: Option<String>,
     pub ad: Option<String>,
     pub kökler: Vec<crate::model::agac::AğaçDüğümü>,
+    pub z: i32,
+    pub sessiz: bool,
     pub sol: Uzunluk,
     pub üst: Uzunluk,
+    /// `Some` iken genişlik sağ kenardan çözülür; açık `genişlik(...)`
+    /// çağrısı bunu `None` yapar.
+    pub sağ: Option<Uzunluk>,
+    /// `Some` iken yükseklik alt kenardan çözülür.
+    pub alt: Option<Uzunluk>,
     pub genişlik: Uzunluk,
     pub yükseklik: Uzunluk,
+    pub yerleşim: AğaçYerleşimi,
+    pub yön: AğaçYönü,
+    pub kenar_biçimi: AğaçKenarBiçimi,
+    /// `edgeForkPosition`; `0..=1` görünüm oranı.
+    pub kenar_çatal_oranı: f32,
+    /// `lineStyle.curveness`.
+    pub kenar_eğriliği: f32,
+    pub sembol: Sembol,
     pub sembol_boyutu: f32,
+    pub sembol_döndürme: Option<f32>,
+    pub sembol_kayması: (Uzunluk, Uzunluk),
+    pub sembol_oranını_koru: bool,
+    pub genişlet_ve_daralt: bool,
+    /// ECharts `initialTreeDepth`; negatif değer tüm ağacı açar.
+    pub ilk_ağaç_derinliği: isize,
+    pub gezinme: AğaçGezinmesi,
+    pub düğüm_ölçek_oranı: f32,
+    pub merkez: Option<(Uzunluk, Uzunluk)>,
+    pub yakınlaştırma: f32,
+    pub öğe_stili: ÖğeStili,
+    pub çizgi_stili: ÇizgiStili,
+    pub etiket: Etiket,
+    pub yaprak_etiketi: EtiketYaması,
+    pub vurgu_odağı: AğaçVurguOdağı,
+    pub vurgu_ölçekle: bool,
+    pub vurgu_öğe_stili: Option<ÖğeStili>,
+    pub vurgu_çizgi_stili: Option<ÇizgiStili>,
+    pub vurgu_etiketi: Option<EtiketYaması>,
+    pub bulanık_öğe_stili: Option<ÖğeStili>,
+    pub bulanık_çizgi_stili: Option<ÇizgiStili>,
+    pub bulanık_etiketi: Option<EtiketYaması>,
+    pub seçili_öğe_stili: Option<ÖğeStili>,
+    pub seçili_çizgi_stili: Option<ÇizgiStili>,
+    pub seçili_etiketi: Option<EtiketYaması>,
+    pub ipucu: Option<İpucu>,
+    /// Büyük ağaçlarda kararlı çizim parça boyutu.
+    pub ilerlemeli: usize,
+    pub ilerlemeli_eşik: usize,
 }
 
 impl Default for AğaçSerisi {
     fn default() -> Self {
         AğaçSerisi {
+            kimlik: None,
             ad: None,
             kökler: Vec::new(),
-            sol: Uzunluk::Yüzde(10.0),
-            üst: Uzunluk::Piksel(60.0),
-            genişlik: Uzunluk::Yüzde(72.0),
-            yükseklik: Uzunluk::Yüzde(78.0),
-            sembol_boyutu: 9.0,
+            z: 2,
+            sessiz: false,
+            sol: Uzunluk::Yüzde(12.0),
+            üst: Uzunluk::Yüzde(12.0),
+            sağ: Some(Uzunluk::Yüzde(12.0)),
+            alt: Some(Uzunluk::Yüzde(12.0)),
+            genişlik: Uzunluk::Yüzde(76.0),
+            yükseklik: Uzunluk::Yüzde(76.0),
+            yerleşim: AğaçYerleşimi::Dik,
+            yön: AğaçYönü::SoldanSağa,
+            kenar_biçimi: AğaçKenarBiçimi::Eğri,
+            kenar_çatal_oranı: 0.5,
+            kenar_eğriliği: 0.5,
+            sembol: Sembol::İçiBoşDaire,
+            sembol_boyutu: 7.0,
+            sembol_döndürme: None,
+            sembol_kayması: (Uzunluk::Piksel(0.0), Uzunluk::Piksel(0.0)),
+            sembol_oranını_koru: false,
+            genişlet_ve_daralt: true,
+            ilk_ağaç_derinliği: 2,
+            gezinme: AğaçGezinmesi::Kapalı,
+            düğüm_ölçek_oranı: 0.4,
+            merkez: None,
+            yakınlaştırma: 1.0,
+            öğe_stili: ÖğeStili::yeni()
+                .renk(Renk::onaltılık(0xb0c4de))
+                .kenarlık_kalınlığı(1.5),
+            çizgi_stili: ÇizgiStili::yeni()
+                .renk(Renk::onaltılık(0xcfd2d7))
+                .kalınlık(1.5),
+            etiket: Etiket::yeni().göster(true).konum(EtiketKonumu::Sağ),
+            yaprak_etiketi: EtiketYaması::yeni(),
+            vurgu_odağı: AğaçVurguOdağı::Yok,
+            vurgu_ölçekle: true,
+            vurgu_öğe_stili: None,
+            vurgu_çizgi_stili: None,
+            vurgu_etiketi: None,
+            bulanık_öğe_stili: None,
+            bulanık_çizgi_stili: None,
+            bulanık_etiketi: None,
+            seçili_öğe_stili: None,
+            seçili_çizgi_stili: None,
+            seçili_etiketi: None,
+            ipucu: None,
+            ilerlemeli: 500,
+            ilerlemeli_eşik: 3_000,
         }
     }
 }
@@ -3817,11 +3907,317 @@ impl AğaçSerisi {
         self
     }
 
+    pub fn kimlik(mut self, kimlik: impl Into<String>) -> Self {
+        self.kimlik = Some(kimlik.into());
+        self
+    }
+
     pub fn kökler(
         mut self,
         kökler: impl IntoIterator<Item = crate::model::agac::AğaçDüğümü>,
     ) -> Self {
         self.kökler = kökler.into_iter().collect();
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
+        self
+    }
+
+    pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
+        self.sol = sol.into();
+        self
+    }
+
+    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+        self.üst = üst.into();
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = Some(alt.into());
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = genişlik.into();
+        self.sağ = None;
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = yükseklik.into();
+        self.alt = None;
+        self
+    }
+
+    pub fn yerleşim(mut self, yerleşim: AğaçYerleşimi) -> Self {
+        self.yerleşim = yerleşim;
+        self
+    }
+
+    pub fn yön(mut self, yön: AğaçYönü) -> Self {
+        self.yön = yön;
+        self
+    }
+
+    pub fn kenar_biçimi(mut self, biçim: AğaçKenarBiçimi) -> Self {
+        self.kenar_biçimi = biçim;
+        self
+    }
+
+    pub fn kenar_çatal_yüzdesi(mut self, yüzde: f32) -> Self {
+        self.kenar_çatal_oranı = (yüzde / 100.0).clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn kenar_çatal_oranı(mut self, oran: f32) -> Self {
+        self.kenar_çatal_oranı = oran.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn kenar_eğriliği(mut self, eğrilik: f32) -> Self {
+        self.kenar_eğriliği = eğrilik.clamp(0.0, 1.0);
+        self
+    }
+
+    pub fn sembol(mut self, sembol: Sembol) -> Self {
+        self.sembol = sembol;
+        self
+    }
+
+    pub fn sembol_boyutu(mut self, boyut: f32) -> Self {
+        self.sembol_boyutu = boyut.max(0.0);
+        self
+    }
+
+    pub fn sembol_döndürme(mut self, derece: f32) -> Self {
+        self.sembol_döndürme = derece.is_finite().then_some(derece);
+        self
+    }
+
+    pub fn sembol_kayması(mut self, x: impl Into<Uzunluk>, y: impl Into<Uzunluk>) -> Self {
+        self.sembol_kayması = (x.into(), y.into());
+        self
+    }
+
+    pub fn sembol_oranını_koru(mut self, koru: bool) -> Self {
+        self.sembol_oranını_koru = koru;
+        self
+    }
+
+    pub fn genişlet_ve_daralt(mut self, açık: bool) -> Self {
+        self.genişlet_ve_daralt = açık;
+        self
+    }
+
+    pub fn ilk_ağaç_derinliği(mut self, derinlik: isize) -> Self {
+        self.ilk_ağaç_derinliği = derinlik;
+        self
+    }
+
+    pub fn gezinme(mut self, gezinme: AğaçGezinmesi) -> Self {
+        self.gezinme = gezinme;
+        self
+    }
+
+    pub fn düğüm_ölçek_oranı(mut self, oran: f32) -> Self {
+        self.düğüm_ölçek_oranı = oran.max(0.0);
+        self
+    }
+
+    pub fn merkez(mut self, x: impl Into<Uzunluk>, y: impl Into<Uzunluk>) -> Self {
+        self.merkez = Some((x.into(), y.into()));
+        self
+    }
+
+    pub fn yakınlaştırma(mut self, yakınlaştırma: f32) -> Self {
+        self.yakınlaştırma = yakınlaştırma.max(0.01);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.çizgi_stili = stil;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    pub fn yaprak_etiketi(mut self, etiket: impl Into<EtiketYaması>) -> Self {
+        self.yaprak_etiketi = etiket.into();
+        self
+    }
+
+    pub fn vurgu_odağı(mut self, odak: AğaçVurguOdağı) -> Self {
+        self.vurgu_odağı = odak;
+        self
+    }
+
+    pub fn vurgu_ölçekle(mut self, ölçekle: bool) -> Self {
+        self.vurgu_ölçekle = ölçekle;
+        self
+    }
+
+    pub fn vurgu_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.vurgu_öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn vurgu_çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.vurgu_çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn vurgu_etiketi(mut self, etiket: impl Into<EtiketYaması>) -> Self {
+        self.vurgu_etiketi = Some(etiket.into());
+        self
+    }
+
+    pub fn bulanık_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.bulanık_öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn bulanık_çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.bulanık_çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn bulanık_etiketi(mut self, etiket: impl Into<EtiketYaması>) -> Self {
+        self.bulanık_etiketi = Some(etiket.into());
+        self
+    }
+
+    pub fn seçili_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.seçili_öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn seçili_çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.seçili_çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn seçili_etiketi(mut self, etiket: impl Into<EtiketYaması>) -> Self {
+        self.seçili_etiketi = Some(etiket.into());
+        self
+    }
+
+    /// Ön-sıralı ECharts `dataIndex` için kökten düğüme ad yolunu verir.
+    /// Daraltılmış alt ağaçlar da veri modelinde kaldığından sıra hesabına
+    /// katılır; renderer isabet sırasıyla birebir aynıdır.
+    pub fn düğüm_yolu(&self, hedef: usize) -> Option<Vec<String>> {
+        fn ara(
+            düğümler: &[crate::model::agac::AğaçDüğümü],
+            hedef: usize,
+            sayaç: &mut usize,
+            yol: &mut Vec<String>,
+        ) -> Option<Vec<String>> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                yol.push(düğüm.ad.clone());
+                if sıra == hedef {
+                    return Some(yol.clone());
+                }
+                if let Some(bulunan) = ara(&düğüm.çocuklar, hedef, sayaç, yol) {
+                    return Some(bulunan);
+                }
+                yol.pop();
+            }
+            None
+        }
+
+        let mut sayaç = 0;
+        let mut yol = Vec::new();
+        ara(&self.kökler, hedef, &mut sayaç, &mut yol)
+    }
+
+    /// `treeExpandAndCollapse` eyleminin model karşılığı. Dönüş değeri
+    /// `(düğüm adı, yeni collapsed durumu)`dur; yapraklar değişmez.
+    pub fn düğüm_daraltmasını_değiştir(&mut self, hedef: usize) -> Option<(String, bool)> {
+        fn ara(
+            düğümler: &mut [crate::model::agac::AğaçDüğümü],
+            hedef: usize,
+            sayaç: &mut usize,
+            derinlik: usize,
+            genişlet_ve_daralt: bool,
+            ilk_derinlik: isize,
+        ) -> Option<(String, bool)> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                if sıra == hedef {
+                    if düğüm.çocuklar.is_empty() {
+                        return None;
+                    }
+                    let açık = düğüm.daraltılmış.map(|dar| !dar).unwrap_or_else(|| {
+                        !genişlet_ve_daralt
+                            || ilk_derinlik < 0
+                            || derinlik.saturating_add(1) as isize <= ilk_derinlik
+                    });
+                    let daraltılmış = açık;
+                    düğüm.daraltılmış = Some(daraltılmış);
+                    return Some((düğüm.ad.clone(), daraltılmış));
+                }
+                if let Some(bulunan) = ara(
+                    &mut düğüm.çocuklar,
+                    hedef,
+                    sayaç,
+                    derinlik.saturating_add(1),
+                    genişlet_ve_daralt,
+                    ilk_derinlik,
+                ) {
+                    return Some(bulunan);
+                }
+            }
+            None
+        }
+
+        let genişlet_ve_daralt = self.genişlet_ve_daralt;
+        let ilk_derinlik = self.ilk_ağaç_derinliği;
+        let mut sayaç = 0;
+        ara(
+            &mut self.kökler,
+            hedef,
+            &mut sayaç,
+            0,
+            genişlet_ve_daralt,
+            ilk_derinlik,
+        )
+    }
+
+    pub fn ipucu(mut self, ipucu: İpucu) -> Self {
+        self.ipucu = Some(ipucu);
+        self
+    }
+
+    pub fn ilerlemeli(mut self, parça_boyutu: usize) -> Self {
+        self.ilerlemeli = parça_boyutu.max(1);
+        self
+    }
+
+    pub fn ilerlemeli_eşik(mut self, eşik: usize) -> Self {
+        self.ilerlemeli_eşik = eşik;
         self
     }
 }
@@ -4790,12 +5186,12 @@ impl Seri {
             | Seri::Özel(_)
             | Seri::AğaçHaritası(_)
             | Seri::GüneşPatlaması(_)
-            | Seri::Ağaç(_)
             | Seri::Sankey(_)
             | Seri::Grafo(_)
             | Seri::Kiriş(_)
             | Seri::Paralel(_)
             | Seri::Takvim(_) => None,
+            Seri::Ağaç(s) => s.öğe_stili.renk.as_ref(),
             Seri::TemaNehri(s) => s.öğe_stili.renk.as_ref(),
             Seri::Hatlar(_) => None,
         }

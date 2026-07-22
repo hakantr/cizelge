@@ -344,6 +344,21 @@ pub enum GrafikOlayı {
         ad: Option<String>,
         değer: Option<f64>,
     },
+    /// Tree dalı tıklanıp açıldı/daraltıldı
+    /// (`treeExpandAndCollapse` / `collapsed`).
+    AğaçGenişletmeDeğişti {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        ad: String,
+        daraltılmış: bool,
+    },
+    /// Tree görünümü sürüklendi veya tekerlekle ölçeklendi (`treeRoam`).
+    AğaçGezinmeDeğişti {
+        seri_sırası: usize,
+        kayma_x: f32,
+        kayma_y: f32,
+        ölçek: f32,
+    },
     /// `matrix.triggerEvent: true` ile bir matrix hücresine tıklandı.
     MatrisHücresiTıklandı {
         bileşen_sırası: usize,

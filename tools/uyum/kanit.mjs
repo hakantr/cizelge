@@ -22,6 +22,15 @@ const RAPOR = path.join(TABAN, 'rapor');
 const EŞİK = Object.freeze({ pixelmatch: 0.1, değişenPikselOranı: 0.01, ssim: 0.99 });
 const REFERANS_YENİLE = process.argv.includes('--referans-yenile');
 
+const ağaçKarşılaştırması = (özet) => ({
+  tipografiSigma: 0.8,
+  sahneÖzeti: {
+    şema_sürümü: 1,
+    koordinat_adımı: 0.001,
+    ...özet
+  }
+});
+
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -66,6 +75,55 @@ const SENARYOLAR = [
   {
     id: 'doc-example/parallel-all', tür: 'statik',
     karşılaştırma: { tipografiSigma: 0.8 },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-basic', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 1, düğüm_sayısı: 52, kenar_sayısı: 51,
+      kenar_yolu_sayısı: 51, etiket_sayısı: 52, daraltılmış_düğüm_sayısı: 12,
+      koordinat_sayısı: 668, fnv1a_64: 'ac13658335726e2b' }),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-legend', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 2, düğüm_sayısı: 67, kenar_sayısı: 65,
+      kenar_yolu_sayısı: 65, etiket_sayısı: 67, daraltılmış_düğüm_sayısı: 2,
+      koordinat_sayısı: 855, fnv1a_64: 'c59de5063e316fc4' }),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-orient-bottom-top', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 1, düğüm_sayısı: 111, kenar_sayısı: 110,
+      kenar_yolu_sayısı: 110, etiket_sayısı: 111, daraltılmış_düğüm_sayısı: 15,
+      koordinat_sayısı: 1435, fnv1a_64: '0df0b4713d1513fa' }),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-orient-right-left', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 1, düğüm_sayısı: 52, kenar_sayısı: 51,
+      kenar_yolu_sayısı: 51, etiket_sayısı: 52, daraltılmış_düğüm_sayısı: 12,
+      koordinat_sayısı: 668, fnv1a_64: '84162e15313ca35d' }),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-polyline', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 1, düğüm_sayısı: 85, kenar_sayısı: 84,
+      kenar_yolu_sayısı: 8, etiket_sayısı: 85, daraltılmış_düğüm_sayısı: 0,
+      koordinat_sayısı: 789, fnv1a_64: '37eea6c009dcc5ae' }),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-radial', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 1, düğüm_sayısı: 219, kenar_sayısı: 218,
+      kenar_yolu_sayısı: 218, etiket_sayısı: 219, daraltılmış_düğüm_sayısı: 6,
+      koordinat_sayısı: 2839, fnv1a_64: 'ad21b3a3594cf7a7' }),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'tree-vertical', tür: 'statik',
+    karşılaştırma: ağaçKarşılaştırması({ seri_sayısı: 1, düğüm_sayısı: 111, kenar_sayısı: 110,
+      kenar_yolu_sayısı: 110, etiket_sayısı: 111, daraltılmış_düğüm_sayısı: 15,
+      koordinat_sayısı: 1435, fnv1a_64: 'cecc82c59e976726' }),
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
   { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -808,7 +866,7 @@ function sahneÖzetiKontrolleri(senaryo, sahneDosyası) {
   if (!beklenen) return [];
   if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
     return [{
-      ad: 'parallel_sahne_özeti',
+      ad: `${senaryo.id.startsWith('tree-') ? 'tree' : 'parallel'}_sahne_özeti`,
       geçti: false,
       açıklama: 'Renderer bağımsız veri/geometri/renk sahne özeti üretilmelidir',
       beklenen,
@@ -822,10 +880,13 @@ function sahneÖzetiKontrolleri(senaryo, sahneDosyası) {
     gerçek: gerçek[alan],
     geçti: gerçek[alan] === beklenen[alan]
   }));
+  const tree = senaryo.id.startsWith('tree-');
   return [{
-    ad: 'parallel_sahne_özeti',
+    ad: `${tree ? 'tree' : 'parallel'}_sahne_özeti`,
     geçti: alanlar.every((alan) => alan.geçti),
-    açıklama: '7.637 Polyline; 229.110 koordinat, RGB, width, opacity ve smooth ile eşleşmeli',
+    açıklama: tree
+      ? 'Görünür Tree düğümleri, kenar yolları, etiket çapaları ve daraltma durumu kesin eşleşmeli'
+      : '7.637 Polyline; 229.110 koordinat, RGB, width, opacity ve smooth ile eşleşmeli',
     alanlar
   }];
 }

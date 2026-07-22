@@ -805,6 +805,11 @@ impl EtiketYaması {
         self
     }
 
+    pub fn döndürme(mut self, döndürme: EtiketDöndürme) -> Self {
+        self.döndürme = Some(döndürme);
+        self
+    }
+
     pub fn yatay_hiza(mut self, hiza: YazıYatayHizası) -> Self {
         self.yatay_hiza = Some(hiza);
         self

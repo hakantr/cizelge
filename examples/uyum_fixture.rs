@@ -14793,6 +14793,366 @@ fn paralel_aqi_eksen_varsayılanı(koyu: bool) -> Eksen {
     eksen
 }
 
+#[derive(Deserialize)]
+struct ResmiAğaçDüğümü {
+    name: String,
+    #[serde(default)]
+    value: Option<f64>,
+    #[serde(default)]
+    children: Vec<ResmiAğaçDüğümü>,
+}
+
+impl ResmiAğaçDüğümü {
+    fn cizelge(self) -> AğaçDüğümü {
+        if self.children.is_empty() {
+            AğaçDüğümü::yaprak(self.name, self.value.unwrap_or_default())
+        } else {
+            let mut düğüm = AğaçDüğümü::dal(
+                self.name,
+                self.children.into_iter().map(Self::cizelge).collect(),
+            );
+            if let Some(değer) = self.value {
+                düğüm = düğüm.değerli(değer);
+            }
+            düğüm
+        }
+    }
+}
+
+fn flare_ağacı() -> Result<AğaçDüğümü, String> {
+    let yol = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/flare.json");
+    let kaynak = std::fs::read_to_string(&yol)
+        .map_err(|hata| format!("{} okunamadı: {hata}", yol.display()))?;
+    serde_json::from_str::<ResmiAğaçDüğümü>(&kaynak)
+        .map(ResmiAğaçDüğümü::cizelge)
+        .map_err(|hata| format!("flare.json çözülemedi: {hata}"))
+}
+
+fn javascript_nesnesi(kaynak: &str, belirteç: &str) -> Result<String, String> {
+    let başlangıç = kaynak
+        .find(belirteç)
+        .ok_or_else(|| format!("Tree kaynağında `{belirteç}` bulunamadı"))?;
+    let göreli = kaynak[başlangıç..]
+        .find('{')
+        .ok_or_else(|| format!("`{belirteç}` nesne başlangıcı eksik"))?;
+    let başlangıç = başlangıç + göreli;
+    let mut derinlik = 0usize;
+    let mut tek_tırnak = false;
+    let mut çift_tırnak = false;
+    let mut kaçış = false;
+    let mut bitiş = None;
+    for (göreli, karakter) in kaynak[başlangıç..].char_indices() {
+        if kaçış {
+            kaçış = false;
+            continue;
+        }
+        if karakter == '\\' && (tek_tırnak || çift_tırnak) {
+            kaçış = true;
+            continue;
+        }
+        if karakter == '\'' && !çift_tırnak {
+            tek_tırnak = !tek_tırnak;
+            continue;
+        }
+        if karakter == '"' && !tek_tırnak {
+            çift_tırnak = !çift_tırnak;
+            continue;
+        }
+        if tek_tırnak || çift_tırnak {
+            continue;
+        }
+        match karakter {
+            '{' => derinlik += 1,
+            '}' => {
+                derinlik = derinlik.saturating_sub(1);
+                if derinlik == 0 {
+                    bitiş = Some(başlangıç + göreli + karakter.len_utf8());
+                    break;
+                }
+            }
+            _ => {}
+        }
+    }
+    bitiş
+        .map(|bitiş| kaynak[başlangıç..bitiş].to_owned())
+        .ok_or_else(|| format!("`{belirteç}` nesnesi kapanmadı"))
+}
+
+fn javascript_ağacını_çöz(kaynak: &str, belirteç: &str) -> Result<AğaçDüğümü, String> {
+    let nesne = javascript_nesnesi(kaynak, belirteç)?
+        .replace("name:", "\"name\":")
+        .replace("value:", "\"value\":")
+        .replace("children:", "\"children\":")
+        .replace('\'', "\"");
+    let karakterler = nesne.chars().collect::<Vec<_>>();
+    let mut json = String::with_capacity(nesne.len());
+    for (sıra, karakter) in karakterler.iter().copied().enumerate() {
+        if karakter == ',' {
+            let sonraki = karakterler
+                .iter()
+                .skip(sıra + 1)
+                .copied()
+                .find(|karakter| !karakter.is_whitespace());
+            if matches!(sonraki, Some(']') | Some('}')) {
+                continue;
+            }
+        }
+        json.push(karakter);
+    }
+    serde_json::from_str::<ResmiAğaçDüğümü>(&json)
+        .map(ResmiAğaçDüğümü::cizelge)
+        .map_err(|hata| format!("`{belirteç}` Tree nesnesi çözülemedi: {hata}"))
+}
+
+fn tree_kaynağından_ağaçlar(
+    dosya: &str,
+    belirteçler: &[&str],
+) -> Result<Vec<AğaçDüğümü>, String> {
+    let kaynak = theme_river_kaynağını_oku(dosya)?;
+    belirteçler
+        .iter()
+        .map(|belirteç| javascript_ağacını_çöz(&kaynak, belirteç))
+        .collect()
+}
+
+fn tree_yatay_etiketi(konum: EtiketKonumu, hiza: YazıYatayHizası, boyut: f32) -> Etiket {
+    Etiket::yeni()
+        .göster(true)
+        .konum(konum)
+        .yatay_hiza(hiza)
+        .dikey_hiza(YazıDikeyHizası::Orta)
+        .yazı(YazıStili::yeni().boyut(boyut))
+}
+
+fn tree_yatay_yaprak_etiketi(konum: EtiketKonumu, hiza: YazıYatayHizası) -> EtiketYaması {
+    EtiketYaması::yeni()
+        .konum(konum)
+        .yatay_hiza(hiza)
+        .dikey_hiza(YazıDikeyHizası::Orta)
+}
+
+fn tree_basic() -> Result<GrafikSeçenekleri, String> {
+    let mut kök = flare_ağacı()?;
+    for (sıra, çocuk) in kök.çocuklar.iter_mut().enumerate() {
+        if sıra % 2 == 0 {
+            çocuk.daraltılmış = Some(true);
+        }
+    }
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .seri(
+            AğaçSerisi::yeni()
+                .kökler([kök])
+                .üst("1%")
+                .sol("7%")
+                .alt("1%")
+                .sağ("20%")
+                .sembol_boyutu(7.0)
+                .etiket(tree_yatay_etiketi(
+                    EtiketKonumu::Sol,
+                    YazıYatayHizası::Sağ,
+                    9.0,
+                ))
+                .yaprak_etiketi(tree_yatay_yaprak_etiketi(
+                    EtiketKonumu::Sağ,
+                    YazıYatayHizası::Sol,
+                ))
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        ))
+}
+
+fn tree_radial() -> Result<GrafikSeçenekleri, String> {
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .seri(
+            AğaçSerisi::yeni()
+                .kökler([flare_ağacı()?])
+                .üst("18%")
+                .alt("14%")
+                .yerleşim(AğaçYerleşimi::Radyal)
+                .sembol(Sembol::İçiBoşDaire)
+                .sembol_boyutu(7.0)
+                .ilk_ağaç_derinliği(3)
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        ))
+}
+
+fn tree_vertical() -> Result<GrafikSeçenekleri, String> {
+    let etiket = Etiket::yeni()
+        .göster(true)
+        .konum(EtiketKonumu::Üst)
+        .döndürme(EtiketDöndürme::Derece(-90.0))
+        .dikey_hiza(YazıDikeyHizası::Orta)
+        .yatay_hiza(YazıYatayHizası::Sağ)
+        .yazı(YazıStili::yeni().boyut(9.0));
+    let yaprak = EtiketYaması::yeni()
+        .konum(EtiketKonumu::Alt)
+        .döndürme(EtiketDöndürme::Derece(-90.0))
+        .dikey_hiza(YazıDikeyHizası::Orta)
+        .yatay_hiza(YazıYatayHizası::Sol);
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .seri(
+            AğaçSerisi::yeni()
+                .kökler([flare_ağacı()?])
+                .sol("2%")
+                .sağ("2%")
+                .üst("8%")
+                .alt("20%")
+                .sembol(Sembol::İçiBoşDaire)
+                .yön(AğaçYönü::ÜsttenAlta)
+                .etiket(etiket)
+                .yaprak_etiketi(yaprak),
+        ))
+}
+
+fn tree_orient_bottom_top() -> Result<GrafikSeçenekleri, String> {
+    let etiket = Etiket::yeni()
+        .göster(true)
+        .konum(EtiketKonumu::Alt)
+        .döndürme(EtiketDöndürme::Derece(90.0))
+        .dikey_hiza(YazıDikeyHizası::Orta)
+        .yatay_hiza(YazıYatayHizası::Sağ);
+    let yaprak = EtiketYaması::yeni()
+        .konum(EtiketKonumu::Üst)
+        .döndürme(EtiketDöndürme::Derece(90.0))
+        .dikey_hiza(YazıDikeyHizası::Orta)
+        .yatay_hiza(YazıYatayHizası::Sol);
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .seri(
+            AğaçSerisi::yeni()
+                .kökler([flare_ağacı()?])
+                .sol("2%")
+                .sağ("2%")
+                .üst("20%")
+                .alt("8%")
+                .sembol(Sembol::İçiBoşDaire)
+                .yön(AğaçYönü::AlttanÜste)
+                .etiket(etiket)
+                .yaprak_etiketi(yaprak)
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        ))
+}
+
+fn tree_orient_right_left() -> Result<GrafikSeçenekleri, String> {
+    let mut kök = flare_ağacı()?;
+    for (sıra, çocuk) in kök.çocuklar.iter_mut().enumerate() {
+        if sıra % 2 == 0 {
+            çocuk.daraltılmış = Some(true);
+        }
+    }
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .seri(
+            AğaçSerisi::yeni()
+                .kökler([kök])
+                .üst("1%")
+                .sol("15%")
+                .alt("1%")
+                .sağ("7%")
+                .sembol_boyutu(7.0)
+                .yön(AğaçYönü::SağdanSola)
+                .etiket(tree_yatay_etiketi(
+                    EtiketKonumu::Sağ,
+                    YazıYatayHizası::Sol,
+                    12.0,
+                ))
+                .yaprak_etiketi(tree_yatay_yaprak_etiketi(
+                    EtiketKonumu::Sol,
+                    YazıYatayHizası::Sağ,
+                ))
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        ))
+}
+
+fn tree_legend() -> Result<GrafikSeçenekleri, String> {
+    let mut ağaçlar =
+        tree_kaynağından_ağaçlar("tree-legend.ts", &["const data =", "var data2 ="])?;
+    if ağaçlar.len() != 2 {
+        return Err("tree-legend iki resmî veri kökü üretmedi".to_owned());
+    }
+    let ikinci = ağaçlar.pop().ok_or_else(|| "tree2 eksik".to_owned())?;
+    let birinci = ağaçlar.pop().ok_or_else(|| "tree1 eksik".to_owned())?;
+    let etiket = tree_yatay_etiketi(EtiketKonumu::Sol, YazıYatayHizası::Sağ, 12.0);
+    let yaprak = tree_yatay_yaprak_etiketi(EtiketKonumu::Sağ, YazıYatayHizası::Sol);
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .gösterge(
+            Gösterge::yeni()
+                .üst("2%")
+                .sol("3%")
+                .yön(Yön::Dikey)
+                .veri(["tree1", "tree2"]),
+        )
+        .seri(
+            AğaçSerisi::yeni()
+                .ad("tree1")
+                .kökler([birinci])
+                .üst("5%")
+                .sol("7%")
+                .alt("2%")
+                .sağ("60%")
+                .sembol_boyutu(7.0)
+                .etiket(etiket.clone())
+                .yaprak_etiketi(yaprak.clone())
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        )
+        .seri(
+            AğaçSerisi::yeni()
+                .ad("tree2")
+                .kökler([ikinci])
+                .üst("20%")
+                .sol("60%")
+                .alt("22%")
+                .sağ("18%")
+                .sembol_boyutu(7.0)
+                .etiket(etiket)
+                .yaprak_etiketi(yaprak)
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        ))
+}
+
+fn tree_polyline() -> Result<GrafikSeçenekleri, String> {
+    let kök = tree_kaynağından_ağaçlar("tree-polyline.ts", &["const data ="])?
+        .pop()
+        .ok_or_else(|| "tree-polyline kökü eksik".to_owned())?;
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni())
+        .seri(
+            AğaçSerisi::yeni()
+                .kimlik("0")
+                .ad("tree1")
+                .kökler([kök])
+                .üst("10%")
+                .sol("8%")
+                .alt("22%")
+                .sağ("20%")
+                .sembol_boyutu(7.0)
+                .kenar_biçimi(AğaçKenarBiçimi::Kırık)
+                .kenar_çatal_yüzdesi(63.0)
+                .ilk_ağaç_derinliği(3)
+                .çizgi_stili(ÇizgiStili::yeni().renk("#cfd2d7").kalınlık(2.0))
+                .etiket(
+                    tree_yatay_etiketi(EtiketKonumu::Sol, YazıYatayHizası::Sağ, 12.0)
+                        .yazı(YazıStili::yeni().arkaplan("#fff")),
+                )
+                .yaprak_etiketi(tree_yatay_yaprak_etiketi(
+                    EtiketKonumu::Sağ,
+                    YazıYatayHizası::Sol,
+                ))
+                .vurgu_odağı(AğaçVurguOdağı::AltSoy),
+        ))
+}
+
 fn parallel_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -15148,6 +15508,73 @@ fn paralel_sahne_özeti(
     })
 }
 
+#[derive(Serialize)]
+struct AğaçSahneÖzeti {
+    şema_sürümü: u8,
+    seri_sayısı: usize,
+    düğüm_sayısı: usize,
+    kenar_sayısı: usize,
+    kenar_yolu_sayısı: usize,
+    etiket_sayısı: usize,
+    daraltılmış_düğüm_sayısı: usize,
+    koordinat_sayısı: usize,
+    koordinat_adımı: f64,
+    fnv1a_64: String,
+}
+
+fn ağaç_sahne_özeti(
+    seçenekler: &GrafikSeçenekleri,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<AğaçSahneÖzeti, String> {
+    let tuval = cizelge::koordinat::Dikdörtgen::yeni(0.0, 0.0, genişlik, yükseklik);
+    let özetler = seçenekler
+        .seriler
+        .iter()
+        .filter_map(|seri| match seri {
+            Seri::Ağaç(seri) => Some(cizelge::grafik::agac::ağaç_sahne_özeti(
+                seri,
+                tuval,
+                (0.0, 0.0, 1.0),
+            )),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    if özetler.is_empty() {
+        return Err("sahne özeti için Tree serisi bulunamadı".to_owned());
+    }
+    let mut birleşik = 0xcbf2_9ce4_8422_2325_u64;
+    fnv_u64(&mut birleşik, özetler.len() as u64);
+    for özet in &özetler {
+        for değer in [
+            özet.düğüm_sayısı,
+            özet.kenar_sayısı,
+            özet.kenar_yolu_sayısı,
+            özet.etiket_sayısı,
+            özet.daraltılmış_düğüm_sayısı,
+            özet.koordinat_sayısı,
+        ] {
+            fnv_u64(&mut birleşik, değer as u64);
+        }
+        fnv_u64(&mut birleşik, özet.fnv1a_64);
+    }
+    Ok(AğaçSahneÖzeti {
+        şema_sürümü: 1,
+        seri_sayısı: özetler.len(),
+        düğüm_sayısı: özetler.iter().map(|özet| özet.düğüm_sayısı).sum(),
+        kenar_sayısı: özetler.iter().map(|özet| özet.kenar_sayısı).sum(),
+        kenar_yolu_sayısı: özetler.iter().map(|özet| özet.kenar_yolu_sayısı).sum(),
+        etiket_sayısı: özetler.iter().map(|özet| özet.etiket_sayısı).sum(),
+        daraltılmış_düğüm_sayısı: özetler
+            .iter()
+            .map(|özet| özet.daraltılmış_düğüm_sayısı)
+            .sum(),
+        koordinat_sayısı: özetler.iter().map(|özet| özet.koordinat_sayısı).sum(),
+        koordinat_adımı: 0.001,
+        fnv1a_64: format!("{birleşik:016x}"),
+    })
+}
+
 fn theme_river_kaynağını_oku(dosya_adı: &str) -> Result<String, String> {
     let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../echarts-examples/public/examples/ts")
@@ -15286,6 +15713,122 @@ fn theme_river_lastfm() -> Result<GrafikSeçenekleri, String> {
 
 #[cfg(test)]
 #[allow(clippy::expect_used, clippy::panic)]
+mod tree_fixture_testleri {
+    use super::*;
+
+    fn düğüm_sayısı(düğüm: &AğaçDüğümü) -> usize {
+        1 + düğüm.çocuklar.iter().map(düğüm_sayısı).sum::<usize>()
+    }
+
+    #[test]
+    fn yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur() {
+        let basic = tree_basic().expect("tree-basic kurulmalı");
+        let Seri::Ağaç(basic) = &basic.seriler[0] else {
+            panic!("Tree serisi bekleniyordu");
+        };
+        assert_eq!(düğüm_sayısı(&basic.kökler[0]), 252);
+        assert_eq!(basic.kökler[0].çocuklar.len(), 10);
+        assert_eq!(basic.kökler[0].çocuklar[0].daraltılmış, Some(true));
+        assert_eq!(basic.kökler[0].çocuklar[1].daraltılmış, None);
+        assert_eq!(basic.sol, Uzunluk::Yüzde(7.0));
+        assert_eq!(basic.sağ, Some(Uzunluk::Yüzde(20.0)));
+
+        let radyal = tree_radial().expect("tree-radial kurulmalı");
+        let Seri::Ağaç(radyal) = &radyal.seriler[0] else {
+            panic!("radyal Tree serisi bekleniyordu");
+        };
+        assert_eq!(radyal.yerleşim, AğaçYerleşimi::Radyal);
+        assert_eq!(radyal.ilk_ağaç_derinliği, 3);
+
+        let dikey = tree_vertical().expect("tree-vertical kurulmalı");
+        let Seri::Ağaç(dikey) = &dikey.seriler[0] else {
+            panic!("dikey Tree serisi bekleniyordu");
+        };
+        assert_eq!(dikey.yön, AğaçYönü::ÜsttenAlta);
+        assert_eq!(dikey.etiket.döndürme, EtiketDöndürme::Derece(-90.0));
+
+        let bt = tree_orient_bottom_top().expect("tree BT kurulmalı");
+        let Seri::Ağaç(bt) = &bt.seriler[0] else {
+            panic!("BT Tree serisi bekleniyordu");
+        };
+        assert_eq!(bt.yön, AğaçYönü::AlttanÜste);
+
+        let rl = tree_orient_right_left().expect("tree RL kurulmalı");
+        let Seri::Ağaç(rl) = &rl.seriler[0] else {
+            panic!("RL Tree serisi bekleniyordu");
+        };
+        assert_eq!(rl.yön, AğaçYönü::SağdanSola);
+        assert_eq!(rl.kökler[0].çocuklar[2].daraltılmış, Some(true));
+
+        let gösterge = tree_legend().expect("tree-legend kurulmalı");
+        assert_eq!(gösterge.seriler.len(), 2);
+        assert_eq!(gösterge.gösterge.as_ref().map(|g| g.yön), Some(Yön::Dikey));
+
+        let kırık = tree_polyline().expect("tree-polyline kurulmalı");
+        let Seri::Ağaç(kırık) = &kırık.seriler[0] else {
+            panic!("kırık Tree serisi bekleniyordu");
+        };
+        assert_eq!(kırık.kenar_biçimi, AğaçKenarBiçimi::Kırık);
+        assert!((kırık.kenar_çatal_oranı - 0.63).abs() < 1e-6);
+        assert_eq!(kırık.ilk_ağaç_derinliği, 3);
+    }
+
+    #[test]
+    fn yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir() {
+        type Fixture = fn() -> Result<GrafikSeçenekleri, String>;
+        let durumlar: [(Fixture, usize, usize, usize, usize, usize, usize, &str); 7] = [
+            (tree_basic, 52, 51, 51, 52, 12, 668, "ac13658335726e2b"),
+            (tree_legend, 67, 65, 65, 67, 2, 855, "c59de5063e316fc4"),
+            (
+                tree_orient_bottom_top,
+                111,
+                110,
+                110,
+                111,
+                15,
+                1435,
+                "0df0b4713d1513fa",
+            ),
+            (
+                tree_orient_right_left,
+                52,
+                51,
+                51,
+                52,
+                12,
+                668,
+                "84162e15313ca35d",
+            ),
+            (tree_polyline, 85, 84, 8, 85, 0, 789, "37eea6c009dcc5ae"),
+            (tree_radial, 219, 218, 218, 219, 6, 2839, "ad21b3a3594cf7a7"),
+            (
+                tree_vertical,
+                111,
+                110,
+                110,
+                111,
+                15,
+                1435,
+                "cecc82c59e976726",
+            ),
+        ];
+
+        for (fixture, düğüm, kenar, yol, etiket, daraltılmış, koordinat, özet) in durumlar {
+            let seçenekler = fixture().expect("resmî Tree fixture kurulmalı");
+            let gerçek =
+                ağaç_sahne_özeti(&seçenekler, 700.0, 525.0).expect("Tree sahne özeti üretilmeli");
+            assert_eq!(gerçek.düğüm_sayısı, düğüm);
+            assert_eq!(gerçek.kenar_sayısı, kenar);
+            assert_eq!(gerçek.kenar_yolu_sayısı, yol);
+            assert_eq!(gerçek.etiket_sayısı, etiket);
+            assert_eq!(gerçek.daraltılmış_düğüm_sayısı, daraltılmış);
+            assert_eq!(gerçek.koordinat_sayısı, koordinat);
+            assert_eq!(gerçek.fnv1a_64, özet);
+        }
+    }
+}
+
+#[cfg(test)]
 mod parallel_fixture_testleri {
     use super::*;
 
@@ -15506,6 +16049,13 @@ fn seçenekler(
         "radar-custom" => Ok(radar_custom()),
         "radar2" => Ok(radar2()),
         "radar-multiple" => Ok(radar_multiple()),
+        "tree-basic" => tree_basic(),
+        "tree-radial" => tree_radial(),
+        "tree-vertical" => tree_vertical(),
+        "tree-orient-bottom-top" => tree_orient_bottom_top(),
+        "tree-orient-right-left" => tree_orient_right_left(),
+        "tree-legend" => tree_legend(),
+        "tree-polyline" => tree_polyline(),
         "parallel-simple" => Ok(parallel_simple()),
         "parallel-aqi" => parallel_aqi(),
         "parallel-nutrients" => parallel_nutrients(),
@@ -15676,12 +16226,17 @@ fn çalıştır() -> Result<(), String> {
     let girdi = argümanları_oku()?;
     let seçenekler = seçenekler(&girdi.id, &girdi.durum, girdi.genişlik, girdi.yükseklik)?;
     if let Some(sahne_çıktısı) = &girdi.sahne_çıktısı {
-        let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
         if let Some(üst) = sahne_çıktısı.parent() {
             std::fs::create_dir_all(üst).map_err(|hata| format!("sahne dizini: {hata}"))?;
         }
-        let json = serde_json::to_vec_pretty(&özet)
-            .map_err(|hata| format!("sahne özeti kodlanamadı: {hata}"))?;
+        let json = if girdi.id.starts_with("tree-") {
+            let özet = ağaç_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
+        } else {
+            let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
+        }
+        .map_err(|hata| format!("sahne özeti kodlanamadı: {hata}"))?;
         std::fs::write(sahne_çıktısı, json)
             .map_err(|hata| format!("sahne özeti yazılamadı: {hata}"))?;
     }

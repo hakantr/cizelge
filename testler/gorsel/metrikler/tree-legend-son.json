@@ -1,0 +1,100 @@
+{
+  "id": "tree-legend",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 8651,
+  "değişen_piksel_oranı": 0.03204074074074074,
+  "ssim": 0.9627780087767922,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 15196,
+    "değişen_piksel_oranı": 0.05628148148148148,
+    "ssim": 0.9373686291855882
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "tree_sahne_özeti",
+      "geçti": true,
+      "açıklama": "Görünür Tree düğümleri, kenar yolları, etiket çapaları ve daraltma durumu kesin eşleşmeli",
+      "alanlar": [
+        {
+          "alan": "şema_sürümü",
+          "beklenen": 1,
+          "gerçek": 1,
+          "geçti": true
+        },
+        {
+          "alan": "koordinat_adımı",
+          "beklenen": 0.001,
+          "gerçek": 0.001,
+          "geçti": true
+        },
+        {
+          "alan": "seri_sayısı",
+          "beklenen": 2,
+          "gerçek": 2,
+          "geçti": true
+        },
+        {
+          "alan": "düğüm_sayısı",
+          "beklenen": 67,
+          "gerçek": 67,
+          "geçti": true
+        },
+        {
+          "alan": "kenar_sayısı",
+          "beklenen": 65,
+          "gerçek": 65,
+          "geçti": true
+        },
+        {
+          "alan": "kenar_yolu_sayısı",
+          "beklenen": 65,
+          "gerçek": 65,
+          "geçti": true
+        },
+        {
+          "alan": "etiket_sayısı",
+          "beklenen": 67,
+          "gerçek": 67,
+          "geçti": true
+        },
+        {
+          "alan": "daraltılmış_düğüm_sayısı",
+          "beklenen": 2,
+          "gerçek": 2,
+          "geçti": true
+        },
+        {
+          "alan": "koordinat_sayısı",
+          "beklenen": 855,
+          "gerçek": 855,
+          "geçti": true
+        },
+        {
+          "alan": "fnv1a_64",
+          "beklenen": "c59de5063e316fc4",
+          "gerçek": "c59de5063e316fc4",
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/tree-legend.png",
+    "gerçek": "testler/gorsel/gerçek/default/tree-legend.png",
+    "fark": "testler/gorsel/fark/default/tree-legend.png",
+    "normalize_fark": "testler/gorsel/fark/default/tree-legend-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/tree-legend.json"
+  }
+}

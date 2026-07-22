@@ -29,7 +29,7 @@ use crate::cizim::olay::{
 };
 use crate::cizim::yuzey::{keskin, ÇizimYüzeyi};
 use crate::cizim::{AfinMatris, Yol, yolu_dönüştür};
-use crate::grafik::agac::ağaç_çiz;
+use crate::grafik::agac::{ağaç_alanı, ağaç_çiz};
 use crate::grafik::agac_haritasi::{ağaç_haritası_çiz, hücre_değer_metni};
 use crate::grafik::cizgi::{nokta_listeleri, ÇizgiKatmanı, çizgi_serisi_çiz};
 use crate::grafik::gosterge_saati::gösterge_saati_çiz;
@@ -74,6 +74,7 @@ use crate::koordinat::{
     Dikdörtgen, Kartezyen2B, ParalelYerleşimi, TakvimYerleşimi, TekEksenYerleşimi,
     paralel_seri_bağlı_mı, ÇalışmaEkseni,
 };
+use crate::model::agac::AğaçGezinmesi;
 use crate::model::bilesen::{
     AraçKutusuÖzelliği, FırçaAracıTürü, FırçaBağı, FırçaKoordinatAralığı, FırçaKoordinatı,
     FırçaSeçimAlanı, FırçaStili, FırçaTürü, GöstergeSimgesi, Tetikleme, Yön, İmleçTürü, İpucu,
@@ -853,6 +854,8 @@ pub struct BoyamaGirdisi {
     pub grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları: `(düğüm sırası, dx, dy)`.
     pub grafo_kaymaları: Vec<(usize, f32, f32)>,
+    /// Tree serisi başına gezinme: `(seriesIndex, dx, dy, scale)`.
+    pub ağaç_görünümleri: Vec<(usize, f32, f32, f32)>,
 }
 
 impl Default for BoyamaGirdisi {
@@ -870,6 +873,29 @@ impl Default for BoyamaGirdisi {
             hiyerarşi_yolu: Vec::new(),
             grafo_görünümü: (0.0, 0.0, 1.0),
             grafo_kaymaları: Vec::new(),
+            ağaç_görünümleri: Vec::new(),
+        }
+    }
+}
+
+/// Tree `roam` isabet alanı ve izin verilen hareket türü.
+#[derive(Clone, Copy, Debug)]
+pub struct AğaçGezinmeAlanı {
+    pub seri_sırası: usize,
+    pub alan: Dikdörtgen,
+    pub gezinme: AğaçGezinmesi,
+}
+
+impl AğaçGezinmeAlanı {
+    pub fn kaydır(self, dx: f32, dy: f32) -> Self {
+        Self {
+            alan: Dikdörtgen::yeni(
+                self.alan.x + dx,
+                self.alan.y + dy,
+                self.alan.genişlik,
+                self.alan.yükseklik,
+            ),
+            ..self
         }
     }
 }
@@ -948,6 +974,8 @@ impl İçYakınlaştırmaAlanı {
 pub struct BoyamaÇıktısı {
     pub gösterge_kutuları: Vec<(Dikdörtgen, String)>,
     pub isabetler: Vec<İsabetBölgesi>,
+    /// Tree `roam` için seri kutuları.
+    pub ağaç_alanları: Vec<AğaçGezinmeAlanı>,
     /// Matrix bileşen hücrelerinin seri dışı tooltip/triggerEvent/cursor
     /// hedefleri; çizim z-sırasıyla saklanır.
     pub matris_hücreleri: Vec<MatrisHücreBölgesi>,
@@ -6199,6 +6227,19 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
+                let görünüm = girdi
+                    .ağaç_görünümleri
+                    .iter()
+                    .find(|(seri_sırası, ..)| *seri_sırası == i)
+                    .map(|(_, dx, dy, ölçek)| (*dx, *dy, *ölçek))
+                    .unwrap_or((0.0, 0.0, 1.0));
+                if a.gezinme != AğaçGezinmesi::Kapalı {
+                    çıktı.ağaç_alanları.push(AğaçGezinmeAlanı {
+                        seri_sırası: i,
+                        alan: ağaç_alanı(a, tüm_alan),
+                        gezinme: a.gezinme,
+                    });
+                }
                 let önce = çıktı.isabetler.len();
                 ağaç_çiz(
                     yüzey,
@@ -6207,6 +6248,8 @@ pub fn grafiği_boya(
                     tüm_alan,
                     seçenekler.seri_rengi(i),
                     ilerleme,
+                    görünüm,
+                    fare,
                     &mut çıktı.isabetler,
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
@@ -6218,9 +6261,13 @@ pub fn grafiği_boya(
                         .rev()
                         .find(|b| b.geometri.içeriyor_mu(f))
                 {
+                    let yol = a
+                        .düğüm_yolu(b.veri_sırası)
+                        .map(|yol| yol.join("."))
+                        .unwrap_or_else(|| b.ad.clone().unwrap_or_default());
                     let satır = İpucuSatırı {
                         im_rengi: Some(seçenekler.seri_rengi(i)),
-                        ad: b.ad.clone().unwrap_or_default(),
+                        ad: yol,
                         değer: b.değer.map(binlik_ayır).unwrap_or_default(),
                     };
                     bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
@@ -7610,5 +7657,66 @@ mod yakınlaştırma_yönü_testleri {
         assert!(döküm.contains("b=14.0 #ffffff@1.0"));
         assert!(döküm.contains("#aaaaaa@1.0"));
         assert!(döküm.contains("#777777@1.0"));
+    }
+
+    #[test]
+    fn tree_roam_gorunumu_dugumleri_olcekler_kaydirir_ve_isabet_alanini_korur() {
+        use crate::model::agac::{AğaçDüğümü, AğaçGezinmesi};
+        use crate::model::seri::AğaçSerisi;
+
+        let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
+            AğaçSerisi::yeni()
+                .kökler([AğaçDüğümü::dal(
+                    "root",
+                    vec![AğaçDüğümü::yaprak("leaf", 1.0)],
+                )])
+                .ilk_ağaç_derinliği(-1)
+                .gezinme(AğaçGezinmesi::Açık),
+        );
+        let mut temel_yüzey = crate::cizim::KayıtYüzeyi::yeni(400.0, 300.0);
+        let temel = grafiği_boya(&mut temel_yüzey, &seçenekler, &BoyamaGirdisi::default());
+        let mut dönüşlü_yüzey = crate::cizim::KayıtYüzeyi::yeni(400.0, 300.0);
+        let dönüşlü = grafiği_boya(
+            &mut dönüşlü_yüzey,
+            &seçenekler,
+            &BoyamaGirdisi {
+                ağaç_görünümleri: vec![(0, 20.0, -5.0, 1.5)],
+                ..Default::default()
+            },
+        );
+        let merkezler = |çıktı: &BoyamaÇıktısı| {
+            çıktı
+                .isabetler
+                .iter()
+                .filter_map(|isabet| match isabet.geometri {
+                    İsabetGeometrisi::Daire { merkez, .. } => Some(merkez),
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        };
+        let temel_merkezler = merkezler(&temel);
+        let dönüşlü_merkezler = merkezler(&dönüşlü);
+
+        assert_eq!(temel_merkezler.len(), 2);
+        assert_eq!(dönüşlü_merkezler.len(), 2);
+        assert_eq!(dönüşlü.ağaç_alanları.len(), 1);
+        assert_eq!(dönüşlü.ağaç_alanları[0].seri_sırası, 0);
+        assert_eq!(dönüşlü.ağaç_alanları[0].gezinme, AğaçGezinmesi::Açık);
+        let temel_uzaklık = temel_merkezler[1].0 - temel_merkezler[0].0;
+        let dönüşlü_uzaklık = dönüşlü_merkezler[1].0 - dönüşlü_merkezler[0].0;
+        assert!((dönüşlü_uzaklık - temel_uzaklık * 1.5).abs() < 1e-3);
+        let alan_merkezi = dönüşlü.ağaç_alanları[0].alan.merkez();
+        assert!(
+            (dönüşlü_merkezler[0].0
+                - (alan_merkezi.0 + (temel_merkezler[0].0 - alan_merkezi.0) * 1.5 + 20.0))
+                .abs()
+                < 1e-3
+        );
+        assert!(
+            (dönüşlü_merkezler[0].1
+                - (alan_merkezi.1 + (temel_merkezler[0].1 - alan_merkezi.1) * 1.5 - 5.0))
+                .abs()
+                < 1e-3
+        );
     }
 }

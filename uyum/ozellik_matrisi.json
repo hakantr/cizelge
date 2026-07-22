@@ -15772,17 +15772,33 @@
     "ts_türü": "TreeSeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Ağaç, From<AğaçSerisi>)",
+    "veri_biçimleri": [
+      "AğaçSerisi"
+    ],
+    "koordinat_dalları": [
+      "kayıt",
+      "boyama",
+      "olay/isabet"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 240,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f55441e88f06c0c5da21",
@@ -27412,17 +27428,33 @@
     "ts_türü": "TreeSeriesNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.children)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::çocuklar, dal)",
+    "veri_biçimleri": [
+      "Vec<AğaçDüğümü>"
+    ],
+    "koordinat_dalları": [
+      "yaprak",
+      "dal",
+      "özyinelemeli-alt-soy"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 72,
       "sembol": "TreeSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ff403414713a52b5a77c",
@@ -27433,17 +27465,32 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.collapsed)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::daraltılmış); src/model/seri.rs (düğüm_daraltmasını_değiştir)",
+    "veri_biçimleri": [
+      "Option<bool>",
+      "treeExpandAndCollapse action"
+    ],
+    "koordinat_dalları": [
+      "açık-yama",
+      "kapalı-yama",
+      "ilk-derinlik-mirası",
+      "dal-tıklaması"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 74,
       "sembol": "TreeSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::tree_expand_and_collapse_action_modeli_ve_olay_yukunu_gunceller",
+      "grafik::agac::testler::ilk_derinlik_ve_açık_daraltılmış_yaması_görünür_alt_soyu_belirler"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-orient-right-left",
+      "tree-radial"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fbd0bdcc484ed525f8e4",
@@ -27454,17 +27501,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.curveness)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçSerisi::kenar_eğriliği); src/grafik/agac.rs (eğri_kenar_yolu)",
+    "veri_biçimleri": [
+      "f32 0..1"
+    ],
+    "koordinat_dalları": [
+      "LR/RL-kontrol-noktası",
+      "TB/BT-kontrol-noktası",
+      "radyal-kontrol-noktası"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 48,
       "sembol": "CurveLineStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-radial"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "47b035b4b064e789e733",
@@ -27475,17 +27533,37 @@
     "ts_türü": "TreeSeriesNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçSerisi::kökler); src/model/agac.rs (AğaçDüğümü)",
+    "veri_biçimleri": [
+      "TreeSeriesNodeItemOption[]",
+      "AğaçDüğümü[]"
+    ],
+    "koordinat_dalları": [
+      "sanal-kök",
+      "preorder-dataIndex",
+      "değer",
+      "ad/id",
+      "çok-kök-girdisi"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 117,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur",
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "779b60cf8b59fb589259",
@@ -27496,17 +27574,28 @@
     "ts_türü": "string | number",
     "zorunlu": false,
     "echarts_varsayılanı": "'50%'",
-    "rust_api": "src/model/seri.rs (tree.edgeForkPosition)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçSerisi::kenar_çatal_yüzdesi, kenar_çatal_oranı)",
+    "veri_biçimleri": [
+      "yüzde",
+      "0..1 oran"
+    ],
+    "koordinat_dalları": [
+      "yatay-çatal",
+      "dikey-çatal",
+      "sınır-kısıtlama"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 100,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-polyline"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "be97a6c28bbe00ee6af5",
@@ -27517,17 +27606,32 @@
     "ts_türü": "'polyline' | 'curve'",
     "zorunlu": false,
     "echarts_varsayılanı": "'curve'",
-    "rust_api": "src/model/seri.rs (tree.edgeShape)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçKenarBiçimi); src/grafik/agac.rs (eğri_kenar_yolu, kırık_kenar_yolu)",
+    "veri_biçimleri": [
+      "curve",
+      "polyline"
+    ],
+    "koordinat_dalları": [
+      "Bezier",
+      "tek-çocuk-doğrudan",
+      "çok-çocuk-ortak-çatal",
+      "radyal-güvenli-eğri"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 95,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac::testler::kırık_kenar_tek_çocukta_doğrudan_çizgidir",
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-polyline",
+      "tree-radial"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "9b34583fdbe6ba5a1d5c",
@@ -27538,17 +27642,30 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (tree.expandAndCollapse)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçSerisi::genişlet_ve_daralt, düğüm_daraltmasını_değiştir); src/eylem.rs (treeExpandAndCollapse)",
+    "veri_biçimleri": [
+      "bool",
+      "action payload dataIndex/series seçicisi"
+    ],
+    "koordinat_dalları": [
+      "etkin",
+      "kapalı",
+      "yaprak-değişmez",
+      "model+olay-yükü"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 108,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::tree_expand_and_collapse_action_modeli_ve_olay_yukunu_gunceller"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-radial"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "bf22cf69f4a014cdb021",
@@ -27559,17 +27676,31 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "2",
-    "rust_api": "src/model/seri.rs (tree.initialTreeDepth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçSerisi::ilk_ağaç_derinliği); src/grafik/agac.rs (düğüm_açık_mı)",
+    "veri_biçimleri": [
+      "isize",
+      "negatif=tümü-açık"
+    ],
+    "koordinat_dalları": [
+      "öntanım-2",
+      "açık-derinlik",
+      "negatif",
+      "düğüm-yaması-önceliği"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 113,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac::testler::ilk_derinlik_ve_açık_daraltılmış_yaması_görünür_alt_soyu_belirler"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-polyline",
+      "tree-radial"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "44665385980156e6e19e",
@@ -27580,17 +27711,37 @@
     "ts_türü": "ItemStyleOption<TCbParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            color: 'lightsteelblue',\n            // borderColor: '#c23531',\n            borderWidth: 1.5\n        }",
-    "rust_api": "src/model/seri.rs (tree.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs ve src/model/agac.rs (normal/emphasis/blur/select öğe stilleri)",
+    "veri_biçimleri": [
+      "ÖğeStili",
+      "düğüm/seri durum yaması"
+    ],
+    "koordinat_dalları": [
+      "renk",
+      "kenarlık",
+      "opaklık",
+      "gölge",
+      "normal/emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 52,
       "sembol": "TreeSeriesStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur",
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b79cf682233c899a520b",
@@ -27601,17 +27752,36 @@
     "ts_türü": "SeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true\n        }",
-    "rust_api": "src/model/seri.rs (tree.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs ve src/model/agac.rs (etiket/durum etiketleri); src/grafik/agac.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması"
+    ],
+    "koordinat_dalları": [
+      "dört-dik-yön",
+      "radyal-otomatik-döndürme",
+      "açık/yaprak",
+      "durumlar"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 57,
       "sembol": "TreeSeriesStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur",
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "84c2b79750cfd7ad471a",
@@ -27622,17 +27792,35 @@
     "ts_türü": "'orthogonal' | 'radial'",
     "zorunlu": false,
     "echarts_varsayılanı": "'orthogonal'",
-    "rust_api": "src/model/seri.rs (tree.layout)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçYerleşimi); src/grafik/agac.rs (D3/Reingold–Tilford yerleşimi)",
+    "veri_biçimleri": [
+      "AğaçYerleşimi::Dik",
+      "AğaçYerleşimi::Radyal"
+    ],
+    "koordinat_dalları": [
+      "orthogonal",
+      "radial",
+      "çoklu-dal-ayırma"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 93,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac::testler::radyal_kök_merkezde_ve_alt_soy_yarıçapta_yerleşir",
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c0062e3a45116a81ffb8",
@@ -27643,17 +27831,31 @@
     "ts_türü": "TreeSeriesLeavesOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.leaves)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçSerisi::yaprak_etiketi); src/grafik/agac.rs (görünür uç state mirası)",
+    "veri_biçimleri": [
+      "EtiketYaması",
+      "TreeSeriesLeavesOption state mirası"
+    ],
+    "koordinat_dalları": [
+      "gerçek-yaprak",
+      "daraltılmış-dal-görünür-uç",
+      "normal/emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 115,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-polyline",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "27612cac00ccfd497ae9",
@@ -27664,17 +27866,35 @@
     "ts_türü": "CurveLineStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            color: tokens.color.borderTint,\n            width: 1.5,\n            curveness: 0.5\n        }",
-    "rust_api": "src/model/seri.rs (tree.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs ve src/model/agac.rs (normal/emphasis/blur/select çizgi stilleri)",
+    "veri_biçimleri": [
+      "ÇizgiStili",
+      "curveness"
+    ],
+    "koordinat_dalları": [
+      "seri-varsayılanı",
+      "çocuk-kenar-yaması",
+      "normal/emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 56,
       "sembol": "TreeSeriesStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur",
+      "tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8f8cd61b4417bc66a167",
@@ -27685,17 +27905,26 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.link)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::bağlantı)",
+    "veri_biçimleri": [
+      "Option<String>"
+    ],
+    "koordinat_dalları": [
+      "yok",
+      "URL metadata"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 76,
       "sembol": "TreeSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d7295cb6f1bf7bd30624",
@@ -27706,17 +27935,34 @@
     "ts_türü": "'LR' | 'TB' | 'RL' | 'BT' | 'horizontal' | 'vertical'",
     "zorunlu": false,
     "echarts_varsayılanı": "'LR'",
-    "rust_api": "src/model/seri.rs (tree.orient)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçYönü); src/grafik/agac.rs (dört dik yön dönüşümü)",
+    "veri_biçimleri": [
+      "LR/horizontal",
+      "RL",
+      "TB/vertical",
+      "BT"
+    ],
+    "koordinat_dalları": [
+      "soldan-sağa",
+      "sağdan-sola",
+      "üstten-alta",
+      "alttan-üste"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 106,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac::testler::dört_dik_yön_aynı_düğüm_sayısını_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7f2729725f6f77a501a3",
@@ -27727,17 +27973,26 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.target)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::hedef)",
+    "veri_biçimleri": [
+      "Option<String>"
+    ],
+    "koordinat_dalları": [
+      "yok",
+      "bağlantı-hedefi metadata"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 77,
       "sembol": "TreeSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f7e7c3043402e5f964b5",
@@ -27748,17 +28003,33 @@
     "ts_türü": "'tree'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (tree.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Ağaç, AğaçSerisi)",
+    "veri_biçimleri": [
+      "sabit 'tree'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "boyama",
+      "isabet/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/tree/TreeSeries.ts",
       "satır": 91,
       "sembol": "TreeSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "tree-basic",
+      "tree-legend",
+      "tree-orient-bottom-top",
+      "tree-orient-right-left",
+      "tree-polyline",
+      "tree-radial",
+      "tree-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1f71fbe5c2d5ce8cc75a",

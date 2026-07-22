@@ -680,6 +680,70 @@ pub fn paralel_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(),
     )
 }
 
+/// Tree dal aç/kapat action'ını kaydeder. `seriesIndex`/`seriesId`/
+/// `seriesName` verilmezse ECharts `eachComponent` gibi bütün Tree
+/// serilerine aynı `dataIndex` uygulanır.
+pub fn ağaç_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "treeExpandAndCollapse",
+        "treeExpandAndCollapse",
+        EylemGüncellemesi::Tam,
+        |çalışma, yük| {
+            let veri_sırası = isteğe_bağlı_sıra(yük, "dataIndex")?.ok_or_else(|| {
+                BilesenHatasi::GeçersizSeçenek {
+                    alan: "treeExpandAndCollapse.dataIndex",
+                    ayrıntı: "negatif olmayan tam dataIndex gerekli".to_owned(),
+                }
+            })?;
+            let seçiciler = if let Some(seçici) = yük.seri_seçici() {
+                vec![seçici]
+            } else {
+                çalışma
+                    .seçenekleri_al()?
+                    .seriler
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(sıra, seri)| {
+                        matches!(seri, crate::model::seri::Seri::Ağaç(_))
+                            .then_some(SeriSeçici::Sıra(sıra))
+                    })
+                    .collect()
+            };
+            if seçiciler.is_empty() {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "treeExpandAndCollapse.series",
+                    sıra: 0,
+                });
+            }
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let (seri_sırası, ad, daraltılmış) =
+                    çalışma.ağaç_daraltmasını_değiştir(seçici, veri_sırası, true)?;
+                let seçenekler = çalışma.seçenekleri_al()?;
+                let seri = seçenekler.seriler.get(seri_sırası);
+                olaylar.push(OlayYükü {
+                    bileşen_türü: Some("series".to_owned()),
+                    bileşen_alt_türü: Some("tree".to_owned()),
+                    seri_sırası: Some(seri_sırası),
+                    seri_kimliği: seri.and_then(|seri| match seri {
+                        crate::model::seri::Seri::Ağaç(ağaç) => ağaç.kimlik.clone(),
+                        _ => None,
+                    }),
+                    seri_adı: seri.and_then(|seri| seri.ad().map(str::to_owned)),
+                    veri_sırası: Some(veri_sırası),
+                    veri_adı: Some(ad),
+                    alanlar: BTreeMap::from([(
+                        "collapsed".to_owned(),
+                        EylemDeğeri::from(daraltılmış),
+                    )]),
+                    ..OlayYükü::default()
+                });
+            }
+            Ok(olaylar)
+        },
+    )
+}
+
 fn paralel_aralıklarını_oku(değer: &EylemDeğeri) -> Result<Vec<[f64; 2]>, BilesenHatasi> {
     değer
         .dizi()
@@ -1307,6 +1371,7 @@ pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<
     veri_yakınlaştırma_eylemini_kaydet(kayıt)?;
     fırça_eylemini_kaydet(kayıt)?;
     paralel_eylemlerini_kaydet(kayıt)?;
+    ağaç_eylemlerini_kaydet(kayıt)?;
     eksen_kırılma_eylemlerini_kaydet(kayıt)?;
     görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
@@ -1502,12 +1567,13 @@ mod testler {
 
     use super::*;
     use crate::calisma_zamani::ÖrnekBaşlatmaSeçenekleri;
+    use crate::model::agac::AğaçDüğümü;
     use crate::model::bilesen::{Başlık, Fırça, Gösterge, GöstergeSeçimKipi, Izgara};
     use crate::model::eksen::{Eksen, EksenKırılması};
     use crate::model::gorsel_esleme::GörselEşleme;
     use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
     use crate::model::secenekler::GrafikSeçenekleri;
-    use crate::model::seri::{ParalelSerisi, ÇizgiSerisi};
+    use crate::model::seri::{AğaçSerisi, ParalelSerisi, ÇizgiSerisi};
     use crate::model::yakinlastirma::VeriYakınlaştırma;
 
     fn çalışma() -> GrafikÇalışmaZamanı {
@@ -1537,6 +1603,58 @@ mod testler {
         assert_eq!(olaylar[0].tür, "dataappended");
         assert_eq!(olaylar[0].alanlar.get("count"), Some(&2usize.into()));
         assert_eq!(çalışma.seçenekleri_al().unwrap().seriler[0].veri().len(), 4);
+    }
+
+    #[test]
+    fn tree_expand_and_collapse_action_modeli_ve_olay_yukunu_gunceller() {
+        let seçenekler = GrafikSeçenekleri::yeni().kimlikli_seri(
+            "tree-id",
+            AğaçSerisi::yeni()
+                .ad("Tree")
+                .ilk_ağaç_derinliği(-1)
+                .kökler([AğaçDüğümü::dal(
+                    "root",
+                    vec![AğaçDüğümü::yaprak("leaf", 7.0)],
+                )]),
+        );
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        ağaç_eylemlerini_kaydet(&mut kayıt).unwrap();
+
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("treeExpandAndCollapse")
+                    .alan("seriesId", "tree-id")
+                    .alan("dataIndex", 0usize),
+            )
+            .unwrap();
+        assert_eq!(olaylar.len(), 1);
+        assert_eq!(olaylar[0].tür, "treeExpandAndCollapse");
+        assert_eq!(olaylar[0].bileşen_alt_türü.as_deref(), Some("tree"));
+        assert_eq!(olaylar[0].seri_sırası, Some(0));
+        assert_eq!(olaylar[0].veri_adı.as_deref(), Some("root"));
+        assert_eq!(
+            olaylar[0].alanlar.get("collapsed"),
+            Some(&EylemDeğeri::Mantıksal(true))
+        );
+        let seçenekler = çalışma.seçenekleri_al().unwrap();
+        let crate::model::seri::Seri::Ağaç(ağaç) = &seçenekler.seriler[0] else {
+            panic!("Tree serisi bekleniyordu");
+        };
+        assert_eq!(ağaç.kökler[0].daraltılmış, Some(true));
+
+        let sessiz = EylemYükü::yeni("treeExpandAndCollapse")
+            .alan("seriesIndex", 0usize)
+            .alan("dataIndex", 0usize)
+            .sessiz(true);
+        assert!(kayıt.gönder(&mut çalışma, &sessiz).unwrap().is_empty());
+        let seçenekler = çalışma.seçenekleri_al().unwrap();
+        let crate::model::seri::Seri::Ağaç(ağaç) = &seçenekler.seriler[0] else {
+            panic!("Tree serisi bekleniyordu");
+        };
+        assert_eq!(ağaç.kökler[0].daraltılmış, Some(false));
     }
 
     #[test]

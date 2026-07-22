@@ -4,7 +4,7 @@
 //! içindedir ve bu modül olmadan da (ör. WASM/SVG hedeflerinde) çalışır.
 
 use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -21,8 +21,8 @@ use crate::calisma_zamani::{
 };
 use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::gorunum::{
-    AraçTürü, BoyamaGirdisi, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya, gösterge_adları,
-    İçYakınlaştırmaAlanı,
+    AraçTürü, AğaçGezinmeAlanı, BoyamaGirdisi, FırçaAlanı, SürgüBölgesi, SürgüParçası,
+    grafiği_boya, gösterge_adları, İçYakınlaştırmaAlanı,
 };
 use crate::cizim::olay::{
     GrafikOlayı, MatrisHücreBölgesi, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, İsabetBölgesi,
@@ -77,6 +77,9 @@ type ParalelEksenKayıtları = Rc<RefCell<Vec<ParalelEksenBölgesi>>>;
 
 /// `parallel.axisExpandable` koordinat alanlarının pencere-mutlak kayıtları.
 type ParalelGenişletmeKayıtları = Rc<RefCell<Vec<ParalelGenişletmeBölgesi>>>;
+
+/// Tree `roam` kutularının pencere-mutlak kayıtları.
+type AğaçGezinmeKayıtları = Rc<RefCell<Vec<AğaçGezinmeAlanı>>>;
 
 fn gpui_imleci(ad: &str) -> CursorStyle {
     match ad.trim().to_ascii_lowercase().as_str() {
@@ -181,6 +184,10 @@ pub struct GrafikGörünümü {
     grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları.
     grafo_kaymaları: std::collections::HashMap<usize, (f32, f32)>,
+    /// Tree serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
+    ağaç_görünümleri: HashMap<usize, (f32, f32, f32)>,
+    /// Pencere-mutlak Tree gezinme alanları.
+    ağaç_alanları: AğaçGezinmeKayıtları,
 }
 
 /// Etkin sürükleme durumu.
@@ -192,6 +199,10 @@ enum Sürükleme {
     },
     /// Grafo görünümünü kaydırma (roam).
     GrafoKaydırma { son: (f32, f32) },
+    /// Tek Tree serisinin görünümünü kaydırma (`series.tree.roam`).
+    AğaçKaydırma {
+        seri_sırası: usize, son: (f32, f32)
+    },
     /// Izgara içinde yatay kaydırma (pan).
     Kaydırma {
         yakınlaştırma_sırası: usize,
@@ -273,6 +284,8 @@ impl GrafikGörünümü {
             grafik_sahnesi: Rc::new(RefCell::new(None)),
             grafo_görünümü: (0.0, 0.0, 1.0),
             grafo_kaymaları: std::collections::HashMap::new(),
+            ağaç_görünümleri: HashMap::new(),
+            ağaç_alanları: Rc::new(RefCell::new(Vec::new())),
         }
     }
 
@@ -640,11 +653,12 @@ impl GrafikGörünümü {
         self.seçenekleri_değiştir(seçenekler, cx)
     }
 
-    /// Gezinme durumunu (hiyerarşi yolu, grafo görünümü) sıfırlar.
+    /// Gezinme durumunu (hiyerarşi yolu, grafo/Tree görünümü) sıfırlar.
     fn gezinmeyi_sıfırla(&mut self) {
         self.hiyerarşi_yolu.clear();
         self.grafo_görünümü = (0.0, 0.0, 1.0);
         self.grafo_kaymaları.clear();
+        self.ağaç_görünümleri.clear();
     }
 
     pub fn seçenekler(&self) -> &GrafikSeçenekleri {
@@ -755,6 +769,12 @@ impl Render for GrafikGörünümü {
             .iter()
             .map(|(sıra, (dx, dy))| (*sıra, *dx, *dy))
             .collect();
+        let ağaç_görünümleri = self
+            .ağaç_görünümleri
+            .iter()
+            .map(|(sıra, (dx, dy, ölçek))| (*sıra, *dx, *dy, *ölçek))
+            .collect::<Vec<_>>();
+        let ağaç_alanları = self.ağaç_alanları.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -787,6 +807,7 @@ impl Render for GrafikGörünümü {
                             hiyerarşi_yolu: hiyerarşi_yolu.clone(),
                             grafo_görünümü,
                             grafo_kaymaları: grafo_kaymaları.clone(),
+                            ağaç_görünümleri: ağaç_görünümleri.clone(),
                         };
                         let mut çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
                         let tanı_bildir = |bileşen: &'static str| {
@@ -818,6 +839,19 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             Err(_) => tanı_bildir("isabet_bölgeleri"),
+                        }
+                        match ağaç_alanları.try_borrow_mut() {
+                            Ok(mut alanlar) => {
+                                alanlar.clear();
+                                alanlar.extend(
+                                    çıktı
+                                        .ağaç_alanları
+                                        .iter()
+                                        .copied()
+                                        .map(|alan| alan.kaydır(köken.0, köken.1)),
+                                );
+                            }
+                            Err(_) => tanı_bildir("ağaç_gezinme_alanları"),
                         }
                         match matris_hücreleri.try_borrow_mut() {
                             Ok(mut bölgeler) => {
@@ -1003,6 +1037,27 @@ impl Render for GrafikGörünümü {
                             cx.notify();
                             return;
                         }
+                        Some(Sürükleme::AğaçKaydırma { seri_sırası, son }) => {
+                            let görünüm = bu
+                                .ağaç_görünümleri
+                                .entry(seri_sırası)
+                                .or_insert((0.0, 0.0, 1.0));
+                            görünüm.0 += yeni.0 - son.0;
+                            görünüm.1 += yeni.1 - son.1;
+                            let (kayma_x, kayma_y, ölçek) = *görünüm;
+                            bu.sürükleme = Some(Sürükleme::AğaçKaydırma {
+                                seri_sırası,
+                                son: yeni,
+                            });
+                            cx.emit(GrafikOlayı::AğaçGezinmeDeğişti {
+                                seri_sırası,
+                                kayma_x,
+                                kayma_y,
+                                ölçek,
+                            });
+                            cx.notify();
+                            return;
+                        }
                         Some(Sürükleme::Kaydırma {
                             yakınlaştırma_sırası,
                             başlangıç_ekseni,
@@ -1160,6 +1215,48 @@ impl Render for GrafikGörünümü {
                     Err(_) => None,
                 };
                 let Some(kayıt) = alan_kaydı else {
+                    // Tree gezinmesi: yalnız alanın `roam` seçeneği ölçeğe
+                    // izin veriyorsa, işaretçinin bulunduğu seriyi büyüt.
+                    let ağaç_alanı = bu.ağaç_alanları.try_borrow().ok().and_then(|alanlar| {
+                        alanlar
+                            .iter()
+                            .rev()
+                            .find(|alan| {
+                                alan.alan.içeriyor_mu(konum) && alan.gezinme.ölçeklenebilir()
+                            })
+                            .copied()
+                    });
+                    if let Some(alan) = ağaç_alanı {
+                        let yön = match olay.delta {
+                            gpui::ScrollDelta::Pixels(p) => f32::from(p.y),
+                            gpui::ScrollDelta::Lines(l) => l.y * 20.0,
+                        };
+                        if yön.abs() < 0.01 {
+                            return;
+                        }
+                        let çarpan = if yön > 0.0 { 1.0 / 0.85 } else { 0.85 };
+                        let görünüm = bu
+                            .ağaç_görünümleri
+                            .entry(alan.seri_sırası)
+                            .or_insert((0.0, 0.0, 1.0));
+                        let eski_ölçek = görünüm.2.max(1e-6);
+                        let yeni_ölçek = (eski_ölçek * çarpan).clamp(0.2, 8.0);
+                        let gerçek_çarpan = yeni_ölçek / eski_ölçek;
+                        let merkez = alan.alan.merkez();
+                        let göreli = (konum.0 - merkez.0, konum.1 - merkez.1);
+                        görünüm.0 = göreli.0 - (göreli.0 - görünüm.0) * gerçek_çarpan;
+                        görünüm.1 = göreli.1 - (göreli.1 - görünüm.1) * gerçek_çarpan;
+                        görünüm.2 = yeni_ölçek;
+                        let (kayma_x, kayma_y, ölçek) = *görünüm;
+                        cx.emit(GrafikOlayı::AğaçGezinmeDeğişti {
+                            seri_sırası: alan.seri_sırası,
+                            kayma_x,
+                            kayma_y,
+                            ölçek,
+                        });
+                        cx.notify();
+                        return;
+                    }
                     // Grafo gezinmesi (roam): tekerlek görünümü ölçekler.
                     if bu
                         .seçenekler
@@ -1752,6 +1849,30 @@ impl Render for GrafikGörünümü {
                                     son: nokta,
                                 });
                             }
+                            // Tree düğümü: resmî treeExpandAndCollapse
+                            // eylemi gibi yalnız dal düğümünün durumunu
+                            // değiştir; veriIndex gizli alt ağaçlarda da
+                            // ön-sıralı model sırası olarak kalır.
+                            Some(Seri::Ağaç(ağaç)) if ağaç.genişlet_ve_daralt => {
+                                let değişiklik = Arc::make_mut(&mut bu.seçenekler)
+                                    .seriler
+                                    .get_mut(b.seri_sırası)
+                                    .and_then(|seri| match seri {
+                                        Seri::Ağaç(ağaç) => {
+                                            ağaç.düğüm_daraltmasını_değiştir(b.veri_sırası)
+                                        }
+                                        _ => None,
+                                    });
+                                if let Some((ad, daraltılmış)) = değişiklik {
+                                    cx.emit(GrafikOlayı::AğaçGenişletmeDeğişti {
+                                        seri_sırası: b.seri_sırası,
+                                        veri_sırası: b.veri_sırası,
+                                        ad,
+                                        daraltılmış,
+                                    });
+                                    cx.notify();
+                                }
+                            }
                             _ => {}
                         }
                         cx.emit(GrafikOlayı::ÖğeTıklandı {
@@ -1768,6 +1889,21 @@ impl Render for GrafikGörünümü {
                             ad: b.ad,
                             değer: b.değer,
                             koordinat: b.koordinat,
+                        });
+                    } else if let Some(alan) =
+                        bu.ağaç_alanları.try_borrow().ok().and_then(|alanlar| {
+                            alanlar
+                                .iter()
+                                .rev()
+                                .find(|alan| {
+                                    alan.alan.içeriyor_mu(nokta) && alan.gezinme.kaydırılabilir()
+                                })
+                                .copied()
+                        })
+                    {
+                        bu.sürükleme = Some(Sürükleme::AğaçKaydırma {
+                            seri_sırası: alan.seri_sırası,
+                            son: nokta,
                         });
                     } else if bu
                         .seçenekler

@@ -1,0 +1,12 @@
+{
+  "şema_sürümü": 1,
+  "seri_sayısı": 1,
+  "düğüm_sayısı": 52,
+  "kenar_sayısı": 51,
+  "kenar_yolu_sayısı": 51,
+  "etiket_sayısı": 52,
+  "daraltılmış_düğüm_sayısı": 12,
+  "koordinat_sayısı": 668,
+  "koordinat_adımı": 0.001,
+  "fnv1a_64": "84162e15313ca35d"
+}

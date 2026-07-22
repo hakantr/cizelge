@@ -32,6 +32,24 @@ impl Kök {
                     değer.map(|d| d.to_string()).unwrap_or_else(|| "-".into())
                 )
                 .into(),
+                GrafikOlayı::AğaçGenişletmeDeğişti {
+                    ad, daraltılmış, ..
+                } => format!(
+                    "Tree → {ad} {}",
+                    if *daraltılmış {
+                        "daraltıldı"
+                    } else {
+                        "genişletildi"
+                    }
+                )
+                .into(),
+                GrafikOlayı::AğaçGezinmeDeğişti {
+                    seri_sırası,
+                    kayma_x,
+                    kayma_y,
+                    ölçek,
+                } => format!("Tree {seri_sırası} roam → ({kayma_x:.1}, {kayma_y:.1}), {ölçek:.2}×")
+                    .into(),
                 GrafikOlayı::MatrisHücresiTıklandı {
                     bileşen_sırası,
                     hedef_türü,

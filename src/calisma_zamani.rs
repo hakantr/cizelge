@@ -952,6 +952,12 @@ pub enum ÇalışmaOlayı {
         paralel_sıraları: Vec<usize>,
         pencere: [f32; 2],
     },
+    AğaçGenişletmeDeğişti {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        ad: String,
+        daraltılmış: bool,
+    },
     EksenKırılmasıDeğişti {
         değişiklikler: Vec<EksenKırılmaDeğişikliği>,
     },
@@ -1747,6 +1753,45 @@ impl GrafikÇalışmaZamanı {
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok(sıra)
+    }
+
+    /// `treeExpandAndCollapse` action'ının başsız model karşılığı.
+    pub fn ağaç_daraltmasını_değiştir(
+        &mut self,
+        seçici: SeriSeçici,
+        veri_sırası: usize,
+        sessiz: bool,
+    ) -> Result<(usize, String, bool), BilesenHatasi> {
+        self.açık_mı("treeExpandAndCollapse")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "treeExpandAndCollapse.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let Some(Seri::Ağaç(ağaç)) = self.seçenekler.seriler.get_mut(sıra) else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "treeExpandAndCollapse",
+                ayrıntı: format!("{sıra}. seri `tree` değildir"),
+            });
+        };
+        let (ad, daraltılmış) =
+            ağaç
+                .düğüm_daraltmasını_değiştir(veri_sırası)
+                .ok_or(BilesenHatasi::EksikVeri {
+                    bileşen: "treeExpandAndCollapse.dataIndex",
+                    sıra: veri_sırası,
+                })?;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::AğaçGenişletmeDeğişti {
+                seri_sırası: sıra,
+                veri_sırası,
+                ad: ad.clone(),
+                daraltılmış,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok((sıra, ad, daraltılmış))
     }
 
     /// Bağ tabanlı çekirdek `series.lines` için tipli `appendData`.

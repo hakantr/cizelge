@@ -1,0 +1,100 @@
+{
+  "id": "tree-radial",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 23192,
+  "değişen_piksel_oranı": 0.08589629629629629,
+  "ssim": 0.9365557229643162,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 42689,
+    "değişen_piksel_oranı": 0.15810740740740742,
+    "ssim": 0.8688675202793319
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "tree_sahne_özeti",
+      "geçti": true,
+      "açıklama": "Görünür Tree düğümleri, kenar yolları, etiket çapaları ve daraltma durumu kesin eşleşmeli",
+      "alanlar": [
+        {
+          "alan": "şema_sürümü",
+          "beklenen": 1,
+          "gerçek": 1,
+          "geçti": true
+        },
+        {
+          "alan": "koordinat_adımı",
+          "beklenen": 0.001,
+          "gerçek": 0.001,
+          "geçti": true
+        },
+        {
+          "alan": "seri_sayısı",
+          "beklenen": 1,
+          "gerçek": 1,
+          "geçti": true
+        },
+        {
+          "alan": "düğüm_sayısı",
+          "beklenen": 219,
+          "gerçek": 219,
+          "geçti": true
+        },
+        {
+          "alan": "kenar_sayısı",
+          "beklenen": 218,
+          "gerçek": 218,
+          "geçti": true
+        },
+        {
+          "alan": "kenar_yolu_sayısı",
+          "beklenen": 218,
+          "gerçek": 218,
+          "geçti": true
+        },
+        {
+          "alan": "etiket_sayısı",
+          "beklenen": 219,
+          "gerçek": 219,
+          "geçti": true
+        },
+        {
+          "alan": "daraltılmış_düğüm_sayısı",
+          "beklenen": 6,
+          "gerçek": 6,
+          "geçti": true
+        },
+        {
+          "alan": "koordinat_sayısı",
+          "beklenen": 2839,
+          "gerçek": 2839,
+          "geçti": true
+        },
+        {
+          "alan": "fnv1a_64",
+          "beklenen": "ad21b3a3594cf7a7",
+          "gerçek": "ad21b3a3594cf7a7",
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/tree-radial.png",
+    "gerçek": "testler/gorsel/gerçek/default/tree-radial.png",
+    "fark": "testler/gorsel/fark/default/tree-radial.png",
+    "normalize_fark": "testler/gorsel/fark/default/tree-radial-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/tree-radial.json"
+  }
+}

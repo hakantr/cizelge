@@ -230,6 +230,73 @@ pub fn sembol_stilli_çiz(
     }
 }
 
+/// Sembolü merkezi çevresinde ECharts `symbolRotate` derecesiyle döndürür.
+/// Dairelerde dönüş görünümü değiştirmediğinden yerel yüzey ilkelini korur;
+/// diğer semboller aynı yol, dolgu ve kenarlık sözleşmesiyle boyanır.
+#[allow(clippy::too_many_arguments)]
+pub fn sembol_stilli_dönüşümlü_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    sembol: &Sembol,
+    merkez: (f32, f32),
+    boyut: f32,
+    derece: f32,
+    renk: Renk,
+    dolgu: Option<&Dolgu>,
+    kenarlık: Option<(f32, Renk)>,
+    opaklık: f32,
+    oranı_koru: bool,
+) {
+    if !derece.is_finite()
+        || derece.abs() <= f32::EPSILON
+        || matches!(sembol, Sembol::Daire | Sembol::İçiBoşDaire | Sembol::Yok)
+    {
+        sembol_stilli_çiz(
+            çizici,
+            sembol,
+            merkez,
+            boyut,
+            renk,
+            dolgu,
+            kenarlık,
+            opaklık,
+            oranı_koru,
+        );
+        return;
+    }
+    let Some(yol) = sembol_dönüşümlü_yolu(sembol, merkez, boyut, oranı_koru, derece) else {
+        return;
+    };
+    let opaklık = opaklık.clamp(0.0, 1.0);
+    let varsayılan_dolgu = Dolgu::Düz(renk);
+    let dolgu = dolgu.unwrap_or(&varsayılan_dolgu).opaklık(opaklık);
+    çizici.yol_doldur(&yol, &dolgu);
+    if let Some((kalınlık, kenarlık)) = kenarlık
+        && kalınlık > 0.0
+    {
+        çizici.yol_çiz(&yol, kalınlık, kenarlık.opaklık(opaklık), ÇizgiTürü::Düz);
+    }
+}
+
+pub(crate) fn sembol_dönüşümlü_yolu(
+    sembol: &Sembol,
+    merkez: (f32, f32),
+    boyut: f32,
+    oranı_koru: bool,
+    derece: f32,
+) -> Option<Yol> {
+    let yol = sembol_yolu(sembol, merkez, boyut, oranı_koru)?;
+    if !derece.is_finite()
+        || derece.abs() <= f32::EPSILON
+        || matches!(sembol, Sembol::Daire | Sembol::İçiBoşDaire)
+    {
+        return Some(yol);
+    }
+    let dönüşüm = AfinMatris::ötele(merkez.0, merkez.1)
+        .çarp(AfinMatris::döndür(derece.to_radians()))
+        .çarp(AfinMatris::ötele(-merkez.0, -merkez.1));
+    Some(yolu_dönüştür(&yol, dönüşüm))
+}
+
 /// Çizgi stilinin çözülmüş görünümü.
 pub fn çizgi_stili_çöz(
     stil: &crate::model::stil::ÇizgiStili,

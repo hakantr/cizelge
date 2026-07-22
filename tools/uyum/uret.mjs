@@ -575,6 +575,154 @@ const PARALLEL_SERIES_OPTION_KANITI = Object.freeze({
   }
 });
 
+const TREE_ÖRNEKLERİ = Object.freeze([
+  'tree-basic', 'tree-legend', 'tree-orient-bottom-top',
+  'tree-orient-right-left', 'tree-polyline', 'tree-radial', 'tree-vertical'
+]);
+
+const TREE_SERIES_OPTION_KANITI = Object.freeze({
+  type: {
+    api: 'src/model/seri.rs (Seri::Ağaç, AğaçSerisi)',
+    testler: ['tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur'],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ["sabit 'tree'"],
+    dallar: ['kayıtlı-seri', 'boyama', 'isabet/tooltip']
+  },
+  data: {
+    api: 'src/model/seri.rs (AğaçSerisi::kökler); src/model/agac.rs (AğaçDüğümü)',
+    testler: [
+      'tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur',
+      'tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'
+    ],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ['TreeSeriesNodeItemOption[]', 'AğaçDüğümü[]'],
+    dallar: ['sanal-kök', 'preorder-dataIndex', 'değer', 'ad/id', 'çok-kök-girdisi']
+  },
+  children: {
+    api: 'src/model/agac.rs (AğaçDüğümü::çocuklar, dal)',
+    testler: ['model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur'],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ['Vec<AğaçDüğümü>'],
+    dallar: ['yaprak', 'dal', 'özyinelemeli-alt-soy']
+  },
+  collapsed: {
+    api: 'src/model/agac.rs (AğaçDüğümü::daraltılmış); src/model/seri.rs (düğüm_daraltmasını_değiştir)',
+    testler: [
+      'eylem::testler::tree_expand_and_collapse_action_modeli_ve_olay_yukunu_gunceller',
+      'grafik::agac::testler::ilk_derinlik_ve_açık_daraltılmış_yaması_görünür_alt_soyu_belirler'
+    ],
+    örnekler: ['tree-basic', 'tree-orient-right-left', 'tree-radial'],
+    veri_biçimleri: ['Option<bool>', 'treeExpandAndCollapse action'],
+    dallar: ['açık-yama', 'kapalı-yama', 'ilk-derinlik-mirası', 'dal-tıklaması']
+  },
+  layout: {
+    api: 'src/model/agac.rs (AğaçYerleşimi); src/grafik/agac.rs (D3/Reingold–Tilford yerleşimi)',
+    testler: [
+      'grafik::agac::testler::radyal_kök_merkezde_ve_alt_soy_yarıçapta_yerleşir',
+      'tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'
+    ],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ['AğaçYerleşimi::Dik', 'AğaçYerleşimi::Radyal'],
+    dallar: ['orthogonal', 'radial', 'çoklu-dal-ayırma']
+  },
+  orient: {
+    api: 'src/model/agac.rs (AğaçYönü); src/grafik/agac.rs (dört dik yön dönüşümü)',
+    testler: ['grafik::agac::testler::dört_dik_yön_aynı_düğüm_sayısını_korur'],
+    örnekler: ['tree-basic', 'tree-orient-bottom-top', 'tree-orient-right-left', 'tree-vertical'],
+    veri_biçimleri: ['LR/horizontal', 'RL', 'TB/vertical', 'BT'],
+    dallar: ['soldan-sağa', 'sağdan-sola', 'üstten-alta', 'alttan-üste']
+  },
+  edgeShape: {
+    api: 'src/model/agac.rs (AğaçKenarBiçimi); src/grafik/agac.rs (eğri_kenar_yolu, kırık_kenar_yolu)',
+    testler: [
+      'grafik::agac::testler::kırık_kenar_tek_çocukta_doğrudan_çizgidir',
+      'tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'
+    ],
+    örnekler: ['tree-basic', 'tree-polyline', 'tree-radial'],
+    veri_biçimleri: ['curve', 'polyline'],
+    dallar: ['Bezier', 'tek-çocuk-doğrudan', 'çok-çocuk-ortak-çatal', 'radyal-güvenli-eğri']
+  },
+  edgeForkPosition: {
+    api: 'src/model/seri.rs (AğaçSerisi::kenar_çatal_yüzdesi, kenar_çatal_oranı)',
+    testler: ['tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur'],
+    örnekler: ['tree-polyline'],
+    veri_biçimleri: ['yüzde', '0..1 oran'],
+    dallar: ['yatay-çatal', 'dikey-çatal', 'sınır-kısıtlama']
+  },
+  curveness: {
+    api: 'src/model/seri.rs (AğaçSerisi::kenar_eğriliği); src/grafik/agac.rs (eğri_kenar_yolu)',
+    testler: ['tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'],
+    örnekler: ['tree-basic', 'tree-radial'],
+    veri_biçimleri: ['f32 0..1'],
+    dallar: ['LR/RL-kontrol-noktası', 'TB/BT-kontrol-noktası', 'radyal-kontrol-noktası']
+  },
+  expandAndCollapse: {
+    api: 'src/model/seri.rs (AğaçSerisi::genişlet_ve_daralt, düğüm_daraltmasını_değiştir); src/eylem.rs (treeExpandAndCollapse)',
+    testler: ['eylem::testler::tree_expand_and_collapse_action_modeli_ve_olay_yukunu_gunceller'],
+    örnekler: ['tree-basic', 'tree-radial'],
+    veri_biçimleri: ['bool', 'action payload dataIndex/series seçicisi'],
+    dallar: ['etkin', 'kapalı', 'yaprak-değişmez', 'model+olay-yükü']
+  },
+  initialTreeDepth: {
+    api: 'src/model/seri.rs (AğaçSerisi::ilk_ağaç_derinliği); src/grafik/agac.rs (düğüm_açık_mı)',
+    testler: ['grafik::agac::testler::ilk_derinlik_ve_açık_daraltılmış_yaması_görünür_alt_soyu_belirler'],
+    örnekler: ['tree-basic', 'tree-polyline', 'tree-radial'],
+    veri_biçimleri: ['isize', 'negatif=tümü-açık'],
+    dallar: ['öntanım-2', 'açık-derinlik', 'negatif', 'düğüm-yaması-önceliği']
+  },
+  leaves: {
+    api: 'src/model/seri.rs (AğaçSerisi::yaprak_etiketi); src/grafik/agac.rs (görünür uç state mirası)',
+    testler: ['tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur'],
+    örnekler: ['tree-basic', 'tree-legend', 'tree-polyline', 'tree-vertical'],
+    veri_biçimleri: ['EtiketYaması', 'TreeSeriesLeavesOption state mirası'],
+    dallar: ['gerçek-yaprak', 'daraltılmış-dal-görünür-uç', 'normal/emphasis/blur/select']
+  },
+  itemStyle: {
+    api: 'src/model/seri.rs ve src/model/agac.rs (normal/emphasis/blur/select öğe stilleri)',
+    testler: [
+      'model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur',
+      'tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'
+    ],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ['ÖğeStili', 'düğüm/seri durum yaması'],
+    dallar: ['renk', 'kenarlık', 'opaklık', 'gölge', 'normal/emphasis/blur/select']
+  },
+  lineStyle: {
+    api: 'src/model/seri.rs ve src/model/agac.rs (normal/emphasis/blur/select çizgi stilleri)',
+    testler: [
+      'model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur',
+      'tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'
+    ],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ['ÇizgiStili', 'curveness'],
+    dallar: ['seri-varsayılanı', 'çocuk-kenar-yaması', 'normal/emphasis/blur/select']
+  },
+  label: {
+    api: 'src/model/seri.rs ve src/model/agac.rs (etiket/durum etiketleri); src/grafik/agac.rs (etiket_geometrisi)',
+    testler: [
+      'model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur',
+      'tree_fixture_testleri::yedi_resmi_tree_sahnesinin_geometrik_ozeti_kilitlidir'
+    ],
+    örnekler: TREE_ÖRNEKLERİ,
+    veri_biçimleri: ['Etiket', 'EtiketYaması'],
+    dallar: ['dört-dik-yön', 'radyal-otomatik-döndürme', 'açık/yaprak', 'durumlar']
+  },
+  link: {
+    api: 'src/model/agac.rs (AğaçDüğümü::bağlantı)',
+    testler: ['model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur'],
+    örnekler: ['tree-basic'],
+    veri_biçimleri: ['Option<String>'],
+    dallar: ['yok', 'URL metadata']
+  },
+  target: {
+    api: 'src/model/agac.rs (AğaçDüğümü::hedef)',
+    testler: ['model::agac::testler::tree_dugumu_resmi_veri_sembol_ve_durum_alanlarini_korur'],
+    örnekler: ['tree-basic'],
+    veri_biçimleri: ['Option<String>'],
+    dallar: ['yok', 'bağlantı-hedefi metadata']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -763,7 +911,13 @@ const YEREL_FIXTURE = Object.freeze({
   'gauge-car': 'examples/uyum_fixture.rs#gauge_car',
   'treemap-simple': 'examples/agac_haritasi.rs',
   'sunburst-simple': 'examples/gunes.rs',
-  'tree-basic': 'examples/agac.rs',
+  'tree-basic': 'examples/uyum_fixture.rs#tree_basic',
+  'tree-legend': 'examples/uyum_fixture.rs#tree_legend',
+  'tree-orient-bottom-top': 'examples/uyum_fixture.rs#tree_orient_bottom_top',
+  'tree-orient-right-left': 'examples/uyum_fixture.rs#tree_orient_right_left',
+  'tree-polyline': 'examples/uyum_fixture.rs#tree_polyline',
+  'tree-radial': 'examples/uyum_fixture.rs#tree_radial',
+  'tree-vertical': 'examples/uyum_fixture.rs#tree_vertical',
   'sankey-simple': 'examples/sankey.rs',
   'graph-simple': 'examples/grafo.rs',
   'chord-simple': 'examples/kiris.rs'
@@ -1117,6 +1271,17 @@ function rustKarşılığı(kök, özellik) {
       koordinat_dalları: kanıt.dallar
     };
   }
+  if (kök.toLowerCase() === 'series.tree' && TREE_SERIES_OPTION_KANITI[özellik]) {
+    const kanıt = TREE_SERIES_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
   if (kök.toLowerCase() === 'echarts' && özellik === 'parallel') {
     return {
       api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle)',
@@ -1144,6 +1309,16 @@ function rustKarşılığı(kök, özellik) {
       testler: ['grafik::paralel::testler::resmi_seri_varsayilanlarini_korur'],
       galeri_örnekleri: ['parallel-simple', 'parallel-aqi', 'parallel-nutrients'],
       veri_biçimleri: ['ParalelSerisi'],
+      koordinat_dalları: ['kayıt', 'boyama', 'olay/isabet']
+    };
+  }
+  if (kök.toLowerCase() === 'registered' && özellik === 'tree') {
+    return {
+      api: 'src/model/seri.rs (Seri::Ağaç, From<AğaçSerisi>)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: ['tree_fixture_testleri::yedi_resmi_tree_fixture_seçeneklerini_ve_verisini_korur'],
+      galeri_örnekleri: TREE_ÖRNEKLERİ,
+      veri_biçimleri: ['AğaçSerisi'],
       koordinat_dalları: ['kayıt', 'boyama', 'olay/isabet']
     };
   }

@@ -77,7 +77,9 @@ pub use genisletme::{
     YüklemeÇizicisi, ÖnİşlemeKayıtDefteri, ÖzelKoordinatSistemi,
 };
 pub use hata::{BilesenHatasi, BilesenTanisi};
-pub use model::agac::AğaçDüğümü;
+pub use model::agac::{
+    AğaçDüğümü, AğaçGezinmesi, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+};
 pub use model::bilesen::{
     AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaBağı,
     FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaStili, FırçaTürü, Gösterge,
@@ -204,7 +206,9 @@ pub mod hazir {
         YüklemeÇizicisi, ÖnİşlemeKayıtDefteri, ÖzelKoordinatSistemi,
     };
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
-    pub use crate::model::agac::AğaçDüğümü;
+    pub use crate::model::agac::{
+        AğaçDüğümü, AğaçGezinmesi, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+    };
     pub use crate::model::bilesen::{
         AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü,
         FırçaBağı, FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaStili, FırçaTürü,

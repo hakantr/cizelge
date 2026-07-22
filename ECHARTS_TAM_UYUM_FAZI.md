@@ -379,8 +379,10 @@ manifestte örnek kimliğiyle tanımlanır ve şu değiştirilemez kurallara uya
   renk örnekleri yalnız ham kare üzerinde denetlenir. Yapısal kapı geçmeden
   tipografi profili sonucu kanıt sayılamaz.
 - Profil yalnız kimliği açıkça kayıtlı `matrix-mbti`,
-  `matrix-periodic-table`, `parallel-aqi`, `parallel-nutrients` ve
-  `doc-example/parallel-all` kartlarında açıktır; başka karta otomatik
+  `matrix-periodic-table`, `parallel-aqi`, `parallel-nutrients`,
+  `doc-example/parallel-all`, `tree-basic`, `tree-legend`,
+  `tree-orient-bottom-top`, `tree-orient-right-left`, `tree-polyline`,
+  `tree-radial` ve `tree-vertical` kartlarında açıktır; başka karta otomatik
   yayılmaz ve referans yenileme gerekçesi oluşturmaz.
 
 Referansın iki ardışık üretimi önce kendi içinde kararlılık kontrolünden
@@ -1881,6 +1883,56 @@ Amaç: Yerleşim ve etkileşim ağırlıklı seri ailelerini tamamlama.
    seçme davranışı.
 8. Büyük graph/tree veri kümeleri için artımlı yerleşim, iptal ve kararlı
    belirlenimci test kipi.
+
+#### Tree aile kapısı
+
+Normatif kaynak yüzeyi `../echarts/src/chart/tree/TreeSeries.ts`,
+`TreeView.ts`, `treeLayout.ts`, `layoutHelper.ts`, `treeAction.ts`,
+`treeVisual.ts` ve `../echarts/src/data/Tree.ts` dosyalarıdır. Galeri
+seçenekleri ve verileri `../echarts-examples/public/examples/ts/tree-*.ts`
+ile `public/data/asset/data/flare.json` kaynaklarından okunur. Bu kaynakların
+yerel commit kilitleri Faz 0 manifestine dahildir; fixture içine yaklaşık ya
+da elle sadeleştirilmiş veri kopyası konulmaz.
+
+Uygulama kapısı şu yüzeyi birlikte kapsar:
+
+- `TreeSeriesNodeItemOption` için `id`, `name`, `value`, `children`,
+  `collapsed`, `link`, `target`, kategori, sembol/boyut/döndürme/kayma,
+  `symbolKeepAspect`, item/line/label ve normal/emphasis/blur/select durumları;
+- `TreeSeriesOption` için kutu yerleşimi, `orthogonal`/`radial`, dört `orient`
+  yönü ve geriye uyumlu adları, `curve`/`polyline`, `edgeForkPosition`,
+  `lineStyle.curveness`, `expandAndCollapse`, `initialTreeDepth`, `leaves`,
+  `roam`, `nodeScaleRatio`, `center`, `zoom`, `silent`, `z`, tooltip ve
+  seri/düğüm durum mirası;
+- ECharts'ın sanal kök ve preorder `dataIndex` sözleşmesi, D3/Reingold–Tilford
+  yerleşimi, radyal etiket yönü, daraltılmış dalın görünür yaprak gibi
+  davranması, tek/çok çocuk polyline çatalı ve düğüm boyutunu roam sırasında
+  koruyan ölçek telafisi;
+- `treeExpandAndCollapse` action'ı, dal tıklaması, yaprağın değişmemesi,
+  seri index/id/name seçicileri, tooltip'te kökten düğüme ad yolu ve GPUI
+  üstünde ayrı `move`/`scale`/`true` roam izinleri. Tıklama, kaydırma ve
+  yakınlaştırma model/görünüm durumunu günceller ve ayrı olay yükü üretir.
+
+Yedi resmî kart (`tree-basic`, `tree-legend`, `tree-orient-bottom-top`,
+`tree-orient-right-left`, `tree-polyline`, `tree-radial`, `tree-vertical`)
+700×525 kaynak viewport'unda ve 600×450 karşılaştırma boyutunda ayrı fixture
+olarak bulunur. Her kartta raster karşılaştırmasına ek olarak görünür düğüm,
+ebeveyn/kenar, kenar yolu, etiket çapası/dönüşü, daraltma durumu, sembol
+kayması/dönüşü ve 0,001 piksel nicemli koordinatlar FNV-1a sahne özetiyle
+kilitlenir. Bu yapısal kapı yedi kartın yedisinde geçmeden tipografi profili
+değerlendirilemez.
+
+Tree için geçerli güncel kanıt durumu şudur: yedi sahne özeti de tam eşleşir;
+ham ve aynı `sigma=0.8` profilli rasterlar ise sabit `%1`/`0.99` kapılarını
+henüz geçmez. En iyi profilli değişen piksel oranı/SSIM değerleri sırasıyla
+`tree-basic` `%0,980 / 0,98840`, `tree-legend` `%3,204 / 0,96278`,
+`bottom-top` `%4,203 / 0,96321`, `right-left` `%2,087 / 0,98456`,
+`polyline` `%2,234 / 0,98277`, `radial` `%8,590 / 0,93656` ve `vertical`
+`%1,929 / 0,97864` düzeyindedir. Bu nedenle kartlar yapısal olarak doğru
+olsa da statik görsel kapıda `kısmi` kalır; eşik, sigma veya maske büyütülerek
+yeşile çevrilemez. Aile kapatılmadan önce glif rasteri sabit eşiklere
+yaklaştırılmalı; aç/kapat ve roam için başlangıç/son görüntüleriyle olay ve
+option/state günlükleri de kanıt paketine eklenmelidir.
 
 Kabul:
 
