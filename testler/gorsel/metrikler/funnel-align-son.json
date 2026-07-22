@@ -1,0 +1,19 @@
+{
+  "id": "funnel-align",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 757,
+  "değişen_piksel_oranı": 0.0028037037037037037,
+  "ssim": 0.9962955153154801,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/funnel-align.png",
+    "gerçek": "testler/gorsel/gerçek/default/funnel-align.png",
+    "fark": "testler/gorsel/fark/default/funnel-align.png"
+  }
+}

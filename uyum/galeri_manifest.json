@@ -18339,7 +18339,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/funnel.ts",
     "kaynak_sha256": "e90e46edc6c66ed396239a1b38da38912934194cff37dfee81765b54211df2c6",
-    "cizelge_fixture": "examples/huni.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#funnel",
     "seriler": [
       "funnel",
       "solid"
@@ -18354,7 +18354,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -18367,14 +18367,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1204,
+          "değişen_piksel_oranı": 0.004459259259259259,
+          "ssim": 0.9911392612172869,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/funnel.png",
+            "sha256": "874437be0d716adbf756dd2850006c0cf6d7de94900f309ca44d7e199b8f64d5"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/funnel.png",
+            "sha256": "e4e0015cfbfbbdac6053df7871a58dbac6c17e5917dcd90cbb3272d2b2aa6633"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/funnel.png",
+            "sha256": "ac3cfc6579a1df7b5a3d1806b0549499931bef4e9040f68daf7a31767eb22e2c"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/funnel-son.json",
+            "sha256": "629d72ba267890bcf319a38fc973f3a48ea28977ea0f5bfadf46abbc123f2067"
+          }
+        }
+      ]
     }
   },
   {
@@ -18399,7 +18424,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/funnel-align.ts",
     "kaynak_sha256": "034c3fa81afc8aa8589f6f2ea491e481ce4eeac4be202229996bcbdfb29c6cfd",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#funnel_align",
     "seriler": [
       "funnel"
     ],
@@ -18413,7 +18438,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -18425,15 +18450,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 757,
+          "değişen_piksel_oranı": 0.0028037037037037037,
+          "ssim": 0.9962955153154801,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/funnel-align.png",
+            "sha256": "04abceeb470d63aa848aba181583dcd991dcf3ce76b1b7530a7a32f3791fb446"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/funnel-align.png",
+            "sha256": "56ea9a4fc2544ddad5dab3b7efbdf620e13c02bba83cf90702db4a424187467f"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/funnel-align.png",
+            "sha256": "8383616099c2ab8c03c5e9b082e49da8cf20a2da9487dc286949b68e3bd4c906"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/funnel-align-son.json",
+            "sha256": "0a00b3caaf2b95d85cf871653681aa17648069398d983289ce435d3414d33133"
+          }
+        }
+      ]
     }
   },
   {
@@ -18458,7 +18508,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/funnel-customize.ts",
     "kaynak_sha256": "ab59c33449ff62f7dc65568482796c6b05fb1b3a55b02017a15b4ece2ec3118a",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#funnel_customize",
     "seriler": [
       "funnel"
     ],
@@ -18472,7 +18522,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -18484,15 +18534,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1357,
+          "değişen_piksel_oranı": 0.005025925925925926,
+          "ssim": 0.9920585850033419,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/funnel-customize.png",
+            "sha256": "af0d9686afad8885acf99feaf00d240eb241562b5e4d591d2534b5300b20ecd3"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/funnel-customize.png",
+            "sha256": "682f78823542ce18de745c45fec3880193cc780f2658c9cb4443aeab8af1d390"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/funnel-customize.png",
+            "sha256": "248d0f263d79bf126c47db5af0c3c8fc65a460d77c48038a7bdb8e63880d5c0d"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/funnel-customize-son.json",
+            "sha256": "0b03c3b0147d301490c6f30efc458ed7bc2643c55584a9899370138e697d0ed0"
+          }
+        }
+      ]
     }
   },
   {
@@ -18517,7 +18592,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/funnel-mutiple.ts",
     "kaynak_sha256": "509a35775038efe7cfd45523f12f34ee5e95fb018c15d69e44f4e90401b3f4ef",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#funnel_mutiple",
     "seriler": [
       "funnel"
     ],
@@ -18531,7 +18606,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -18543,15 +18618,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1375,
+          "değişen_piksel_oranı": 0.005092592592592593,
+          "ssim": 0.9918964039525356,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/funnel-mutiple.png",
+            "sha256": "ca5ff8633d7f7ba06ca60daab5e10fb3738d09eb0ba5a7d11ef557c5699c5333"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/funnel-mutiple.png",
+            "sha256": "27a100b00217f4d41a84eb32fd160c3e903ead06735b01c7b9307ea7be213454"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/funnel-mutiple.png",
+            "sha256": "c0066bf4e577be67a5da4047532793da5f09ef377d47a1739cf3102aeb100366"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/funnel-mutiple-son.json",
+            "sha256": "1de645e868c58ec1ec47492dab65e1802709b09a09dc6c936b4ee92fbd26f773"
+          }
+        }
+      ]
     }
   },
   {

@@ -23,6 +23,19 @@ const REFERANS_YENİLE = process.argv.includes('--referans-yenile');
 
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  {
+    id: 'funnel-align', tür: 'statik', genişlik: 1400, yükseklik: 1050,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'funnel-customize', tür: 'statik', genişlik: 1000, yükseklik: 750,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'funnel-mutiple', tür: 'statik', genişlik: 1000, yükseklik: 750,
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
   { id: 'gauge', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-speed', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

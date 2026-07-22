@@ -13,7 +13,7 @@ pub use crate::model::hatlar::{
 };
 use crate::model::imleyici::{İmAlanı, İmNoktası, İmleyiciler, İmÇizgisi};
 use crate::model::stil::{
-    AlanStili, Biçimleyici, Etiket, EtiketDöndürme, YazıStili, ÇizgiStili, ÖğeStili,
+    AlanStili, Biçimleyici, Etiket, EtiketDöndürme, EtiketYaması, YazıStili, ÇizgiStili, ÖğeStili,
 };
 use crate::model::veri_kumesi::SeriYerleşimi;
 use crate::renk::Dolgu;
@@ -1941,24 +1941,187 @@ pub enum HuniSıralaması {
     Yok,
 }
 
+/// Huni akış yönü (`funnel.orient`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum HuniYönü {
+    #[default]
+    Dikey,
+    Yatay,
+}
+
+/// Değer genişliği/yüksekliğinin görünüm kutusundaki hizası
+/// (`funnel.funnelAlign`). Dikey hunide `Sol/Orta/Sağ`, yatay hunide
+/// `Üst/Orta/Alt` kullanılır.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum HuniHizası {
+    Sol,
+    #[default]
+    Orta,
+    Sağ,
+    Üst,
+    Alt,
+}
+
+/// Huni durumlarındaki `labelLine` yaması. `None` alanlar normal durumdan
+/// miras alınır.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct HuniEtiketÇizgisiYaması {
+    pub göster: Option<bool>,
+    pub uzunluk: Option<f32>,
+    pub stil: Option<ÇizgiStili>,
+}
+
+impl HuniEtiketÇizgisiYaması {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = Some(göster);
+        self
+    }
+
+    pub fn uzunluk(mut self, uzunluk: f32) -> Self {
+        self.uzunluk = Some(uzunluk.max(0.0));
+        self
+    }
+
+    pub fn stil(mut self, stil: ÇizgiStili) -> Self {
+        self.stil = Some(stil);
+        self
+    }
+
+    pub(crate) fn uygula(&self, taban: &EtiketÇizgisi) -> EtiketÇizgisi {
+        let mut sonuç = taban.clone();
+        if let Some(göster) = self.göster {
+            sonuç.göster = göster;
+        }
+        if let Some(uzunluk) = self.uzunluk {
+            sonuç.uzunluk1 = uzunluk;
+        }
+        if let Some(stil) = &self.stil {
+            sonuç.stil = stil.clone();
+        }
+        sonuç
+    }
+}
+
+/// Huni `emphasis` / `blur` / `select` durum yaması.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct HuniDurumYaması {
+    pub öğe_stili: ÖğeStili,
+    pub etiket: EtiketYaması,
+    pub etiket_çizgisi: HuniEtiketÇizgisiYaması,
+}
+
+impl HuniDurumYaması {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: impl Into<EtiketYaması>) -> Self {
+        self.etiket = etiket.into();
+        self
+    }
+
+    pub fn etiket_çizgisi(mut self, çizgi: HuniEtiketÇizgisiYaması) -> Self {
+        self.etiket_çizgisi = çizgi;
+        self
+    }
+}
+
+/// Nesne biçimli huni verisine özgü seçenekler. Normal `itemStyle` ve
+/// `label`, [`VeriÖğesi`] üzerinde kalır; burada FunnelDataItemOption'a özgü
+/// `itemStyle.width/height`, `labelLine` ve durum yamaları tutulur.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct HuniVeriYaması {
+    pub genişlik: Option<Uzunluk>,
+    pub yükseklik: Option<Uzunluk>,
+    pub etiket_çizgisi: HuniEtiketÇizgisiYaması,
+    pub vurgu: HuniDurumYaması,
+    pub bulanık: HuniDurumYaması,
+    pub seçim: HuniDurumYaması,
+}
+
+impl HuniVeriYaması {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(genişlik.into());
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = Some(yükseklik.into());
+        self
+    }
+
+    pub fn etiket_çizgisi(mut self, çizgi: HuniEtiketÇizgisiYaması) -> Self {
+        self.etiket_çizgisi = çizgi;
+        self
+    }
+
+    pub fn vurgu(mut self, durum: HuniDurumYaması) -> Self {
+        self.vurgu = durum;
+        self
+    }
+
+    pub fn bulanık(mut self, durum: HuniDurumYaması) -> Self {
+        self.bulanık = durum;
+        self
+    }
+
+    pub fn seçim(mut self, durum: HuniDurumYaması) -> Self {
+        self.seçim = durum;
+        self
+    }
+}
+
 /// Huni serisi (`series-funnel`).
 #[derive(Clone, Debug)]
 pub struct HuniSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
     pub sol: Uzunluk,
+    pub sağ: Uzunluk,
     pub üst: Uzunluk,
-    pub genişlik: Uzunluk,
-    pub yükseklik: Uzunluk,
+    pub alt: Uzunluk,
+    pub genişlik: Option<Uzunluk>,
+    pub yükseklik: Option<Uzunluk>,
+    /// Açık değilse veri kapsamından türetilir (`min` / `max`).
+    pub en_az: Option<f64>,
+    pub en_çok: Option<f64>,
     pub sıralama: HuniSıralaması,
+    pub yön: HuniYönü,
+    pub hiza: HuniHizası,
     /// Dilimler arası dikey boşluk (`gap`).
     pub dilim_boşluğu: f32,
     /// En dar dilimin genişliği (`minSize`).
     pub en_az_genişlik: Uzunluk,
     /// En geniş dilimin genişliği (`maxSize`).
     pub en_çok_genişlik: Uzunluk,
+    /// ZRender çizim sırası (`z`), ECharts öntanımlısı 2.
+    pub z: i32,
+    /// İşaretçi/isabet olaylarını kapatır (`silent`).
+    pub sessiz: bool,
     pub öğe_stili: ÖğeStili,
     pub etiket: Etiket,
+    pub etiket_çizgisi: EtiketÇizgisi,
+    pub vurgu: HuniDurumYaması,
+    pub bulanık: HuniDurumYaması,
+    pub seçim: HuniDurumYaması,
+    pub öğe_yamaları: Vec<Option<HuniVeriYaması>>,
+    /// Veri kümesi eşlemesi: `(ad boyutu, değer boyutu)` (`encode`).
+    pub eşleme: Option<(String, String)>,
+    pub veri_kümesi_sırası: usize,
+    pub seri_yerleşimi: SeriYerleşimi,
 }
 
 impl Default for HuniSerisi {
@@ -1966,14 +2129,22 @@ impl Default for HuniSerisi {
         HuniSerisi {
             ad: None,
             veri: Vec::new(),
-            sol: Uzunluk::Yüzde(10.0),
+            sol: Uzunluk::Piksel(80.0),
+            sağ: Uzunluk::Piksel(80.0),
             üst: Uzunluk::Piksel(60.0),
-            genişlik: Uzunluk::Yüzde(80.0),
-            yükseklik: Uzunluk::Yüzde(70.0),
+            alt: Uzunluk::Piksel(65.0),
+            genişlik: None,
+            yükseklik: None,
+            en_az: None,
+            en_çok: None,
             sıralama: HuniSıralaması::Azalan,
-            dilim_boşluğu: 2.0,
+            yön: HuniYönü::Dikey,
+            hiza: HuniHizası::Orta,
+            dilim_boşluğu: 0.0,
             en_az_genişlik: Uzunluk::Yüzde(0.0),
             en_çok_genişlik: Uzunluk::Yüzde(100.0),
+            z: 2,
+            sessiz: false,
             öğe_stili: ÖğeStili {
                 kenarlık_rengi: Some(crate::renk::Renk::BEYAZ),
                 kenarlık_kalınlığı: 1.0,
@@ -1981,9 +2152,24 @@ impl Default for HuniSerisi {
             },
             etiket: Etiket {
                 göster: true,
-                konum: crate::model::stil::EtiketKonumu::İç,
+                konum: crate::model::stil::EtiketKonumu::Dış,
                 ..Default::default()
             },
+            etiket_çizgisi: EtiketÇizgisi {
+                uzunluk1: 20.0,
+                uzunluk2: 0.0,
+                ..Default::default()
+            },
+            vurgu: HuniDurumYaması {
+                etiket: EtiketYaması::yeni().göster(true),
+                ..Default::default()
+            },
+            bulanık: HuniDurumYaması::default(),
+            seçim: HuniDurumYaması::default(),
+            öğe_yamaları: Vec::new(),
+            eşleme: None,
+            veri_kümesi_sırası: 0,
+            seri_yerleşimi: SeriYerleşimi::Sütun,
         }
     }
 }
@@ -2000,6 +2186,49 @@ impl HuniSerisi {
 
     pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
         self.veri = veri_listesi(veri);
+        self.öğe_yamaları.resize(self.veri.len(), None);
+        self
+    }
+
+    pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
+        self.sol = sol.into();
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = sağ.into();
+        self
+    }
+
+    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+        self.üst = üst.into();
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = alt.into();
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = Some(genişlik.into());
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = Some(yükseklik.into());
+        self
+    }
+
+    pub fn değer_aralığı(mut self, en_az: f64, en_çok: f64) -> Self {
+        self.en_az = Some(en_az);
+        self.en_çok = Some(en_çok);
+        self
+    }
+
+    pub fn otomatik_değer_aralığı(mut self) -> Self {
+        self.en_az = None;
+        self.en_çok = None;
         self
     }
 
@@ -2008,8 +2237,38 @@ impl HuniSerisi {
         self
     }
 
+    pub fn yön(mut self, yön: HuniYönü) -> Self {
+        self.yön = yön;
+        self
+    }
+
+    pub fn hiza(mut self, hiza: HuniHizası) -> Self {
+        self.hiza = hiza;
+        self
+    }
+
     pub fn dilim_boşluğu(mut self, boşluk: f32) -> Self {
         self.dilim_boşluğu = boşluk.max(0.0);
+        self
+    }
+
+    pub fn boyut_aralığı(
+        mut self,
+        en_az: impl Into<Uzunluk>,
+        en_çok: impl Into<Uzunluk>,
+    ) -> Self {
+        self.en_az_genişlik = en_az.into();
+        self.en_çok_genişlik = en_çok.into();
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
         self
     }
 
@@ -2018,8 +2277,51 @@ impl HuniSerisi {
         self
     }
 
+    pub fn etiket_çizgisi(mut self, çizgi: EtiketÇizgisi) -> Self {
+        self.etiket_çizgisi = çizgi;
+        self
+    }
+
     pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
         self.öğe_stili = stil;
+        self
+    }
+
+    pub fn vurgu(mut self, durum: HuniDurumYaması) -> Self {
+        self.vurgu = durum;
+        self
+    }
+
+    pub fn bulanık(mut self, durum: HuniDurumYaması) -> Self {
+        self.bulanık = durum;
+        self
+    }
+
+    pub fn seçim(mut self, durum: HuniDurumYaması) -> Self {
+        self.seçim = durum;
+        self
+    }
+
+    pub fn öğe_yaması(mut self, sıra: usize, yama: HuniVeriYaması) -> Self {
+        if self.öğe_yamaları.len() <= sıra {
+            self.öğe_yamaları.resize(sıra + 1, None);
+        }
+        self.öğe_yamaları[sıra] = Some(yama);
+        self
+    }
+
+    pub fn eşle(mut self, ad_boyutu: impl Into<String>, değer_boyutu: impl Into<String>) -> Self {
+        self.eşleme = Some((ad_boyutu.into(), değer_boyutu.into()));
+        self
+    }
+
+    pub fn veri_kümesi_sırası(mut self, sıra: usize) -> Self {
+        self.veri_kümesi_sırası = sıra;
+        self
+    }
+
+    pub fn seri_yerleşimi(mut self, yerleşim: SeriYerleşimi) -> Self {
+        self.seri_yerleşimi = yerleşim;
         self
     }
 }

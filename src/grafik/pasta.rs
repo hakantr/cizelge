@@ -523,6 +523,7 @@ pub fn pasta_çiz(
                     etiket,
                     konum,
                     YatayHiza::Orta,
+                    DikeyHiza::Orta,
                     renk,
                     kontur,
                     etiket_dönüş_açısı(etiket.döndürme, orta_açı as f32, true),
@@ -931,6 +932,33 @@ pub(crate) fn zengin_etiketi_yaz(
         etiket,
         konum,
         hiza,
+        DikeyHiza::Orta,
+        varsayılan_renk,
+        None,
+        dönüş,
+    );
+}
+
+/// Rich etiket bloğunu hem yatay hem dikey ECharts `align`/
+/// `verticalAlign` çapasıyla çizer.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn zengin_etiketi_hizalı_yaz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    ham_metin: &str,
+    etiket: &Etiket,
+    konum: (f32, f32),
+    yatay_hiza: YatayHiza,
+    dikey_hiza: DikeyHiza,
+    varsayılan_renk: Renk,
+    dönüş: f32,
+) {
+    zengin_etiketi_konturlu_yaz(
+        çizici,
+        ham_metin,
+        etiket,
+        konum,
+        yatay_hiza,
+        dikey_hiza,
         varsayılan_renk,
         None,
         dönüş,
@@ -944,6 +972,7 @@ fn zengin_etiketi_konturlu_yaz(
     etiket: &Etiket,
     konum: (f32, f32),
     hiza: YatayHiza,
+    dikey_hiza: DikeyHiza,
     varsayılan_renk: Renk,
     varsayılan_kontur: Option<Renk>,
     dönüş: f32,
@@ -956,7 +985,11 @@ fn zengin_etiketi_konturlu_yaz(
         YatayHiza::Orta => -yerleşim.genişlik / 2.0,
         YatayHiza::Sağ => -yerleşim.genişlik,
     };
-    let kutu_y = -yerleşim.yükseklik / 2.0;
+    let kutu_y = match dikey_hiza {
+        DikeyHiza::Üst => 0.0,
+        DikeyHiza::Orta => -yerleşim.yükseklik / 2.0,
+        DikeyHiza::Alt => -yerleşim.yükseklik,
+    };
     zengin_stil_kutusunu_çiz(
         çizici,
         Dikdörtgen::yeni(kutu_x, kutu_y, yerleşim.genişlik, yerleşim.yükseklik),

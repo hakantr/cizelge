@@ -149,6 +149,30 @@ fn sütun_etiket_yerleşimi(
             DikeyHiza::Orta,
             false,
         ),
+        EtiketKonumu::SağÜst => (
+            (d.sağ() + uzaklık, d.y - uzaklık),
+            YatayHiza::Sol,
+            DikeyHiza::Alt,
+            false,
+        ),
+        EtiketKonumu::SağAlt => (
+            (d.sağ() + uzaklık, d.alt() + uzaklık),
+            YatayHiza::Sol,
+            DikeyHiza::Üst,
+            false,
+        ),
+        EtiketKonumu::SolÜst => (
+            (d.x - uzaklık, d.y - uzaklık),
+            YatayHiza::Sağ,
+            DikeyHiza::Alt,
+            false,
+        ),
+        EtiketKonumu::SolAlt => (
+            (d.x - uzaklık, d.alt() + uzaklık),
+            YatayHiza::Sağ,
+            DikeyHiza::Üst,
+            false,
+        ),
         EtiketKonumu::İç | EtiketKonumu::Merkez => {
             ((orta_x, orta_y), YatayHiza::Orta, DikeyHiza::Orta, true)
         }

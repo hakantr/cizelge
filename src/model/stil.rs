@@ -399,6 +399,12 @@ pub enum EtiketKonumu {
     Alt,
     Sol,
     Sağ,
+    /// Funnel dış etiket köşeleri (`rightTop`, `rightBottom`,
+    /// `leftTop`, `leftBottom`).
+    SağÜst,
+    SağAlt,
+    SolÜst,
+    SolAlt,
     /// Kutupsal sütunda değer aralığının başlangıcı (`'start'`).
     Başlangıç,
     /// Kutupsal sütunda başlangıcın şekil içindeki yanı

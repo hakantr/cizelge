@@ -1,0 +1,19 @@
+{
+  "id": "funnel-mutiple",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1375,
+  "değişen_piksel_oranı": 0.005092592592592593,
+  "ssim": 0.9918964039525356,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/funnel-mutiple.png",
+    "gerçek": "testler/gorsel/gerçek/default/funnel-mutiple.png",
+    "fark": "testler/gorsel/fark/default/funnel-mutiple.png"
+  }
+}

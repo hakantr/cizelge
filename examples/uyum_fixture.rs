@@ -4391,6 +4391,321 @@ mod bar_histogram_testleri {
     }
 }
 
+fn funnel_verisi() -> [VeriÖğesi; 5] {
+    [
+        VeriÖğesi::adlı("Visit", 60.0),
+        VeriÖğesi::adlı("Inquiry", 40.0),
+        VeriÖğesi::adlı("Order", 20.0),
+        VeriÖğesi::adlı("Click", 80.0),
+        VeriÖğesi::adlı("Show", 100.0),
+    ]
+}
+
+fn funnel_urun_verisi() -> [VeriÖğesi; 5] {
+    [
+        VeriÖğesi::adlı("Prod C", 60.0),
+        VeriÖğesi::adlı("Prod D", 30.0),
+        VeriÖğesi::adlı("Prod E", 10.0),
+        VeriÖğesi::adlı("Prod B", 80.0),
+        VeriÖğesi::adlı("Prod A", 100.0),
+    ]
+}
+
+fn funnel_toolbox(dikey: bool) -> AraçKutusu {
+    let araçlar = AraçKutusu::yeni()
+        .veri_görünümü(true)
+        .geri_yükle(true)
+        .png_kaydet(true);
+    if dikey {
+        araçlar.yön(Yön::Dikey).üst(DikeyKonum::Orta)
+    } else {
+        araçlar
+    }
+}
+
+fn funnel() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Funnel").üst(25))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .biçimleyici("{a} <br/>{b} : {c}%"),
+        )
+        .araç_kutusu(funnel_toolbox(false))
+        .gösterge(
+            Gösterge::yeni()
+                .alt(25)
+                .veri(["Show", "Click", "Visit", "Inquiry", "Order"]),
+        )
+        .seri(
+            HuniSerisi::yeni()
+                .ad("Funnel")
+                .sol("10%")
+                .üst(60)
+                .alt(60)
+                .genişlik("80%")
+                .değer_aralığı(0.0, 100.0)
+                .boyut_aralığı("0%", "100%")
+                .sıralama(HuniSıralaması::Azalan)
+                .dilim_boşluğu(2.0)
+                .etiket(Etiket::yeni().göster(true).konum(EtiketKonumu::İç))
+                .etiket_çizgisi(
+                    EtiketÇizgisi::yeni()
+                        .uzunluk1(10.0)
+                        .uzunluk2(0.0)
+                        .stil(ÇizgiStili::yeni().kalınlık(1.0)),
+                )
+                .öğe_stili(
+                    ÖğeStili::yeni()
+                        .kenarlık_rengi("#fff")
+                        .kenarlık_kalınlığı(1.0),
+                )
+                .vurgu(
+                    HuniDurumYaması::yeni()
+                        .etiket(EtiketYaması::yeni().yazı(YazıStili::yeni().boyut(20.0))),
+                )
+                .veri(funnel_verisi()),
+        )
+}
+
+fn funnel_align() -> GrafikSeçenekleri {
+    let seri = |sol: &str, üst: &str, sıralama: HuniSıralaması, hiza: HuniHizası| {
+        HuniSerisi::yeni()
+            .ad(if sıralama == HuniSıralaması::Artan {
+                "Pyramid"
+            } else {
+                "Funnel"
+            })
+            .genişlik("40%")
+            .yükseklik("45%")
+            .sol(sol)
+            .üst(üst)
+            .sıralama(sıralama)
+            .hiza(hiza)
+            .veri(funnel_urun_verisi())
+    };
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Funnel Compare")
+                .sol(11.0)
+                // Pinned TitleView `top: 'bottom'` alt metni tamamen tuval
+                // dışında bıraktığı için kanıt karesinde yalnız ana metin var.
+                .alt(10),
+        )
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .biçimleyici("{a} <br/>{b} : {c}%"),
+        )
+        .araç_kutusu(funnel_toolbox(true))
+        .gösterge(
+            Gösterge::yeni()
+                .yön(Yön::Dikey)
+                .sol(11.0)
+                .alt(34)
+                .veri(["Prod A", "Prod B", "Prod C", "Prod D", "Prod E"]),
+        )
+        .seri(seri("5%", "50%", HuniSıralaması::Azalan, HuniHizası::Sağ))
+        .seri(seri("5%", "5%", HuniSıralaması::Artan, HuniHizası::Sağ))
+        .seri(seri("55%", "5%", HuniSıralaması::Azalan, HuniHizası::Sol))
+        .seri(seri("55%", "50%", HuniSıralaması::Artan, HuniHizası::Sol))
+}
+
+fn funnel_customize() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Funnel").üst(25))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .biçimleyici("{a} <br/>{b} : {c}%"),
+        )
+        .araç_kutusu(funnel_toolbox(false))
+        .gösterge(
+            Gösterge::yeni()
+                .alt(25)
+                .veri(["Show", "Click", "Visit", "Inquiry", "Order"]),
+        )
+        .seri(
+            HuniSerisi::yeni()
+                .ad("Expected")
+                .sol("10%")
+                .genişlik("80%")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .konum(EtiketKonumu::Dış)
+                        .biçimleyici("{b}Expected"),
+                )
+                .etiket_çizgisi(
+                    EtiketÇizgisi::yeni()
+                        .göster(false)
+                        .uzunluk1(20.0)
+                        .uzunluk2(0.0),
+                )
+                .öğe_stili(ÖğeStili::yeni().opaklık(0.7))
+                .vurgu(
+                    HuniDurumYaması::yeni().etiket(
+                        EtiketYaması::yeni()
+                            .konum(EtiketKonumu::İç)
+                            .biçimleyici("{b}Expected: {c}%"),
+                    ),
+                )
+                .veri(funnel_verisi()),
+        )
+        .seri(
+            HuniSerisi::yeni()
+                .ad("Actual")
+                .z(100)
+                .sol("10%")
+                .genişlik("80%")
+                .boyut_aralığı("0%", "80%")
+                .etiket(
+                    Etiket::yeni()
+                        .göster(true)
+                        .konum(EtiketKonumu::İç)
+                        .biçimleyici("{c}%")
+                        .yazı(YazıStili::yeni().renk("#fff")),
+                )
+                .öğe_stili(
+                    ÖğeStili::yeni()
+                        .opaklık(0.5)
+                        .kenarlık_rengi("#fff")
+                        .kenarlık_kalınlığı(2.0),
+                )
+                .vurgu(
+                    HuniDurumYaması::yeni().etiket(
+                        EtiketYaması::yeni()
+                            .konum(EtiketKonumu::İç)
+                            .biçimleyici("{b}Actual: {c}%"),
+                    ),
+                )
+                .veri([
+                    VeriÖğesi::adlı("Visit", 30.0),
+                    VeriÖğesi::adlı("Inquiry", 10.0),
+                    VeriÖğesi::adlı("Order", 5.0),
+                    VeriÖğesi::adlı("Click", 50.0),
+                    VeriÖğesi::adlı("Show", 80.0),
+                ]),
+        )
+}
+
+fn funnel_mutiple() -> GrafikSeçenekleri {
+    let veri = || {
+        [
+            VeriÖğesi::adlı("Visit", 60.0),
+            VeriÖğesi::adlı("Inquiry", 30.0),
+            VeriÖğesi::adlı("Order", 10.0),
+            VeriÖğesi::adlı("Click", 80.0),
+            VeriÖğesi::adlı("Show", 100.0),
+        ]
+    };
+    let seri = |sol: &str, üst: &str, sıralama: HuniSıralaması, etiket_konumu: EtiketKonumu| {
+        HuniSerisi::yeni()
+            .ad(if sıralama == HuniSıralaması::Artan {
+                "Pyramid"
+            } else {
+                "Funnel"
+            })
+            .genişlik("40%")
+            .yükseklik("45%")
+            .sol(sol)
+            .üst(üst)
+            .sıralama(sıralama)
+            .etiket(Etiket::yeni().göster(true).konum(etiket_konumu))
+            .veri(veri())
+    };
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Funnel").sol(11.0).alt(10))
+        .ipucu(
+            İpucu::yeni()
+                .tetikleme(Tetikleme::Öğe)
+                .biçimleyici("{a} <br/>{b} : {c}%"),
+        )
+        .araç_kutusu(funnel_toolbox(true))
+        .gösterge(
+            Gösterge::yeni()
+                .yön(Yön::Dikey)
+                .sol(11.0)
+                .alt(34)
+                .veri(["Show", "Click", "Visit", "Inquiry", "Order"]),
+        )
+        .seri(seri("5%", "50%", HuniSıralaması::Azalan, EtiketKonumu::Dış))
+        .seri(seri("5%", "5%", HuniSıralaması::Artan, EtiketKonumu::Dış))
+        .seri(seri("55%", "5%", HuniSıralaması::Azalan, EtiketKonumu::Sol))
+        .seri(seri("55%", "50%", HuniSıralaması::Artan, EtiketKonumu::Sol))
+}
+
+#[cfg(test)]
+mod funnel_fixture_testleri {
+    use super::*;
+
+    #[test]
+    fn dort_resmi_funnel_fixture_tum_serileri_tasir() {
+        let temel = funnel();
+        assert_eq!(temel.seriler.len(), 1);
+        let Seri::Huni(temel) = &temel.seriler[0] else {
+            panic!("funnel serisi bekleniyordu");
+        };
+        assert_eq!((temel.en_az, temel.en_çok), (Some(0.0), Some(100.0)));
+        assert_eq!(temel.dilim_boşluğu, 2.0);
+        assert_eq!(temel.etiket.konum, EtiketKonumu::İç);
+        assert_eq!(temel.etiket_çizgisi.uzunluk1, 10.0);
+
+        let hizalı = funnel_align();
+        assert_eq!(hizalı.seriler.len(), 4);
+        let hiza_ve_sıralar = hizalı
+            .seriler
+            .iter()
+            .map(|seri| match seri {
+                Seri::Huni(huni) => (huni.hiza, huni.sıralama),
+                _ => panic!("funnel serisi bekleniyordu"),
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            hiza_ve_sıralar,
+            [
+                (HuniHizası::Sağ, HuniSıralaması::Azalan),
+                (HuniHizası::Sağ, HuniSıralaması::Artan),
+                (HuniHizası::Sol, HuniSıralaması::Azalan),
+                (HuniHizası::Sol, HuniSıralaması::Artan),
+            ]
+        );
+
+        let özel = funnel_customize();
+        assert_eq!(özel.seriler.len(), 2);
+        let Seri::Huni(actual) = &özel.seriler[1] else {
+            panic!("actual funnel serisi bekleniyordu");
+        };
+        assert_eq!(actual.en_çok_genişlik, Uzunluk::Yüzde(80.0));
+        assert_eq!(actual.z, 100);
+        assert_eq!(actual.etiket.konum, EtiketKonumu::İç);
+
+        let çoklu = funnel_mutiple();
+        assert_eq!(çoklu.seriler.len(), 4);
+        assert_eq!(
+            çoklu
+                .seriler
+                .iter()
+                .map(|seri| match seri {
+                    Seri::Huni(huni) => huni.etiket.konum,
+                    _ => panic!("funnel serisi bekleniyordu"),
+                })
+                .collect::<Vec<_>>(),
+            [
+                EtiketKonumu::Dış,
+                EtiketKonumu::Dış,
+                EtiketKonumu::Sol,
+                EtiketKonumu::Sol,
+            ]
+        );
+    }
+}
+
 fn gauge() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .ipucu(İpucu::yeni().biçimleyici("{a} <br/>{b} : {c}%"))
@@ -12010,6 +12325,10 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "line-markline" => Ok(line_markline()),
         "line-marker" => Ok(line_marker()),
         "bar-histogram" => Ok(bar_histogram()),
+        "funnel" => Ok(funnel()),
+        "funnel-align" => Ok(funnel_align()),
+        "funnel-customize" => Ok(funnel_customize()),
+        "funnel-mutiple" => Ok(funnel_mutiple()),
         "gauge" => Ok(gauge()),
         "gauge-simple" => Ok(gauge_simple()),
         "gauge-speed" => gauge_speed(),

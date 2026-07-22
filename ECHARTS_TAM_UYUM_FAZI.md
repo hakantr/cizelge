@@ -1388,6 +1388,77 @@ zaman 332 gerçek kartı korur ve bu dilimle kilitli statik görsel kanıt sayı
 erişilebilirlik ve ölçümlü performans kapıları Faz 7/8 tamamlanana kadar ayrı
 `kısmi` durumlar olarak kalır; statik kanıt bunları tamamlanmış saymaz.
 
+Funnel doğrulanmış kapsamı:
+
+- Resmî `funnel`, `funnel-align`, `funnel-customize` ve kaynak kimliğindeki
+  yazımı korunmuş `funnel-mutiple` örneklerinin her biri
+  `../echarts-examples/public/examples/ts/<id>.ts` kaynağından ayrı fixture'a
+  bağlanmıştır. Model ve davranış için
+  `../echarts/src/chart/funnel/FunnelSeries.ts`, `funnelLayout.ts` ve
+  `FunnelView.ts` normatiftir.
+- `HuniSerisi`, ECharts 6.1 öntanımlı `left: 80`, `top: 60`, `right: 80`,
+  `bottom: 65`, `minSize: 0%`, `maxSize: 100%`, `sort: descending`,
+  `orient: vertical`, `gap: 0`, `funnelAlign: center`, dış etiket,
+  20 piksellik labelLine ve beyaz bir piksellik kenarı taşır. Piksel/yüzde
+  kutu ölçüleri, açık veya veri kapsamından türetilen `min/max`, dikey/yatay
+  yön, sol/orta/sağ ve üst/orta/alt hiza, artan/azalan/sırasız akış,
+  öğe-başına width/height, `z`, `silent`, dataset index/layout ve
+  `encode(name, value)` Rust API'sinde ayrıdır.
+- Yerleşim, resmî sıralanmış ham indeksleri ve legend süzmesini korur;
+  değerleri sıkıştırmalı doğrusal eşlemeyle min/max size aralığına taşır.
+  Artan akışta başlangıç alt/sağ kenara alınır, dilim boyu ve gap işareti
+  ters çevrilir. Son dilimin bulunmayan devam değeri ECharts gibi sıfır
+  sayıldığı için `minSize: 0%` huniyi gerçek bir uca kapatır. Negatif kutu
+  konumları kırpılmadan, genişlik/yükseklik ise güvenli biçimde çözülür.
+- Normal ve veri-öğesi `itemStyle`, `label`, `labelLine` ile
+  `emphasis`/`blur`/`select` yamaları model miras zincirindedir; statik
+  boyama emphasis ve select yamalarını uygular. İç, merkez,
+  iç-sol/iç-sağ, dış, sol/sağ, üst/alt ve dört dış köşe etiketi; rich text,
+  formatter `{a}/{b}/{c}/{d}`, dönüş, kayma, dolguya göre otomatik iç yazı
+  kontrastı, çizgi rengi ve opaklığı desteklenir. Seçili öğenin açıkça
+  değiştirilmemiş kenarı etkin temanın `primary` rengine döner; hover
+  vurgusu tooltip'in açık olmasına bağlı değildir.
+- Hover ve tıklama, yamuğun sınır kutusunu değil gerçek dört köşeli çokgeni
+  sınar. Böylece dar uçların çevresindeki boş pikseller olay üretmez;
+  `silent` seri isabet kaydı üretmez. İlk oluşturma animasyonu ECharts
+  `FunnelPiece` gibi geometriyi daraltmak yerine bütün polygon, kenar,
+  label ve labelLine opaklığını birlikte geçirir.
+- `funnel-align`, dört ayrı görünüm kutusunda artan/azalan ve sol/sağ
+  hizalamayı; `funnel-mutiple`, dört kutuda dış/sol etiket ve piramit
+  yönünü; `funnel-customize`, üst üste Expected/Actual serilerini,
+  `maxSize: 80%`, seri opaklıklarını, iki piksellik kenarı ve normal/vurgu
+  formatter'larını; `funnel` ise öntanımlı tek seri, legend, tooltip ve
+  toolbox bileşimini kanıtlar. Dataset name/value aktarımı ve öğe yaması
+  indekslerinin veri çözümünden sonra korunması ayrıca çekirdek testidir.
+- Her yeni referans iki bağımsız ECharts üretiminde bit düzeyinde aynı
+  çıktı verdiği doğrulandıktan sonra yalnız bir kez kilitlenmiştir.
+  `funnel` resmî 700×525 çalışma alanında; ince uzun kenarlarda raster
+  örnekleme gürültüsünü azaltmak için `funnel-customize` ve
+  `funnel-mutiple` 1000×750, `funnel-align` 1400×1050 kaynak alanında
+  üretilip resmî 600×450 kanıt boyutuna indirilir. Bütün ölçüler her iki
+  renderer'da aynı kaynak alanına göre yeniden çözülür; çözünürlük seçimi
+  geometri feragati veya maske değildir.
+
+600×450 kilitli Funnel statik kanıt metrikleri:
+
+| Örnek | Değişen piksel oranı | SSIM |
+|---|---:|---:|
+| `funnel` | %0,4459 | 0,991139 |
+| `funnel-align` | %0,2804 | 0,996296 |
+| `funnel-customize` | %0,5026 | 0,992059 |
+| `funnel-mutiple` | %0,5093 | 0,991896 |
+
+Dört Funnel kartının statik görsel kapısı `tam_kanıtlı`dır; böylece rapordaki
+kilitli statik kanıt sayısı 151 olur. Çekirdek 311/311 ve uyum fixture
+50/50 testleri; `cargo check --all-targets`, no-default derleme ve üretilmiş
+dosya denetimi geçmiştir. Kilitli depo görsel koşusu, `dataset-encode0`
+taban çizgisi yapısal kontrolü dâhil 198/198 kareyi yeniden doğrulamıştır.
+Eski golden'lar yenilenmemiştir; `cargo test --all-targets` önceden kayıtlı
+33 `testler/altin.rs` uyuşmazlığında kalır. Blur/focus eylemleri,
+erişilebilirlik, koyu profil ve ölçümlü performans kapıları kapanana kadar
+kartların genel durumu `uygulandı_kanıt_bekliyor` kalır; statik kanıt bu
+kapıları tamamlanmış saymaz.
+
 Kabul:
 
 - Radar 5, Gauge 12, Funnel 4, ThemeRiver 2, Calendar 9, Matrix 12 ve

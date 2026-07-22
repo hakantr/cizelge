@@ -565,6 +565,13 @@ impl GrafikSeçenekleri {
                     s.veri.is_empty(),
                     false,
                 ),
+                Seri::Huni(s) => (
+                    s.eşleme.clone(),
+                    s.veri_kümesi_sırası,
+                    s.seri_yerleşimi,
+                    s.veri.is_empty(),
+                    false,
+                ),
                 _ => continue,
             };
             // series.data, dataset'ten daha yüksek önceliklidir.
@@ -722,6 +729,13 @@ impl GrafikSeçenekleri {
                 }
                 Seri::Pasta(s) => {
                     s.veri = veri;
+                    if otomatik_eşleme && s.ad.is_none() {
+                        s.ad = Some(değer_boyutu.clone());
+                    }
+                }
+                Seri::Huni(s) => {
+                    s.veri = veri;
+                    s.öğe_yamaları.resize(s.veri.len(), None);
                     if otomatik_eşleme && s.ad.is_none() {
                         s.ad = Some(değer_boyutu.clone());
                     }
@@ -1302,7 +1316,7 @@ mod testler {
     use super::*;
     use crate::model::deger::VeriDeğeri;
     use crate::model::eksen::EksenKırılması;
-    use crate::model::seri::{MumSerisi, SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
+    use crate::model::seri::{HuniSerisi, MumSerisi, SaçılımSerisi, SütunSerisi, ÇizgiSerisi};
     use crate::model::stil::ÖğeStili;
     use crate::renk::{Dolgu, Renk};
 
@@ -1508,6 +1522,26 @@ mod testler {
             Some("Matcha Latte")
         );
         assert_eq!(çözülmüş.seriler[1].veri()[1].değer.sayı(), Some(73.4));
+    }
+
+    #[test]
+    fn huni_dataset_encode_ad_deger_ve_oge_yama_sirasini_korur() {
+        let küme = VeriKümesi::yeni(["stage", "amount"])
+            .satır(["Visit".into(), 100.into()])
+            .satır(["Order".into(), 40.into()]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .veri_kümesi(küme)
+            .seri(HuniSerisi::yeni().eşle("stage", "amount"));
+
+        let (çözülmüş, hatalar) = seçenekler.veri_kümesini_uygula();
+
+        assert!(hatalar.is_empty());
+        let Seri::Huni(huni) = &çözülmüş.seriler[0] else {
+            unreachable!();
+        };
+        assert_eq!(huni.veri[0].ad.as_deref(), Some("Visit"));
+        assert_eq!(huni.veri[1].değer.sayı(), Some(40.0));
+        assert_eq!(huni.öğe_yamaları.len(), 2);
     }
 
     #[test]

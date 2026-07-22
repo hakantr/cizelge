@@ -5047,22 +5047,34 @@ pub fn grafiği_boya(
                     continue;
                 }
                 let dilimler = huni_yerleşimi(h, seçenekler, tüm_alan, kapalı, ilerleme);
-                let vurgu = match (&ipucu_seçeneği, fare) {
-                    (Some(ipucu), Some(f)) if ipucu.tetikleme != Tetikleme::Kapalı => dilimler
-                        .iter()
-                        .position(|d| d.sınır_kutusu().içeriyor_mu(f)),
-                    _ => None,
-                };
-                huni_çiz(yüzey, h, i, &dilimler, vurgu, &mut çıktı.isabetler);
-                if let (Some(dilim), Some(f)) = (vurgu.and_then(|v| dilimler.get(v)), fare) {
+                // Hover emphasis tooltip'ten bağımsızdır; tooltip kapalıyken
+                // de ECharts öğe durumu çalışmaya devam eder.
+                let vurgu = fare
+                    .and_then(|f| dilimler.iter().find(|d| d.içeriyor_mu(f)).map(|d| d.sıra))
+                    .or_else(|| {
+                        girdi
+                            .ipucu_öğesi
+                            .filter(|(seri_sırası, _)| *seri_sırası == i)
+                            .map(|(_, veri_sırası)| veri_sırası)
+                    });
+                huni_çiz(
+                    yüzey,
+                    h,
+                    i,
+                    &dilimler,
+                    vurgu,
+                    ilerleme,
+                    &mut çıktı.isabetler,
+                );
+                if let Some(dilim) = vurgu.and_then(|v| dilimler.iter().find(|d| d.sıra == v)) {
                     bekleyen_ipucu = Some((
                         seri.ad().map(str::to_string),
                         vec![İpucuSatırı {
-                            im_rengi: Some(dilim.renk),
+                            im_rengi: Some(dilim.dolgu.temsilî()),
                             ad: dilim.ad.clone(),
                             değer: binlik_ayır(dilim.değer),
                         }],
-                        f,
+                        fare.unwrap_or_else(|| dilim.sınır_kutusu().merkez()),
                     ));
                 }
             }

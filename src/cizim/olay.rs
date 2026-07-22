@@ -11,6 +11,11 @@ use crate::koordinat::Dikdörtgen;
 #[derive(Clone, Debug)]
 pub enum İsabetGeometrisi {
     Dikdörtgen(Dikdörtgen),
+    /// Kapalı çokgen; funnel dilimleri gibi sınır kutusu boşluk içeren
+    /// şekillerde olay hedefini gerçek boyalı alanla aynı tutar.
+    Çokgen {
+        noktalar: Vec<(f32, f32)>,
+    },
     Daire {
         merkez: (f32, f32),
         yarıçap: f32,
@@ -34,6 +39,22 @@ impl İsabetGeometrisi {
     pub fn içeriyor_mu(&self, n: (f32, f32)) -> bool {
         match self {
             İsabetGeometrisi::Dikdörtgen(d) => d.içeriyor_mu(n),
+            İsabetGeometrisi::Çokgen { noktalar } => {
+                if noktalar.len() < 3 {
+                    return false;
+                }
+                let mut içeride = false;
+                let mut önceki = noktalar.len() - 1;
+                for sıra in 0..noktalar.len() {
+                    let (xi, yi) = noktalar[sıra];
+                    let (xj, yj) = noktalar[önceki];
+                    if ((yi > n.1) != (yj > n.1)) && n.0 < (xj - xi) * (n.1 - yi) / (yj - yi) + xi {
+                        içeride = !içeride;
+                    }
+                    önceki = sıra;
+                }
+                içeride
+            }
             İsabetGeometrisi::Daire { merkez, yarıçap } => {
                 let dx = n.0 - merkez.0;
                 let dy = n.1 - merkez.1;
@@ -74,6 +95,18 @@ impl İsabetGeometrisi {
     pub fn merkez(&self) -> (f32, f32) {
         match self {
             İsabetGeometrisi::Dikdörtgen(d) => d.merkez(),
+            İsabetGeometrisi::Çokgen { noktalar } => {
+                if noktalar.is_empty() {
+                    return (0.0, 0.0);
+                }
+                let toplam = noktalar.iter().fold((0.0, 0.0), |toplam, nokta| {
+                    (toplam.0 + nokta.0, toplam.1 + nokta.1)
+                });
+                (
+                    toplam.0 / noktalar.len() as f32,
+                    toplam.1 / noktalar.len() as f32,
+                )
+            }
             İsabetGeometrisi::Daire { merkez, .. } => *merkez,
             İsabetGeometrisi::Halka {
                 merkez,
@@ -110,6 +143,12 @@ impl İsabetGeometrisi {
                 d.genişlik,
                 d.yükseklik,
             )),
+            İsabetGeometrisi::Çokgen { noktalar } => İsabetGeometrisi::Çokgen {
+                noktalar: noktalar
+                    .iter()
+                    .map(|nokta| (nokta.0 + dx, nokta.1 + dy))
+                    .collect(),
+            },
             İsabetGeometrisi::Daire { merkez, yarıçap } => İsabetGeometrisi::Daire {
                 merkez: (merkez.0 + dx, merkez.1 + dy),
                 yarıçap: *yarıçap,
@@ -243,4 +282,21 @@ pub enum SihirliSeriTürü {
     Sütun,
     /// Uyumlu sütun/çizgi serilerini ortak bir yığına al (`magicType: stack`).
     Yığın,
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+
+    #[test]
+    fn cokgen_isabeti_sinir_kutusu_boslugunu_hedef_saymaz() {
+        let yamuk = İsabetGeometrisi::Çokgen {
+            noktalar: vec![(0.0, 0.0), (10.0, 0.0), (7.0, 10.0), (3.0, 10.0)],
+        };
+
+        assert!(yamuk.içeriyor_mu((5.0, 5.0)));
+        assert!(!yamuk.içeriyor_mu((0.5, 9.0)));
+        assert_eq!(yamuk.merkez(), (5.0, 5.0));
+        assert!(yamuk.kaydır(20.0, 30.0).içeriyor_mu((25.0, 35.0)));
+    }
 }
