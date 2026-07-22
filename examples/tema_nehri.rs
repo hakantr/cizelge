@@ -22,6 +22,7 @@ fn seçenekler() -> GrafikSeçenekleri {
         .başlık(Başlık::yeni().metin("Enerji Üretimi Akışı"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
         .koyu(true)
+        .tek_eksen(TekEksen::yeni())
         .seri(TemaNehriSerisi::yeni().ad("Üretim").veri(veri))
 }
 

@@ -1,0 +1,195 @@
+{
+  "id": "themeRiver-basic",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 491,
+  "değişen_piksel_oranı": 0.0018185185185185186,
+  "ssim": 0.9985067006323202,
+  "yapısal_kontroller": [
+    {
+      "ad": "single_axis_taban_çizgisi",
+      "geçti": true,
+      "açıklama": "Tema nehri altındaki singleAxis taban çizgisi tüm genişlikte görünmeli",
+      "örnekler": [
+        {
+          "x": 40,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 100,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 200,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 300,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 400,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 500,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 560,
+          "y": 407,
+          "rgb": [
+            109,
+            110,
+            114
+          ],
+          "geçti": true
+        }
+      ]
+    },
+    {
+      "ad": "alti_katmanli_siluet",
+      "geçti": true,
+      "açıklama": "Resmî ilk güçlü kesitte altı katman doğru sıra ve renkte bulunmalı",
+      "örnekler": [
+        {
+          "x": 85,
+          "y": 93,
+          "rgb": [
+            80,
+            112,
+            221
+          ],
+          "beklenen": [
+            80,
+            112,
+            221
+          ],
+          "geçti": true
+        },
+        {
+          "x": 85,
+          "y": 158,
+          "rgb": [
+            182,
+            214,
+            52
+          ],
+          "beklenen": [
+            182,
+            214,
+            52
+          ],
+          "geçti": true
+        },
+        {
+          "x": 85,
+          "y": 201,
+          "rgb": [
+            80,
+            83,
+            114
+          ],
+          "beklenen": [
+            80,
+            83,
+            114
+          ],
+          "geçti": true
+        },
+        {
+          "x": 85,
+          "y": 244,
+          "rgb": [
+            255,
+            153,
+            77
+          ],
+          "beklenen": [
+            255,
+            153,
+            77
+          ],
+          "geçti": true
+        },
+        {
+          "x": 85,
+          "y": 292,
+          "rgb": [
+            12,
+            168,
+            223
+          ],
+          "beklenen": [
+            12,
+            168,
+            223
+          ],
+          "geçti": true
+        },
+        {
+          "x": 85,
+          "y": 340,
+          "rgb": [
+            255,
+            209,
+            10
+          ],
+          "beklenen": [
+            255,
+            209,
+            10
+          ],
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/themeRiver-basic.png",
+    "gerçek": "testler/gorsel/gerçek/default/themeRiver-basic.png",
+    "fark": "testler/gorsel/fark/default/themeRiver-basic.png"
+  }
+}

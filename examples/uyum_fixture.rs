@@ -12692,6 +12692,187 @@ fn mix_zoom_on_value(son: bool) -> Result<GrafikSeçenekleri, String> {
         .seri(SütunSerisi::yeni().ad("Budget 2012").veri(bütçe_2012)))
 }
 
+fn theme_river_kaynağını_oku(dosya_adı: &str) -> Result<String, String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts")
+        .join(dosya_adı);
+    std::fs::read_to_string(&dosya).map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))
+}
+
+fn theme_river_tarihi(tarih: &str) -> Result<f64, String> {
+    use cizelge::yardimci::takvim::{TakvimAnı, takvimden_ana};
+
+    let parçalar = tarih
+        .split('/')
+        .map(str::parse::<u32>)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|hata| format!("geçersiz themeRiver tarihi `{tarih}`: {hata}"))?;
+    let [yıl, ay, gün] = parçalar.as_slice() else {
+        return Err(format!("geçersiz themeRiver tarihi: {tarih}"));
+    };
+    let utc = takvimden_ana(TakvimAnı {
+        yıl: *yıl as i32,
+        ay: *ay,
+        gün: *gün,
+        saat: 0,
+        dakika: 0,
+        saniye: 0,
+        milisaniye: 0,
+    });
+
+    // Resmî referans tarayıcısı Europe/Istanbul saat diliminde çalışır.
+    // Türkiye 2015'te yaz saati bitişini 8 Kasım'a ertelediği için
+    // `new Date("2015/11/08")` ile ertesi yerel gece arasında 25 saat vardır.
+    // Tüm anlara eklenen sabit saat dilimi kayması koordinatı değiştirmez;
+    // yalnız geçişteki bir saatlik farkı korumak yeterlidir. Sonraki yerel
+    // geceleri UTC gün sınırına normalleyerek yerel eksen biçimleyicimizin
+    // gün etiketlerini de resmî örnekle aynı tutuyoruz.
+    Ok(if (*yıl, *ay, *gün) == (2015, 11, 8) {
+        utc - 3_600_000.0
+    } else {
+        utc
+    })
+}
+
+fn theme_river_basic() -> Result<GrafikSeçenekleri, String> {
+    let kaynak = theme_river_kaynağını_oku("themeRiver-basic.ts")?;
+    let ham: Vec<(String, f64, String)> = resmi_javascript_dizisi(&kaynak, "type: 'themeRiver'")?;
+    let mut veri = Vec::with_capacity(ham.len());
+    for (tarih, değer, katman) in ham {
+        veri.push((theme_river_tarihi(&tarih)?, değer, katman));
+    }
+    let katmanlar = ["DQ", "TY", "SS", "QG", "SY", "DD"];
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .gösterge(Gösterge::yeni().veri(katmanlar).üst(15).iç_boşluk(15.0))
+        .tek_eksen(
+            TekEksen::zaman()
+                // ECharts TimeScale bu 20 günlük kapsamda iki günlük alt
+                // düzey çentikleri üretir; yerel ölçek aynı görünür düzeyi
+                // açık splitNumber ile temsil eder.
+                .eksen(
+                    Eksen::zaman()
+                        .bölme_sayısı(11)
+                        .etiket(
+                            EksenEtiketi::yeni().biçimleyici(Biçimleyici::İşlev(Arc::new(
+                                |değer, _| {
+                                    cizelge::yardimci::takvim::andan_takvime(değer)
+                                        .gün
+                                        .to_string()
+                                },
+                            ))),
+                        ),
+                )
+                .üst(50)
+                .alt(50),
+        )
+        .seri(
+            TemaNehriSerisi::yeni()
+                .vurgu_öğe_stili(
+                    ÖğeStili::yeni()
+                        .gölge_bulanıklığı(20.0)
+                        .gölge_rengi("rgba(0,0,0,0.8)"),
+                )
+                .veri(veri),
+        ))
+}
+
+fn theme_river_lastfm() -> Result<GrafikSeçenekleri, String> {
+    let kaynak = theme_river_kaynağını_oku("themeRiver-lastfm.ts")?;
+    let ham: Vec<Vec<f64>> = resmi_javascript_dizisi(&kaynak, "let rawData")?;
+    // Kaynak 24 satır üretir ancak yalnız 20 label taşır. ECharts
+    // `getInitialData`, adı undefined olan son dört satırı süzer.
+    let adlar = [
+        "The Sea and Cake",
+        "Andrew Bird",
+        "Laura Veirs",
+        "Brian Eno",
+        "Christopher Willits",
+        "Wilco",
+        "Edgar Meyer",
+        "BÃ©la Fleck",
+        "Fleet Foxes",
+        "Kings of Convenience",
+        "Brett Dennen",
+        "Psapp",
+        "The Bad Plus",
+        "Feist",
+        "Battles",
+        "Avishai Cohen",
+        "Rachael Yamagata",
+        "Norah Jones",
+        "BÃ©la Fleck and the Flecktones",
+        "Joshua Redman",
+    ];
+    let veri = ham
+        .into_iter()
+        .take(adlar.len())
+        .enumerate()
+        .flat_map(|(katman_sırası, satır)| {
+            satır
+                .into_iter()
+                .enumerate()
+                .map(move |(x, değer)| (x as f64, değer, adlar[katman_sırası]))
+        })
+        .collect::<Vec<_>>();
+
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .tek_eksen(TekEksen::yeni().eksen(Eksen::değer().en_çok_veri()))
+        .seri(
+            TemaNehriSerisi::yeni()
+                .etiket(Etiket::yeni().göster(false))
+                .veri(veri),
+        ))
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
+mod theme_river_fixture_testleri {
+    use super::*;
+
+    #[test]
+    fn basic_resmi_alti_katmanin_tum_noktalarini_tasir() {
+        let seçenekler = theme_river_basic().expect("basic fixture kurulmalı");
+        assert_eq!(seçenekler.tek_eksenler.len(), 1);
+        let Seri::TemaNehri(nehir) = &seçenekler.seriler[0] else {
+            panic!("themeRiver serisi bekleniyordu");
+        };
+        assert_eq!(nehir.veri.len(), 6 * 21);
+        assert_eq!(
+            cizelge::grafik::tema_nehri::tema_nehri_katman_adları(nehir),
+            ["DQ", "TY", "SS", "QG", "SY", "DD"]
+        );
+        seçenekler
+            .doğrula()
+            .expect("singleAxis bağı geçerli olmalı");
+    }
+
+    #[test]
+    fn basic_istanbul_yaz_saati_gecisindeki_yirmi_bes_saati_korur() {
+        let sekiz = theme_river_tarihi("2015/11/08").expect("tarih geçerli olmalı");
+        let dokuz = theme_river_tarihi("2015/11/09").expect("tarih geçerli olmalı");
+        assert_eq!(dokuz - sekiz, 25.0 * 60.0 * 60.0 * 1000.0);
+    }
+
+    #[test]
+    fn lastfm_undefined_etiketli_son_dort_satiri_resmi_gibi_suzer() {
+        let seçenekler = theme_river_lastfm().expect("lastfm fixture kurulmalı");
+        let Seri::TemaNehri(nehir) = &seçenekler.seriler[0] else {
+            panic!("themeRiver serisi bekleniyordu");
+        };
+        assert_eq!(nehir.veri.len(), 20 * 20);
+        assert_eq!(
+            cizelge::grafik::tema_nehri::tema_nehri_katman_adları(nehir).len(),
+            20
+        );
+        assert!(!nehir.etiket.göster);
+        assert!(seçenekler.tek_eksenler[0].eksen.en_çok_veri);
+    }
+}
+
 fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
     match id {
         "line-simple" => Ok(line_simple()),
@@ -12707,6 +12888,8 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "radar-custom" => Ok(radar_custom()),
         "radar2" => Ok(radar2()),
         "radar-multiple" => Ok(radar_multiple()),
+        "themeRiver-basic" => theme_river_basic(),
+        "themeRiver-lastfm" => theme_river_lastfm(),
         "gauge" => Ok(gauge()),
         "gauge-simple" => Ok(gauge_simple()),
         "gauge-speed" => gauge_speed(),

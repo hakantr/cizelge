@@ -4117,9 +4117,28 @@ pub struct TemaNehriSerisi {
     pub ad: Option<String>,
     /// `(x, değer, katman)` kayıtları.
     pub veri: Vec<(f64, f64, String)>,
+    /// Bağlı `singleAxis` bileşeninin sırası (`singleAxisIndex`).
+    pub tek_eksen_sırası: usize,
+    /// Eksenin dik yönündeki iç boşluk (`boundaryGap`).
+    pub sınır_boşluğu: [Uzunluk; 2],
+    /// Seri içindeki katmanların renk paleti (`series.color`).
+    pub renkler: Vec<Dolgu>,
+    pub öğe_stili: ÖğeStili,
+    pub vurgu_öğe_stili: ÖğeStili,
+    pub etiket: Etiket,
+    pub vurgu_etiketi: EtiketYaması,
+    /// `label.margin`; öntanımlı 4 px.
+    pub etiket_boşluğu: f32,
+    pub sessiz: bool,
+    /// Eski bileşensiz kullanımın yerleşim alanı. Bir `singleAxis`
+    /// bulunduğunda bu dört alan kullanılmaz.
+    #[doc(hidden)]
     pub sol: Uzunluk,
+    #[doc(hidden)]
     pub üst: Uzunluk,
+    #[doc(hidden)]
     pub genişlik: Uzunluk,
+    #[doc(hidden)]
     pub yükseklik: Uzunluk,
 }
 
@@ -4128,6 +4147,18 @@ impl Default for TemaNehriSerisi {
         TemaNehriSerisi {
             ad: None,
             veri: Vec::new(),
+            tek_eksen_sırası: 0,
+            sınır_boşluğu: [Uzunluk::Yüzde(10.0), Uzunluk::Yüzde(10.0)],
+            renkler: Vec::new(),
+            öğe_stili: ÖğeStili::default(),
+            vurgu_öğe_stili: ÖğeStili::default(),
+            etiket: Etiket::yeni()
+                .göster(true)
+                .konum(EtiketKonumu::Sol)
+                .yazı(YazıStili::yeni().boyut(11.0)),
+            vurgu_etiketi: EtiketYaması::yeni().göster(true),
+            etiket_boşluğu: 4.0,
+            sessiz: false,
             sol: Uzunluk::Yüzde(8.0),
             üst: Uzunluk::Piksel(70.0),
             genişlik: Uzunluk::Yüzde(84.0),
@@ -4143,6 +4174,55 @@ impl TemaNehriSerisi {
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
         self.ad = Some(ad.into());
+        self
+    }
+
+    pub fn tek_eksen_sırası(mut self, sıra: usize) -> Self {
+        self.tek_eksen_sırası = sıra;
+        self
+    }
+
+    pub fn sınır_boşluğu(
+        mut self,
+        başlangıç: impl Into<Uzunluk>,
+        bitiş: impl Into<Uzunluk>,
+    ) -> Self {
+        self.sınır_boşluğu = [başlangıç.into(), bitiş.into()];
+        self
+    }
+
+    pub fn renkler<D: Into<Dolgu>>(mut self, renkler: impl IntoIterator<Item = D>) -> Self {
+        self.renkler = renkler.into_iter().map(Into::into).collect();
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn vurgu_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.vurgu_öğe_stili = stil;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    pub fn vurgu_etiketi(mut self, etiket: EtiketYaması) -> Self {
+        self.vurgu_etiketi = etiket;
+        self
+    }
+
+    pub fn etiket_boşluğu(mut self, boşluk: f32) -> Self {
+        self.etiket_boşluğu = boşluk.max(0.0);
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
         self
     }
 
@@ -4263,6 +4343,7 @@ impl Seri {
     /// Tek eksenli koordinat sisteminde mi çizilir?
     pub fn tek_eksen_mi(&self) -> bool {
         matches!(self, Seri::Saçılım(s) if s.tek_eksen_sırası.is_some())
+            || matches!(self, Seri::TemaNehri(_))
     }
 
     pub fn veri(&self) -> &[VeriÖğesi] {
@@ -4383,8 +4464,8 @@ impl Seri {
             | Seri::Grafo(_)
             | Seri::Kiriş(_)
             | Seri::Paralel(_)
-            | Seri::Takvim(_)
-            | Seri::TemaNehri(_) => None,
+            | Seri::Takvim(_) => None,
+            Seri::TemaNehri(s) => s.öğe_stili.renk.as_ref(),
             Seri::Hatlar(_) => None,
         }
     }

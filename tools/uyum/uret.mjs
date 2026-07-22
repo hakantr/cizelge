@@ -227,6 +227,8 @@ const YEREL_FIXTURE = Object.freeze({
   'radar-custom': 'examples/uyum_fixture.rs#radar_custom',
   'radar2': 'examples/uyum_fixture.rs#radar2',
   'radar-multiple': 'examples/uyum_fixture.rs#radar_multiple',
+  'themeRiver-basic': 'examples/uyum_fixture.rs#theme_river_basic',
+  'themeRiver-lastfm': 'examples/uyum_fixture.rs#theme_river_lastfm',
   'gauge': 'examples/uyum_fixture.rs#gauge',
   'gauge-simple': 'examples/uyum_fixture.rs#gauge_simple',
   'gauge-speed': 'examples/uyum_fixture.rs#gauge_speed',
@@ -245,7 +247,6 @@ const YEREL_FIXTURE = Object.freeze({
   'sankey-simple': 'examples/sankey.rs',
   'graph-simple': 'examples/grafo.rs',
   'chord-simple': 'examples/kiris.rs',
-  'themeRiver-basic': 'examples/tema_nehri.rs',
   'parallel-simple': 'examples/paralel.rs'
 });
 

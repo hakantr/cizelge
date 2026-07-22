@@ -1517,15 +1517,71 @@ Radar doğrulanmış kapsamı:
 | `radar2` | %0,4804 | 0,997508 |
 | `radar-multiple` | %0,2956 | 0,997976 |
 
-Beş Radar kartının statik görsel kapısı `tam_kanıtlı`dır. Galeri 332 gerçek
-kartı ve kanıtsız kartlarda açık yer tutucuyu korurken 156 kartta sıfır
-baytlı veya eksik olmayan gerçek önizleme gösterir. Çekirdek 314/314 ve uyum
-fixture 51/51 testleri, `cargo check --all-targets`, no-default PNG derlemesi
-ve üretilmiş dosya denetimi geçmiştir. Kilitli depo koşusu, `dataset-encode0`
-kategori taban çizgisinin dokuz örnek noktasındaki ayrı yapısal kontrolü
-dâhil 203/203 kareyi doğrular. Eski golden'lar yenilenmez; animasyon,
-programatik hover/blur/select, erişilebilirlik, koyu profil ve ölçümlü
-performans kapıları Faz 7/8/9 tamamlanana kadar kartların genel durumunu
+Beş Radar kartının statik görsel kapısı `tam_kanıtlı`dır. Eski golden'lar
+yenilenmez; animasyon, programatik hover/blur/select, erişilebilirlik, koyu
+profil ve ölçümlü performans kapıları Faz 7/8/9 tamamlanana kadar kartların
+genel durumunu `uygulandı_kanıt_bekliyor` olarak tutar.
+
+ThemeRiver doğrulanmış kapsamı:
+
+- Resmî `themeRiver-basic` ve `themeRiver-lastfm` kaynakları
+  `../echarts-examples/public/examples/ts/<id>.ts` dosyalarından kayıpsız
+  Rust fixture'larına bağlanmıştır. Model ve yerleşim için
+  `../echarts/src/chart/themeRiver/ThemeRiverSeries.ts`,
+  `themeRiverLayout.ts`, `ThemeRiverView.ts` ile
+  `../echarts/src/coord/single/Single.ts` normatiftir.
+- `TemaNehriSerisi`; `singleAxisIndex`, iki uçlu yüzde/piksel
+  `boundaryGap`, katman renk paleti, normal ve emphasis `itemStyle`, normal
+  ve emphasis label, `label.margin` ve `silent` yüzeylerini taşır.
+  `GrafikSeçenekleri::doğrula`, bulunmayan `singleAxisIndex` bağını sessizce
+  yok saymaz ve tipli `EksikVeri { bileşen: "singleAxis" }` hatası verir.
+- Resmî `fixData` akışı gibi katman adları ilk görülme sırasıyla gruplanır;
+  bütün tek-eksen değerlerinin birleşimi çıkarılır ve bir katmanda eksik
+  kalan değerler sıfırla tamamlanır. Adı `undefined` olan Last.fm satırları
+  veri modeline alınmaz; resmî kaynakta 24 ham satırdan yalnız ad taşıyan
+  20 katman ve bunların 400 noktası çizilir.
+- Yerleşim gerçek `singleAxis` kutusunu ve veri ölçeğini paylaşır. Her
+  kesitte katman toplamları çıkarılır, en büyük toplamdan ECharts silhouette
+  tabanı `(max - sum) / 2` hesaplanır ve dik yöndeki `boundaryGap`
+  düşüldükten sonra tek bir `ky` ile ölçeklenir. Her iki kenar zrender
+  `ECPolygon` ile aynı `smooth: 0.4` kübik kontrol noktalarıyla çizilir;
+  dolgular arasında boşluk veya örtüşme bırakılmaz.
+- Katman paleti `itemStyle.color` → `series.color` → global palet
+  önceliğini izler. Opaklık, kenarlık ve gölge; hover/programatik emphasis;
+  gerçek bant çokgeniyle isabet; animasyon kırpması; legend katman adları,
+  renkleri ve seçili-gizli yeniden yerleşimi uygulanır. Varsayılan 11 px
+  katman etiketi ilk noktanın dört piksel soluna, koyu `#333` dolgu ve iki
+  piksellik zemin konturuyla bütün bantların üstünde çizilir.
+- `themeRiver-basic` fixture'ı altı katman × 21 tarihi, legend ve zaman
+  singleAxis'ini taşır. Resmî referans tarayıcısının `Europe/Istanbul`
+  saat dilimindeki 8–9 Kasım 2015 yaz saati geçişi ilk aralığı 25 saat
+  yaptığından fixture aynı mutlak aralığı korur; iki günlük ECharts zaman
+  çentikleri bu kapsam için açık bölme sayısıyla eşlenir. `themeRiver-lastfm`
+  `max: dataMax`, etiketsiz 20 katman ve sayısal singleAxis yolunu doğrular.
+- İki referans da 700×525 çalışma alanında iki bağımsız resmî üretimin bit
+  düzeyinde aynı olduğu görüldükten sonra kilitlenmiş, her iki renderer aynı
+  `sharp.resize(600, 450)` adımından geçirilmiştir. Maske veya eşik
+  gevşetmesi yoktur. Genel pixelmatch/SSIM kapısına ek olarak her iki kartta
+  singleAxis taban çizgisi genişlik boyunca ayrı örneklenir;
+  `themeRiver-basic` güçlü bir kesitte altı katmanın sıra ve rengini altı
+  bağımsız piksel örneğiyle ayrıca kilitler.
+
+600×450 kilitli ThemeRiver statik kanıt metrikleri:
+
+| Örnek | Değişen piksel oranı | SSIM | Yapısal kapı |
+|---|---:|---:|---:|
+| `themeRiver-basic` | %0,1819 | 0,998507 | 2/2 |
+| `themeRiver-lastfm` | %0,0485 | 0,999297 | 1/1 |
+
+İki ThemeRiver kartının statik görsel kapısı `tam_kanıtlı`dır. Galeri 332
+gerçek kartı ve kanıtsız kartlarda açık yer tutucuyu korurken 158 kartta
+sıfır baytlı veya eksik olmayan gerçek önizleme gösterir. Çekirdek ve uyum
+fixture testleri, `cargo check --all-targets`, no-default PNG derlemesi ve
+üretilmiş dosya denetimi geçmiştir. Kilitli depo koşusu,
+`dataset-encode0` kategori taban çizgisi ile ThemeRiver taban/siluet
+kontrolleri dâhil 205/205 kareyi doğrular. Eski golden'lar yenilenmez;
+animasyonun ara kareleri, erişilebilirlik, koyu profil ve ölçümlü performans
+kapıları Faz 7/8/9 tamamlanana kadar kartların genel durumunu
 `uygulandı_kanıt_bekliyor` olarak tutar.
 
 Kabul:

@@ -1124,6 +1124,14 @@ impl GrafikSeçenekleri {
                     sıra: tek_eksen_sırası,
                 });
             }
+            if let Seri::TemaNehri(nehir) = seri
+                && self.tek_eksenler.get(nehir.tek_eksen_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "singleAxis",
+                    sıra: nehir.tek_eksen_sırası,
+                });
+            }
             if let Seri::Saçılım(saçılım) = seri
                 && let Some(takvim_sırası) = saçılım.takvim_sırası
                 && self.takvimler.get(takvim_sırası).is_none()
@@ -1738,6 +1746,27 @@ mod testler {
                 sıra: 2
             })
         ));
+    }
+
+    #[test]
+    fn tema_nehri_single_axis_index_bagini_dogrular() {
+        let eksik = GrafikSeçenekleri::yeni().seri(
+            crate::model::seri::TemaNehriSerisi::yeni()
+                .tek_eksen_sırası(1)
+                .veri([(0.0, 1.0, "A")]),
+        );
+        assert!(matches!(
+            eksik.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "singleAxis",
+                sıra: 1
+            })
+        ));
+
+        let geçerli = GrafikSeçenekleri::yeni()
+            .tek_eksen(TekEksen::yeni())
+            .seri(crate::model::seri::TemaNehriSerisi::yeni().veri([(0.0, 1.0, "A")]));
+        assert!(geçerli.doğrula().is_ok());
     }
 
     #[test]

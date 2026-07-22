@@ -461,6 +461,7 @@ fn tema_nehri(d: &Durum) -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .başlık(Başlık::yeni().metin("Tema Nehri"))
         .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .tek_eksen(TekEksen::yeni())
         .seri(TemaNehriSerisi::yeni().ad("Üretim").veri(veri))
 }
 

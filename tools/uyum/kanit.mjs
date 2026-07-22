@@ -41,6 +41,8 @@ const SENARYOLAR = [
   { id: 'radar-custom', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'radar2', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'radar-multiple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'themeRiver-lastfm', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-speed', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -449,23 +451,81 @@ function karşılaştır(referansDosyası, gerçekDosyası, farkDosyası) {
 // örtülmesini tek başına yakalayamaz. Kritik geometri kontrolleri, kilitli
 // kartın bilinen semantik örnek noktalarını ayrı bir geçiş kapısı yapar.
 function yapısalKontroller(senaryo, gerçekDosyası) {
-  if (senaryo.id !== 'dataset-encode0') return [];
   const görüntü = pngOku(gerçekDosyası);
-  const x = 172;
-  const yler = [72, 106, 141, 176, 211, 246, 281, 316, 351];
-  const örnekler = yler.map((y) => {
+  const piksel = (x, y) => {
     const başlangıç = (y * görüntü.width + x) * 4;
-    const rgb = Array.from(görüntü.data.subarray(başlangıç, başlangıç + 3));
+    return Array.from(görüntü.data.subarray(başlangıç, başlangıç + 3));
+  };
+  const nötrKoyuÖrnek = (x, y) => {
+    const rgb = piksel(x, y);
     const sapma = Math.max(...rgb) - Math.min(...rgb);
     const parlaklık = rgb.reduce((toplam, kanal) => toplam + kanal, 0) / rgb.length;
     return { x, y, rgb, geçti: sapma <= 18 && parlaklık <= 190 };
-  });
-  return [{
-    ad: 'kategori_taban_çizgisi',
-    geçti: örnekler.every((örnek) => örnek.geçti),
-    açıklama: 'Y ekseni taban vuruşu dokuz barın başlangıcında kesintisiz görünmeli',
-    örnekler
-  }];
+  };
+  const tabanÇizgisi = (ad, açıklama, y, xler) => {
+    const örnekler = xler.map((x) => nötrKoyuÖrnek(x, y));
+    return { ad, geçti: örnekler.every((örnek) => örnek.geçti), açıklama, örnekler };
+  };
+
+  if (senaryo.id === 'dataset-encode0') {
+    const x = 172;
+    const örnekler = [72, 106, 141, 176, 211, 246, 281, 316, 351]
+      .map((y) => nötrKoyuÖrnek(x, y));
+    return [{
+      ad: 'kategori_taban_çizgisi',
+      geçti: örnekler.every((örnek) => örnek.geçti),
+      açıklama: 'Y ekseni taban vuruşu dokuz barın başlangıcında kesintisiz görünmeli',
+      örnekler
+    }];
+  }
+
+  if (senaryo.id === 'themeRiver-basic') {
+    const beklenenRenkler = [
+      [80, 112, 221],
+      [182, 214, 52],
+      [80, 83, 114],
+      [255, 153, 77],
+      [12, 168, 223],
+      [255, 209, 10]
+    ];
+    const katmanÖrnekleri = [93, 158, 201, 244, 292, 340].map((y, sıra) => {
+      const x = 85;
+      const rgb = piksel(x, y);
+      const beklenen = beklenenRenkler[sıra];
+      return {
+        x,
+        y,
+        rgb,
+        beklenen,
+        geçti: rgb.every((kanal, kanalSırası) => Math.abs(kanal - beklenen[kanalSırası]) <= 2)
+      };
+    });
+    return [
+      tabanÇizgisi(
+        'single_axis_taban_çizgisi',
+        'Tema nehri altındaki singleAxis taban çizgisi tüm genişlikte görünmeli',
+        407,
+        [40, 100, 200, 300, 400, 500, 560]
+      ),
+      {
+        ad: 'alti_katmanli_siluet',
+        geçti: katmanÖrnekleri.every((örnek) => örnek.geçti),
+        açıklama: 'Resmî ilk güçlü kesitte altı katman doğru sıra ve renkte bulunmalı',
+        örnekler: katmanÖrnekleri
+      }
+    ];
+  }
+
+  if (senaryo.id === 'themeRiver-lastfm') {
+    return [tabanÇizgisi(
+      'single_axis_taban_çizgisi',
+      'dataMax singleAxis taban çizgisi tüm genişlikte görünmeli',
+      428,
+      [60, 100, 200, 300, 400, 500, 560]
+    )];
+  }
+
+  return [];
 }
 
 function htmlKaçır(değer) {

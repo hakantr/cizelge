@@ -20656,7 +20656,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/themeRiver-basic.ts",
     "kaynak_sha256": "8907f1e6392e3b4a2e15d7a01fec6216e17c6376fb568899bcf4d3721d0b2d09",
-    "cizelge_fixture": "examples/tema_nehri.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#theme_river_basic",
     "seriler": [
       "dashed",
       "line",
@@ -20674,7 +20674,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -20687,14 +20687,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 491,
+          "değişen_piksel_oranı": 0.0018185185185185186,
+          "ssim": 0.9985067006323202,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/themeRiver-basic.png",
+            "sha256": "8018b8b87eafd000b7458b09a3db3e094428a9b39514a0461391b8532ff8cb2b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/themeRiver-basic.png",
+            "sha256": "5e8e3a9aae8812587649ee51ac6710c478a9664e6c1b68d1138d6489eae2a158"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/themeRiver-basic.png",
+            "sha256": "7f5aba696ffc182b7d46d26f8b3bf51748f703ae87282d4a3a9d731a21f7f715"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/themeRiver-basic-son.json",
+            "sha256": "775fa94d2635dd065e7ec4b9297ed27701fea6787c888a2c8830369d67478990"
+          }
+        }
+      ]
     }
   },
   {
@@ -20719,7 +20744,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/themeRiver-lastfm.ts",
     "kaynak_sha256": "2dfa7fddf47c106986ec303c271caefde7faa68e0691213ff057013371630050",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#theme_river_lastfm",
     "seriler": [
       "themeRiver"
     ],
@@ -20731,7 +20756,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -20743,15 +20768,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 131,
+          "değişen_piksel_oranı": 0.0004851851851851852,
+          "ssim": 0.9992968079377524,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/themeRiver-lastfm.png",
+            "sha256": "7c862930f9ba0aa9f4109498989c72caa479dd4d0682519ca24b241bd7fcbb27"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/themeRiver-lastfm.png",
+            "sha256": "68798882e83d03b72830fffa68c712c91881400ee660ac8600582d7ec908ec5d"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/themeRiver-lastfm.png",
+            "sha256": "509df2eb103644652355d20522c22f3c2828bac5513fdb3e71ea5e7e2aa25253"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/themeRiver-lastfm-son.json",
+            "sha256": "79e6b706e2e4ef41354b3cae453f7ea729d53d247a30a905de921dd807cd0cc2"
+          }
+        }
+      ]
     }
   },
   {

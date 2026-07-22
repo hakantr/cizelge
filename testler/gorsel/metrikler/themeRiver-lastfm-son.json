@@ -1,0 +1,98 @@
+{
+  "id": "themeRiver-lastfm",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 131,
+  "değişen_piksel_oranı": 0.0004851851851851852,
+  "ssim": 0.9992968079377524,
+  "yapısal_kontroller": [
+    {
+      "ad": "single_axis_taban_çizgisi",
+      "geçti": true,
+      "açıklama": "dataMax singleAxis taban çizgisi tüm genişlikte görünmeli",
+      "örnekler": [
+        {
+          "x": 60,
+          "y": 428,
+          "rgb": [
+            141,
+            141,
+            145
+          ],
+          "geçti": true
+        },
+        {
+          "x": 100,
+          "y": 428,
+          "rgb": [
+            141,
+            141,
+            145
+          ],
+          "geçti": true
+        },
+        {
+          "x": 200,
+          "y": 428,
+          "rgb": [
+            102,
+            103,
+            108
+          ],
+          "geçti": true
+        },
+        {
+          "x": 300,
+          "y": 428,
+          "rgb": [
+            141,
+            141,
+            145
+          ],
+          "geçti": true
+        },
+        {
+          "x": 400,
+          "y": 428,
+          "rgb": [
+            141,
+            141,
+            145
+          ],
+          "geçti": true
+        },
+        {
+          "x": 500,
+          "y": 428,
+          "rgb": [
+            141,
+            141,
+            145
+          ],
+          "geçti": true
+        },
+        {
+          "x": 560,
+          "y": 428,
+          "rgb": [
+            141,
+            141,
+            145
+          ],
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/themeRiver-lastfm.png",
+    "gerçek": "testler/gorsel/gerçek/default/themeRiver-lastfm.png",
+    "fark": "testler/gorsel/fark/default/themeRiver-lastfm.png"
+  }
+}

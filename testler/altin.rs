@@ -820,6 +820,7 @@ fn tema_nehri() {
     }
     let seçenekler = GrafikSeçenekleri::yeni()
         .animasyon(false)
+        .tek_eksen(TekEksen::yeni())
         .seri(TemaNehriSerisi::yeni().ad("Üretim").veri(veri));
     altın_karşılaştır("tema_nehri", &boya_ve_dök(seçenekler));
 }
