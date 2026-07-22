@@ -1,11 +1,20 @@
 # çizelge
 
-[Apache ECharts](https://echarts.apache.org)'ın **gpui** üzerinde çalışan,
-tümüyle Türkçe API'li yerli Rust uyarlaması.
+Bu proje, [Apache ECharts](https://echarts.apache.org) 6.1.0'ın bildirime dayalı
+`option` modelini, çizelge motorunu ve görsel davranışlarını Rust'a ve GPUI'ye
+taşıyan, tümüyle Türkçe API'li bir porttur. Bağımsız olarak ortaya çıkarılmış
+yeni bir grafik motoru değildir. Normatif kaynak,
+[Apache ECharts deposundaki `74e9e09a` commit'idir](https://github.com/apache/echarts/commit/74e9e09a0b5687fdd34319121ac73b3022d1483c);
+davranış, API, algoritma, varsayılan değer ve görsel uyum kararlarında Apache
+ECharts esas alınır. Resmî galeri envanteri ve örnek kaynakları için normatif
+yardımcı kaynak,
+[`echarts-examples` deposundaki `1ff3451` commit'idir](https://github.com/apache/echarts-examples/commit/1ff3451941535c51af83eacd504035ef4bfd7d0d).
+Doğrulama araçları bu kaynakların sırasıyla `../echarts` ve
+`../echarts-examples` altındaki yerel klonlarını kullanır.
 
-Web/Canvas yerine doğrudan GPU'da çizer: ECharts'ın bildirime dayalı `option`
-modeli, "güzel" çentik algoritması, sütun yerleşimi, yumuşak eğri kontrol
-noktaları ve yığınlama davranışı ilgili ECharts kaynaklarının birebir portudur.
+Web/Canvas yerine doğrudan GPU'da çizer. ECharts'ın "güzel" çentik algoritması,
+sütun yerleşimi, yumuşak eğri kontrol noktaları ve yığınlama davranışı dahil
+uyum kapsamındaki yetenekler ilgili ECharts kaynaklarından port edilir.
 
 ```rust
 use cizelge::hazir::*;
@@ -33,7 +42,10 @@ cargo run --example pano      # tek pencerede dört grafik
 ```
 
 > Depo, bağımsız `../gpui` çalışma alanındaki `gpui` ve `gpui_platform`
-> crate'lerine yol bağımlılığıyla bağlıdır.
+> crate'lerine yol bağımlılığıyla bağlıdır. Doğrulanan GPUI kaynağı
+> `5566476024607a4c6999ab7b91d0218633a9b96c` commit'idir; GPUI çizelge
+> davranışları için normatif kaynak değil, masaüstü çalışma zamanı ve çizim
+> yüzeyidir.
 
 ## Modül eşlemesi (ECharts → çizelge)
 
@@ -78,7 +90,8 @@ sankey, gösterge saati (gauge); `dataZoom`, `visualMap`, fırça, araç kutusu;
 3B görünümler ve GL serileri (`scatterGL`, `linesGL`, `flowGL`, `graphGL`)
 bu projeye dahil değildir.
 
-Ayrıntılı, fazlara bölünmüş plan için: **[FAZ_PLANI.md](FAZ_PLANI.md)**.
+Ayrıntılı ECharts uyum planı için
+**[ECHARTS_TAM_UYUM_FAZI.md](ECHARTS_TAM_UYUM_FAZI.md)** dosyasına bakın.
 
 ## Güvence kuralları
 
@@ -88,18 +101,33 @@ Ayrıntılı, fazlara bölünmüş plan için: **[FAZ_PLANI.md](FAZ_PLANI.md)**.
   kurtarılabilir sorunlar `BilesenTanisi` olay kanalından yayımlanır,
   `seçenekleri_değiştir` doğrulama + işlem geri alma yapar.
 - **Lisans sınırı:** proje hiçbir koşulda Apache-2.0 dışına çıkmaz
-  (ayrıntılar FAZ_PLANI.md'de).
+  (ayrıntılar ECHARTS_TAM_UYUM_FAZI.md'de).
 
-## Lisans ve atıf
+## Atıf ve teşekkür
 
-Apache-2.0 (bkz. [LICENSE](LICENSE) ve [NOTICE](NOTICE)). Algoritmalar ve
-seçenek modeli, Apache Software Foundation'ın Apache-2.0 lisanslı
-[Apache ECharts](https://github.com/apache/echarts) projesinden
-uyarlanmıştır.
+Grafik motorunun özgün tasarımı, `option`/API fikirleri, algoritmaları,
+varsayılan davranışları, görsel dili ve resmî örnek senaryoları
+[Apache ECharts projesine](https://github.com/apache/echarts) aittir. Bu
+depodaki Rust kodu; söz konusu çalışmayı GPUI tabanlı bir çalışma zamanına
+uyarlamak, eşdeğerliğini sınamak ve belgelemek amacıyla geliştirilir.
+
+Apache Software Foundation'a; Apache ECharts PMC üyelerine, commit sahiplerine
+ve katkıcılarına; ayrıca resmî galeri kaynaklarını geliştiren
+`echarts-examples` katkıcılarına içtenlikle teşekkür ederiz. Çizelge'nin
+ulaşabildiği işlevsellik ve doğruluk, onların açık kaynak olarak paylaştığı
+çalışma sayesinde mümkündür.
+
+## Lisans
+
+Bu repo Apache-2.0 lisanslıdır (bkz. [LICENSE](LICENSE) ve [NOTICE](NOTICE)).
+Normatif Apache ECharts kaynağı Apache-2.0, ECharts'ın kullandığı zrender ise
+BSD-3-Clause lisanslıdır; kaynak telif ve lisans bildirimleri [NOTICE](NOTICE)
+içinde korunur.
 
 **Değiştirilemez kural:** Proje hiçbir koşulda Apache-2.0 lisans sınırının
 dışına çıkmaz; GPL/LGPL/AGPL lisanslı kod veya bağımlılık kabul edilmez.
-Ayrıntı: [FAZ_PLANI.md](FAZ_PLANI.md) içindeki lisans kuralı bölümü.
+Ayrıntı: [ECHARTS_TAM_UYUM_FAZI.md](ECHARTS_TAM_UYUM_FAZI.md) içindeki lisans
+kuralı bölümü.
 
 ## PNG / SVG dışa aktarım
 
