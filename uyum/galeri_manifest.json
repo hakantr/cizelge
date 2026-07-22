@@ -953,7 +953,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/radar.ts",
     "kaynak_sha256": "103790b046a947b04fbd0827ad7e0a496ecdf1812ba232db23252c2fafd3d224",
-    "cizelge_fixture": "examples/radar.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#radar",
     "seriler": [
       "radar"
     ],
@@ -966,7 +966,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -979,14 +979,39 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 700,
+          "değişen_piksel_oranı": 0.0025925925925925925,
+          "ssim": 0.9982952108688082,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar.png",
+            "sha256": "6873e8e5ff947b2f95ee8ba64bcaacfa1a1adf12da169dc56dbe641a07533901"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/radar.png",
+            "sha256": "0903f6ef9aac9aa39fa59bcfd5a2c1ff3d2027e3b1812eef9c1ece29e996d216"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/radar.png",
+            "sha256": "5b611a46eca5fe65781513e9a28b928aeeff42250538928d04db80027cad16a3"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/radar-son.json",
+            "sha256": "2fe8624719af18ae5dc78584ba03f90cbb467ecfa762feb2406d5585dfaf04db"
+          }
+        }
+      ]
     }
   },
   {
@@ -2670,7 +2695,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/radar-aqi.ts",
     "kaynak_sha256": "a970332170a6b0366163a939c7e5cdd56dc6b15edd5e93ade4facf00f07b4ed5",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#radar_aqi",
     "seriler": [
       "radar"
     ],
@@ -2683,7 +2708,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2695,15 +2720,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1095,
+          "değişen_piksel_oranı": 0.004055555555555555,
+          "ssim": 0.9978225645696192,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar-aqi.png",
+            "sha256": "25f2c8d87e5b0c327dee9746643b53386d42146212a62ade473d396fe4c3abd0"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/radar-aqi.png",
+            "sha256": "235722148230d32cc9656f3eeeb82239cab4c2ec6dca73c12d5d80adc0609bfa"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/radar-aqi.png",
+            "sha256": "ab49c4eff2116d1d9cc75335fd41dba93ed311a7277b9ef7b43b76bdeeff8a83"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/radar-aqi-son.json",
+            "sha256": "d2d46d8a5be8c36292c00e1c9080931a5ed0717168b7c795faccf1fb0202e6e7"
+          }
+        }
+      ]
     }
   },
   {
@@ -5398,7 +5448,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/radar-custom.ts",
     "kaynak_sha256": "927dc5d91a070dbe026cba8244c00186b44a02d4996e6d844ba4dce53a8136fc",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#radar_custom",
     "seriler": [
       "dashed",
       "radar"
@@ -5412,7 +5462,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5424,15 +5474,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1313,
+          "değişen_piksel_oranı": 0.004862962962962963,
+          "ssim": 0.996951236147204,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar-custom.png",
+            "sha256": "8282c5dde9e01b61d20a45e7315e061218ec7ada23df6f210a331af446a5a502"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/radar-custom.png",
+            "sha256": "ac24754dfe127116c6249c8ffc95122d476a8fc913a49ca898a6c3eda8d69183"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/radar-custom.png",
+            "sha256": "eaf0c40642b765c1aad5108d419ee9907bf876b01b01578b222998b2bb20969f"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/radar-custom-son.json",
+            "sha256": "92c947dc18a170e771faf78998d2c9662204efc3120deedd0b5c60e3dfa4727d"
+          }
+        }
+      ]
     }
   },
   {
@@ -8641,7 +8716,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/radar2.ts",
     "kaynak_sha256": "e1241c956c7847357ca53e3472b682e1b09a4d16620f671d6191dd44e93ab2af",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#radar2",
     "seriler": [
       "radar",
       "scroll"
@@ -8657,7 +8732,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -8669,15 +8744,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1297,
+          "değişen_piksel_oranı": 0.004803703703703704,
+          "ssim": 0.9975079321291845,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar2.png",
+            "sha256": "4169dc6d1cbd9e713d2bcf604c111dd15cd027e41aa95363fd99a1f4a138682c"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/radar2.png",
+            "sha256": "d6529c1ef038b694201a97ba7b9d5d3520dfa949ad9b21f1ab4993c91e10b0e4"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/radar2.png",
+            "sha256": "bdb23adf3ad91b048917c5f107b5250b4d443dd4e81cbc9d1e7eaa521c5b1f29"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/radar2-son.json",
+            "sha256": "395ebbc49a97e86eb2b588600627d989e59261355e834614019a2a6187579a5c"
+          }
+        }
+      ]
     }
   },
   {
@@ -20350,7 +20450,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/radar-multiple.ts",
     "kaynak_sha256": "f3cdfbbb284250bc27d48b533783eab4a1f4fca2b038d40baf3013bdc77ae23f",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#radar_multiple",
     "seriler": [
       "radar"
     ],
@@ -20364,7 +20464,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -20376,15 +20476,40 @@
       3
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 798,
+          "değişen_piksel_oranı": 0.0029555555555555555,
+          "ssim": 0.9979759926047689,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar-multiple.png",
+            "sha256": "81b9469f4d352183c0580aff45635648802228b7fa52c0bfc44a8f192de8d110"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/radar-multiple.png",
+            "sha256": "4331af0efd742228d33a24182af6568ab8b034c61e1ad6cc9f03b1f87e376ac4"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/radar-multiple.png",
+            "sha256": "80010109fce738471484d28513acda6898c1021103e04bf023facd561e5b8da3"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/radar-multiple-son.json",
+            "sha256": "1d9826b1f72822f9cbfeec37ba73ce1e4ce2927f6e01f5614b0499aed7b779a0"
+          }
+        }
+      ]
     }
   },
   {

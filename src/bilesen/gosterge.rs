@@ -30,6 +30,10 @@ pub struct GöstergeÖğesi {
     /// Seri/veri `itemStyle`ından miras alınan legend simgesi kenarlığı.
     pub kenarlık: Option<(f32, Renk)>,
     pub kapalı: bool,
+    /// `symbol: none` kullanan Radar serilerinde ECharts, seçili serinin
+    /// temsili renk kutusunu korur; legend süzgecinden çıkan serilerin
+    /// simge yolu ise üretilmez. Metin yine `inactiveColor` ile görünür.
+    pub kapalı_simge_gizli: bool,
 }
 
 const SİMGE_METİN_ARASI: f32 = 5.0;
@@ -187,86 +191,181 @@ pub fn gösterge_çiz(
 
     // Kaydırmalı yatay gösterge: sayfaya böl.
     if seçenek.kaydırılabilir && seçenek.yön == Yön::Yatay {
-        let denetim_genişliği = 96.0;
-        let kullanılabilir =
-            (çizici.genişlik() - denetim_genişliği - seçenek.iç_boşluk * 2.0).max(60.0);
-        // Sayfaları doldur.
-        let mut sayfalar: Vec<(usize, usize)> = Vec::new(); // (başlangıç, uzunluk)
-        let mut başlangıç = 0usize;
-        while başlangıç < öğeler.len() {
-            let mut genişlik_toplam = 0.0f32;
-            let mut uzunluk = 0usize;
-            for g in genişlikler.iter().skip(başlangıç) {
-                let ek = if uzunluk == 0 {
-                    *g
+        // ScrollableLegendView bütün öğeleri tek şeritte tutar ve son tam
+        // öğede kesmek yerine şeridi denetimlerin önünde kırpar. Böylece
+        // sağdaki kısmi öğe bir sonraki sayfanın başlangıç öğesi olur.
+        let mut başlangıçlar = Vec::with_capacity(genişlikler.len());
+        let mut içerik_genişliği = 0.0_f32;
+        for (sıra, genişlik) in genişlikler.iter().copied().enumerate() {
+            if sıra > 0 {
+                içerik_genişliği += seçenek.öğe_boşluğu;
+            }
+            başlangıçlar.push(içerik_genişliği);
+            içerik_genişliği += genişlik;
+        }
+        let azami_genişlik =
+            (çizici.genişlik() - seçenek.iç_boşluk * 2.0).max(görünen_satır_yüksekliği);
+
+        // İçerik taşımazsa scroll legend denetimleri görünmez; normal
+        // legend gibi verilen left/right konumunda tek satır çizilir.
+        if içerik_genişliği <= azami_genişlik {
+            let başlangıç_x = yatay_başlangıç(seçenek, çizici.genişlik(), içerik_genişliği);
+            let mut kutular = Vec::with_capacity(öğeler.len());
+            for (sıra, ((öğe, görünen_ad), genişlik)) in öğeler
+                .iter()
+                .zip(&görünen_adlar)
+                .zip(&genişlikler)
+                .enumerate()
+            {
+                let kutu = Dikdörtgen::yeni(
+                    başlangıç_x + başlangıçlar[sıra],
+                    üst,
+                    *genişlik,
+                    görünen_satır_yüksekliği,
+                );
+                öğe_çiz(
+                    çizici,
+                    seçenek,
+                    öğe,
+                    görünen_ad,
+                    kutu,
+                    boyut,
+                    satır_dikey_taşması,
+                );
+                kutular.push((kutu, öğe.ad.clone()));
+            }
+            return GöstergeÇıktısı {
+                kutular,
+                oklar: Vec::new(),
+                sayfa_sayısı: 1,
+            };
+        }
+
+        // Varsayılan yatay pageIcon yolu 12×20 oranlıdır; 15×15 hedef
+        // kutuya oranı korunarak 9×15 görünür geometriyle yerleşir.
+        let simge_genişliği = 9.0_f32;
+        let simge_yüksekliği = 15.0_f32;
+        let denetim_öğe_boşluğu = 5.0_f32;
+        let yer_tutucu = çizici.yazı_ölç("xx/xx", boyut).0;
+        let denetim_genişliği = simge_genişliği * 2.0 + denetim_öğe_boşluğu * 2.0 + yer_tutucu;
+        let içerik_penceresi = (azami_genişlik - denetim_genişliği - seçenek.öğe_boşluğu).max(1.0);
+
+        // `_getPageInfo`: pencereyle kesişen son öğe, sonraki sayfanın ilk
+        // öğesi olur. Son öğe sağdan taşıyorsa kendi başına bir son sayfa
+        // daha üretir.
+        let mut sayfa_başları = vec![0usize];
+        let mut sayfa_başı = 0usize;
+        while sayfa_başı < öğeler.len() {
+            let pencere_sonu = başlangıçlar[sayfa_başı] + içerik_penceresi;
+            let mut son_kesişen = sayfa_başı;
+            for sıra in sayfa_başı + 1..öğeler.len() {
+                if başlangıçlar[sıra] <= pencere_sonu {
+                    son_kesişen = sıra;
                 } else {
-                    seçenek.öğe_boşluğu + *g
-                };
-                if genişlik_toplam + ek > kullanılabilir && uzunluk > 0 {
                     break;
                 }
-                genişlik_toplam += ek;
-                uzunluk += 1;
             }
-            uzunluk = uzunluk.max(1);
-            sayfalar.push((başlangıç, uzunluk));
-            başlangıç += uzunluk;
+            let son_bitiş = başlangıçlar[son_kesişen] + genişlikler[son_kesişen];
+            if son_kesişen + 1 >= öğeler.len() && son_bitiş <= pencere_sonu {
+                break;
+            }
+            let sonraki = if son_kesişen > sayfa_başı {
+                son_kesişen
+            } else {
+                sayfa_başı + 1
+            };
+            if sonraki >= öğeler.len() {
+                break;
+            }
+            sayfa_başları.push(sonraki);
+            sayfa_başı = sonraki;
         }
-        let sayfa_sayısı = sayfalar.len().max(1);
-        let sayfa = sayfa % sayfa_sayısı;
-        let (s_baş, s_uzunluk) = sayfalar.get(sayfa).copied().unwrap_or((0, öğeler.len()));
-
+        let sayfa_sayısı = sayfa_başları.len().max(1);
+        let sayfa = sayfa.min(sayfa_sayısı.saturating_sub(1));
+        let başlangıç_sırası = sayfa_başları.get(sayfa).copied().unwrap_or(0);
+        let içerik_x = seçenek.iç_boşluk;
+        let kayma = başlangıçlar.get(başlangıç_sırası).copied().unwrap_or(0.0);
+        let kırpma = Dikdörtgen::yeni(içerik_x, üst, içerik_penceresi, görünen_satır_yüksekliği);
         let mut kutular = Vec::new();
-        let mut x = seçenek.iç_boşluk;
-        for ((öğe, görünen_ad), genişlik) in öğeler
-            .iter()
-            .zip(&görünen_adlar)
-            .zip(&genişlikler)
-            .skip(s_baş)
-            .take(s_uzunluk)
-        {
-            let kutu = Dikdörtgen::yeni(x, üst, *genişlik, görünen_satır_yüksekliği);
-            öğe_çiz(
-                çizici,
-                seçenek,
-                öğe,
-                görünen_ad,
-                kutu,
-                boyut,
-                satır_dikey_taşması,
-            );
-            kutular.push((kutu, öğe.ad.clone()));
-            x += genişlik + seçenek.öğe_boşluğu;
-        }
+        çizici.kırpılı(kırpma, &mut |yüzey| {
+            for (sıra, ((öğe, görünen_ad), genişlik)) in öğeler
+                .iter()
+                .zip(&görünen_adlar)
+                .zip(&genişlikler)
+                .enumerate()
+                .skip(başlangıç_sırası)
+            {
+                let x = içerik_x + başlangıçlar[sıra] - kayma;
+                if x >= kırpma.sağ() {
+                    break;
+                }
+                let kutu = Dikdörtgen::yeni(x, üst, *genişlik, görünen_satır_yüksekliği);
+                öğe_çiz(
+                    yüzey,
+                    seçenek,
+                    öğe,
+                    görünen_ad,
+                    kutu,
+                    boyut,
+                    satır_dikey_taşması,
+                );
+                kutular.push((kutu, öğe.ad.clone()));
+            }
+        });
 
-        // Denetimler: ‹ n/m ›
-        let mut oklar = Vec::new();
-        let denetim_x = çizici.genişlik() - denetim_genişliği - seçenek.iç_boşluk;
+        let denetim_x = seçenek.iç_boşluk + azami_genişlik - denetim_genişliği;
         let orta_y = üst + görünen_satır_yüksekliği / 2.0;
-        let sol_ok = Dikdörtgen::yeni(denetim_x, üst, 18.0, görünen_satır_yüksekliği);
-        let sağ_ok = Dikdörtgen::yeni(denetim_x + 70.0, üst, 18.0, görünen_satır_yüksekliği);
-        for (kutu, işaret, yön) in [(sol_ok, "‹", -1i32), (sağ_ok, "›", 1i32)] {
-            çizici.dikdörtgen(kutu, &Dolgu::Düz(tema::nötr_10()), [3.0; 4], None);
-            çizici.yazı(
-                işaret,
-                kutu.merkez(),
-                YatayHiza::Orta,
-                DikeyHiza::Orta,
-                boyut,
-                tema::ikincil_metin(),
-                true,
-            );
-            oklar.push((kutu, yön));
-        }
+        let önceki_merkez = (denetim_x + simge_genişliği / 2.0, orta_y);
+        let metin_merkez = (
+            denetim_x + simge_genişliği + denetim_öğe_boşluğu + yer_tutucu / 2.0,
+            orta_y,
+        );
+        let sonraki_merkez = (
+            denetim_x
+                + simge_genişliği
+                + denetim_öğe_boşluğu
+                + yer_tutucu
+                + denetim_öğe_boşluğu
+                + simge_genişliği / 2.0,
+            orta_y,
+        );
+        let önceki_var = sayfa > 0;
+        let sonraki_var = sayfa + 1 < sayfa_sayısı;
+        yatay_sayfa_üçgeni_çiz(çizici, önceki_merkez, false, önceki_var);
+        yatay_sayfa_üçgeni_çiz(çizici, sonraki_merkez, true, sonraki_var);
         çizici.yazı(
             &format!("{}/{}", sayfa + 1, sayfa_sayısı),
-            (denetim_x + 44.0, orta_y),
+            metin_merkez,
             YatayHiza::Orta,
             DikeyHiza::Orta,
             boyut,
-            tema::ikincil_metin(),
+            tema::üçüncül_metin(),
             false,
         );
+
+        let mut oklar = Vec::new();
+        if önceki_var {
+            oklar.push((
+                Dikdörtgen::yeni(
+                    önceki_merkez.0 - simge_genişliği / 2.0,
+                    önceki_merkez.1 - simge_yüksekliği / 2.0,
+                    simge_genişliği,
+                    simge_yüksekliği,
+                ),
+                -1,
+            ));
+        }
+        if sonraki_var {
+            oklar.push((
+                Dikdörtgen::yeni(
+                    sonraki_merkez.0 - simge_genişliği / 2.0,
+                    sonraki_merkez.1 - simge_yüksekliği / 2.0,
+                    simge_genişliği,
+                    simge_yüksekliği,
+                ),
+                1,
+            ));
+        }
         return GöstergeÇıktısı {
             kutular,
             oklar,
@@ -500,6 +599,33 @@ fn dikey_kenar(konum: DikeyKonum, yüzey_yüksekliği: f32) -> f32 {
     }
 }
 
+fn yatay_sayfa_üçgeni_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    merkez: (f32, f32),
+    sağa: bool,
+    etkin: bool,
+) {
+    let yarı_x = 4.5_f32;
+    let yarı_y = 7.5_f32;
+    let mut yol = Yol::yeni();
+    if sağa {
+        yol.taşı((merkez.0 + yarı_x, merkez.1));
+        yol.çiz((merkez.0 - yarı_x, merkez.1 - yarı_y));
+        yol.çiz((merkez.0 - yarı_x, merkez.1 + yarı_y));
+    } else {
+        yol.taşı((merkez.0 - yarı_x, merkez.1));
+        yol.çiz((merkez.0 + yarı_x, merkez.1 - yarı_y));
+        yol.çiz((merkez.0 + yarı_x, merkez.1 + yarı_y));
+    }
+    yol.kapat();
+    let renk = if etkin {
+        tema::aksan_50()
+    } else {
+        tema::aksan_10()
+    };
+    çizici.yol_doldur(&yol, &Dolgu::Düz(renk));
+}
+
 fn sayfa_üçgeni_çiz(
     çizici: &mut dyn ÇizimYüzeyi, merkez: (f32, f32), aşağı: bool, etkin: bool
 ) {
@@ -573,53 +699,57 @@ fn öğe_çiz(
     // metin tabanının ortak merkezi item koordinatında daima y=7'dir.
     let orta_y = kutu.y + satır_dikey_taşması + seçenek.simge_yüksekliği / 2.0;
 
-    match simge {
-        GöstergeSimgesi::YuvarlakKöşeliKare => {
-            let d = Dikdörtgen::yeni(
-                içerik_x,
-                orta_y - seçenek.simge_yüksekliği / 2.0,
-                seçenek.simge_genişliği,
-                seçenek.simge_yüksekliği,
-            );
-            çizici.dikdörtgen(d, &Dolgu::Düz(renk), [3.0; 4], kenarlık);
-        }
-        GöstergeSimgesi::Daire => {
-            let yarıçap = seçenek.simge_yüksekliği / 2.0;
-            çizici.daire(
-                (simge_x + seçenek.simge_genişliği / 2.0, orta_y),
-                yarıçap,
-                Some(&Dolgu::Düz(renk)),
-                None,
-            );
-        }
-        GöstergeSimgesi::Çizgi => {
-            // ECharts çizgi serisi simgesi: yatay çizgi + `series.symbol`.
-            let çizgi_kalınlığı = öğe.çizgi_kalınlığı.unwrap_or(2.0);
-            if çizgi_kalınlığı > 0.0 {
-                çizici.çizgi(
-                    (içerik_x, orta_y),
-                    (içerik_x + seçenek.simge_genişliği, orta_y),
-                    çizgi_kalınlığı,
-                    renk,
-                    crate::model::stil::ÇizgiTürü::Düz,
+    if öğe.kapalı && öğe.kapalı_simge_gizli {
+        // Yerleşim kutusu değişmez; yalnız sembolün boyaması atlanır.
+    } else {
+        match simge {
+            GöstergeSimgesi::YuvarlakKöşeliKare => {
+                let d = Dikdörtgen::yeni(
+                    içerik_x,
+                    orta_y - seçenek.simge_yüksekliği / 2.0,
+                    seçenek.simge_genişliği,
+                    seçenek.simge_yüksekliği,
+                );
+                çizici.dikdörtgen(d, &Dolgu::Düz(renk), [3.0; 4], kenarlık);
+            }
+            GöstergeSimgesi::Daire => {
+                let yarıçap = seçenek.simge_yüksekliği / 2.0;
+                çizici.daire(
+                    (simge_x + seçenek.simge_genişliği / 2.0, orta_y),
+                    yarıçap,
+                    Some(&Dolgu::Düz(renk)),
+                    None,
                 );
             }
-            let merkez = (içerik_x + seçenek.simge_genişliği / 2.0, orta_y);
-            // LegendView, seri sembolünü `itemHeight * 0.8` boyutunda
-            // ölçekler (14px öntanımlıda çap/kenar 11.2px).
-            let yarı = seçenek.simge_yüksekliği * 0.4;
-            let varsayılan = Sembol::İçiBoşDaire;
-            crate::grafik::sembol_stilli_çiz(
-                çizici,
-                öğe.çizgi_sembolü.as_ref().unwrap_or(&varsayılan),
-                merkez,
-                yarı * 2.0,
-                renk,
-                None,
-                None,
-                1.0,
-                true,
-            );
+            GöstergeSimgesi::Çizgi => {
+                // ECharts çizgi serisi simgesi: yatay çizgi + `series.symbol`.
+                let çizgi_kalınlığı = öğe.çizgi_kalınlığı.unwrap_or(2.0);
+                if çizgi_kalınlığı > 0.0 {
+                    çizici.çizgi(
+                        (içerik_x, orta_y),
+                        (içerik_x + seçenek.simge_genişliği, orta_y),
+                        çizgi_kalınlığı,
+                        renk,
+                        crate::model::stil::ÇizgiTürü::Düz,
+                    );
+                }
+                let merkez = (içerik_x + seçenek.simge_genişliği / 2.0, orta_y);
+                // LegendView, seri sembolünü `itemHeight * 0.8` boyutunda
+                // ölçekler (14px öntanımlıda çap/kenar 11.2px).
+                let yarı = seçenek.simge_yüksekliği * 0.4;
+                let varsayılan = Sembol::İçiBoşDaire;
+                crate::grafik::sembol_stilli_çiz(
+                    çizici,
+                    öğe.çizgi_sembolü.as_ref().unwrap_or(&varsayılan),
+                    merkez,
+                    yarı * 2.0,
+                    renk,
+                    None,
+                    None,
+                    1.0,
+                    true,
+                );
+            }
         }
     }
 
@@ -640,4 +770,57 @@ fn öğe_çiz(
         yazı_rengi,
         false,
     );
+}
+
+#[cfg(test)]
+mod testler {
+    use super::*;
+    use crate::cizim::KayıtYüzeyi;
+
+    fn öğeler() -> Vec<GöstergeÖğesi> {
+        (b'A'..=b'L')
+            .map(|harf| GöstergeÖğesi {
+                ad: char::from(harf).to_string(),
+                renk: Renk::onaltılık(0xff0000),
+                opaklık: 1.0,
+                simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                çizgi_kalınlığı: None,
+                çizgi_sembolü: None,
+                kenarlık: None,
+                kapalı: false,
+                kapalı_simge_gizli: false,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn yatay_scroll_legend_kismi_son_ogeyi_sonraki_sayfada_yineler() {
+        let seçenek = Gösterge::yeni()
+            .kaydırılabilir(true)
+            .iç_boşluk(0.0)
+            .simge_genişliği(10.0)
+            .simge_yüksekliği(10.0);
+        let öğeler = öğeler();
+        let mut ilk_yüzey = KayıtYüzeyi::yeni(200.0, 100.0);
+        let ilk = gösterge_çiz(&mut ilk_yüzey, &seçenek, &öğeler, 0);
+        assert_eq!(ilk.sayfa_sayısı, 3);
+        assert_eq!(ilk.kutular.len(), 5);
+        assert!(
+            ilk.kutular
+                .last()
+                .is_some_and(|(kutu, _)| kutu.sağ() > 128.0)
+        );
+        assert_eq!(
+            ilk.oklar.iter().map(|(_, yön)| *yön).collect::<Vec<_>>(),
+            [1]
+        );
+
+        let mut ikinci_yüzey = KayıtYüzeyi::yeni(200.0, 100.0);
+        let ikinci = gösterge_çiz(&mut ikinci_yüzey, &seçenek, &öğeler, 1);
+        assert_eq!(ikinci.kutular.first().map(|(_, ad)| ad.as_str()), Some("E"));
+        assert_eq!(
+            ikinci.oklar.iter().map(|(_, yön)| *yön).collect::<Vec<_>>(),
+            [-1, 1]
+        );
+    }
 }

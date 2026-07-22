@@ -36,6 +36,11 @@ const SENARYOLAR = [
     id: 'funnel-mutiple', tür: 'statik', genişlik: 1000, yükseklik: 750,
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
+  { id: 'radar', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'radar-aqi', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'radar-custom', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'radar2', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  { id: 'radar-multiple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-simple', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge-speed', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },

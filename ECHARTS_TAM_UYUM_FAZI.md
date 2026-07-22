@@ -1459,6 +1459,75 @@ erişilebilirlik, koyu profil ve ölçümlü performans kapıları kapanana kada
 kartların genel durumu `uygulandı_kanıt_bekliyor` kalır; statik kanıt bu
 kapıları tamamlanmış saymaz.
 
+Radar doğrulanmış kapsamı:
+
+- Resmî `radar`, `radar-aqi`, `radar-custom`, `radar2` ve
+  `radar-multiple` kaynaklarının tamamı
+  `../echarts-examples/public/examples/ts/<id>.ts` dosyasından ayrı Rust
+  fixture'ına bağlanmıştır. Model ve davranış için
+  `../echarts/src/coord/radar/RadarModel.ts`, `Radar.ts`,
+  `../echarts/src/component/radar/RadarView.ts` ile
+  `../echarts/src/chart/radar/RadarSeries.ts`, `RadarView.ts` ve
+  `radarLayout.ts` normatiftir.
+- `RadarKoordinatı`, ECharts 6.1 öntanımlı merkez, iç/dış yarıçap,
+  `startAngle: 90`, `clockwise: false`, beş bölme, polygon şekli ve
+  `scale: false` davranışını taşır. Çoklu radar dizisi ve `radarIndex` bağı;
+  gösterge başına ad, açık/otomatik min-max ve renk; circle/polygon;
+  `axisName` görünürlük/formatter/gap/yazı stili; `axisLine`, `splitLine`,
+  `splitArea` görünürlük, renk döngüsü, çizgi stili, opaklık ve gölge;
+  `silent` ile `z` ayrı model alanlarıdır.
+- Gösterge ölçekleri, `axisAlignTicks.scaleCalcAlign` akışındaki güzel adım
+  büyütme sırasını izler. Yalnız pozitif `max` için örtük sıfır min,
+  yalnız negatif `min` için örtük sıfır max, açık iki uç, veri kapsamından
+  otomatik uçlar ve her kolda aynı `splitNumber` halka yapısal testlidir.
+  Açı dönüşümü ECharts'ın yukarı yönlü koordinatını ekran Y eksenine çevirir;
+  `clockwise: false` gösterge sırasını saat yönünün tersinde ilerletir.
+- `RadarSerisi`; çoklu veri öğesi, `radarIndex`, `colorBy: data` palet
+  ilerlemesi, sembol/tür/boyut, çizgi/alan/öğe/etiket stili, veri-öğesi
+  yamaları, `emphasis`/`blur`/`select`, `z` ve `silent` seçeneklerini taşır.
+  Düz ve radyal gradyan alanlar, kesikli çizgi, rect/circle/path semboller,
+  formatter ve rich etiketler ortak boyama hattında çözülür. Hover gerçek
+  radar polygonunu sınar; sessiz seri veya koordinat isabet kaydı üretmez.
+- Bir radar ağı, kendisine bağlı bütün serilerden kapsam çıkarılarak yalnız
+  bir kez ve serilerin altında çizilir. Split alanları gerçek halka olarak
+  boyanır; dairesel gölge maskesi dolu disk değil zrender `Ring` deliğini
+  koruyan annulus'tur. Katman sırası polyline, polygon ve sembol düzenini;
+  legend rengi seri/veri `itemStyle`ı ve `visualMap` sonucunu izler.
+- `radar-aqi`, `selectedMode: single` ilk seçimini ve `symbol: none`
+  serilerde kapalı legend simgesinin boyanmamasını; `radar2`, 28 serilik
+  sürekli visualMap'i ve scroll legend'in kısmi son öğeyi sonraki sayfada
+  tekrar başlatan kırpma/sayfalama davranışını; `radar-custom`, iki radar,
+  otomatik kapsam, renkli halka gölgesi, veri-öğesi areaStyle, rect sembol,
+  kesikli çizgi, değer etiketi ve radyal gradyanı; `radar-multiple`, üç
+  bağımsız merkez/yarıçap ve beş legend sağlayıcısını aynı option
+  bileşiminde doğrular.
+- Beş yeni referansın her biri, 700×525 resmî çalışma alanında iki bağımsız
+  üretimin bit düzeyinde aynı olduğu doğrulandıktan sonra yalnız bir kez
+  kilitlenmiştir. Her iki renderer'ın ham çıktısı aynı
+  `sharp.resize(600, 450)` adımından geçer; maske, eşik gevşetmesi veya
+  geometri feragati kullanılmaz.
+
+600×450 kilitli Radar statik kanıt metrikleri:
+
+| Örnek | Değişen piksel oranı | SSIM |
+|---|---:|---:|
+| `radar` | %0,2593 | 0,998295 |
+| `radar-aqi` | %0,4056 | 0,997823 |
+| `radar-custom` | %0,4863 | 0,996951 |
+| `radar2` | %0,4804 | 0,997508 |
+| `radar-multiple` | %0,2956 | 0,997976 |
+
+Beş Radar kartının statik görsel kapısı `tam_kanıtlı`dır. Galeri 332 gerçek
+kartı ve kanıtsız kartlarda açık yer tutucuyu korurken 156 kartta sıfır
+baytlı veya eksik olmayan gerçek önizleme gösterir. Çekirdek 314/314 ve uyum
+fixture 51/51 testleri, `cargo check --all-targets`, no-default PNG derlemesi
+ve üretilmiş dosya denetimi geçmiştir. Kilitli depo koşusu, `dataset-encode0`
+kategori taban çizgisinin dokuz örnek noktasındaki ayrı yapısal kontrolü
+dâhil 203/203 kareyi doğrular. Eski golden'lar yenilenmez; animasyon,
+programatik hover/blur/select, erişilebilirlik, koyu profil ve ölçümlü
+performans kapıları Faz 7/8/9 tamamlanana kadar kartların genel durumunu
+`uygulandı_kanıt_bekliyor` olarak tutar.
+
 Kabul:
 
 - Radar 5, Gauge 12, Funnel 4, ThemeRiver 2, Calendar 9, Matrix 12 ve

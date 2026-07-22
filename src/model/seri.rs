@@ -13,7 +13,8 @@ pub use crate::model::hatlar::{
 };
 use crate::model::imleyici::{İmAlanı, İmNoktası, İmleyiciler, İmÇizgisi};
 use crate::model::stil::{
-    AlanStili, Biçimleyici, Etiket, EtiketDöndürme, EtiketYaması, YazıStili, ÇizgiStili, ÖğeStili,
+    AlanStili, Biçimleyici, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması, YazıStili,
+    ÇizgiStili, ÖğeStili,
 };
 use crate::model::veri_kumesi::SeriYerleşimi;
 use crate::renk::Dolgu;
@@ -3192,15 +3193,125 @@ impl GöstergeSaatiSerisi {
 
 /// Radar serisi (`series-radar`). Her veri öğesi, koordinattaki gösterge
 /// sayısı kadar değerli bir dizidir; öğe adı göstergede (legend) listelenir.
+#[derive(Clone, Debug, Default)]
+pub struct RadarDurumYaması {
+    pub çizgi_stili: Option<ÇizgiStili>,
+    pub alan_stili: Option<AlanStili>,
+    pub öğe_stili: Option<ÖğeStili>,
+    pub etiket: Option<Etiket>,
+}
+
+impl RadarDurumYaması {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn alan_stili(mut self, stil: AlanStili) -> Self {
+        self.alan_stili = Some(stil);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
+}
+
+/// Nesne biçimli `series-radar.data[i]` seçenekleri. Ham değer/ad ortak
+/// [`VeriÖğesi`] üzerinde kalır; radar'a özgü sembol, çizgi, alan ve durum
+/// yamaları bu dizide özgün veri sırasıyla tutulur.
+#[derive(Clone, Debug, Default)]
+pub struct RadarVeriYaması {
+    pub sembol: Option<Sembol>,
+    pub sembol_boyutu: Option<f32>,
+    pub çizgi_stili: Option<ÇizgiStili>,
+    pub alan_stili: Option<AlanStili>,
+    pub öğe_stili: Option<ÖğeStili>,
+    pub etiket: Option<Etiket>,
+    pub vurgu: RadarDurumYaması,
+    pub bulanık: RadarDurumYaması,
+    pub seçili: RadarDurumYaması,
+}
+
+impl RadarVeriYaması {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn sembol(mut self, sembol: Sembol) -> Self {
+        self.sembol = Some(sembol);
+        self
+    }
+
+    pub fn sembol_boyutu(mut self, boyut: f32) -> Self {
+        self.sembol_boyutu = Some(boyut.max(0.0));
+        self
+    }
+
+    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
+        self.çizgi_stili = Some(stil);
+        self
+    }
+
+    pub fn alan_stili(mut self, stil: AlanStili) -> Self {
+        self.alan_stili = Some(stil);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn vurgu(mut self, yama: RadarDurumYaması) -> Self {
+        self.vurgu = yama;
+        self
+    }
+
+    pub fn bulanık(mut self, yama: RadarDurumYaması) -> Self {
+        self.bulanık = yama;
+        self
+    }
+
+    pub fn seçili(mut self, yama: RadarDurumYaması) -> Self {
+        self.seçili = yama;
+        self
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct RadarSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
+    pub veri_ayarları: Vec<RadarVeriYaması>,
+    pub radar_sırası: usize,
     pub çizgi_stili: ÇizgiStili,
     pub alan_stili: Option<AlanStili>,
+    pub öğe_stili: ÖğeStili,
+    pub etiket: Etiket,
     pub sembol: Sembol,
     pub sembol_boyutu: f32,
     pub sembol_göster: bool,
+    pub vurgu: RadarDurumYaması,
+    pub bulanık: RadarDurumYaması,
+    pub seçili: RadarDurumYaması,
+    pub z: i32,
+    pub sessiz: bool,
 }
 
 impl Default for RadarSerisi {
@@ -3208,11 +3319,20 @@ impl Default for RadarSerisi {
         RadarSerisi {
             ad: None,
             veri: Vec::new(),
+            veri_ayarları: Vec::new(),
+            radar_sırası: 0,
             çizgi_stili: ÇizgiStili::default(),
             alan_stili: None,
+            öğe_stili: ÖğeStili::default(),
+            etiket: Etiket::yeni().konum(EtiketKonumu::Üst),
             sembol: Sembol::Daire,
-            sembol_boyutu: 6.0,
+            sembol_boyutu: 8.0,
             sembol_göster: true,
+            vurgu: RadarDurumYaması::default(),
+            bulanık: RadarDurumYaması::default(),
+            seçili: RadarDurumYaması::default(),
+            z: 2,
+            sessiz: false,
         }
     }
 }
@@ -3233,6 +3353,23 @@ impl RadarSerisi {
             .into_iter()
             .map(|(ad, değerler)| VeriÖğesi::adlı(ad, değerler))
             .collect();
+        self.veri_ayarları
+            .resize_with(self.veri.len(), Default::default);
+        self
+    }
+
+    pub fn veri_öğeleri<T: Into<VeriÖğesi>>(
+        mut self,
+        veri: impl IntoIterator<Item = T>,
+    ) -> Self {
+        self.veri = veri_listesi(veri);
+        self.veri_ayarları
+            .resize_with(self.veri.len(), Default::default);
+        self
+    }
+
+    pub fn radar_sırası(mut self, sıra: usize) -> Self {
+        self.radar_sırası = sıra;
         self
     }
 
@@ -3243,6 +3380,65 @@ impl RadarSerisi {
 
     pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
         self.çizgi_stili = stil;
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    pub fn sembol(mut self, sembol: Sembol) -> Self {
+        self.sembol_göster = !matches!(sembol, Sembol::Yok);
+        self.sembol = sembol;
+        self
+    }
+
+    pub fn sembol_boyutu(mut self, boyut: f32) -> Self {
+        self.sembol_boyutu = boyut.max(0.0);
+        self
+    }
+
+    pub fn sembol_göster(mut self, göster: bool) -> Self {
+        self.sembol_göster = göster;
+        self
+    }
+
+    pub fn vurgu(mut self, yama: RadarDurumYaması) -> Self {
+        self.vurgu = yama;
+        self
+    }
+
+    pub fn bulanık(mut self, yama: RadarDurumYaması) -> Self {
+        self.bulanık = yama;
+        self
+    }
+
+    pub fn seçili(mut self, yama: RadarDurumYaması) -> Self {
+        self.seçili = yama;
+        self
+    }
+
+    pub fn veri_ayarı(mut self, sıra: usize, ayar: RadarVeriYaması) -> Self {
+        if self.veri_ayarları.len() <= sıra {
+            self.veri_ayarları.resize_with(sıra + 1, Default::default);
+        }
+        self.veri_ayarları[sıra] = ayar;
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
         self
     }
 }

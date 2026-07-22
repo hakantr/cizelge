@@ -47,7 +47,8 @@ use crate::grafik::pasta::{
     Dilim, boş_pasta_çiz_merkezle, dilim_değer_metni, pasta_yerleşimi_merkezle, pasta_çiz,
 };
 use crate::grafik::radar::{
-    radar_ağı_çiz, radar_düzeni, radar_ipucu_satırları, radar_serisi_çiz
+    radar_ağı_çiz, radar_düzeni_serilerle, radar_görsel_kapsamı, radar_ipucu_satırları,
+    radar_serisi_çiz, radar_vurgusu,
 };
 use crate::grafik::sacilim::{
     BüyükSaçılımNoktaları, SaçılımNoktası, büyük_saçılım_noktaları, büyük_saçılım_çiz,
@@ -72,7 +73,7 @@ use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
 use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
 use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
-use crate::model::seri::{EksenBağı, GrafoSerisi, SaçılımSerisi, Seri, ÖzelBağlam};
+use crate::model::seri::{EksenBağı, GrafoSerisi, SaçılımSerisi, Sembol, Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
 use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
@@ -1380,20 +1381,62 @@ fn gösterge_öğeleri(
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         match seri {
             Seri::Radar(r) => {
+                let palet_başlangıcı =
+                    crate::grafik::radar::radar_palet_başlangıcı(seçenekler, i);
+                let mut adlı_öğe_var = false;
                 for (j, öğe) in r.veri.iter().enumerate() {
                     let Some(ad) = öğe.ad.clone() else { continue };
+                    adlı_öğe_var = true;
                     if !süzgeç.is_empty() && !süzgeç.contains(&ad) {
                         continue;
                     }
+                    let öğe_stili = öğe
+                        .stil
+                        .as_ref()
+                        .or_else(|| {
+                            r.veri_ayarları
+                                .get(j)
+                                .and_then(|ayar| ayar.öğe_stili.as_ref())
+                        })
+                        .unwrap_or(&r.öğe_stili);
                     öğeler.push(GöstergeÖğesi {
                         kapalı: kapalı.contains(&ad),
                         ad,
-                        renk: seçenekler.palet_rengi(j),
-                        opaklık: 1.0,
-                        simge: GöstergeSimgesi::Çizgi,
+                        renk: crate::grafik::radar::radar_öğe_rengi(
+                            seçenekler,
+                            i,
+                            j,
+                            palet_başlangıcı + j,
+                        ),
+                        opaklık: öğe_stili.opaklık.unwrap_or(1.0),
+                        simge: GöstergeSimgesi::YuvarlakKöşeliKare,
                         çizgi_kalınlığı: None,
                         çizgi_sembolü: None,
                         kenarlık: None,
+                        kapalı_simge_gizli: false,
+                    });
+                }
+                // Veri öğeleri adsızsa LegendVisualProvider seri adına
+                // düşer (radar-aqi gibi çok satırlı tek-seri kümeleri).
+                if !adlı_öğe_var
+                    && let Some(ad) = r.ad.clone()
+                    && (süzgeç.is_empty() || süzgeç.contains(&ad))
+                {
+                    let renk = if r.veri.is_empty() {
+                        seçenekler.palet_rengi(palet_başlangıcı)
+                    } else {
+                        crate::grafik::radar::radar_öğe_rengi(seçenekler, i, 0, palet_başlangıcı)
+                    };
+                    öğeler.push(GöstergeÖğesi {
+                        kapalı: kapalı.contains(&ad),
+                        ad,
+                        renk,
+                        opaklık: r.öğe_stili.opaklık.unwrap_or(1.0),
+                        simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                        çizgi_kalınlığı: None,
+                        çizgi_sembolü: None,
+                        kenarlık: None,
+                        kapalı_simge_gizli: r.sembol == Sembol::Yok,
                     });
                 }
             }
@@ -1412,6 +1455,7 @@ fn gösterge_öğeleri(
                         çizgi_kalınlığı: None,
                         çizgi_sembolü: None,
                         kenarlık: None,
+                        kapalı_simge_gizli: false,
                     });
                 }
             }
@@ -1447,6 +1491,7 @@ fn gösterge_öğeleri(
                             .kenarlık_rengi
                             .filter(|_| p.öğe_stili.kenarlık_kalınlığı > 0.0)
                             .map(|renk| (p.öğe_stili.kenarlık_kalınlığı, renk)),
+                        kapalı_simge_gizli: false,
                     });
                 }
             }
@@ -1499,6 +1544,7 @@ fn gösterge_öğeleri(
                     çizgi_kalınlığı,
                     çizgi_sembolü,
                     kenarlık,
+                    kapalı_simge_gizli: false,
                 });
             }
         }
@@ -2855,6 +2901,25 @@ pub fn grafiği_boya(
                 .iter()
                 .filter_map(|(ad, seçili)| (!*seçili).then_some(ad.clone())),
         );
+        if gösterge.seçim_kipi == crate::model::bilesen::GöstergeSeçimKipi::Tek
+            && girdi.kapalı.is_empty()
+        {
+            let adlar = gösterge_öğeleri(seçenekler, &HashSet::new())
+                .into_iter()
+                .map(|öğe| öğe.ad)
+                .collect::<Vec<_>>();
+            let seçilen = adlar
+                .iter()
+                .find(|ad| gösterge.seçili.get(*ad).copied().unwrap_or(true))
+                .or_else(|| adlar.first());
+            if let Some(seçilen) = seçilen {
+                for ad in &adlar {
+                    if ad != seçilen {
+                        etkili_kapalı.insert(ad.clone());
+                    }
+                }
+            }
+        }
     }
     let kapalı = &etkili_kapalı;
     let ipucu_seçeneği = seçenekler.ipucu.clone().filter(|i| i.göster);
@@ -4810,6 +4875,32 @@ pub fn grafiği_boya(
         }
     }
 
+    // Radar bileşenleri z=0 katmanında, bütün radar serilerinden önce ve
+    // her `radarIndex` için yalnız bir kez çizilir.
+    let radar_alanı = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
+    let radar_düzenleri = seçenekler
+        .tüm_radarlar()
+        .enumerate()
+        .map(|(radar_sırası, koordinat)| {
+            let bağlı_seriler = seçenekler
+                .seriler
+                .iter()
+                .filter_map(|seri| match seri {
+                    Seri::Radar(radar)
+                        if radar.radar_sırası == radar_sırası
+                            && ad_görünür(seri.ad(), kapalı) =>
+                    {
+                        Some(radar)
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>();
+            let düzen = radar_düzeni_serilerle(koordinat, radar_alanı, &bağlı_seriler);
+            radar_ağı_çiz(yüzey, koordinat, &düzen);
+            (koordinat, düzen)
+        })
+        .collect::<Vec<_>>();
+
     // 4b) Görsel eşleme bileşenleri (gradyan çubukları). ECharts
     // `visualMap: []` dizisinin her üyesini çizer; ilk üyenin isabet alanı
     // geriye uyumlu tekil etkileşim alanında korunur.
@@ -4823,6 +4914,7 @@ pub fn grafiği_boya(
                 Seri::Isı(ısı) => Some(ısı_değer_kapsamı(ısı)),
                 Seri::Takvim(takvim) => Some(takvim_değer_kapsamı(takvim)),
                 Seri::Saçılım(saçılım) => Some(saçılım_görsel_kapsamı(saçılım, eşleme)),
+                Seri::Radar(_) => Some(radar_görsel_kapsamı(seçenekler, eşleme)),
                 _ => None,
             })
             .unwrap_or([0.0, 1.0]);
@@ -5097,23 +5189,33 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
-                let Some(koordinat) = &seçenekler.radar else {
+                let Some((koordinat, düzen)) = radar_düzenleri.get(r.radar_sırası) else {
                     continue;
                 };
                 if koordinat.göstergeler.len() < 3 {
                     continue;
                 }
-                let düzen = radar_düzeni(koordinat, tüm_alan);
-                radar_ağı_çiz(yüzey, koordinat, &düzen);
+                let vurgu = if r.sessiz || koordinat.sessiz {
+                    None
+                } else {
+                    fare.and_then(|fare| radar_vurgusu(r, düzen, kapalı, ilerleme, fare))
+                        .or_else(|| {
+                            girdi
+                                .ipucu_öğesi
+                                .filter(|(seri_sırası, _)| *seri_sırası == i)
+                                .map(|(_, veri_sırası)| veri_sırası)
+                        })
+                };
                 radar_serisi_çiz(
                     yüzey,
                     r,
                     i,
                     koordinat,
-                    &düzen,
+                    düzen,
                     seçenekler,
                     kapalı,
                     ilerleme,
+                    vurgu,
                     &mut çıktı.isabetler,
                 );
                 // Öğe ipucu: köşe sembolü isabeti.

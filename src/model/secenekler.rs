@@ -56,6 +56,9 @@ pub struct GrafikSeçenekleri {
     pub görsel_eşlemeler: Vec<GörselEşleme>,
     /// Radar koordinat sistemi (`radar`).
     pub radar: Option<RadarKoordinatı>,
+    /// Çoklu radar koordinat listesi (`radar: []`). Boşsa geriye uyumlu
+    /// tekil `radar` alanı kullanılır.
+    pub radarlar: Vec<RadarKoordinatı>,
     /// Kutupsal koordinat sistemi (`polar` + `angleAxis` + `radiusAxis`).
     pub kutupsal: Option<KutupsalKoordinat>,
     /// Çoklu kutupsal koordinat listesi (`polar: []`). Boşsa geriye
@@ -118,6 +121,7 @@ impl Default for GrafikSeçenekleri {
             görsel_eşleme: None,
             görsel_eşlemeler: Vec::new(),
             radar: None,
+            radarlar: Vec::new(),
             kutupsal: None,
             kutupsallar: Vec::new(),
             matris: None,
@@ -318,7 +322,31 @@ impl GrafikSeçenekleri {
 
     pub fn radar(mut self, koordinat: RadarKoordinatı) -> Self {
         self.radar = Some(koordinat);
+        self.radarlar.clear();
         self
+    }
+
+    /// `radar: []` listesini doğrudan ayarlar.
+    pub fn radarlar(mut self, koordinatlar: impl IntoIterator<Item = RadarKoordinatı>) -> Self {
+        self.radar = None;
+        self.radarlar = koordinatlar.into_iter().collect();
+        self
+    }
+
+    /// Var olan tekil/serili radar listesine bir koordinat ekler.
+    pub fn radar_ekle(mut self, koordinat: RadarKoordinatı) -> Self {
+        if self.radarlar.is_empty()
+            && let Some(tekil) = self.radar.take()
+        {
+            self.radarlar.push(tekil);
+        }
+        self.radarlar.push(koordinat);
+        self
+    }
+
+    /// Tekil ve çoğul radar seçeneklerini ECharts bileşen sırasıyla dolaşır.
+    pub fn tüm_radarlar(&self) -> impl DoubleEndedIterator<Item = &RadarKoordinatı> {
+        self.radar.iter().chain(self.radarlar.iter())
     }
 
     pub fn kutupsal(mut self, koordinat: KutupsalKoordinat) -> Self {
@@ -1071,6 +1099,14 @@ impl GrafikSeçenekleri {
             }
         }
         for seri in &self.seriler {
+            if let Seri::Radar(radar) = seri
+                && self.tüm_radarlar().nth(radar.radar_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "radar",
+                    sıra: radar.radar_sırası,
+                });
+            }
             if let Some(kutupsal_sırası) = seri.kutupsal_sırası()
                 && self.tüm_kutupsallar().nth(kutupsal_sırası).is_none()
             {

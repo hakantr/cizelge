@@ -108,7 +108,9 @@ pub use model::matris::{
     MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisGövdeHücresi, MatrisKonumu,
     MatrisKoordinatı,
 };
-pub use model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
+pub use model::radar::{
+    RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri, RadarŞekli,
+};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, DüzSaçılımVerisi, EtiketYerleşimParametreleri,
@@ -117,9 +119,10 @@ pub use model::seri::{
     GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıSerisi, HuniDurumYaması,
     HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi, HuniSıralaması, HuniVeriYaması, HuniYönü,
     IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
-    PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
-    SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi,
-    Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+    PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi, RadarVeriYaması, SankeyBağı,
+    SankeySerisi, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
+    TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
+    ÖğeRengiİşlevi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -224,7 +227,10 @@ pub mod hazir {
         MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisGövdeHücresi, MatrisKonumu,
         MatrisKoordinatı,
     };
-    pub use crate::model::radar::{RadarGöstergesi, RadarKoordinatı, RadarŞekli};
+    pub use crate::model::radar::{
+        RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri,
+        RadarŞekli,
+    };
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
@@ -233,9 +239,10 @@ pub mod hazir {
         GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıSerisi, HuniDurumYaması,
         HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi, HuniSıralaması, HuniVeriYaması, HuniYönü,
         IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
-        PastaSerisi, Piktogram, RadarSerisi, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
-        SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,
-        ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+        PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi, RadarVeriYaması, SankeyBağı,
+        SankeySerisi, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
+        TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
+        ÖğeRengiİşlevi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

@@ -4391,6 +4391,379 @@ mod bar_histogram_testleri {
     }
 }
 
+fn radar() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Basic Radar Chart").iç_boşluk(15.0))
+        .gösterge(
+            Gösterge::yeni()
+                .iç_boşluk(15.0)
+                .veri(["Allocated Budget", "Actual Spending"]),
+        )
+        .radar(RadarKoordinatı::yeni().göstergeler([
+            ("Sales", 6_500.0),
+            ("Administration", 16_000.0),
+            ("Information Technology", 30_000.0),
+            ("Customer Support", 38_000.0),
+            ("Development", 52_000.0),
+            ("Marketing", 25_000.0),
+        ]))
+        .seri(RadarSerisi::yeni().ad("Budget vs spending").veri([
+            (
+                "Allocated Budget",
+                vec![4_200.0, 3_000.0, 20_000.0, 35_000.0, 50_000.0, 18_000.0],
+            ),
+            (
+                "Actual Spending",
+                vec![5_000.0, 14_000.0, 28_000.0, 26_000.0, 42_000.0, 21_000.0],
+            ),
+        ]))
+}
+
+fn radar_aqi_verisini_oku() -> Result<(Vec<Vec<f64>>, Vec<Vec<f64>>, Vec<Vec<f64>>), String> {
+    let dosya = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/examples/ts/radar-aqi.ts");
+    let kaynak = std::fs::read_to_string(&dosya)
+        .map_err(|hata| format!("{} okunamadı: {hata}", dosya.display()))?;
+    Ok((
+        resmi_javascript_dizisi(&kaynak, "const dataBJ")?,
+        resmi_javascript_dizisi(&kaynak, "const dataSH")?,
+        resmi_javascript_dizisi(&kaynak, "const dataGZ")?,
+    ))
+}
+
+fn radar_aqi() -> Result<GrafikSeçenekleri, String> {
+    let (pekin, şanghay, guangzhou) = radar_aqi_verisini_oku()?;
+    let altın = Renk::kyma(238.0 / 255.0, 197.0 / 255.0, 102.0 / 255.0, 1.0);
+    let bölme_renkleri = [1.0_f32, 0.8, 0.6, 0.4, 0.2, 0.1].map(|alfa| altın.alfa_ile(alfa));
+    let koordinat = RadarKoordinatı::yeni()
+        .göstergeler([
+            ("AQI", 300.0),
+            ("PM2.5", 250.0),
+            ("PM10", 300.0),
+            ("CO", 5.0),
+            ("NO2", 200.0),
+            ("SO2", 100.0),
+        ])
+        .şekil(RadarŞekli::Daire)
+        .bölme_sayısı(5)
+        .eksen_adı(RadarEksenAdı::yeni().yazı(YazıStili::yeni().renk(altın)))
+        .bölme_çizgisi(RadarÇizgileri::yeni().renkler(bölme_renkleri))
+        .bölme_alanı(RadarBölmeAlanı::yeni().göster(false))
+        .eksen_çizgisi(RadarÇizgileri::yeni().renk(Renk::kyma(
+            altın.kırmızı,
+            altın.yeşil,
+            altın.mavi,
+            0.5,
+        )));
+    let seri = |ad: &str, veri: Vec<Vec<f64>>, renk: &str, alan_opaklığı: f32| {
+        RadarSerisi::yeni()
+            .ad(ad)
+            .sembol(Sembol::Yok)
+            .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0).opaklık(0.5))
+            .öğe_stili(ÖğeStili::yeni().renk(renk))
+            .alan_stili(AlanStili::yeni().opaklık(alan_opaklığı))
+            .veri_öğeleri(veri.into_iter().map(VeriÖğesi::yeni))
+    };
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .arkaplan("#161627")
+        .başlık(
+            Başlık::yeni()
+                .metin("AQI - Radar")
+                .iç_boşluk(15.0)
+                .yazı(YazıStili::yeni().renk("#eee")),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .iç_boşluk(15.0)
+                .alt(5)
+                .öğe_boşluğu(20.0)
+                .yazı(YazıStili::yeni().renk("#fff").boyut(14.0))
+                .seçim_kipi(GöstergeSeçimKipi::Tek)
+                .veri(["Beijing", "Shanghai", "Guangzhou"]),
+        )
+        .radar(koordinat)
+        .seri(seri("Beijing", pekin, "#F9713C", 0.1))
+        .seri(seri("Shanghai", şanghay, "#B3E4A1", 0.05))
+        .seri(seri("Guangzhou", guangzhou, "rgb(238, 197, 102)", 0.05)))
+}
+
+fn radar_custom() -> GrafikSeçenekleri {
+    let ilk = RadarKoordinatı::yeni()
+        .gösterge_listesi([
+            RadarGöstergesi::otomatik("Indicator1"),
+            RadarGöstergesi::otomatik("Indicator2"),
+            RadarGöstergesi::otomatik("Indicator3"),
+            RadarGöstergesi::otomatik("Indicator4"),
+            RadarGöstergesi::otomatik("Indicator5"),
+        ])
+        .merkez("25%", "50%")
+        .yarıçap(120)
+        .başlangıç_açısı(90.0)
+        .bölme_sayısı(4)
+        .şekil(RadarŞekli::Daire)
+        .eksen_adı(
+            RadarEksenAdı::yeni()
+                .biçimleyici("【{value}】")
+                .yazı(YazıStili::yeni().renk("#428BD4")),
+        )
+        .bölme_alanı(
+            RadarBölmeAlanı::yeni()
+                .renkler(["#77EADF", "#26C3BE", "#64AFE9", "#428BD4"])
+                .gölge("rgba(0, 0, 0, 0.2)", 10.0, 0.0, 0.0),
+        )
+        .eksen_çizgisi(RadarÇizgileri::yeni().renk("rgba(211, 253, 250, 0.8)"))
+        .bölme_çizgisi(RadarÇizgileri::yeni().renk("rgba(211, 253, 250, 0.8)"));
+    let ikinci = RadarKoordinatı::yeni()
+        .göstergeler([
+            ("Indicator1", 150.0),
+            ("Indicator2", 150.0),
+            ("Indicator3", 150.0),
+            ("Indicator4", 120.0),
+            ("Indicator5", 108.0),
+            ("Indicator6", 72.0),
+        ])
+        .merkez("75%", "50%")
+        .yarıçap(120)
+        .eksen_adı(
+            RadarEksenAdı::yeni().yazı(
+                YazıStili::yeni()
+                    .renk("#fff")
+                    .arkaplan("#666")
+                    .kenarlık_yarıçapı(3.0)
+                    .iç_boşluk([3.0, 5.0, 3.0, 5.0]),
+            ),
+        );
+    let veri_b =
+        RadarVeriYaması::yeni().alan_stili(AlanStili::yeni().renk("rgba(255, 228, 52, 0.6)"));
+    let veri_c = RadarVeriYaması::yeni()
+        .sembol(Sembol::Kare)
+        .sembol_boyutu(12.0)
+        .çizgi_stili(ÇizgiStili::yeni().tür(ÇizgiTürü::Kesikli))
+        .etiket(
+            Etiket::yeni()
+                .göster(true)
+                .konum(EtiketKonumu::Üst)
+                .biçimleyici(Biçimleyici::İşlev(
+                    Arc::new(|değer, _| format!("{değer}")),
+                )),
+        );
+    let veri_d = RadarVeriYaması::yeni().alan_stili(AlanStili::yeni().renk(Dolgu::radyal(
+        0.1,
+        0.6,
+        1.0,
+        vec![
+            RenkDurağı::yeni(0.0, "rgba(255, 145, 124, 0.1)"),
+            RenkDurağı::yeni(1.0, "rgba(255, 145, 124, 0.9)"),
+        ],
+    )));
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .palet(["#67F9D8", "#FFE434", "#56A3F1", "#FF917C"])
+        .başlık(
+            Başlık::yeni()
+                .metin("Customized Radar Chart")
+                .iç_boşluk(15.0),
+        )
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0))
+        .radarlar([ilk, ikinci])
+        .seri(
+            RadarSerisi::yeni()
+                .vurgu(RadarDurumYaması::yeni().çizgi_stili(ÇizgiStili::yeni().kalınlık(4.0)))
+                .veri([
+                    ("Data A", vec![100.0, 8.0, 0.4, -80.0, 2_000.0]),
+                    ("Data B", vec![60.0, 5.0, 0.3, -100.0, 1_500.0]),
+                ])
+                .veri_ayarı(1, veri_b),
+        )
+        .seri(
+            RadarSerisi::yeni()
+                .radar_sırası(1)
+                .veri([
+                    ("Data C", vec![120.0, 118.0, 130.0, 100.0, 99.0, 70.0]),
+                    ("Data D", vec![100.0, 93.0, 50.0, 90.0, 70.0, 60.0]),
+                ])
+                .veri_ayarı(0, veri_c)
+                .veri_ayarı(1, veri_d),
+        )
+}
+
+fn radar2() -> GrafikSeçenekleri {
+    let yıllar = (1..=28)
+        .map(|sıra| (sıra + 2000).to_string())
+        .collect::<Vec<_>>();
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Proportion of Browsers")
+                .alt_metin("Fake Data")
+                .üst(10)
+                .sol(10.0)
+                .iç_boşluk(15.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .gösterge(
+            Gösterge::yeni()
+                .iç_boşluk(15.0)
+                .kaydırılabilir(true)
+                .alt(10)
+                .veri(yıllar.clone()),
+        )
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(200.0)
+                .üst("center")
+                .sağ(10)
+                .renkler(["red", "yellow"])
+                .hesaplanabilir(true),
+        )
+        .radar(RadarKoordinatı::yeni().göstergeler([
+            ("IE8-", 400.0),
+            ("IE9+", 400.0),
+            ("Safari", 400.0),
+            ("Firefox", 400.0),
+            ("Chrome", 400.0),
+        ]));
+    for sıra in 1..=28 {
+        let i = sıra as f64;
+        seçenekler = seçenekler.seri(
+            RadarSerisi::yeni()
+                .sembol(Sembol::Yok)
+                .çizgi_stili(ÇizgiStili::yeni().kalınlık(1.0))
+                .vurgu(
+                    RadarDurumYaması::yeni()
+                        .alan_stili(AlanStili::yeni().renk("rgba(0,250,0,0.3)")),
+                )
+                .veri([(
+                    yıllar[sıra - 1].clone(),
+                    vec![
+                        (40.0 - i) * 10.0,
+                        (38.0 - i) * 4.0 + 60.0,
+                        i * 5.0 + 10.0,
+                        i * 9.0,
+                        i * i / 2.0,
+                    ],
+                )]),
+        );
+    }
+    seçenekler
+}
+
+fn radar_multiple() -> GrafikSeçenekleri {
+    let aylar = (1..=12).map(|ay| format!("{ay}月")).collect::<Vec<_>>();
+    GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Multiple Radar").iç_boşluk(15.0))
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Eksen))
+        .gösterge(Gösterge::yeni().iç_boşluk(15.0).veri([
+            "A Software",
+            "A Phone",
+            "Another Phone",
+            "Precipitation",
+            "Evaporation",
+        ]))
+        .radarlar([
+            RadarKoordinatı::yeni()
+                .göstergeler([
+                    ("Brand", 100.0),
+                    ("Content", 100.0),
+                    ("Usability", 100.0),
+                    ("Function", 100.0),
+                ])
+                .merkez("25%", "40%")
+                .yarıçap(80),
+            RadarKoordinatı::yeni()
+                .göstergeler([
+                    ("Look", 100.0),
+                    ("Photo", 100.0),
+                    ("System", 100.0),
+                    ("Performance", 100.0),
+                    ("Screen", 100.0),
+                ])
+                .merkez("50%", "60%")
+                .yarıçap(80),
+            RadarKoordinatı::yeni()
+                .gösterge_listesi(aylar.iter().map(|ay| RadarGöstergesi::yeni(ay, 100.0)))
+                .merkez("75%", "40%")
+                .yarıçap(80),
+        ])
+        .seri(
+            RadarSerisi::yeni()
+                .alan_stili(AlanStili::yeni())
+                .veri([("A Software", vec![60.0, 73.0, 85.0, 40.0])]),
+        )
+        .seri(
+            RadarSerisi::yeni()
+                .radar_sırası(1)
+                .alan_stili(AlanStili::yeni())
+                .veri([
+                    ("A Phone", vec![85.0, 90.0, 90.0, 95.0, 95.0]),
+                    ("Another Phone", vec![95.0, 80.0, 95.0, 90.0, 93.0]),
+                ]),
+        )
+        .seri(
+            RadarSerisi::yeni()
+                .radar_sırası(2)
+                .alan_stili(AlanStili::yeni())
+                .veri([
+                    (
+                        "Precipitation",
+                        vec![
+                            2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 75.6, 82.2, 48.7, 18.8, 6.0, 2.3,
+                        ],
+                    ),
+                    (
+                        "Evaporation",
+                        vec![
+                            2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 35.6, 62.2, 32.6, 20.0, 6.4, 3.3,
+                        ],
+                    ),
+                ]),
+        )
+}
+
+#[cfg(test)]
+#[allow(clippy::indexing_slicing, clippy::panic)]
+mod radar_fixture_testleri {
+    use super::*;
+
+    #[test]
+    fn bes_resmi_radar_option_bilesimi_kayipsizdir() {
+        let temel = radar();
+        assert_eq!(temel.tüm_radarlar().count(), 1);
+        assert_eq!(temel.seriler.len(), 1);
+        let aqi = radar_aqi().expect("AQI kaynağı okunmalı");
+        assert_eq!(aqi.seriler.len(), 3);
+        assert_eq!(aqi.seriler[0].veri().len(), 31);
+        assert_eq!(
+            aqi.gösterge.as_ref().unwrap().seçim_kipi,
+            GöstergeSeçimKipi::Tek
+        );
+
+        let özel = radar_custom();
+        assert_eq!(özel.tüm_radarlar().count(), 2);
+        let Seri::Radar(ikinci) = &özel.seriler[1] else {
+            panic!("ikinci seri radar olmalı");
+        };
+        assert_eq!(ikinci.radar_sırası, 1);
+        assert_eq!(ikinci.veri_ayarları[0].sembol_boyutu, Some(12.0));
+        assert!(ikinci.veri_ayarları[1].alan_stili.is_some());
+
+        let tarayıcı = radar2();
+        assert_eq!(tarayıcı.seriler.len(), 28);
+        assert!(tarayıcı.gösterge.as_ref().unwrap().kaydırılabilir);
+        assert!(tarayıcı.görsel_eşleme.as_ref().unwrap().hesaplanabilir);
+
+        let çoklu = radar_multiple();
+        assert_eq!(çoklu.tüm_radarlar().count(), 3);
+        assert_eq!(çoklu.seriler.len(), 3);
+        assert_eq!(çoklu.tüm_radarlar().nth(2).unwrap().göstergeler.len(), 12);
+    }
+}
+
 fn funnel_verisi() -> [VeriÖğesi; 5] {
     [
         VeriÖğesi::adlı("Visit", 60.0),
@@ -12329,6 +12702,11 @@ fn seçenekler(id: &str, durum: &str) -> Result<GrafikSeçenekleri, String> {
         "funnel-align" => Ok(funnel_align()),
         "funnel-customize" => Ok(funnel_customize()),
         "funnel-mutiple" => Ok(funnel_mutiple()),
+        "radar" => Ok(radar()),
+        "radar-aqi" => radar_aqi(),
+        "radar-custom" => Ok(radar_custom()),
+        "radar2" => Ok(radar2()),
+        "radar-multiple" => Ok(radar_multiple()),
         "gauge" => Ok(gauge()),
         "gauge-simple" => Ok(gauge_simple()),
         "gauge-speed" => gauge_speed(),

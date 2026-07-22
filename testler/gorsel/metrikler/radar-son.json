@@ -1,0 +1,19 @@
+{
+  "id": "radar",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 700,
+  "değişen_piksel_oranı": 0.0025925925925925925,
+  "ssim": 0.9982952108688082,
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar.png",
+    "gerçek": "testler/gorsel/gerçek/default/radar.png",
+    "fark": "testler/gorsel/fark/default/radar.png"
+  }
+}
