@@ -1009,10 +1009,11 @@ fn güneş_patlaması_odak() {
         ..Default::default()
     };
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
-    // Merkezde "geri" düğmesi: tıklanınca yol bir üst düzeye kırpılır.
+    // Merkezde resmî, etiketsiz virtual-root sektörü vardır; tıklanınca yol
+    // bir üst düzeye kırpılır. ECharts bu sektöre ev simgesi eklemez.
     assert_eq!(çıktı.kırıntılar.len(), 1);
     assert_eq!(çıktı.kırıntılar.first().map(|(_, _, u)| *u), Some(0));
-    assert!(yüzey.döküm().contains("⌂"));
+    assert!(!yüzey.döküm().contains("⌂"));
 }
 
 #[test]

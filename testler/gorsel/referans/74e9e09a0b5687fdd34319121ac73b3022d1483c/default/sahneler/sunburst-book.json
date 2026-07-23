@@ -1,0 +1,2528 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sunburst",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "dilimler": [
+        {
+          "veri_sırası": 20,
+          "ad": "非虚构",
+          "derinlik": 1,
+          "değer": 23,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 0,
+          "r": 40,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": 2.68,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "非虚构",
+          "etiket_x": 427.004,
+          "etiket_y": 305.729,
+          "etiket_dönüşü": 0
+        },
+        {
+          "veri_sırası": 21,
+          "ad": "设计",
+          "derinlik": 2,
+          "değer": 4,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -0.832,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "设计",
+          "etiket_x": 436.19,
+          "etiket_y": 227.596,
+          "etiket_dönüşü": 1.201
+        },
+        {
+          "veri_sırası": 22,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -1.386,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 421.764,
+          "etiket_y": 168.244,
+          "etiket_dönüşü": 6.191
+        },
+        {
+          "veri_sırası": 23,
+          "ad": "无界面交互",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -1.386,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "无界面交互",
+          "etiket_x": 423.84,
+          "etiket_y": 145.84,
+          "etiket_dönüşü": 1.478
+        },
+        {
+          "veri_sırası": 24,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 2,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": -1.386,
+          "bitiş_açısı": -1.016,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 456.058,
+          "etiket_y": 176.31,
+          "etiket_dönüşü": 5.914
+        },
+        {
+          "veri_sırası": 25,
+          "ad": "数字绘图的光照与渲染技术",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -1.386,
+          "bitiş_açısı": -1.201,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "数字绘图的光照与渲染技术",
+          "etiket_x": 451.049,
+          "etiket_y": 150.926,
+          "etiket_dönüşü": 1.294
+        },
+        {
+          "veri_sırası": 26,
+          "ad": "日本建筑解剖书",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -1.201,
+          "bitiş_açısı": -1.016,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "日本建筑解剖书",
+          "etiket_x": 476.861,
+          "etiket_y": 160.926,
+          "etiket_dönüşü": 1.109
+        },
+        {
+          "veri_sırası": 27,
+          "ad": "3☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": -1.016,
+          "bitiş_açısı": -0.832,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "3☆",
+          "etiket_x": 486.836,
+          "etiket_y": 193.453,
+          "etiket_dönüşü": 5.636
+        },
+        {
+          "veri_sırası": 28,
+          "ad": "奇幻世界艺术\n&RPG地图绘制讲座",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -1.016,
+          "bitiş_açısı": -0.832,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "奇幻世界艺术\n&RPG地图绘制讲座",
+          "etiket_x": 500.395,
+          "etiket_y": 175.497,
+          "etiket_dönüşü": 0.924
+        },
+        {
+          "veri_sırası": 29,
+          "ad": "社科",
+          "derinlik": 2,
+          "değer": 5,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": -0.832,
+          "bitiş_açısı": 0.092,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "社科",
+          "etiket_x": 477.604,
+          "etiket_y": 269.01,
+          "etiket_dönüşü": 0.37
+        },
+        {
+          "veri_sırası": 30,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": -0.832,
+          "bitiş_açısı": -0.647,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 504.224,
+          "etiket_y": 209.304,
+          "etiket_dönüşü": 5.452
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "痛点",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -0.832,
+          "bitiş_açısı": -0.647,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "痛点",
+          "etiket_x": 520.851,
+          "etiket_y": 194.146,
+          "etiket_dönüşü": 0.739
+        },
+        {
+          "veri_sırası": 32,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 3,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": -0.647,
+          "bitiş_açısı": -0.092,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 528.89,
+          "etiket_y": 249.142,
+          "etiket_dönüşü": 5.082
+        },
+        {
+          "veri_sırası": 33,
+          "ad": "卓有成效的管理者",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -0.647,
+          "bitiş_açısı": -0.462,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "卓有成效的管理者",
+          "etiket_x": 537.533,
+          "etiket_y": 216.235,
+          "etiket_dönüşü": 0.554
+        },
+        {
+          "veri_sırası": 34,
+          "ad": "进化",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -0.462,
+          "bitiş_açısı": -0.277,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "进化",
+          "etiket_x": 549.871,
+          "etiket_y": 241.014,
+          "etiket_dönüşü": 0.37
+        },
+        {
+          "veri_sırası": 35,
+          "ad": "后物欲时代的来临",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -0.277,
+          "bitiş_açısı": -0.092,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "后物欲时代的来临",
+          "etiket_x": 557.446,
+          "etiket_y": 267.638,
+          "etiket_dönüşü": 0.185
+        },
+        {
+          "veri_sırası": 36,
+          "ad": "3☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": -0.092,
+          "bitiş_açısı": 0.092,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "3☆",
+          "etiket_x": 537.5,
+          "etiket_y": 295.2,
+          "etiket_dönüşü": 1.571
+        },
+        {
+          "veri_sırası": 37,
+          "ad": "疯癫与文明",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": -0.092,
+          "bitiş_açısı": 0.092,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "疯癫与文明",
+          "etiket_x": 560,
+          "etiket_y": 295.2,
+          "etiket_dönüşü": 0
+        },
+        {
+          "veri_sırası": 38,
+          "ad": "心理",
+          "derinlik": 2,
+          "değer": 4,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 0.092,
+          "bitiş_açısı": 0.832,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "心理",
+          "etiket_x": 474.899,
+          "etiket_y": 327.516,
+          "etiket_dönüşü": 5.821
+        },
+        {
+          "veri_sırası": 39,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 0.092,
+          "bitiş_açısı": 0.277,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 535.329,
+          "etiket_y": 318.628,
+          "etiket_dönüşü": 1.386
+        },
+        {
+          "veri_sırası": 40,
+          "ad": "我们时代的神经症人格",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 0.092,
+          "bitiş_açısı": 0.277,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "我们时代的神经症人格",
+          "etiket_x": 557.446,
+          "etiket_y": 322.762,
+          "etiket_dönüşü": 6.098
+        },
+        {
+          "veri_sırası": 41,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 2,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 0.277,
+          "bitiş_açısı": 0.647,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 524.133,
+          "etiket_y": 352.032,
+          "etiket_dönüşü": 1.109
+        },
+        {
+          "veri_sırası": 42,
+          "ad": "皮格马利翁效应",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 0.277,
+          "bitiş_açısı": 0.462,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "皮格马利翁效应",
+          "etiket_x": 549.871,
+          "etiket_y": 349.386,
+          "etiket_dönüşü": 5.914
+        },
+        {
+          "veri_sırası": 43,
+          "ad": "受伤的人",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 0.462,
+          "bitiş_açısı": 0.647,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "受伤的人",
+          "etiket_x": 537.533,
+          "etiket_y": 374.165,
+          "etiket_dönüşü": 5.729
+        },
+        {
+          "veri_sırası": 44,
+          "ad": "3☆",
+          "derinlik": 3,
+          "değer": 0,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 0.647,
+          "bitiş_açısı": 0.647,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "",
+          "etiket_x": 0,
+          "etiket_y": 0,
+          "etiket_dönüşü": 0
+        },
+        {
+          "veri_sırası": 45,
+          "ad": "2☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 0.647,
+          "bitiş_açısı": 0.832,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "2☆",
+          "etiket_x": 504.224,
+          "etiket_y": 381.096,
+          "etiket_dönüşü": 0.832
+        },
+        {
+          "veri_sırası": 46,
+          "ad": "迷恋",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 0.647,
+          "bitiş_açısı": 0.832,
+          "saat_yönünde": true,
+          "renk": [
+            204,
+            63,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "迷恋",
+          "etiket_x": 520.851,
+          "etiket_y": 396.254,
+          "etiket_dönüşü": 5.544
+        },
+        {
+          "veri_sırası": 47,
+          "ad": "居家",
+          "derinlik": 2,
+          "değer": 3,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 0.832,
+          "bitiş_açısı": 1.386,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "居家",
+          "etiket_x": 442.316,
+          "etiket_y": 360.099,
+          "etiket_dönüşü": 5.174
+        },
+        {
+          "veri_sırası": 48,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 3,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 0.832,
+          "bitiş_açısı": 1.386,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 466.832,
+          "etiket_y": 409.333,
+          "etiket_dönüşü": 0.462
+        },
+        {
+          "veri_sırası": 49,
+          "ad": "把房子住成家",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 0.832,
+          "bitiş_açısı": 1.016,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "把房子住成家",
+          "etiket_x": 500.395,
+          "etiket_y": 414.903,
+          "etiket_dönüşü": 5.359
+        },
+        {
+          "veri_sırası": 50,
+          "ad": "只过必要生活",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 1.016,
+          "bitiş_açısı": 1.201,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "只过必要生活",
+          "etiket_x": 476.861,
+          "etiket_y": 429.474,
+          "etiket_dönüşü": 5.174
+        },
+        {
+          "veri_sırası": 51,
+          "ad": "北欧简约风格",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 1.201,
+          "bitiş_açısı": 1.386,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "北欧简约风格",
+          "etiket_x": 451.049,
+          "etiket_y": 439.474,
+          "etiket_dönüşü": 4.99
+        },
+        {
+          "veri_sırası": 52,
+          "ad": "绘本",
+          "derinlik": 2,
+          "değer": 4,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 1.386,
+          "bitiş_açısı": 2.125,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "绘本",
+          "etiket_x": 396.678,
+          "etiket_y": 366.466,
+          "etiket_dönüşü": 1.386
+        },
+        {
+          "veri_sırası": 53,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 1.386,
+          "bitiş_açısı": 1.571,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 421.764,
+          "etiket_y": 422.156,
+          "etiket_dönüşü": 0.092
+        },
+        {
+          "veri_sırası": 54,
+          "ad": "设计诗",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 1.386,
+          "bitiş_açısı": 1.571,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "设计诗",
+          "etiket_x": 423.84,
+          "etiket_y": 444.56,
+          "etiket_dönüşü": 4.805
+        },
+        {
+          "veri_sırası": 55,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 2,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 1.571,
+          "bitiş_açısı": 1.94,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 386.572,
+          "etiket_y": 420.529,
+          "etiket_dönüşü": 6.098
+        },
+        {
+          "veri_sırası": 56,
+          "ad": "假如生活糊弄了你",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 1.571,
+          "bitiş_açısı": 1.756,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "假如生活糊弄了你",
+          "etiket_x": 396.16,
+          "etiket_y": 444.56,
+          "etiket_dönüşü": 1.478
+        },
+        {
+          "veri_sırası": 57,
+          "ad": "博物学家的神秘动物图鉴",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 1.756,
+          "bitiş_açısı": 1.94,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "博物学家的神秘动物图鉴",
+          "etiket_x": 368.951,
+          "etiket_y": 439.474,
+          "etiket_dönüşü": 1.294
+        },
+        {
+          "veri_sırası": 58,
+          "ad": "3☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 1.94,
+          "bitiş_açısı": 2.125,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "3☆",
+          "etiket_x": 353.168,
+          "etiket_y": 409.333,
+          "etiket_dönüşü": 5.821
+        },
+        {
+          "veri_sırası": 59,
+          "ad": "方向",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 1.94,
+          "bitiş_açısı": 2.125,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "方向",
+          "etiket_x": 343.139,
+          "etiket_y": 429.474,
+          "etiket_dönüşü": 1.109
+        },
+        {
+          "veri_sırası": 60,
+          "ad": "哲学",
+          "derinlik": 2,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 2.125,
+          "bitiş_açısı": 2.31,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "哲学",
+          "etiket_x": 366.309,
+          "etiket_y": 353.056,
+          "etiket_dönüşü": 0.924
+        },
+        {
+          "veri_sırası": 61,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 2.125,
+          "bitiş_açısı": 2.31,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 333.164,
+          "etiket_y": 396.947,
+          "etiket_dönüşü": 5.636
+        },
+        {
+          "veri_sırası": 62,
+          "ad": "人生的智慧",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 2.125,
+          "bitiş_açısı": 2.31,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "人生的智慧",
+          "etiket_x": 319.605,
+          "etiket_y": 414.903,
+          "etiket_dönüşü": 0.924
+        },
+        {
+          "veri_sırası": 63,
+          "ad": "技术",
+          "derinlik": 2,
+          "değer": 2,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 2.31,
+          "bitiş_açısı": 2.68,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "技术",
+          "etiket_x": 352.144,
+          "etiket_y": 338.891,
+          "etiket_dönüşü": 0.647
+        },
+        {
+          "veri_sırası": 64,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 2.31,
+          "bitiş_açısı": 2.495,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 315.776,
+          "etiket_y": 381.096,
+          "etiket_dönüşü": 5.452
+        },
+        {
+          "veri_sırası": 65,
+          "ad": "代码整洁之道",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 2.31,
+          "bitiş_açısı": 2.495,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "代码整洁之道",
+          "etiket_x": 299.149,
+          "etiket_y": 396.254,
+          "etiket_dönüşü": 0.739
+        },
+        {
+          "veri_sırası": 66,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 2.495,
+          "bitiş_açısı": 2.68,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 301.597,
+          "etiket_y": 362.32,
+          "etiket_dönüşü": 5.267
+        },
+        {
+          "veri_sırası": 67,
+          "ad": "Three.js 开发指南",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 2.495,
+          "bitiş_açısı": 2.68,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Three.js 开发指南",
+          "etiket_x": 282.467,
+          "etiket_y": 374.165,
+          "etiket_dönüşü": 0.554
+        },
+        {
+          "veri_sırası": 0,
+          "ad": "虚构",
+          "derinlik": 1,
+          "değer": 11,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 0,
+          "r": 40,
+          "başlangıç_açısı": 2.68,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "虚构",
+          "etiket_x": 392.996,
+          "etiket_y": 284.671,
+          "etiket_dönüşü": 0
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "小说",
+          "derinlik": 2,
+          "değer": 7,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 2.68,
+          "bitiş_açısı": 3.973,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "小说",
+          "etiket_x": 338.734,
+          "etiket_y": 281.878,
+          "etiket_dönüşü": 6.098
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 3,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 2.68,
+          "bitiş_açısı": 3.234,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 284.671,
+          "etiket_y": 318.628,
+          "etiket_dönüşü": 4.897
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "疼",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 2.68,
+          "bitiş_açısı": 2.864,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "疼",
+          "etiket_x": 270.129,
+          "etiket_y": 349.386,
+          "etiket_dönüşü": 0.37
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "慈悲",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 2.864,
+          "bitiş_açısı": 3.049,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "慈悲",
+          "etiket_x": 262.554,
+          "etiket_y": 322.762,
+          "etiket_dönüşü": 0.185
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "楼下的房客",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 3.049,
+          "bitiş_açısı": 3.234,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "楼下的房客",
+          "etiket_x": 260,
+          "etiket_y": 295.2,
+          "etiket_dönüşü": 0
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 3,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 3.234,
+          "bitiş_açısı": 3.788,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 291.11,
+          "etiket_y": 249.142,
+          "etiket_dönüşü": 1.201
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "虚无的十字架",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 3.234,
+          "bitiş_açısı": 3.419,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "虚无的十字架",
+          "etiket_x": 262.554,
+          "etiket_y": 267.638,
+          "etiket_dönüşü": 6.098
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "无声告白",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 3.419,
+          "bitiş_açısı": 3.604,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "无声告白",
+          "etiket_x": 270.129,
+          "etiket_y": 241.014,
+          "etiket_dönüşü": 5.914
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "童年的终结",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 3.604,
+          "bitiş_açısı": 3.788,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "童年的终结",
+          "etiket_x": 282.467,
+          "etiket_y": 216.235,
+          "etiket_dönüşü": 5.729
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "3☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 3.788,
+          "bitiş_açısı": 3.973,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "3☆",
+          "etiket_x": 315.776,
+          "etiket_y": 209.304,
+          "etiket_dönüşü": 0.832
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "疯癫老人日记",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 3.788,
+          "bitiş_açısı": 3.973,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "疯癫老人日记",
+          "etiket_x": 299.149,
+          "etiket_y": 194.146,
+          "etiket_dönüşü": 5.544
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "其他",
+          "derinlik": 2,
+          "değer": 4,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 40,
+          "r": 105,
+          "başlangıç_açısı": 3.973,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "其他",
+          "etiket_x": 383.81,
+          "etiket_y": 227.596,
+          "etiket_dönüşü": 5.082
+        },
+        {
+          "veri_sırası": 13,
+          "ad": "5☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 3.973,
+          "bitiş_açısı": 4.158,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "5☆",
+          "etiket_x": 333.164,
+          "etiket_y": 193.453,
+          "etiket_dönüşü": 0.647
+        },
+        {
+          "veri_sırası": 14,
+          "ad": "纳博科夫短篇小说全集",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 3.973,
+          "bitiş_açısı": 4.158,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            174,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "纳博科夫短篇小说全集",
+          "etiket_x": 319.605,
+          "etiket_y": 175.497,
+          "etiket_dönüşü": 5.359
+        },
+        {
+          "veri_sırası": 15,
+          "ad": "4☆",
+          "derinlik": 3,
+          "değer": 2,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 4.158,
+          "bitiş_açısı": 4.528,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "4☆",
+          "etiket_x": 363.942,
+          "etiket_y": 176.31,
+          "etiket_dönüşü": 0.37
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "安魂曲",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 4.158,
+          "bitiş_açısı": 4.343,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "安魂曲",
+          "etiket_x": 343.139,
+          "etiket_y": 160.926,
+          "etiket_dönüşü": 5.174
+        },
+        {
+          "veri_sırası": 17,
+          "ad": "人生拼图版",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 4.343,
+          "bitiş_açısı": 4.528,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            120,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "人生拼图版",
+          "etiket_x": 368.951,
+          "etiket_y": 150.926,
+          "etiket_dönüşü": 4.99
+        },
+        {
+          "veri_sırası": 18,
+          "ad": "3☆",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 115,
+          "r": 140,
+          "başlangıç_açısı": 4.528,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "3☆",
+          "etiket_x": 398.236,
+          "etiket_y": 168.244,
+          "etiket_dönüşü": 0.092
+        },
+        {
+          "veri_sırası": 19,
+          "ad": "比起爱你，我更需要你",
+          "derinlik": 4,
+          "değer": 1,
+          "cx": 410,
+          "cy": 295.2,
+          "r0": 140,
+          "r": 145,
+          "başlangıç_açısı": 4.528,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            234,
+            81,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            46,
+            39,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "比起爱你，我更需要你",
+          "etiket_x": 396.16,
+          "etiket_y": 145.84,
+          "etiket_dönüşü": 4.805
+        }
+      ]
+    }
+  ]
+}

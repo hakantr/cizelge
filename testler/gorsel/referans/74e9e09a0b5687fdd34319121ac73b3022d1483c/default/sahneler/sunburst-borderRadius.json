@@ -1,0 +1,493 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sunburst",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "dilimler": [
+        {
+          "veri_sırası": 0,
+          "ad": "Grandpa",
+          "derinlik": 1,
+          "değer": 25,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 60,
+          "r": 104.063,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": 4.039,
+          "saat_yönünde": true,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Grandpa",
+          "etiket_x": 377.093,
+          "etiket_y": 339.928,
+          "etiket_dönüşü": 5.049
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "Uncle Leo",
+          "derinlik": 2,
+          "değer": 15,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 104.063,
+          "r": 148.125,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": 1.795,
+          "saat_yönünde": true,
+          "renk": [
+            101,
+            129,
+            225,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Uncle Leo",
+          "etiket_x": 475.301,
+          "etiket_y": 276.618,
+          "etiket_dönüşü": 6.171
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "Cousin Mary",
+          "derinlik": 3,
+          "değer": 5,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -0.449,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Cousin Mary",
+          "etiket_x": 440.529,
+          "etiket_y": 118.425,
+          "etiket_dönüşü": 1.01
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "Jackson",
+          "derinlik": 4,
+          "değer": 2,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 192.188,
+          "r": 236.25,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -1.122,
+          "saat_yönünde": true,
+          "renk": [
+            145,
+            165,
+            233,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Jackson",
+          "etiket_x": 397.668,
+          "etiket_y": 53.652,
+          "etiket_dönüşü": 1.346
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "Cousin Ben",
+          "derinlik": 3,
+          "değer": 4,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": -0.449,
+          "bitiş_açısı": 0.449,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Cousin Ben",
+          "etiket_x": 520.156,
+          "etiket_y": 262.5,
+          "etiket_dönüşü": 0
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "Cousin Jack",
+          "derinlik": 3,
+          "değer": 2,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": 0.449,
+          "bitiş_açısı": 0.898,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Cousin Jack",
+          "etiket_x": 483.034,
+          "etiket_y": 368.591,
+          "etiket_dönüşü": 5.61
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "Father",
+          "derinlik": 2,
+          "değer": 10,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 104.063,
+          "r": 148.125,
+          "başlangıç_açısı": 1.795,
+          "bitiş_açısı": 4.039,
+          "saat_yönünde": true,
+          "renk": [
+            101,
+            129,
+            225,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Father",
+          "etiket_x": 227.068,
+          "etiket_y": 290.558,
+          "etiket_dönüşü": 0.224
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "Me",
+          "derinlik": 3,
+          "değer": 5,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": 1.795,
+          "bitiş_açısı": 2.917,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Me",
+          "etiket_x": 229.681,
+          "etiket_y": 382.819,
+          "etiket_dönüşü": 0.785
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "Brother Peter",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": 2.917,
+          "bitiş_açısı": 3.142,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Brother Peter",
+          "etiket_x": 180.914,
+          "etiket_y": 281.551,
+          "etiket_dönüşü": 0.112
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "Nancy",
+          "derinlik": 1,
+          "değer": 3,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 60,
+          "r": 104.063,
+          "başlangıç_açısı": 4.039,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Nancy",
+          "etiket_x": 322.907,
+          "etiket_y": 185.072,
+          "etiket_dönüşü": 5.049
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "Uncle Nike",
+          "derinlik": 2,
+          "değer": 3,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 104.063,
+          "r": 148.125,
+          "başlangıç_açısı": 4.039,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            191,
+            219,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Uncle Nike",
+          "etiket_x": 308.354,
+          "etiket_y": 143.482,
+          "etiket_dönüşü": 5.049
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "Cousin Jenny",
+          "derinlik": 3,
+          "değer": 2,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": 4.039,
+          "bitiş_açısı": 4.488,
+          "saat_yönünde": true,
+          "renk": [
+            200,
+            224,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Cousin Jenny",
+          "etiket_x": 276.172,
+          "etiket_y": 109.195,
+          "etiket_dönüşü": 5.161
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "Cousin Betty",
+          "derinlik": 3,
+          "değer": 1,
+          "cx": 350,
+          "cy": 262.5,
+          "r0": 148.125,
+          "r": 192.188,
+          "başlangıç_açısı": 4.488,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            200,
+            224,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2,
+          "köşe_yarıçapları": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "etiket_göster": false,
+          "etiket_metni": "Cousin Betty",
+          "etiket_x": 330.949,
+          "etiket_y": 93.414,
+          "etiket_dönüşü": 4.825
+        }
+      ]
+    }
+  ]
+}

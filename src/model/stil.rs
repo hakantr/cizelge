@@ -222,6 +222,13 @@ pub struct YazıStili {
     pub arkaplan: Option<Dolgu>,
     pub kenarlık_rengi: Option<Renk>,
     pub kenarlık_kalınlığı: Option<f32>,
+    /// Canvas/zrender metin gölgesi (`textShadowBlur`,
+    /// `textShadowColor`, `textShadowOffsetX/Y`). `Option`, durum/level
+    /// yamalarında açık `0` değerinin kalıtılan gölgeyi kapatabilmesini
+    /// sağlar.
+    pub metin_gölge_bulanıklığı: Option<f32>,
+    pub metin_gölge_rengi: Option<Renk>,
+    pub metin_gölge_kayması: Option<(f32, f32)>,
     /// CSS sıralı köşe yarıçapları: sol üst, sağ üst, sağ alt, sol alt.
     pub kenarlık_yarıçapları: Option<[f32; 4]>,
     /// CSS sıralı iç boşluk: üst, sağ, alt, sol.
@@ -284,6 +291,21 @@ impl YazıStili {
 
     pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
         self.kenarlık_kalınlığı = Some(kalınlık.max(0.0));
+        self
+    }
+
+    pub fn metin_gölge_bulanıklığı(mut self, bulanıklık: f32) -> Self {
+        self.metin_gölge_bulanıklığı = Some(bulanıklık.max(0.0));
+        self
+    }
+
+    pub fn metin_gölge_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.metin_gölge_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn metin_gölge_kayması(mut self, x: f32, y: f32) -> Self {
+        self.metin_gölge_kayması = Some((x, y));
         self
     }
 
@@ -366,6 +388,15 @@ impl YazıStili {
         }
         if yama.kenarlık_kalınlığı.is_some() {
             sonuç.kenarlık_kalınlığı = yama.kenarlık_kalınlığı;
+        }
+        if yama.metin_gölge_bulanıklığı.is_some() {
+            sonuç.metin_gölge_bulanıklığı = yama.metin_gölge_bulanıklığı;
+        }
+        if yama.metin_gölge_rengi.is_some() {
+            sonuç.metin_gölge_rengi = yama.metin_gölge_rengi;
+        }
+        if yama.metin_gölge_kayması.is_some() {
+            sonuç.metin_gölge_kayması = yama.metin_gölge_kayması;
         }
         if yama.kenarlık_yarıçapları.is_some() {
             sonuç.kenarlık_yarıçapları = yama.kenarlık_yarıçapları;
@@ -610,6 +641,9 @@ pub struct Etiket {
     /// Komşu etiket kutuları arasındaki en küçük boşluk (`minMargin`).
     pub en_küçük_boşluk: f32,
     pub döndürme: EtiketDöndürme,
+    /// Sunburst `label.minAngle`; dilimin mutlak açıklığı bu dereceden
+    /// küçükse etiket çizilmez. `None`, bileşenin öntanımlısını kullanır.
+    pub en_küçük_açı: Option<f32>,
     pub yatay_hiza: Option<YazıYatayHizası>,
     pub dikey_hiza: Option<YazıDikeyHizası>,
 }
@@ -637,6 +671,7 @@ impl Default for Etiket {
             // uygular. Toplam dikey yerleşim payı bu nedenle 2 px'dir.
             en_küçük_boşluk: 2.0,
             döndürme: EtiketDöndürme::Yok,
+            en_küçük_açı: None,
             yatay_hiza: None,
             dikey_hiza: None,
         }
@@ -728,6 +763,11 @@ impl Etiket {
         self
     }
 
+    pub fn en_küçük_açı(mut self, derece: f32) -> Self {
+        self.en_küçük_açı = derece.is_finite().then(|| derece.max(0.0));
+        self
+    }
+
     pub fn yatay_hiza(mut self, hiza: YazıYatayHizası) -> Self {
         self.yatay_hiza = Some(hiza);
         self
@@ -746,6 +786,7 @@ impl Etiket {
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct EtiketYaması {
     pub göster: Option<bool>,
+    pub sessiz: Option<bool>,
     pub konum: Option<EtiketKonumu>,
     pub kayma: Option<(f32, f32)>,
     pub biçimleyici: Option<Biçimleyici>,
@@ -759,6 +800,7 @@ pub struct EtiketYaması {
     pub kenar_boşluğu: Option<f32>,
     pub en_küçük_boşluk: Option<f32>,
     pub döndürme: Option<EtiketDöndürme>,
+    pub en_küçük_açı: Option<f32>,
     pub yatay_hiza: Option<YazıYatayHizası>,
     pub dikey_hiza: Option<YazıDikeyHizası>,
 }
@@ -770,6 +812,11 @@ impl EtiketYaması {
 
     pub fn göster(mut self, göster: bool) -> Self {
         self.göster = Some(göster);
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = Some(sessiz);
         self
     }
 
@@ -810,6 +857,11 @@ impl EtiketYaması {
         self
     }
 
+    pub fn en_küçük_açı(mut self, derece: f32) -> Self {
+        self.en_küçük_açı = derece.is_finite().then(|| derece.max(0.0));
+        self
+    }
+
     pub fn yatay_hiza(mut self, hiza: YazıYatayHizası) -> Self {
         self.yatay_hiza = Some(hiza);
         self
@@ -824,6 +876,9 @@ impl EtiketYaması {
         let mut sonuç = taban.clone();
         if let Some(değer) = self.göster {
             sonuç.göster = değer;
+        }
+        if let Some(değer) = self.sessiz {
+            sonuç.sessiz = Some(değer);
         }
         if let Some(değer) = self.konum {
             sonuç.konum = değer;
@@ -864,6 +919,9 @@ impl EtiketYaması {
         if let Some(değer) = self.döndürme {
             sonuç.döndürme = değer;
         }
+        if let Some(değer) = self.en_küçük_açı {
+            sonuç.en_küçük_açı = Some(değer);
+        }
         if let Some(değer) = self.yatay_hiza {
             sonuç.yatay_hiza = Some(değer);
         }
@@ -878,6 +936,7 @@ impl From<Etiket> for EtiketYaması {
     fn from(etiket: Etiket) -> Self {
         EtiketYaması {
             göster: Some(etiket.göster),
+            sessiz: etiket.sessiz,
             konum: Some(etiket.konum),
             kayma: Some(etiket.kayma),
             biçimleyici: etiket.biçimleyici,
@@ -891,6 +950,7 @@ impl From<Etiket> for EtiketYaması {
             kenar_boşluğu: Some(etiket.kenar_boşluğu),
             en_küçük_boşluk: Some(etiket.en_küçük_boşluk),
             döndürme: Some(etiket.döndürme),
+            en_küçük_açı: etiket.en_küçük_açı,
             yatay_hiza: etiket.yatay_hiza,
             dikey_hiza: etiket.dikey_hiza,
         }
@@ -952,6 +1012,18 @@ mod testler {
     #[test]
     fn ortak_etiket_konumu_zrender_gibi_içtir() {
         assert_eq!(Etiket::default().konum, EtiketKonumu::İç);
+    }
+
+    #[test]
+    fn metin_golgesi_durum_yamasinda_acik_sifirla_kapatilabilir() {
+        let taban = YazıStili::yeni()
+            .metin_gölge_bulanıklığı(5.0)
+            .metin_gölge_rengi("#333")
+            .metin_gölge_kayması(2.0, -1.0);
+        let sonuç = taban.yama_uygula(&YazıStili::yeni().metin_gölge_bulanıklığı(0.0));
+        assert_eq!(sonuç.metin_gölge_bulanıklığı, Some(0.0));
+        assert_eq!(sonuç.metin_gölge_rengi, Some(Renk::onaltılık(0x333333)));
+        assert_eq!(sonuç.metin_gölge_kayması, Some((2.0, -1.0)));
     }
 
     #[test]

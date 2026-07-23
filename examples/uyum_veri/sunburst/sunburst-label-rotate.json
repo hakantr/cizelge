@@ -1,0 +1,67 @@
+{
+  "şema_sürümü": 1,
+  "kaynak": "../echarts-examples/public/examples/ts/sunburst-label-rotate.ts",
+  "veri": [
+    {
+      "value": 8,
+      "children": [
+        {
+          "value": 4,
+          "children": [
+            {
+              "value": 2
+            },
+            {
+              "value": 1
+            },
+            {
+              "value": 1
+            },
+            {
+              "value": 0.5
+            }
+          ]
+        },
+        {
+          "value": 2
+        }
+      ]
+    },
+    {
+      "value": 4,
+      "children": [
+        {
+          "children": [
+            {
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": 4,
+      "children": [
+        {
+          "children": [
+            {
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "value": 3,
+      "children": [
+        {
+          "children": [
+            {
+              "value": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

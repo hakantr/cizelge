@@ -11,6 +11,9 @@ use crate::model::agac::{
     AğaçGezinmesi, AğaçHaritasıDurumu, AğaçHaritasıDüğümTıklaması, AğaçHaritasıGörseli,
     AğaçHaritasıKırpmaPenceresi, AğaçHaritasıKırıntısı, AğaçHaritasıSeviyesi, AğaçHaritasıSırası,
     AğaçHaritasıÖğeStili, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+    GüneşPatlamasıAnimasyonTürü, GüneşPatlamasıDurumu, GüneşPatlamasıDüğümTıklaması,
+    GüneşPatlamasıRenkKaynağı, GüneşPatlamasıSeviyesi, GüneşPatlamasıSırası,
+    GüneşPatlamasıÖğeStili,
 };
 use crate::model::bilesen::İpucu;
 use crate::model::deger::{VeriDeğeri, VeriÖğesi, veri_listesi};
@@ -4114,23 +4117,180 @@ impl AğaçHaritasıSerisi {
     }
 }
 
-/// Güneş patlaması serisi (`series-sunburst`): iç içe halkalar.
+/// `series-sunburst.sort` callback'ine verilen ECharts parametreleri.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct GüneşPatlamasıSıralamaParametreleri {
+    pub veri_sırası: usize,
+    pub derinlik: usize,
+    pub yükseklik: usize,
+    pub değer: f64,
+}
+
+/// Sunburst etiket callback'indeki `treePathInfo` öğesi. Sanal seri kökü
+/// için `veri_sırası=None`, gerçek düğümler için sıfır tabanlı ön-sıralı
+/// veri indeksi kullanılır.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GüneşPatlamasıYolBilgisi {
+    pub ad: String,
+    pub veri_sırası: Option<usize>,
+    pub değer: f64,
+}
+
+/// `series-sunburst.label.formatter` işlevinin tam ağaç bağlamı.
+#[derive(Clone, Debug, PartialEq)]
+pub struct GüneşPatlamasıEtiketParametreleri {
+    pub seri_adı: Option<String>,
+    pub ad: String,
+    pub veri_sırası: usize,
+    pub değer: f64,
+    pub derinlik: usize,
+    pub yükseklik: usize,
+    pub ağaç_yolu: Vec<GüneşPatlamasıYolBilgisi>,
+}
+
+/// Klonlanabilir Sunburst etiket biçimleyicisi.
+#[derive(Clone)]
+pub struct GüneşPatlamasıEtiketİşlevi(
+    Arc<dyn Fn(&GüneşPatlamasıEtiketParametreleri) -> String + Send + Sync>,
+);
+
+impl GüneşPatlamasıEtiketİşlevi {
+    pub fn yeni(
+        işlev: impl Fn(&GüneşPatlamasıEtiketParametreleri) -> String + Send + Sync + 'static,
+    ) -> Self {
+        Self(Arc::new(işlev))
+    }
+
+    pub fn uygula(&self, parametreler: &GüneşPatlamasıEtiketParametreleri) -> String {
+        (self.0)(parametreler)
+    }
+}
+
+impl fmt::Debug for GüneşPatlamasıEtiketİşlevi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("GüneşPatlamasıEtiketİşlevi(..)")
+    }
+}
+
+/// Klonlanabilir Sunburst sıralama işlevi.
+#[derive(Clone)]
+pub struct GüneşPatlamasıSıralamaİşlevi(
+    Arc<
+        dyn Fn(
+                &GüneşPatlamasıSıralamaParametreleri,
+                &GüneşPatlamasıSıralamaParametreleri,
+            ) -> std::cmp::Ordering
+            + Send
+            + Sync,
+    >,
+);
+
+impl GüneşPatlamasıSıralamaİşlevi {
+    pub fn yeni(
+        işlev: impl Fn(
+            &GüneşPatlamasıSıralamaParametreleri,
+            &GüneşPatlamasıSıralamaParametreleri,
+        ) -> std::cmp::Ordering
+        + Send
+        + Sync
+        + 'static,
+    ) -> Self {
+        Self(Arc::new(işlev))
+    }
+
+    pub fn karşılaştır(
+        &self,
+        a: &GüneşPatlamasıSıralamaParametreleri,
+        b: &GüneşPatlamasıSıralamaParametreleri,
+    ) -> std::cmp::Ordering {
+        (self.0)(a, b)
+    }
+}
+
+impl fmt::Debug for GüneşPatlamasıSıralamaİşlevi {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("GüneşPatlamasıSıralamaİşlevi(..)")
+    }
+}
+
+/// Güneş patlaması serisi (`series-sunburst`): ECharts'ın dairesel
+/// yerleşim, seviye kalıtımı, durum ve gezinme seçeneklerinin Rust yüzeyi.
 #[derive(Clone, Debug)]
 pub struct GüneşPatlamasıSerisi {
+    pub kimlik: Option<String>,
     pub ad: Option<String>,
     pub kökler: Vec<crate::model::agac::AğaçDüğümü>,
+    pub z: i32,
+    pub sessiz: bool,
     pub merkez: (Uzunluk, Uzunluk),
     /// `(iç, dış)` yarıçap.
     pub yarıçap: (Uzunluk, Uzunluk),
+    pub saat_yönünde: bool,
+    /// ECharts derece uzayı; `90` saat 12 yönüdür.
+    pub başlangıç_açısı: f32,
+    pub en_küçük_açı: f32,
+    pub sıfır_toplamı_göster: bool,
+    pub sıfır_veri_etiketini_göster: bool,
+    pub düğüm_tıklaması: GüneşPatlamasıDüğümTıklaması,
+    pub sıralama: GüneşPatlamasıSırası,
+    pub sıralama_işlevi: Option<GüneşPatlamasıSıralamaİşlevi>,
+    pub renk_kaynağı: GüneşPatlamasıRenkKaynağı,
+    pub etiket: Etiket,
+    pub etiket_biçimleyicisi: Option<GüneşPatlamasıEtiketİşlevi>,
+    pub öğe_stili: GüneşPatlamasıÖğeStili,
+    pub vurgu: GüneşPatlamasıDurumu,
+    pub bulanık: GüneşPatlamasıDurumu,
+    pub seçili: GüneşPatlamasıDurumu,
+    pub seviyeler: Vec<GüneşPatlamasıSeviyesi>,
+    pub animasyon_türü: GüneşPatlamasıAnimasyonTürü,
+    pub ipucu: Option<İpucu>,
+    /// ECharts v6 Calendar/Matrix kutu sağlayıcıları.
+    pub takvim_sırası: Option<usize>,
+    pub takvim_koordinatı: Option<f64>,
+    pub matris_sırası: Option<usize>,
+    pub matris_koordinatı: Option<(MatrisAralığı, MatrisAralığı)>,
 }
 
 impl Default for GüneşPatlamasıSerisi {
     fn default() -> Self {
-        GüneşPatlamasıSerisi {
+        Self {
+            kimlik: None,
             ad: None,
             kökler: Vec::new(),
-            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
-            yarıçap: (Uzunluk::Yüzde(12.0), Uzunluk::Yüzde(75.0)),
+            z: 2,
+            sessiz: false,
+            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(50.0)),
+            yarıçap: (Uzunluk::Piksel(0.0), Uzunluk::Yüzde(75.0)),
+            saat_yönünde: true,
+            başlangıç_açısı: 90.0,
+            en_küçük_açı: 0.0,
+            sıfır_toplamı_göster: true,
+            sıfır_veri_etiketini_göster: false,
+            düğüm_tıklaması: GüneşPatlamasıDüğümTıklaması::DüğümüKökYap,
+            sıralama: GüneşPatlamasıSırası::Azalan,
+            sıralama_işlevi: None,
+            renk_kaynağı: GüneşPatlamasıRenkKaynağı::Seri,
+            etiket: Etiket::yeni()
+                .göster(true)
+                .sessiz(true)
+                .konum(EtiketKonumu::İç)
+                .uzaklık(5.0)
+                .döndürme(EtiketDöndürme::Radyal)
+                .yatay_hiza(crate::model::stil::YazıYatayHizası::Orta),
+            etiket_biçimleyicisi: None,
+            öğe_stili: GüneşPatlamasıÖğeStili::seri_varsayılanı(),
+            vurgu: GüneşPatlamasıDurumu::yeni().odak(AğaçVurguOdağı::AltSoy),
+            bulanık: GüneşPatlamasıDurumu::yeni()
+                .öğe_stili(GüneşPatlamasıÖğeStili::yeni().opaklık(0.2))
+                .etiket(EtiketYaması::yeni().yazı(YazıStili::yeni().opaklık(0.1))),
+            seçili: GüneşPatlamasıDurumu::default(),
+            seviyeler: Vec::new(),
+            animasyon_türü: GüneşPatlamasıAnimasyonTürü::Genişleme,
+            ipucu: None,
+            takvim_sırası: None,
+            takvim_koordinatı: None,
+            matris_sırası: None,
+            matris_koordinatı: None,
         }
     }
 }
@@ -4138,6 +4298,11 @@ impl Default for GüneşPatlamasıSerisi {
 impl GüneşPatlamasıSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    pub fn kimlik(mut self, kimlik: impl Into<String>) -> Self {
+        self.kimlik = Some(kimlik.into());
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -4153,8 +4318,171 @@ impl GüneşPatlamasıSerisi {
         self
     }
 
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
+        self
+    }
+
+    pub fn merkez(mut self, x: impl Into<Uzunluk>, y: impl Into<Uzunluk>) -> Self {
+        self.merkez = (x.into(), y.into());
+        self
+    }
+
     pub fn halka(mut self, iç: impl Into<Uzunluk>, dış: impl Into<Uzunluk>) -> Self {
         self.yarıçap = (iç.into(), dış.into());
+        self
+    }
+
+    pub fn saat_yönünde(mut self, saat_yönünde: bool) -> Self {
+        self.saat_yönünde = saat_yönünde;
+        self
+    }
+
+    pub fn başlangıç_açısı(mut self, derece: f32) -> Self {
+        if derece.is_finite() {
+            self.başlangıç_açısı = derece;
+        }
+        self
+    }
+
+    pub fn en_küçük_açı(mut self, derece: f32) -> Self {
+        if derece.is_finite() {
+            self.en_küçük_açı = derece.max(0.0);
+        }
+        self
+    }
+
+    pub fn sıfır_toplamı_göster(mut self, göster: bool) -> Self {
+        self.sıfır_toplamı_göster = göster;
+        self
+    }
+
+    pub fn sıfır_veri_etiketini_göster(mut self, göster: bool) -> Self {
+        self.sıfır_veri_etiketini_göster = göster;
+        self
+    }
+
+    pub fn düğüm_tıklaması(
+        mut self, davranış: GüneşPatlamasıDüğümTıklaması
+    ) -> Self {
+        self.düğüm_tıklaması = davranış;
+        self
+    }
+
+    pub fn sıralama(mut self, sıralama: GüneşPatlamasıSırası) -> Self {
+        self.sıralama = sıralama;
+        self.sıralama_işlevi = None;
+        self
+    }
+
+    pub fn sıralama_işlevi(
+        mut self,
+        işlev: impl Fn(
+            &GüneşPatlamasıSıralamaParametreleri,
+            &GüneşPatlamasıSıralamaParametreleri,
+        ) -> std::cmp::Ordering
+        + Send
+        + Sync
+        + 'static,
+    ) -> Self {
+        self.sıralama_işlevi = Some(GüneşPatlamasıSıralamaİşlevi::yeni(işlev));
+        self
+    }
+
+    pub fn renk_kaynağı(mut self, kaynak: GüneşPatlamasıRenkKaynağı) -> Self {
+        self.renk_kaynağı = kaynak;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    /// ECharts formatter parametresindeki `treePathInfo` dâhil tam ağaç
+    /// bağlamını alan etiket işlevi.
+    pub fn etiket_biçimleyicisi(
+        mut self,
+        işlev: impl Fn(&GüneşPatlamasıEtiketParametreleri) -> String + Send + Sync + 'static,
+    ) -> Self {
+        self.etiket_biçimleyicisi = Some(GüneşPatlamasıEtiketİşlevi::yeni(işlev));
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: GüneşPatlamasıÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn vurgu(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.vurgu = durum;
+        self
+    }
+
+    pub fn bulanık(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.bulanık = durum;
+        self
+    }
+
+    pub fn seçili(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.seçili = durum;
+        self
+    }
+
+    pub fn seviyeler(
+        mut self,
+        seviyeler: impl IntoIterator<Item = GüneşPatlamasıSeviyesi>,
+    ) -> Self {
+        self.seviyeler = seviyeler.into_iter().collect();
+        self
+    }
+
+    pub fn animasyon_türü(mut self, tür: GüneşPatlamasıAnimasyonTürü) -> Self {
+        self.animasyon_türü = tür;
+        self
+    }
+
+    pub fn ipucu(mut self, ipucu: İpucu) -> Self {
+        self.ipucu = Some(ipucu);
+        self
+    }
+
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = Some(sıra);
+        self.matris_sırası = None;
+        self.matris_koordinatı = None;
+        self
+    }
+
+    pub fn takvim_hücresi(mut self, tarih_ms: f64) -> Self {
+        self.takvim_sırası.get_or_insert(0);
+        self.takvim_koordinatı = tarih_ms.is_finite().then_some(tarih_ms);
+        self.matris_sırası = None;
+        self.matris_koordinatı = None;
+        self
+    }
+
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self.takvim_sırası = None;
+        self.takvim_koordinatı = None;
+        self
+    }
+
+    pub fn matris_hücresi(
+        mut self,
+        x: impl Into<MatrisAralığı>,
+        y: impl Into<MatrisAralığı>,
+    ) -> Self {
+        self.matris_sırası.get_or_insert(0);
+        self.matris_koordinatı = Some((x.into(), y.into()));
+        self.takvim_sırası = None;
+        self.takvim_koordinatı = None;
         self
     }
 
@@ -4183,6 +4511,50 @@ impl GüneşPatlamasıSerisi {
         let mut sayaç = 0;
         let mut yol = Vec::new();
         ara(&self.kökler, hedef, &mut sayaç, &mut yol)
+    }
+
+    pub fn düğüm(&self, hedef: usize) -> Option<&crate::model::agac::AğaçDüğümü> {
+        fn ara<'a>(
+            düğümler: &'a [crate::model::agac::AğaçDüğümü],
+            hedef: usize,
+            sayaç: &mut usize,
+        ) -> Option<&'a crate::model::agac::AğaçDüğümü> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                if sıra == hedef {
+                    return Some(düğüm);
+                }
+                if let Some(sonuç) = ara(&düğüm.çocuklar, hedef, sayaç) {
+                    return Some(sonuç);
+                }
+            }
+            None
+        }
+        let mut sayaç = 0;
+        ara(&self.kökler, hedef, &mut sayaç)
+    }
+
+    pub fn düğüm_sırası_kimlikle(&self, hedef: &str) -> Option<usize> {
+        fn ara(
+            düğümler: &[crate::model::agac::AğaçDüğümü],
+            hedef: &str,
+            sayaç: &mut usize,
+        ) -> Option<usize> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                if düğüm.kimlik.as_deref().unwrap_or(&düğüm.ad) == hedef {
+                    return Some(sıra);
+                }
+                if let Some(sıra) = ara(&düğüm.çocuklar, hedef, sayaç) {
+                    return Some(sıra);
+                }
+            }
+            None
+        }
+        let mut sayaç = 0;
+        ara(&self.kökler, hedef, &mut sayaç)
     }
 }
 
@@ -5397,6 +5769,7 @@ impl Seri {
     pub fn kimlik(&self) -> Option<&str> {
         match self {
             Seri::AğaçHaritası(s) => s.kimlik.as_deref(),
+            Seri::GüneşPatlaması(s) => s.kimlik.as_deref(),
             Seri::Ağaç(s) => s.kimlik.as_deref(),
             _ => None,
         }

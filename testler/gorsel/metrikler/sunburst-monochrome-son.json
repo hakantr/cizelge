@@ -1,0 +1,43 @@
+{
+  "id": "sunburst-monochrome",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 0,
+  "değişen_piksel_oranı": 0,
+  "ssim": 0.9998568550754822,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 32,
+    "değişen_piksel_oranı": 0.00011851851851851852,
+    "ssim": 0.9998007284349845
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "sunburst_sektör_geometrisi_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Her Sunburst sektörünün veri sırası, açı/yarıçap sınırı, dolgu/kenarlık/köşe katmanı ve bağlı etiket geometrisi kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_dilim": 46,
+      "gerçek_dilim": 46,
+      "karşılaştırılan_alan": 920,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sunburst-monochrome.png",
+    "gerçek": "testler/gorsel/gerçek/default/sunburst-monochrome.png",
+    "fark": "testler/gorsel/fark/default/sunburst-monochrome.png",
+    "normalize_fark": "testler/gorsel/fark/default/sunburst-monochrome-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/sunburst-monochrome.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/sunburst-monochrome.json"
+  }
+}

@@ -917,6 +917,158 @@ const TREEMAP_SERIES_OPTION_KANITI = Object.freeze({
   }
 });
 
+const SUNBURST_ÖRNEKLERİ = Object.freeze([
+  'sunburst-simple', 'sunburst-borderRadius', 'sunburst-label-rotate',
+  'sunburst-monochrome', 'sunburst-visualMap', 'sunburst-drink', 'sunburst-book'
+]);
+const SUNBURST_FIXTURE_TESTİ =
+  'sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur';
+const SUNBURST_SAHNE_TESTİ =
+  'sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur';
+const SUNBURST_ACTION_TESTİ =
+  'eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur';
+
+const SUNBURST_SERIES_OPTION_KANITI = Object.freeze({
+  type: {
+    api: 'src/model/seri.rs (Seri::GüneşPatlaması, GüneşPatlamasıSerisi)',
+    testler: [SUNBURST_FIXTURE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ["sabit 'sunburst'"], dallar: ['kayıtlı-seri', 'boyama', 'isabet/tooltip']
+  },
+  data: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::kökler); src/model/agac.rs (AğaçDüğümü)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['number', 'number[]', 'SunburstSeriesNodeItemOption[]'],
+    dallar: ['sanal-kök', 'preorder-dataIndex', 'iç-düğüm-toplamı', 'negatif-sıfırlama']
+  },
+  children: {
+    api: 'src/model/agac.rs (AğaçDüğümü::çocuklar, dal)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['Vec<AğaçDüğümü>'], dallar: ['yaprak', 'dal', 'özyinelemeli-alt-soy']
+  },
+  radius: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::halka); src/grafik/gunes.rs (güneş_patlaması_dilimleri)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['number', 'percent', '[inner, outer]'], dallar: ['disk', 'halka', 'seviye-override']
+  },
+  r0: {
+    api: 'src/model/agac.rs (GüneşPatlamasıSeviyesi::yarıçap)',
+    testler: [SUNBURST_SAHNE_TESTİ], örnekler: ['sunburst-drink', 'sunburst-book'],
+    veri_biçimleri: ['number', 'percent'], dallar: ['otomatik-katman', 'mutlak-seviye-içi']
+  },
+  r: {
+    api: 'src/model/agac.rs (GüneşPatlamasıSeviyesi::yarıçap)',
+    testler: [SUNBURST_SAHNE_TESTİ], örnekler: ['sunburst-drink', 'sunburst-book'],
+    veri_biçimleri: ['number', 'percent'], dallar: ['otomatik-katman', 'mutlak-seviye-dışı']
+  },
+  clockwise: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::saat_yönünde)',
+    testler: ['grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur', SUNBURST_SAHNE_TESTİ],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['bool'], dallar: ['saat-yönü', 'ters-yön']
+  },
+  startAngle: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::başlangıç_açısı)',
+    testler: ['grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur', SUNBURST_SAHNE_TESTİ],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['degree'], dallar: ['90-varsayılanı', 'özel-açı']
+  },
+  minAngle: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::en_küçük_açı); src/grafik/gunes.rs (minAngle dağıtımı)',
+    testler: ['grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur'],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['degree'], dallar: ['sıfır', 'pozitif-alt-sınır']
+  },
+  stillShowZeroSum: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::sıfır_toplamı_göster)',
+    testler: ['grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur'],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['bool'], dallar: ['eşit-açı', 'boş-açı']
+  },
+  renderLabelForZeroData: {
+    api: 'src/model/seri.rs (sıfır_veri_etiketini_göster); src/grafik/gunes.rs (sıfır sektör/etiket ayrımı)',
+    testler: [SUNBURST_SAHNE_TESTİ], örnekler: ['sunburst-book'], veri_biçimleri: ['bool'],
+    dallar: ['sıfır-sektör-korunur', 'etiket-gizli', 'etiket-açık']
+  },
+  sort: {
+    api: 'src/model/agac.rs (GüneşPatlamasıSırası); src/model/seri.rs (GüneşPatlamasıSıralamaİşlevi)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ],
+    örnekler: ['sunburst-simple', 'sunburst-monochrome', 'sunburst-label-rotate', 'sunburst-drink', 'sunburst-book'],
+    veri_biçimleri: ['desc', 'asc', 'null/undefined', 'tipli Rust callback'],
+    dallar: ['değer-azalan', 'değer-artan', 'ham-sıra', 'depth/dataIndex callback']
+  },
+  nodeClick: {
+    api: 'src/model/agac.rs (GüneşPatlamasıDüğümTıklaması); src/cizim/pencere.rs (root/link/false)',
+    testler: [SUNBURST_ACTION_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['rootToNode', 'link', 'false'],
+    dallar: ['düğümü-kök-yap', 'merkez-rollup', 'host-güvenli-bağlantı', 'kapalı']
+  },
+  link: {
+    api: 'src/model/agac.rs (AğaçDüğümü::bağlantı)', testler: [SUNBURST_ACTION_TESTİ],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['Option<String>'], dallar: ['yok', 'URL metadata']
+  },
+  target: {
+    api: 'src/model/agac.rs (AğaçDüğümü::hedef)', testler: [SUNBURST_ACTION_TESTİ],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['Option<String>'], dallar: ['_blank-varsayılanı', 'özel-hedef']
+  },
+  cursor: {
+    api: 'src/model/agac.rs (AğaçDüğümü::imleç); src/cizim/pencere.rs (CSS→GPUI imleç eşlemesi)',
+    testler: [SUNBURST_FIXTURE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['String'], dallar: ['pointer', 'default', 'bilinmeyen-güvenli-düşüş']
+  },
+  collapsed: {
+    api: 'src/model/agac.rs (AğaçDüğümü::daraltılmış; resmî ortak Tree metadata alanı)',
+    testler: [SUNBURST_FIXTURE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['Option<bool>'], dallar: ['metadata-koruma', 'Sunburst yerleşiminde resmî olarak etkisiz']
+  },
+  itemStyle: {
+    api: 'src/model/agac.rs (GüneşPatlamasıÖğeStili); src/grafik/gunes.rs (seri→level→node→state kalıtımı)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['Dolgu', 'Renk', 'number/percent cornerRadius'],
+    dallar: ['fill/border', 'opacity', 'shadow', 'solid/dashed/dotted', 'normal/emphasis/blur/select']
+  },
+  borderRadius: {
+    api: 'src/model/agac.rs (GüneşPatlamasıKöşeYarıçapı); src/cizim/yuzey.rs (yuvarlatılmış_dilim_yolu)',
+    testler: ['grafik::gunes::testler::mutlak_level_yaricapi_ve_yuzde_kose_yaricapi_korunur', SUNBURST_SAHNE_TESTİ],
+    örnekler: ['sunburst-borderRadius'], veri_biçimleri: ['number', '[inner,outer]', '[4]', 'percent'],
+    dallar: ['dört-sector-köşesi', 'halka-kalınlığına-yüzde', 'dar-açı-kıstırma']
+  },
+  label: {
+    api: 'src/model/stil.rs (Etiket/EtiketYaması); src/grafik/gunes.rs (etiket_geometrisi)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['Etiket', 'EtiketYaması', 'treePathInfo callback'],
+    dallar: ['inside/outside', 'radial/tangential/degree', 'align/distance', 'minAngle', 'durumlar']
+  },
+  rotate: {
+    api: 'src/model/stil.rs (EtiketDöndürme); src/grafik/gunes.rs (etiket_geometrisi)',
+    testler: [SUNBURST_SAHNE_TESTİ], örnekler: ['sunburst-simple', 'sunburst-label-rotate', 'sunburst-drink', 'sunburst-book'],
+    veri_biçimleri: ['radial', 'tangential', 'number'], dallar: ['otomatik-flip', 'dış-etiket', 'derece']
+  },
+  position: {
+    api: 'src/model/stil.rs (EtiketKonumu); src/grafik/gunes.rs (etiket_geometrisi)',
+    testler: [SUNBURST_SAHNE_TESTİ], örnekler: ['sunburst-drink', 'sunburst-book'],
+    veri_biçimleri: ['inside', 'outside'], dallar: ['halka-ortası', 'dış-yarıçap+distance']
+  },
+  levels: {
+    api: 'src/model/agac.rs (GüneşPatlamasıSeviyesi); src/grafik/gunes.rs (seviye_uygula)',
+    testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ],
+    örnekler: ['sunburst-label-rotate', 'sunburst-drink', 'sunburst-book'],
+    veri_biçimleri: ['Vec<GüneşPatlamasıSeviyesi>'],
+    dallar: ['radius', 'itemStyle', 'label', 'emphasis/blur/select', 'seri→level→node kalıtımı']
+  },
+  silent: {
+    api: 'src/model/seri.rs (GüneşPatlamasıSerisi::sessiz); src/grafik/gunes.rs (isabet kaydı)',
+    testler: [SUNBURST_FIXTURE_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['bool'], dallar: ['boya-korunur', 'isabet-kapalı']
+  },
+  animationType: {
+    api: 'src/model/agac.rs (GüneşPatlamasıAnimasyonTürü); resmî 6.1 çalışma zamanı bu bildirimi okumaz',
+    testler: ['grafik::gunes::testler::animation_type_iki_resmi_degeri_modelde_korur'],
+    örnekler: SUNBURST_ÖRNEKLERİ, veri_biçimleri: ['expansion', 'scale'],
+    dallar: ['iki-değer-modelde-korunur', 'resmî-runtime-etkisiz']
+  },
+  highlight: {
+    api: 'src/eylem.rs (sunburstHighlight/sunburstUnhighlight); src/grafik/gunes.rs (odak/blur durumları)',
+    testler: [SUNBURST_ACTION_TESTİ], örnekler: SUNBURST_ÖRNEKLERİ,
+    veri_biçimleri: ['dispatchAction payload'], dallar: ['highlight→highlight', 'unhighlight→downplay', 'ancestor/descendant/relative']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -1110,7 +1262,13 @@ const YEREL_FIXTURE = Object.freeze({
   'treemap-show-parent': 'examples/uyum_fixture.rs#treemap_show_parent',
   'treemap-simple': 'examples/uyum_fixture.rs#treemap_simple',
   'treemap-visual': 'examples/uyum_fixture.rs#treemap_visual',
-  'sunburst-simple': 'examples/gunes.rs',
+  'sunburst-simple': 'examples/uyum_fixture.rs#sunburst_simple',
+  'sunburst-borderRadius': 'examples/uyum_fixture.rs#sunburst_border_radius',
+  'sunburst-label-rotate': 'examples/uyum_fixture.rs#sunburst_label_rotate',
+  'sunburst-monochrome': 'examples/uyum_fixture.rs#sunburst_monochrome',
+  'sunburst-visualMap': 'examples/uyum_fixture.rs#sunburst_visual_map',
+  'sunburst-drink': 'examples/uyum_fixture.rs#sunburst_drink',
+  'sunburst-book': 'examples/uyum_fixture.rs#sunburst_book',
   'tree-basic': 'examples/uyum_fixture.rs#tree_basic',
   'tree-legend': 'examples/uyum_fixture.rs#tree_legend',
   'tree-orient-bottom-top': 'examples/uyum_fixture.rs#tree_orient_bottom_top',
@@ -1493,6 +1651,17 @@ function rustKarşılığı(kök, özellik) {
       koordinat_dalları: kanıt.dallar
     };
   }
+  if (kök.toLowerCase() === 'series.sunburst' && SUNBURST_SERIES_OPTION_KANITI[özellik]) {
+    const kanıt = SUNBURST_SERIES_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
   if (kök.toLowerCase() === 'echarts' && özellik === 'parallel') {
     return {
       api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle)',
@@ -1540,6 +1709,16 @@ function rustKarşılığı(kök, özellik) {
       testler: [TREEMAP_FIXTURE_TESTİ, TREEMAP_SAHNE_TESTİ],
       galeri_örnekleri: TREEMAP_ÖRNEKLERİ,
       veri_biçimleri: ['AğaçHaritasıSerisi'],
+      koordinat_dalları: ['none', 'calendar-box', 'matrix-box', 'boyama', 'olay/isabet']
+    };
+  }
+  if (kök.toLowerCase() === 'registered' && özellik === 'sunburst') {
+    return {
+      api: 'src/model/seri.rs (Seri::GüneşPatlaması, From<GüneşPatlamasıSerisi>)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: [SUNBURST_FIXTURE_TESTİ, SUNBURST_SAHNE_TESTİ, SUNBURST_ACTION_TESTİ],
+      galeri_örnekleri: SUNBURST_ÖRNEKLERİ,
+      veri_biçimleri: ['GüneşPatlamasıSerisi'],
       koordinat_dalları: ['none', 'calendar-box', 'matrix-box', 'boyama', 'olay/isabet']
     };
   }

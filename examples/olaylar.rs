@@ -64,6 +64,20 @@ impl Kök {
                     }
                 )
                 .into(),
+                GrafikOlayı::GüneşPatlamasıKöküDeğişti {
+                    seri_sırası,
+                    yol,
+                    yön,
+                    ..
+                } => format!(
+                    "Sunburst {seri_sırası} kökü → {} ({yön:?})",
+                    if yol.is_empty() {
+                        "Tümü".to_owned()
+                    } else {
+                        yol.join(" / ")
+                    }
+                )
+                .into(),
                 GrafikOlayı::Bağlantıİstendi {
                     seri_sırası,
                     url,

@@ -4,8 +4,8 @@
 
 use crate::model::Uzunluk;
 use crate::model::seri::Sembol;
-use crate::model::stil::{EtiketYaması, YazıStili, ÇizgiStili, ÖğeStili};
-use crate::renk::Renk;
+use crate::model::stil::{EtiketYaması, YazıStili, ÇizgiStili, ÇizgiTürü, ÖğeStili};
+use crate::renk::{Dolgu, Renk};
 
 /// Tree yerleşimi (`series-tree.layout`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
@@ -99,6 +99,256 @@ pub enum AğaçHaritasıDüğümTıklaması {
     DüğümeYakınlaştır,
     BağlantıyıAç,
     Kapalı,
+}
+
+/// Sunburst düğüm tıklamasının resmî davranışı (`nodeClick`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum GüneşPatlamasıDüğümTıklaması {
+    /// ECharts `'rootToNode'` öntanımlısı.
+    #[default]
+    DüğümüKökYap,
+    /// Düğümün `link` / `target` değerini konağa iletir.
+    BağlantıyıAç,
+    Kapalı,
+}
+
+/// Sunburst kardeş düğümlerinin yerleşim sırası (`sort`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum GüneşPatlamasıSırası {
+    #[default]
+    Azalan,
+    Artan,
+    /// ECharts `null` / `undefined`; kaynak veri sırasını korur.
+    Veri,
+}
+
+/// Sunburst ilk çizim animasyonu (`animationType`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum GüneşPatlamasıAnimasyonTürü {
+    #[default]
+    Genişleme,
+    Ölçek,
+}
+
+/// Sunburst palet paylaşım kipi (`colorBy`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum GüneşPatlamasıRenkKaynağı {
+    #[default]
+    Seri,
+    Veri,
+}
+
+/// zrender `Sector.cornerRadius` sırası: iç-başlangıç, iç-bitiş,
+/// dış-başlangıç, dış-bitiş. Yüzdeler halka kalınlığına göre çözülür.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct GüneşPatlamasıKöşeYarıçapı(pub [Uzunluk; 4]);
+
+impl From<f32> for GüneşPatlamasıKöşeYarıçapı {
+    fn from(değer: f32) -> Self {
+        Self([Uzunluk::Piksel(değer); 4])
+    }
+}
+
+impl From<[f32; 2]> for GüneşPatlamasıKöşeYarıçapı {
+    fn from([iç, dış]: [f32; 2]) -> Self {
+        Self([
+            Uzunluk::Piksel(iç),
+            Uzunluk::Piksel(iç),
+            Uzunluk::Piksel(dış),
+            Uzunluk::Piksel(dış),
+        ])
+    }
+}
+
+impl From<[Uzunluk; 2]> for GüneşPatlamasıKöşeYarıçapı {
+    fn from([iç, dış]: [Uzunluk; 2]) -> Self {
+        Self([iç, iç, dış, dış])
+    }
+}
+
+impl From<[Uzunluk; 4]> for GüneşPatlamasıKöşeYarıçapı {
+    fn from(değerler: [Uzunluk; 4]) -> Self {
+        Self(değerler)
+    }
+}
+
+/// Sunburst `itemStyle` yaması. Sayısal alanların `Option` olması,
+/// `levels[i]` ve veri düğümlerinde açık sıfırın kalıtımı gerçekten
+/// sıfırlayabilmesini sağlar.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct GüneşPatlamasıÖğeStili {
+    pub renk: Option<Dolgu>,
+    pub kenarlık_rengi: Option<Renk>,
+    pub kenarlık_kalınlığı: Option<f32>,
+    pub kenarlık_türü: Option<ÇizgiTürü>,
+    pub kenarlık_yarıçapı: Option<GüneşPatlamasıKöşeYarıçapı>,
+    pub opaklık: Option<f32>,
+    pub gölge_bulanıklığı: Option<f32>,
+    pub gölge_rengi: Option<Renk>,
+    pub gölge_kayması: Option<(f32, f32)>,
+}
+
+impl GüneşPatlamasıÖğeStili {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    /// `SunburstSeries.defaultOption.itemStyle` karşılığı.
+    pub fn seri_varsayılanı() -> Self {
+        Self {
+            kenarlık_rengi: Some(Renk::BEYAZ),
+            kenarlık_kalınlığı: Some(1.0),
+            kenarlık_türü: Some(ÇizgiTürü::Düz),
+            opaklık: Some(1.0),
+            gölge_bulanıklığı: Some(0.0),
+            gölge_rengi: Some(Renk::kyma(0.0, 0.0, 0.0, 0.2)),
+            gölge_kayması: Some((0.0, 0.0)),
+            ..Self::default()
+        }
+    }
+
+    pub fn renk(mut self, renk: impl Into<Dolgu>) -> Self {
+        self.renk = Some(renk.into());
+        self
+    }
+
+    pub fn kenarlık_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.kenarlık_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
+        self.kenarlık_kalınlığı = Some(kalınlık.max(0.0));
+        self
+    }
+
+    pub fn kenarlık_türü(mut self, tür: ÇizgiTürü) -> Self {
+        self.kenarlık_türü = Some(tür);
+        self
+    }
+
+    pub fn kenarlık_yarıçapı(
+        mut self, yarıçap: impl Into<GüneşPatlamasıKöşeYarıçapı>
+    ) -> Self {
+        self.kenarlık_yarıçapı = Some(yarıçap.into());
+        self
+    }
+
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        self.opaklık = opaklık.is_finite().then(|| opaklık.clamp(0.0, 1.0));
+        self
+    }
+
+    pub fn gölge_bulanıklığı(mut self, bulanıklık: f32) -> Self {
+        self.gölge_bulanıklığı = bulanıklık.is_finite().then(|| bulanıklık.max(0.0));
+        self
+    }
+
+    pub fn gölge_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.gölge_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn gölge_kayması(mut self, x: f32, y: f32) -> Self {
+        if x.is_finite() && y.is_finite() {
+            self.gölge_kayması = Some((x, y));
+        }
+        self
+    }
+
+    /// Ortak `ÖğeStili` değerlerini açık Sunburst yamasına dönüştürür.
+    pub fn taban(mut self, stil: ÖğeStili) -> Self {
+        self.renk = stil.renk;
+        self.kenarlık_rengi = stil.kenarlık_rengi;
+        self.kenarlık_kalınlığı = Some(stil.kenarlık_kalınlığı.max(0.0));
+        self.kenarlık_türü = Some(stil.kenarlık_türü);
+        if stil.kenarlık_yarıçapı != [0.0; 4] {
+            self.kenarlık_yarıçapı = Some(GüneşPatlamasıKöşeYarıçapı(
+                stil.kenarlık_yarıçapı.map(Uzunluk::Piksel),
+            ));
+        }
+        self.opaklık = stil.opaklık;
+        self.gölge_bulanıklığı = Some(stil.gölge_bulanıklığı.max(0.0));
+        self.gölge_rengi = stil.gölge_rengi;
+        self.gölge_kayması = Some(stil.gölge_kayması);
+        self
+    }
+}
+
+/// Sunburst `emphasis` / `blur` / `select` yaması.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct GüneşPatlamasıDurumu {
+    pub öğe_stili: Option<GüneşPatlamasıÖğeStili>,
+    pub etiket: Option<EtiketYaması>,
+    pub odak: Option<AğaçVurguOdağı>,
+}
+
+impl GüneşPatlamasıDurumu {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn öğe_stili(mut self, stil: GüneşPatlamasıÖğeStili) -> Self {
+        self.öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: EtiketYaması) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn odak(mut self, odak: AğaçVurguOdağı) -> Self {
+        self.odak = Some(odak);
+        self
+    }
+}
+
+/// `series-sunburst.levels[i]` miras katmanı.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct GüneşPatlamasıSeviyesi {
+    pub yarıçap: Option<(Uzunluk, Uzunluk)>,
+    pub öğe_stili: Option<GüneşPatlamasıÖğeStili>,
+    pub etiket: Option<EtiketYaması>,
+    pub vurgu: GüneşPatlamasıDurumu,
+    pub bulanık: GüneşPatlamasıDurumu,
+    pub seçili: GüneşPatlamasıDurumu,
+}
+
+impl GüneşPatlamasıSeviyesi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn yarıçap(mut self, iç: impl Into<Uzunluk>, dış: impl Into<Uzunluk>) -> Self {
+        self.yarıçap = Some((iç.into(), dış.into()));
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: GüneşPatlamasıÖğeStili) -> Self {
+        self.öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: EtiketYaması) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn vurgu(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.vurgu = durum;
+        self
+    }
+
+    pub fn bulanık(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.bulanık = durum;
+        self
+    }
+
+    pub fn seçili(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.seçili = durum;
+        self
+    }
 }
 
 /// Treemap paletinin kardeşler arasında dağıtılma anahtarı.
@@ -565,6 +815,14 @@ pub struct AğaçDüğümü {
     pub ağaç_haritası_vurgusu: Option<AğaçHaritasıDurumu>,
     pub ağaç_haritası_bulanıklığı: Option<AğaçHaritasıDurumu>,
     pub ağaç_haritası_seçilisi: Option<AğaçHaritasıDurumu>,
+    /// Sunburst'a özgü model yamaları. Ortak `itemStyle`/`label` alanları
+    /// da desteklenir; bu alanlar yüzde köşe yarıçapı ve odak davranışını
+    /// kayıpsız taşır.
+    pub güneş_patlaması_öğe_stili: Option<GüneşPatlamasıÖğeStili>,
+    pub güneş_patlaması_vurgusu: Option<GüneşPatlamasıDurumu>,
+    pub güneş_patlaması_bulanıklığı: Option<GüneşPatlamasıDurumu>,
+    pub güneş_patlaması_seçilisi: Option<GüneşPatlamasıDurumu>,
+    pub güneş_patlaması_düğüm_tıklaması: Option<GüneşPatlamasıDüğümTıklaması>,
     /// ECharts `cursor`; GPUI katmanı desteklenen CSS adlarını yerel imlece
     /// dönüştürür, bilinmeyen değerler normal imlece düşer.
     pub imleç: Option<String>,
@@ -748,6 +1006,34 @@ impl AğaçDüğümü {
 
     pub fn ağaç_haritası_seçilisi(mut self, durum: AğaçHaritasıDurumu) -> Self {
         self.ağaç_haritası_seçilisi = Some(durum);
+        self
+    }
+
+    pub fn güneş_patlaması_öğe_stili(mut self, stil: GüneşPatlamasıÖğeStili) -> Self {
+        self.güneş_patlaması_öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn güneş_patlaması_vurgusu(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.güneş_patlaması_vurgusu = Some(durum);
+        self
+    }
+
+    pub fn güneş_patlaması_bulanıklığı(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.güneş_patlaması_bulanıklığı = Some(durum);
+        self
+    }
+
+    pub fn güneş_patlaması_seçilisi(mut self, durum: GüneşPatlamasıDurumu) -> Self {
+        self.güneş_patlaması_seçilisi = Some(durum);
+        self
+    }
+
+    pub fn güneş_patlaması_düğüm_tıklaması(
+        mut self,
+        davranış: GüneşPatlamasıDüğümTıklaması,
+    ) -> Self {
+        self.güneş_patlaması_düğüm_tıklaması = Some(davranış);
         self
     }
 

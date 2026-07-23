@@ -961,6 +961,168 @@ pub fn ağaç_haritası_eylemlerini_kaydet(
     Ok(())
 }
 
+fn güneş_patlaması_seçicileri(
+    çalışma: &GrafikÇalışmaZamanı,
+    yük: &EylemYükü,
+    bileşen: &'static str,
+) -> Result<Vec<SeriSeçici>, BilesenHatasi> {
+    if let Some(seçici) = yük.seri_seçici() {
+        return Ok(vec![seçici]);
+    }
+    let seçiciler = çalışma
+        .seçenekleri_al()?
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, seri)| {
+            matches!(seri, crate::model::seri::Seri::GüneşPatlaması(_))
+                .then_some(SeriSeçici::Sıra(sıra))
+        })
+        .collect::<Vec<_>>();
+    if seçiciler.is_empty() {
+        return Err(BilesenHatasi::EksikVeri { bileşen, sıra: 0 });
+    }
+    Ok(seçiciler)
+}
+
+fn güneş_patlaması_hedefi(
+    çalışma: &GrafikÇalışmaZamanı,
+    seçici: &SeriSeçici,
+    yük: &EylemYükü,
+) -> Result<Option<usize>, BilesenHatasi> {
+    if let Some(sıra) = isteğe_bağlı_sıra(yük, "dataIndex")? {
+        return Ok(Some(sıra));
+    }
+    let hedef_kimliği = yük
+        .al("targetNodeId")
+        .or_else(|| yük.al("targetNode"))
+        .and_then(EylemDeğeri::metin);
+    let Some(hedef_kimliği) = hedef_kimliği else {
+        return Ok(None);
+    };
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seri_sırası = match seçici {
+        SeriSeçici::Sıra(sıra) => Some(*sıra),
+        SeriSeçici::Kimlik(kimlik) => (0..seçenekler.seriler.len())
+            .find(|&sıra| seçenekler.seri_kimliği(sıra) == Some(kimlik.as_str())),
+        SeriSeçici::Ad(ad) => seçenekler
+            .seriler
+            .iter()
+            .position(|seri| seri.ad() == Some(ad.as_str())),
+    }
+    .ok_or(BilesenHatasi::EksikVeri {
+        bileşen: "sunburst.series",
+        sıra: 0,
+    })?;
+    let Some(crate::model::seri::Seri::GüneşPatlaması(seri)) = seçenekler.seriler.get(seri_sırası)
+    else {
+        return Err(BilesenHatasi::Desteklenmeyen {
+            özellik: "sunburst targetNodeId",
+            ayrıntı: format!("{seri_sırası}. seri `sunburst` değildir"),
+        });
+    };
+    seri.düğüm_sırası_kimlikle(hedef_kimliği)
+        .map(Some)
+        .ok_or(BilesenHatasi::GeçersizSeçenek {
+            alan: "sunburst.targetNodeId",
+            ayrıntı: format!("`{hedef_kimliği}` düğümü bulunamadı"),
+        })
+}
+
+fn güneş_patlaması_olayı(
+    çalışma: &GrafikÇalışmaZamanı,
+    seri_sırası: usize,
+    veri_sırası: Option<usize>,
+) -> Result<OlayYükü, BilesenHatasi> {
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seri = seçenekler.seriler.get(seri_sırası);
+    let veri_adı = veri_sırası.and_then(|veri_sırası| match seri {
+        Some(crate::model::seri::Seri::GüneşPatlaması(seri)) => {
+            seri.düğüm(veri_sırası).map(|düğüm| düğüm.ad.clone())
+        }
+        _ => None,
+    });
+    Ok(OlayYükü {
+        bileşen_türü: Some("series".to_owned()),
+        bileşen_alt_türü: Some("sunburst".to_owned()),
+        seri_sırası: Some(seri_sırası),
+        seri_kimliği: seri.and_then(|seri| match seri {
+            crate::model::seri::Seri::GüneşPatlaması(seri) => seri.kimlik.clone(),
+            _ => None,
+        }),
+        seri_adı: seri.and_then(|seri| seri.ad().map(str::to_owned)),
+        veri_sırası,
+        veri_adı,
+        ..OlayYükü::default()
+    })
+}
+
+/// Sunburst view action'ı ile ECharts'ın eski vurgu yönlendirme adlarını
+/// kaydeder.
+pub fn güneş_patlaması_eylemlerini_kaydet(
+    kayıt: &mut EylemKayıtDefteri,
+) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "sunburstRootToNode",
+        "sunburstRootToNode",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| {
+            let seçiciler =
+                güneş_patlaması_seçicileri(çalışma, yük, "sunburstRootToNode.series")?;
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let hedef = güneş_patlaması_hedefi(çalışma, &seçici, yük)?;
+                let (seri_sırası, yol, yön) =
+                    çalışma.güneş_patlaması_köküne_git(seçici, hedef, true)?;
+                let mut olay = güneş_patlaması_olayı(çalışma, seri_sırası, hedef)?;
+                olay.alanlar.insert(
+                    "direction".to_owned(),
+                    EylemDeğeri::from(match yön {
+                        crate::cizim::olay::GüneşPatlamasıKökYönü::Aşağı => "drillDown",
+                        crate::cizim::olay::GüneşPatlamasıKökYönü::Yukarı => "rollUp",
+                    }),
+                );
+                olay.alanlar.insert(
+                    "path".to_owned(),
+                    EylemDeğeri::Dizi(yol.into_iter().map(EylemDeğeri::from).collect()),
+                );
+                olaylar.push(olay);
+            }
+            Ok(olaylar)
+        },
+    )?;
+    for (eski_tür, yeni_tür) in [
+        ("sunburstHighlight", "highlight"),
+        ("sunburstUnhighlight", "downplay"),
+    ] {
+        kayıt.kaydet(
+            eski_tür,
+            eski_tür,
+            EylemGüncellemesi::Yok,
+            move |çalışma, yük| {
+                let seçiciler = güneş_patlaması_seçicileri(çalışma, yük, "sunburst.series")?;
+                let mut olaylar = Vec::with_capacity(seçiciler.len());
+                for seçici in seçiciler {
+                    let hedef = güneş_patlaması_hedefi(çalışma, &seçici, yük)?;
+                    let seri_sırası = match seçici {
+                        SeriSeçici::Sıra(sıra) => sıra,
+                        _ => {
+                            let (sıra, _) = çalışma.güneş_patlaması_görünümü(seçici)?;
+                            sıra
+                        }
+                    };
+                    let mut olay = güneş_patlaması_olayı(çalışma, seri_sırası, hedef)?;
+                    olay.alanlar
+                        .insert("forwardedType".to_owned(), EylemDeğeri::from(yeni_tür));
+                    olaylar.push(olay);
+                }
+                Ok(olaylar)
+            },
+        )?;
+    }
+    Ok(())
+}
+
 fn paralel_aralıklarını_oku(değer: &EylemDeğeri) -> Result<Vec<[f64; 2]>, BilesenHatasi> {
     değer
         .dizi()
@@ -1590,6 +1752,7 @@ pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<
     paralel_eylemlerini_kaydet(kayıt)?;
     ağaç_eylemlerini_kaydet(kayıt)?;
     ağaç_haritası_eylemlerini_kaydet(kayıt)?;
+    güneş_patlaması_eylemlerini_kaydet(kayıt)?;
     eksen_kırılma_eylemlerini_kaydet(kayıt)?;
     görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
@@ -1791,7 +1954,9 @@ mod testler {
     use crate::model::gorsel_esleme::GörselEşleme;
     use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
     use crate::model::secenekler::GrafikSeçenekleri;
-    use crate::model::seri::{AğaçHaritasıSerisi, AğaçSerisi, ParalelSerisi, ÇizgiSerisi};
+    use crate::model::seri::{
+        AğaçHaritasıSerisi, AğaçSerisi, GüneşPatlamasıSerisi, ParalelSerisi, ÇizgiSerisi,
+    };
     use crate::model::yakinlastirma::VeriYakınlaştırma;
 
     fn çalışma() -> GrafikÇalışmaZamanı {
@@ -2003,6 +2168,76 @@ mod testler {
                 .unwrap()
                 .3,
             Some(1)
+        );
+    }
+
+    #[test]
+    fn sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(
+            GüneşPatlamasıSerisi::yeni()
+                .kimlik("sun")
+                .ad("Sunburst")
+                .kökler([AğaçDüğümü::dal(
+                    "root",
+                    vec![AğaçDüğümü::yaprak("leaf", 7.0).kimlik("leaf-id")],
+                )]),
+        );
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        güneş_patlaması_eylemlerini_kaydet(&mut kayıt).unwrap();
+
+        let aşağı = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("sunburstRootToNode")
+                    .alan("seriesId", "sun")
+                    .alan("targetNodeId", "leaf-id"),
+            )
+            .unwrap();
+        assert_eq!(aşağı[0].bileşen_alt_türü.as_deref(), Some("sunburst"));
+        assert_eq!(aşağı[0].veri_adı.as_deref(), Some("leaf"));
+        assert_eq!(
+            aşağı[0].alanlar.get("direction"),
+            Some(&EylemDeğeri::from("drillDown"))
+        );
+        assert_eq!(
+            çalışma
+                .güneş_patlaması_görünümü(SeriSeçici::kimlik("sun"))
+                .unwrap()
+                .1,
+            vec!["root".to_owned(), "leaf".to_owned()]
+        );
+
+        let eski = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("sunburstHighlight")
+                    .alan("seriesId", "sun")
+                    .alan("dataIndex", 1usize),
+            )
+            .unwrap();
+        assert_eq!(
+            eski[0].alanlar.get("forwardedType"),
+            Some(&EylemDeğeri::from("highlight"))
+        );
+
+        let yukarı = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("sunburstRootToNode").alan("seriesId", "sun"),
+            )
+            .unwrap();
+        assert_eq!(
+            yukarı[0].alanlar.get("direction"),
+            Some(&EylemDeğeri::from("rollUp"))
+        );
+        assert!(
+            çalışma
+                .güneş_patlaması_görünümü(SeriSeçici::kimlik("sun"))
+                .unwrap()
+                .1
+                .is_empty()
         );
     }
 

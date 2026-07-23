@@ -14801,7 +14801,135 @@ enum ResmiAğaçDeğeri {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+enum ResmiKöşeYarıçapı {
+    Tek(f32),
+    İki([f32; 2]),
+    Dört([f32; 4]),
+}
+
+impl ResmiKöşeYarıçapı {
+    fn cizelge(self) -> GüneşPatlamasıKöşeYarıçapı {
+        match self {
+            Self::Tek(değer) => değer.into(),
+            Self::İki(değerler) => değerler.into(),
+            Self::Dört(değerler) => {
+                GüneşPatlamasıKöşeYarıçapı(değerler.map(Uzunluk::Piksel))
+            }
+        }
+    }
+}
+
+#[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct ResmiGüneşÖğeStili {
+    #[serde(default)]
+    color: Option<String>,
+    #[serde(default)]
+    border_color: Option<String>,
+    #[serde(default)]
+    border_width: Option<f32>,
+    #[serde(default)]
+    border_radius: Option<ResmiKöşeYarıçapı>,
+    #[serde(default)]
+    opacity: Option<f32>,
+    #[serde(default)]
+    shadow_blur: Option<f32>,
+    #[serde(default)]
+    shadow_color: Option<String>,
+    #[serde(default)]
+    shadow_offset_x: Option<f32>,
+    #[serde(default)]
+    shadow_offset_y: Option<f32>,
+}
+
+impl ResmiGüneşÖğeStili {
+    fn cizelge(self) -> GüneşPatlamasıÖğeStili {
+        let mut stil = GüneşPatlamasıÖğeStili::yeni();
+        if let Some(renk) = self.color {
+            stil = stil.renk(renk.as_str());
+        }
+        if let Some(renk) = self.border_color {
+            stil = stil.kenarlık_rengi(renk.as_str());
+        }
+        if let Some(kalınlık) = self.border_width {
+            stil = stil.kenarlık_kalınlığı(kalınlık);
+        }
+        if let Some(yarıçap) = self.border_radius {
+            stil = stil.kenarlık_yarıçapı(yarıçap.cizelge());
+        }
+        if let Some(opaklık) = self.opacity {
+            stil = stil.opaklık(opaklık);
+        }
+        if let Some(bulanıklık) = self.shadow_blur {
+            stil = stil.gölge_bulanıklığı(bulanıklık);
+        }
+        if let Some(renk) = self.shadow_color {
+            stil = stil.gölge_rengi(renk.as_str());
+        }
+        if self.shadow_offset_x.is_some() || self.shadow_offset_y.is_some() {
+            stil = stil.gölge_kayması(
+                self.shadow_offset_x.unwrap_or(0.0),
+                self.shadow_offset_y.unwrap_or(0.0),
+            );
+        }
+        stil
+    }
+}
+
+#[derive(Deserialize, Default)]
+struct ResmiGüneşEtiketDurumu {
+    #[serde(default)]
+    opacity: Option<f32>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct ResmiGüneşEtiketi {
+    #[serde(default)]
+    show: Option<bool>,
+    #[serde(default)]
+    color: Option<String>,
+    #[serde(default)]
+    opacity: Option<f32>,
+    #[serde(default)]
+    downplay: Option<ResmiGüneşEtiketDurumu>,
+}
+
+impl ResmiGüneşEtiketi {
+    fn cizelge(&self) -> EtiketYaması {
+        let mut yama = EtiketYaması::yeni();
+        if let Some(göster) = self.show {
+            yama = yama.göster(göster);
+        }
+        let mut yazı = YazıStili::yeni();
+        let mut yazı_var = false;
+        if let Some(renk) = &self.color {
+            yazı = yazı.renk(renk.as_str());
+            yazı_var = true;
+        }
+        if let Some(opaklık) = self.opacity {
+            yazı = yazı.opaklık(opaklık);
+            yazı_var = true;
+        }
+        if yazı_var {
+            yama = yama.yazı(yazı);
+        }
+        yama
+    }
+
+    fn bulanıklık(&self) -> Option<GüneşPatlamasıDurumu> {
+        let opaklık = self.downplay.as_ref()?.opacity?;
+        Some(
+            GüneşPatlamasıDurumu::yeni()
+                .etiket(EtiketYaması::yeni().yazı(YazıStili::yeni().opaklık(opaklık))),
+        )
+    }
+}
+
+#[derive(Deserialize)]
 struct ResmiAğaçDüğümü {
+    #[serde(default)]
     name: String,
     #[serde(default)]
     id: Option<String>,
@@ -14809,6 +14937,10 @@ struct ResmiAğaçDüğümü {
     value: Option<ResmiAğaçDeğeri>,
     #[serde(default)]
     size: Option<f64>,
+    #[serde(default, rename = "itemStyle")]
+    item_style: Option<ResmiGüneşÖğeStili>,
+    #[serde(default)]
+    label: Option<ResmiGüneşEtiketi>,
     #[serde(default)]
     children: Vec<ResmiAğaçDüğümü>,
 }
@@ -14834,6 +14966,16 @@ impl ResmiAğaçDüğümü {
             None if self.size.is_some() => düğüm.değerli(self.size.unwrap_or_default()),
             None => düğüm,
         };
+        if let Some(stil) = self.item_style {
+            düğüm = düğüm.güneş_patlaması_öğe_stili(stil.cizelge());
+        }
+        if let Some(etiket) = self.label {
+            let bulanıklık = etiket.bulanıklık();
+            düğüm = düğüm.etiket(etiket.cizelge());
+            if let Some(bulanıklık) = bulanıklık {
+                düğüm = düğüm.güneş_patlaması_bulanıklığı(bulanıklık);
+            }
+        }
         düğüm
     }
 
@@ -14862,6 +15004,30 @@ impl ResmiAğaçDüğümü {
             .map(Self::cizelge)
             .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", yol.display()))
     }
+}
+
+#[derive(Deserialize)]
+struct ResmiGüneşBelgesi {
+    şema_sürümü: u8,
+    kaynak: String,
+    veri: Vec<ResmiAğaçDüğümü>,
+}
+
+fn güneş_verisini_oku(id: &str) -> Result<Vec<AğaçDüğümü>, String> {
+    let yol = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("examples/uyum_veri/sunburst")
+        .join(format!("{id}.json"));
+    let kaynak = std::fs::read_to_string(&yol)
+        .map_err(|hata| format!("{} okunamadı: {hata}", yol.display()))?;
+    let belge = serde_json::from_str::<ResmiGüneşBelgesi>(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", yol.display()))?;
+    if belge.şema_sürümü != 1
+        || !belge.kaynak.ends_with(&format!("{id}.ts"))
+            && !belge.kaynak.ends_with(&format!("{id}.js"))
+    {
+        return Err(format!("{id}: geçersiz Sunburst veri belgesi"));
+    }
+    Ok(ResmiAğaçDüğümü::cizelge_dizisi(belge.veri))
 }
 
 fn flare_ağacı() -> Result<AğaçDüğümü, String> {
@@ -15683,6 +15849,220 @@ fn treemap_sunburst_transition(durum: &str) -> Result<GrafikSeçenekleri, String
     }
 }
 
+fn güneş_radyal_etiketi() -> Etiket {
+    Etiket::yeni()
+        .göster(true)
+        .sessiz(true)
+        .konum(EtiketKonumu::İç)
+        .uzaklık(5.0)
+        .döndürme(EtiketDöndürme::Radyal)
+        .yatay_hiza(YazıYatayHizası::Orta)
+}
+
+fn sunburst_simple() -> Result<GrafikSeçenekleri, String> {
+    Ok(GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GüneşPatlamasıSerisi::yeni()
+            .halka(0, "90%")
+            .etiket(güneş_radyal_etiketi())
+            .kökler(güneş_verisini_oku("sunburst-simple")?),
+    ))
+}
+
+fn sunburst_border_radius() -> Result<GrafikSeçenekleri, String> {
+    Ok(GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GüneşPatlamasıSerisi::yeni()
+            .halka(60, "90%")
+            .öğe_stili(
+                GüneşPatlamasıÖğeStili::seri_varsayılanı()
+                    .kenarlık_yarıçapı(7.0)
+                    .kenarlık_kalınlığı(2.0),
+            )
+            .etiket(güneş_radyal_etiketi().göster(false))
+            .kökler(güneş_verisini_oku("sunburst-borderRadius")?),
+    ))
+}
+
+fn sunburst_label_rotate() -> Result<GrafikSeçenekleri, String> {
+    let etiket = güneş_radyal_etiketi().yazı(
+        YazıStili::yeni()
+            .renk("#000")
+            .kenarlık_rengi("#fff")
+            .kenarlık_kalınlığı(2.0),
+    );
+    let seviyeler = [
+        GüneşPatlamasıSeviyesi::yeni(),
+        GüneşPatlamasıSeviyesi::yeni()
+            .öğe_stili(GüneşPatlamasıÖğeStili::yeni().renk("#CD4949"))
+            .etiket(EtiketYaması::yeni().döndürme(EtiketDöndürme::Radyal)),
+        GüneşPatlamasıSeviyesi::yeni()
+            .öğe_stili(GüneşPatlamasıÖğeStili::yeni().renk("#F47251"))
+            .etiket(EtiketYaması::yeni().döndürme(EtiketDöndürme::Teğetsel)),
+        GüneşPatlamasıSeviyesi::yeni()
+            .öğe_stili(GüneşPatlamasıÖğeStili::yeni().renk("#FFC75F"))
+            .etiket(EtiketYaması::yeni().döndürme(EtiketDöndürme::Derece(0.0))),
+    ];
+    Ok(GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GüneşPatlamasıSerisi::yeni()
+            .halka("15%", "80%")
+            .sıralama(GüneşPatlamasıSırası::Veri)
+            .vurgu(GüneşPatlamasıDurumu::yeni().odak(AğaçVurguOdağı::Ata))
+            .etiket(etiket)
+            .etiket_biçimleyicisi(|parametreler| match parametreler.ağaç_yolu.len() {
+                2 => "radial".to_owned(),
+                3 => "tangential".to_owned(),
+                4 => "0".to_owned(),
+                _ => String::new(),
+            })
+            .seviyeler(seviyeler)
+            .kökler(güneş_verisini_oku("sunburst-label-rotate")?),
+    ))
+}
+
+fn sunburst_monochrome() -> Result<GrafikSeçenekleri, String> {
+    Ok(GrafikSeçenekleri::yeni().animasyon(false).seri(
+        GüneşPatlamasıSerisi::yeni()
+            .halka("15%", "80%")
+            .sıralama(GüneşPatlamasıSırası::Veri)
+            .vurgu(GüneşPatlamasıDurumu::yeni().odak(AğaçVurguOdağı::Ata))
+            .etiket(güneş_radyal_etiketi())
+            .öğe_stili(
+                GüneşPatlamasıÖğeStili::seri_varsayılanı()
+                    .renk("#ddd")
+                    .kenarlık_kalınlığı(2.0),
+            )
+            .seviyeler([])
+            .kökler(güneş_verisini_oku("sunburst-monochrome")?),
+    ))
+}
+
+fn sunburst_visual_map() -> Result<GrafikSeçenekleri, String> {
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .görsel_eşleme(
+            GörselEşleme::yeni()
+                .en_az(0.0)
+                .en_çok(10.0)
+                .renkler(["#2F93C8", "#AEC48F", "#FFDB5C", "#F98862"]),
+        )
+        .seri(
+            GüneşPatlamasıSerisi::yeni()
+                .halka(0, "90%")
+                .etiket(güneş_radyal_etiketi())
+                .kökler(güneş_verisini_oku("sunburst-visualMap")?),
+        ))
+}
+
+fn sunburst_drink() -> Result<GrafikSeçenekleri, String> {
+    let seviyeler = [
+        GüneşPatlamasıSeviyesi::yeni(),
+        GüneşPatlamasıSeviyesi::yeni()
+            .yarıçap("15%", "35%")
+            .öğe_stili(GüneşPatlamasıÖğeStili::yeni().kenarlık_kalınlığı(2.0))
+            .etiket(EtiketYaması::yeni().döndürme(EtiketDöndürme::Teğetsel)),
+        GüneşPatlamasıSeviyesi::yeni()
+            .yarıçap("35%", "70%")
+            .etiket(EtiketYaması::yeni().yatay_hiza(YazıYatayHizası::Sağ)),
+        GüneşPatlamasıSeviyesi::yeni()
+            .yarıçap("70%", "72%")
+            .öğe_stili(GüneşPatlamasıÖğeStili::yeni().kenarlık_kalınlığı(3.0))
+            .etiket(
+                EtiketYaması::yeni()
+                    .konum(EtiketKonumu::Dış)
+                    .sessiz(false)
+                    .yazı(YazıStili::yeni().eş_iç_boşluk(3.0)),
+            ),
+    ];
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("WORLD COFFEE RESEARCH SENSORY LEXICON")
+                .alt_metin("Source: https://worldcoffeeresearch.org/work/sensory-lexicon/")
+                .yazı(
+                    YazıStili::yeni()
+                        .boyut(14.0)
+                        .yatay_hiza(YazıYatayHizası::Orta),
+                )
+                .alt_yazı(YazıStili::yeni().yatay_hiza(YazıYatayHizası::Orta)),
+        )
+        .seri(
+            GüneşPatlamasıSerisi::yeni()
+                .halka(0, "95%")
+                .sıralama(GüneşPatlamasıSırası::Veri)
+                .vurgu(GüneşPatlamasıDurumu::yeni().odak(AğaçVurguOdağı::Ata))
+                .seviyeler(seviyeler)
+                .kökler(güneş_verisini_oku("sunburst-drink")?),
+        ))
+}
+
+fn sunburst_book() -> Result<GrafikSeçenekleri, String> {
+    const RENKLER: [&str; 5] = ["#FFAE57", "#FF7853", "#EA5151", "#CC3F57", "#9A2555"];
+    const ARKAPLAN: &str = "#2E2733";
+    let seviyeler = [
+        GüneşPatlamasıSeviyesi::yeni(),
+        GüneşPatlamasıSeviyesi::yeni()
+            .yarıçap(0, 40)
+            .etiket(EtiketYaması::yeni().döndürme(EtiketDöndürme::Derece(0.0))),
+        GüneşPatlamasıSeviyesi::yeni().yarıçap(40, 105),
+        GüneşPatlamasıSeviyesi::yeni()
+            .yarıçap(115, 140)
+            .öğe_stili(
+                GüneşPatlamasıÖğeStili::yeni()
+                    .renk("transparent")
+                    .gölge_bulanıklığı(2.0)
+                    .gölge_rengi(RENKLER[2]),
+            )
+            .etiket(
+                EtiketYaması::yeni()
+                    .döndürme(EtiketDöndürme::Teğetsel)
+                    .yazı(YazıStili::yeni().boyut(10.0).renk(RENKLER[0])),
+            ),
+        GüneşPatlamasıSeviyesi::yeni()
+            .yarıçap(140, 145)
+            .öğe_stili(
+                GüneşPatlamasıÖğeStili::yeni()
+                    .gölge_bulanıklığı(80.0)
+                    .gölge_rengi(RENKLER[0]),
+            )
+            .etiket(
+                EtiketYaması::yeni().konum(EtiketKonumu::Dış).yazı(
+                    YazıStili::yeni()
+                        .metin_gölge_bulanıklığı(5.0)
+                        .metin_gölge_rengi("#333"),
+                ),
+            )
+            .bulanık(
+                GüneşPatlamasıDurumu::yeni()
+                    .etiket(EtiketYaması::yeni().yazı(YazıStili::yeni().opaklık(0.5))),
+            ),
+    ];
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .arkaplan(ARKAPLAN)
+        .palet(RENKLER)
+        .seri(
+            GüneşPatlamasıSerisi::yeni()
+                .merkez("50%", "48%")
+                .sıralama_işlevi(|a, b| {
+                    if a.derinlik == 1 {
+                        b.değer
+                            .partial_cmp(&a.değer)
+                            .unwrap_or(std::cmp::Ordering::Equal)
+                    } else {
+                        a.veri_sırası.cmp(&b.veri_sırası)
+                    }
+                })
+                .etiket(güneş_radyal_etiketi().yazı(YazıStili::yeni().renk(ARKAPLAN)))
+                .öğe_stili(
+                    GüneşPatlamasıÖğeStili::seri_varsayılanı()
+                        .kenarlık_rengi(ARKAPLAN)
+                        .kenarlık_kalınlığı(2.0),
+                )
+                .seviyeler(seviyeler)
+                .kökler(güneş_verisini_oku("sunburst-book")?),
+        ))
+}
+
 fn parallel_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -16093,6 +16473,47 @@ struct AğaçHaritasıSahneKanıtı {
     seriler: Vec<AğaçHaritasıSahneSerisi>,
 }
 
+#[derive(Serialize)]
+struct GüneşPatlamasıSahneDilim {
+    veri_sırası: usize,
+    ad: String,
+    derinlik: usize,
+    değer: f64,
+    cx: f32,
+    cy: f32,
+    r0: f32,
+    r: f32,
+    başlangıç_açısı: f32,
+    bitiş_açısı: f32,
+    saat_yönünde: bool,
+    renk: [u8; 4],
+    kenarlık_rengi: [u8; 4],
+    kenarlık_kalınlığı: f32,
+    köşe_yarıçapları: [f32; 4],
+    etiket_göster: bool,
+    etiket_metni: String,
+    etiket_x: f32,
+    etiket_y: f32,
+    etiket_dönüşü: f32,
+    etiket_yatay_hizası: &'static str,
+    etiket_dikey_hizası: &'static str,
+    etiket_fontu: String,
+}
+
+#[derive(Serialize)]
+struct GüneşPatlamasıSahneSerisi {
+    seri_sırası: usize,
+    dilimler: Vec<GüneşPatlamasıSahneDilim>,
+}
+
+#[derive(Serialize)]
+struct GüneşPatlamasıSahneKanıtı {
+    şema_sürümü: u8,
+    tür: &'static str,
+    koordinat_adımı: f32,
+    seriler: Vec<GüneşPatlamasıSahneSerisi>,
+}
+
 fn binde_yuvarla(değer: f32) -> f32 {
     (değer * 1_000.0).round() / 1_000.0
 }
@@ -16202,6 +16623,120 @@ fn ağaç_haritası_sahne_kanıtı(
     Ok(AğaçHaritasıSahneKanıtı {
         şema_sürümü: 1,
         tür: "treemap",
+        koordinat_adımı: 0.001,
+        seriler,
+    })
+}
+
+fn güneş_patlaması_sahne_kanıtı(
+    seçenekler: &GrafikSeçenekleri,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<GüneşPatlamasıSahneKanıtı, String> {
+    let tuval = cizelge::koordinat::Dikdörtgen::yeni(0.0, 0.0, genişlik, yükseklik);
+    let seriler = seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(seri_sırası, seri)| match seri {
+            Seri::GüneşPatlaması(seri)
+                if seri.ad.as_deref().map_or(true, |ad| {
+                    seçenekler
+                        .gösterge
+                        .as_ref()
+                        .map_or(true, |gösterge| gösterge.seçili_mi(ad))
+                }) =>
+            {
+                Some((seri_sırası, seri))
+            }
+            _ => None,
+        })
+        .map(|(seri_sırası, seri)| {
+            let eşlemeler = seçenekler
+                .seri_görsel_eşlemeleri(seri_sırası)
+                .map(|eşleme| {
+                    (
+                        eşleme,
+                        cizelge::grafik::gunes::güneş_patlaması_görsel_kapsamı(seri, eşleme),
+                    )
+                })
+                .collect::<Vec<_>>();
+            let dilimler = cizelge::grafik::gunes::güneş_patlaması_dilimleri(
+                seri,
+                tuval,
+                &[],
+                &|palet_sırası| seçenekler.palet_rengi(palet_sırası),
+                &eşlemeler,
+            )
+            .into_iter()
+            .map(|dilim| {
+                let opaklık = dilim.öğe_stili.opaklık.unwrap_or(1.0).clamp(0.0, 1.0);
+                let kalınlık = (dilim.dış_yarıçap - dilim.iç_yarıçap).abs();
+                let köşe_yarıçapları = dilim
+                    .öğe_stili
+                    .kenarlık_yarıçapı
+                    .map(|yarıçap| yarıçap.0.map(|değer| değer.çöz(kalınlık)))
+                    .unwrap_or([0.0; 4])
+                    .map(binde_yuvarla);
+                GüneşPatlamasıSahneDilim {
+                    veri_sırası: dilim.veri_sırası,
+                    ad: dilim.ad,
+                    derinlik: dilim.derinlik,
+                    değer: dilim.değer,
+                    cx: binde_yuvarla(dilim.merkez.0),
+                    cy: binde_yuvarla(dilim.merkez.1),
+                    r0: binde_yuvarla(dilim.iç_yarıçap),
+                    r: binde_yuvarla(dilim.dış_yarıçap),
+                    başlangıç_açısı: binde_yuvarla(dilim.açı0),
+                    bitiş_açısı: binde_yuvarla(dilim.açı1),
+                    saat_yönünde: dilim.saat_yönünde,
+                    renk: renk_kanalları(dilim.dolgu.temsilî().opaklık(opaklık)),
+                    kenarlık_rengi: renk_kanalları(
+                        dilim
+                            .öğe_stili
+                            .kenarlık_rengi
+                            .unwrap_or(Renk::SAYDAM)
+                            .opaklık(opaklık),
+                    ),
+                    kenarlık_kalınlığı: binde_yuvarla(
+                        dilim.öğe_stili.kenarlık_kalınlığı.unwrap_or(0.0),
+                    ),
+                    köşe_yarıçapları,
+                    etiket_göster: dilim.etiket.göster,
+                    etiket_metni: dilim.etiket_metni,
+                    etiket_x: binde_yuvarla(dilim.etiket_konumu.0),
+                    etiket_y: binde_yuvarla(dilim.etiket_konumu.1),
+                    etiket_dönüşü: binde_yuvarla(dilim.etiket_dönüşü),
+                    etiket_yatay_hizası: match dilim.etiket_yatay_hizası {
+                        cizelge::cizim::YatayHiza::Sol => "left",
+                        cizelge::cizim::YatayHiza::Orta => "center",
+                        cizelge::cizim::YatayHiza::Sağ => "right",
+                    },
+                    etiket_dikey_hizası: match dilim.etiket_dikey_hizası {
+                        cizelge::cizim::DikeyHiza::Üst => "top",
+                        cizelge::cizim::DikeyHiza::Orta => "middle",
+                        cizelge::cizim::DikeyHiza::Alt => "bottom",
+                    },
+                    etiket_fontu: format!(
+                        "{}px {}",
+                        dilim.etiket.yazı.boyut.unwrap_or(cizelge::tema::YAZI_KÜÇÜK),
+                        dilim.etiket.yazı.aile.as_deref().unwrap_or("sans-serif")
+                    ),
+                }
+            })
+            .collect();
+            GüneşPatlamasıSahneSerisi {
+                seri_sırası,
+                dilimler,
+            }
+        })
+        .collect::<Vec<_>>();
+    if seriler.is_empty() {
+        return Err("sahne kanıtı için Sunburst serisi bulunamadı".to_owned());
+    }
+    Ok(GüneşPatlamasıSahneKanıtı {
+        şema_sürümü: 1,
+        tür: "sunburst",
         koordinat_adımı: 0.001,
         seriler,
     })
@@ -16618,6 +17153,139 @@ mod treemap_fixture_testleri {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
+mod sunburst_fixture_testleri {
+    use super::*;
+
+    type Fixture = fn() -> Result<GrafikSeçenekleri, String>;
+
+    fn düğüm_sayısı(düğümler: &[AğaçDüğümü]) -> usize {
+        düğümler
+            .iter()
+            .map(|düğüm| 1 + düğüm_sayısı(&düğüm.çocuklar))
+            .sum()
+    }
+
+    #[test]
+    fn yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur() {
+        let durumlar: [(&str, Fixture, usize); 7] = [
+            ("sunburst-simple", sunburst_simple, 13),
+            ("sunburst-borderRadius", sunburst_border_radius, 13),
+            ("sunburst-label-rotate", sunburst_label_rotate, 16),
+            ("sunburst-monochrome", sunburst_monochrome, 46),
+            ("sunburst-visualMap", sunburst_visual_map, 20),
+            ("sunburst-drink", sunburst_drink, 110),
+            ("sunburst-book", sunburst_book, 68),
+        ];
+        for (id, fixture, beklenen) in durumlar {
+            let seçenekler = fixture().unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            let Seri::GüneşPatlaması(seri) = &seçenekler.seriler[0] else {
+                panic!("{id}: Sunburst serisi bekleniyordu");
+            };
+            assert_eq!(düğüm_sayısı(&seri.kökler), beklenen, "{id}");
+            seçenekler
+                .doğrula()
+                .unwrap_or_else(|hata| panic!("{id}: {hata}"));
+        }
+
+        let yuvarlak = sunburst_border_radius().expect("rounded fixture");
+        let Seri::GüneşPatlaması(yuvarlak) = &yuvarlak.seriler[0] else {
+            panic!("Sunburst bekleniyordu");
+        };
+        assert_eq!(
+            yuvarlak.yarıçap,
+            (Uzunluk::Piksel(60.0), Uzunluk::Yüzde(90.0))
+        );
+        assert!(!yuvarlak.etiket.göster);
+        assert_eq!(yuvarlak.öğe_stili.kenarlık_kalınlığı, Some(2.0));
+
+        let dönen = sunburst_label_rotate().expect("label rotate fixture");
+        let Seri::GüneşPatlaması(dönen) = &dönen.seriler[0] else {
+            panic!("Sunburst bekleniyordu");
+        };
+        assert_eq!(dönen.sıralama, GüneşPatlamasıSırası::Veri);
+        assert_eq!(dönen.seviyeler.len(), 4);
+        assert!(dönen.etiket_biçimleyicisi.is_some());
+
+        let görsel = sunburst_visual_map().expect("visualMap fixture");
+        assert_eq!(
+            görsel
+                .görsel_eşleme
+                .as_ref()
+                .map(|eşleme| eşleme.renkler.len()),
+            Some(4)
+        );
+
+        let kitap = sunburst_book().expect("book fixture");
+        let Seri::GüneşPatlaması(kitap_serisi) = &kitap.seriler[0] else {
+            panic!("Sunburst bekleniyordu");
+        };
+        assert_eq!(
+            kitap_serisi.merkez,
+            (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(48.0))
+        );
+        assert_eq!(kitap_serisi.seviyeler.len(), 5);
+        assert!(kitap_serisi.sıralama_işlevi.is_some());
+        assert!(kitap_serisi.kökler[0].güneş_patlaması_öğe_stili.is_some());
+    }
+
+    #[test]
+    fn yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur() {
+        let durumlar: [(Fixture, usize); 7] = [
+            (sunburst_simple, 13),
+            (sunburst_border_radius, 13),
+            (sunburst_label_rotate, 16),
+            (sunburst_monochrome, 46),
+            (sunburst_visual_map, 20),
+            (sunburst_drink, 110),
+            (sunburst_book, 68),
+        ];
+        let mut toplam = 0;
+        for (fixture, beklenen) in durumlar {
+            let seçenekler = fixture().expect("resmî Sunburst fixture kurulmalı");
+            let kanıt = güneş_patlaması_sahne_kanıtı(&seçenekler, 700.0, 525.0)
+                .expect("Sunburst sahne kanıtı üretilmeli");
+            let dilimler = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.dilimler)
+                .collect::<Vec<_>>();
+            assert_eq!(dilimler.len(), beklenen);
+            assert!(dilimler.iter().all(|dilim| {
+                dilim.cx.is_finite()
+                    && dilim.cy.is_finite()
+                    && dilim.r0.is_finite()
+                    && dilim.r.is_finite()
+                    && dilim.r >= dilim.r0
+                    && dilim.başlangıç_açısı.is_finite()
+                    && dilim.bitiş_açısı.is_finite()
+            }));
+            toplam += dilimler.len();
+        }
+        assert_eq!(toplam, 286);
+
+        let dönen = güneş_patlaması_sahne_kanıtı(
+            &sunburst_label_rotate().expect("label rotate fixture"),
+            700.0,
+            525.0,
+        )
+        .expect("label rotate scene");
+        assert!(
+            dönen.seriler[0]
+                .dilimler
+                .iter()
+                .any(|dilim| dilim.etiket_metni == "radial")
+        );
+        assert!(
+            dönen.seriler[0]
+                .dilimler
+                .iter()
+                .any(|dilim| dilim.etiket_metni == "tangential")
+        );
+    }
+}
+
+#[cfg(test)]
 mod parallel_fixture_testleri {
     use super::*;
 
@@ -16852,6 +17520,13 @@ fn seçenekler(
         "treemap-show-parent" => treemap_show_parent(),
         "treemap-visual" => treemap_visual(),
         "treemap-sunburst-transition" => treemap_sunburst_transition(durum),
+        "sunburst-simple" => sunburst_simple(),
+        "sunburst-borderRadius" => sunburst_border_radius(),
+        "sunburst-label-rotate" => sunburst_label_rotate(),
+        "sunburst-monochrome" => sunburst_monochrome(),
+        "sunburst-visualMap" => sunburst_visual_map(),
+        "sunburst-drink" => sunburst_drink(),
+        "sunburst-book" => sunburst_book(),
         "parallel-simple" => Ok(parallel_simple()),
         "parallel-aqi" => parallel_aqi(),
         "parallel-nutrients" => parallel_nutrients(),
@@ -17031,6 +17706,10 @@ fn çalıştır() -> Result<(), String> {
         } else if girdi.id.starts_with("treemap-") {
             let özet =
                 ağaç_haritası_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
+        } else if girdi.id.starts_with("sunburst-") {
+            let özet =
+                güneş_patlaması_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
             serde_json::to_vec_pretty(&özet)
         } else {
             let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;

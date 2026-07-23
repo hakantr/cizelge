@@ -1,0 +1,532 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sunburst",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "dilimler": [
+        {
+          "veri_sırası": 0,
+          "ad": "Grandpa",
+          "derinlik": 1,
+          "değer": 25.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 0.0,
+          "r": 59.063,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": 4.039,
+          "saat_yönünde": true,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Grandpa",
+          "etiket_x": 359.754,
+          "etiket_y": 290.374,
+          "etiket_dönüşü": 5.049,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "Uncle Leo",
+          "derinlik": 2,
+          "değer": 15.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 59.063,
+          "r": 118.125,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": 1.795,
+          "saat_yönünde": true,
+          "renk": [
+            101,
+            129,
+            225,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Uncle Leo",
+          "etiket_x": 438.037,
+          "etiket_y": 272.419,
+          "etiket_dönüşü": 6.171,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "Cousin Mary",
+          "derinlik": 3,
+          "değer": 5.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -0.449,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Cousin Mary",
+          "etiket_x": 428.558,
+          "etiket_y": 137.476,
+          "etiket_dönüşü": 1.01,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "Jackson",
+          "derinlik": 4,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 177.188,
+          "r": 236.25,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -1.122,
+          "saat_yönünde": true,
+          "renk": [
+            145,
+            165,
+            233,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Jackson",
+          "etiket_x": 395.999,
+          "etiket_y": 60.964,
+          "etiket_dönüşü": 1.346,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "Cousin Ben",
+          "derinlik": 3,
+          "değer": 4.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": -0.449,
+          "bitiş_açısı": 0.449,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Cousin Ben",
+          "etiket_x": 497.656,
+          "etiket_y": 262.5,
+          "etiket_dönüşü": 0.0,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "Cousin Jack",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": 0.449,
+          "bitiş_açısı": 0.898,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Cousin Jack",
+          "etiket_x": 465.442,
+          "etiket_y": 354.562,
+          "etiket_dönüşü": 5.61,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "Father",
+          "derinlik": 2,
+          "değer": 10.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 59.063,
+          "r": 118.125,
+          "başlangıç_açısı": 1.795,
+          "bitiş_açısı": 4.039,
+          "saat_yönünde": true,
+          "renk": [
+            101,
+            129,
+            225,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Father",
+          "etiket_x": 263.627,
+          "etiket_y": 282.214,
+          "etiket_dönüşü": 0.224,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "Me",
+          "derinlik": 3,
+          "değer": 5.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": 1.795,
+          "bitiş_açısı": 2.917,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Me",
+          "etiket_x": 245.591,
+          "etiket_y": 366.909,
+          "etiket_dönüşü": 0.785,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "Brother Peter",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": 2.917,
+          "bitiş_açısı": 3.142,
+          "saat_yönünde": true,
+          "renk": [
+            123,
+            147,
+            229,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Brother Peter",
+          "etiket_x": 203.272,
+          "etiket_y": 279.032,
+          "etiket_dönüşü": 0.112,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "Nancy",
+          "derinlik": 1,
+          "değer": 3.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 0.0,
+          "r": 59.063,
+          "başlangıç_açısı": 4.039,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Nancy",
+          "etiket_x": 340.246,
+          "etiket_y": 234.626,
+          "etiket_dönüşü": 5.049,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "Uncle Nike",
+          "derinlik": 2,
+          "değer": 3.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 59.063,
+          "r": 118.125,
+          "başlangıç_açısı": 4.039,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            191,
+            219,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Uncle Nike",
+          "etiket_x": 320.739,
+          "etiket_y": 178.878,
+          "etiket_dönüşü": 5.049,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "Cousin Jenny",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": 4.039,
+          "bitiş_açısı": 4.488,
+          "saat_yönünde": true,
+          "renk": [
+            200,
+            224,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Cousin Jenny",
+          "etiket_x": 285.934,
+          "etiket_y": 129.466,
+          "etiket_dönüşü": 5.161,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "Cousin Betty",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 118.125,
+          "r": 177.188,
+          "başlangıç_açısı": 4.488,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            200,
+            224,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 1.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "Cousin Betty",
+          "etiket_x": 333.468,
+          "etiket_y": 115.772,
+          "etiket_dönüşü": 4.825,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        }
+      ]
+    }
+  ]
+}

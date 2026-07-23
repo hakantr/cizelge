@@ -455,9 +455,14 @@ echarts.registerPreprocessor((opt) => {
     item.animation = false;
     item.progressive = 100000;
   }
-  for (const key of ['title', 'legend', 'toolbox']) {
-    const values = Array.isArray(opt[key]) ? opt[key] : opt[key] ? [opt[key]] : [];
-    for (const item of values) if (item.padding == null) item.padding = 15;
+  // Yeni Sunburst geçidi resmi örnek seçeneğini değiştirmeden doğrulanır.
+  // Daha önce kilitlenmiş ailelerin snapshot üretilebilirliği, yalnız kendi
+  // eski kartlarında kullanılan bileşen padding normalizasyonuyla korunur.
+  if (!${JSON.stringify(id.startsWith('sunburst-'))}) {
+    for (const key of ['title', 'legend', 'toolbox']) {
+      const values = Array.isArray(opt[key]) ? opt[key] : opt[key] ? [opt[key]] : [];
+      for (const item of values) if (item.padding == null) item.padding = 15;
+    }
   }
 });
 ${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' || Number.isInteger(gaugeZamanlayıcıMs) ? `
@@ -1158,48 +1163,101 @@ async function çalıştır() {
         };
         const seriler = [];
         chart.getModel().eachSeries((model) => {
-          if (model.subType !== 'treemap') return;
-          const viewRoot = model.getViewRoot?.() || model.getData?.()?.tree?.root;
-          const yerleşim = model.layoutInfo || {};
-          const düğümler = [];
-          const gez = (düğüm, üstX, üstY) => {
-            const kutu = düğüm?.getLayout?.();
-            if (!kutu) return;
-            const x = üstX + (kutu.x || 0);
-            const y = üstY + (kutu.y || 0);
-            const stil = düğüm.hostTree?.data?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
-            const modelcik = düğüm.getModel?.();
-            düğümler.push({
-              veri_sırası: Math.max(0, (düğüm.dataIndex ?? 1) - 1),
+          if (model.subType === 'treemap') {
+            const viewRoot = model.getViewRoot?.() || model.getData?.()?.tree?.root;
+            const yerleşim = model.layoutInfo || {};
+            const düğümler = [];
+            const gez = (düğüm, üstX, üstY) => {
+              const kutu = düğüm?.getLayout?.();
+              if (!kutu) return;
+              const x = üstX + (kutu.x || 0);
+              const y = üstY + (kutu.y || 0);
+              const stil = düğüm.hostTree?.data?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
+              const modelcik = düğüm.getModel?.();
+              düğümler.push({
+                veri_sırası: Math.max(0, (düğüm.dataIndex ?? 1) - 1),
+                ad: düğüm.name || '',
+                derinlik: Math.max(0, (düğüm.depth ?? 1) - (viewRoot.depth ?? 0) - 1),
+                x: yuvarla((yerleşim.x || 0) + x),
+                y: yuvarla((yerleşim.y || 0) + y),
+                genişlik: yuvarla(kutu.width),
+                yükseklik: yuvarla(kutu.height),
+                renk: renk(stil.fill),
+                kenarlık_rengi: renk(stil.stroke),
+                kenarlık_kalınlığı: yuvarla(kutu.borderWidth),
+                boşluk_genişliği: yuvarla(modelcik?.get?.(['itemStyle', 'gapWidth']) || 0),
+                üst_yükseklik: yuvarla(kutu.upperHeight),
+                yaprak: !(düğüm.viewChildren?.length),
+                inilebilir_yaprak: kutu.isLeafRoot === true
+              });
+              for (const çocuk of düğüm.viewChildren || []) gez(çocuk, x, y);
+            };
+            for (const çocuk of viewRoot?.viewChildren || []) gez(çocuk, 0, 0);
+            seriler.push({
+              seri_sırası: model.seriesIndex,
+              alan: {
+                x: yuvarla(yerleşim.x),
+                y: yuvarla(yerleşim.y),
+                genişlik: yuvarla(yerleşim.width),
+                yükseklik: yuvarla(yerleşim.height)
+              },
+              düğümler
+            });
+            return;
+          }
+          if (model.subType !== 'sunburst') return;
+          const veri = model.getData?.();
+          const viewRoot = model.getViewRoot?.() || veri?.tree?.root;
+          const dilimler = [];
+          const köşeler = (değer) => {
+            const dizi = Array.isArray(değer) ? değer : [değer || 0];
+            if (dizi.length === 1) return [dizi[0], dizi[0], dizi[0], dizi[0]].map(yuvarla);
+            if (dizi.length === 2) return [dizi[0], dizi[0], dizi[1], dizi[1]].map(yuvarla);
+            return [dizi[0] || 0, dizi[1] || 0, dizi[2] || 0, dizi[3] || 0].map(yuvarla);
+          };
+          const gez = (düğüm) => {
+            const yerleşim = düğüm?.getLayout?.();
+            if (!yerleşim || düğüm === viewRoot) return;
+            const grafik = veri?.getItemGraphicEl?.(düğüm.dataIndex);
+            const şekil = grafik?.shape || yerleşim;
+            const stil = grafik?.style || veri?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
+            const etiket = grafik?.getTextContent?.();
+            dilimler.push({
+              veri_sırası: Math.max(
+                0,
+                (veri?.getRawIndex?.(düğüm.dataIndex) ?? düğüm.dataIndex ?? 1) - 1
+              ),
               ad: düğüm.name || '',
-              derinlik: Math.max(0, (düğüm.depth ?? 1) - (viewRoot.depth ?? 0) - 1),
-              x: yuvarla((yerleşim.x || 0) + x),
-              y: yuvarla((yerleşim.y || 0) + y),
-              genişlik: yuvarla(kutu.width),
-              yükseklik: yuvarla(kutu.height),
+              derinlik: düğüm.depth || 0,
+              değer: Number(düğüm.getValue?.() ?? 0) || 0,
+              cx: yuvarla(şekil.cx ?? yerleşim.cx),
+              cy: yuvarla(şekil.cy ?? yerleşim.cy),
+              r0: yuvarla(şekil.r0 ?? yerleşim.r0),
+              r: yuvarla(şekil.r ?? yerleşim.r),
+              başlangıç_açısı: yuvarla(şekil.startAngle ?? yerleşim.startAngle),
+              bitiş_açısı: yuvarla(şekil.endAngle ?? yerleşim.endAngle),
+              saat_yönünde: (şekil.clockwise ?? yerleşim.clockwise) !== false,
               renk: renk(stil.fill),
               kenarlık_rengi: renk(stil.stroke),
-              kenarlık_kalınlığı: yuvarla(kutu.borderWidth),
-              boşluk_genişliği: yuvarla(modelcik?.get?.(['itemStyle', 'gapWidth']) || 0),
-              üst_yükseklik: yuvarla(kutu.upperHeight),
-              yaprak: !(düğüm.viewChildren?.length),
-              inilebilir_yaprak: kutu.isLeafRoot === true
+              kenarlık_kalınlığı: yuvarla(stil.lineWidth || 0),
+              köşe_yarıçapları: köşeler(şekil.cornerRadius),
+              etiket_göster: Boolean(etiket && !etiket.ignore),
+              etiket_metni: etiket?.style?.text || '',
+              etiket_x: yuvarla(etiket?.x),
+              etiket_y: yuvarla(etiket?.y),
+              etiket_dönüşü: yuvarla(etiket?.rotation),
+              etiket_yatay_hizası: etiket?.style?.align || 'left',
+              etiket_dikey_hizası: etiket?.style?.verticalAlign || 'top',
+              etiket_fontu: etiket?.style?.font || '',
+              etiket_rengi: renk(etiket?.style?.fill)
             });
-            for (const çocuk of düğüm.viewChildren || []) gez(çocuk, x, y);
+            for (const çocuk of düğüm.children || []) gez(çocuk);
           };
-          for (const çocuk of viewRoot?.viewChildren || []) gez(çocuk, 0, 0);
-          seriler.push({
-            seri_sırası: model.seriesIndex,
-            alan: {
-              x: yuvarla(yerleşim.x),
-              y: yuvarla(yerleşim.y),
-              genişlik: yuvarla(yerleşim.width),
-              yükseklik: yuvarla(yerleşim.height)
-            },
-            düğümler
-          });
+          for (const çocuk of viewRoot?.children || []) gez(çocuk);
+          seriler.push({ seri_sırası: model.seriesIndex, dilimler });
         });
-        return { şema_sürümü: 1, tür: 'treemap', koordinat_adımı: 0.001, seriler };
+        const tür = seriler.some((seri) => Array.isArray(seri.dilimler)) ? 'sunburst' : 'treemap';
+        return { şema_sürümü: 1, tür, koordinat_adımı: 0.001, seriler };
       });
       fs.mkdirSync(path.dirname(path.resolve(args.sceneOutput)), { recursive: true });
       fs.writeFileSync(path.resolve(args.sceneOutput), `${JSON.stringify(sahne, null, 2)}\n`);

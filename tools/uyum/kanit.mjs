@@ -39,6 +39,13 @@ const treemapKarşılaştırması = () => ({
   sahneReferansı: true
 });
 
+const sunburstKarşılaştırması = () => ({
+  tipografiSigma: 0.8,
+  // Her sektörün açı/yarıçap/style/etiket geometrisi kilitli ECharts
+  // sahnesiyle alan alan karşılaştırılır.
+  sahneReferansı: true
+});
+
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -141,6 +148,20 @@ const SENARYOLAR = [
     id,
     tür: 'statik',
     karşılaştırma: treemapKarşılaştırması(),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  })),
+  ...[
+    { id: 'sunburst-simple' },
+    { id: 'sunburst-borderRadius' },
+    { id: 'sunburst-label-rotate' },
+    { id: 'sunburst-monochrome' },
+    { id: 'sunburst-visualMap' },
+    { id: 'sunburst-drink', genişlik: 1000, yükseklik: 750 },
+    { id: 'sunburst-book', genişlik: 820, yükseklik: 615 }
+  ].map((senaryo) => ({
+    ...senaryo,
+    tür: 'statik',
+    karşılaştırma: sunburstKarşılaştırması(),
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   })),
   { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -996,8 +1017,103 @@ function treemapSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) 
   }];
 }
 
+function sunburstSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
+  if (!senaryo.karşılaştırma?.sahneReferansı) return [];
+  const açıklama = 'Her Sunburst sektörünün veri sırası, açı/yarıçap sınırı, dolgu/kenarlık/köşe katmanı ve bağlı etiket geometrisi kilitli ECharts sahnesiyle eşleşmeli';
+  if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
+    return [{
+      ad: 'sunburst_sektör_geometrisi_ve_katmanları', geçti: false, açıklama,
+      hata: 'Cizelge sahne kanıtı eksik'
+    }];
+  }
+  if (!referansSahneDosyası || !fs.existsSync(referansSahneDosyası)) {
+    return [{
+      ad: 'sunburst_sektör_geometrisi_ve_katmanları', geçti: false, açıklama,
+      hata: 'kilitli ECharts sahne kanıtı eksik'
+    }];
+  }
+  const gerçek = JSON.parse(fs.readFileSync(sahneDosyası, 'utf8'));
+  const beklenen = JSON.parse(fs.readFileSync(referansSahneDosyası, 'utf8'));
+  const uyuşmazlıklar = [];
+  const ekle = (yol, beklenenDeğer, gerçekDeğer) => {
+    if (uyuşmazlıklar.length < 60) {
+      uyuşmazlıklar.push({ yol, beklenen: beklenenDeğer, gerçek: gerçekDeğer });
+    }
+  };
+  for (const alan of ['şema_sürümü', 'tür', 'koordinat_adımı']) {
+    if (gerçek[alan] !== beklenen[alan]) ekle(alan, beklenen[alan], gerçek[alan]);
+  }
+  const koordinatlar = new Set([
+    'cx', 'cy', 'r0', 'r', 'başlangıç_açısı', 'bitiş_açısı',
+    'kenarlık_kalınlığı', 'etiket_x', 'etiket_y', 'etiket_dönüşü',
+    'köşe_yarıçapları'
+  ]);
+  const eşitMi = (alan, a, b) => {
+    if (alan === 'köşe_yarıçapları' && Array.isArray(a) && Array.isArray(b)) {
+      return a.length === b.length && a.every((değer, sıra) => Math.abs(değer - b[sıra]) <= 0.0011);
+    }
+    if (koordinatlar.has(alan) && typeof a === 'number' && typeof b === 'number') {
+      return Math.abs(a - b) <= 0.0011;
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+  };
+  const bSeriler = beklenen.seriler || [];
+  const gSeriler = gerçek.seriler || [];
+  if (bSeriler.length !== gSeriler.length) ekle('seriler.length', bSeriler.length, gSeriler.length);
+  for (let seriSırası = 0; seriSırası < Math.min(bSeriler.length, gSeriler.length); seriSırası += 1) {
+    const bSeri = bSeriler[seriSırası];
+    const gSeri = gSeriler[seriSırası];
+    if (bSeri.seri_sırası !== gSeri.seri_sırası) {
+      ekle(`seriler[${seriSırası}].seri_sırası`, bSeri.seri_sırası, gSeri.seri_sırası);
+    }
+    const bDilimler = bSeri.dilimler || [];
+    const gDilimler = gSeri.dilimler || [];
+    if (bDilimler.length !== gDilimler.length) {
+      ekle(`seriler[${seriSırası}].dilimler.length`, bDilimler.length, gDilimler.length);
+    }
+    for (let sıra = 0; sıra < Math.min(bDilimler.length, gDilimler.length); sıra += 1) {
+      const bDilim = bDilimler[sıra];
+      const gDilim = gDilimler[sıra];
+      for (const alan of [
+        'veri_sırası', 'ad', 'derinlik', 'değer', 'cx', 'cy', 'r0', 'r',
+        'başlangıç_açısı', 'bitiş_açısı', 'saat_yönünde', 'renk',
+        'kenarlık_rengi', 'kenarlık_kalınlığı', 'köşe_yarıçapları',
+        'etiket_göster', 'etiket_metni', 'etiket_x', 'etiket_y', 'etiket_dönüşü'
+      ]) {
+        // Görünmeyen etiketin metin/konum/dönüş alanları çizim çıktısının
+        // parçası değildir. ECharts bu iç durumu korurken Çizelge sahnesi
+        // kasıtlı olarak boşaltabilir; görünürlük bitini yine sıkı kıyasla.
+        if (!bDilim.etiket_göster && !gDilim.etiket_göster
+            && ['etiket_metni', 'etiket_x', 'etiket_y', 'etiket_dönüşü'].includes(alan)) {
+          continue;
+        }
+        if (!eşitMi(alan, bDilim[alan], gDilim[alan])) {
+          ekle(
+            `seriler[${seriSırası}].dilimler[${sıra}](${bDilim.ad}).${alan}`,
+            bDilim[alan], gDilim[alan]
+          );
+        }
+      }
+    }
+  }
+  const beklenenDilim = bSeriler.reduce((toplam, seri) => toplam + (seri.dilimler?.length || 0), 0);
+  const gerçekDilim = gSeriler.reduce((toplam, seri) => toplam + (seri.dilimler?.length || 0), 0);
+  return [{
+    ad: 'sunburst_sektör_geometrisi_ve_katmanları',
+    geçti: uyuşmazlıklar.length === 0,
+    açıklama,
+    beklenen_dilim: beklenenDilim,
+    gerçek_dilim: gerçekDilim,
+    karşılaştırılan_alan: Math.min(beklenenDilim, gerçekDilim) * 20,
+    uyuşmazlıklar
+  }];
+}
+
 function sahneÖzetiKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
   if (senaryo.karşılaştırma?.sahneReferansı) {
+    if (senaryo.id.startsWith('sunburst-')) {
+      return sunburstSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
+    }
     return treemapSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
   }
   const beklenen = senaryo.karşılaştırma?.sahneÖzeti;

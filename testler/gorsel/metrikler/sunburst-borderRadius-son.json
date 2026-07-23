@@ -1,0 +1,43 @@
+{
+  "id": "sunburst-borderRadius",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 0,
+  "değişen_piksel_oranı": 0,
+  "ssim": 0.9997341110911173,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 51,
+    "değişen_piksel_oranı": 0.00018888888888888888,
+    "ssim": 0.9996055477581549
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "sunburst_sektör_geometrisi_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Her Sunburst sektörünün veri sırası, açı/yarıçap sınırı, dolgu/kenarlık/köşe katmanı ve bağlı etiket geometrisi kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_dilim": 13,
+      "gerçek_dilim": 13,
+      "karşılaştırılan_alan": 260,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sunburst-borderRadius.png",
+    "gerçek": "testler/gorsel/gerçek/default/sunburst-borderRadius.png",
+    "fark": "testler/gorsel/fark/default/sunburst-borderRadius.png",
+    "normalize_fark": "testler/gorsel/fark/default/sunburst-borderRadius-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/sunburst-borderRadius.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/sunburst-borderRadius.json"
+  }
+}

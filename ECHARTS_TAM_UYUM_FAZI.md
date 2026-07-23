@@ -2020,6 +2020,95 @@ universal transition ara kareleri ve ölçümlü/iptal edilebilir büyük veri i
 Faz 7/8 kapılarında tamamlanmadan Treemap ailesi genel olarak
 `tam_kanıtlı` sayılmaz.
 
+#### Sunburst aile kapısı
+
+Sunburst aktarımının normatif çekirdeği
+`../echarts/src/chart/sunburst/SunburstSeries.ts`, `sunburstLayout.ts`,
+`sunburstVisual.ts`, `SunburstPiece.ts`, `SunburstView.ts`,
+`sunburstAction.ts` ve `install.ts` dosyalarıdır. Galeri davranışı ve veri
+şekli için `../echarts-examples/public/examples/ts` altındaki
+`sunburst-simple`, `sunburst-borderRadius`, `sunburst-label-rotate`,
+`sunburst-monochrome`, `sunburst-visualMap`, `sunburst-drink` ve
+`sunburst-book` kaynakları kullanılır. Book kaynağının uzantısı resmî repoda
+`.js`, diğerleri `.ts`dir. `tools/uyum/sunburst_verisi.mjs` bu dosyaları
+TypeScript ile yerel olarak dönüştürür, kaynağın kendi veri kurma kodunu
+çalıştırır ve yedi belirlenimci JSON ağacı üretir; elle kısaltılmış veya
+temsili veri kullanılmaz.
+
+Uygulanan Sunburst yüzeyi şunları birlikte taşır:
+
+- Sanal kök, kararlı preorder `dataIndex`, sayı/çok boyutlu değer, iç düğüm
+  toplamı, sıfır/sonlu olmayan değer kuralları ve seri/veri `colorBy` palet
+  paylaşımı. Sıralama `desc`, `asc`, ham veri sırası veya tipli Rust callback
+  olabilir; callback derinlik, değer ve veri sırasını görür;
+- `radius`, seviye başına `r0/r`, `center`, `startAngle`, `clockwise`,
+  `minAngle`, `stillShowZeroSum` ve `renderLabelForZeroData`. Sıfır değerli
+  sektör sahne ve veri indeksinden atılmaz; yalnız ilgili seçenek kapalıysa
+  etiketi görünmez. Yüzde ve mutlak yarıçaplar aynı kısa-tuval boyutuna göre
+  çözülür;
+- Seri → level → düğüm → normal/emphasis/blur/select kalıtımı; düz,
+  gradyan ve desen dolgu, border türü/kalınlığı/rengi, dört sektör köşesi,
+  opacity, dolgu ve kenarlık gölgesi. Saydam dolguda Canvas gölgesi dolgu
+  maskesine yanlışlıkla yayılmaz; varsa yalnız stroke maskesi gölgelenir;
+- İç/dış etiket, `radial`, `tangential` ve sayısal dönüş, ters tarafta
+  otomatik 180° çevirme, distance/offset/align/verticalAlign/padding,
+  çok satır, rich text ve `treePathInfo` taşıyan formatter callback'i.
+  Zrender'ın dolgu parlaklığına bağlı iç metin rengi, otomatik 2 px iç/dış
+  kontur, açık `textBorder*`, `textShadow*`, font ailesi ve macOS CJK geri
+  düşümü raster yolunda uygulanır;
+- `nodeClick: rootToNode | link | false`, merkez roll-up halkası, güvenli
+  link/target isteği, `cursor` ve `silent`; vurgu odağında self/ancestor/
+  descendant/relative. `sunburstRootToNode`, `sunburstHighlight` ve
+  `sunburstUnhighlight` action adları query/batch/silent yükleriyle tipli
+  çalışma zamanı olaylarına bağlıdır;
+- `coordinateSystemUsage: 'box'` için none, Calendar içerik kutusu ve Matrix
+  hücre/aralık kutusu. Eksik bileşen veya geçersiz koordinat tipli doğrulama
+  hatasıdır. Seri kaydı, setOption birleşimi, replaceMerge/restore/clear ve
+  seri kimliğine bağlı görünüm kökü aynı yaşam döngüsüne dahildir;
+- `animationType: 'expansion' | 'scale'` iki resmî değer olarak modelde
+  korunur. Kilitli ECharts 6.1 kaynağı bu alanı bildirip varsayılanı
+  `expansion` yapsa da Sunburst çalışma zamanı alanı okumaz; Çizelge de
+  kaynağın sahip olmadığı sahte bir davranış dalı kanıtlamaz. Genel
+  add/update/remove ve universal transition ara kareleri Faz 8 kapısındadır.
+
+Yapısal kanıt rasterdan bağımsızdır. Referans üreticisi çalışan ECharts
+modelinden her sektör için veri sırası, ad, derinlik, değer, merkez,
+`r0/r`, başlangıç/bitiş açısı, yön, dolgu, kenarlık, köşe yarıçapları ve
+bağlı etiket görünürlüğü/metni/konumu/dönüşünü 0,001 mantıksal piksel
+çözünürlükte çıkarır. Çizelge aynı şemayı kendi yerleşiminden üretir;
+`tools/uyum/kanit.mjs` alanları sektör sektör karşılaştırır. İki tarafta da
+görünmeyen etikete ait boyanmayan metin/konum ayrıntıları karşılaştırılmaz,
+fakat görünürlük biti ve sektörün kendisi zorunlu kalır. Sonuç; Book 68,
+Border Radius 13, Drink 110, Label Rotate 16, Monochrome 46, Simple 13 ve
+VisualMap 20 olmak üzere **286/286 sektör ve 5.720 karşılaştırılan alanda
+sıfır uyuşmazlıktır**.
+
+600×450 kilitli Sunburst raster durumu şöyledir. Kapı metrikleri iki
+görüntüye de aynı Gauss çekirdeği (`σ=0,8`) uygulandıktan sonra değişmeyen
+`pixelmatch=0,1`, değişen piksel `≤%1` ve `SSIM≥0,99` eşikleriyle hesaplanır;
+ham metrikler ve ham fark görüntüsü ayrıca saklanır.
+
+| Örnek | Kapı farkı | Kapı SSIM | Ham fark | Ham SSIM | Sektör kapısı | Statik durum |
+|---|---:|---:|---:|---:|---:|---|
+| `sunburst-book` | %0,1663 | 0,994007 | %1,2856 | 0,991627 | 68/68 | geçti |
+| `sunburst-borderRadius` | %0,0000 | 0,999734 | %0,0189 | 0,999606 | 13/13 | geçti |
+| `sunburst-drink` | %0,0026 | 0,998112 | %0,5381 | 0,997092 | 110/110 | geçti |
+| `sunburst-label-rotate` | %0,0133 | 0,998152 | %0,4826 | 0,997097 | 16/16 | geçti |
+| `sunburst-monochrome` | %0,0000 | 0,999857 | %0,0119 | 0,999801 | 46/46 | geçti |
+| `sunburst-simple` | %0,0037 | 0,998763 | %0,3226 | 0,997708 | 13/13 | geçti |
+| `sunburst-visualMap` | %0,0067 | 0,998456 | %0,4804 | 0,997150 | 20/20 | geçti |
+
+Referans yenileme her örneği iki bağımsız Chromium çalıştırmasında üretir
+ve bit düzeyinde aynı değilse kilit yazmaz. Sunburst referansında örnek
+seçeneği animation'ın kanıt için kapatılması dışında değiştirilmez; örneğin
+kaynakta yazılmayan `title.padding`, ECharts'ın resmî 5 px varsayılanında
+kalır. Yedi kartın fixture ve sahne testleri, çekirdek/action testleri ve
+görsel raporu sırasıyla `examples/uyum_fixture.rs`,
+`src/grafik/gunes.rs`, `src/eylem.rs` ve
+`testler/gorsel/rapor/index.html` üzerinden denetlenir. Bu geçitle statik
+görsel kanıt sayacı **182/332 (%54,8)** olur; tüm kapılar sayacı, Faz 7/8
+etkileşim/animasyon ve çapraz yüzey kapıları tamamlanana kadar ayrı kalır.
+
 Kabul:
 
 - Graph 12, Tree 7, Treemap 7, Sunburst 7, Sankey 7 ve Chord 4 görünür

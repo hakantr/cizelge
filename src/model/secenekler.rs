@@ -1396,6 +1396,7 @@ impl GrafikSeçenekleri {
                 Seri::Grafo(grafo) => grafo.matris_sırası,
                 Seri::Özel(özel) => özel.matris_sırası,
                 Seri::AğaçHaritası(ağaç_haritası) => ağaç_haritası.matris_sırası,
+                Seri::GüneşPatlaması(güneş) => güneş.matris_sırası,
                 _ => None,
             };
             if let Some(matris_sırası) = matris_sırası
@@ -1556,6 +1557,78 @@ impl GrafikSeçenekleri {
                         alan: "series.treemap.coordinateSystem",
                         ayrıntı: "Matrix koordinatı bir matrixIndex ile bağlanmalı".to_owned(),
                     });
+                }
+            }
+            if let Seri::GüneşPatlaması(güneş) = seri {
+                if let Some(takvim_sırası) = güneş.takvim_sırası {
+                    if self.takvimler.get(takvim_sırası).is_none() {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "calendar",
+                            sıra: takvim_sırası,
+                        });
+                    }
+                    if !güneş.takvim_koordinatı.is_some_and(f64::is_finite) {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sunburst.coord",
+                            ayrıntı: "takvim Sunburst'ü sonlu bir tarih koordinatı taşımalı"
+                                .to_owned(),
+                        });
+                    }
+                } else if güneş.takvim_koordinatı.is_some() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sunburst.coordinateSystem",
+                        ayrıntı: "takvim koordinatı bir calendarIndex ile bağlanmalı".to_owned(),
+                    });
+                }
+                if güneş.matris_sırası.is_some() && güneş.matris_koordinatı.is_none() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sunburst.coord",
+                        ayrıntı: "Matrix Sunburst'ü bir hücre/aralık koordinatı taşımalı"
+                            .to_owned(),
+                    });
+                }
+                if güneş.matris_sırası.is_none() && güneş.matris_koordinatı.is_some() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sunburst.coordinateSystem",
+                        ayrıntı: "Matrix koordinatı bir matrixIndex ile bağlanmalı".to_owned(),
+                    });
+                }
+                if !güneş.başlangıç_açısı.is_finite()
+                    || !güneş.en_küçük_açı.is_finite()
+                    || güneş.en_küçük_açı < 0.0
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sunburst.startAngle/minAngle",
+                        ayrıntı: "açılar sonlu, minAngle negatif olmayan sayı olmalı".to_owned(),
+                    });
+                }
+                let uzunluk_geçerli = |uzunluk: crate::model::Uzunluk, negatif_olabilir: bool| {
+                    let değer = match uzunluk {
+                        crate::model::Uzunluk::Piksel(değer)
+                        | crate::model::Uzunluk::Yüzde(değer) => değer,
+                    };
+                    değer.is_finite() && (negatif_olabilir || değer >= 0.0)
+                };
+                if !uzunluk_geçerli(güneş.merkez.0, true)
+                    || !uzunluk_geçerli(güneş.merkez.1, true)
+                    || !uzunluk_geçerli(güneş.yarıçap.0, false)
+                    || !uzunluk_geçerli(güneş.yarıçap.1, false)
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sunburst.center/radius",
+                        ayrıntı: "merkez sonlu, yarıçaplar sonlu ve negatif olmayan olmalı"
+                            .to_owned(),
+                    });
+                }
+                for (sıra, seviye) in güneş.seviyeler.iter().enumerate() {
+                    if let Some((iç, dış)) = seviye.yarıçap
+                        && (!uzunluk_geçerli(iç, false) || !uzunluk_geçerli(dış, false))
+                    {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sunburst.levels.radius",
+                            ayrıntı: format!("{sıra}. level yarıçapları geçersiz"),
+                        });
+                    }
                 }
             }
             if let Seri::Hatlar(hatlar) = seri {

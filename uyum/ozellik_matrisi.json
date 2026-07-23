@@ -15730,17 +15730,37 @@
     "ts_türü": "SunburstSeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::GüneşPatlaması, From<GüneşPatlamasıSerisi>)",
+    "veri_biçimleri": [
+      "GüneşPatlamasıSerisi"
+    ],
+    "koordinat_dalları": [
+      "none",
+      "calendar-box",
+      "matrix-box",
+      "boyama",
+      "olay/isabet"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 255,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur",
+      "eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "238117dd19aab7770f6b",
@@ -26691,17 +26711,33 @@
     "ts_türü": "'expansion' | 'scale'",
     "zorunlu": false,
     "echarts_varsayılanı": "'expansion'",
-    "rust_api": "src/model/seri.rs (sunburst.animationType)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıAnimasyonTürü); resmî 6.1 çalışma zamanı bu bildirimi okumaz",
+    "veri_biçimleri": [
+      "expansion",
+      "scale"
+    ],
+    "koordinat_dalları": [
+      "iki-değer-modelde-korunur",
+      "resmî-runtime-etkisiz"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 155,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::animation_type_iki_resmi_degeri_modelde_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1675cd687307d04ebc7a",
@@ -26712,17 +26748,31 @@
     "ts_türü": "(number | string)[] | number | string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.borderRadius)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıKöşeYarıçapı); src/cizim/yuzey.rs (yuvarlatılmış_dilim_yolu)",
+    "veri_biçimleri": [
+      "number",
+      "[inner,outer]",
+      "[4]",
+      "percent"
+    ],
+    "koordinat_dalları": [
+      "dört-sector-köşesi",
+      "halka-kalınlığına-yüzde",
+      "dar-açı-kıstırma"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 52,
       "sembol": "SunburstItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::mutlak_level_yaricapi_ve_yuzde_kose_yaricapi_korunur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-borderRadius"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "99bfb61145369d9a2195",
@@ -26733,17 +26783,34 @@
     "ts_türü": "SunburstSeriesNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.children)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::çocuklar, dal)",
+    "veri_biçimleri": [
+      "Vec<AğaçDüğümü>"
+    ],
+    "koordinat_dalları": [
+      "yaprak",
+      "dal",
+      "özyinelemeli-alt-soy"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 91,
       "sembol": "SunburstSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4f54685fbbc76ad78413",
@@ -26754,17 +26821,33 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (sunburst.clockwise)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::saat_yönünde)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "saat-yönü",
+      "ters-yön"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 133,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e008452969d1a93f95f1",
@@ -26775,17 +26858,32 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.collapsed)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::daraltılmış; resmî ortak Tree metadata alanı)",
+    "veri_biçimleri": [
+      "Option<bool>"
+    ],
+    "koordinat_dalları": [
+      "metadata-koruma",
+      "Sunburst yerleşiminde resmî olarak etkisiz"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 93,
       "sembol": "SunburstSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "030a019eda599649fa91",
@@ -26796,17 +26894,33 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.cursor)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::imleç); src/cizim/pencere.rs (CSS→GPUI imleç eşlemesi)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "pointer",
+      "default",
+      "bilinmeyen-güvenli-düşüş"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 95,
       "sembol": "SunburstSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "62b3c88b1a385655fbd6",
@@ -26817,17 +26931,37 @@
     "ts_türü": "SunburstSeriesNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": "[]",
-    "rust_api": "src/model/seri.rs (sunburst.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::kökler); src/model/agac.rs (AğaçDüğümü)",
+    "veri_biçimleri": [
+      "number",
+      "number[]",
+      "SunburstSeriesNodeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "sanal-kök",
+      "preorder-dataIndex",
+      "iç-düğüm-toplamı",
+      "negatif-sıfırlama"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 151,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d194a4a6005807e2bd63",
@@ -26838,17 +26972,33 @@
     "ts_türü": "{\n        itemStyle?: SunburstItemStyleOption\n        label?: SunburstLabelOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.highlight)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/eylem.rs (sunburstHighlight/sunburstUnhighlight); src/grafik/gunes.rs (odak/blur durumları)",
+    "veri_biçimleri": [
+      "dispatchAction payload"
+    ],
+    "koordinat_dalları": [
+      "highlight→highlight",
+      "unhighlight→downplay",
+      "ancestor/descendant/relative"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 111,
       "sembol": "SunburstSeriesLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6f26a5f71106b6bc04b2",
@@ -26859,17 +27009,38 @@
     "ts_türü": "SunburstItemStyleOption<TCbParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            borderWidth: 1,\n            borderColor: 'white',\n            borderType: 'solid',\n            shadowBlur: 0,\n            shadowColor: 'rgba(0, 0, 0, 0.2)',\n            shadowOffsetX: 0,\n            shadowOffsetY: 0,\n            opacity: 1\n        }",
-    "rust_api": "src/model/seri.rs (sunburst.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıÖğeStili); src/grafik/gunes.rs (seri→level→node→state kalıtımı)",
+    "veri_biçimleri": [
+      "Dolgu",
+      "Renk",
+      "number/percent cornerRadius"
+    ],
+    "koordinat_dalları": [
+      "fill/border",
+      "opacity",
+      "shadow",
+      "solid/dashed/dotted",
+      "normal/emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 77,
       "sembol": "SunburstStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2696bb05616805333dcf",
@@ -26880,17 +27051,38 @@
     "ts_türü": "SunburstLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            // could be: 'radial', 'tangential', or 'none'\n            rotate: 'radial',\n            show: true,\n            opacity: 1,\n            // 'left' is for inner side of inside, and 'right' is for outer\n            // side for inside\n            align: 'center',\n            position: 'inside',\n            distance: 5,\n            silent: true\n        }",
-    "rust_api": "src/model/seri.rs (sunburst.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Etiket/EtiketYaması); src/grafik/gunes.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "treePathInfo callback"
+    ],
+    "koordinat_dalları": [
+      "inside/outside",
+      "radial/tangential/degree",
+      "align/distance",
+      "minAngle",
+      "durumlar"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 78,
       "sembol": "SunburstStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "5d0e3e6fede7c9d5b380",
@@ -26901,17 +27093,32 @@
     "ts_türü": "SunburstSeriesLevelOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.levels)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıSeviyesi); src/grafik/gunes.rs (seviye_uygula)",
+    "veri_biçimleri": [
+      "Vec<GüneşPatlamasıSeviyesi>"
+    ],
+    "koordinat_dalları": [
+      "radius",
+      "itemStyle",
+      "label",
+      "emphasis/blur/select",
+      "seri→level→node kalıtımı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 153,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-label-rotate",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4dd60873f17d7ecfa8d8",
@@ -26922,17 +27129,32 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.link)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::bağlantı)",
+    "veri_biçimleri": [
+      "Option<String>"
+    ],
+    "koordinat_dalları": [
+      "yok",
+      "URL metadata"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 88,
       "sembol": "SunburstSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8fdfa56d0f227809e046",
@@ -26943,17 +27165,32 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0",
-    "rust_api": "src/model/seri.rs (sunburst.minAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::en_küçük_açı); src/grafik/gunes.rs (minAngle dağıtımı)",
+    "veri_biçimleri": [
+      "degree"
+    ],
+    "koordinat_dalları": [
+      "sıfır",
+      "pozitif-alt-sınır"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 135,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "dec7ed41bb59d29f8dcd",
@@ -26964,17 +27201,32 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0",
-    "rust_api": "src/model/seri.rs (sunburst.minAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::en_küçük_açı); src/grafik/gunes.rs (minAngle dağıtımı)",
+    "veri_biçimleri": [
+      "degree"
+    ],
+    "koordinat_dalları": [
+      "sıfır",
+      "pozitif-alt-sınır"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 57,
       "sembol": "SunburstLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0faa6b2857bb8f9a0a08",
@@ -26985,17 +27237,36 @@
     "ts_türü": "'rootToNode' | 'link' | false",
     "zorunlu": false,
     "echarts_varsayılanı": "'rootToNode'",
-    "rust_api": "src/model/seri.rs (sunburst.nodeClick)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıDüğümTıklaması); src/cizim/pencere.rs (root/link/false)",
+    "veri_biçimleri": [
+      "rootToNode",
+      "link",
+      "false"
+    ],
+    "koordinat_dalları": [
+      "düğümü-kök-yap",
+      "merkez-rollup",
+      "host-güvenli-bağlantı",
+      "kapalı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 147,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "730d791576a068f0a2a1",
@@ -27006,17 +27277,36 @@
     "ts_türü": "'rootToNode' | 'link' | false",
     "zorunlu": false,
     "echarts_varsayılanı": "'rootToNode'",
-    "rust_api": "src/model/seri.rs (sunburst.nodeClick)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıDüğümTıklaması); src/cizim/pencere.rs (root/link/false)",
+    "veri_biçimleri": [
+      "rootToNode",
+      "link",
+      "false"
+    ],
+    "koordinat_dalları": [
+      "düğümü-kök-yap",
+      "merkez-rollup",
+      "host-güvenli-bağlantı",
+      "kapalı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 86,
       "sembol": "SunburstSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "169417a42059addb9e90",
@@ -27027,17 +27317,28 @@
     "ts_türü": "SeriesLabelOption['position'] | 'outside'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.position)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (EtiketKonumu); src/grafik/gunes.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "inside",
+      "outside"
+    ],
+    "koordinat_dalları": [
+      "halka-ortası",
+      "dış-yarıçap+distance"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 59,
       "sembol": "SunburstLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "605543f86552245cf147",
@@ -27048,17 +27349,28 @@
     "ts_türü": "number | string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.r)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıSeviyesi::yarıçap)",
+    "veri_biçimleri": [
+      "number",
+      "percent"
+    ],
+    "koordinat_dalları": [
+      "otomatik-katman",
+      "mutlak-seviye-dışı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 105,
       "sembol": "SunburstSeriesLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "83eaa32e22b1d38df46a",
@@ -27069,17 +27381,28 @@
     "ts_türü": "number | string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.r0)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıSeviyesi::yarıçap)",
+    "veri_biçimleri": [
+      "number",
+      "percent"
+    ],
+    "koordinat_dalları": [
+      "otomatik-katman",
+      "mutlak-seviye-içi"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 109,
       "sembol": "SunburstSeriesLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "eab4032280a443166e6d",
@@ -27090,17 +27413,36 @@
     "ts_türü": "(number | string)[]",
     "zorunlu": false,
     "echarts_varsayılanı": "[0, '75%']",
-    "rust_api": "src/model/seri.rs (sunburst.radius)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::halka); src/grafik/gunes.rs (güneş_patlaması_dilimleri)",
+    "veri_biçimleri": [
+      "number",
+      "percent",
+      "[inner, outer]"
+    ],
+    "koordinat_dalları": [
+      "disk",
+      "halka",
+      "seviye-override"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 101,
       "sembol": "SunburstSeriesLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8a74777ee5abf9e04262",
@@ -27111,17 +27453,27 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "false",
-    "rust_api": "src/model/seri.rs (sunburst.renderLabelForZeroData)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (sıfır_veri_etiketini_göster); src/grafik/gunes.rs (sıfır sektör/etiket ayrımı)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "sıfır-sektör-korunur",
+      "etiket-gizli",
+      "etiket-açık"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 149,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ace7590ff3f1026f95fc",
@@ -27132,17 +27484,32 @@
     "ts_türü": "'radial' | 'tangential' | number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.rotate)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (EtiketDöndürme); src/grafik/gunes.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "radial",
+      "tangential",
+      "number"
+    ],
+    "koordinat_dalları": [
+      "otomatik-flip",
+      "dış-etiket",
+      "derece"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 56,
       "sembol": "SunburstLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-label-rotate",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2ab25df797d08233e0db",
@@ -27153,17 +27520,32 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.silent)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::sessiz); src/grafik/gunes.rs (isabet kaydı)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "boya-korunur",
+      "isabet-kapalı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 58,
       "sembol": "SunburstLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a57fa26b90f81fd9f61f",
@@ -27174,17 +27556,36 @@
     "ts_türü": "'desc' | 'asc' | ((a: SortParam, b: SortParam) => number)",
     "zorunlu": false,
     "echarts_varsayılanı": "'desc'",
-    "rust_api": "src/model/seri.rs (sunburst.sort)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (GüneşPatlamasıSırası); src/model/seri.rs (GüneşPatlamasıSıralamaİşlevi)",
+    "veri_biçimleri": [
+      "desc",
+      "asc",
+      "null/undefined",
+      "tipli Rust callback"
+    ],
+    "koordinat_dalları": [
+      "değer-azalan",
+      "değer-artan",
+      "ham-sıra",
+      "depth/dataIndex callback"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 157,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-monochrome",
+      "sunburst-label-rotate",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b1f6b9b727bd0cc38be6",
@@ -27195,17 +27596,33 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "90",
-    "rust_api": "src/model/seri.rs (sunburst.startAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::başlangıç_açısı)",
+    "veri_biçimleri": [
+      "degree"
+    ],
+    "koordinat_dalları": [
+      "90-varsayılanı",
+      "özel-açı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 134,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur",
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_sahnesi_tum_dilimleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "25e0763c01586bb1872e",
@@ -27216,17 +27633,32 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (sunburst.stillShowZeroSum)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (GüneşPatlamasıSerisi::sıfır_toplamı_göster)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "eşit-açı",
+      "boş-açı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 139,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::gunes::testler::resmi_birim_aciyi_ve_on_sirali_indeksleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e2070ef87ce385a24920",
@@ -27237,17 +27669,32 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.target)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::hedef)",
+    "veri_biçimleri": [
+      "Option<String>"
+    ],
+    "koordinat_dalları": [
+      "_blank-varsayılanı",
+      "özel-hedef"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 89,
       "sembol": "SunburstSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sunburst_root_ve_eski_vurgu_actionlari_resmi_yuku_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "13ed1baf29e119e8c8b6",
@@ -27258,17 +27705,33 @@
     "ts_türü": "'sunburst'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sunburst.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::GüneşPatlaması, GüneşPatlamasıSerisi)",
+    "veri_biçimleri": [
+      "sabit 'sunburst'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "boyama",
+      "isabet/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/sunburst/SunburstSeries.ts",
       "satır": 131,
       "sembol": "SunburstSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sunburst_fixture_testleri::yedi_resmi_sunburst_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sunburst-simple",
+      "sunburst-borderRadius",
+      "sunburst-label-rotate",
+      "sunburst-monochrome",
+      "sunburst-visualMap",
+      "sunburst-drink",
+      "sunburst-book"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d83a788754cebc5cec7c",

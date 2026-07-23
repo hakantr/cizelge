@@ -25,14 +25,16 @@ use crate::cizim::gorunum::{
     grafiği_boya, gösterge_adları, İçYakınlaştırmaAlanı,
 };
 use crate::cizim::olay::{
-    AğaçHaritasıKökYönü, GrafikOlayı, MatrisHücreBölgesi, ParalelEksenBölgesi,
-    ParalelGenişletmeBölgesi, İsabetBölgesi, İsabetGeometrisi,
+    AğaçHaritasıKökYönü, GrafikOlayı, GüneşPatlamasıKökYönü, MatrisHücreBölgesi,
+    ParalelEksenBölgesi, ParalelGenişletmeBölgesi, İsabetBölgesi, İsabetGeometrisi,
 };
 use crate::grafik::isi::{GörselEşlemeSürgüParçası, SürekliGörselEşlemeBölgesi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
 use crate::koordinat::ParalelGenişletmeDavranışı;
-use crate::model::agac::AğaçHaritasıDüğümTıklaması;
+use crate::model::agac::{
+    AğaçHaritasıDüğümTıklaması, GüneşPatlamasıDüğümTıklaması
+};
 use crate::model::paralel::ParalelGenişletmeTetikleyicisi;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::Seri;
@@ -1632,6 +1634,30 @@ impl Render for GrafikGörünümü {
                                 yol: yeni_yol,
                                 yön: AğaçHaritasıKökYönü::Yukarı,
                             });
+                        } else if eski_uzunluk != yeni_yol.len()
+                            && let Some(Seri::GüneşPatlaması(güneş)) =
+                                bu.seçenekler.seriler.get(seri_sırası)
+                        {
+                            let veri_sırası = if yeni_yol.is_empty() {
+                                None
+                            } else {
+                                let mut sıra = 0usize;
+                                let mut bulunan = None;
+                                while güneş.düğüm(sıra).is_some() {
+                                    if güneş.düğüm_yolu(sıra).as_ref() == Some(&yeni_yol) {
+                                        bulunan = Some(sıra);
+                                        break;
+                                    }
+                                    sıra = sıra.saturating_add(1);
+                                }
+                                bulunan
+                            };
+                            cx.emit(GrafikOlayı::GüneşPatlamasıKöküDeğişti {
+                                seri_sırası,
+                                veri_sırası,
+                                yol: yeni_yol,
+                                yön: GüneşPatlamasıKökYönü::Yukarı,
+                            });
                         }
                         cx.notify();
                         return;
@@ -1976,11 +2002,57 @@ impl Render for GrafikGörünümü {
                                     }
                                 }
                             }
-                            // Sunburst da her seri için bağımsız kök yolu tutar.
                             Some(Seri::GüneşPatlaması(güneş)) => {
-                                if let Some(yol) = güneş.düğüm_yolu(b.veri_sırası) {
-                                    bu.hiyerarşi_yolları.insert(b.seri_sırası, yol);
-                                    cx.notify();
+                                let davranış = güneş
+                                    .düğüm(b.veri_sırası)
+                                    .and_then(|düğüm| düğüm.güneş_patlaması_düğüm_tıklaması)
+                                    .unwrap_or(güneş.düğüm_tıklaması);
+                                match davranış {
+                                    GüneşPatlamasıDüğümTıklaması::DüğümüKökYap => {
+                                        if let Some(yol) = güneş.düğüm_yolu(b.veri_sırası) {
+                                            let eski = bu
+                                                .hiyerarşi_yolları
+                                                .get(&b.seri_sırası)
+                                                .cloned()
+                                                .unwrap_or_default();
+                                            if eski != yol {
+                                                bu.hiyerarşi_yolları
+                                                    .insert(b.seri_sırası, yol.clone());
+                                                let yön = if eski.starts_with(&yol)
+                                                    && yol.len() < eski.len()
+                                                {
+                                                    GüneşPatlamasıKökYönü::Yukarı
+                                                } else {
+                                                    GüneşPatlamasıKökYönü::Aşağı
+                                                };
+                                                cx.emit(
+                                                    GrafikOlayı::GüneşPatlamasıKöküDeğişti {
+                                                        seri_sırası: b.seri_sırası,
+                                                        veri_sırası: Some(b.veri_sırası),
+                                                        yol,
+                                                        yön,
+                                                    },
+                                                );
+                                                cx.notify();
+                                            }
+                                        }
+                                    }
+                                    GüneşPatlamasıDüğümTıklaması::BağlantıyıAç => {
+                                        if let Some(düğüm) = güneş.düğüm(b.veri_sırası)
+                                            && let Some(url) = &düğüm.bağlantı
+                                        {
+                                            cx.emit(GrafikOlayı::Bağlantıİstendi {
+                                                seri_sırası: b.seri_sırası,
+                                                veri_sırası: b.veri_sırası,
+                                                url: url.clone(),
+                                                hedef: düğüm
+                                                    .hedef
+                                                    .clone()
+                                                    .unwrap_or_else(|| "_blank".to_owned()),
+                                            });
+                                        }
+                                    }
+                                    GüneşPatlamasıDüğümTıklaması::Kapalı => {}
                                 }
                             }
                             // Grafo düğümü: sürüklemeyi başlat.

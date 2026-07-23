@@ -317,6 +317,24 @@ pub trait ÇizimYüzeyi {
         self.yazı(metin, konum, yatay, dikey, boyut * ölçek, renk, kalın)
     }
 
+    /// Dönüştürülmüş glif maskesinin Canvas `textShadow*` gölgesini boyar.
+    /// Gölge desteği sunmayan yüzeyler metnin kendisini etkilemeden atlar.
+    #[allow(clippy::too_many_arguments)]
+    fn dönüşümlü_yazı_gölgesi(
+        &mut self,
+        _metin: &str,
+        _konum: (f32, f32),
+        _yatay: YatayHiza,
+        _dikey: DikeyHiza,
+        _boyut: f32,
+        _kalın: bool,
+        _renk: Renk,
+        _bulanıklık: f32,
+        _kayma: (f32, f32),
+        _dönüşüm: AfinMatris,
+    ) {
+    }
+
     /// Açık yazı tipi ailesini tam affine dönüşümle birlikte korur.
     #[allow(clippy::too_many_arguments)]
     fn dönüşümlü_aileli_yazı(

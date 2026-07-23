@@ -1,0 +1,43 @@
+{
+  "id": "sunburst-label-rotate",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 36,
+  "değişen_piksel_oranı": 0.00013333333333333334,
+  "ssim": 0.9981517537547187,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1303,
+    "değişen_piksel_oranı": 0.004825925925925926,
+    "ssim": 0.9970969144548316
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "sunburst_sektör_geometrisi_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Her Sunburst sektörünün veri sırası, açı/yarıçap sınırı, dolgu/kenarlık/köşe katmanı ve bağlı etiket geometrisi kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_dilim": 16,
+      "gerçek_dilim": 16,
+      "karşılaştırılan_alan": 320,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sunburst-label-rotate.png",
+    "gerçek": "testler/gorsel/gerçek/default/sunburst-label-rotate.png",
+    "fark": "testler/gorsel/fark/default/sunburst-label-rotate.png",
+    "normalize_fark": "testler/gorsel/fark/default/sunburst-label-rotate-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/sunburst-label-rotate.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/sunburst-label-rotate.json"
+  }
+}

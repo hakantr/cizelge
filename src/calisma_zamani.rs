@@ -10,7 +10,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use crate::animasyon::Yumuşatma;
-use crate::cizim::olay::AğaçHaritasıKökYönü;
+use crate::cizim::olay::{AğaçHaritasıKökYönü, GüneşPatlamasıKökYönü};
 use crate::hata::BilesenHatasi;
 use crate::koordinat::Kartezyen2B;
 use crate::model::bilesen::{
@@ -997,6 +997,12 @@ pub enum ÇalışmaOlayı {
         yol: Vec<String>,
         yön: AğaçHaritasıKökYönü,
     },
+    GüneşPatlamasıKöküDeğişti {
+        seri_sırası: usize,
+        veri_sırası: Option<usize>,
+        yol: Vec<String>,
+        yön: GüneşPatlamasıKökYönü,
+    },
     AğaçHaritasıGörünümüDeğişti {
         seri_sırası: usize,
         kök_dikdörtgeni: Option<AğaçHaritasıKökDikdörtgeni>,
@@ -1027,6 +1033,8 @@ pub struct GrafikÇalışmaZamanı {
     yükleme: Option<String>,
     /// Treemap view state, `getOption` sonucuna karışmaz.
     ağaç_haritası_kökleri: BTreeMap<usize, Vec<String>>,
+    /// Sunburst view state, `getOption` sonucuna karışmaz.
+    güneş_patlaması_kökleri: BTreeMap<usize, Vec<String>>,
     ağaç_haritası_kök_dikdörtgenleri: BTreeMap<usize, AğaçHaritasıKökDikdörtgeni>,
     ağaç_haritası_yakınlaştırma_hedefleri: BTreeMap<usize, usize>,
     olaylar: Vec<ÇalışmaOlayı>,
@@ -1056,6 +1064,7 @@ impl GrafikÇalışmaZamanı {
             bekleyen_olay_sessiz: true,
             yükleme: None,
             ağaç_haritası_kökleri: BTreeMap::new(),
+            güneş_patlaması_kökleri: BTreeMap::new(),
             ağaç_haritası_kök_dikdörtgenleri: BTreeMap::new(),
             ağaç_haritası_yakınlaştırma_hedefleri: BTreeMap::new(),
             olaylar: Vec::new(),
@@ -1928,6 +1937,100 @@ impl GrafikÇalışmaZamanı {
         Ok((sıra, yeni_yol, yön))
     }
 
+    /// `sunburstRootToNode` action'ının başsız view-root karşılığı.
+    /// `veri_sırası=None`, sanal köke döner; Sunburst yaprakları da ECharts
+    /// gibi tam dairelik görünüm kökü olabilir.
+    pub fn güneş_patlaması_köküne_git(
+        &mut self,
+        seçici: SeriSeçici,
+        veri_sırası: Option<usize>,
+        sessiz: bool,
+    ) -> Result<(usize, Vec<String>, GüneşPatlamasıKökYönü), BilesenHatasi> {
+        self.açık_mı("sunburstRootToNode")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "sunburstRootToNode.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let Some(Seri::GüneşPatlaması(güneş)) = self.seçenekler.seriler.get(sıra) else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "sunburstRootToNode",
+                ayrıntı: format!("{sıra}. seri `sunburst` değildir"),
+            });
+        };
+        let yeni_yol = match veri_sırası {
+            Some(veri_sırası) => {
+                güneş.düğüm(veri_sırası).ok_or(BilesenHatasi::EksikVeri {
+                    bileşen: "sunburstRootToNode.dataIndex",
+                    sıra: veri_sırası,
+                })?;
+                güneş
+                    .düğüm_yolu(veri_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "sunburstRootToNode.dataIndex",
+                        sıra: veri_sırası,
+                    })?
+            }
+            None => Vec::new(),
+        };
+        let eski_yol = self
+            .güneş_patlaması_kökleri
+            .get(&sıra)
+            .cloned()
+            .unwrap_or_default();
+        let yön = if eski_yol.starts_with(&yeni_yol) && yeni_yol.len() < eski_yol.len() {
+            GüneşPatlamasıKökYönü::Yukarı
+        } else {
+            GüneşPatlamasıKökYönü::Aşağı
+        };
+        if yeni_yol.is_empty() {
+            self.güneş_patlaması_kökleri.remove(&sıra);
+        } else {
+            self.güneş_patlaması_kökleri.insert(sıra, yeni_yol.clone());
+        }
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::GüneşPatlamasıKöküDeğişti {
+                seri_sırası: sıra,
+                veri_sırası,
+                yol: yeni_yol.clone(),
+                yön,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok((sıra, yeni_yol, yön))
+    }
+
+    /// Başsız renderer bağlayıcısı için etkin Sunburst view-root yolunu verir.
+    pub fn güneş_patlaması_görünümü(
+        &self,
+        seçici: SeriSeçici,
+    ) -> Result<(usize, Vec<String>), BilesenHatasi> {
+        self.açık_mı("sunburstView")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "sunburstView.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        if !matches!(
+            self.seçenekler.seriler.get(sıra),
+            Some(Seri::GüneşPatlaması(_))
+        ) {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "sunburstView",
+                ayrıntı: format!("{sıra}. seri `sunburst` değildir"),
+            });
+        }
+        Ok((
+            sıra,
+            self.güneş_patlaması_kökleri
+                .get(&sıra)
+                .cloned()
+                .unwrap_or_default(),
+        ))
+    }
+
     /// `treemapZoomToNode`: hedef düğümü saklar; renderer hedefin alanından
     /// `zoomToNodeRatio` ve `scaleLimit` ile kök dikdörtgenini hesaplar.
     pub fn ağaç_haritası_düğümüne_yakınlaştır(
@@ -2070,6 +2173,7 @@ impl GrafikÇalışmaZamanı {
 
     fn ağaç_haritası_durumunu_temizle(&mut self) {
         self.ağaç_haritası_kökleri.clear();
+        self.güneş_patlaması_kökleri.clear();
         self.ağaç_haritası_kök_dikdörtgenleri.clear();
         self.ağaç_haritası_yakınlaştırma_hedefleri.clear();
     }
@@ -2104,6 +2208,19 @@ impl GrafikÇalışmaZamanı {
                     Some(Seri::AğaçHaritası(seri)) if seri.düğüm(*veri_sırası).is_some()
                 )
             });
+        self.güneş_patlaması_kökleri.retain(|sıra, yol| {
+            let Some(Seri::GüneşPatlaması(seri)) = self.seçenekler.seriler.get(*sıra) else {
+                return false;
+            };
+            let mut düğümler = seri.kökler.as_slice();
+            for ad in yol {
+                let Some(düğüm) = düğümler.iter().find(|düğüm| &düğüm.ad == ad) else {
+                    return false;
+                };
+                düğümler = &düğüm.çocuklar;
+            }
+            true
+        });
     }
 
     /// Bağ tabanlı çekirdek `series.lines` için tipli `appendData`.

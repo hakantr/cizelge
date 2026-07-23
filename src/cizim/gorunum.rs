@@ -6391,8 +6391,53 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
+                let yerleşim_referansı = if let Some(matris_sırası) = g.matris_sırası {
+                    let Some((x, y)) = &g.matris_koordinatı else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                        continue;
+                    };
+                    let Some(kutu) = yerleşim.veriden_yerleşime(x, y, true) else {
+                        continue;
+                    };
+                    kutu
+                } else if let Some(takvim_sırası) = g.takvim_sırası {
+                    let Some(tarih) = g.takvim_koordinatı else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+                        continue;
+                    };
+                    let Some(kutu) = yerleşim.hücre(tarih) else {
+                        continue;
+                    };
+                    let kenar = seçenekler
+                        .takvimler
+                        .get(takvim_sırası)
+                        .map_or(0.0, |takvim| {
+                            takvim.öğe_stili.kenarlık_kalınlığı.max(0.0) / 2.0
+                        });
+                    Dikdörtgen::yeni(
+                        kutu.x + kenar,
+                        kutu.y + kenar,
+                        (kutu.genişlik - 2.0 * kenar).max(0.0),
+                        (kutu.yükseklik - 2.0 * kenar).max(0.0),
+                    )
+                } else {
+                    tüm_alan
+                };
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                let görsel_eşlemeler = seçenekler
+                    .seri_görsel_eşlemeleri(i)
+                    .map(|eşleme| {
+                        (
+                            eşleme,
+                            crate::grafik::gunes::güneş_patlaması_görsel_kapsamı(g, eşleme),
+                        )
+                    })
+                    .collect::<Vec<_>>();
                 let kök_yolu = girdi
                     .hiyerarşi_yolları
                     .iter()
@@ -6403,10 +6448,12 @@ pub fn grafiği_boya(
                     yüzey,
                     g,
                     i,
-                    tüm_alan,
+                    yerleşim_referansı,
                     &palet,
+                    &görsel_eşlemeler,
                     ilerleme,
                     kök_yolu,
+                    fare,
                     &mut çıktı.isabetler,
                     &mut çıktı.kırıntılar,
                 );

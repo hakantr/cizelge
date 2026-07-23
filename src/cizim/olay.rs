@@ -342,6 +342,14 @@ pub enum AğaçHaritasıKökYönü {
     Yukarı,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GüneşPatlamasıKökYönü {
+    /// `sunburstRootToNode.direction = 'drillDown'`.
+    Aşağı,
+    /// `sunburstRootToNode.direction = 'rollUp'`.
+    Yukarı,
+}
+
 #[derive(Clone, Debug)]
 pub enum GrafikOlayı {
     /// Bir veri öğesine tıklandı (`'click'`).
@@ -374,6 +382,13 @@ pub enum GrafikOlayı {
         veri_sırası: Option<usize>,
         yol: Vec<String>,
         yön: AğaçHaritasıKökYönü,
+    },
+    /// Sunburst view root değişti (`sunburstRootToNode`).
+    GüneşPatlamasıKöküDeğişti {
+        seri_sırası: usize,
+        veri_sırası: Option<usize>,
+        yol: Vec<String>,
+        yön: GüneşPatlamasıKökYönü,
     },
     /// `nodeClick: 'link'` dış URL açma isteği. Kitaplık pencereyi doğrudan
     /// açmak yerine güvenlik ve platform kararı için isteği konağa iletir.

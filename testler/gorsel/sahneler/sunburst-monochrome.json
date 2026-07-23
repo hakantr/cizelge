@@ -1,0 +1,1852 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sunburst",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "dilimler": [
+        {
+          "veri_sırası": 0,
+          "ad": "",
+          "derinlik": 1,
+          "değer": 15.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 39.375,
+          "r": 82.031,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": 0.785,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 406.082,
+          "etiket_y": 239.27,
+          "etiket_dönüşü": 0.393,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 5.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -0.785,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 389.554,
+          "etiket_y": 167.008,
+          "etiket_dönüşü": 1.178,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": -1.571,
+          "bitiş_açısı": -1.414,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 361.456,
+          "etiket_y": 116.934,
+          "etiket_dönüşü": 1.492,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": -1.414,
+          "bitiş_açısı": -1.1,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 395.121,
+          "etiket_y": 123.631,
+          "etiket_dönüşü": 1.257,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": -1.414,
+          "bitiş_açısı": -1.257,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 394.045,
+          "etiket_y": 79.041,
+          "etiket_dönüşü": 1.335,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": -1.1,
+          "bitiş_açısı": -0.942,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 426.293,
+          "etiket_y": 138.001,
+          "etiket_dönüşü": 1.021,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": -1.1,
+          "bitiş_açısı": -0.942,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 448.581,
+          "etiket_y": 101.631,
+          "etiket_dönüşü": 1.021,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 10.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": -0.785,
+          "bitiş_açısı": 0.785,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 453.359,
+          "etiket_y": 262.5,
+          "etiket_dönüşü": 0.0,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 6.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": -0.785,
+          "bitiş_açısı": 0.157,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 488.869,
+          "etiket_y": 217.379,
+          "etiket_dönüşü": 0.314,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": -0.785,
+          "bitiş_açısı": -0.628,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 493.467,
+          "etiket_y": 139.967,
+          "etiket_dönüşü": 0.707,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": -0.628,
+          "bitiş_açısı": -0.471,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 510.869,
+          "etiket_y": 163.919,
+          "etiket_dönüşü": 0.55,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": -0.471,
+          "bitiş_açısı": -0.314,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 524.31,
+          "etiket_y": 190.298,
+          "etiket_dönüşü": 0.393,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": -0.314,
+          "bitiş_açısı": -0.157,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 533.459,
+          "etiket_y": 218.455,
+          "etiket_dönüşü": 0.236,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 13,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 0.157,
+          "bitiş_açısı": 0.471,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 488.869,
+          "etiket_y": 307.621,
+          "etiket_dönüşü": 5.969,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 14,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 0.157,
+          "bitiş_açısı": 0.314,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 533.459,
+          "etiket_y": 306.545,
+          "etiket_dönüşü": 6.048,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 15,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 0.471,
+          "bitiş_açısı": 0.628,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 474.499,
+          "etiket_y": 338.793,
+          "etiket_dönüşü": 5.733,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 0.471,
+          "bitiş_açısı": 0.628,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 510.869,
+          "etiket_y": 361.081,
+          "etiket_dönüşü": 5.733,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 17,
+          "ad": "",
+          "derinlik": 1,
+          "değer": 9.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 39.375,
+          "r": 82.031,
+          "başlangıç_açısı": 0.785,
+          "bitiş_açısı": 2.199,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 354.763,
+          "etiket_y": 323.016,
+          "etiket_dönüşü": 4.791,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 18,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 4.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": 0.785,
+          "bitiş_açısı": 1.414,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 396.924,
+          "etiket_y": 354.594,
+          "etiket_dönüşü": 5.184,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 19,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 0.785,
+          "bitiş_açısı": 1.1,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 435.826,
+          "etiket_y": 380.629,
+          "etiket_dönüşü": 5.341,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 20,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 1.1,
+          "bitiş_açısı": 1.257,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 405.878,
+          "etiket_y": 397.401,
+          "etiket_dönüşü": 5.105,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 21,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 1.1,
+          "bitiş_açısı": 1.257,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 422.202,
+          "etiket_y": 436.81,
+          "etiket_dönüşü": 5.105,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 22,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 3.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": 1.414,
+          "bitiş_açısı": 1.885,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 341.891,
+          "etiket_y": 365.541,
+          "etiket_dönüşü": 1.492,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 23,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 3.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 1.414,
+          "bitiş_açısı": 1.885,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 338.544,
+          "etiket_y": 408.066,
+          "etiket_dönüşü": 1.492,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 24,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 1.414,
+          "bitiş_açısı": 1.571,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 364.803,
+          "etiket_y": 450.59,
+          "etiket_dönüşü": 4.791,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 25,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 1.571,
+          "bitiş_açısı": 1.728,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 335.197,
+          "etiket_y": 450.59,
+          "etiket_dönüşü": 1.492,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 26,
+          "ad": "",
+          "derinlik": 1,
+          "değer": 7.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 39.375,
+          "r": 82.031,
+          "başlangıç_açısı": 2.199,
+          "bitiş_açısı": 3.299,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 293.918,
+          "etiket_y": 285.73,
+          "etiket_dönüşü": 0.393,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 27,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 6.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": 2.199,
+          "bitiş_açısı": 3.142,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 257.906,
+          "etiket_y": 309.424,
+          "etiket_dönüşü": 0.471,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 28,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 2.199,
+          "bitiş_açısı": 2.356,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 255.17,
+          "etiket_y": 373.531,
+          "etiket_dönüşü": 0.864,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 29,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 3.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 2.356,
+          "bitiş_açısı": 2.827,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 225.501,
+          "etiket_y": 338.793,
+          "etiket_dönüşü": 0.55,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 30,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 2.356,
+          "bitiş_açısı": 2.513,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 206.533,
+          "etiket_y": 385.033,
+          "etiket_dönüşü": 0.707,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 2.513,
+          "bitiş_açısı": 2.67,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 189.131,
+          "etiket_y": 361.081,
+          "etiket_dönüşü": 0.55,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 32,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 2.827,
+          "bitiş_açısı": 3.142,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 205.782,
+          "etiket_y": 285.342,
+          "etiket_dönüşü": 0.157,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 33,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 2.827,
+          "bitiş_açısı": 2.985,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 166.541,
+          "etiket_y": 306.545,
+          "etiket_dönüşü": 0.236,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 34,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 2.985,
+          "bitiş_açısı": 3.142,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 161.91,
+          "etiket_y": 277.303,
+          "etiket_dönüşü": 0.079,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 35,
+          "ad": "",
+          "derinlik": 1,
+          "değer": 9.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 39.375,
+          "r": 82.031,
+          "başlangıç_açısı": 3.299,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 310.576,
+          "etiket_y": 216.341,
+          "etiket_dönüşü": 5.419,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 36,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 6.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": 3.299,
+          "bitiş_açısı": 4.241,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 266.381,
+          "etiket_y": 201.747,
+          "etiket_dönüşü": 5.655,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 37,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 3.299,
+          "bitiş_açısı": 3.456,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 208.019,
+          "etiket_y": 228.413,
+          "etiket_dönüşü": 6.048,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 38,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 3.456,
+          "bitiş_açısı": 3.77,
+          "saat_yönünde": true,
+          "renk": [
+            245,
+            79,
+            74,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 219.899,
+          "etiket_y": 196.21,
+          "etiket_dönüşü": 5.812,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 39,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 2.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 3.456,
+          "bitiş_açısı": 3.77,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 181.892,
+          "etiket_y": 176.845,
+          "etiket_dönüşü": 5.812,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 40,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 3.77,
+          "bitiş_açısı": 3.927,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 238.969,
+          "etiket_y": 167.67,
+          "etiket_dönüşü": 5.576,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 41,
+          "ad": "",
+          "derinlik": 2,
+          "değer": 3.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 82.031,
+          "r": 124.688,
+          "başlangıç_açısı": 4.241,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            180,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 325.871,
+          "etiket_y": 161.996,
+          "etiket_dönüşü": 4.948,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 42,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 4.241,
+          "bitiş_açısı": 4.398,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 294.122,
+          "etiket_y": 127.599,
+          "etiket_dönüşü": 5.105,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 43,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 4.398,
+          "bitiş_açısı": 4.555,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 315.913,
+          "etiket_y": 120.519,
+          "etiket_dönüşü": 4.948,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 44,
+          "ad": "",
+          "derinlik": 4,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 167.344,
+          "r": 210.0,
+          "başlangıç_açısı": 4.398,
+          "bitiş_açısı": 4.555,
+          "saat_yönünde": true,
+          "renk": [
+            255,
+            140,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 305.955,
+          "etiket_y": 79.041,
+          "etiket_dönüşü": 4.948,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        },
+        {
+          "veri_sırası": 45,
+          "ad": "",
+          "derinlik": 3,
+          "değer": 1.0,
+          "cx": 350.0,
+          "cy": 262.5,
+          "r0": 124.688,
+          "r": 167.344,
+          "başlangıç_açısı": 4.555,
+          "bitiş_açısı": 4.712,
+          "saat_yönünde": true,
+          "renk": [
+            221,
+            221,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "köşe_yarıçapları": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "etiket_göster": true,
+          "etiket_metni": "",
+          "etiket_x": 338.544,
+          "etiket_y": 116.934,
+          "etiket_dönüşü": 4.791,
+          "etiket_yatay_hizası": "center",
+          "etiket_dikey_hizası": "middle",
+          "etiket_fontu": "12px sans-serif"
+        }
+      ]
+    }
+  ]
+}

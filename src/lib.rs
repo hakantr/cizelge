@@ -59,8 +59,8 @@ pub use cizim::pencere::GrafikGörünümü;
 #[cfg(feature = "png")]
 pub use cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use cizim::{
-    AfinMatris, AğaçHaritasıKökYönü, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu,
-    MatrisHedefTürü, MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi,
+    AfinMatris, AğaçHaritasıKökYönü, GrafikOlayı, GörselDurum, GüneşPatlamasıKökYönü, KayıtYüzeyi,
+    KırpmaYolu, MatrisHedefTürü, MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi,
     ParalelGenişletmeBölgesi, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
     SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SihirliSeriTürü,
     SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
@@ -71,7 +71,8 @@ pub use eylem::{
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, ağaç_haritası_eylemlerini_kaydet,
     eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
     geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-    paralel_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+    güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+    veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -84,6 +85,9 @@ pub use model::agac::{
     AğaçHaritasıGörselBoyutu, AğaçHaritasıGörseli, AğaçHaritasıKırpmaPenceresi,
     AğaçHaritasıKırıntısı, AğaçHaritasıRenkEşlemesi, AğaçHaritasıSeviyesi, AğaçHaritasıSırası,
     AğaçHaritasıÖğeStili, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+    GüneşPatlamasıAnimasyonTürü, GüneşPatlamasıDurumu, GüneşPatlamasıDüğümTıklaması,
+    GüneşPatlamasıKöşeYarıçapı, GüneşPatlamasıRenkKaynağı, GüneşPatlamasıSeviyesi,
+    GüneşPatlamasıSırası, GüneşPatlamasıÖğeStili,
 };
 pub use model::bilesen::{
     AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaBağı,
@@ -129,13 +133,14 @@ pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, DüzSaçılımVerisi, EtiketYerleşimParametreleri,
     EtiketYerleşimSonucu, EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi,
     GrafoYerleşimi, GöstergeMetinYaması, GöstergeSaatiSerisi, GöstergeVeriÖğesi,
-    GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıSerisi, HuniDurumYaması,
-    HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi, HuniSıralaması, HuniVeriYaması, HuniYönü,
-    IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
-    PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi, RadarVeriYaması, SankeyBağı,
-    SankeySerisi, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
-    TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
-    ÖğeRengiİşlevi,
+    GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıEtiketParametreleri,
+    GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi, GüneşPatlamasıSıralamaParametreleri,
+    GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
+    HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
+    MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
+    RadarVeriYaması, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol, SembolBoyutu, Seri,
+    SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme,
+    ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -192,18 +197,19 @@ pub mod hazir {
     #[cfg(feature = "png")]
     pub use crate::cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
     pub use crate::cizim::{
-        AfinMatris, AğaçHaritasıKökYönü, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu,
-        MatrisHedefTürü, MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi,
-        ParalelGenişletmeBölgesi, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
-        SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi,
-        YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
+        AfinMatris, AğaçHaritasıKökYönü, GrafikOlayı, GörselDurum, GüneşPatlamasıKökYönü,
+        KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü, MatrisHücreBölgesi, OdakKapsamı,
+        ParalelEksenBölgesi, ParalelGenişletmeBölgesi, Sahne, SahneDüğümü, SahneFarkı, SahneMetni,
+        SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli,
+        SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
     };
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
         ağaç_haritası_eylemlerini_kaydet, eksen_imleci_eylemini_kaydet,
         eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
-        görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+        görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
+        güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
         veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
     pub use crate::genisletme::{
@@ -217,6 +223,9 @@ pub mod hazir {
         AğaçHaritasıGörselBoyutu, AğaçHaritasıGörseli, AğaçHaritasıKırpmaPenceresi,
         AğaçHaritasıKırıntısı, AğaçHaritasıRenkEşlemesi, AğaçHaritasıSeviyesi, AğaçHaritasıSırası,
         AğaçHaritasıÖğeStili, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+        GüneşPatlamasıAnimasyonTürü, GüneşPatlamasıDurumu, GüneşPatlamasıDüğümTıklaması,
+        GüneşPatlamasıKöşeYarıçapı, GüneşPatlamasıRenkKaynağı, GüneşPatlamasıSeviyesi,
+        GüneşPatlamasıSırası, GüneşPatlamasıÖğeStili,
     };
     pub use crate::model::bilesen::{
         AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü,
@@ -263,13 +272,14 @@ pub mod hazir {
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
         EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi,
         GöstergeMetinYaması, GöstergeSaatiSerisi, GöstergeVeriÖğesi, GöstergeİbreYaması,
-        GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıSerisi, HuniDurumYaması,
-        HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi, HuniSıralaması, HuniVeriYaması, HuniYönü,
-        IsıHaritasıSerisi, KirişSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi,
-        PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi, RadarVeriYaması, SankeyBağı,
-        SankeySerisi, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
-        TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
-        ÖğeRengiİşlevi,
+        GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıEtiketParametreleri,
+        GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi, GüneşPatlamasıSıralamaParametreleri,
+        GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
+        HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
+        MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması,
+        RadarSerisi, RadarVeriYaması, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
+        SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,
+        ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

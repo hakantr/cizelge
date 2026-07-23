@@ -1,0 +1,43 @@
+{
+  "id": "sunburst-simple",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 10,
+  "değişen_piksel_oranı": 0.000037037037037037037,
+  "ssim": 0.9987634174143503,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 871,
+    "değişen_piksel_oranı": 0.003225925925925926,
+    "ssim": 0.9977085834235206
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "sunburst_sektör_geometrisi_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Her Sunburst sektörünün veri sırası, açı/yarıçap sınırı, dolgu/kenarlık/köşe katmanı ve bağlı etiket geometrisi kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_dilim": 13,
+      "gerçek_dilim": 13,
+      "karşılaştırılan_alan": 260,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sunburst-simple.png",
+    "gerçek": "testler/gorsel/gerçek/default/sunburst-simple.png",
+    "fark": "testler/gorsel/fark/default/sunburst-simple.png",
+    "normalize_fark": "testler/gorsel/fark/default/sunburst-simple-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/sunburst-simple.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/sunburst-simple.json"
+  }
+}

@@ -127,6 +127,53 @@ fn mac_cjk_glifi(
 }
 
 #[cfg(target_os = "macos")]
+fn mac_cjk_dönüşümlü_glif_yolu(
+    yazı_tipi: &core_text::font::CTFont,
+    glif: core_graphics::font::CGGlyph,
+    kalem: f32,
+    taban_y: f32,
+    dönüşüm: AfinMatris,
+) -> Option<ts::Path> {
+    use core_graphics::geometry::CGAffineTransform;
+    use core_graphics::path::CGPathElementType;
+    use std::cell::RefCell;
+
+    let kimlik = CGAffineTransform::new(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    let cg_yolu = yazı_tipi.create_path_for_glyph(glif, &kimlik).ok()?;
+    let kurucu = RefCell::new(ts::PathBuilder::new());
+    cg_yolu.apply(&|öğe| {
+        let nokta = |sıra: usize| {
+            let nokta = öğe.points()[sıra];
+            dönüşüm.noktayı_dönüştür((kalem + nokta.x as f32, taban_y - nokta.y as f32))
+        };
+        let mut kurucu = kurucu.borrow_mut();
+        match öğe.element_type {
+            CGPathElementType::MoveToPoint => {
+                let p = nokta(0);
+                kurucu.move_to(p.0, p.1);
+            }
+            CGPathElementType::AddLineToPoint => {
+                let p = nokta(0);
+                kurucu.line_to(p.0, p.1);
+            }
+            CGPathElementType::AddQuadCurveToPoint => {
+                let p1 = nokta(0);
+                let p2 = nokta(1);
+                kurucu.quad_to(p1.0, p1.1, p2.0, p2.1);
+            }
+            CGPathElementType::AddCurveToPoint => {
+                let p1 = nokta(0);
+                let p2 = nokta(1);
+                let p3 = nokta(2);
+                kurucu.cubic_to(p1.0, p1.1, p2.0, p2.1, p3.0, p3.1);
+            }
+            CGPathElementType::CloseSubpath => kurucu.close(),
+        }
+    });
+    kurucu.into_inner().finish()
+}
+
+#[cfg(target_os = "macos")]
 fn mac_cjk_glif_çiz(
     harita: &mut ts::Pixmap,
     kırpma: Option<&[u8]>,
@@ -1653,7 +1700,25 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         let mut yol = ts::PathBuilder::new();
         let mut son: Option<(f32, f32)> = None;
         let mut kontur_var = false;
+        let mut dönüşümlü_yollar = Vec::new();
+        #[cfg(target_os = "macos")]
+        let mac_cjk = mac_cjk_yazı_tipi(boyut, kalın);
         for karakter in metin.chars() {
+            #[cfg(target_os = "macos")]
+            if yazılar.birincil(kalın).glyph_id(karakter).0 == 0
+                && let Some((glif, ilerleme)) = mac_cjk
+                    .as_ref()
+                    .and_then(|yazı_tipi| mac_cjk_glifi(yazı_tipi, karakter))
+                && let Some(glif_yolu) = mac_cjk.as_ref().and_then(|yazı_tipi| {
+                    mac_cjk_dönüşümlü_glif_yolu(yazı_tipi, glif, kalem, taban_y, dönüşüm)
+                })
+            {
+                dönüşümlü_yollar.push(glif_yolu);
+                kalem += ilerleme;
+                önceki = None;
+                son = None;
+                continue;
+            }
             let kimlik = vektör_ölçekli.glyph_id(karakter);
             if let Some((önceki_kimlik, önceki_boşluk)) = önceki
                 && !önceki_boşluk
@@ -1706,10 +1771,15 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             önceki = Some((kimlik, karakter.is_whitespace()));
         }
         if kontur_var && let Some(yol) = yol.finish() {
+            dönüşümlü_yollar.push(yol);
+        }
+        if !dönüşümlü_yollar.is_empty() {
             let mut boya = ts::Paint::default();
             boya.set_color(renk_çevir(renk));
             boya.anti_alias = true;
-            self.doldur(&yol, &boya);
+            for yol in &dönüşümlü_yollar {
+                self.doldur(yol, &boya);
+            }
             // CoreText/Chromium'un küçük döndürülmüş gliflerdeki hinting
             // örtüsü tiny-skia'nın salt yol örtüsünden biraz daha dolgundur.
             // Aynı yolu düşük alfa ile ikinci kez geçirmek yalnız kenar
@@ -1725,7 +1795,9 @@ impl ÇizimYüzeyi for PikselYüzeyi {
                 DÖNÜŞÜMLÜ_YAZI_EK_OPAKLIĞI
             };
             boya.set_color(renk_çevir(renk.opaklık(ek_opaklık)));
-            self.doldur(&yol, &boya);
+            for yol in &dönüşümlü_yollar {
+                self.doldur(yol, &boya);
+            }
             return ölçü;
         }
 
@@ -1891,6 +1963,50 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             }
         }
         ölçü
+    }
+
+    fn dönüşümlü_yazı_gölgesi(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        kalın: bool,
+        renk: Renk,
+        bulanıklık: f32,
+        kayma: (f32, f32),
+        dönüşüm: AfinMatris,
+    ) {
+        if metin.is_empty() || bulanıklık <= 0.0 || renk.alfa <= 0.0 {
+            return;
+        }
+        let Some(boş_harita) = ts::Pixmap::new(self.harita.width(), self.harita.height()) else {
+            self.tanı(
+                "dönüşümlü_yazı_gölgesi",
+                "metin gölgesi haritası ayrılamadı".to_owned(),
+            );
+            return;
+        };
+        let ana_harita = std::mem::replace(&mut self.harita, boş_harita);
+        self.dönüşümlü_yazı(
+            metin,
+            konum,
+            yatay,
+            dikey,
+            boyut,
+            Renk::BEYAZ,
+            kalın,
+            dönüşüm,
+        );
+        let maske = self
+            .harita
+            .pixels()
+            .iter()
+            .map(|piksel| piksel.alpha())
+            .collect::<Vec<_>>();
+        self.harita = ana_harita;
+        self.gölge_maskesini_boya(maske, renk, bulanıklık, kayma);
     }
 
     fn dönüşümlü_aileli_yazı(

@@ -650,6 +650,9 @@ fn zengin_koşu_tabanı(yazı: &YazıStili) -> YazıStili {
         kalın: yazı.kalın,
         kalınlık_belirtildi: yazı.kalınlık_belirtildi,
         aile: yazı.aile.clone(),
+        metin_gölge_bulanıklığı: yazı.metin_gölge_bulanıklığı,
+        metin_gölge_rengi: yazı.metin_gölge_rengi,
+        metin_gölge_kayması: yazı.metin_gölge_kayması,
         ..YazıStili::default()
     }
 }
@@ -1089,6 +1092,24 @@ fn zengin_metin_içeriğini_çiz(
                 .then_some(varsayılan_kontur)
                 .flatten()
                 .map(|renk| renk.opaklık(opaklık));
+            if let (Some(bulanıklık), Some(gölge_rengi)) = (
+                koşu.yazı.metin_gölge_bulanıklığı,
+                koşu.yazı.metin_gölge_rengi,
+            ) && bulanıklık > 0.0
+            {
+                çizici.dönüşümlü_yazı_gölgesi(
+                    &koşu.metin,
+                    (metin_x, metin_y),
+                    metin_hizası,
+                    DikeyHiza::Orta,
+                    boyut,
+                    koşu.yazı.kalın,
+                    gölge_rengi.opaklık(opaklık),
+                    bulanıklık,
+                    koşu.yazı.metin_gölge_kayması.unwrap_or((0.0, 0.0)),
+                    dönüşüm,
+                );
+            }
             if let Some(kontur) = kontur {
                 çizici.dönüşümlü_konturlu_yazı(
                     &koşu.metin,
