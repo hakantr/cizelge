@@ -51,6 +51,10 @@ const KONTURLU_YAZI_TABAN_EKİ: f32 = 0.12;
 struct YazıTakımı {
     normal: Arc<FontVec>,
     kalın: Arc<FontVec>,
+    /// `ab_glyph::PxScale` fontun yüz metrik kutusunu kullanır; CSS
+    /// `font-size` ise aileye özgü em kutusudur. Arial için yukarıdaki
+    /// genel oran, Verdana için daha yüksek em/yüz oranı gerekir.
+    raster_oranı: f32,
     /// Chromium/CoreText bir glif Arial'de yoksa metni aynı CSS satırında
     /// uygun sistem sans-serif yüzüyle sürdürür. Başta CJK olmak üzere bu
     /// yüzler aynı geri düşüm zincirini raster çıktıda korur.
@@ -74,7 +78,7 @@ impl YazıTakımı {
     fn karakter_yüzü(&self, karakter: char, kalın: bool) -> (&Arc<FontVec>, f32, usize) {
         let birincil = self.birincil(kalın);
         if birincil.glyph_id(karakter).0 != 0 {
-            return (birincil, YAZI_RASTER_ORANI, 0);
+            return (birincil, self.raster_oranı, 0);
         }
         for (sıra, yedek) in self.yedekler.iter().enumerate() {
             let yüz = if kalın { &yedek.kalın } else { &yedek.normal };
@@ -82,7 +86,7 @@ impl YazıTakımı {
                 return (yüz, 1.0, sıra + 1);
             }
         }
-        (birincil, YAZI_RASTER_ORANI, 0)
+        (birincil, self.raster_oranı, 0)
     }
 }
 
@@ -256,9 +260,22 @@ fn mac_cjk_glif_çiz(
 
 /// Yazı tipini fontdb ile sistemden yükler; bulunamazsa `None`.
 fn yazı_takımı_yükle(serif: bool) -> Option<YazıTakımı> {
+    yazı_takımı_adla_yükle(None, serif)
+}
+
+fn yazı_takımı_adla_yükle(aile: Option<&str>, serif: bool) -> Option<YazıTakımı> {
     let mut veritabanı = fontdb::Database::new();
     veritabanı.load_system_fonts();
-    let aileler = if serif {
+    let aileler = if let Some(aile) = aile {
+        vec![
+            fontdb::Family::Name(aile),
+            if serif {
+                fontdb::Family::Serif
+            } else {
+                fontdb::Family::SansSerif
+            },
+        ]
+    } else if serif {
         vec![
             fontdb::Family::Name("Times New Roman"),
             fontdb::Family::Name("Times"),
@@ -336,6 +353,15 @@ fn yazı_takımı_yükle(serif: bool) -> Option<YazıTakımı> {
     Some(YazıTakımı {
         normal,
         kalın,
+        // Chromium Canvas `measureText`, aynı sistem Verdana dosyasında
+        // ab_glyph'in genel Arial oranından yaklaşık %8 daha geniş em
+        // ölçüsü verir. Aileye özgü oran hem kesmeyi hem rasteri aynı
+        // metrikle yürütür.
+        raster_oranı: if aile.is_some() {
+            YAZI_RASTER_ORANI * 1.08
+        } else {
+            YAZI_RASTER_ORANI
+        },
         yedekler,
     })
 }
@@ -350,6 +376,8 @@ pub struct PikselYüzeyi {
     kırpma: Option<ts::Mask>,
     yazılar: Option<YazıTakımı>,
     serif_yazılar: Option<YazıTakımı>,
+    /// Custom/rich text içindeki açık `fontFamily: 'Verdana'` yüzü.
+    verdana_yazılar: Option<YazıTakımı>,
     /// Çizim sırasında yutulan kurtarılabilir sorunlar.
     tanılar: Vec<BilesenTanisi>,
 }
@@ -382,6 +410,10 @@ impl PikselYüzeyi {
             // birlikte yüklenir; böylece `measureText` ve gerçek glif aynı
             // aileyi kullanır.
             serif_yazılar: yazı_takımı_yükle(true),
+            // Açık `fontFamily: 'Verdana'` kullanılana kadar ikinci font
+            // veritabanını kurma. Varsayılan Arial yolunun yüz/raster
+            // seçimini bağımsız tutar ve açılışı gereksiz yere pahalılaştırmaz.
+            verdana_yazılar: None,
             tanılar: Vec::new(),
         })
     }
@@ -1471,11 +1503,28 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         // 10 px etiketlerde Canvas çıktısını korurken 12 px ve üstündeki
         // mevcut ECharts kalibrasyonunu değiştirmez.
         let küçük_yazı_oranı = ((12.0 - boyut) / 2.0).clamp(0.0, 1.0);
-        let taban_düzeltmesi = YAZI_TABAN_DÜZELTMESİ + 0.3 * küçük_yazı_oranı;
-        let kapsama_çarpanı = YAZI_KAPSAMA_ÇARPANI - 0.1 * küçük_yazı_oranı;
+        // CoreText/Skia hinting geçişi 10 px'te belirgindir; 9 px ve altında
+        // aynı taban itmesini sürdürmek glifi bir raster satırı aşağı taşır.
+        // Üst kolda 12 px'e kadar önceki doğrusal sönümü koru.
+        let küçük_yazı_taban_oranı = if boyut <= 10.0 {
+            (boyut - 9.0).clamp(0.0, 1.0)
+        } else {
+            küçük_yazı_oranı
+        };
         let (genişlik, yükseklik) = self.yazı_ölç_ağırlıklı(metin, boyut, kalın);
         let Some(yazılar) = self.yazılar.clone() else {
             return (genişlik, yükseklik);
+        };
+        let açık_aile = yazılar.raster_oranı > YAZI_RASTER_ORANI * 1.01;
+        let taban_düzeltmesi = if açık_aile {
+            YAZI_TABAN_DÜZELTMESİ - 1.0
+        } else {
+            YAZI_TABAN_DÜZELTMESİ + 0.3 * küçük_yazı_taban_oranı
+        };
+        let kapsama_çarpanı = if açık_aile {
+            0.95
+        } else {
+            YAZI_KAPSAMA_ÇARPANI - 0.1 * küçük_yazı_oranı
         };
         let birincil_yazı_tipi = if kalın {
             yazılar.kalın.clone()
@@ -1483,7 +1532,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             yazılar.normal.clone()
         };
         let birincil_ölçekli = birincil_yazı_tipi.as_scaled(ab_glyph::PxScale::from(
-            boyut * self.ölçek * YAZI_RASTER_ORANI,
+            boyut * self.ölçek * yazılar.raster_oranı,
         ));
 
         let x0 = match yatay {
@@ -1609,10 +1658,19 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         kalın: bool,
         aile: &str,
     ) -> (f32, f32) {
+        let verdana = aile.eq_ignore_ascii_case("Verdana");
+        if verdana && self.verdana_yazılar.is_none() {
+            self.verdana_yazılar = yazı_takımı_adla_yükle(Some("Verdana"), false);
+        }
         if serif_ailesi_mi(aile) && self.serif_yazılar.is_none() {
             self.serif_yazılar = yazı_takımı_yükle(true);
         }
-        if serif_ailesi_mi(aile) && self.serif_yazılar.is_some() {
+        if verdana && self.verdana_yazılar.is_some() {
+            std::mem::swap(&mut self.yazılar, &mut self.verdana_yazılar);
+            let sonuç = self.yazı(metin, konum, yatay, dikey, boyut, renk, kalın);
+            std::mem::swap(&mut self.yazılar, &mut self.verdana_yazılar);
+            sonuç
+        } else if serif_ailesi_mi(aile) && self.serif_yazılar.is_some() {
             std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
             let sonuç = self.yazı(metin, konum, yatay, dikey, boyut, renk, kalın);
             std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
@@ -1627,12 +1685,31 @@ impl ÇizimYüzeyi for PikselYüzeyi {
     }
 
     fn aileli_yazı_ölç(&self, metin: &str, boyut: f32, aile: &str) -> (f32, f32) {
-        let takım = if serif_ailesi_mi(aile) {
+        let takım = if aile.eq_ignore_ascii_case("Verdana") {
+            self.verdana_yazılar.as_ref().or(self.yazılar.as_ref())
+        } else if serif_ailesi_mi(aile) {
             self.serif_yazılar.as_ref().or(self.yazılar.as_ref())
         } else {
             self.yazılar.as_ref()
         };
         self.yazı_ölç_ağırlıklı_takımla(metin, boyut, false, takım)
+    }
+
+    fn aileli_stilli_yazı_ölç(
+        &self,
+        metin: &str,
+        boyut: f32,
+        kalın: bool,
+        aile: &str,
+    ) -> (f32, f32) {
+        let takım = if aile.eq_ignore_ascii_case("Verdana") {
+            self.verdana_yazılar.as_ref().or(self.yazılar.as_ref())
+        } else if serif_ailesi_mi(aile) {
+            self.serif_yazılar.as_ref().or(self.yazılar.as_ref())
+        } else {
+            self.yazılar.as_ref()
+        };
+        self.yazı_ölç_ağırlıklı_takımla(metin, boyut, kalın, takım)
     }
 
     fn stilli_yazı_ölç(&self, metin: &str, boyut: f32, kalın: bool) -> (f32, f32) {
@@ -1674,7 +1751,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
             yazılar.normal.clone()
         };
         let ölçekli = yazı_tipi.as_scaled(ab_glyph::PxScale::from(
-            boyut * self.ölçek * YAZI_RASTER_ORANI,
+            boyut * self.ölçek * yazılar.raster_oranı,
         ));
 
         let x0 = match yatay {
@@ -1696,7 +1773,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         // davranışını sağlar. Konturu bulunmayan renkli/bitmap gliflerde alttaki
         // güvenli maske yolu kullanılmaya devam eder.
         let vektör_ölçekli =
-            yazı_tipi.as_scaled(ab_glyph::PxScale::from(boyut * YAZI_RASTER_ORANI));
+            yazı_tipi.as_scaled(ab_glyph::PxScale::from(boyut * yazılar.raster_oranı));
         let satır = vektör_ölçekli.ascent() - vektör_ölçekli.descent();
         let taban_y = üst
             + (ölçü.1 - satır) / 2.0
@@ -2029,10 +2106,20 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         aile: &str,
         dönüşüm: AfinMatris,
     ) -> (f32, f32) {
+        let verdana = aile.eq_ignore_ascii_case("Verdana");
+        if verdana && self.verdana_yazılar.is_none() {
+            self.verdana_yazılar = yazı_takımı_adla_yükle(Some("Verdana"), false);
+        }
         if serif_ailesi_mi(aile) && self.serif_yazılar.is_none() {
             self.serif_yazılar = yazı_takımı_yükle(true);
         }
-        if serif_ailesi_mi(aile) && self.serif_yazılar.is_some() {
+        if verdana && self.verdana_yazılar.is_some() {
+            std::mem::swap(&mut self.yazılar, &mut self.verdana_yazılar);
+            let sonuç =
+                self.dönüşümlü_yazı(metin, konum, yatay, dikey, boyut, renk, kalın, dönüşüm);
+            std::mem::swap(&mut self.yazılar, &mut self.verdana_yazılar);
+            sonuç
+        } else if serif_ailesi_mi(aile) && self.serif_yazılar.is_some() {
             std::mem::swap(&mut self.yazılar, &mut self.serif_yazılar);
             let sonuç = self.dönüşümlü_yazı(
                 metin,
@@ -2075,7 +2162,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
                     yazılar.normal.clone()
                 };
                 let ölçekli =
-                    yazı_tipi.as_scaled(ab_glyph::PxScale::from(boyut * YAZI_RASTER_ORANI));
+                    yazı_tipi.as_scaled(ab_glyph::PxScale::from(boyut * yazılar.raster_oranı));
                 let x0 = match yatay {
                     YatayHiza::Sol => konum.0,
                     YatayHiza::Orta => konum.0 - ölçü.0 / 2.0,

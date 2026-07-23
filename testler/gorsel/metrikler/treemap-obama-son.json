@@ -8,14 +8,14 @@
     "ssim": 0.99
   },
   "geçti": false,
-  "değişen_piksel": 10468,
-  "değişen_piksel_oranı": 0.03877037037037037,
-  "ssim": 0.9157612224999533,
+  "değişen_piksel": 10361,
+  "değişen_piksel_oranı": 0.038374074074074074,
+  "ssim": 0.9155931838581036,
   "ham": {
     "geçti": false,
-    "değişen_piksel": 11397,
-    "değişen_piksel_oranı": 0.04221111111111111,
-    "ssim": 0.9127378281401483
+    "değişen_piksel": 11402,
+    "değişen_piksel_oranı": 0.04222962962962963,
+    "ssim": 0.9125723315468025
   },
   "tipografi_normalizasyonu": {
     "gaussian_sigma": 0.8,

@@ -609,6 +609,9 @@ pub struct Eksen {
     pub ad_konumu: EksenAdKonumu,
     /// Eksen çizgisi ile eksen adı arasındaki boşluk (`nameGap`).
     pub ad_boşluğu: f32,
+    /// Eksen adının derece cinsinden dönüşü (`nameRotate`). `None`, yatay
+    /// eksende 0°; dikey eksende 90° olan ECharts yönünü kullanır.
+    pub ad_döndürme: Option<f32>,
     /// Eksen adı yazı stili (`nameTextStyle`).
     pub ad_yazı: YazıStili,
     /// Kategori ekseni verisi.
@@ -655,8 +658,13 @@ pub struct Eksen {
     /// Değer ekseninin açık çentik aralığı (`interval`). Verildiğinde
     /// `minInterval`/`maxInterval` kısıtlarının önüne geçer.
     pub aralık: Option<f64>,
+    /// En küçük/büyük ana çentik aralığı (`minInterval` / `maxInterval`).
+    /// Değer ekseninde veri birimi, zaman ekseninde milisaniyedir.
     pub en_küçük_adım: Option<f64>,
     pub en_büyük_adım: Option<f64>,
+    /// Zaman çentiklerini ve etiketlerini yerel takvime hizalayan UTC
+    /// ofseti, dakika cinsinden. Sıfır UTC'dir.
+    pub zaman_dilimi_dakikası: i32,
     /// Log ekseni tabanı (`logBase`), öntanımlı 10.
     pub log_tabanı: f64,
     pub ters: bool,
@@ -693,6 +701,7 @@ impl Default for Eksen {
             ad: None,
             ad_konumu: EksenAdKonumu::Bitiş,
             ad_boşluğu: 15.0,
+            ad_döndürme: None,
             ad_yazı: YazıStili::default(),
             veri: Vec::new(),
             kenar_boşluğu: None,
@@ -712,6 +721,7 @@ impl Default for Eksen {
             aralık: None,
             en_küçük_adım: None,
             en_büyük_adım: None,
+            zaman_dilimi_dakikası: 0,
             log_tabanı: 10.0,
             ters: false,
             konum: None,
@@ -799,6 +809,11 @@ impl Eksen {
 
     pub fn ad_boşluğu(mut self, boşluk: f32) -> Self {
         self.ad_boşluğu = if boşluk.is_finite() { boşluk } else { 15.0 };
+        self
+    }
+
+    pub fn ad_döndürme(mut self, derece: f32) -> Self {
+        self.ad_döndürme = derece.is_finite().then_some(derece);
         self
     }
 
@@ -906,6 +921,13 @@ impl Eksen {
 
     pub fn en_büyük_adım(mut self, adım: f64) -> Self {
         self.en_büyük_adım = Some(adım);
+        self
+    }
+
+    /// Zaman ekseninin takvim ofsetini ayarlar. Örneğin İstanbul için
+    /// yaz saatinde `180`, UTC için `0` kullanılır.
+    pub fn zaman_dilimi_dakikası(mut self, dakika: i32) -> Self {
+        self.zaman_dilimi_dakikası = dakika.clamp(-24 * 60, 24 * 60);
         self
     }
 

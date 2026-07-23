@@ -118,6 +118,9 @@ function html(id, kaynak, frame, state, width, height) {
     'gauge-barometer': 2000,
     'gauge-clock': 1000
   })[id] ?? null;
+  const spiralGüncellemeSayısı = id === 'custom-spiral-race'
+    ? state === 'güncelleme' ? 1 : state === 'son' ? 8 : 0
+    : null;
   const sonEylem = Number.isInteger(kümelemeSırası)
     ? `myChart.dispatchAction({type:'timelineChange', currentIndex:${kümelemeSırası}});`
     : Number.isInteger(symbolMorphTikleri) && symbolMorphTikleri > 0
@@ -135,6 +138,25 @@ function html(id, kaynak, frame, state, width, height) {
             throw new Error('scatter-aggregate-bar 2000 ms zamanlayıcısı yakalanamadı');
           }
           for (let tik = 0; tik < ${aggregateTikleri}; tik += 1) zamanlayıcı.callback();
+        }`
+    : id === 'pie-parliament-transition' && state === 'parliament'
+      ? `{
+          const zamanlayıcı = window.__capturedIntervals[0];
+          if (!zamanlayıcı || zamanlayıcı.ms !== 2000) {
+            throw new Error('pie-parliament-transition 2000 ms zamanlayıcısı yakalanamadı');
+          }
+          zamanlayıcı.callback();
+        }`
+    : Number.isInteger(spiralGüncellemeSayısı) && spiralGüncellemeSayısı > 0
+      ? `{
+          for (let tik = 0; tik < ${spiralGüncellemeSayısı}; tik += 1) {
+            const zamanlayıcı = window.__capturedTimeouts[tik];
+            const beklenen = tik === 0 ? 1000 : 7000;
+            if (!zamanlayıcı || zamanlayıcı.ms !== beklenen) {
+              throw new Error('custom-spiral-race zamanlayıcı zinciri eksik: ' + tik);
+            }
+            zamanlayıcı.callback();
+          }
         }`
     : Number.isInteger(gaugeZamanlayıcıMs)
       ? `{
@@ -479,7 +501,7 @@ echarts.registerPreprocessor((opt) => {
     }
   }
 });
-${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'graph-force-dynamic' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' || Number.isInteger(gaugeZamanlayıcıMs) ? `
+${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'graph-force-dynamic' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' || id === 'pie-parliament-transition' || Number.isInteger(gaugeZamanlayıcıMs) ? `
 // Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
 // ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
 // girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.
@@ -492,6 +514,22 @@ window.clearInterval = (timerId) => {
   const sıra = Number(timerId) - 1;
   if (sıra >= 0 && sıra < window.__capturedIntervals.length) {
     window.__capturedIntervals[sıra] = null;
+  }
+};
+` : ''}
+${id === 'custom-spiral-race' ? `
+// Spiral Race, ilk adımı 1000 ms ve devamını 7000 ms timeout zinciriyle
+// kurar. Kaynak callback'lerini ayrı tutmak başlangıç/güncelleme/son kanıt
+// durumlarını duvar saatinden bağımsız ve tekrarlanabilir yapar.
+window.__capturedTimeouts = [];
+window.setTimeout = (callback, ms) => {
+  window.__capturedTimeouts.push({callback, ms});
+  return window.__capturedTimeouts.length;
+};
+window.clearTimeout = (timerId) => {
+  const sıra = Number(timerId) - 1;
+  if (sıra >= 0 && sıra < window.__capturedTimeouts.length) {
+    window.__capturedTimeouts[sıra] = null;
   }
 };
 ` : ''}
@@ -567,6 +605,13 @@ async function sunucuBaşlat(sayfa) {
       // harici CDN kullanılmadan örnekle aynı registerTransform yolu çalışır.
       dosya = path.join(ECHARTS, 'test/lib/ecSimpleTransform.js');
     }
+    else if (url.pathname === '/d3-hierarchy@2.0.0/dist/d3-hierarchy.min.js') {
+      // Circle Packing kartı resmî kaynakta bu sabit d3-hierarchy
+      // sürümünü CDN'den yükler. Kanıt üretimi ağdan bağımsız ve yeniden
+      // üretilebilir kalsın diye aynı paket kilitli geliştirme bağımlılığından
+      // sunulur.
+      dosya = path.join(ARAÇ, 'node_modules/d3-hierarchy/dist/d3-hierarchy.min.js');
+    }
     else if (url.pathname.startsWith('/data/')) {
       dosya = path.join(ÖRNEKLER, 'public', url.pathname);
     }
@@ -574,7 +619,11 @@ async function sunucuBaşlat(sayfa) {
       if (!path.resolve(dosya).startsWith(path.resolve(ÖRNEKLER, 'public'))
           && path.resolve(dosya) !== path.resolve(ECHARTS, 'dist/echarts.js')
           && path.resolve(dosya) !== path.resolve(ECHARTS, 'test/lib/ecStat.min.js')
-          && path.resolve(dosya) !== path.resolve(ECHARTS, 'test/lib/ecSimpleTransform.js')) {
+          && path.resolve(dosya) !== path.resolve(ECHARTS, 'test/lib/ecSimpleTransform.js')
+          && path.resolve(dosya) !== path.resolve(
+            ARAÇ,
+            'node_modules/d3-hierarchy/dist/d3-hierarchy.min.js'
+          )) {
         yanıt.writeHead(403).end();
         return;
       }
@@ -1279,6 +1328,65 @@ async function çalıştır() {
         };
         const seriler = [];
         chart.getModel().eachSeries((model) => {
+          if (model.subType === 'custom') {
+            const veri = model.getData?.();
+            const öğeyiÖzetle = (öğe) => {
+              if (!öğe) return null;
+              const kutu = öğe.getBoundingRect?.()?.clone?.();
+              const dönüşüm = öğe.getComputedTransform?.();
+              const dünyaKutusu = kutu?.clone?.();
+              if (dünyaKutusu && dönüşüm) dünyaKutusu.applyTransform(dönüşüm);
+              const bağlıMetin = öğe.getTextContent?.();
+              return {
+                tür: öğe.type,
+                x: yuvarla(öğe.x),
+                y: yuvarla(öğe.y),
+                dönüş: yuvarla(öğe.rotation),
+                ölçek_x: yuvarla(öğe.scaleX ?? 1),
+                ölçek_y: yuvarla(öğe.scaleY ?? 1),
+                dönüşüm: Array.isArray(dönüşüm) ? dönüşüm.map(yuvarla) : null,
+                yerel_kutu: kutu ? {
+                  x: yuvarla(kutu.x), y: yuvarla(kutu.y),
+                  genişlik: yuvarla(kutu.width), yükseklik: yuvarla(kutu.height)
+                } : null,
+                kutu: dünyaKutusu ? {
+                  x: yuvarla(dünyaKutusu.x), y: yuvarla(dünyaKutusu.y),
+                  genişlik: yuvarla(dünyaKutusu.width),
+                  yükseklik: yuvarla(dünyaKutusu.height)
+                } : null,
+                şekil: öğe.shape ? Object.fromEntries(
+                  Object.entries(öğe.shape)
+                    .filter(([, değer]) => typeof değer === 'number' || typeof değer === 'string')
+                    .map(([anahtar, değer]) => [anahtar, typeof değer === 'number' ? yuvarla(değer) : değer])
+                ) : null,
+                stil: {
+                  dolgu: renk(öğe.style?.fill),
+                  çizgi: renk(öğe.style?.stroke),
+                  çizgi_kalınlığı: yuvarla(öğe.style?.lineWidth),
+                  metin: öğe.style?.text ?? null,
+                  font: öğe.style?.font ?? null
+                },
+                bağlı_metin: bağlıMetin ? {
+                  metin: bağlıMetin.style?.text ?? null,
+                  dolgu: renk(bağlıMetin.style?.fill),
+                  font: bağlıMetin.style?.font ?? null,
+                  font_ailesi: bağlıMetin.style?.fontFamily ?? null,
+                  font_boyutu: yuvarla(bağlıMetin.style?.fontSize),
+                  genişlik: yuvarla(bağlıMetin.style?.width),
+                  taşma: bağlıMetin.style?.overflow ?? null,
+                  hiza: bağlıMetin.style?.align ?? null,
+                  dikey_hiza: bağlıMetin.style?.verticalAlign ?? null
+                } : null,
+                çocuklar: öğe.childrenRef?.().map(öğeyiÖzetle) ?? []
+              };
+            };
+            const öğeler = [];
+            for (let sıra = 0; sıra < (veri?.count?.() || 0); sıra += 1) {
+              öğeler.push({ veri_sırası: sıra, öğe: öğeyiÖzetle(veri.getItemGraphicEl?.(sıra)) });
+            }
+            seriler.push({ seri_sırası: model.seriesIndex, öğeler, __tür: 'custom' });
+            return;
+          }
           if (model.subType === 'treemap') {
             const viewRoot = model.getViewRoot?.() || model.getData?.()?.tree?.root;
             const yerleşim = model.layoutInfo || {};
@@ -1660,7 +1768,9 @@ async function çalıştır() {
           for (const çocuk of viewRoot?.children || []) gez(çocuk);
           seriler.push({ seri_sırası: model.seriesIndex, dilimler });
         });
-        const tür = seriler.some((seri) => seri.__tür === 'graph')
+        const tür = seriler.some((seri) => seri.__tür === 'custom')
+          ? 'custom'
+          : seriler.some((seri) => seri.__tür === 'graph')
           ? 'graph'
           : seriler.some((seri) => seri.__tür === 'chord')
           ? 'chord'

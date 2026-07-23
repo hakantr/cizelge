@@ -25,6 +25,11 @@ pub use crate::model::hatlar::{
 use crate::model::imleyici::{İmAlanı, İmNoktası, İmleyiciler, İmÇizgisi};
 pub use crate::model::kiris::KirişSerisi;
 use crate::model::matris::MatrisAralığı;
+pub use crate::model::ozel::{
+    ÖzelBoyut, ÖzelEylemBağlamı, ÖzelGörselDeğeri, ÖzelKoordinatTanımı, ÖzelSeriKoordinatSistemi,
+    ÖzelSütunYerleşimi, ÖzelSırasında, ÖzelTurBağlamı, ÖzelÖğeBağlamı, ÖzelÖğeÇizimi,
+    ÖzelÖğeÇıktısı,
+};
 use crate::model::stil::{
     AlanStili, Biçimleyici, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması, YazıStili,
     ÇizgiStili, ÖğeStili,
@@ -202,6 +207,8 @@ impl fmt::Debug for ÖğeRengiİşlevi {
 pub struct ÇizgiSerisi {
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
+    /// ZRender çizim sırası (`series.line.z`), ECharts öntanımlısı 2.
+    pub z: i32,
     /// `0.0` düz çizgi; `true` karşılığı `0.5`tir (ECharts `smooth`).
     pub yumuşaklık: f32,
     pub basamak: Option<Basamak>,
@@ -244,6 +251,7 @@ impl Default for ÇizgiSerisi {
         ÇizgiSerisi {
             ad: None,
             veri: Vec::new(),
+            z: 2,
             yumuşaklık: 0.0,
             basamak: None,
             sembol: Sembol::İçiBoşDaire,
@@ -325,6 +333,11 @@ impl ÇizgiSerisi {
 
     pub fn veri<T: Into<VeriÖğesi>>(mut self, veri: impl IntoIterator<Item = T>) -> Self {
         self.veri = veri_listesi(veri);
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
         self
     }
 
@@ -3575,11 +3588,22 @@ pub type ÖzelÇizim = Arc<dyn Fn(&mut dyn crate::cizim::ÇizimYüzeyi, &ÖzelBa
 /// Bu aynı zamanda üçüncü taraf seri türleri için eklenti noktasıdır.
 #[derive(Clone)]
 pub struct ÖzelSeri {
+    pub kimlik: Option<String>,
     pub ad: Option<String>,
     pub veri: Vec<VeriÖğesi>,
     pub çizim: Option<ÖzelÇizim>,
+    /// ECharts tarzı, her ham veri satırı için bir graphic/sahne ağacı
+    /// döndüren `renderItem(params, api)` karşılığı.
+    pub öğe_çizimi: Option<ÖzelÖğeÇizimi>,
+    pub koordinat_sistemi: ÖzelSeriKoordinatSistemi,
     /// Eksen/ızgara kurulumu gerekli mi? `false` ise tuvalin tamamı verilir.
+    /// Yeni kod `koordinat_sistemi` kullanmalıdır; alan eski kaynak kodunu
+    /// kırmamak için eşlenmiş halde korunur.
     pub kartezyen_gerekli: bool,
+    /// Bağlı polar (`polarIndex`).
+    pub kutupsal_sırası: usize,
+    /// Bağlı singleAxis (`singleAxisIndex`).
+    pub tek_eksen_sırası: Option<usize>,
     /// Bağlı takvim (`calendarIndex`); doluysa kartezyen kurulmaz.
     pub takvim_sırası: Option<usize>,
     /// Bağlı Matrix (`matrixIndex`); doluysa kartezyen kurulmaz.
@@ -3589,16 +3613,34 @@ pub struct ÖzelSeri {
     pub matris_y_kategorileri: Vec<String>,
     /// Bağlı eksenler (`xAxisIndex`/`yAxisIndex`).
     pub eksen_bağı: EksenBağı,
+    /// Koordinat alanına kırp (`clip`).
+    pub kırp: bool,
+    pub sessiz: bool,
+    pub z: i32,
+    /// Dataset `encode` boyut eşlemesi. Anahtarlar `x`, `y`, `tooltip`,
+    /// `itemName` gibi resmi kanal adlarıdır.
+    pub kodlama: Vec<(String, Vec<usize>)>,
+    pub eylem_bağlamı: ÖzelEylemBağlamı,
+    pub aşamalı: usize,
+    pub aşamalı_eşik: usize,
+    pub evrensel_geçiş: bool,
 }
 
 impl fmt::Debug for ÖzelSeri {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("ÖzelSeri")
+            .field("kimlik", &self.kimlik)
             .field("ad", &self.ad)
             .field("veri", &self.veri.len())
+            .field("öğe_çizimi", &self.öğe_çizimi.as_ref().map(|_| "İşlev(..)"))
+            .field("koordinat_sistemi", &self.koordinat_sistemi)
             .field("kartezyen_gerekli", &self.kartezyen_gerekli)
+            .field("kutupsal_sırası", &self.kutupsal_sırası)
+            .field("tek_eksen_sırası", &self.tek_eksen_sırası)
             .field("takvim_sırası", &self.takvim_sırası)
             .field("matris_sırası", &self.matris_sırası)
+            .field("kırp", &self.kırp)
+            .field("sessiz", &self.sessiz)
             .finish()
     }
 }
@@ -3606,15 +3648,28 @@ impl fmt::Debug for ÖzelSeri {
 impl Default for ÖzelSeri {
     fn default() -> Self {
         ÖzelSeri {
+            kimlik: None,
             ad: None,
             veri: Vec::new(),
             çizim: None,
+            öğe_çizimi: None,
+            koordinat_sistemi: ÖzelSeriKoordinatSistemi::Kartezyen2B,
             kartezyen_gerekli: true,
+            kutupsal_sırası: 0,
+            tek_eksen_sırası: None,
             takvim_sırası: None,
             matris_sırası: None,
             matris_x_kategorileri: Vec::new(),
             matris_y_kategorileri: Vec::new(),
             eksen_bağı: EksenBağı::default(),
+            kırp: false,
+            sessiz: false,
+            z: 2,
+            kodlama: Vec::new(),
+            eylem_bağlamı: ÖzelEylemBağlamı::default(),
+            aşamalı: 400,
+            aşamalı_eşik: 3_000,
+            evrensel_geçiş: false,
         }
     }
 }
@@ -3627,9 +3682,16 @@ impl ÖzelSeri {
     /// Seriyi verilen x/y eksen sıralarına bağlar (`xAxisIndex`/`yAxisIndex`).
     pub fn eksenler(mut self, x: usize, y: usize) -> Self {
         self.eksen_bağı = EksenBağı { x, y };
+        self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::Kartezyen2B;
         self.kartezyen_gerekli = true;
+        self.tek_eksen_sırası = None;
         self.takvim_sırası = None;
         self.matris_sırası = None;
+        self
+    }
+
+    pub fn kimlik(mut self, kimlik: impl Into<String>) -> Self {
+        self.kimlik = Some(kimlik.into());
         self
     }
 
@@ -3652,12 +3714,62 @@ impl ÖzelSeri {
         self
     }
 
+    /// Resmi `renderItem` gibi her veri satırı için bir sahne öğesi döndürür.
+    /// `GrafikÖğesi` doğrudan döndürülebilir; otomatik olarak
+    /// [`ÖzelÖğeÇıktısı`] içine alınır.
+    pub fn öğe_çizimi<F, R>(mut self, işlev: F) -> Self
+    where
+        F: for<'a> Fn(&ÖzelÖğeBağlamı<'a>) -> Option<R> + Send + Sync + 'static,
+        R: Into<ÖzelÖğeÇıktısı> + 'static,
+    {
+        self.öğe_çizimi = Some(Arc::new(move |bağlam| işlev(bağlam).map(Into::into)));
+        self
+    }
+
+    pub fn koordinat_sistemi(mut self, sistem: ÖzelSeriKoordinatSistemi) -> Self {
+        self.koordinat_sistemi = sistem;
+        self.kartezyen_gerekli = sistem == ÖzelSeriKoordinatSistemi::Kartezyen2B;
+        if sistem != ÖzelSeriKoordinatSistemi::TekEksen {
+            self.tek_eksen_sırası = None;
+        }
+        if sistem != ÖzelSeriKoordinatSistemi::Takvim {
+            self.takvim_sırası = None;
+        }
+        if sistem != ÖzelSeriKoordinatSistemi::Matris {
+            self.matris_sırası = None;
+        }
+        self
+    }
+
     pub fn kartezyen_gerekli(mut self, gerekli: bool) -> Self {
         self.kartezyen_gerekli = gerekli;
         if gerekli {
+            self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::Kartezyen2B;
+            self.tek_eksen_sırası = None;
             self.takvim_sırası = None;
             self.matris_sırası = None;
+        } else if self.koordinat_sistemi == ÖzelSeriKoordinatSistemi::Kartezyen2B {
+            self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::Yok;
         }
+        self
+    }
+
+    pub fn kutupsal_sırası(mut self, sıra: usize) -> Self {
+        self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::Kutupsal;
+        self.kutupsal_sırası = sıra;
+        self.kartezyen_gerekli = false;
+        self.tek_eksen_sırası = None;
+        self.takvim_sırası = None;
+        self.matris_sırası = None;
+        self
+    }
+
+    pub fn tek_eksen_sırası(mut self, sıra: usize) -> Self {
+        self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::TekEksen;
+        self.tek_eksen_sırası = Some(sıra);
+        self.kartezyen_gerekli = false;
+        self.takvim_sırası = None;
+        self.matris_sırası = None;
         self
     }
 
@@ -3665,7 +3777,9 @@ impl ÖzelSeri {
     /// ve `calendarIndex`). Çizim bağlamındaki `takvim` alanı bu yerleşimi
     /// taşır; tarihleri piksele çevirmek için `veriden_noktaya` kullanılabilir.
     pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::Takvim;
         self.takvim_sırası = Some(sıra);
+        self.tek_eksen_sırası = None;
         self.matris_sırası = None;
         self.kartezyen_gerekli = false;
         self
@@ -3674,7 +3788,9 @@ impl ÖzelSeri {
     /// Seriyi bir Matrix koordinatına bağlar. Çizim bağlamındaki `matris`
     /// üzerinden `veriden_noktaya` ve `veriden_yerleşime` kullanılabilir.
     pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.koordinat_sistemi = ÖzelSeriKoordinatSistemi::Matris;
         self.matris_sırası = Some(sıra);
+        self.tek_eksen_sırası = None;
         self.takvim_sırası = None;
         self.kartezyen_gerekli = false;
         self
@@ -3688,6 +3804,52 @@ impl ÖzelSeri {
     ) -> Self {
         self.matris_x_kategorileri = x.into_iter().map(Into::into).collect();
         self.matris_y_kategorileri = y.into_iter().map(Into::into).collect();
+        self
+    }
+
+    pub fn kırp(mut self, kırp: bool) -> Self {
+        self.kırp = kırp;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn kodla(
+        mut self,
+        kanal: impl Into<String>,
+        boyutlar: impl IntoIterator<Item = usize>,
+    ) -> Self {
+        let kanal = kanal.into();
+        let boyutlar = boyutlar.into_iter().collect();
+        if let Some((_, mevcut)) = self.kodlama.iter_mut().find(|(ad, _)| ad == &kanal) {
+            *mevcut = boyutlar;
+        } else {
+            self.kodlama.push((kanal, boyutlar));
+        }
+        self
+    }
+
+    pub fn eylem_bağlamı(mut self, bağlam: ÖzelEylemBağlamı) -> Self {
+        self.eylem_bağlamı = bağlam;
+        self
+    }
+
+    pub fn aşamalı(mut self, parça: usize, eşik: usize) -> Self {
+        self.aşamalı = parça;
+        self.aşamalı_eşik = eşik;
+        self
+    }
+
+    pub fn evrensel_geçiş(mut self, etkin: bool) -> Self {
+        self.evrensel_geçiş = etkin;
         self
     }
 }
@@ -5446,6 +5608,26 @@ pub enum Seri {
 }
 
 impl Seri {
+    /// Ortak SeriesModel `z` katmanı. Aynı z değerinde seçenek dizisi sırası
+    /// kararlı bağlayıcıdır.
+    pub fn z_sırası(&self) -> i32 {
+        match self {
+            Seri::Çizgi(s) => s.z,
+            Seri::Sütun(s) => s.z,
+            Seri::Huni(s) => s.z,
+            Seri::Radar(s) => s.z,
+            Seri::Özel(s) => s.z,
+            Seri::AğaçHaritası(s) => s.z,
+            Seri::GüneşPatlaması(s) => s.z,
+            Seri::Ağaç(s) => s.z,
+            Seri::Sankey(s) => s.z,
+            Seri::Grafo(s) => s.z,
+            Seri::Kiriş(s) => s.z,
+            Seri::Paralel(s) => s.z,
+            _ => 2,
+        }
+    }
+
     /// Seri modelinin kendi `id` alanı. Kimliği modelinde taşıyan ailelerde
     /// `GrafikSeçenekleri::seri` bunu normal merge kimliği olarak kullanır.
     pub fn kimlik(&self) -> Option<&str> {
@@ -5456,6 +5638,7 @@ impl Seri {
             Seri::Sankey(s) => s.kimlik.as_deref(),
             Seri::Grafo(s) => s.kimlik.as_deref(),
             Seri::Kiriş(s) => s.kimlik.as_deref(),
+            Seri::Özel(s) => s.kimlik.as_deref(),
             _ => None,
         }
     }
@@ -5498,6 +5681,7 @@ impl Seri {
             Seri::Grafo(s) => {
                 s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::Kutupsal
             }
+            Seri::Özel(s) => s.koordinat_sistemi == ÖzelSeriKoordinatSistemi::Kutupsal,
             _ => false,
         }
     }
@@ -5521,6 +5705,9 @@ impl Seri {
             {
                 Some(s.kutupsal_sırası)
             }
+            Seri::Özel(s) if s.koordinat_sistemi == ÖzelSeriKoordinatSistemi::Kutupsal => {
+                Some(s.kutupsal_sırası)
+            }
             _ => None,
         }
     }
@@ -5542,7 +5729,7 @@ impl Seri {
                 })
         ) || matches!(self, Seri::Isı(s) if s.matris_sırası.is_none())
             || matches!(self, Seri::Saçılım(s) if s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none() && s.matris_sırası.is_none())
-            || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
+            || matches!(self, Seri::Özel(s) if s.koordinat_sistemi == ÖzelSeriKoordinatSistemi::Kartezyen2B)
             || matches!(self, Seri::Grafo(s) if s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::Kartezyen2B)
     }
 
@@ -5551,6 +5738,7 @@ impl Seri {
         matches!(self, Seri::Saçılım(s) if s.tek_eksen_sırası.is_some())
             || matches!(self, Seri::TemaNehri(_))
             || matches!(self, Seri::Grafo(s) if s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::TekEksen)
+            || matches!(self, Seri::Özel(s) if s.koordinat_sistemi == ÖzelSeriKoordinatSistemi::TekEksen)
     }
 
     pub fn veri(&self) -> &[VeriÖğesi] {

@@ -13,6 +13,7 @@ pub mod imleyici;
 pub mod kiris;
 pub mod kutupsal;
 pub mod matris;
+pub mod ozel;
 pub mod paralel;
 pub mod radar;
 pub mod sankey;

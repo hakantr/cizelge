@@ -27,6 +27,8 @@ mod candlestick_sh_verisi;
 mod custom_calendar_icon_verisi;
 #[path = "uyum_veri/perlin.rs"]
 mod perlin;
+#[path = "uyum_custom.rs"]
+mod uyum_custom;
 #[path = "uyum_graph.rs"]
 mod uyum_graph;
 
@@ -12997,7 +12999,7 @@ fn matrix_graph(genişlik: f32, yükseklik: f32) -> GrafikSeçenekleri {
                         .dönüşüm(
                             YerelDönüşüm::default()
                                 .ötele(kenar[1] - 15.0, matris_yüksekliği / 5.0 * 3.0 + kenar[0])
-                                .döndür(-std::f32::consts::FRAC_PI_2),
+                                .döndür(std::f32::consts::FRAC_PI_2),
                         ),
                 ),
         )
@@ -13204,7 +13206,7 @@ fn matrix_confusion(genişlik: f32) -> GrafikSeçenekleri {
                         .dönüşüm(
                             YerelDönüşüm::default()
                                 .ötele((genişlik - 600.0) / 2.0 - 50.0, 270.0)
-                                .döndür(-std::f32::consts::FRAC_PI_2),
+                                .döndür(std::f32::consts::FRAC_PI_2),
                         ),
                 ),
         )
@@ -19081,6 +19083,9 @@ fn seçenekler(
     genişlik: f32,
     yükseklik: f32,
 ) -> Result<GrafikSeçenekleri, String> {
+    if let Some(seçenekler) = uyum_custom::resmi(id, durum) {
+        return Ok(seçenekler);
+    }
     match id {
         "line-simple" => Ok(line_simple()),
         "line-markline" => Ok(line_markline()),

@@ -6,9 +6,11 @@
     "uret": "node uret.mjs",
     "denetle": "node uret.mjs --check",
     "kanıt": "node kanit.mjs",
-    "referans:yenile": "node kanit.mjs --referans-yenile"
+    "referans:yenile": "node kanit.mjs --referans-yenile",
+    "veri:circle-packing": "node circle_packing_verisi.mjs"
   },
   "devDependencies": {
+    "d3-hierarchy": "^2.0.0",
     "pixelmatch": "7.2.0",
     "pngjs": "7.0.0",
     "puppeteer-core": "24.12.1",

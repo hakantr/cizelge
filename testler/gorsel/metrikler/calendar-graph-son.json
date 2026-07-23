@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 306,
-  "değişen_piksel_oranı": 0.0011333333333333334,
-  "ssim": 0.9989962820455327,
+  "değişen_piksel": 634,
+  "değişen_piksel_oranı": 0.0023481481481481483,
+  "ssim": 0.9972480434216522,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/calendar-graph.png",
     "gerçek": "testler/gorsel/gerçek/default/calendar-graph.png",

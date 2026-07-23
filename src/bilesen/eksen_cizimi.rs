@@ -621,7 +621,7 @@ fn kırılma_zikzağını_çiz(
 pub fn eksenleri_çiz(
     çizici: &mut dyn ÇizimYüzeyi, alan: Dikdörtgen, eksenler: &[&ÇalışmaEkseni]
 ) {
-    eksenleri_çiz_iç(çizici, alan, eksenler, None, false);
+    eksenleri_çiz_iç(çizici, alan, eksenler, None, false, false);
 }
 
 /// Eksenleri kartezyen serilerin öntanımlı `z: 2` katmanının altında veya
@@ -633,7 +633,14 @@ pub fn eksenleri_çiz_katman(
     eksenler: &[&ÇalışmaEkseni],
     serilerin_üstünde: bool,
 ) {
-    eksenleri_çiz_iç(çizici, alan, eksenler, Some(serilerin_üstünde), false);
+    eksenleri_çiz_iç(
+        çizici,
+        alan,
+        eksenler,
+        Some(serilerin_üstünde),
+        false,
+        false,
+    );
 }
 
 /// Görünür sütunların tabanındaki kategori ekseni çizgisini seri boyasından
@@ -645,7 +652,18 @@ pub fn kategori_taban_çizgilerini_üstte_çiz(
     alan: Dikdörtgen,
     eksenler: &[&ÇalışmaEkseni],
 ) {
-    eksenleri_çiz_iç(çizici, alan, eksenler, Some(false), true);
+    eksenleri_çiz_iç(çizici, alan, eksenler, Some(false), true, true);
+}
+
+/// Custom `renderItem` öğelerinin eksen tabanını örtememesi gereken
+/// doğrulama/uyumluluk katmanı. Çentik ve etiketler yeniden çizilmez; yalnız
+/// görünür bütün kartezyen axisLine vuruşları seri ağacının üstüne alınır.
+pub fn eksen_taban_çizgilerini_üstte_çiz(
+    çizici: &mut dyn ÇizimYüzeyi,
+    alan: Dikdörtgen,
+    eksenler: &[&ÇalışmaEkseni],
+) {
+    eksenleri_çiz_iç(çizici, alan, eksenler, Some(false), true, false);
 }
 
 fn eksenleri_çiz_iç(
@@ -653,6 +671,7 @@ fn eksenleri_çiz_iç(
     alan: Dikdörtgen,
     eksenler: &[&ÇalışmaEkseni],
     katman: Option<bool>,
+    yalnız_çizgi: bool,
     yalnız_kategori_çizgisi: bool,
 ) {
     for eksen in eksenler {
@@ -764,7 +783,7 @@ fn eksenleri_çiz_iç(
                 }
             }
         }
-        if yalnız_kategori_çizgisi {
+        if yalnız_çizgi {
             continue;
         }
 
@@ -942,6 +961,7 @@ fn eksenleri_çiz_iç(
                 .seçenek
                 .ad_yazı
                 .renk
+                .or(eksen.seçenek.çizgi.renk)
                 .unwrap_or_else(tema::eksen_etiketi);
             let kalın = eksen.seçenek.ad_yazı.kalın;
             // AxisBuilder başlangıç/bitişi fiziksel tuval kenarına değil,
@@ -1007,15 +1027,45 @@ fn eksenleri_çiz_iç(
                         ((sabit, alan.y - eksen.seçenek.ad_boşluğu), DikeyHiza::Alt)
                     }
                 };
-                çizici.yazı(
-                    ad,
-                    (çapa.0, çapa.1 + EKSEN_YAZI_TABAN_DENGESİ),
-                    YatayHiza::Orta,
-                    dikey,
-                    boyut,
-                    renk,
-                    kalın,
-                );
+                // AxisBuilder yalnız `nameLocation: middle/center` için adı
+                // eksenin kendi dönüşüne uyarlar. Varsayılan `end` ile
+                // `start` adları, dikey eksende de açık `nameRotate`
+                // verilmedikçe yatay kalır.
+                let derece = eksen.seçenek.ad_döndürme.unwrap_or_else(|| {
+                    if ad_konumu == EksenAdKonumu::Orta {
+                        90.0
+                    } else {
+                        0.0
+                    }
+                });
+                if derece.abs() <= f32::EPSILON {
+                    çizici.yazı(
+                        ad,
+                        (çapa.0, çapa.1 + EKSEN_YAZI_TABAN_DENGESİ),
+                        YatayHiza::Orta,
+                        dikey,
+                        boyut,
+                        renk,
+                        kalın,
+                    );
+                } else {
+                    let yerel_dikey = if dış_yön < 0.0 {
+                        DikeyHiza::Alt
+                    } else {
+                        DikeyHiza::Üst
+                    };
+                    çizici.dönüşümlü_yazı(
+                        ad,
+                        (0.0, 0.0),
+                        YatayHiza::Orta,
+                        yerel_dikey,
+                        boyut,
+                        renk,
+                        kalın,
+                        AfinMatris::ötele(çapa.0, çapa.1)
+                            .çarp(AfinMatris::döndür(-derece.to_radians())),
+                    );
+                }
             }
         }
     }

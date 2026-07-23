@@ -1,0 +1,259 @@
+{
+  "id": "cycle-plot",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 77,
+  "değişen_piksel_oranı": 0.0002851851851851852,
+  "ssim": 0.998789743385783,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 790,
+    "değişen_piksel_oranı": 0.002925925925925926,
+    "ssim": 0.9982014168081171
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "kartezyen_x_taban_çizgisi",
+      "geçti": true,
+      "açıklama": "X ekseni taban çizgisi Custom öğelerin altında kalmadan nötr renk ve doğru katmanda görünmeli",
+      "örnekler": [
+        {
+          "x": 98,
+          "y": 390,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 98,
+            "y": 390,
+            "rgb": [
+              109,
+              110,
+              114
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 146,
+            "parlaklık": 111,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 6
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 114.33333333333334,
+            "y": 455.00000000000006,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 189,
+          "y": 390,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 189,
+            "y": 390,
+            "rgb": [
+              109,
+              110,
+              114
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 146,
+            "parlaklık": 111,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 6
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 220.5,
+            "y": 455.00000000000006,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 301.5,
+          "y": 390,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 301.5,
+            "y": 390,
+            "rgb": [
+              109,
+              110,
+              114
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 146,
+            "parlaklık": 111,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 6
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 351.75,
+            "y": 455.00000000000006,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 414,
+          "y": 390,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 414,
+            "y": 390,
+            "rgb": [
+              109,
+              110,
+              114
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 146,
+            "parlaklık": 111,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 6
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 483.00000000000006,
+            "y": 455.00000000000006,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 532,
+          "y": 390,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 532,
+            "y": 390,
+            "rgb": [
+              109,
+              110,
+              114
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 146,
+            "parlaklık": 111,
+            "nötrlük_sapması": 5,
+            "nötr_puan": 6
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 620.6666666666667,
+            "y": 455.00000000000006,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/cycle-plot.png",
+    "gerçek": "testler/gorsel/gerçek/default/cycle-plot.png",
+    "fark": "testler/gorsel/fark/default/cycle-plot.png",
+    "normalize_fark": "testler/gorsel/fark/default/cycle-plot-tipografi.png"
+  }
+}

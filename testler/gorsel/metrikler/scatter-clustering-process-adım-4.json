@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 533,
-  "değişen_piksel_oranı": 0.0019740740740740743,
-  "ssim": 0.9962120452557404,
+  "değişen_piksel": 591,
+  "değişen_piksel_oranı": 0.002188888888888889,
+  "ssim": 0.9961583692378396,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/scatter-clustering-process-adım-4.png",
     "gerçek": "testler/gorsel/gerçek/default/scatter-clustering-process-adım-4.png",

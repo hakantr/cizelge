@@ -1,0 +1,30 @@
+{
+  "id": "custom-gantt-flight",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 437,
+  "değişen_piksel_oranı": 0.0016185185185185185,
+  "ssim": 0.9942326127650709,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1454,
+    "değişen_piksel_oranı": 0.0053851851851851856,
+    "ssim": 0.9934681606831283
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-gantt-flight.png",
+    "gerçek": "testler/gorsel/gerçek/default/custom-gantt-flight.png",
+    "fark": "testler/gorsel/fark/default/custom-gantt-flight.png",
+    "normalize_fark": "testler/gorsel/fark/default/custom-gantt-flight-tipografi.png"
+  }
+}

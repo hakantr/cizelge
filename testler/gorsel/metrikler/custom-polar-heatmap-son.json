@@ -1,0 +1,30 @@
+{
+  "id": "custom-polar-heatmap",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 144,
+  "değişen_piksel_oranı": 0.0005333333333333334,
+  "ssim": 0.998127329741456,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 938,
+    "değişen_piksel_oranı": 0.003474074074074074,
+    "ssim": 0.9975067565551143
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-polar-heatmap.png",
+    "gerçek": "testler/gorsel/gerçek/default/custom-polar-heatmap.png",
+    "fark": "testler/gorsel/fark/default/custom-polar-heatmap.png",
+    "normalize_fark": "testler/gorsel/fark/default/custom-polar-heatmap-tipografi.png"
+  }
+}

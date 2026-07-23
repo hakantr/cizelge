@@ -1442,6 +1442,15 @@ impl GrafikSeçenekleri {
                     sıra: tek_eksen_sırası,
                 });
             }
+            if let Seri::Özel(özel) = seri
+                && let Some(tek_eksen_sırası) = özel.tek_eksen_sırası
+                && self.tek_eksenler.get(tek_eksen_sırası).is_none()
+            {
+                return Err(BilesenHatasi::EksikVeri {
+                    bileşen: "singleAxis",
+                    sıra: tek_eksen_sırası,
+                });
+            }
             if let Seri::TemaNehri(nehir) = seri
                 && self.tek_eksenler.get(nehir.tek_eksen_sırası).is_none()
             {

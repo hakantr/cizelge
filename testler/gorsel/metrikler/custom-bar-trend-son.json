@@ -1,0 +1,259 @@
+{
+  "id": "custom-bar-trend",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 715,
+  "değişen_piksel_oranı": 0.002648148148148148,
+  "ssim": 0.9958558036469599,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1400,
+    "değişen_piksel_oranı": 0.005185185185185185,
+    "ssim": 0.9930028442498618
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "kartezyen_x_taban_çizgisi",
+      "geçti": true,
+      "açıklama": "X ekseni taban çizgisi Custom öğelerin altında kalmadan nötr renk ve doğru katmanda görünmeli",
+      "örnekler": [
+        {
+          "x": 98,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 98,
+            "y": 381,
+            "rgb": [
+              125,
+              132,
+              101
+            ],
+            "arkaplan": [
+              236.5,
+              244.5,
+              204
+            ],
+            "kontrast": 112.5,
+            "parlaklık": 119.33333333333333,
+            "nötrlük_sapması": 31,
+            "nötr_puan": 38.33333333333333
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 114.33333333333334,
+            "y": 444.5,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              237,
+              245,
+              204.5
+            ],
+            "kontrast": 160,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 189,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 189,
+            "y": 381,
+            "rgb": [
+              143,
+              125,
+              115
+            ],
+            "arkaplan": [
+              254,
+              236,
+              220
+            ],
+            "kontrast": 111,
+            "parlaklık": 127.66666666666667,
+            "nötrlük_sapması": 28,
+            "nötr_puan": 43.66666666666667
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 220.5,
+            "y": 444.5,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              229.5,
+              210.5
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 301.5,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 301.5,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              254,
+              254,
+              254
+            ],
+            "kontrast": 113,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4,
+            "nötr_puan": 34.33333333333334
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 351.75,
+            "y": 444.5,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 414,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 414,
+            "y": 381,
+            "rgb": [
+              142,
+              123,
+              111
+            ],
+            "arkaplan": [
+              254,
+              232.5,
+              214.5
+            ],
+            "kontrast": 112,
+            "parlaklık": 125.33333333333333,
+            "nötrlük_sapması": 31,
+            "nötr_puan": 44.33333333333333
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 483.00000000000006,
+            "y": 444.5,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              255,
+              232,
+              214.5
+            ],
+            "kontrast": 171,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        },
+        {
+          "x": 532,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 532,
+            "y": 381,
+            "rgb": [
+              112,
+              106,
+              128
+            ],
+            "arkaplan": [
+              221,
+              214,
+              235
+            ],
+            "kontrast": 109,
+            "parlaklık": 115.33333333333333,
+            "nötrlük_sapması": 22,
+            "nötr_puan": 25.33333333333333
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 620.6666666666667,
+            "y": 444.5,
+            "rgb": [
+              84,
+              85,
+              90
+            ],
+            "arkaplan": [
+              221.5,
+              214.5,
+              235.5
+            ],
+            "kontrast": 145.5,
+            "parlaklık": 86.33333333333333,
+            "nötrlük_sapması": 6,
+            "nötr_puan": 31.66666666666667
+          },
+          "geçti": true
+        }
+      ]
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-bar-trend.png",
+    "gerçek": "testler/gorsel/gerçek/default/custom-bar-trend.png",
+    "fark": "testler/gorsel/fark/default/custom-bar-trend.png",
+    "normalize_fark": "testler/gorsel/fark/default/custom-bar-trend-tipografi.png"
+  }
+}

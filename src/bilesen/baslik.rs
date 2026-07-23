@@ -13,6 +13,7 @@ fn metin_ölç(
     boyut: f32,
     satır_yüksekliği: f32,
     kalın: bool,
+    aile: Option<&str>,
 ) -> (f32, f32) {
     let Some(metin) = metin else {
         return (0.0, 0.0);
@@ -20,7 +21,12 @@ fn metin_ölç(
     let satırlar: Vec<&str> = metin.split('\n').collect();
     let genişlik = satırlar
         .iter()
-        .map(|satır| çizici.stilli_yazı_ölç(satır, boyut, kalın).0)
+        .map(|satır| {
+            aile.map_or_else(
+                || çizici.stilli_yazı_ölç(satır, boyut, kalın).0,
+                |aile| çizici.aileli_stilli_yazı_ölç(satır, boyut, kalın, aile).0,
+            )
+        })
         .fold(0.0_f32, f32::max);
     (genişlik, satır_yüksekliği * satırlar.len() as f32)
 }
@@ -36,18 +42,16 @@ fn çok_satırlı_yazı(
     satır_yüksekliği: f32,
     renk: Renk,
     kalın: bool,
+    aile: Option<&str>,
 ) {
     let iç_ofset = ((satır_yüksekliği - boyut) / 2.0).max(0.0);
     for (sıra, satır) in metin.split('\n').enumerate() {
-        çizici.yazı(
-            satır,
-            (çapa_x, üst + sıra as f32 * satır_yüksekliği + iç_ofset),
-            hiza,
-            DikeyHiza::Üst,
-            boyut,
-            renk,
-            kalın,
-        );
+        let konum = (çapa_x, üst + sıra as f32 * satır_yüksekliği + iç_ofset);
+        if let Some(aile) = aile {
+            çizici.aileli_yazı(satır, konum, hiza, DikeyHiza::Üst, boyut, renk, kalın, aile);
+        } else {
+            çizici.yazı(satır, konum, hiza, DikeyHiza::Üst, boyut, renk, kalın);
+        }
     }
 }
 
@@ -84,6 +88,7 @@ pub fn başlık_çiz_alanda(
         metin_boyutu,
         metin_satırı,
         ana_kalın,
+        başlık.yazı.aile.as_deref(),
     );
     let (alt_genişlik, alt_yükseklik) = metin_ölç(
         çizici,
@@ -91,6 +96,7 @@ pub fn başlık_çiz_alanda(
         alt_boyut,
         alt_satırı,
         başlık.alt_yazı.kalın,
+        başlık.alt_yazı.aile.as_deref(),
     );
     let blok_genişliği = ana_genişlik.max(alt_genişlik);
     let blok_yüksekliği = ana_yükseklik
@@ -199,6 +205,7 @@ pub fn başlık_çiz_alanda(
             metin_satırı,
             renk,
             ana_kalın,
+            başlık.yazı.aile.as_deref(),
         );
         y += ana_yükseklik + başlık.öğe_boşluğu;
     } else if başlık.alt_metin.is_some() {
@@ -221,6 +228,7 @@ pub fn başlık_çiz_alanda(
             alt_satırı,
             renk,
             başlık.alt_yazı.kalın,
+            başlık.alt_yazı.aile.as_deref(),
         );
     }
 }

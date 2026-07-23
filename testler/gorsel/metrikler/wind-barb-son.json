@@ -1,0 +1,30 @@
+{
+  "id": "wind-barb",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 350,
+  "değişen_piksel_oranı": 0.0012962962962962963,
+  "ssim": 0.9973992259967505,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1577,
+    "değişen_piksel_oranı": 0.005840740740740741,
+    "ssim": 0.9957727347922024
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/wind-barb.png",
+    "gerçek": "testler/gorsel/gerçek/default/wind-barb.png",
+    "fark": "testler/gorsel/fark/default/wind-barb.png",
+    "normalize_fark": "testler/gorsel/fark/default/wind-barb-tipografi.png"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "custom-spiral-race",
+  "senaryo": "etkileşim",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 403,
+  "değişen_piksel_oranı": 0.0014925925925925927,
+  "ssim": 0.99530180947999,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 856,
+    "değişen_piksel_oranı": 0.0031703703703703703,
+    "ssim": 0.9937295127628789
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-spiral-race-son.png",
+    "gerçek": "testler/gorsel/gerçek/default/custom-spiral-race-son.png",
+    "fark": "testler/gorsel/fark/default/custom-spiral-race-son.png",
+    "normalize_fark": "testler/gorsel/fark/default/custom-spiral-race-son-tipografi.png"
+  }
+}

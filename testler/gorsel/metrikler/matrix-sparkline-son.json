@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 2423,
-  "değişen_piksel_oranı": 0.008974074074074074,
-  "ssim": 0.9908130861491101,
+  "değişen_piksel": 2416,
+  "değişen_piksel_oranı": 0.008948148148148148,
+  "ssim": 0.9908365981013434,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/matrix-sparkline.png",
     "gerçek": "testler/gorsel/gerçek/default/matrix-sparkline.png",

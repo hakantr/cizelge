@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1390,
-  "değişen_piksel_oranı": 0.005148148148148148,
-  "ssim": 0.9978023041378192,
+  "değişen_piksel": 1642,
+  "değişen_piksel_oranı": 0.006081481481481481,
+  "ssim": 0.9967854881885455,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/matrix-graph.png",
     "gerçek": "testler/gorsel/gerçek/default/matrix-graph.png",

@@ -155,7 +155,9 @@ pub use model::seri::{
     IsıHaritasıSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram,
     RadarDurumYaması, RadarSerisi, RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri,
     SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme,
-    ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+    ÖzelBağlam, ÖzelBoyut, ÖzelEylemBağlamı, ÖzelGörselDeğeri, ÖzelKoordinatTanımı, ÖzelSeri,
+    ÖzelSeriKoordinatSistemi, ÖzelSütunYerleşimi, ÖzelSırasında, ÖzelTurBağlamı, ÖzelÇizim,
+    ÖzelÖğeBağlamı, ÖzelÖğeÇizimi, ÖzelÖğeÇıktısı, ÖğeRengiİşlevi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -309,7 +311,9 @@ pub mod hazir {
         IsıHaritasıSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi,
         Piktogram, RadarDurumYaması, RadarSerisi, RadarVeriYaması, SaçılımSerisi, Sembol,
         SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,
-        ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+        ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelBoyut, ÖzelEylemBağlamı, ÖzelGörselDeğeri,
+        ÖzelKoordinatTanımı, ÖzelSeri, ÖzelSeriKoordinatSistemi, ÖzelSütunYerleşimi, ÖzelSırasında,
+        ÖzelTurBağlamı, ÖzelÇizim, ÖzelÖğeBağlamı, ÖzelÖğeÇizimi, ÖzelÖğeÇıktısı, ÖğeRengiİşlevi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

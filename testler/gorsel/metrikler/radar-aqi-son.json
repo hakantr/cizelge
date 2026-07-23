@@ -8,9 +8,9 @@
     "ssim": 0.99
   },
   "geçti": true,
-  "değişen_piksel": 1106,
-  "değişen_piksel_oranı": 0.004096296296296297,
-  "ssim": 0.9979400311341272,
+  "değişen_piksel": 1075,
+  "değişen_piksel_oranı": 0.003981481481481482,
+  "ssim": 0.9980254753968125,
   "dosyalar": {
     "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/radar-aqi.png",
     "gerçek": "testler/gorsel/gerçek/default/radar-aqi.png",

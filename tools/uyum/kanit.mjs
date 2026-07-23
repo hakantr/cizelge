@@ -68,8 +68,42 @@ const graphKarşılaştırması = () => ({
   sahneReferansı: true
 });
 
+const customKarşılaştırması = () => ({
+  tipografiSigma: 0.8
+});
+
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
+  ...[
+    'custom-profit', 'custom-error-scatter', 'custom-bar-trend',
+    'custom-cartesian-polygon', 'custom-error-bar', 'custom-profile', 'cycle-plot',
+    'custom-polar-heatmap', 'flame-graph', 'custom-gauge', 'wind-barb',
+    'custom-gantt-flight', 'circle-packing-with-d3'
+  ].map((id) => ({
+    id,
+    tür: 'statik',
+    karşılaştırma: customKarşılaştırması(),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  })),
+  {
+    id: 'pie-parliament-transition',
+    tür: 'etkileşim',
+    karşılaştırma: customKarşılaştırması(),
+    kareler: [
+      { ad: 'pie', kare: 1, durum: 'başlangıç' },
+      { ad: 'parliament', kare: 1, durum: 'parliament' }
+    ]
+  },
+  {
+    id: 'custom-spiral-race',
+    tür: 'etkileşim',
+    karşılaştırma: customKarşılaştırması(),
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'güncelleme', kare: 1, durum: 'güncelleme' },
+      { ad: 'son', kare: 1, durum: 'son' }
+    ]
+  },
   { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   {
     id: 'funnel-align', tür: 'statik', genişlik: 1400, yükseklik: 1050,
@@ -715,11 +749,16 @@ async function karşılaştır(
 // Toplam piksel oranı, ince fakat anlamlı bir eksen çizgisinin tamamen
 // örtülmesini tek başına yakalayamaz. Kritik geometri kontrolleri, kilitli
 // kartın bilinen semantik örnek noktalarını ayrı bir geçiş kapısı yapar.
-function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
+function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası, hamGerçekDosyası = null) {
   const referansGörüntü = pngOku(referansDosyası);
   const görüntü = pngOku(gerçekDosyası);
+  const hamGörüntü = hamGerçekDosyası && fs.existsSync(hamGerçekDosyası)
+    ? pngOku(hamGerçekDosyası)
+    : null;
   const pikselOku = (kaynak, x, y) => {
-    const başlangıç = (y * kaynak.width + x) * 4;
+    const px = Math.max(0, Math.min(kaynak.width - 1, Math.round(x)));
+    const py = Math.max(0, Math.min(kaynak.height - 1, Math.round(y)));
+    const başlangıç = (py * kaynak.width + px) * 4;
     return Array.from(kaynak.data.subarray(başlangıç, başlangıç + 3));
   };
   const piksel = (x, y) => pikselOku(görüntü, x, y);
@@ -752,14 +791,22 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
   // kontrastı ayrı ölçerek eksen katmanını zorunlu kapı yapar. Arka plan,
   // çizginin normalinde ±5 px örneklenir; bu hem açık hem koyu temada çalışır.
   const eksenÇizgisiÖrneği = (x, y, dikey, nötrHedef = null) => {
-    const tek = (kaynak) => {
+    const tek = (kaynak, ölçekX = 1, ölçekY = 1) => {
       const adaylar = [];
       for (let kayma = -2; kayma <= 2; kayma += 1) {
-        const px = x + (dikey ? kayma : 0);
-        const py = y + (dikey ? 0 : kayma);
+        const px = (x + (dikey ? kayma : 0)) * ölçekX;
+        const py = (y + (dikey ? 0 : kayma)) * ölçekY;
         const rgb = pikselOku(kaynak, px, py);
-        const önce = pikselOku(kaynak, px + (dikey ? -5 : 0), py + (dikey ? 0 : -5));
-        const sonra = pikselOku(kaynak, px + (dikey ? 5 : 0), py + (dikey ? 0 : 5));
+        const önce = pikselOku(
+          kaynak,
+          px + (dikey ? -5 * ölçekX : 0),
+          py + (dikey ? 0 : -5 * ölçekY)
+        );
+        const sonra = pikselOku(
+          kaynak,
+          px + (dikey ? 5 * ölçekX : 0),
+          py + (dikey ? 0 : 5 * ölçekY)
+        );
         const arkaplan = önce.map((kanal, sıra) => (kanal + sonra[sıra]) / 2);
         const kontrast = Math.max(...rgb.map((kanal, sıra) => Math.abs(kanal - arkaplan[sıra])));
         const parlaklık = rgb.reduce((toplam, kanal) => toplam + kanal, 0) / rgb.length;
@@ -786,18 +833,49 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
       ))[0];
     };
     const referans = tek(referansGörüntü);
-    const gerçek = tek(görüntü);
+    // İnce axisLine, 700x525 ham kare 600x450 rapor karesine küçültülürken
+    // bitişik Custom dolguyla karışabilir. Nötr taban kapısı bu nedenle
+    // gerçek çizim yüzeyindeki ham pikseli ölçer; raster/SSIM yine normalize
+    // edilmiş 600x450 kare üzerinden ayrı ve değişmeden hesaplanır.
+    const gerçekKaynak = Number.isFinite(nötrHedef) && hamGörüntü ? hamGörüntü : görüntü;
+    const gerçek = tek(
+      gerçekKaynak,
+      gerçekKaynak.width / görüntü.width,
+      gerçekKaynak.height / görüntü.height
+    );
     return {
       x,
       y,
       yön: dikey ? 'dikey' : 'yatay',
       referans,
       gerçek,
-      geçti: referans.kontrast >= 18
-        && gerçek.kontrast >= 18
-        && Math.abs(referans.kayma - gerçek.kayma) <= 2
+      geçti: gerçek.kontrast >= 18
+        && Math.abs(gerçek.kayma) <= 2
+        && (Number.isFinite(nötrHedef)
+          ? gerçek.nötrlük_sapması <= 18
+            && Math.abs(gerçek.parlaklık - nötrHedef) <= 45
+          : referans.kontrast >= 18
+            && Math.abs(referans.kayma - gerçek.kayma) <= 2)
     };
   };
+  const kartezyenEksenKapıları = (x, y, üst, sağ, xGörünür = true, yGörünür = true) => [
+    paralelEksenKapısı(
+      'kartezyen_x_taban_çizgisi',
+      'X ekseni taban çizgisi Custom öğelerin altında kalmadan nötr renk ve doğru katmanda görünmeli',
+      [y],
+      [x + 8, x + (sağ - x) * 0.22, x + (sağ - x) * 0.47, x + (sağ - x) * 0.72, sağ - 8],
+      false,
+      112
+    ),
+    paralelEksenKapısı(
+      'kartezyen_y_taban_çizgisi',
+      'Y ekseni taban çizgisi Custom öğelerin altında kalmadan nötr renk ve doğru katmanda görünmeli',
+      [x],
+      [üst + 8, üst + (y - üst) * 0.24, üst + (y - üst) * 0.51, üst + (y - üst) * 0.77, y - 8],
+      true,
+      112
+    )
+  ].filter((_, sıra) => sıra === 0 ? xGörünür : yGörünür);
   const paralelEksenKapısı = (
     ad,
     açıklama,
@@ -824,6 +902,24 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
       açıklama: 'Y ekseni taban vuruşu dokuz barın başlangıcında kesintisiz görünmeli',
       örnekler
     }];
+  }
+
+  if ([
+    'custom-profit', 'custom-error-scatter', 'custom-cartesian-polygon'
+  ].includes(senaryo.id)) {
+    return kartezyenEksenKapıları(90, 381, 55, 540);
+  }
+
+  if (['custom-bar-trend', 'custom-error-bar'].includes(senaryo.id)) {
+    return kartezyenEksenKapıları(90, 381, 55, 540, true, false);
+  }
+
+  if (senaryo.id === 'custom-profile') {
+    return kartezyenEksenKapıları(90, 313, 55, 540, false, true);
+  }
+
+  if (senaryo.id === 'cycle-plot') {
+    return kartezyenEksenKapıları(90, 390, 103, 540, true, false);
   }
 
   if (senaryo.id === 'calendar-simple') {
@@ -1583,23 +1679,29 @@ function göreli(dosya) {
 async function çalıştır() {
   for (const d of [REFERANS, REFERANS_SAHNE, GERÇEK, FARK, METRİK, SAHNE, RAPOR]) dizin(d);
   const sonuçlar = [];
-  const idSırası = process.argv.indexOf('--id');
+  const seçilenIdler = process.argv.flatMap((argüman, sıra) =>
+    argüman === '--id' ? [process.argv[sıra + 1]] : []
+  );
   const önekSırası = process.argv.indexOf('--id-prefix');
-  const seçilenId = idSırası >= 0 ? process.argv[idSırası + 1] : null;
   const seçilenÖnek = önekSırası >= 0 ? process.argv[önekSırası + 1] : null;
-  if (seçilenId && seçilenÖnek) {
+  if (seçilenIdler.length > 0 && seçilenÖnek) {
     throw new Error('`--id` ve `--id-prefix` aynı anda kullanılamaz');
   }
-  if ((idSırası >= 0 && !seçilenId) || (önekSırası >= 0 && !seçilenÖnek)) {
+  if (seçilenIdler.some((id) => !id || id.startsWith('--'))
+      || (önekSırası >= 0 && !seçilenÖnek)) {
     throw new Error('kanıt seçme seçeneğinin değeri eksik');
   }
-  const senaryolar = seçilenId
-    ? SENARYOLAR.filter((senaryo) => senaryo.id === seçilenId)
+  const seçilenIdKümesi = new Set(seçilenIdler);
+  const senaryolar = seçilenIdler.length > 0
+    ? SENARYOLAR.filter((senaryo) => seçilenIdKümesi.has(senaryo.id))
     : seçilenÖnek
       ? SENARYOLAR.filter((senaryo) => senaryo.id.startsWith(seçilenÖnek))
       : SENARYOLAR;
-  if (seçilenId && senaryolar.length === 0) {
-    throw new Error(`bilinmeyen kanıt senaryosu: ${seçilenId}`);
+  const bilinmeyenIdler = seçilenIdler.filter(
+    (id) => !SENARYOLAR.some((senaryo) => senaryo.id === id)
+  );
+  if (bilinmeyenIdler.length > 0) {
+    throw new Error(`bilinmeyen kanıt senaryosu: ${bilinmeyenIdler.join(', ')}`);
   }
   if (seçilenÖnek && senaryolar.length === 0) {
     throw new Error(`kanıt senaryosu öneki eşleşmedi: ${seçilenÖnek}`);
@@ -1641,7 +1743,6 @@ async function çalıştır() {
       if (sahne) fixtureArgümanları.push('--scene-output', sahne);
       execFileSync('cargo', fixtureArgümanları, { cwd: KÖK, stdio: 'inherit' });
       await sharp(ham).resize(600, 450).toFile(gerçek);
-      fs.rmSync(ham, { force: true });
       const metrik = await karşılaştır(
         referans,
         gerçek,
@@ -1650,9 +1751,10 @@ async function çalıştır() {
         senaryo.karşılaştırma
       );
       const yapısal_kontroller = [
-        ...yapısalKontroller(senaryo, referans, gerçek),
+        ...yapısalKontroller(senaryo, referans, gerçek, ham),
         ...sahneÖzetiKontrolleri(senaryo, sahne, referansSahne)
       ];
+      fs.rmSync(ham, { force: true });
       metrik.geçti = metrik.geçti
         && yapısal_kontroller.every((kontrol) => kontrol.geçti);
       sonuçlar.push({

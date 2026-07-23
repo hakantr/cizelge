@@ -406,6 +406,20 @@ pub trait ÇizimYüzeyi {
         self.yazı_ölç(metin, boyut)
     }
 
+    /// Açık aile ve ağırlıkla yazı ölçer. Başlık/rich-text
+    /// yerleşimi, `fontFamily` seçildiğinde de boyama yüzüyle aynı
+    /// metrikleri kullanmalıdır.
+    fn aileli_stilli_yazı_ölç(
+        &self,
+        metin: &str,
+        boyut: f32,
+        kalın: bool,
+        aile: &str,
+    ) -> (f32, f32) {
+        let _ = (kalın, aile);
+        self.yazı_ölç(metin, boyut)
+    }
+
     /// Yazıyı gerçekten çizilecek ağırlıkla ölçer. Basit yüzeyler normal
     /// metriklere düşebilir; yazı tipi şekillendiren yüzeyler kalın yüzün
     /// kendi ilerleme değerlerini kullanır.

@@ -15,7 +15,7 @@ use crate::cizim::yuzey::{
 use crate::hata::BilesenHatasi;
 use crate::koordinat::Dikdörtgen;
 use crate::model::stil::ÇizgiTürü;
-use crate::renk::{Dolgu, Renk};
+use crate::renk::{DesenTekrarı, Dolgu, GörüntüDeseni, Renk};
 
 /// zrender `Transformable` alanları.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -50,7 +50,10 @@ impl YerelDönüşüm {
     pub fn matris(self) -> AfinMatris {
         AfinMatris::ötele(self.x, self.y)
             .çarp(AfinMatris::ötele(self.köken_x, self.köken_y))
-            .çarp(AfinMatris::döndür(self.dönüş))
+            // zrender `Transformable.rotation` pozitif açıyı Canvas'ta
+            // saat yönünün tersine uygular. Ekran-y aşağı affine matrisinde
+            // bunun işareti ters çevrilmelidir.
+            .çarp(AfinMatris::döndür(-self.dönüş))
             .çarp(AfinMatris::ölçekle(self.ölçek_x, self.ölçek_y))
             .çarp(AfinMatris::ötele(-self.köken_x, -self.köken_y))
             .çarp(self.ek)
@@ -363,6 +366,13 @@ pub struct SahneMetni {
     pub kalın: bool,
     /// CSS `fontFamily`; `None` yüzeyin sans-serif öntanımlısını kullanır.
     pub aile: Option<String>,
+    /// `style.width` + `overflow: 'truncate'` karşılığı. `None`, metni
+    /// doğal genişliğinde bırakır.
+    pub en_çok_genişlik: Option<f32>,
+    /// Taşmada kullanılacak işaret (`ellipsis`, ECharts öntanımlısı `...`).
+    pub üç_nokta: String,
+    /// Truncate sırasında korunacak en az karakter (`truncateMinChar`).
+    pub en_az_karakter: usize,
 }
 
 impl SahneMetni {
@@ -376,6 +386,9 @@ impl SahneMetni {
             renk: Renk::SİYAH,
             kalın: false,
             aile: None,
+            en_çok_genişlik: None,
+            üç_nokta: "...".to_owned(),
+            en_az_karakter: 0,
         }
     }
 
@@ -400,8 +413,45 @@ impl SahneMetni {
 pub struct SahneResmi {
     pub kaynak: String,
     pub kutu: Dikdörtgen,
+    /// Çözümlenmiş RGBA içerik. `Sığdır` semantiğiyle hedef
+    /// kutuya ölçeklenir; kaynak yüklenmediyse `yer_tutucu` kullanılır.
+    pub görüntü: Option<GörüntüDeseni>,
     /// Resim yüklenene kadar ve kayıt yüzeyinde kullanılan belirlenimci renk.
     pub yer_tutucu: Dolgu,
+}
+
+impl SahneResmi {
+    pub fn yeni(kaynak: impl Into<String>, kutu: Dikdörtgen) -> Self {
+        Self {
+            kaynak: kaynak.into(),
+            kutu,
+            görüntü: None,
+            yer_tutucu: Dolgu::Düz(Renk::SAYDAM),
+        }
+    }
+
+    /// Düz RGBA8 verisini doğrulayan ve önden çarpılmış sahne
+    /// görüntüsüne dönüştüren kolaylık kurucusu.
+    pub fn rgba(
+        kaynak: impl Into<String>,
+        kutu: Dikdörtgen,
+        genişlik: u32,
+        yükseklik: u32,
+        pikseller: Vec<u8>,
+    ) -> Option<Self> {
+        let görüntü = GörüntüDeseni::rgba(genişlik, yükseklik, pikseller, DesenTekrarı::Sığdır)?;
+        Some(Self {
+            kaynak: kaynak.into(),
+            kutu,
+            görüntü: Some(görüntü),
+            yer_tutucu: Dolgu::Düz(Renk::SAYDAM),
+        })
+    }
+
+    pub fn yer_tutucu(mut self, dolgu: impl Into<Dolgu>) -> Self {
+        self.yer_tutucu = dolgu.into();
+        self
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -805,6 +855,16 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
     match &kayıt.düğüm.öğe {
         SahneÖğesi::Şekil(şekil) => {
             let yol = yolu_dönüştür(&şekil.yol(), kayıt.dünya);
+            if let Some(gölge_rengi) = stil.gölge_rengi
+                && stil.gölge_bulanıklığı > 0.0
+            {
+                yüzey.yol_gölgesi(
+                    &yol,
+                    gölge_rengi.opaklık(stil.opaklık),
+                    stil.gölge_bulanıklığı,
+                    (0.0, 0.0),
+                );
+            }
             if let Some(dolgu) = &stil.dolgu {
                 yüzey.yol_doldur(&yol, &dolgu_opaklık(dolgu, stil.opaklık));
             }
@@ -819,9 +879,27 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
             }
         }
         SahneÖğesi::Metin(metin) => {
+            let ölç = |aday: &str| {
+                metin.aile.as_deref().map_or_else(
+                    || yüzey.stilli_yazı_ölç(aday, metin.boyut, metin.kalın).0,
+                    |aile| yüzey.aileli_yazı_ölç(aday, metin.boyut, aile).0,
+                )
+            };
+            let çizilecek = metin.en_çok_genişlik.map_or_else(
+                || metin.metin.clone(),
+                |en_çok| {
+                    metni_genişliğe_sığdır(
+                        &metin.metin,
+                        en_çok,
+                        &metin.üç_nokta,
+                        metin.en_az_karakter,
+                        ölç,
+                    )
+                },
+            );
             if let Some(aile) = metin.aile.as_deref() {
                 let _ = yüzey.dönüşümlü_aileli_yazı(
-                    &metin.metin,
+                    &çizilecek,
                     metin.konum,
                     metin.yatay,
                     metin.dikey,
@@ -833,7 +911,7 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
                 );
             } else {
                 let _ = yüzey.dönüşümlü_yazı(
-                    &metin.metin,
+                    &çizilecek,
                     metin.konum,
                     metin.yatay,
                     metin.dikey,
@@ -853,10 +931,53 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
                 .yol(),
                 kayıt.dünya,
             );
-            yüzey.yol_doldur(&yol, &dolgu_opaklık(&resim.yer_tutucu, stil.opaklık));
+            let dolgu = resim
+                .görüntü
+                .clone()
+                .map(Dolgu::Desen)
+                .unwrap_or_else(|| resim.yer_tutucu.clone());
+            yüzey.yol_doldur(&yol, &dolgu_opaklık(&dolgu, stil.opaklık));
         }
         SahneÖğesi::Grup(_) => {}
     }
+}
+
+fn metni_genişliğe_sığdır(
+    metin: &str,
+    en_çok: f32,
+    üç_nokta: &str,
+    en_az_karakter: usize,
+    ölç: impl Fn(&str) -> f32,
+) -> String {
+    if en_çok <= 0.0 {
+        return String::new();
+    }
+    if ölç(metin) <= en_çok {
+        return metin.to_owned();
+    }
+    let karakterler = metin.chars().collect::<Vec<_>>();
+    let en_az = en_az_karakter.min(karakterler.len());
+    for sayı in (en_az..karakterler.len()).rev() {
+        let Some(ön) = karakterler.get(..sayı) else {
+            continue;
+        };
+        let ön = ön.iter().collect::<String>();
+        let aday = format!("{ön}{üç_nokta}");
+        if ölç(&aday) <= en_çok {
+            return aday;
+        }
+    }
+    // zrender `truncateMinChar`: işaret sığmasa bile istenen en az karakter
+    // tek başına sığıyorsa onu korur.
+    if en_az > 0
+        && let Some(ön) = karakterler.get(..en_az)
+    {
+        let ön = ön.iter().collect::<String>();
+        if ölç(&ön) <= en_çok {
+            return ön;
+        }
+    }
+    String::new()
 }
 
 fn kırpmalar_içeriyor(kırpmalar: &[DünyaKırpması], nokta: (f32, f32)) -> bool {
@@ -1365,11 +1486,11 @@ mod testler {
             .çocuk(çocuk);
         let mut sahne = Sahne::yeni();
         sahne.ekle(grup).unwrap();
-        let dünya_merkezi = (90.0, 60.0);
+        let dünya_merkezi = (110.0, 40.0);
         let isabet = sahne.isabet(dünya_merkezi).unwrap();
         assert_eq!(isabet.kimlik, "hedef");
         assert!((isabet.yerel_nokta.0 - 10.0).abs() < 1e-4);
-        assert!(sahne.isabet((99.5, 50.5)).is_none());
+        assert!(sahne.isabet((100.5, 49.5)).is_none());
     }
 
     #[test]

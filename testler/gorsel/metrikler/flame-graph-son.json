@@ -1,0 +1,30 @@
+{
+  "id": "flame-graph",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 815,
+  "değişen_piksel_oranı": 0.0030185185185185185,
+  "ssim": 0.9937388235140535,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 3908,
+    "değişen_piksel_oranı": 0.014474074074074073,
+    "ssim": 0.9907894077171714
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/flame-graph.png",
+    "gerçek": "testler/gorsel/gerçek/default/flame-graph.png",
+    "fark": "testler/gorsel/fark/default/flame-graph.png",
+    "normalize_fark": "testler/gorsel/fark/default/flame-graph-tipografi.png"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "pie-parliament-transition",
+  "senaryo": "etkileşim",
+  "kare": "pie",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 0,
+  "değişen_piksel_oranı": 0,
+  "ssim": 0.999901114733978,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 14,
+    "değişen_piksel_oranı": 0.00005185185185185185,
+    "ssim": 0.9998537728046312
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/pie-parliament-transition-pie.png",
+    "gerçek": "testler/gorsel/gerçek/default/pie-parliament-transition-pie.png",
+    "fark": "testler/gorsel/fark/default/pie-parliament-transition-pie.png",
+    "normalize_fark": "testler/gorsel/fark/default/pie-parliament-transition-pie-tipografi.png"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "custom-gauge",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 1265,
+  "değişen_piksel_oranı": 0.0046851851851851855,
+  "ssim": 0.9935336215079963,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 971,
+    "değişen_piksel_oranı": 0.0035962962962962962,
+    "ssim": 0.9927085071561794
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/custom-gauge.png",
+    "gerçek": "testler/gorsel/gerçek/default/custom-gauge.png",
+    "fark": "testler/gorsel/fark/default/custom-gauge.png",
+    "normalize_fark": "testler/gorsel/fark/default/custom-gauge-tipografi.png"
+  }
+}

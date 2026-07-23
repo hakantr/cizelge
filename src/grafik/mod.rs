@@ -13,6 +13,7 @@ pub mod isi;
 pub mod kiris;
 pub mod kutupsal;
 pub mod mum;
+pub mod ozel;
 pub mod paralel;
 pub mod pasta;
 pub mod radar;

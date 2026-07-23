@@ -36,6 +36,8 @@ pub struct ZamanÖlçeği {
     pub birim_adımı: f64,
     /// Nice tick seçiminin kırılmalar düşüldükten sonraki yaklaşık aralığı.
     pub yaklaşık_aralık: f64,
+    /// Takvim sınırları ve etiketleri için UTC ofseti (dakika).
+    pub zaman_dilimi_dakikası: i32,
 }
 
 impl ZamanÖlçeği {
@@ -50,6 +52,24 @@ impl ZamanÖlçeği {
         veri_kapsamı: [f64; 2],
         bölme_sayısı: usize,
         etkin_açıklık: f64,
+    ) -> Self {
+        Self::kur_etkin_açıklıkla_sınırlı(
+            veri_kapsamı,
+            bölme_sayısı,
+            etkin_açıklık,
+            None,
+            None,
+        )
+    }
+
+    /// `minInterval` / `maxInterval` sınırlarını zaman ekseninin nice
+    /// aralık seçimine uygular. Değerler ECharts gibi milisaniyedir.
+    pub fn kur_etkin_açıklıkla_sınırlı(
+        veri_kapsamı: [f64; 2],
+        bölme_sayısı: usize,
+        etkin_açıklık: f64,
+        en_küçük_aralık: Option<f64>,
+        en_büyük_aralık: Option<f64>,
     ) -> Self {
         let mut kapsam = veri_kapsamı;
         if !kapsam[0].is_finite() || !kapsam[1].is_finite() {
@@ -67,7 +87,13 @@ impl ZamanÖlçeği {
         } else {
             açıklık
         };
-        let hedef_adım = etkin_açıklık / bölme_sayısı.max(1) as f64;
+        let mut hedef_adım = etkin_açıklık / bölme_sayısı.max(1) as f64;
+        if let Some(en_küçük) = en_küçük_aralık.filter(|v| v.is_finite() && *v > 0.0) {
+            hedef_adım = hedef_adım.max(en_küçük);
+        }
+        if let Some(en_büyük) = en_büyük_aralık.filter(|v| v.is_finite() && *v > 0.0) {
+            hedef_adım = hedef_adım.min(en_büyük);
+        }
 
         // Aday adımlar: (birim, birim adımı, milisaniye karşılığı).
         let adaylar: [(ZamanBirimi, f64, f64); 19] = [
@@ -141,7 +167,13 @@ impl ZamanÖlçeği {
             birim,
             birim_adımı,
             yaklaşık_aralık: hedef_adım,
+            zaman_dilimi_dakikası: 0,
         }
+    }
+
+    pub fn zaman_dilimi_dakikasıyla(mut self, dakika: i32) -> Self {
+        self.zaman_dilimi_dakikası = dakika.clamp(-24 * 60, 24 * 60);
+        self
     }
 
     pub fn oranla(&self, değer: f64) -> f64 {
@@ -153,6 +185,22 @@ impl ZamanÖlçeği {
     }
 
     pub fn çentikler(&self) -> Vec<Çentik> {
+        let ofset = f64::from(self.zaman_dilimi_dakikası) * DAKİKA;
+        if ofset != 0.0 {
+            // Takvim algoritmasını yerel zaman çizelgesinde çalıştırıp
+            // üretilen yerel sınırları tekrar gerçek Unix anına çevir.
+            let mut yerel = self.clone();
+            yerel.kapsam = [self.kapsam[0] + ofset, self.kapsam[1] + ofset];
+            yerel.zaman_dilimi_dakikası = 0;
+            return yerel
+                .çentikler()
+                .into_iter()
+                .map(|mut çentik| {
+                    çentik.değer -= ofset;
+                    çentik
+                })
+                .collect();
+        }
         if self.birim == ZamanBirimi::Gün && (self.birim_adımı - 7.0).abs() < f64::EPSILON {
             return haftalık_kademeli_çentikler(self.kapsam);
         }
@@ -248,7 +296,8 @@ impl ZamanÖlçeği {
     /// Etiket biçimi birime göre seçilir (`Time.ts` içindeki kademeli
     /// `formatter` yaklaşımının sade karşılığı).
     pub fn etiket(&self, değer: f64) -> String {
-        let t = andan_takvime(değer);
+        let ofset = f64::from(self.zaman_dilimi_dakikası) * DAKİKA;
+        let t = andan_takvime(değer + ofset);
         let ay_adı = ay_kısaltması(t.ay);
         match self.birim {
             ZamanBirimi::Yıl => format!("{}", t.yıl),
@@ -425,6 +474,56 @@ mod testler {
         let ö = ZamanÖlçeği::kur([başlangıç, bitiş], 7);
         assert_eq!(ö.birim, ZamanBirimi::Gün);
         assert!(!ö.çentikler().is_empty());
+    }
+
+    #[test]
+    fn zaman_en_buyuk_araligi_gunluk_centikleri_zorlar() {
+        let başlangıç = takvimden_ana(TakvimAnı {
+            yıl: 2026,
+            ay: 6,
+            gün: 28,
+            saat: 0,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let ölçek = ZamanÖlçeği::kur_etkin_açıklıkla_sınırlı(
+            [başlangıç, başlangıç + 7.0 * GÜN],
+            3,
+            7.0 * GÜN,
+            None,
+            Some(GÜN),
+        );
+
+        assert_eq!(ölçek.birim, ZamanBirimi::Gün);
+        assert_eq!(ölçek.birim_adımı, 1.0);
+        assert_eq!(ölçek.çentikler().len(), 8);
+    }
+
+    #[test]
+    fn zaman_dilimi_gunluk_centigi_yerel_gece_yarisina_hizalar() {
+        let başlangıç = takvimden_ana(TakvimAnı {
+            yıl: 2026,
+            ay: 6,
+            gün: 27,
+            saat: 11,
+            dakika: 0,
+            saniye: 0,
+            milisaniye: 0,
+        });
+        let ölçek = ZamanÖlçeği::kur_etkin_açıklıkla_sınırlı(
+            [başlangıç, başlangıç + 2.0 * GÜN],
+            2,
+            2.0 * GÜN,
+            None,
+            Some(GÜN),
+        )
+        .zaman_dilimi_dakikasıyla(180);
+        let ilk = ölçek.çentikler()[0].değer;
+        let utc = andan_takvime(ilk);
+
+        assert_eq!((utc.ay, utc.gün, utc.saat), (6, 27, 21));
+        assert_eq!(ölçek.etiket(ilk), "28");
     }
 
     #[test]

@@ -1,0 +1,30 @@
+{
+  "id": "circle-packing-with-d3",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 215,
+  "değişen_piksel_oranı": 0.0007962962962962962,
+  "ssim": 0.993315469391493,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 2006,
+    "değişen_piksel_oranı": 0.00742962962962963,
+    "ssim": 0.9885436323283712
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/circle-packing-with-d3.png",
+    "gerçek": "testler/gorsel/gerçek/default/circle-packing-with-d3.png",
+    "fark": "testler/gorsel/fark/default/circle-packing-with-d3.png",
+    "normalize_fark": "testler/gorsel/fark/default/circle-packing-with-d3-tipografi.png"
+  }
+}
