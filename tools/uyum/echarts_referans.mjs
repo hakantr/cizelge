@@ -179,6 +179,12 @@ function html(id, kaynak, frame, state, width, height) {
         }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
+    : id === 'line-draggable' && state === 'sürükle'
+      ? `{
+          const pos = myChart.convertToPixel('grid', [-40, 30]);
+          onPointDragging(2, pos);
+          updatePosition();
+        }`
     : id === 'bar-brush' && state === 'seçim'
       ? `{
           myChart.dispatchAction({
@@ -357,14 +363,30 @@ function html(id, kaynak, frame, state, width, height) {
     || (id === 'dynamic-data2' && state === 'ipucu')
     ? `await new Promise((resolve) => setTimeout(resolve, 0));`
     : '';
+  const setOptionSonrasıZamanlayıcıyıBekle = id === 'line-draggable'
+    ? `await new Promise((resolve) => setTimeout(resolve, 0));`
+    : '';
   const zamanŞeridiAnimasyonunuTamamla = id === 'scatter-clustering-process'
     && Number.isInteger(kümelemeSırası);
+  const grafikAnahtarKareAnimasyonu = [
+    'graphic-stroke-animation',
+    'graphic-loading',
+    'graphic-wave-animation'
+  ].includes(id);
+  const animasyonuElleGüncelle = zamanŞeridiAnimasyonunuTamamla
+    || grafikAnahtarKareAnimasyonu;
   const hedefMs = zamanŞeridiAnimasyonunuTamamla
     // Resmî örnek checkpointStyle.animationDuration=1500 kullanıyor.
     // timelineChange veriyi hemen güncellese de kontrol noktasını bir
     // sonraki karelerde taşır; kanıt seçilen adımın tamamlanmış
     // görsel durumunu karşılaştırır.
     ? 1500
+    : id === 'graphic-stroke-animation'
+      ? frame * 3000
+      : id === 'graphic-loading'
+        ? frame * 3200
+        : id === 'graphic-wave-animation'
+          ? frame * 4000
     : id === 'scatter-effect'
       || id === 'calendar-effectscatter'
       || id === 'calendar-charts'
@@ -481,7 +503,7 @@ myChart.setOption = (...args) => {
   return value;
 };
 echarts.registerPreprocessor((opt) => {
-  opt.animation = false;
+  opt.animation = ${grafikAnahtarKareAnimasyonu};
   const series = Array.isArray(opt.series) ? opt.series : opt.series ? [opt.series] : [];
   for (const item of series) {
     item.animation = false;
@@ -569,14 +591,15 @@ window.__sourceDone = true;
   }
   ${zamanlayıcıyıBekle}
   if (!window.__applied && typeof option !== 'undefined' && option) myChart.setOption(option);
+  ${setOptionSonrasıZamanlayıcıyıBekle}
   ${sonEylem}
-  if (${zamanŞeridiAnimasyonunuTamamla}) myChart.getZr().animation.update();
+  if (${animasyonuElleGüncelle}) myChart.getZr().animation.update();
   window.__advance(${hedefMs});
   // ECharts betiği yüklenirken native requestAnimationFrame'i kendi içine
   // bağlar. Sanal saati ilerlettikten sonra zrender animasyon yöneticisini
   // bir kez elle güncelleyerek hedef andaki tamamlanmış durumu deterministik
   // biçimde boya; gerçek zamanlı bir beklemeye bağlı kalma.
-  if (${zamanŞeridiAnimasyonunuTamamla}) myChart.getZr().animation.update();
+  if (${animasyonuElleGüncelle}) myChart.getZr().animation.update();
   myChart.getZr().flush();
   window.__ready = true;
 })().catch((error) => { window.__referenceError = error.stack || String(error); });

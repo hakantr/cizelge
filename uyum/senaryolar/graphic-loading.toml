@@ -1,18 +1,18 @@
 # Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
 id = "graphic-loading"
-kapsam_durumu = "yok"
+kapsam_durumu = "uygulandı_kanıt_bekliyor"
 sahip_faz = 6
 resmi_kaynak = "public/examples/ts/graphic-loading.ts"
-fixture = ""
+fixture = "examples/uyum_graphic.rs#graphic_loading"
 viewport_genişlik = 400
 viewport_yükseklik = 300
 shot_delay_ms = 0
 profiller = ["açık", "koyu"]
 
 [kanıt]
-api = "yok"
-statik_görsel = "yok"
-animasyon = "yok"
-etkileşim = "yok"
-erişilebilirlik = "yok"
-performans = "yok"
+api = "kısmi"
+statik_görsel = "tam_kanıtlı"
+animasyon = "tam_kanıtlı"
+etkileşim = "kısmi"
+erişilebilirlik = "kısmi"
+performans = "kısmi"

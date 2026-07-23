@@ -8248,17 +8248,29 @@
     "ts_türü": "'merge' | 'replace' | 'remove'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeEylemi merge/replace/remove); src/calisma_zamani.rs (SeçenekYaması)",
+    "veri_biçimleri": [
+      "merge",
+      "replace",
+      "remove"
+    ],
+    "koordinat_dalları": [
+      "kök",
+      "iç-içe-id"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 106,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur",
+      "calisma_zamani::testler::graphic_set_option_oge_eylemleri_merge_replace_remove_sirasini_izler"
+    ],
+    "galeri_örnekleri": [
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "9be0fb7e88f0b2c93dea",
@@ -8269,17 +8281,27 @@
     "ts_türü": "'raw' | 'all'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikSınırlamaKipi); src/bilesen/grafik.rs (all/raw)",
+    "veri_biçimleri": [
+      "all",
+      "raw"
+    ],
+    "koordinat_dalları": [
+      "dönüşümlü-birleşik-sınır",
+      "ham-sınır"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 91,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer"
+    ],
+    "galeri_örnekleri": [
+      "line-graphic"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b73646000200a6044a2b",
@@ -8290,17 +8312,28 @@
     "ts_türü": "GraphicComponentElementOption[]",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::grup/GrafikÖğeİçeriği::Grup)",
+    "veri_biçimleri": [
+      "GrafikÖğesi[]"
+    ],
+    "koordinat_dalları": [
+      "çok-seviye",
+      "ebeveyn-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 144,
       "sembol": "GraphicComponentGroupOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur",
+      "bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer"
+    ],
+    "galeri_örnekleri": [
+      "graphic-loading",
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c9096e74db3c7867b38c",
@@ -8311,17 +8344,28 @@
     "ts_türü": "GraphicComponentElementOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::grup/GrafikÖğeİçeriği::Grup)",
+    "veri_biçimleri": [
+      "GrafikÖğesi[]"
+    ],
+    "koordinat_dalları": [
+      "çok-seviye",
+      "ebeveyn-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 76,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur",
+      "bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer"
+    ],
+    "galeri_örnekleri": [
+      "graphic-loading",
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1554ad8ef77ff4ad870e",
@@ -8332,17 +8376,28 @@
     "ts_türü": "Omit<GraphicComponentZRPathOption, 'clipPath'> | false",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::kırp); src/cizim/sahne.rs (iç-içe KırpmaYolu)",
+    "veri_biçimleri": [
+      "KırpmaYolu[]"
+    ],
+    "koordinat_dalları": [
+      "shape",
+      "path",
+      "iç-içe-transform"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 101,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a9ca275d8addc504d696",
@@ -8353,17 +8408,31 @@
     "ts_türü": "GraphicComponentElementOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": "[]",
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikBileşeni::öğe/öğeler)",
+    "veri_biçimleri": [
+      "GrafikÖğesi[]"
+    ],
+    "koordinat_dalları": [
+      "kök-dizi",
+      "iç-içe-grup"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 191,
       "sembol": "GraphicComponentOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur",
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8ce0445149d47d0b73f7",
@@ -8395,17 +8464,25 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::grup_boyutu)",
+    "veri_biçimleri": [
+      "nonnegative f32"
+    ],
+    "koordinat_dalları": [
+      "group-container"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 140,
       "sembol": "GraphicComponentGroupOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer"
+    ],
+    "galeri_örnekleri": [
+      "graphic-loading"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4d17d4e3566d4b0ac2e1",
@@ -8416,17 +8493,26 @@
     "ts_türü": "[boolean, boolean]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikYerleşimi); src/bilesen/grafik.rs (yatay/dikey yerleşim çözümü)",
+    "veri_biçimleri": [
+      "hesaplanan [bool,bool]"
+    ],
+    "koordinat_dalları": [
+      "left/right",
+      "top/bottom"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 77,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer"
+    ],
+    "galeri_örnekleri": [
+      "line-graphic"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "040cd09daa6d61dc74cc",
@@ -8437,17 +8523,30 @@
     "ts_türü": "OptionId",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::kimlik, öğeyi_bul, öğe_yolu)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "kimlikli",
+      "kimliksiz-kararlı-yol"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 70,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "02f6cdc17e7fa655f749",
@@ -8458,17 +8557,27 @@
     "ts_türü": "GraphicExtraElementInfo",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::bilgi); src/bilesen/grafik.rs (GrafikÖğeBilgisi); src/cizim/olay.rs (olay yükü)",
+    "veri_biçimleri": [
+      "BTreeMap<String, EylemDeğeri>"
+    ],
+    "koordinat_dalları": [
+      "tıklama",
+      "sürükleme",
+      "setOption-merge"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 97,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır"
+    ],
+    "galeri_örnekleri": [
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a96d2321bdb81f3c6cd7",
@@ -8479,17 +8588,31 @@
     "ts_türü": "ElementKeyframeAnimationOption<ImageProps> | ElementKeyframeAnimationOption<ImageProps>[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikAnahtarKareAnimasyonu/GrafikAnahtarKare); src/bilesen/grafik.rs (zaman örnekleme)",
+    "veri_biçimleri": [
+      "tek/çok timeline",
+      "percent/duration/delay/loop/easing"
+    ],
+    "koordinat_dalları": [
+      "transform",
+      "shape",
+      "style"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 160,
       "sembol": "GraphicComponentImageOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f69692dc39900a56777f",
@@ -8500,17 +8623,31 @@
     "ts_türü": "ElementKeyframeAnimationOption<TextProps> | ElementKeyframeAnimationOption<TextProps>[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikAnahtarKareAnimasyonu/GrafikAnahtarKare); src/bilesen/grafik.rs (zaman örnekleme)",
+    "veri_biçimleri": [
+      "tek/çok timeline",
+      "percent/duration/delay/loop/easing"
+    ],
+    "koordinat_dalları": [
+      "transform",
+      "shape",
+      "style"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 171,
       "sembol": "GraphicComponentTextOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f9c9c314e444d1581213",
@@ -8521,17 +8658,31 @@
     "ts_türü": "ElementKeyframeAnimationOption<GroupProps> | ElementKeyframeAnimationOption<GroupProps>[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikAnahtarKareAnimasyonu/GrafikAnahtarKare); src/bilesen/grafik.rs (zaman örnekleme)",
+    "veri_biçimleri": [
+      "tek/çok timeline",
+      "percent/duration/delay/loop/easing"
+    ],
+    "koordinat_dalları": [
+      "transform",
+      "shape",
+      "style"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 146,
       "sembol": "GraphicComponentGroupOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f9fa52b7a2484dcaaf6f",
@@ -8542,17 +8693,31 @@
     "ts_türü": "ElementKeyframeAnimationOption<PathProps> | ElementKeyframeAnimationOption<PathProps>[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikAnahtarKareAnimasyonu/GrafikAnahtarKare); src/bilesen/grafik.rs (zaman örnekleme)",
+    "veri_biçimleri": [
+      "tek/çok timeline",
+      "percent/duration/delay/loop/easing"
+    ],
+    "koordinat_dalları": [
+      "transform",
+      "shape",
+      "style"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 153,
       "sembol": "GraphicComponentZRPathOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "graphic-wave-animation"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c06285ffa1b88d927624",
@@ -8584,17 +8749,26 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::ad); src/cizim/olay.rs (GrafikOlayı)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "tıklama",
+      "sürükleme"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 71,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır"
+    ],
+    "galeri_örnekleri": [
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "10792c7f77f0aa0fe1fd",
@@ -8605,17 +8779,26 @@
     "ts_türü": "OptionId",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (tipli iç içe Grup sahipliği ve öğe_yolu)",
+    "veri_biçimleri": [
+      "Vec<usize> hiyerarşi yolu"
+    ],
+    "koordinat_dalları": [
+      "ebeveyn",
+      "kök"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 74,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-loading"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6d7c57c60059bd4ebfe4",
@@ -8626,17 +8809,25 @@
     "ts_türü": "GraphicComponentElementOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeİçeriği::Grup; iç kaynak alanının tipli karşılığı)",
+    "veri_biçimleri": [
+      "GrafikÖğesi"
+    ],
+    "koordinat_dalları": [
+      "flatten olmadan sahiplik"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 75,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-loading"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1a3fdf9eedfcbd36b9fa",
@@ -8647,17 +8838,31 @@
     "ts_türü": "PathProps['shape'] & TransitionOptionMixin<PathProps['shape']>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeİçeriği::Şekil); src/cizim/sahne.rs (SahneŞekli)",
+    "veri_biçimleri": [
+      "rect/circle/ring/sector/arc/line/polyline/polygon/Bézier/path/compound"
+    ],
+    "koordinat_dalları": [
+      "statik",
+      "keyframe"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 150,
       "sembol": "GraphicComponentZRPathOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "423e98ff0f8f9ecdd8d3",
@@ -8668,17 +8873,33 @@
     "ts_türü": "ZRStyleProps",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/cizim/yuzey.rs (SahneStili/SahneStilYaması); src/cizim/piksel.rs; src/cizim/svg.rs",
+    "veri_biçimleri": [
+      "fill/stroke/opacity/dash/shadow/text/image"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI",
+      "keyframe"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 120,
       "sembol": "GraphicComponentDisplayableOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "5577d171827f8edb07dd",
@@ -8689,17 +8910,33 @@
     "ts_türü": "ImageStyleProps & TransitionOptionMixin<ImageStyleProps>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/cizim/yuzey.rs (SahneStili/SahneStilYaması); src/cizim/piksel.rs; src/cizim/svg.rs",
+    "veri_biçimleri": [
+      "fill/stroke/opacity/dash/shadow/text/image"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI",
+      "keyframe"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 158,
       "sembol": "GraphicComponentImageOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c07ea2913f10b91aee57",
@@ -8710,17 +8947,33 @@
     "ts_türü": "PathStyleProps & TransitionOptionMixin<PathStyleProps>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/cizim/yuzey.rs (SahneStili/SahneStilYaması); src/cizim/piksel.rs; src/cizim/svg.rs",
+    "veri_biçimleri": [
+      "fill/stroke/opacity/dash/shadow/text/image"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI",
+      "keyframe"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 151,
       "sembol": "GraphicComponentZRPathOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c2df40568fb46a20971e",
@@ -8731,17 +8984,33 @@
     "ts_türü": "TextStyleProps & TransitionOptionMixin<TextStyleProps>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/cizim/yuzey.rs (SahneStili/SahneStilYaması); src/cizim/piksel.rs; src/cizim/svg.rs",
+    "veri_biçimleri": [
+      "fill/stroke/opacity/dash/shadow/text/image"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI",
+      "keyframe"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 169,
       "sembol": "GraphicComponentTextOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3adcf87ee3ec009cc540",
@@ -8752,17 +9021,26 @@
     "ts_türü": "ElementTextConfig",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikMetinKonumu/GrafikBağlıMetni); src/bilesen/grafik.rs",
+    "veri_biçimleri": [
+      "inside/top/bottom/left/right/[x,y]"
+    ],
+    "koordinat_dalları": [
+      "host-bounds",
+      "text-alignment"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 104,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::dikdörtgen_yerleşimi_bağlı_metni_ve_isabeti_ortaktır"
+    ],
+    "galeri_örnekleri": [
+      "line-graphic"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1bb4ca066497f193eb26",
@@ -8773,17 +9051,28 @@
     "ts_türü": "Omit<GraphicComponentTextOption, 'clipPath'>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikBağlıMetni/GrafikÖğesi::bağlı_metin); src/bilesen/grafik.rs",
+    "veri_biçimleri": [
+      "GrafikBağlıMetni"
+    ],
+    "koordinat_dalları": [
+      "host-shape",
+      "sessiz-metin"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 103,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::dikdörtgen_yerleşimi_bağlı_metni_ve_isabeti_ortaktır",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "line-graphic"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "91d011c3c158005415e8",
@@ -8815,17 +9104,35 @@
     "ts_türü": "'group'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeİçeriği); src/cizim/sahne.rs (SahneŞekli)",
+    "veri_biçimleri": [
+      "group",
+      "path/shape",
+      "image",
+      "text"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 131,
       "sembol": "GraphicComponentGroupOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "18272733771f2fd33185",
@@ -8836,17 +9143,35 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeİçeriği); src/cizim/sahne.rs (SahneŞekli)",
+    "veri_biçimleri": [
+      "group",
+      "path/shape",
+      "image",
+      "text"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 68,
       "sembol": "GraphicComponentBaseElementOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1e554d045cc5ce23a0a2",
@@ -8857,17 +9182,35 @@
     "ts_türü": "'image'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeİçeriği); src/cizim/sahne.rs (SahneŞekli)",
+    "veri_biçimleri": [
+      "group",
+      "path/shape",
+      "image",
+      "text"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 157,
       "sembol": "GraphicComponentImageOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8764fc748ed3bb4c6a93",
@@ -8878,17 +9221,35 @@
     "ts_türü": "'text'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğeİçeriği); src/cizim/sahne.rs (SahneŞekli)",
+    "veri_biçimleri": [
+      "group",
+      "path/shape",
+      "image",
+      "text"
+    ],
+    "koordinat_dalları": [
+      "PNG",
+      "SVG",
+      "GPUI"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 168,
       "sembol": "GraphicComponentTextOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır",
+      "cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graphic-stroke-animation",
+      "graphic-loading",
+      "line-graphic",
+      "graphic-wave-animation",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "59f8782044794158b5aa",
@@ -8920,17 +9281,25 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::grup_boyutu)",
+    "veri_biçimleri": [
+      "nonnegative f32"
+    ],
+    "koordinat_dalları": [
+      "group-container"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 139,
       "sembol": "GraphicComponentGroupOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer"
+    ],
+    "galeri_örnekleri": [
+      "graphic-loading"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fcb1806d561d95604232",
@@ -8941,17 +9310,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafik_bileseni.rs (GrafikÖğesi::z); src/cizim/sahne.rs (zlevel/z/z2 kararlı sırası)",
+    "veri_biçimleri": [
+      "f32"
+    ],
+    "koordinat_dalları": [
+      "zlevel",
+      "z",
+      "z2"
+    ],
     "kaynak": {
       "dosya": "src/component/graphic/GraphicModel.ts",
       "satır": 121,
       "sembol": "GraphicComponentDisplayableOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır"
+    ],
+    "galeri_örnekleri": [
+      "line-graphic",
+      "line-draggable"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "61235a82f2cb3f8c60d2",

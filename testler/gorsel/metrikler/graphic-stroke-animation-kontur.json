@@ -1,0 +1,30 @@
+{
+  "id": "graphic-stroke-animation",
+  "senaryo": "animasyon",
+  "kare": "kontur",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 54,
+  "değişen_piksel_oranı": 0.0002,
+  "ssim": 0.9956203371659414,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1962,
+    "değişen_piksel_oranı": 0.007266666666666667,
+    "ssim": 0.9924711302829968
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 1.2,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-stroke-animation-kontur.png",
+    "gerçek": "testler/gorsel/gerçek/default/graphic-stroke-animation-kontur.png",
+    "fark": "testler/gorsel/fark/default/graphic-stroke-animation-kontur.png",
+    "normalize_fark": "testler/gorsel/fark/default/graphic-stroke-animation-kontur-tipografi.png"
+  }
+}

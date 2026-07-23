@@ -15,7 +15,7 @@ use crate::bilesen::eksen_cizimi::{
     kategori_taban_çizgilerini_üstte_çiz, kırılma_alanlarını_çiz,
 };
 use crate::bilesen::gosterge::{GöstergeÖğesi, gösterge_çiz};
-use crate::bilesen::grafik::{GrafikSahnesi, grafik_sahnesi_hazırla};
+use crate::bilesen::grafik::{GrafikSahnesi, grafik_sahnesi_hazırla_zamanda};
 use crate::bilesen::ipucu::{ipucu_çiz, İpucuSatırı};
 use crate::bilesen::matris_cizimi::matris_çiz;
 use crate::bilesen::paralel_cizimi::paralel_eksenlerini_çiz;
@@ -8018,7 +8018,13 @@ pub fn grafiği_boya(
     // 5e) Serbest `graphic` bileşeni. Sahnenin aynısı çıktı içinde
     // korunur; gpui tıklama sınamasında ikinci bir geometri üretmez.
     if let Some(grafik) = &seçenekler.grafik {
-        let sahne = grafik_sahnesi_hazırla(grafik, yüzey.genişlik(), yüzey.yükseklik());
+        let sahne = grafik_sahnesi_hazırla_zamanda(
+            grafik,
+            yüzey.genişlik(),
+            yüzey.yükseklik(),
+            zaman_sn,
+            seçenekler.animasyon,
+        );
         sahne.sahne.çiz(yüzey);
         çıktı.grafik_sahnesi = Some(sahne);
     }

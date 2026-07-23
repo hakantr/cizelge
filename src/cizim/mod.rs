@@ -30,8 +30,9 @@ pub use olay::{
 #[cfg(feature = "png")]
 pub use piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use sahne::{
-    GörselDurum, KırpmaYolu, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
-    SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, YerelDönüşüm, yolu_dönüştür,
+    GörselDurum, KırpmaYolu, OdakKapsamı, Sahne, SahneDüğümü, SahneFarkı, SahneMetinTaşması,
+    SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli,
+    YerelDönüşüm, yolu_dönüştür,
 };
 pub use svg::{SvgYüzeyi, svg_dışa_aktar};
 pub use svg_yol::SvgYolHatası;

@@ -272,9 +272,14 @@ pub struct SahneStili {
     pub çizgi_rengi: Option<Renk>,
     pub çizgi_kalınlığı: f32,
     pub çizgi_türü: ÇizgiTürü,
+    /// Canvas `lineDash` / `lineDashOffset`; boş dizi `çizgi_türü`
+    /// öntanımlısını kullanır.
+    pub çizgi_deseni: Vec<f32>,
+    pub çizgi_deseni_kayması: f32,
     pub opaklık: f32,
     pub gölge_rengi: Option<Renk>,
     pub gölge_bulanıklığı: f32,
+    pub gölge_kayması: (f32, f32),
 }
 
 impl Default for SahneStili {
@@ -284,9 +289,12 @@ impl Default for SahneStili {
             çizgi_rengi: None,
             çizgi_kalınlığı: 1.0,
             çizgi_türü: ÇizgiTürü::Düz,
+            çizgi_deseni: Vec::new(),
+            çizgi_deseni_kayması: 0.0,
             opaklık: 1.0,
             gölge_rengi: None,
             gölge_bulanıklığı: 0.0,
+            gölge_kayması: (0.0, 0.0),
         }
     }
 }
@@ -298,11 +306,16 @@ pub struct SahneStilYaması {
     pub çizgi_rengi: Option<Renk>,
     pub çizgi_kalınlığı: Option<f32>,
     pub çizgi_türü: Option<ÇizgiTürü>,
+    pub çizgi_deseni: Option<Vec<f32>>,
+    pub çizgi_deseni_kayması: Option<f32>,
     pub opaklık: Option<f32>,
+    pub gölge_rengi: Option<Renk>,
+    pub gölge_bulanıklığı: Option<f32>,
+    pub gölge_kayması: Option<(f32, f32)>,
 }
 
 impl SahneStilYaması {
-    fn uygula(&self, stil: &mut SahneStili) {
+    pub fn uygula(&self, stil: &mut SahneStili) {
         if let Some(dolgu) = &self.dolgu {
             stil.dolgu = Some(dolgu.clone());
         }
@@ -315,8 +328,23 @@ impl SahneStilYaması {
         if let Some(tür) = self.çizgi_türü {
             stil.çizgi_türü = tür;
         }
+        if let Some(desen) = &self.çizgi_deseni {
+            stil.çizgi_deseni = desen.clone();
+        }
+        if let Some(kayma) = self.çizgi_deseni_kayması {
+            stil.çizgi_deseni_kayması = kayma;
+        }
         if let Some(opaklık) = self.opaklık {
             stil.opaklık = opaklık;
+        }
+        if let Some(renk) = self.gölge_rengi {
+            stil.gölge_rengi = Some(renk);
+        }
+        if let Some(bulanıklık) = self.gölge_bulanıklığı {
+            stil.gölge_bulanıklığı = bulanıklık;
+        }
+        if let Some(kayma) = self.gölge_kayması {
+            stil.gölge_kayması = kayma;
         }
     }
 }
@@ -373,6 +401,18 @@ pub struct SahneMetni {
     pub üç_nokta: String,
     /// Truncate sırasında korunacak en az karakter (`truncateMinChar`).
     pub en_az_karakter: usize,
+    /// zrender `overflow`: tek satır kısaltma veya genişlik içinde sarma.
+    pub taşma: SahneMetinTaşması,
+    /// Açık `lineHeight`; `None` yüzeyin ortak satır oranını kullanır.
+    pub satır_yüksekliği: Option<f32>,
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum SahneMetinTaşması {
+    #[default]
+    Kısalt,
+    SözcükKır,
+    HerYerdenKır,
 }
 
 impl SahneMetni {
@@ -389,12 +429,28 @@ impl SahneMetni {
             en_çok_genişlik: None,
             üç_nokta: "...".to_owned(),
             en_az_karakter: 0,
+            taşma: SahneMetinTaşması::Kısalt,
+            satır_yüksekliği: None,
         }
     }
 
     pub fn sınır_kutusu(&self) -> Dikdörtgen {
-        let genişlik = self.metin.chars().count() as f32 * self.boyut * 0.6;
-        let yükseklik = self.boyut * crate::cizim::yuzey::SATIR_ORANI;
+        let doğal_genişlik = self
+            .metin
+            .lines()
+            .map(|satır| satır.chars().count())
+            .max()
+            .unwrap_or(0) as f32
+            * self.boyut
+            * 0.6;
+        let genişlik = self.en_çok_genişlik.map_or(doğal_genişlik, |en_çok| {
+            doğal_genişlik.min(en_çok.max(0.0))
+        });
+        let satır_sayısı = self.metin.lines().count().max(1) as f32;
+        let satır_yüksekliği = self
+            .satır_yüksekliği
+            .unwrap_or(self.boyut * crate::cizim::yuzey::SATIR_ORANI);
+        let yükseklik = satır_yüksekliği * satır_sayısı;
         let x = match self.yatay {
             YatayHiza::Sol => self.konum.0,
             YatayHiza::Orta => self.konum.0 - genişlik / 2.0,
@@ -862,7 +918,7 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
                     &yol,
                     gölge_rengi.opaklık(stil.opaklık),
                     stil.gölge_bulanıklığı,
-                    (0.0, 0.0),
+                    stil.gölge_kayması,
                 );
             }
             if let Some(dolgu) = &stil.dolgu {
@@ -870,12 +926,27 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
             }
             if let Some(renk) = stil.çizgi_rengi {
                 let ölçek = ((kayıt.dünya.x_ölçeği() + kayıt.dünya.y_ölçeği()) / 2.0).max(0.0);
-                yüzey.yol_çiz(
-                    &yol,
-                    stil.çizgi_kalınlığı * ölçek,
-                    renk.opaklık(stil.opaklık),
-                    stil.çizgi_türü,
-                );
+                if stil.çizgi_deseni.is_empty() {
+                    yüzey.yol_çiz(
+                        &yol,
+                        stil.çizgi_kalınlığı * ölçek,
+                        renk.opaklık(stil.opaklık),
+                        stil.çizgi_türü,
+                    );
+                } else {
+                    let desen = stil
+                        .çizgi_deseni
+                        .iter()
+                        .map(|değer| değer * ölçek)
+                        .collect::<Vec<_>>();
+                    yüzey.yol_çizgi_deseni(
+                        &yol,
+                        stil.çizgi_kalınlığı * ölçek,
+                        renk.opaklık(stil.opaklık),
+                        &desen,
+                        stil.çizgi_deseni_kayması * ölçek,
+                    );
+                }
             }
         }
         SahneÖğesi::Metin(metin) => {
@@ -885,41 +956,94 @@ fn düğümü_çiz(yüzey: &mut dyn ÇizimYüzeyi, kayıt: &GörüntüKaydı<'_>
                     |aile| yüzey.aileli_yazı_ölç(aday, metin.boyut, aile).0,
                 )
             };
-            let çizilecek = metin.en_çok_genişlik.map_or_else(
-                || metin.metin.clone(),
-                |en_çok| {
-                    metni_genişliğe_sığdır(
+            let satırlar = metin.en_çok_genişlik.map_or_else(
+                || metin.metin.lines().map(str::to_owned).collect::<Vec<_>>(),
+                |en_çok| match metin.taşma {
+                    SahneMetinTaşması::Kısalt => vec![metni_genişliğe_sığdır(
                         &metin.metin,
                         en_çok,
                         &metin.üç_nokta,
                         metin.en_az_karakter,
                         ölç,
-                    )
+                    )],
+                    SahneMetinTaşması::SözcükKır => {
+                        metni_satırlara_böl(&metin.metin, en_çok, false, ölç)
+                    }
+                    SahneMetinTaşması::HerYerdenKır => {
+                        metni_satırlara_böl(&metin.metin, en_çok, true, ölç)
+                    }
                 },
             );
-            if let Some(aile) = metin.aile.as_deref() {
-                let _ = yüzey.dönüşümlü_aileli_yazı(
-                    &çizilecek,
-                    metin.konum,
-                    metin.yatay,
-                    metin.dikey,
-                    metin.boyut,
-                    metin.renk.opaklık(stil.opaklık),
-                    metin.kalın,
-                    aile,
-                    kayıt.dünya,
-                );
-            } else {
-                let _ = yüzey.dönüşümlü_yazı(
-                    &çizilecek,
-                    metin.konum,
-                    metin.yatay,
-                    metin.dikey,
-                    metin.boyut,
-                    metin.renk.opaklık(stil.opaklık),
-                    metin.kalın,
-                    kayıt.dünya,
-                );
+            let satır_yüksekliği = metin
+                .satır_yüksekliği
+                // Piksel/SVG/GPUI ortak yazı yüzeyi tek satır kutusunu
+                // font boyutunda ölçer. Eski tek-satır çapasını ve
+                // zrender'ın açık `lineHeight` yokluğunu aynen koru.
+                .unwrap_or(metin.boyut);
+            let toplam_yükseklik = satır_yüksekliği * satırlar.len().max(1) as f32;
+            let üst = match metin.dikey {
+                DikeyHiza::Üst => metin.konum.1,
+                DikeyHiza::Orta => metin.konum.1 - toplam_yükseklik / 2.0,
+                DikeyHiza::Alt => metin.konum.1 - toplam_yükseklik,
+            };
+            for (sıra, çizilecek) in satırlar.iter().enumerate() {
+                let konum = (metin.konum.0, üst + sıra as f32 * satır_yüksekliği);
+                if let Some(kontur) = stil.çizgi_rengi {
+                    let renk = metin.renk.opaklık(stil.opaklık);
+                    let kontur = kontur.opaklık(stil.opaklık);
+                    if stil.çizgi_deseni.is_empty() {
+                        let _ = yüzey.dönüşümlü_konturlu_yazı(
+                            çizilecek,
+                            konum,
+                            metin.yatay,
+                            DikeyHiza::Üst,
+                            metin.boyut,
+                            renk,
+                            metin.kalın,
+                            kontur,
+                            stil.çizgi_kalınlığı,
+                            kayıt.dünya,
+                        );
+                    } else {
+                        let _ = yüzey.dönüşümlü_desenli_konturlu_yazı(
+                            çizilecek,
+                            konum,
+                            metin.yatay,
+                            DikeyHiza::Üst,
+                            metin.boyut,
+                            renk,
+                            metin.kalın,
+                            kontur,
+                            stil.çizgi_kalınlığı,
+                            &stil.çizgi_deseni,
+                            stil.çizgi_deseni_kayması,
+                            kayıt.dünya,
+                        );
+                    }
+                } else if let Some(aile) = metin.aile.as_deref() {
+                    let _ = yüzey.dönüşümlü_aileli_yazı(
+                        çizilecek,
+                        konum,
+                        metin.yatay,
+                        DikeyHiza::Üst,
+                        metin.boyut,
+                        metin.renk.opaklık(stil.opaklık),
+                        metin.kalın,
+                        aile,
+                        kayıt.dünya,
+                    );
+                } else {
+                    let _ = yüzey.dönüşümlü_yazı(
+                        çizilecek,
+                        konum,
+                        metin.yatay,
+                        DikeyHiza::Üst,
+                        metin.boyut,
+                        metin.renk.opaklık(stil.opaklık),
+                        metin.kalın,
+                        kayıt.dünya,
+                    );
+                }
             }
         }
         SahneÖğesi::Resim(resim) => {
@@ -978,6 +1102,53 @@ fn metni_genişliğe_sığdır(
         }
     }
     String::new()
+}
+
+fn metni_satırlara_böl(
+    metin: &str,
+    en_çok: f32,
+    her_yerden: bool,
+    ölç: impl Fn(&str) -> f32 + Copy,
+) -> Vec<String> {
+    if en_çok <= 0.0 {
+        return vec![String::new()];
+    }
+    let mut sonuç = Vec::new();
+    for paragraf in metin.split('\n') {
+        let mut satır = String::new();
+        for sözcük in paragraf.split_whitespace() {
+            let aday = if satır.is_empty() {
+                sözcük.to_owned()
+            } else {
+                format!("{satır} {sözcük}")
+            };
+            if ölç(&aday) <= en_çok {
+                satır = aday;
+                continue;
+            }
+            if !satır.is_empty() {
+                sonuç.push(std::mem::take(&mut satır));
+            }
+            if ölç(sözcük) <= en_çok && !her_yerden {
+                satır = sözcük.to_owned();
+                continue;
+            }
+            for karakter in sözcük.chars() {
+                let aday = format!("{satır}{karakter}");
+                if !satır.is_empty() && ölç(&aday) > en_çok {
+                    sonuç.push(std::mem::take(&mut satır));
+                }
+                satır.push(karakter);
+            }
+        }
+        if !satır.is_empty() || paragraf.is_empty() {
+            sonuç.push(std::mem::take(&mut satır));
+        }
+    }
+    if sonuç.is_empty() {
+        sonuç.push(String::new());
+    }
+    sonuç
 }
 
 fn kırpmalar_içeriyor(kırpmalar: &[DünyaKırpması], nokta: (f32, f32)) -> bool {

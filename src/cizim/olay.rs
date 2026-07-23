@@ -5,6 +5,7 @@
 
 use std::collections::BTreeMap;
 
+use crate::eylem::EylemDeğeri;
 use crate::koordinat::{
     Dikdörtgen, ParalelGenişletmeSonucu, ParalelYerleşimi, ÇalışmaEkseni
 };
@@ -434,6 +435,18 @@ pub enum GrafikOlayı {
     GrafikÖğesiTıklandı {
         kimlik: Option<String>,
         ad: Option<String>,
+        bilgi: BTreeMap<String, EylemDeğeri>,
+    },
+    /// `graphic` öğesinin zrender `draggable` hareketi. `fark`, son pointer
+    /// olayının ekran-piksel farkı; `konum`, güncel yerel `x/y`; `yol`,
+    /// kimliksiz resmi tutamaçların da kararlı biçimde bulunmasını sağlar.
+    GrafikÖğesiSürüklendi {
+        kimlik: Option<String>,
+        ad: Option<String>,
+        bilgi: BTreeMap<String, EylemDeğeri>,
+        yol: Vec<usize>,
+        fark: (f32, f32),
+        konum: (f32, f32),
     },
     /// Gösterge öğesi tıklanıp bir ad açıldı/kapandı
     /// (`'legendselectchanged'`).

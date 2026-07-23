@@ -1585,6 +1585,132 @@ const CHORD_SERIES_OPTION_KANITI = Object.freeze({
   }
 });
 
+const GRAPHIC_ÖRNEKLERİ = [
+  'graphic-stroke-animation',
+  'graphic-loading',
+  'line-graphic',
+  'graphic-wave-animation',
+  'line-draggable'
+];
+const GRAPHIC_MODEL_TESTİ =
+  'model::grafik_bileseni::testler::graphic_merge_replace_remove_ve_dizi_yolu_iç_içe_öğeleri_korur';
+const GRAPHIC_SAHNE_TESTİ =
+  'bilesen::grafik::testler::görünmez_sürükleme_tutamacı_isabete_yol_ve_draggable_bilgisi_taşır';
+const GRAPHIC_YERLEŞİM_TESTİ =
+  'bilesen::grafik::testler::nested_group_boyutu_cocuk_yerlesimini_ve_ham_siniri_ayri_cozer';
+const GRAPHIC_ANİMASYON_TESTİ =
+  'bilesen::grafik::testler::anahtar_kare_gecikme_dongu_sekil_stil_ve_donusumu_ara_degerler';
+const GRAPHIC_SVG_TESTİ =
+  'cizim::svg::testler::graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur';
+
+// GraphicModel.ts yalnız kök `elements` dizisini değil, element union'ının
+// alanlarını da aynı `graphic.*` kökünde envantere çıkarır. İç
+// `parentOption`/`hv` alanları Rust'ta açık kullanıcı seçeneği olmak yerine
+// iç içe tip ve yerleşim çözücüsüyle temsil edilir.
+const GRAPHIC_OPTION_KANITI = Object.freeze({
+  elements: {
+    api: 'src/model/grafik_bileseni.rs (GrafikBileşeni::öğe/öğeler)',
+    testler: [GRAPHIC_MODEL_TESTİ, GRAPHIC_SAHNE_TESTİ], örnekler: GRAPHIC_ÖRNEKLERİ,
+    veri_biçimleri: ['GrafikÖğesi[]'], dallar: ['kök-dizi', 'iç-içe-grup']
+  },
+  '$action': {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğeEylemi merge/replace/remove); src/calisma_zamani.rs (SeçenekYaması)',
+    testler: [GRAPHIC_MODEL_TESTİ, 'calisma_zamani::testler::graphic_set_option_oge_eylemleri_merge_replace_remove_sirasini_izler'],
+    örnekler: ['line-draggable'], veri_biçimleri: ['merge', 'replace', 'remove'], dallar: ['kök', 'iç-içe-id']
+  },
+  id: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::kimlik, öğeyi_bul, öğe_yolu)',
+    testler: [GRAPHIC_MODEL_TESTİ], örnekler: GRAPHIC_ÖRNEKLERİ,
+    veri_biçimleri: ['String'], dallar: ['kimlikli', 'kimliksiz-kararlı-yol']
+  },
+  name: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::ad); src/cizim/olay.rs (GrafikOlayı)',
+    testler: [GRAPHIC_SAHNE_TESTİ], örnekler: ['line-draggable'],
+    veri_biçimleri: ['String'], dallar: ['tıklama', 'sürükleme']
+  },
+  info: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::bilgi); src/bilesen/grafik.rs (GrafikÖğeBilgisi); src/cizim/olay.rs (olay yükü)',
+    testler: [GRAPHIC_SAHNE_TESTİ], örnekler: ['line-draggable'],
+    veri_biçimleri: ['BTreeMap<String, EylemDeğeri>'], dallar: ['tıklama', 'sürükleme', 'setOption-merge']
+  },
+  type: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğeİçeriği); src/cizim/sahne.rs (SahneŞekli)',
+    testler: [GRAPHIC_SAHNE_TESTİ, GRAPHIC_SVG_TESTİ], örnekler: GRAPHIC_ÖRNEKLERİ,
+    veri_biçimleri: ['group', 'path/shape', 'image', 'text'], dallar: ['PNG', 'SVG', 'GPUI']
+  },
+  children: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::grup/GrafikÖğeİçeriği::Grup)',
+    testler: [GRAPHIC_MODEL_TESTİ, GRAPHIC_YERLEŞİM_TESTİ], örnekler: ['graphic-loading', 'graphic-wave-animation'],
+    veri_biçimleri: ['GrafikÖğesi[]'], dallar: ['çok-seviye', 'ebeveyn-dönüşümü']
+  },
+  parentId: {
+    api: 'src/model/grafik_bileseni.rs (tipli iç içe Grup sahipliği ve öğe_yolu)',
+    testler: [GRAPHIC_MODEL_TESTİ], örnekler: ['graphic-loading'],
+    veri_biçimleri: ['Vec<usize> hiyerarşi yolu'], dallar: ['ebeveyn', 'kök']
+  },
+  parentOption: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğeİçeriği::Grup; iç kaynak alanının tipli karşılığı)',
+    testler: [GRAPHIC_MODEL_TESTİ], örnekler: ['graphic-loading'],
+    veri_biçimleri: ['GrafikÖğesi'], dallar: ['flatten olmadan sahiplik']
+  },
+  hv: {
+    api: 'src/model/grafik_bileseni.rs (GrafikYerleşimi); src/bilesen/grafik.rs (yatay/dikey yerleşim çözümü)',
+    testler: [GRAPHIC_YERLEŞİM_TESTİ], örnekler: ['line-graphic'],
+    veri_biçimleri: ['hesaplanan [bool,bool]'], dallar: ['left/right', 'top/bottom']
+  },
+  bounding: {
+    api: 'src/model/grafik_bileseni.rs (GrafikSınırlamaKipi); src/bilesen/grafik.rs (all/raw)',
+    testler: [GRAPHIC_YERLEŞİM_TESTİ], örnekler: ['line-graphic'],
+    veri_biçimleri: ['all', 'raw'], dallar: ['dönüşümlü-birleşik-sınır', 'ham-sınır']
+  },
+  width: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::grup_boyutu)',
+    testler: [GRAPHIC_YERLEŞİM_TESTİ], örnekler: ['graphic-loading'],
+    veri_biçimleri: ['nonnegative f32'], dallar: ['group-container']
+  },
+  height: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::grup_boyutu)',
+    testler: [GRAPHIC_YERLEŞİM_TESTİ], örnekler: ['graphic-loading'],
+    veri_biçimleri: ['nonnegative f32'], dallar: ['group-container']
+  },
+  clipPath: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::kırp); src/cizim/sahne.rs (iç-içe KırpmaYolu)',
+    testler: [GRAPHIC_SAHNE_TESTİ, GRAPHIC_SVG_TESTİ], örnekler: ['graphic-wave-animation'],
+    veri_biçimleri: ['KırpmaYolu[]'], dallar: ['shape', 'path', 'iç-içe-transform']
+  },
+  textContent: {
+    api: 'src/model/grafik_bileseni.rs (GrafikBağlıMetni/GrafikÖğesi::bağlı_metin); src/bilesen/grafik.rs',
+    testler: ['bilesen::grafik::testler::dikdörtgen_yerleşimi_bağlı_metni_ve_isabeti_ortaktır', GRAPHIC_SVG_TESTİ],
+    örnekler: ['graphic-stroke-animation', 'line-graphic'], veri_biçimleri: ['GrafikBağlıMetni'], dallar: ['host-shape', 'sessiz-metin']
+  },
+  textConfig: {
+    api: 'src/model/grafik_bileseni.rs (GrafikMetinKonumu/GrafikBağlıMetni); src/bilesen/grafik.rs',
+    testler: ['bilesen::grafik::testler::dikdörtgen_yerleşimi_bağlı_metni_ve_isabeti_ortaktır'],
+    örnekler: ['line-graphic'], veri_biçimleri: ['inside/top/bottom/left/right/[x,y]'], dallar: ['host-bounds', 'text-alignment']
+  },
+  keyframeAnimation: {
+    api: 'src/model/grafik_bileseni.rs (GrafikAnahtarKareAnimasyonu/GrafikAnahtarKare); src/bilesen/grafik.rs (zaman örnekleme)',
+    testler: [GRAPHIC_ANİMASYON_TESTİ, GRAPHIC_SVG_TESTİ],
+    örnekler: ['graphic-stroke-animation', 'graphic-loading', 'graphic-wave-animation'],
+    veri_biçimleri: ['tek/çok timeline', 'percent/duration/delay/loop/easing'], dallar: ['transform', 'shape', 'style']
+  },
+  shape: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğeİçeriği::Şekil); src/cizim/sahne.rs (SahneŞekli)',
+    testler: [GRAPHIC_ANİMASYON_TESTİ, GRAPHIC_SVG_TESTİ], örnekler: GRAPHIC_ÖRNEKLERİ,
+    veri_biçimleri: ['rect/circle/ring/sector/arc/line/polyline/polygon/Bézier/path/compound'], dallar: ['statik', 'keyframe']
+  },
+  style: {
+    api: 'src/cizim/yuzey.rs (SahneStili/SahneStilYaması); src/cizim/piksel.rs; src/cizim/svg.rs',
+    testler: [GRAPHIC_ANİMASYON_TESTİ, GRAPHIC_SVG_TESTİ], örnekler: GRAPHIC_ÖRNEKLERİ,
+    veri_biçimleri: ['fill/stroke/opacity/dash/shadow/text/image'], dallar: ['PNG', 'SVG', 'GPUI', 'keyframe']
+  },
+  z2: {
+    api: 'src/model/grafik_bileseni.rs (GrafikÖğesi::z); src/cizim/sahne.rs (zlevel/z/z2 kararlı sırası)',
+    testler: [GRAPHIC_SAHNE_TESTİ], örnekler: ['line-graphic', 'line-draggable'],
+    veri_biçimleri: ['f32'], dallar: ['zlevel', 'z', 'z2']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -1592,7 +1718,10 @@ const CHORD_SERIES_OPTION_KANITI = Object.freeze({
 const ARA_KARE_ANIMASYON_KANITI = new Set([
   'scatter-effect',
   'calendar-effectscatter',
-  'calendar-charts'
+  'calendar-charts',
+  'graphic-stroke-animation',
+  'graphic-loading',
+  'graphic-wave-animation'
 ]);
 
 const YEREL_FIXTURE = Object.freeze({
@@ -1759,6 +1888,11 @@ const YEREL_FIXTURE = Object.freeze({
   'custom-gantt-flight': 'examples/uyum_custom.rs#custom_gantt_flight',
   'circle-packing-with-d3': 'examples/uyum_custom.rs#circle_packing_with_d3',
   'custom-spiral-race': 'examples/uyum_custom.rs#custom_spiral_race',
+  'graphic-stroke-animation': 'examples/uyum_graphic.rs#graphic_stroke_animation',
+  'graphic-loading': 'examples/uyum_graphic.rs#graphic_loading',
+  'line-graphic': 'examples/uyum_graphic.rs#line_graphic',
+  'graphic-wave-animation': 'examples/uyum_graphic.rs#graphic_wave_animation',
+  'line-draggable': 'examples/uyum_graphic.rs#line_draggable',
   'funnel': 'examples/uyum_fixture.rs#funnel',
   'funnel-align': 'examples/uyum_fixture.rs#funnel_align',
   'funnel-customize': 'examples/uyum_fixture.rs#funnel_customize',
@@ -2344,6 +2478,17 @@ function rustKarşılığı(kök, özellik) {
       galeri_örnekleri: CHORD_ÖRNEKLERİ,
       veri_biçimleri: ['KirişSerisi'],
       koordinat_dalları: ['none', 'box-layout', 'boyama', 'isabet/tooltip', 'durum katmanları']
+    };
+  }
+  if (kök.toLowerCase() === 'graphic' && GRAPHIC_OPTION_KANITI[özellik]) {
+    const kanıt = GRAPHIC_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: kanıt.durum ?? 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
     };
   }
   if (kök.toLowerCase() === 'calendar' && CALENDAR_OPTION_KANITI[özellik]) {

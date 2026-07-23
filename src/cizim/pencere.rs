@@ -19,6 +19,7 @@ use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
 use crate::calisma_zamani::{
     GrafikÇalışmaZamanı, SeçenekAyarlamaKipi, SeçenekYaması, ÖrnekBaşlatmaSeçenekleri,
 };
+use crate::cizim::AfinMatris;
 use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::gorunum::{
     AraçTürü, AğaçGezinmeAlanı, BoyamaGirdisi, FırçaAlanı, GrafoGezinmeAlanı, SürgüBölgesi,
@@ -28,6 +29,7 @@ use crate::cizim::olay::{
     AğaçHaritasıKökYönü, GrafikOlayı, GüneşPatlamasıKökYönü, MatrisHücreBölgesi,
     ParalelEksenBölgesi, ParalelGenişletmeBölgesi, İsabetBölgesi, İsabetGeometrisi,
 };
+use crate::eylem::EylemDeğeri;
 use crate::grafik::isi::{GörselEşlemeSürgüParçası, SürekliGörselEşlemeBölgesi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
@@ -266,8 +268,18 @@ pub struct GrafikGörünümü {
 }
 
 /// Etkin sürükleme durumu.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 enum Sürükleme {
+    /// Serbest Graphic öğesinin yerel `x/y` dönüşümünü taşıma.
+    GrafikÖğesi {
+        yol: Vec<usize>,
+        kimlik: Option<String>,
+        ad: Option<String>,
+        bilgi: BTreeMap<String, EylemDeğeri>,
+        /// Ekran farkını öğenin ebeveyn koordinatına çevirir.
+        ekrandan_yerele: AfinMatris,
+        son: (f32, f32),
+    },
     /// Grafo düğümünü taşıma.
     GrafoDüğüm {
         seri_sırası: usize,
@@ -326,6 +338,40 @@ enum Sürükleme {
         paralel_sırası: usize,
         başlangıç: (f32, f32),
     },
+}
+
+fn grafik_öğesini_sürükle(
+    seçenekler: &mut GrafikSeçenekleri,
+    yol: &[usize],
+    fark: (f32, f32),
+) -> Option<(f32, f32)> {
+    let öğe = seçenekler.grafik.as_mut()?.öğeyi_yolda_mut(yol)?;
+    öğe.dönüşüm.x += fark.0;
+    öğe.dönüşüm.y += fark.1;
+    Some((öğe.dönüşüm.x, öğe.dönüşüm.y))
+}
+
+fn grafik_sürükleme_matrisi(
+    seçenekler: &GrafikSeçenekleri,
+    yol: &[usize],
+    dünya: AfinMatris,
+) -> AfinMatris {
+    let Some(yerel) = seçenekler
+        .grafik
+        .as_ref()
+        .and_then(|grafik| grafik.öğeyi_yolda(yol))
+        .map(|öğe| öğe.dönüşüm.matris())
+    else {
+        return AfinMatris::BİRİM;
+    };
+    // İsabet matrisi `ebeveyn * öğe`dir. Yerleşim yalnız öteleme
+    // eklediğinden doğrusal kısım aynı kalır; ekran vektörünü ebeveynin
+    // tersine sokmak, dönmüş/ölçeklenmiş grupta yerel x/y'yi korur.
+    yerel
+        .ters()
+        .and_then(|yerel_tersi| dünya.çarp(yerel_tersi).ters())
+        .map(|ters| AfinMatris::yeni(ters.a, ters.b, ters.c, ters.d, 0.0, 0.0))
+        .unwrap_or(AfinMatris::BİRİM)
 }
 
 impl EventEmitter<GrafikOlayı> for GrafikGörünümü {}
@@ -1138,7 +1184,43 @@ impl Render for GrafikGörünümü {
                 }
                 // Etkin sürükleme: kaydırma ya da sürgü.
                 if olay.pressed_button == Some(MouseButton::Left) {
-                    match bu.sürükleme {
+                    match bu.sürükleme.clone() {
+                        Some(Sürükleme::GrafikÖğesi {
+                            yol,
+                            kimlik,
+                            ad,
+                            bilgi,
+                            ekrandan_yerele,
+                            son,
+                        }) => {
+                            let fark = (yeni.0 - son.0, yeni.1 - son.1);
+                            let yerel_fark = ekrandan_yerele.vektörü_dönüştür(fark);
+                            let konum = grafik_öğesini_sürükle(
+                                Arc::make_mut(&mut bu.seçenekler),
+                                &yol,
+                                yerel_fark,
+                            );
+                            bu.sürükleme = Some(Sürükleme::GrafikÖğesi {
+                                yol: yol.clone(),
+                                kimlik: kimlik.clone(),
+                                ad: ad.clone(),
+                                bilgi: bilgi.clone(),
+                                ekrandan_yerele,
+                                son: yeni,
+                            });
+                            if let Some(konum) = konum {
+                                cx.emit(GrafikOlayı::GrafikÖğesiSürüklendi {
+                                    kimlik,
+                                    ad,
+                                    bilgi,
+                                    yol,
+                                    fark,
+                                    konum,
+                                });
+                                cx.notify();
+                            }
+                            return;
+                        }
                         Some(Sürükleme::GrafoDüğüm {
                             seri_sırası,
                             veri_sırası,
@@ -1882,17 +1964,36 @@ impl Render for GrafikGörünümü {
                     let grafik_vuruşu = match bu.grafik_sahnesi.try_borrow() {
                         Ok(kayıt) => kayıt.as_ref().and_then(|(hazır, köken)| {
                             let yerel = (konum.0 - köken.0, konum.1 - köken.1);
-                            hazır
-                                .sahne
-                                .isabet(yerel)
-                                .and_then(|isabet| hazır.öğe_bilgileri.get(&isabet.kimlik).cloned())
+                            hazır.sahne.isabet(yerel).and_then(|isabet| {
+                                hazır
+                                    .öğe_bilgileri
+                                    .get(&isabet.kimlik)
+                                    .cloned()
+                                    .map(|bilgi| (bilgi, isabet.dünya_matrisi))
+                            })
                         }),
                         Err(_) => None,
                     };
-                    if let Some(bilgi) = grafik_vuruşu {
+                    if let Some((bilgi, dünya_matrisi)) = grafik_vuruşu {
+                        if bilgi.sürüklenebilir {
+                            let ekrandan_yerele = grafik_sürükleme_matrisi(
+                                &bu.seçenekler,
+                                &bilgi.yol,
+                                dünya_matrisi,
+                            );
+                            bu.sürükleme = Some(Sürükleme::GrafikÖğesi {
+                                yol: bilgi.yol.clone(),
+                                kimlik: bilgi.kimlik.clone(),
+                                ad: bilgi.ad.clone(),
+                                bilgi: bilgi.bilgi.clone(),
+                                ekrandan_yerele,
+                                son: konum,
+                            });
+                        }
                         cx.emit(GrafikOlayı::GrafikÖğesiTıklandı {
                             kimlik: bilgi.kimlik,
                             ad: bilgi.ad,
+                            bilgi: bilgi.bilgi,
                         });
                         return;
                     }
@@ -2427,7 +2528,9 @@ impl Render for GrafikGörünümü {
 #[allow(clippy::expect_used)]
 mod testler {
     use super::*;
+    use crate::cizim::YerelDönüşüm;
     use crate::model::Uzunluk;
+    use crate::model::grafik_bileseni::{GrafikBileşeni, GrafikÖğesi};
     use crate::model::grafo::{GrafoDüğümü, GrafoSerisi};
 
     #[test]
@@ -2486,5 +2589,45 @@ mod testler {
             Some("pointer")
         );
         assert_eq!(grafo_imlecini_bul(&seçenekler, &[kenar], (50.0, 0.0)), None);
+    }
+
+    #[test]
+    fn graphic_surukleme_yolu_modelin_yerel_donusumunu_gunceller() {
+        let tutamaç = GrafikÖğesi::dikdörtgen(Dikdörtgen::yeni(0.0, 0.0, 20.0, 20.0))
+            .kimlik("tutamaç")
+            .dönüşüm(YerelDönüşüm {
+                x: 10.0,
+                y: 20.0,
+                ..YerelDönüşüm::default()
+            })
+            .görünmez(true)
+            .sürüklenebilir(true);
+        let grup = GrafikÖğesi::grup([tutamaç]).dönüşüm(YerelDönüşüm {
+            ölçek_x: 2.0,
+            ölçek_y: 2.0,
+            ..YerelDönüşüm::default()
+        });
+        let mut seçenekler = GrafikSeçenekleri::yeni().grafik(GrafikBileşeni::yeni().öğe(grup));
+        let hazır = crate::bilesen::grafik::grafik_sahnesi_hazırla(
+            seçenekler.grafik.as_ref().unwrap(),
+            200.0,
+            200.0,
+        );
+        let isabet = hazır.sahne.isabet((30.0, 50.0)).unwrap();
+        let ekrandan_yerele =
+            grafik_sürükleme_matrisi(&seçenekler, &[0, 0], isabet.dünya_matrisi);
+        let yerel_fark = ekrandan_yerele.vektörü_dönüştür((8.0, -4.0));
+
+        assert_eq!(
+            grafik_öğesini_sürükle(&mut seçenekler, &[0, 0], yerel_fark),
+            Some((14.0, 18.0))
+        );
+        let öğe = seçenekler
+            .grafik
+            .as_ref()
+            .unwrap()
+            .öğeyi_yolda(&[0, 0])
+            .unwrap();
+        assert_eq!((öğe.dönüşüm.x, öğe.dönüşüm.y), (14.0, 18.0));
     }
 }

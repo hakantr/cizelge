@@ -12893,24 +12893,24 @@
           "ad": "son",
           "senaryo": "statik",
           "geçti": true,
-          "değişen_piksel": 1497,
-          "değişen_piksel_oranı": 0.005544444444444445,
-          "ssim": 0.9947948337124938,
+          "değişen_piksel": 1111,
+          "değişen_piksel_oranı": 0.004114814814814815,
+          "ssim": 0.9965021567551435,
           "referans": {
             "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/multiple-y-axis.png",
             "sha256": "b0f16761a7b0e2b1be87759758eeac663694fc7e9c59f37263c1485e018aba7f"
           },
           "gerçek": {
             "yol": "testler/gorsel/gerçek/default/multiple-y-axis.png",
-            "sha256": "136c429dad04a293cbad33a5430b50ee4216dfd16b3b4e3a5e7426ba77f69a32"
+            "sha256": "eec039e5461ec6f8a3fb21b13d60b0670a39fcd2993e9ed2228dc1d1cb06ff92"
           },
           "fark": {
             "yol": "testler/gorsel/fark/default/multiple-y-axis.png",
-            "sha256": "31025c0dfecb01a434f982337cd32ca0c53eff4cda30387be46fef0119ffec42"
+            "sha256": "e9b70c411fda46aa81ede64621774b4d0f5435ddb45b1e48847865bb78dc8a1c"
           },
           "metrik": {
             "yol": "testler/gorsel/metrikler/multiple-y-axis-son.json",
-            "sha256": "add167f9038f14bfc34fbad75526738e750d19803a76b9522352ab1d5216b230"
+            "sha256": "65f91529c279bb78f282a919ce4d8bef231e0816fc27cd1cf860cbd5d88df765"
           }
         }
       ]
@@ -15246,7 +15246,7 @@
     "videoEnd": 3000,
     "kaynak": "public/examples/ts/graphic-stroke-animation.ts",
     "kaynak_sha256": "0e13435ac6ae214b4bdb0c150e7ca23b8036f0b379b65c0aee0bdb4757ce7938",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_graphic.rs#graphic_stroke_animation",
     "seriler": [
       "text"
     ],
@@ -15258,7 +15258,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -15272,15 +15272,130 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "tam_kanıtlı",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "çizim",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 15,
+          "değişen_piksel_oranı": 0.00005555555555555556,
+          "ssim": 0.9982842780834762,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-stroke-animation-çizim.png",
+            "sha256": "400f03b76e17a11108d023067ba7a6f3d54fb725f3f6df1d1471646dd80044a2"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-stroke-animation-çizim.png",
+            "sha256": "48b42f37225e31506268fa02d826fb79eb276876bec51be54431c317632ffcdd"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-stroke-animation-çizim.png",
+            "sha256": "c8648fcd295ba988c0e9d48b0da4ab2afa72d4df03b3d79ea77bcaac525744e4"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 398,
+            "değişen_piksel_oranı": 0.001474074074074074,
+            "ssim": 0.9967087907342085
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 1.2,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-stroke-animation-çizim-tipografi.png",
+            "sha256": "f841fe8b9421bd905d97f6c256a1c5af45a37e5e9dcee059301b62c23b53b474"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-stroke-animation-çizim.json",
+            "sha256": "4df11e855f6ff27bd77f3579406b041af361b67a5b7337e39152feca3974de1e"
+          }
+        },
+        {
+          "ad": "dolgu",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 100,
+          "değişen_piksel_oranı": 0.00037037037037037035,
+          "ssim": 0.9977634497288385,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-stroke-animation-dolgu.png",
+            "sha256": "0234befd07276dcb2b86c694fe32766fb13b4240426d6e80f8a38edf26fff562"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-stroke-animation-dolgu.png",
+            "sha256": "cc5cb59d59029a37ab4d8876ca2cd25786f0694b7dc7fe14fc54fba9129c399b"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-stroke-animation-dolgu.png",
+            "sha256": "3db4c7ce4a1d8bf4c7cf8823f9cf6e08bb823264ed6a1a00683aa206f66159e3"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 2564,
+            "değişen_piksel_oranı": 0.009496296296296296,
+            "ssim": 0.9971564774369016
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 1.2,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-stroke-animation-dolgu-tipografi.png",
+            "sha256": "50164aa4fd7c8d6ad0c1e920635527a4c71acd327b8b95e078fbe00f259a51e1"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-stroke-animation-dolgu.json",
+            "sha256": "ad4a9d92d2def2003681a111067ad2cc6125acaa3306f57d6f3e58b3c3a2865c"
+          }
+        },
+        {
+          "ad": "kontur",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 54,
+          "değişen_piksel_oranı": 0.0002,
+          "ssim": 0.9956203371659414,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-stroke-animation-kontur.png",
+            "sha256": "c2f7968cd645cad597c036ac0dc1764474c001d7da34a275df4536298602adcf"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-stroke-animation-kontur.png",
+            "sha256": "245e84e3a1f86d30edbf370cfd5888ce5a1e60ac3af4e588337a7e0de9004122"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-stroke-animation-kontur.png",
+            "sha256": "ae3100d306a874e2fc63a901ef12f1f737caae72abb8e09fa1ffef57383775e2"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 1962,
+            "değişen_piksel_oranı": 0.007266666666666667,
+            "ssim": 0.9924711302829968
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 1.2,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-stroke-animation-kontur-tipografi.png",
+            "sha256": "a40d91d8344db3167ef4f559f3c0a5193cb6d1ce873966588241495709bfda7f"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-stroke-animation-kontur.json",
+            "sha256": "a21d3e02cacbf769823212c25943d6be8f8fdd40d864b6255ee6dc055ca9c79e"
+          }
+        }
+      ]
     }
   },
   {
@@ -16931,7 +17046,7 @@
     "videoEnd": 3200,
     "kaynak": "public/examples/ts/graphic-loading.ts",
     "kaynak_sha256": "a8970ff524b641933bca937fe7208d34881f5bea97500c1c65d58b7bfcb78bea",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_graphic.rs#graphic_loading",
     "seriler": [
       "group",
       "rect"
@@ -16944,7 +17059,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -16958,15 +17073,130 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "tam_kanıtlı",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "erken",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9999960300839503,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-loading-erken.png",
+            "sha256": "a4898a86b7d69c6c26d0f4a6a94ff14c5db068cd9e6c9516c51b056059820018"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-loading-erken.png",
+            "sha256": "9b532847962519b192df4aa2cbb340134155d84a9299d3e7e8b5e9da40664e1b"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-loading-erken.png",
+            "sha256": "b98949e5369f4275ea0629bbdc3070a349615e73f93cd27bf4f6bc94b25ab8dd"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 0,
+            "değişen_piksel_oranı": 0,
+            "ssim": 0.9999913221954628
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-loading-erken-tipografi.png",
+            "sha256": "8a6d0aadcdf3d575f7fffb1afe6e73c283b9a99ac83e38fccf29ae8fd320e38e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-loading-erken.json",
+            "sha256": "d7bb8b00315f8ba01b0e4ac2fd5b47a73bb60f64242c8defd355ce6c4d2034a2"
+          }
+        },
+        {
+          "ad": "geç",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9999885958760739,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-loading-geç.png",
+            "sha256": "45006f7d6b27aeffc3d4e7201dd37f5cf41078de96617ae0edc69ebe4c51e68b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-loading-geç.png",
+            "sha256": "99df329f75f33c4166f4e071e28e9a62f17fcd2c220d98f0b0bc74cc9dd8421d"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-loading-geç.png",
+            "sha256": "9a61cbc53835c7895afb7e07d35913957cb47f9e1e29da641ece2d57b43db9a2"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 0,
+            "değişen_piksel_oranı": 0,
+            "ssim": 0.9999827996187276
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-loading-geç-tipografi.png",
+            "sha256": "9ac9736df0c39870feeac37a1cc7cfc8f668c36f7155b5722a2e7cf4fc8da055"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-loading-geç.json",
+            "sha256": "18562759d8a010aa237fe564b01a91869834c9d58b254689c32e77b0cfb7bb36"
+          }
+        },
+        {
+          "ad": "orta",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9999926334335034,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-loading-orta.png",
+            "sha256": "f0777a43c0273edb400c473bcb1d39cd38459ad1b0bb30a579f889dbd32b718b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-loading-orta.png",
+            "sha256": "f97dd6ee5cfa0c54c5a46d810745af5fb92cc2fbe9e761a4fb11f5aa51413c61"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-loading-orta.png",
+            "sha256": "e653154361eccbc4291f8af4baa35c8eff022e4614e373412b3fe26fdfe9be88"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 0,
+            "değişen_piksel_oranı": 0,
+            "ssim": 0.9999937720222336
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-loading-orta-tipografi.png",
+            "sha256": "a1deca2247bc68726fc01519cf663a76f12265d6c71475a4cf0bb1cbea6d8feb"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-loading-orta.json",
+            "sha256": "c8dd69c26964ab6962541d353adc87a8a6c5c0292b604a05f62d2871c79ccc0f"
+          }
+        }
+      ]
     }
   },
   {
@@ -19503,7 +19733,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/line-graphic.ts",
     "kaynak_sha256": "4cac3bb9c5555063945693e5a949d4d6f3bf7b1d0c7078d2859079f83775cd72",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_graphic.rs#line_graphic",
     "seriler": [
       "group",
       "line",
@@ -19521,7 +19751,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -19535,15 +19765,82 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 762,
+          "değişen_piksel_oranı": 0.002822222222222222,
+          "ssim": 0.9958940034145297,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-graphic.png",
+            "sha256": "a471c738a433d6a935de3e2e1f5ef201e0eb5f809a6d469dea972d73b302e2f9"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/line-graphic.png",
+            "sha256": "d85d551455789ccb189cab6becdf85d98e2382cc98d649f73da88a5d61b72afb"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/line-graphic.png",
+            "sha256": "c911f3f10ef68aff5074c7261ab323e22c3aedc2b0861c090fe3abe792a023c5"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 4109,
+            "değişen_piksel_oranı": 0.015218518518518518,
+            "ssim": 0.9870436242879155
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 3.5,
+            "bölgeler": [
+              {
+                "x": 70,
+                "y": 192,
+                "genişlik": 180,
+                "yükseklik": 64
+              },
+              {
+                "çokgen": [
+                  [
+                    400,
+                    437
+                  ],
+                  [
+                    418,
+                    455
+                  ],
+                  [
+                    603,
+                    269
+                  ],
+                  [
+                    585,
+                    251
+                  ]
+                ]
+              }
+            ],
+            "açıklama": "Aynı Gauss çekirdeği yalnız kayıtlı tipografi bölgelerine uygulanır; bölge dışı geometri ham pikseldir."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/line-graphic-tipografi.png",
+            "sha256": "5d92d551ab96aeef13f8eebb11828b4bae7f77d23549b6a23e47db7369d862aa"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/line-graphic-son.json",
+            "sha256": "fa1acc838c2df3287fd584820ca624a68f534bdfacfd38e9d27cd87d76983dbf"
+          }
+        }
+      ]
     }
   },
   {
@@ -21376,7 +21673,7 @@
     "videoEnd": 5000,
     "kaynak": "public/examples/ts/graphic-wave-animation.js",
     "kaynak_sha256": "a67337551dd148e61a0554317698cb37fbf5357aff4ac15d4fd7f651da8c6225",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_graphic.rs#graphic_wave_animation",
     "seriler": [
       "circle"
     ],
@@ -21388,7 +21685,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -21402,15 +21699,130 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "tam_kanıtlı",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "erken",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 5,
+          "değişen_piksel_oranı": 0.000018518518518518518,
+          "ssim": 0.9992818363619396,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-wave-animation-erken.png",
+            "sha256": "7325c4ed3be7575f438fd4d60ec3105b2a06a81f31dadf362cf19204475c0bd0"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-wave-animation-erken.png",
+            "sha256": "964d61e44460e67c8d92586cf2bab0351bda45d997612e24d0a509457513af75"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-wave-animation-erken.png",
+            "sha256": "3b05128c3c2bc2c2d94eebc5befe11aff8eff23c56126e944abf4f3ce773304e"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 411,
+            "değişen_piksel_oranı": 0.0015222222222222221,
+            "ssim": 0.9990924213136687
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-wave-animation-erken-tipografi.png",
+            "sha256": "c125e113d238cc0afde0c3738ad382c8f31c4fcbf357c287c058b9fd10ec298d"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-wave-animation-erken.json",
+            "sha256": "f3927944e0250be5d07ab167ffaf5773964b13bfbdefd0220d02548f7d94ac7c"
+          }
+        },
+        {
+          "ad": "geç",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9992214953205144,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-wave-animation-geç.png",
+            "sha256": "e55520ef0d8378208e2705f8c2372318dc8419575f8728eacddd1e396ac5c578"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-wave-animation-geç.png",
+            "sha256": "c8aec6b45bb57c25c1568d7c2c2c6520b316e9456202df944eb145ce8d4a22ca"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-wave-animation-geç.png",
+            "sha256": "4232a2e6b8b561e55852303747e8a6feb585e05398c589384596a587b20edcb8"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 396,
+            "değişen_piksel_oranı": 0.0014666666666666667,
+            "ssim": 0.9990276455527779
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-wave-animation-geç-tipografi.png",
+            "sha256": "1aa011f4625e168e6855c34c5a166470d392f1fabcbf633f7d300a7487ab14c1"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-wave-animation-geç.json",
+            "sha256": "fa862a6054f29646067f0bb3b811ee92d7d0e8335b917978ffcb8e2a50e3eadd"
+          }
+        },
+        {
+          "ad": "orta",
+          "senaryo": "animasyon",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9996174123528304,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-wave-animation-orta.png",
+            "sha256": "8bef97725fefab76d634f78972cda17f2b74900d409c6a452f38440ec317934b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graphic-wave-animation-orta.png",
+            "sha256": "f42eee6bb2843691d6322b2d34d860d70eb799d57e69f6e0a9eab32a364628a0"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graphic-wave-animation-orta.png",
+            "sha256": "6d1b86b7165ed6976a75cf2a508ea1df2ad82dfc6b0bbc1fb7633704156762aa"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 119,
+            "değişen_piksel_oranı": 0.00044074074074074073,
+            "ssim": 0.9994799163790314
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graphic-wave-animation-orta-tipografi.png",
+            "sha256": "ee64ba59b6579576c861ceba717ed87d541cabbfb4f41d0ddf3b09e0cc59ec03"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graphic-wave-animation-orta.json",
+            "sha256": "1f65633fada546f8603c38e67f1de978fe77261cf33f7a1c62f34e8897c37250"
+          }
+        }
+      ]
     }
   },
   {
@@ -24974,7 +25386,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/line-draggable.ts",
     "kaynak_sha256": "6ef266f94d1e412a4851bd85a2551b75b619a36b155dde2c59b3d3ba266dc040",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_graphic.rs#line_draggable",
     "seriler": [
       "circle",
       "hideTip",
@@ -24997,7 +25409,7 @@
       "dataZoom"
     ],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -25011,15 +25423,92 @@
       5
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "başlangıç",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 211,
+          "değişen_piksel_oranı": 0.0007814814814814815,
+          "ssim": 0.9988035264957563,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-draggable-başlangıç.png",
+            "sha256": "f20f11fb09f02b36884e0c8acbf32e9691bb541999ddd2763fa4f8488c371936"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/line-draggable-başlangıç.png",
+            "sha256": "5cf5b2b708d660e7ac96ee28a0c6fef02f0e175849d71c63b663f2b93adfc8dd"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/line-draggable-başlangıç.png",
+            "sha256": "dca1db876f208090c2fc87bd2c132f7fa487ce332f728665e7ad3762f325bbfe"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 516,
+            "değişen_piksel_oranı": 0.001911111111111111,
+            "ssim": 0.9980654431426724
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/line-draggable-başlangıç-tipografi.png",
+            "sha256": "51326120f39474f2535e79e76b0d4ca5f99caae2974a210872e9ff7be781daf5"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/line-draggable-başlangıç.json",
+            "sha256": "eb1ccc20d770b432f50f945a94004b5871b7591aa4c4c35afe974eb80ad118a2"
+          }
+        },
+        {
+          "ad": "sürükle",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 211,
+          "değişen_piksel_oranı": 0.0007814814814814815,
+          "ssim": 0.9988274180100922,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/line-draggable-sürükle.png",
+            "sha256": "2d0a5dedda318710a1c6d4535ec89437f2739034354bd22af21c820e80b2b7e3"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/line-draggable-sürükle.png",
+            "sha256": "55359cf28abe9da65722ba2787c522dbc2bfe6548041751bd8dedd8f9281feb9"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/line-draggable-sürükle.png",
+            "sha256": "2d440eeb3b854d7177ddb174f6f406f0fde32684ba6c155a4b68ec6b01f98811"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 512,
+            "değişen_piksel_oranı": 0.0018962962962962963,
+            "ssim": 0.9981020273294064
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/line-draggable-sürükle-tipografi.png",
+            "sha256": "3ea6a687a5928087c564b1327d32171761ce17a88222c1781aa0784589c1a652"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/line-draggable-sürükle.json",
+            "sha256": "8868a7ab57763095972676ff69d9bbf0727b408b9e449f2e909b6ebead376aca"
+          }
+        }
+      ]
     }
   },
   {

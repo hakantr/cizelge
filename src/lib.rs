@@ -42,7 +42,9 @@ pub mod yerlesim;
 pub mod zamanlayici;
 
 pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
-pub use bilesen::grafik::{GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla};
+pub use bilesen::grafik::{
+    GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla, grafik_sahnesi_hazırla_zamanda,
+};
 pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
 pub use calisma_zamani::{
     AğaçHaritasıKökDikdörtgeni, BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği,
@@ -104,8 +106,9 @@ pub use model::eksen::{
 };
 pub use model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
 pub use model::grafik_bileseni::{
-    GrafikBağlıMetni, GrafikBileşeni, GrafikMetinKonumu, GrafikYerleşimi, GrafikÖğesi,
-    GrafikÖğeİçeriği,
+    GrafikAnahtarKare, GrafikAnahtarKareAnimasyonu, GrafikBağlıMetni, GrafikBileşeni,
+    GrafikMetinKonumu, GrafikSınırlamaKipi, GrafikYerleşimi, GrafikÖğeEylemi, GrafikÖğeYaması,
+    GrafikÖğesi, GrafikÖğeİçeriği,
 };
 pub use model::grafo::{
     GrafoAralığı, GrafoBağı, GrafoDaireselAyarı, GrafoDurumu, GrafoDüğümü, GrafoEnBoyDikeyHizası,
@@ -198,7 +201,9 @@ pub use zamanlayici::{
 /// girişinin karşılığı).
 pub mod hazir {
     pub use crate::bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
-    pub use crate::bilesen::grafik::{GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla};
+    pub use crate::bilesen::grafik::{
+        GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla, grafik_sahnesi_hazırla_zamanda,
+    };
     pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
     pub use crate::calisma_zamani::{
         AğaçHaritasıKökDikdörtgeni, BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği,
@@ -259,8 +264,9 @@ pub mod hazir {
     };
     pub use crate::model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
     pub use crate::model::grafik_bileseni::{
-        GrafikBağlıMetni, GrafikBileşeni, GrafikMetinKonumu, GrafikYerleşimi, GrafikÖğesi,
-        GrafikÖğeİçeriği,
+        GrafikAnahtarKare, GrafikAnahtarKareAnimasyonu, GrafikBağlıMetni, GrafikBileşeni,
+        GrafikMetinKonumu, GrafikSınırlamaKipi, GrafikYerleşimi, GrafikÖğeEylemi, GrafikÖğeYaması,
+        GrafikÖğesi, GrafikÖğeİçeriği,
     };
     pub use crate::model::grafo::{
         GrafoAralığı, GrafoBağı, GrafoDaireselAyarı, GrafoDurumu, GrafoDüğümü,

@@ -598,6 +598,105 @@ impl ÇizimYüzeyi for SvgYüzeyi {
         ölçü
     }
 
+    fn dönüşümlü_konturlu_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        kontur_rengi: Renk,
+        kontur_kalınlığı: f32,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        self.dönüşümlü_desenli_konturlu_yazı(
+            metin,
+            konum,
+            yatay,
+            dikey,
+            boyut,
+            renk,
+            kalın,
+            kontur_rengi,
+            kontur_kalınlığı,
+            &[],
+            0.0,
+            dönüşüm,
+        )
+    }
+
+    fn dönüşümlü_desenli_konturlu_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        kontur_rengi: Renk,
+        kontur_kalınlığı: f32,
+        desen: &[f32],
+        desen_kayması: f32,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        if metin.is_empty() {
+            return (0.0, 0.0);
+        }
+        let (genişlik, yükseklik) = self.yazı_ölç(metin, boyut);
+        let çapa = match yatay {
+            YatayHiza::Sol => "start",
+            YatayHiza::Orta => "middle",
+            YatayHiza::Sağ => "end",
+        };
+        let y = match dikey {
+            DikeyHiza::Üst => konum.1 + boyut * 0.95,
+            DikeyHiza::Orta => konum.1 + boyut * 0.35,
+            DikeyHiza::Alt => konum.1 - yükseklik + boyut * 0.95,
+        };
+        let geçerli = çizgi_deseni_normalleştir(desen);
+        let desen_özniteliği = if geçerli.is_empty() {
+            String::new()
+        } else {
+            let değerler = geçerli
+                .iter()
+                .map(|değer| değer.to_string())
+                .collect::<Vec<_>>()
+                .join(" ");
+            format!(
+                r#" stroke-dasharray="{değerler}" stroke-dashoffset="{}""#,
+                if desen_kayması.is_finite() {
+                    desen_kayması
+                } else {
+                    0.0
+                }
+            )
+        };
+        let _ = write!(
+            self.gövde,
+            r#"<text x="{:.1}" y="{:.1}" text-anchor="{}" font-size="{}" fill="{}" stroke="{}" stroke-width="{}" paint-order="stroke fill" transform="matrix({} {} {} {} {} {})"{}{}>{}</text>"#,
+            konum.0,
+            y,
+            çapa,
+            boyut,
+            renk_svg(renk),
+            renk_svg(kontur_rengi),
+            kontur_kalınlığı.max(0.0),
+            dönüşüm.a,
+            dönüşüm.b,
+            dönüşüm.c,
+            dönüşüm.d,
+            dönüşüm.e,
+            dönüşüm.f,
+            if kalın { r#" font-weight="bold""# } else { "" },
+            desen_özniteliği,
+            kaçır(metin)
+        );
+        (genişlik, yükseklik)
+    }
+
     fn olarak(&mut self) -> &mut dyn ÇizimYüzeyi {
         self
     }
@@ -680,5 +779,30 @@ mod testler {
         assert!(belge.contains(r#"stroke-dashoffset="2""#));
         assert!(belge.contains(r#"stroke-linecap="butt""#));
         assert!(belge.contains(r#"stroke-linejoin="bevel""#));
+    }
+
+    #[test]
+    fn graphic_metin_konturu_svg_deseni_ve_anahtar_kare_fazini_korur() {
+        let mut yüzey = SvgYüzeyi::yeni(320.0, 120.0);
+        yüzey.dönüşümlü_desenli_konturlu_yazı(
+            "Apache ECharts",
+            (160.0, 60.0),
+            YatayHiza::Orta,
+            DikeyHiza::Orta,
+            32.0,
+            Renk::SAYDAM,
+            true,
+            Renk::SİYAH,
+            1.0,
+            &[200.0, 0.0],
+            200.0,
+            AfinMatris::BİRİM,
+        );
+        let belge = yüzey.belge();
+
+        assert!(belge.contains(r#"stroke-dasharray="200 0""#));
+        assert!(belge.contains(r#"stroke-dashoffset="200""#));
+        assert!(belge.contains(r#"paint-order="stroke fill""#));
+        assert!(belge.contains(r#"font-weight="bold""#));
     }
 }

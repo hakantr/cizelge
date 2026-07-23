@@ -31,6 +31,8 @@ mod perlin;
 mod uyum_custom;
 #[path = "uyum_graph.rs"]
 mod uyum_graph;
+#[path = "uyum_graphic.rs"]
+mod uyum_graphic;
 
 struct Girdi {
     id: String,
@@ -19086,6 +19088,9 @@ fn seçenekler(
     if let Some(seçenekler) = uyum_custom::resmi(id, durum) {
         return Ok(seçenekler);
     }
+    if let Some(seçenekler) = uyum_graphic::resmi(id, durum, genişlik, yükseklik) {
+        return Ok(seçenekler);
+    }
     match id {
         "line-simple" => Ok(line_simple()),
         "line-markline" => Ok(line_markline()),
@@ -19475,11 +19480,17 @@ fn çalıştır() -> Result<(), String> {
             .map(|metin| (metin, yüzey.yazı_ölç(metin, 12.0).0))
         );
     }
+    let animasyon_süresi_sn = match girdi.id.as_str() {
+        "graphic-stroke-animation" => 3.0,
+        "graphic-loading" => 3.2,
+        "graphic-wave-animation" => 4.0,
+        _ => 2.0,
+    };
     let boyama = BoyamaGirdisi {
         // Referans ön işlemcisi seri giriş animasyonunu kapatır; `kare`
         // yalnız sürekli efekt saatini ilerletir.
         ilerleme: 1.0,
-        zaman_sn: girdi.kare * 2.0,
+        zaman_sn: girdi.kare * animasyon_süresi_sn,
         fare: kanıt_faresi,
         ipucu_öğesi: kanıt_ipucu_öğesi,
         ..BoyamaGirdisi::default()

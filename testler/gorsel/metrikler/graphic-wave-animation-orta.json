@@ -1,0 +1,30 @@
+{
+  "id": "graphic-wave-animation",
+  "senaryo": "animasyon",
+  "kare": "orta",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 0,
+  "değişen_piksel_oranı": 0,
+  "ssim": 0.9996174123528304,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 119,
+    "değişen_piksel_oranı": 0.00044074074074074073,
+    "ssim": 0.9994799163790314
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graphic-wave-animation-orta.png",
+    "gerçek": "testler/gorsel/gerçek/default/graphic-wave-animation-orta.png",
+    "fark": "testler/gorsel/fark/default/graphic-wave-animation-orta.png",
+    "normalize_fark": "testler/gorsel/fark/default/graphic-wave-animation-orta-tipografi.png"
+  }
+}

@@ -72,6 +72,12 @@ const customKarşılaştırması = () => ({
   tipografiSigma: 0.8
 });
 
+const graphicKarşılaştırması = (tipografiSigma = 0.8) => ({
+  // Graphic örneklerinde sistem fontu rasterizasyonundan doğan saçakları
+  // yumuşatırken şekil, konum, renk ve animasyon karelerini aynen korur.
+  tipografiSigma
+});
+
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   ...[
@@ -102,6 +108,60 @@ const SENARYOLAR = [
       { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
       { ad: 'güncelleme', kare: 1, durum: 'güncelleme' },
       { ad: 'son', kare: 1, durum: 'son' }
+    ]
+  },
+  {
+    id: 'graphic-stroke-animation',
+    tür: 'animasyon',
+    karşılaştırma: graphicKarşılaştırması(1.2),
+    kareler: [
+      { ad: 'çizim', kare: 0.2, durum: 'başlangıç' },
+      { ad: 'kontur', kare: 0.7, durum: 'başlangıç' },
+      { ad: 'dolgu', kare: 0.9, durum: 'başlangıç' }
+    ]
+  },
+  {
+    id: 'graphic-loading',
+    tür: 'animasyon',
+    karşılaştırma: graphicKarşılaştırması(),
+    kareler: [
+      { ad: 'erken', kare: 0.25, durum: 'başlangıç' },
+      { ad: 'orta', kare: 0.55, durum: 'başlangıç' },
+      { ad: 'geç', kare: 0.9, durum: 'başlangıç' }
+    ]
+  },
+  {
+    id: 'line-graphic',
+    tür: 'statik',
+    karşılaştırma: {
+      ...graphicKarşılaştırması(3.5),
+      // Yalnız resmî örneğin açık fontFamily kullanan açıklama metni ile
+      // döndürülmüş filigran yazısı yumuşatılır. Eksenler, seri eğrisi,
+      // kutu/gölge ve filigran şeridi ham piksellerle karşılaştırılır.
+      tipografiBölgeleri: [
+        { x: 70, y: 192, genişlik: 180, yükseklik: 64 },
+        { çokgen: [[400, 437], [418, 455], [603, 269], [585, 251]] }
+      ]
+    },
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  },
+  {
+    id: 'graphic-wave-animation',
+    tür: 'animasyon',
+    karşılaştırma: graphicKarşılaştırması(),
+    kareler: [
+      { ad: 'erken', kare: 0.2, durum: 'başlangıç' },
+      { ad: 'orta', kare: 0.55, durum: 'başlangıç' },
+      { ad: 'geç', kare: 0.9, durum: 'başlangıç' }
+    ]
+  },
+  {
+    id: 'line-draggable',
+    tür: 'etkileşim',
+    karşılaştırma: graphicKarşılaştırması(),
+    kareler: [
+      { ad: 'başlangıç', kare: 1, durum: 'başlangıç' },
+      { ad: 'sürükle', kare: 1, durum: 'sürükle' }
     ]
   },
   { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -698,13 +758,42 @@ function görüntüMetrikleri(referans, gerçek, farkDosyası) {
   };
 }
 
-async function tipografiyiNormalizeEt(görüntü, sigma) {
-  const veri = await sharp(görüntü.data, {
+function noktaÇokgendeMi(x, y, çokgen) {
+  let içeride = false;
+  for (let i = 0, j = çokgen.length - 1; i < çokgen.length; j = i++) {
+    const [xi, yi] = çokgen[i];
+    const [xj, yj] = çokgen[j];
+    const kesişiyor = ((yi > y) !== (yj > y))
+      && x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi;
+    if (kesişiyor) içeride = !içeride;
+  }
+  return içeride;
+}
+
+async function tipografiyiNormalizeEt(görüntü, sigma, bölgeler = null) {
+  const bulanık = await sharp(görüntü.data, {
     raw: { width: görüntü.width, height: görüntü.height, channels: 4 }
   })
     .blur(sigma)
     .raw()
     .toBuffer();
+  if (!Array.isArray(bölgeler) || bölgeler.length === 0) {
+    return { data: bulanık, width: görüntü.width, height: görüntü.height };
+  }
+  const veri = Buffer.from(görüntü.data);
+  for (let y = 0; y < görüntü.height; y += 1) {
+    for (let x = 0; x < görüntü.width; x += 1) {
+      const bölgede = bölgeler.some((bölge) => (
+        Array.isArray(bölge.çokgen)
+          ? noktaÇokgendeMi(x + 0.5, y + 0.5, bölge.çokgen)
+          : x >= bölge.x && x < bölge.x + bölge.genişlik
+            && y >= bölge.y && y < bölge.y + bölge.yükseklik
+      ));
+      if (!bölgede) continue;
+      const başlangıç = (y * görüntü.width + x) * 4;
+      bulanık.copy(veri, başlangıç, başlangıç, başlangıç + 4);
+    }
+  }
   return { data: veri, width: görüntü.width, height: görüntü.height };
 }
 
@@ -722,9 +811,10 @@ async function karşılaştır(
   if (!(Number.isFinite(sigma) && sigma >= 0.3) || ham.hata) {
     return ham;
   }
+  const bölgeler = karşılaştırma?.tipografiBölgeleri ?? null;
   const [normalizeReferans, normalizeGerçek] = await Promise.all([
-    tipografiyiNormalizeEt(referans, sigma),
-    tipografiyiNormalizeEt(gerçek, sigma)
+    tipografiyiNormalizeEt(referans, sigma, bölgeler),
+    tipografiyiNormalizeEt(gerçek, sigma, bölgeler)
   ]);
   const normalize = görüntüMetrikleri(
     normalizeReferans,
@@ -741,7 +831,10 @@ async function karşılaştır(
     },
     tipografi_normalizasyonu: {
       gaussian_sigma: sigma,
-      açıklama: 'İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur.'
+      ...(bölgeler ? { bölgeler } : {}),
+      açıklama: bölgeler
+        ? 'Aynı Gauss çekirdeği yalnız kayıtlı tipografi bölgelerine uygulanır; bölge dışı geometri ham pikseldir.'
+        : 'İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur.'
     }
   };
 }
@@ -916,6 +1009,22 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası, hamGerç
 
   if (senaryo.id === 'custom-profile') {
     return kartezyenEksenKapıları(90, 313, 55, 540, false, true);
+  }
+
+  if (senaryo.id === 'line-graphic') {
+    // Resmî kartın category yAxis'i görünür bir taban taşır; value xAxis
+    // tabanı kaynak zrender sahnesinde çizilmez, yalnız grid çizgileri vardır.
+    return kartezyenEksenKapıları(52, 417, 55, 576, false, true).map((kapı) => ({
+      ...kapı,
+      açıklama: `${kapı.açıklama}; Graphic açıklama kutusu ve filigran katmanı eksen doğrulamasını örtemez`
+    }));
+  }
+
+  if (senaryo.id === 'line-draggable') {
+    return kartezyenEksenKapıları(90, 396, 36, 540).map((kapı) => ({
+      ...kapı,
+      açıklama: `${kapı.açıklama}; görünmez sürükleme tutamaçları taban çizgisini örtemez`
+    }));
   }
 
   if (senaryo.id === 'cycle-plot') {

@@ -8,7 +8,9 @@ pub enum Yumuşatma {
     /// ECharts serilerinin öntanımlı giriş animasyonu (`cubicOut`).
     #[default]
     KübikÇıkış,
+    KübikGiriş,
     KübikGirişÇıkış,
+    SinüzoidalGirişÇıkış,
     ElastikÇıkış,
 }
 
@@ -22,6 +24,7 @@ impl Yumuşatma {
                 let k = t - 1.0;
                 k * k * k + 1.0
             }
+            Yumuşatma::KübikGiriş => t * t * t,
             Yumuşatma::KübikGirişÇıkış => {
                 let k = t * 2.0;
                 if k < 1.0 {
@@ -30,6 +33,9 @@ impl Yumuşatma {
                     let k = k - 2.0;
                     0.5 * (k * k * k + 2.0)
                 }
+            }
+            Yumuşatma::SinüzoidalGirişÇıkış => {
+                0.5 * (1.0 - (std::f32::consts::PI * t).cos())
             }
             Yumuşatma::ElastikÇıkış => {
                 if t == 0.0 || t == 1.0 {
@@ -63,7 +69,9 @@ mod testler {
         for y in [
             Yumuşatma::Doğrusal,
             Yumuşatma::KübikÇıkış,
+            Yumuşatma::KübikGiriş,
             Yumuşatma::KübikGirişÇıkış,
+            Yumuşatma::SinüzoidalGirişÇıkış,
             Yumuşatma::ElastikÇıkış,
         ] {
             assert!((y.uygula(0.0) - 0.0).abs() < 1e-6);

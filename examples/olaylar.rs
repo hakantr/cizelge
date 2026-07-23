@@ -125,10 +125,26 @@ impl Kök {
                     değer.as_deref().unwrap_or("-")
                 )
                 .into(),
-                GrafikOlayı::GrafikÖğesiTıklandı { kimlik, ad } => format!(
+                GrafikOlayı::GrafikÖğesiTıklandı { kimlik, ad, .. } => format!(
                     "Graphic tıklandı → kimlik: {}, ad: {}",
                     kimlik.as_deref().unwrap_or("-"),
                     ad.as_deref().unwrap_or("-")
+                )
+                .into(),
+                GrafikOlayı::GrafikÖğesiSürüklendi {
+                    kimlik,
+                    yol,
+                    fark,
+                    konum,
+                    ..
+                } => format!(
+                    "Graphic sürüklendi → kimlik: {}, yol: {:?}, fark: ({:.1}, {:.1}), konum: ({:.1}, {:.1})",
+                    kimlik.as_deref().unwrap_or("-"),
+                    yol,
+                    fark.0,
+                    fark.1,
+                    konum.0,
+                    konum.1
                 )
                 .into(),
                 GrafikOlayı::GöstergeDeğişti { ad, görünür } => format!(

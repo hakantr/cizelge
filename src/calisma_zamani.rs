@@ -20,7 +20,9 @@ use crate::model::bilesen::{
 use crate::model::deger::VeriÖğesi;
 use crate::model::eksen::{Eksen, EksenKırılması};
 use crate::model::gorsel_esleme::GörselEşleme;
-use crate::model::grafik_bileseni::GrafikBileşeni;
+use crate::model::grafik_bileseni::{
+    GrafikBileşeni, GrafikÖğeEylemi, GrafikÖğeYaması, GrafikÖğesi,
+};
 use crate::model::hatlar::HatVerisi;
 use crate::model::kutupsal::KutupsalKoordinat;
 use crate::model::matris::MatrisKoordinatı;
@@ -120,6 +122,7 @@ pub struct SeçenekYaması {
     y_ekseni_veri_yamaları: Vec<EksenVeriYaması>,
     eksen_kırılma_yamaları: Vec<EksenKırılmaYaması>,
     seri_veri_yamaları: Vec<SeriVeriYaması>,
+    grafik_öğe_eylemleri: Vec<GrafikÖğeEylemi>,
 }
 
 #[derive(Clone, Debug)]
@@ -157,6 +160,7 @@ impl SeçenekYaması {
             y_ekseni_veri_yamaları: Vec::new(),
             eksen_kırılma_yamaları: Vec::new(),
             seri_veri_yamaları: Vec::new(),
+            grafik_öğe_eylemleri: Vec::new(),
         }
     }
 
@@ -169,6 +173,7 @@ impl SeçenekYaması {
             y_ekseni_veri_yamaları: Vec::new(),
             eksen_kırılma_yamaları: Vec::new(),
             seri_veri_yamaları: Vec::new(),
+            grafik_öğe_eylemleri: Vec::new(),
         }
     }
 
@@ -579,6 +584,31 @@ impl SeçenekYaması {
         self.değer.grafik = None;
         self.sağlanan.insert(SeçenekAlanı::Grafik);
         self
+    }
+
+    /// `setOption({graphic:{elements:[{$action: ...}]}})` biçimindeki
+    /// kimlikli öğe eylemini kök Graphic seçeneklerini değiştirmeden ekler.
+    pub fn grafik_öğe_eylemi(mut self, eylem: GrafikÖğeEylemi) -> Self {
+        self.grafik_öğe_eylemleri.push(eylem);
+        self
+    }
+
+    pub fn grafik_öğesini_birleştir(
+        self,
+        kimlik: impl Into<String>,
+        yama: GrafikÖğeYaması,
+    ) -> Self {
+        self.grafik_öğe_eylemi(GrafikÖğeEylemi::birleştir(kimlik, yama))
+    }
+
+    pub fn grafik_öğesini_değiştir(
+        self, kimlik: impl Into<String>, öğe: GrafikÖğesi
+    ) -> Self {
+        self.grafik_öğe_eylemi(GrafikÖğeEylemi::değiştir(kimlik, öğe))
+    }
+
+    pub fn grafik_öğesini_kaldır(self, kimlik: impl Into<String>) -> Self {
+        self.grafik_öğe_eylemi(GrafikÖğeEylemi::kaldır(kimlik))
     }
 
     pub fn zaman_şeridi(mut self, zaman_şeridi: ZamanŞeridi) -> Self {
@@ -2774,6 +2804,11 @@ fn yamayı_uygula(
     alanı_uygula!(araç_kutusu, SeçenekAlanı::AraçKutusu);
     alanı_uygula!(fırça, SeçenekAlanı::Fırça);
     alanı_uygula!(grafik, SeçenekAlanı::Grafik);
+    if let Some(grafik) = &mut hedef.grafik {
+        for eylem in &yama.grafik_öğe_eylemleri {
+            grafik.eylemi_uygula(eylem.clone());
+        }
+    }
     alanı_uygula!(zaman_şeridi, SeçenekAlanı::ZamanŞeridi);
     alanı_uygula!(palet, SeçenekAlanı::Palet);
     alanı_uygula!(arkaplan, SeçenekAlanı::Arkaplan);
@@ -3026,7 +3061,9 @@ mod testler {
     use crate::model::bilesen::Başlık;
     use crate::model::deger::VeriDeğeri;
     use crate::model::eksen::EksenKırılmaAlanı;
-    use crate::model::grafik_bileseni::{GrafikBileşeni, GrafikÖğesi};
+    use crate::model::grafik_bileseni::{
+        GrafikBileşeni, GrafikÖğeYaması, GrafikÖğesi, GrafikÖğeİçeriği,
+    };
     use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı, ParalelYerleşim};
     use crate::model::seri::{PastaSerisi, ÇizgiSerisi};
 
@@ -3128,6 +3165,47 @@ mod testler {
             )
             .unwrap();
         assert!(çalışma.seçenekleri_al().unwrap().grafik.is_none());
+    }
+
+    #[test]
+    fn graphic_set_option_oge_eylemleri_merge_replace_remove_sirasini_izler() {
+        let grafik = GrafikBileşeni::yeni().öğe(
+            GrafikÖğesi::grup([
+                GrafikÖğesi::dikdörtgen(
+                    crate::koordinat::Dikdörtgen::yeni(0.0, 0.0, 10.0, 10.0),
+                )
+                .kimlik("tutamaç")
+                .sürüklenebilir(true),
+                GrafikÖğesi::metin("eski").kimlik("metin"),
+                GrafikÖğesi::metin("sil").kimlik("sil"),
+            ])
+            .kimlik("grup"),
+        );
+        let mut çalışma = çalışma(GrafikSeçenekleri::yeni().grafik(grafik));
+        çalışma
+            .seçenekleri_ayarla(
+                SeçenekYaması::yeni()
+                    .grafik_öğesini_birleştir(
+                        "tutamaç",
+                        GrafikÖğeYaması::yeni().konum(80.0, 40.0),
+                    )
+                    .grafik_öğesini_değiştir("metin", GrafikÖğesi::metin("yeni"))
+                    .grafik_öğesini_kaldır("sil"),
+                SeçenekAyarlamaKipi::default(),
+            )
+            .unwrap();
+
+        let sonuç = çalışma.seçenekleri_al().unwrap();
+        let grafik = sonuç.grafik.as_ref().unwrap();
+        let tutamaç = grafik.öğeyi_bul("tutamaç").unwrap();
+        assert_eq!((tutamaç.dönüşüm.x, tutamaç.dönüşüm.y), (80.0, 40.0));
+        assert!(tutamaç.sürüklenebilir);
+        let GrafikÖğeİçeriği::Metin(metin) = &grafik.öğeyi_bul("metin").unwrap().içerik
+        else {
+            panic!("metin bekleniyordu")
+        };
+        assert_eq!(metin.metin, "yeni");
+        assert!(grafik.öğeyi_bul("sil").is_none());
     }
 
     #[test]

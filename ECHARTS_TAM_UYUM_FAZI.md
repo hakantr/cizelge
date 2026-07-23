@@ -2550,11 +2550,75 @@ ve eksen katmanı `src/cizim/gorunum.rs`; sahne/durum/isabet yolu
 `src/grafik/ozel.rs` ile `src/cizim/sahne.rs`; resmî Chromium sahnesi ve
 raster/taban kapıları `tools/uyum/echarts_referans.mjs` ile
 `tools/uyum/kanit.mjs` üzerinden denetlenir. Custom dilimiyle statik görsel
-kanıt sayacı **219/332 (%66,0)** olur. Bu kapanış Faz 6'nın Graphic 5 ve Rich
-Text 3 işlerini ya da Faz 7/8/9'daki ortak koyu kip, GPUI/SVG, klavye/ARIA,
-legend-hover, tam animasyon/universal transition ve büyük veri kapılarını
-tamamlanmış saymaz; bu nedenle genel `tam_kanıtlı` sayacı şimdilik ayrı ve
-sıfır kalır.
+kanıt sayacı **219/332 (%66,0)** olur. Ardından gelen Graphic dilimi bu
+sayacı 224'e taşır. Rich Text ile Faz 7/8/9'daki ortak koyu kip, GPUI/SVG,
+klavye/ARIA, legend-hover, tam geçiş ve büyük veri kapıları ayrı kabul
+koşulları olarak kalır; bu nedenle genel `tam_kanıtlı` sayacı ayrıdır.
+
+#### Graphic kategori diliminin uygulanmış durumu
+
+Kilitli `../echarts/src/component/graphic/GraphicModel.ts`,
+`GraphicView.ts`, `../echarts/src/animation/customGraphicKeyframeAnimation.ts`
+ve `../echarts-examples/public/examples/ts` kaynaklarına göre resmî galerideki
+Graphic kategorisi **5/5 kart ve 12/12 kanıt karesi** düzeyinde uygulanmıştır:
+`graphic-stroke-animation`, `graphic-loading`, `line-graphic`,
+`graphic-wave-animation` ve `line-draggable`.
+
+Taşınan Graphic yüzeyi şunları kapsar:
+
+- `GrafikBileşeni`, `GrafikÖğesi` ve `GrafikÖğeİçeriği`; group,
+  path ve bütün ortak iki boyutlu `SahneŞekli` türleri, image ve text aynı
+  tipli ağaçta PNG, SVG ve GPUI yüzeylerine gider;
+- `id` tabanlı `$action: merge/replace/remove`, iç içe kimlik arama ve
+  kararlı dizi yolu `SeçenekYaması` ile gerçek `setOption` sırasında uygulanır;
+- nested group, `width/height`, `bounding: all/raw`, left/right/top/bottom,
+  affine transform, kırpma, zlevel/z/z2 ve kararlı çizim sırası korunur;
+- fill/stroke/opacity/dash/dashOffset, gölge, çok satırlı sarılan metin,
+  metin konturu, `textContent`/`textConfig`, sessiz/görünmez/yoksay,
+  cursor ve emphasis/select/blur durum stilleri ortak sahnede taşınır;
+- `keyframeAnimation` için duration, delay, loop, genel ve kareye özel
+  easing; transform, shape ve style izleri belirlenimci saatten ara değerlenir;
+- `draggable` öğeler GPUI isabetinden modelin yerel x/y dönüşümüne
+  yazılır. Tıklama ve sürükleme olayları `id`, `name`, kararlı yol ve
+  ECharts `info` kullanıcı yükünü geri verir.
+
+Resmî GraphicModel envanterindeki doğrudan 34 alanın 30'u
+`uyum/ozellik_matrisi.json` içinde Rust API, test ve galeri kartına
+bağlanmıştır. Graphic'e özgü olmayan `tooltip` kapanışı Faz 7'de;
+`enterAnimation`, `updateAnimation` ve `leaveAnimation` veri-farkı/geçiş
+kapanışı Faz 8'de yapılır. Bu dört satır tamamlanmadan genel
+`tam_kanıtlı` sayacı artırılmaz.
+
+600×450 raster kapısı genel `pixelmatch=0,1`, değişen piksel `≤%1` ve
+`SSIM≥0,99` eşiklerini aynen kullanır. Tipografi normalizasyonu iki tarafa
+aynı çekirdeği uygular ve ham metrik/farkı da saklar. `line-graphic`te
+yalnız açıklama metni ile döndürülmüş filigranın kayıtlı bölgeleri
+`σ=3,5` ile normalize edilir; bölge dışındaki eksen, seri ve kutu
+geometrisi ham pikseldir. Ayrı yapısal kapı `line-graphic`in görünür Y
+ekseni tabanını, `line-draggable` senaryosunun her iki karesinde X ve Y
+eksen tabanlarını denetler. Böylece toplam raster oranı ince bir taban
+çizgisi hatasını gizleyemez.
+
+| Resmî örnek | Kare | Kapı farkı | Kapı SSIM | Ham fark | Ham SSIM | Yapısal kapı |
+|---|---|---:|---:|---:|---:|---|
+| `graphic-stroke-animation` | çizim | %0,0056 | 0,998284 | %0,1474 | 0,996709 | — |
+| `graphic-stroke-animation` | kontur | %0,0200 | 0,995620 | %0,7267 | 0,992471 | — |
+| `graphic-stroke-animation` | dolgu | %0,0370 | 0,997763 | %0,9496 | 0,997156 | — |
+| `graphic-loading` | erken | %0,0000 | 0,999996 | %0,0000 | 0,999991 | — |
+| `graphic-loading` | orta | %0,0000 | 0,999993 | %0,0000 | 0,999994 | — |
+| `graphic-loading` | geç | %0,0000 | 0,999989 | %0,0000 | 0,999983 | — |
+| `line-graphic` | son | %0,2822 | 0,995894 | %1,5219 | 0,987044 | Y tabanı 1/1 |
+| `graphic-wave-animation` | erken | %0,0019 | 0,999282 | %0,1522 | 0,999092 | — |
+| `graphic-wave-animation` | orta | %0,0000 | 0,999617 | %0,0441 | 0,999480 | — |
+| `graphic-wave-animation` | geç | %0,0000 | 0,999221 | %0,1467 | 0,999028 | — |
+| `line-draggable` | başlangıç | %0,0781 | 0,998804 | %0,1911 | 0,998065 | X/Y 2/2 |
+| `line-draggable` | sürükle | %0,0781 | 0,998827 | %0,1896 | 0,998102 | X/Y 2/2 |
+
+Fixture `examples/uyum_graphic.rs`; resmî Chromium zaman/etkileşim
+koşucusu `tools/uyum/echarts_referans.mjs`; Cizelge render, fark ve yapısal
+kapılar `tools/uyum/kanit.mjs`; API envanteri ve 332 kartlı rapor
+`tools/uyum/uret.mjs` tarafından yeniden üretilir. Graphic kapanışıyla
+kilitli statik görsel kanıt sayacı **224/332 (%67,5)** olur.
 
 Kabul:
 

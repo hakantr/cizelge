@@ -397,6 +397,40 @@ pub trait ÇizimYüzeyi {
         self.dönüşümlü_yazı(metin, konum, yatay, dikey, boyut, renk, kalın, dönüşüm)
     }
 
+    /// `graphic` / zrender metin konturunun açık `lineDash` ve
+    /// `lineDashOffset` karşılığı. Glif dış hattını desenleyemeyen yüzeyler
+    /// aynı konturu düz vuruşla korur.
+    #[allow(clippy::too_many_arguments)]
+    fn dönüşümlü_desenli_konturlu_yazı(
+        &mut self,
+        metin: &str,
+        konum: (f32, f32),
+        yatay: YatayHiza,
+        dikey: DikeyHiza,
+        boyut: f32,
+        renk: Renk,
+        kalın: bool,
+        kontur_rengi: Renk,
+        kontur_kalınlığı: f32,
+        desen: &[f32],
+        desen_kayması: f32,
+        dönüşüm: AfinMatris,
+    ) -> (f32, f32) {
+        let _ = (desen, desen_kayması);
+        self.dönüşümlü_konturlu_yazı(
+            metin,
+            konum,
+            yatay,
+            dikey,
+            boyut,
+            renk,
+            kalın,
+            kontur_rengi,
+            kontur_kalınlığı,
+            dönüşüm,
+        )
+    }
+
     /// Yazının kaplayacağı `(genişlik, yükseklik)` boyutunu ölçer.
     fn yazı_ölç(&self, metin: &str, boyut: f32) -> (f32, f32);
 

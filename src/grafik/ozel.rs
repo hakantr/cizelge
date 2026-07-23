@@ -299,7 +299,7 @@ fn öğe_sayısal_değeri(öğe: &VeriÖğesi) -> Option<f64> {
     })
 }
 
-fn öğeyi_ara_değerle(
+pub(crate) fn öğeyi_ara_değerle(
     başlangıç: &GrafikÖğesi,
     hedef: &GrafikÖğesi,
     t: f32,
@@ -484,12 +484,23 @@ fn stili_ara_değerle(a: &SahneStili, b: &SahneStili, t: f32) -> SahneStili {
         },
         çizgi_kalınlığı: ara(a.çizgi_kalınlığı, b.çizgi_kalınlığı, t),
         çizgi_türü: b.çizgi_türü,
+        çizgi_deseni: if a.çizgi_deseni.len() == b.çizgi_deseni.len() {
+            a.çizgi_deseni
+                .iter()
+                .zip(&b.çizgi_deseni)
+                .map(|(a, b)| ara(*a, *b, t))
+                .collect()
+        } else {
+            b.çizgi_deseni.clone()
+        },
+        çizgi_deseni_kayması: ara(a.çizgi_deseni_kayması, b.çizgi_deseni_kayması, t),
         opaklık: ara(a.opaklık, b.opaklık, t),
         gölge_rengi: match (a.gölge_rengi, b.gölge_rengi) {
             (Some(a), Some(b)) => Some(a.karıştır(b, t)),
             _ => b.gölge_rengi,
         },
         gölge_bulanıklığı: ara(a.gölge_bulanıklığı, b.gölge_bulanıklığı, t),
+        gölge_kayması: noktayı_ara_değerle(a.gölge_kayması, b.gölge_kayması, t),
     }
 }
 
