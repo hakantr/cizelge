@@ -1,0 +1,6383 @@
+{
+  "şema_sürümü": 1,
+  "tür": "treemap",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 20,
+        "y": 80,
+        "genişlik": 660,
+        "yükseklik": 395
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "ad": "Health and Human Services",
+          "derinlik": 0,
+          "x": 23,
+          "y": 83,
+          "genişlik": 296.14,
+          "yükseklik": 232.139,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "Centers for Medicare and Medicaid Services",
+          "derinlik": 1,
+          "x": 23,
+          "y": 83,
+          "genişlik": 266.841,
+          "yükseklik": 232.139,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "Administration for Children and Families",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 83,
+          "genişlik": 28.299,
+          "yükseklik": 65.533,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "National Institutes of Health",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 149.533,
+          "genişlik": 28.299,
+          "yükseklik": 60.379,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "Administration for Children and Families",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 210.912,
+          "genişlik": 28.299,
+          "yükseklik": 30.201,
+          "renk": [
+            160,
+            114,
+            118,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "Centers for Medicare and Medicaid Services",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 242.114,
+          "genişlik": 14.17,
+          "yükseklik": 26.277,
+          "renk": [
+            117,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "Health Resources and Services Administration",
+          "derinlik": 1,
+          "x": 306.011,
+          "y": 242.114,
+          "genişlik": 13.128,
+          "yükseklik": 26.277,
+          "renk": [
+            160,
+            112,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "Centers for Disease Control and Prevention",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 269.391,
+          "genişlik": 15.417,
+          "yükseklik": 19.281,
+          "renk": [
+            160,
+            112,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "Indian Health Services",
+          "derinlik": 1,
+          "x": 307.258,
+          "y": 269.391,
+          "genişlik": 11.882,
+          "yükseklik": 19.281,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "Substance Abuse and Mental Health Services Administration",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 289.672,
+          "genişlik": 16.863,
+          "yükseklik": 9.713,
+          "renk": [
+            161,
+            119,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "Food and Drug Administration",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 300.384,
+          "genişlik": 16.863,
+          "yükseklik": 7.679,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "Administration on Aging",
+          "derinlik": 1,
+          "x": 290.841,
+          "y": 309.063,
+          "genişlik": 16.863,
+          "yükseklik": 6.075,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "Health Resources and Services Administration",
+          "derinlik": 1,
+          "x": 308.704,
+          "y": 289.672,
+          "genişlik": 10.436,
+          "yükseklik": 9.647,
+          "renk": [
+            109,
+            165,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 13,
+          "ad": "Departmental Management",
+          "derinlik": 1,
+          "x": 308.704,
+          "y": 300.319,
+          "genişlik": 5.494,
+          "yükseklik": 8.249,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 14,
+          "ad": "Centers for Disease Control and Prevention",
+          "derinlik": 1,
+          "x": 315.198,
+          "y": 300.319,
+          "genişlik": 3.942,
+          "yükseklik": 8.249,
+          "renk": [
+            110,
+            165,
+            120,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 15,
+          "ad": "Program Support Center",
+          "derinlik": 1,
+          "x": 308.704,
+          "y": 309.568,
+          "genişlik": 4.563,
+          "yükseklik": 5.571,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "Departmental Management",
+          "derinlik": 1,
+          "x": 314.267,
+          "y": 309.568,
+          "genişlik": 4.873,
+          "yükseklik": 3.551,
+          "renk": [
+            152,
+            67,
+            75,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 17,
+          "ad": "Administration on Aging",
+          "derinlik": 1,
+          "x": 314.267,
+          "y": 314.118,
+          "genişlik": 4.873,
+          "yükseklik": 1.02,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 24,
+          "ad": "Social Security Administration",
+          "derinlik": 0,
+          "x": 23,
+          "y": 318.139,
+          "genişlik": 296.14,
+          "yükseklik": 153.861,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 25,
+          "ad": "Social Security Administration",
+          "derinlik": 1,
+          "x": 23,
+          "y": 318.139,
+          "genişlik": 292.42,
+          "yükseklik": 153.861,
+          "renk": [
+            51,
+            160,
+            71,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 26,
+          "ad": "Social Security Administration",
+          "derinlik": 1,
+          "x": 316.42,
+          "y": 318.139,
+          "genişlik": 2.719,
+          "yükseklik": 153.861,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 27,
+          "ad": "Defense--Military Programs",
+          "derinlik": 0,
+          "x": 322.14,
+          "y": 83,
+          "genişlik": 185.016,
+          "yükseklik": 203.628,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 28,
+          "ad": "Operation and Maintenance",
+          "derinlik": 1,
+          "x": 322.14,
+          "y": 83,
+          "genişlik": 121.184,
+          "yükseklik": 134.621,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 29,
+          "ad": "Military Personnel",
+          "derinlik": 1,
+          "x": 444.324,
+          "y": 83,
+          "genişlik": 62.832,
+          "yükseklik": 134.621,
+          "renk": [
+            114,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 30,
+          "ad": "Procurement",
+          "derinlik": 1,
+          "x": 322.14,
+          "y": 218.621,
+          "genişlik": 103.273,
+          "yükseklik": 68.007,
+          "renk": [
+            159,
+            110,
+            115,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "Research, Development, Test, and Evaluation",
+          "derinlik": 1,
+          "x": 426.412,
+          "y": 218.621,
+          "genişlik": 60.661,
+          "yükseklik": 68.007,
+          "renk": [
+            159,
+            110,
+            115,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 32,
+          "ad": "Military Construction",
+          "derinlik": 1,
+          "x": 488.073,
+          "y": 218.621,
+          "genişlik": 19.082,
+          "yükseklik": 35.58,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 33,
+          "ad": "Military Personnel",
+          "derinlik": 1,
+          "x": 488.073,
+          "y": 255.2,
+          "genişlik": 11.769,
+          "yükseklik": 23.094,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 34,
+          "ad": "Revolving and Management Funds",
+          "derinlik": 1,
+          "x": 500.842,
+          "y": 255.2,
+          "genişlik": 6.314,
+          "yükseklik": 23.094,
+          "renk": [
+            153,
+            77,
+            84,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 35,
+          "ad": "Family Housing",
+          "derinlik": 1,
+          "x": 488.073,
+          "y": 279.295,
+          "genişlik": 10.43,
+          "yükseklik": 7.333,
+          "renk": [
+            153,
+            76,
+            83,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 36,
+          "ad": "Operation and Maintenance",
+          "derinlik": 1,
+          "x": 499.504,
+          "y": 279.295,
+          "genişlik": 7.652,
+          "yükseklik": 4.43,
+          "renk": [
+            102,
+            164,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 37,
+          "ad": "Trust Funds",
+          "derinlik": 1,
+          "x": 499.504,
+          "y": 284.724,
+          "genişlik": 7.652,
+          "yükseklik": 1.903,
+          "renk": [
+            148,
+            48,
+            58,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 39,
+          "ad": "Treasury",
+          "derinlik": 0,
+          "x": 510.156,
+          "y": 83,
+          "genişlik": 166.844,
+          "yükseklik": 203.628,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 40,
+          "ad": "Interest on the Public Debt",
+          "derinlik": 1,
+          "x": 510.156,
+          "y": 83,
+          "genişlik": 166.844,
+          "yükseklik": 157.708,
+          "renk": [
+            105,
+            165,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 41,
+          "ad": "Internal Revenue Service",
+          "derinlik": 1,
+          "x": 510.156,
+          "y": 241.708,
+          "genişlik": 99.389,
+          "yükseklik": 44.92,
+          "renk": [
+            157,
+            97,
+            103,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 42,
+          "ad": "Financial Management Service",
+          "derinlik": 1,
+          "x": 610.545,
+          "y": 241.708,
+          "genişlik": 45.223,
+          "yükseklik": 28.772,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 43,
+          "ad": "Internal Revenue Service",
+          "derinlik": 1,
+          "x": 610.545,
+          "y": 271.48,
+          "genişlik": 45.223,
+          "yükseklik": 15.147,
+          "renk": [
+            109,
+            165,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 44,
+          "ad": "Departmental Offices",
+          "derinlik": 1,
+          "x": 656.768,
+          "y": 241.708,
+          "genişlik": 20.232,
+          "yükseklik": 24.124,
+          "renk": [
+            155,
+            86,
+            93,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 45,
+          "ad": "Financial Management Service",
+          "derinlik": 1,
+          "x": 656.768,
+          "y": 266.832,
+          "genişlik": 18.263,
+          "yükseklik": 10.203,
+          "renk": [
+            53,
+            160,
+            73,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 46,
+          "ad": "Internal Revenue Service",
+          "derinlik": 1,
+          "x": 656.768,
+          "y": 278.035,
+          "genişlik": 18.263,
+          "yükseklik": 8.593,
+          "renk": [
+            74,
+            162,
+            90,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 47,
+          "ad": "Alcohol and Tobacco Tax and Trade Bureau",
+          "derinlik": 1,
+          "x": 676.015,
+          "y": 266.832,
+          "genişlik": 0.969,
+          "yükseklik": 13.548,
+          "renk": [
+            88,
+            163,
+            101,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 48,
+          "ad": "Financial Management Service",
+          "derinlik": 1,
+          "x": 676.015,
+          "y": 281.38,
+          "genişlik": 0.969,
+          "yükseklik": 5.247,
+          "renk": [
+            160,
+            111,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 54,
+          "ad": "Agriculture",
+          "derinlik": 0,
+          "x": 322.14,
+          "y": 289.628,
+          "genişlik": 124.858,
+          "yükseklik": 63.534,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 55,
+          "ad": "Food and Nutrition Service",
+          "derinlik": 1,
+          "x": 322.14,
+          "y": 289.628,
+          "genişlik": 88.052,
+          "yükseklik": 63.534,
+          "renk": [
+            109,
+            165,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 56,
+          "ad": "Farm Service Agency",
+          "derinlik": 1,
+          "x": 411.192,
+          "y": 289.628,
+          "genişlik": 19.536,
+          "yükseklik": 25.319,
+          "renk": [
+            161,
+            117,
+            121,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 57,
+          "ad": "Food and Nutrition Service",
+          "derinlik": 1,
+          "x": 431.727,
+          "y": 289.628,
+          "genişlik": 15.27,
+          "yükseklik": 25.319,
+          "renk": [
+            160,
+            113,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 58,
+          "ad": "Forest Service",
+          "derinlik": 1,
+          "x": 411.192,
+          "y": 315.947,
+          "genişlik": 13.855,
+          "yükseklik": 18.026,
+          "renk": [
+            160,
+            116,
+            120,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 59,
+          "ad": "Natural Resources Conservation Service",
+          "derinlik": 1,
+          "x": 426.047,
+          "y": 315.947,
+          "genişlik": 12.31,
+          "yükseklik": 18.026,
+          "renk": [
+            94,
+            164,
+            107,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 60,
+          "ad": "Risk Management Agency",
+          "derinlik": 1,
+          "x": 439.357,
+          "y": 315.947,
+          "genişlik": 7.64,
+          "yükseklik": 18.026,
+          "renk": [
+            153,
+            73,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 61,
+          "ad": "Foreign Agricultural Service",
+          "derinlik": 1,
+          "x": 411.192,
+          "y": 334.973,
+          "genişlik": 10.211,
+          "yükseklik": 9.448,
+          "renk": [
+            159,
+            106,
+            111,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 62,
+          "ad": "Farm Service Agency",
+          "derinlik": 1,
+          "x": 411.192,
+          "y": 345.421,
+          "genişlik": 10.211,
+          "yükseklik": 7.741,
+          "renk": [
+            157,
+            97,
+            103,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 63,
+          "ad": "Rural Housing Service",
+          "derinlik": 1,
+          "x": 422.403,
+          "y": 334.973,
+          "genişlik": 10.383,
+          "yükseklik": 6.005,
+          "renk": [
+            156,
+            89,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 64,
+          "ad": "Agricultural Marketing Service",
+          "derinlik": 1,
+          "x": 422.403,
+          "y": 341.978,
+          "genişlik": 10.383,
+          "yükseklik": 5.327,
+          "renk": [
+            116,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 65,
+          "ad": "National Institute of Food and Agriculture",
+          "derinlik": 1,
+          "x": 422.403,
+          "y": 348.305,
+          "genişlik": 10.383,
+          "yükseklik": 4.857,
+          "renk": [
+            159,
+            106,
+            111,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 66,
+          "ad": "Food Safety and Inspection Service",
+          "derinlik": 1,
+          "x": 433.786,
+          "y": 334.973,
+          "genişlik": 4.2,
+          "yükseklik": 9.722,
+          "renk": [
+            161,
+            119,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 67,
+          "ad": "Agricultural Research Service",
+          "derinlik": 1,
+          "x": 438.986,
+          "y": 334.973,
+          "genişlik": 3.701,
+          "yükseklik": 9.722,
+          "renk": [
+            155,
+            84,
+            91,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 68,
+          "ad": "Animal and Plant Health Inspection Service",
+          "derinlik": 1,
+          "x": 443.687,
+          "y": 334.973,
+          "genişlik": 3.31,
+          "yükseklik": 9.722,
+          "renk": [
+            158,
+            104,
+            110,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 69,
+          "ad": "Forest Service",
+          "derinlik": 1,
+          "x": 433.786,
+          "y": 345.694,
+          "genişlik": 7.284,
+          "yükseklik": 3.626,
+          "renk": [
+            159,
+            106,
+            111,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 70,
+          "ad": "Rural Utilities Service",
+          "derinlik": 1,
+          "x": 433.786,
+          "y": 350.321,
+          "genişlik": 7.284,
+          "yükseklik": 2.841,
+          "renk": [
+            157,
+            97,
+            103,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 71,
+          "ad": "Departmental Management",
+          "derinlik": 1,
+          "x": 442.07,
+          "y": 345.694,
+          "genişlik": 2.612,
+          "yükseklik": 5.29,
+          "renk": [
+            160,
+            114,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 72,
+          "ad": "Animal and Plant Health Inspection Service",
+          "derinlik": 1,
+          "x": 445.683,
+          "y": 345.694,
+          "genişlik": 1.315,
+          "yükseklik": 5.29,
+          "renk": [
+            157,
+            96,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 73,
+          "ad": "Rural Development",
+          "derinlik": 1,
+          "x": 442.07,
+          "y": 351.984,
+          "genişlik": 4.927,
+          "yükseklik": 1.177,
+          "renk": [
+            111,
+            165,
+            121,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 92,
+          "ad": "Labor",
+          "derinlik": 0,
+          "x": 322.14,
+          "y": 356.162,
+          "genişlik": 124.858,
+          "yükseklik": 56.476,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 93,
+          "ad": "Employment and Training Administration",
+          "derinlik": 1,
+          "x": 322.14,
+          "y": 356.162,
+          "genişlik": 110.94,
+          "yükseklik": 56.476,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 94,
+          "ad": "Employment and Training Administration",
+          "derinlik": 1,
+          "x": 434.079,
+          "y": 356.162,
+          "genişlik": 12.918,
+          "yükseklik": 38.289,
+          "renk": [
+            159,
+            108,
+            113,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 95,
+          "ad": "Office of Workers' Compensation Programs",
+          "derinlik": 1,
+          "x": 434.079,
+          "y": 395.451,
+          "genişlik": 9.869,
+          "yükseklik": 9.455,
+          "renk": [
+            160,
+            111,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 96,
+          "ad": "Occupational Safety and Health Administration",
+          "derinlik": 1,
+          "x": 444.948,
+          "y": 395.451,
+          "genişlik": 2.049,
+          "yükseklik": 9.455,
+          "renk": [
+            103,
+            164,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 97,
+          "ad": "Bureau of Labor Statistics",
+          "derinlik": 1,
+          "x": 434.079,
+          "y": 405.905,
+          "genişlik": 7.098,
+          "yükseklik": 2.903,
+          "renk": [
+            87,
+            163,
+            101,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 98,
+          "ad": "Departmental Management",
+          "derinlik": 1,
+          "x": 434.079,
+          "y": 409.809,
+          "genişlik": 7.098,
+          "yükseklik": 2.829,
+          "renk": [
+            94,
+            164,
+            107,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 99,
+          "ad": "Mine Safety and Health Administration",
+          "derinlik": 1,
+          "x": 442.177,
+          "y": 405.905,
+          "genişlik": 2.576,
+          "yükseklik": 4.872,
+          "renk": [
+            99,
+            164,
+            111,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 100,
+          "ad": "Wage and Hour Division",
+          "derinlik": 1,
+          "x": 445.753,
+          "y": 405.905,
+          "genişlik": 1.244,
+          "yükseklik": 4.872,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 101,
+          "ad": "Employee Benefits Security Administration",
+          "derinlik": 1,
+          "x": 442.177,
+          "y": 411.707,
+          "genişlik": 4.82,
+          "yükseklik": 0.86,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 106,
+          "ad": "Veterans Affairs",
+          "derinlik": 0,
+          "x": 322.14,
+          "y": 415.638,
+          "genişlik": 124.858,
+          "yükseklik": 56.362,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 107,
+          "ad": "Benefits Programs",
+          "derinlik": 1,
+          "x": 322.14,
+          "y": 415.638,
+          "genişlik": 66.109,
+          "yükseklik": 56.362,
+          "renk": [
+            160,
+            116,
+            120,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 108,
+          "ad": "Veterans Health Administration",
+          "derinlik": 1,
+          "x": 389.249,
+          "y": 415.638,
+          "genişlik": 50.836,
+          "yükseklik": 56.362,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 109,
+          "ad": "Departmental Administration",
+          "derinlik": 1,
+          "x": 441.085,
+          "y": 415.638,
+          "genişlik": 5.912,
+          "yükseklik": 56.362,
+          "renk": [
+            159,
+            107,
+            112,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 112,
+          "ad": "Transportation",
+          "derinlik": 0,
+          "x": 449.997,
+          "y": 289.628,
+          "genişlik": 91.891,
+          "yükseklik": 75.233,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 113,
+          "ad": "Federal Highway Administration",
+          "derinlik": 1,
+          "x": 449.997,
+          "y": 289.628,
+          "genişlik": 65.82,
+          "yükseklik": 56.985,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 114,
+          "ad": "Federal Transit Administration",
+          "derinlik": 1,
+          "x": 449.997,
+          "y": 347.613,
+          "genişlik": 65.82,
+          "yükseklik": 17.248,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 115,
+          "ad": "Federal Aviation Administration",
+          "derinlik": 1,
+          "x": 516.817,
+          "y": 289.628,
+          "genişlik": 25.071,
+          "yükseklik": 26.14,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 116,
+          "ad": "Federal Railroad Administration",
+          "derinlik": 1,
+          "x": 516.817,
+          "y": 316.767,
+          "genişlik": 14.179,
+          "yükseklik": 28.114,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 117,
+          "ad": "Federal Aviation Administration",
+          "derinlik": 1,
+          "x": 531.996,
+          "y": 316.767,
+          "genişlik": 9.892,
+          "yükseklik": 28.114,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 118,
+          "ad": "National Infrastructure Bank",
+          "derinlik": 1,
+          "x": 516.817,
+          "y": 345.881,
+          "genişlik": 18.38,
+          "yükseklik": 13.17,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 119,
+          "ad": "Office of the Secretary",
+          "derinlik": 1,
+          "x": 516.817,
+          "y": 360.051,
+          "genişlik": 18.38,
+          "yükseklik": 4.81,
+          "renk": [
+            111,
+            165,
+            121,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 120,
+          "ad": "National Highway Traffic Safety Administration",
+          "derinlik": 1,
+          "x": 536.197,
+          "y": 345.881,
+          "genişlik": 5.691,
+          "yükseklik": 6.059,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 121,
+          "ad": "Federal Motor Carrier Safety Administration",
+          "derinlik": 1,
+          "x": 536.197,
+          "y": 352.94,
+          "genişlik": 3.461,
+          "yükseklik": 6.461,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 122,
+          "ad": "Maritime Administration",
+          "derinlik": 1,
+          "x": 540.658,
+          "y": 352.94,
+          "genişlik": 1.23,
+          "yükseklik": 6.461,
+          "renk": [
+            158,
+            100,
+            105,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 123,
+          "ad": "Office of the Secretary",
+          "derinlik": 1,
+          "x": 536.197,
+          "y": 360.402,
+          "genişlik": 3.85,
+          "yükseklik": 2.284,
+          "renk": [
+            152,
+            68,
+            76,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 124,
+          "ad": "Pipeline and Hazardous Materials Safety Administration",
+          "derinlik": 1,
+          "x": 536.197,
+          "y": 363.686,
+          "genişlik": 3.85,
+          "yükseklik": 1.174,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 125,
+          "ad": "Federal Railroad Administration",
+          "derinlik": 1,
+          "x": 540.967,
+          "y": 360.402,
+          "genişlik": 0.841,
+          "yükseklik": 4.459,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 133,
+          "ad": "Education",
+          "derinlik": 0,
+          "x": 449.997,
+          "y": 367.86,
+          "genişlik": 91.891,
+          "yükseklik": 53.678,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 134,
+          "ad": "Office of Federal Student Aid",
+          "derinlik": 1,
+          "x": 449.997,
+          "y": 367.86,
+          "genişlik": 50.121,
+          "yükseklik": 32.312,
+          "renk": [
+            105,
+            165,
+            115,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 135,
+          "ad": "Office of Elementary and Secondary Education",
+          "derinlik": 1,
+          "x": 449.997,
+          "y": 401.173,
+          "genişlik": 50.121,
+          "yükseklik": 20.366,
+          "renk": [
+            153,
+            74,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 136,
+          "ad": "Office of Federal Student Aid",
+          "derinlik": 1,
+          "x": 501.118,
+          "y": 367.86,
+          "genişlik": 20.014,
+          "yükseklik": 32.012,
+          "renk": [
+            153,
+            74,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 137,
+          "ad": "Office of Special Education and Rehabilitative Services",
+          "derinlik": 1,
+          "x": 522.133,
+          "y": 367.86,
+          "genişlik": 19.755,
+          "yükseklik": 32.012,
+          "renk": [
+            158,
+            101,
+            106,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 138,
+          "ad": "Office of Innovation and Improvement",
+          "derinlik": 1,
+          "x": 501.118,
+          "y": 400.873,
+          "genişlik": 19.297,
+          "yükseklik": 12.333,
+          "renk": [
+            58,
+            161,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 139,
+          "ad": "Office of Special Education and Rehabilitative Services",
+          "derinlik": 1,
+          "x": 501.118,
+          "y": 414.206,
+          "genişlik": 19.297,
+          "yükseklik": 7.333,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 140,
+          "ad": "Office of Postsecondary Education",
+          "derinlik": 1,
+          "x": 521.416,
+          "y": 400.873,
+          "genişlik": 8.07,
+          "yükseklik": 14.131,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 141,
+          "ad": "Office of Safe and Drug-Free Schools",
+          "derinlik": 1,
+          "x": 530.485,
+          "y": 400.873,
+          "genişlik": 5.377,
+          "yükseklik": 14.131,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 142,
+          "ad": "Office of Vocational and Adult Education",
+          "derinlik": 1,
+          "x": 536.862,
+          "y": 400.873,
+          "genişlik": 5.026,
+          "yükseklik": 14.131,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 143,
+          "ad": "Institute of Education Sciences",
+          "derinlik": 1,
+          "x": 521.416,
+          "y": 416.004,
+          "genişlik": 5.301,
+          "yükseklik": 5.535,
+          "renk": [
+            114,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 144,
+          "ad": "Office of English Language Acquisition",
+          "derinlik": 1,
+          "x": 527.716,
+          "y": 416.004,
+          "genişlik": 5.218,
+          "yükseklik": 5.535,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 145,
+          "ad": "Departmental Management",
+          "derinlik": 1,
+          "x": 533.934,
+          "y": 416.004,
+          "genişlik": 4.422,
+          "yükseklik": 5.535,
+          "renk": [
+            116,
+            165,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 146,
+          "ad": "Office of Postsecondary Education",
+          "derinlik": 1,
+          "x": 539.356,
+          "y": 416.004,
+          "genişlik": 2.532,
+          "yükseklik": 5.535,
+          "renk": [
+            155,
+            85,
+            92,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 148,
+          "ad": "Office of Personnel Management",
+          "derinlik": 0,
+          "x": 449.997,
+          "y": 424.539,
+          "genişlik": 91.891,
+          "yükseklik": 47.461,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 149,
+          "ad": "Office of Personnel Management",
+          "derinlik": 1,
+          "x": 449.997,
+          "y": 424.539,
+          "genişlik": 91.598,
+          "yükseklik": 47.461,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 150,
+          "ad": "Office of Personnel Management",
+          "derinlik": 1,
+          "x": 542.095,
+          "y": 424.539,
+          "genişlik": 0,
+          "yükseklik": 47.461,
+          "renk": [
+            67,
+            161,
+            84,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 151,
+          "ad": "Other",
+          "derinlik": 0,
+          "x": 544.888,
+          "y": 289.628,
+          "genişlik": 47.678,
+          "yükseklik": 72.22,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 152,
+          "ad": "National Aeronautics and Space Administration",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 289.628,
+          "genişlik": 30.731,
+          "yükseklik": 31.617,
+          "renk": [
+            161,
+            120,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 153,
+          "ad": "Allowances",
+          "derinlik": 1,
+          "x": 576.619,
+          "y": 289.628,
+          "genişlik": 15.947,
+          "yükseklik": 31.617,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 154,
+          "ad": "Environmental Protection Agency",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 322.244,
+          "genişlik": 21.79,
+          "yükseklik": 20.763,
+          "renk": [
+            159,
+            110,
+            115,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 155,
+          "ad": "National Science Foundation",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 344.007,
+          "genişlik": 21.79,
+          "yükseklik": 17.84,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 156,
+          "ad": "Postal Service",
+          "derinlik": 1,
+          "x": 567.678,
+          "y": 322.244,
+          "genişlik": 18.619,
+          "yükseklik": 15.755,
+          "renk": [
+            116,
+            165,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 157,
+          "ad": "National Credit Union Administration",
+          "derinlik": 1,
+          "x": 587.298,
+          "y": 322.244,
+          "genişlik": 5.268,
+          "yükseklik": 15.755,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 158,
+          "ad": "Corporation for National and Community Service",
+          "derinlik": 1,
+          "x": 567.678,
+          "y": 338.999,
+          "genişlik": 9.235,
+          "yükseklik": 5.799,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 159,
+          "ad": "Tennessee Valley Authority",
+          "derinlik": 1,
+          "x": 567.678,
+          "y": 345.798,
+          "genişlik": 9.235,
+          "yükseklik": 5.075,
+          "renk": [
+            114,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 160,
+          "ad": "Smithsonian Institution",
+          "derinlik": 1,
+          "x": 567.678,
+          "y": 351.874,
+          "genişlik": 9.235,
+          "yükseklik": 4.66,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 161,
+          "ad": "Small Business Administration",
+          "derinlik": 1,
+          "x": 567.678,
+          "y": 357.533,
+          "genişlik": 9.235,
+          "yükseklik": 4.314,
+          "renk": [
+            154,
+            82,
+            89,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 162,
+          "ad": "Broadcasting Board of Governors",
+          "derinlik": 1,
+          "x": 577.914,
+          "y": 338.999,
+          "genişlik": 5.41,
+          "yükseklik": 5.614,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 163,
+          "ad": "Intelligence Community Management Account",
+          "derinlik": 1,
+          "x": 584.323,
+          "y": 338.999,
+          "genişlik": 3.947,
+          "yükseklik": 5.614,
+          "renk": [
+            159,
+            107,
+            112,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 164,
+          "ad": "Central Intelligence Agency",
+          "derinlik": 1,
+          "x": 589.271,
+          "y": 338.999,
+          "genişlik": 3.295,
+          "yükseklik": 5.614,
+          "renk": [
+            114,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 165,
+          "ad": "Corporation for Public Broadcasting",
+          "derinlik": 1,
+          "x": 577.914,
+          "y": 345.614,
+          "genişlik": 3.32,
+          "yükseklik": 4.77,
+          "renk": [
+            160,
+            111,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 166,
+          "ad": "Legal Services Corporation",
+          "derinlik": 1,
+          "x": 582.234,
+          "y": 345.614,
+          "genişlik": 3.311,
+          "yükseklik": 4.77,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 167,
+          "ad": "Equal Employment Opportunity Commission",
+          "derinlik": 1,
+          "x": 586.545,
+          "y": 345.614,
+          "genişlik": 2.697,
+          "yükseklik": 4.77,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 168,
+          "ad": "Postal Service",
+          "derinlik": 1,
+          "x": 590.242,
+          "y": 345.614,
+          "genişlik": 2.324,
+          "yükseklik": 4.77,
+          "renk": [
+            160,
+            115,
+            120,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 169,
+          "ad": "Federal Drug Control Programs",
+          "derinlik": 1,
+          "x": 577.914,
+          "y": 351.384,
+          "genişlik": 4.97,
+          "yükseklik": 2.083,
+          "renk": [
+            160,
+            111,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 170,
+          "ad": "Bureau of Consumer Financial Protection",
+          "derinlik": 1,
+          "x": 577.914,
+          "y": 354.467,
+          "genişlik": 4.97,
+          "yükseklik": 2.046,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 172,
+          "ad": "National Labor Relations Board",
+          "derinlik": 1,
+          "x": 577.914,
+          "y": 357.514,
+          "genişlik": 4.97,
+          "yükseklik": 1.667,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 171,
+          "ad": "Securities Investor Protection Corporation",
+          "derinlik": 1,
+          "x": 577.914,
+          "y": 360.18,
+          "genişlik": 4.97,
+          "yükseklik": 1.667,
+          "renk": [
+            157,
+            94,
+            100,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 173,
+          "ad": "Court Services and Offender Supervision Agency for the District",
+          "derinlik": 1,
+          "x": 583.883,
+          "y": 351.384,
+          "genişlik": 2.335,
+          "yükseklik": 3.276,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 174,
+          "ad": "National Science Foundation",
+          "derinlik": 1,
+          "x": 587.219,
+          "y": 351.384,
+          "genişlik": 2.206,
+          "yükseklik": 3.276,
+          "renk": [
+            109,
+            165,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 175,
+          "ad": "Institute of Museum and Library Services",
+          "derinlik": 1,
+          "x": 590.425,
+          "y": 351.384,
+          "genişlik": 2.141,
+          "yükseklik": 3.276,
+          "renk": [
+            159,
+            109,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 176,
+          "ad": "Federal Housing Finance Agency",
+          "derinlik": 1,
+          "x": 583.883,
+          "y": 355.66,
+          "genişlik": 4.06,
+          "yükseklik": 1.48,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 177,
+          "ad": "Affordable Housing Program",
+          "derinlik": 1,
+          "x": 583.883,
+          "y": 358.139,
+          "genişlik": 4.06,
+          "yükseklik": 1.359,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 178,
+          "ad": "Neighborhood Reinvestment Corporation",
+          "derinlik": 1,
+          "x": 583.883,
+          "y": 360.499,
+          "genişlik": 4.06,
+          "yükseklik": 1.348,
+          "renk": [
+            160,
+            114,
+            118,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 179,
+          "ad": "Public Company Accounting Oversight Board",
+          "derinlik": 1,
+          "x": 588.944,
+          "y": 355.66,
+          "genişlik": 1.401,
+          "yükseklik": 3.903,
+          "renk": [
+            116,
+            165,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 180,
+          "ad": "Federal Trade Commission",
+          "derinlik": 1,
+          "x": 591.345,
+          "y": 355.66,
+          "genişlik": 1.221,
+          "yükseklik": 3.903,
+          "renk": [
+            161,
+            117,
+            121,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 181,
+          "ad": "Commodity Futures Trading Commission",
+          "derinlik": 1,
+          "x": 588.944,
+          "y": 360.563,
+          "genişlik": 3.622,
+          "yükseklik": 1.284,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 242,
+          "ad": "Other Defense Civil Programs",
+          "derinlik": 0,
+          "x": 595.566,
+          "y": 289.628,
+          "genişlik": 41.722,
+          "yükseklik": 72.22,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 243,
+          "ad": "Military Retirement",
+          "derinlik": 1,
+          "x": 595.566,
+          "y": 289.628,
+          "genişlik": 41.722,
+          "yükseklik": 59.78,
+          "renk": [
+            160,
+            113,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 244,
+          "ad": "Retiree Health Care",
+          "derinlik": 1,
+          "x": 595.566,
+          "y": 350.408,
+          "genişlik": 41.722,
+          "yükseklik": 11.44,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 250,
+          "ad": "Housing and Urban Development",
+          "derinlik": 0,
+          "x": 640.288,
+          "y": 289.628,
+          "genişlik": 36.712,
+          "yükseklik": 72.22,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 251,
+          "ad": "Public and Indian Housing Programs",
+          "derinlik": 1,
+          "x": 640.288,
+          "y": 289.628,
+          "genişlik": 36.712,
+          "yükseklik": 50.275,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 252,
+          "ad": "Community Planning and Development",
+          "derinlik": 1,
+          "x": 640.288,
+          "y": 340.902,
+          "genişlik": 18.995,
+          "yükseklik": 20.945,
+          "renk": [
+            155,
+            88,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 253,
+          "ad": "Housing Programs",
+          "derinlik": 1,
+          "x": 660.282,
+          "y": 340.902,
+          "genişlik": 16.718,
+          "yükseklik": 12.524,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 254,
+          "ad": "Management and Administration",
+          "derinlik": 1,
+          "x": 660.282,
+          "y": 354.426,
+          "genişlik": 10.366,
+          "yükseklik": 7.421,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 255,
+          "ad": "Community Planning and Development",
+          "derinlik": 1,
+          "x": 671.648,
+          "y": 354.426,
+          "genişlik": 5.352,
+          "yükseklik": 7.421,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 260,
+          "ad": "Homeland Security",
+          "derinlik": 0,
+          "x": 544.888,
+          "y": 364.847,
+          "genişlik": 63.303,
+          "yükseklik": 40.283,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 261,
+          "ad": "Customs and Border Protection",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 364.847,
+          "genişlik": 24.047,
+          "yükseklik": 21.297,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 262,
+          "ad": "United States Coast Guard",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 387.144,
+          "genişlik": 24.047,
+          "yükseklik": 17.986,
+          "renk": [
+            116,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 263,
+          "ad": "Federal Emergency Management Agency",
+          "derinlik": 1,
+          "x": 569.935,
+          "y": 364.847,
+          "genişlik": 14.32,
+          "yükseklik": 22.589,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 264,
+          "ad": "Immigration and Customs Enforcement",
+          "derinlik": 1,
+          "x": 585.255,
+          "y": 364.847,
+          "genişlik": 11.398,
+          "yükseklik": 22.589,
+          "renk": [
+            161,
+            120,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 265,
+          "ad": "Transportation Security Administration",
+          "derinlik": 1,
+          "x": 597.653,
+          "y": 364.847,
+          "genişlik": 10.538,
+          "yükseklik": 22.589,
+          "renk": [
+            159,
+            108,
+            113,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 266,
+          "ad": "Citizenship and Immigration Services",
+          "derinlik": 1,
+          "x": 569.935,
+          "y": 388.436,
+          "genişlik": 11.732,
+          "yükseklik": 9.592,
+          "renk": [
+            109,
+            165,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 267,
+          "ad": "United States Secret Service",
+          "derinlik": 1,
+          "x": 569.935,
+          "y": 399.028,
+          "genişlik": 11.732,
+          "yükseklik": 6.102,
+          "renk": [
+            94,
+            164,
+            107,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 268,
+          "ad": "United States Coast Guard",
+          "derinlik": 1,
+          "x": 582.667,
+          "y": 388.436,
+          "genişlik": 12.719,
+          "yükseklik": 5.448,
+          "renk": [
+            154,
+            78,
+            85,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 269,
+          "ad": "Customs and Border Protection",
+          "derinlik": 1,
+          "x": 582.667,
+          "y": 394.883,
+          "genişlik": 12.719,
+          "yükseklik": 4.707,
+          "renk": [
+            95,
+            164,
+            107,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 270,
+          "ad": "National Protection and Programs Directorate",
+          "derinlik": 1,
+          "x": 582.667,
+          "y": 400.59,
+          "genişlik": 12.719,
+          "yükseklik": 4.54,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 271,
+          "ad": "Departmental Management and Operations",
+          "derinlik": 1,
+          "x": 596.386,
+          "y": 388.436,
+          "genişlik": 5.725,
+          "yükseklik": 9.304,
+          "renk": [
+            93,
+            164,
+            106,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 272,
+          "ad": "Science and Technology",
+          "derinlik": 1,
+          "x": 603.111,
+          "y": 388.436,
+          "genişlik": 5.08,
+          "yükseklik": 9.304,
+          "renk": [
+            88,
+            163,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 273,
+          "ad": "Citizenship and Immigration Services",
+          "derinlik": 1,
+          "x": 596.386,
+          "y": 398.74,
+          "genişlik": 4.012,
+          "yükseklik": 2.876,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 274,
+          "ad": "Domestic Nuclear Detection Office",
+          "derinlik": 1,
+          "x": 596.386,
+          "y": 402.615,
+          "genişlik": 4.012,
+          "yükseklik": 2.515,
+          "renk": [
+            158,
+            100,
+            106,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 275,
+          "ad": "Immigration and Customs Enforcement",
+          "derinlik": 1,
+          "x": 601.399,
+          "y": 398.74,
+          "genişlik": 3.227,
+          "yükseklik": 2.915,
+          "renk": [
+            96,
+            164,
+            108,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 276,
+          "ad": "Federal Law Enforcement Training Center",
+          "derinlik": 1,
+          "x": 601.399,
+          "y": 402.655,
+          "genişlik": 3.227,
+          "yükseklik": 2.475,
+          "renk": [
+            160,
+            112,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 277,
+          "ad": "Transportation Security Administration",
+          "derinlik": 1,
+          "x": 605.626,
+          "y": 398.74,
+          "genişlik": 2.565,
+          "yükseklik": 2.732,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 278,
+          "ad": "United States Secret Service",
+          "derinlik": 1,
+          "x": 605.626,
+          "y": 402.472,
+          "genişlik": 2.565,
+          "yükseklik": 2.658,
+          "renk": [
+            117,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 281,
+          "ad": "International Assistance Programs",
+          "derinlik": 0,
+          "x": 544.888,
+          "y": 408.13,
+          "genişlik": 63.303,
+          "yükseklik": 33.251,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 282,
+          "ad": "International Security Assistance",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 408.13,
+          "genişlik": 45.552,
+          "yükseklik": 17.093,
+          "renk": [
+            114,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 283,
+          "ad": "Military Sales Program",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 426.223,
+          "genişlik": 45.552,
+          "yükseklik": 15.158,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 284,
+          "ad": "Agency for International Development",
+          "derinlik": 1,
+          "x": 591.44,
+          "y": 408.13,
+          "genişlik": 16.751,
+          "yükseklik": 17.564,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 285,
+          "ad": "Multilateral Assistance",
+          "derinlik": 1,
+          "x": 591.44,
+          "y": 426.694,
+          "genişlik": 11.487,
+          "yükseklik": 14.687,
+          "renk": [
+            113,
+            165,
+            122,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 286,
+          "ad": "Millennium Challenge Corporation",
+          "derinlik": 1,
+          "x": 603.928,
+          "y": 426.694,
+          "genişlik": 4.263,
+          "yükseklik": 10.277,
+          "renk": [
+            116,
+            165,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 287,
+          "ad": "Peace Corps",
+          "derinlik": 1,
+          "x": 603.928,
+          "y": 437.97,
+          "genişlik": 4.263,
+          "yükseklik": 3.41,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 292,
+          "ad": "Justice",
+          "derinlik": 0,
+          "x": 544.888,
+          "y": 444.381,
+          "genişlik": 63.303,
+          "yükseklik": 27.619,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 293,
+          "ad": "Federal Bureau of Investigation",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 444.381,
+          "genişlik": 28.032,
+          "yükseklik": 13.551,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 294,
+          "ad": "Office of Justice Programs",
+          "derinlik": 1,
+          "x": 544.888,
+          "y": 458.932,
+          "genişlik": 28.032,
+          "yükseklik": 13.068,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 295,
+          "ad": "Federal Prison System",
+          "derinlik": 1,
+          "x": 573.92,
+          "y": 444.381,
+          "genişlik": 18.557,
+          "yükseklik": 17.164,
+          "renk": [
+            116,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 296,
+          "ad": "Legal Activities and U.S. Marshals",
+          "derinlik": 1,
+          "x": 573.92,
+          "y": 462.545,
+          "genişlik": 18.557,
+          "yükseklik": 9.455,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 297,
+          "ad": "Legal Activities and U.S. Marshals",
+          "derinlik": 1,
+          "x": 593.476,
+          "y": 444.381,
+          "genişlik": 6.908,
+          "yükseklik": 14.365,
+          "renk": [
+            114,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 298,
+          "ad": "General Administration",
+          "derinlik": 1,
+          "x": 601.385,
+          "y": 444.381,
+          "genişlik": 6.806,
+          "yükseklik": 14.365,
+          "renk": [
+            160,
+            114,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 299,
+          "ad": "Drug Enforcement Administration",
+          "derinlik": 1,
+          "x": 593.476,
+          "y": 459.746,
+          "genişlik": 11.467,
+          "yükseklik": 7.442,
+          "renk": [
+            157,
+            95,
+            101,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 300,
+          "ad": "Bureau of Alcohol, Tobacco, Firearms, and Explosives",
+          "derinlik": 1,
+          "x": 593.476,
+          "y": 468.187,
+          "genişlik": 11.467,
+          "yükseklik": 3.813,
+          "renk": [
+            160,
+            114,
+            118,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 301,
+          "ad": "Interagency Law Enforcement",
+          "derinlik": 1,
+          "x": 605.943,
+          "y": 459.746,
+          "genişlik": 2.248,
+          "yükseklik": 7.713,
+          "renk": [
+            160,
+            111,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 302,
+          "ad": "Drug Enforcement Administration",
+          "derinlik": 1,
+          "x": 605.943,
+          "y": 468.458,
+          "genişlik": 2.248,
+          "yükseklik": 3.542,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 306,
+          "ad": "State",
+          "derinlik": 0,
+          "x": 611.191,
+          "y": 364.847,
+          "genişlik": 32.47,
+          "yükseklik": 49.94,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 307,
+          "ad": "Administration of Foreign Affairs",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 364.847,
+          "genişlik": 16.737,
+          "yükseklik": 42.451,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 308,
+          "ad": "Other",
+          "derinlik": 1,
+          "x": 628.928,
+          "y": 364.847,
+          "genişlik": 14.732,
+          "yükseklik": 42.451,
+          "renk": [
+            113,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 309,
+          "ad": "International Organizations and Conferences",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 408.298,
+          "genişlik": 23.698,
+          "yükseklik": 6.489,
+          "renk": [
+            160,
+            111,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 310,
+          "ad": "Administration of Foreign Affairs",
+          "derinlik": 1,
+          "x": 635.889,
+          "y": 408.298,
+          "genişlik": 7.772,
+          "yükseklik": 6.489,
+          "renk": [
+            161,
+            120,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 313,
+          "ad": "Energy",
+          "derinlik": 0,
+          "x": 646.661,
+          "y": 364.847,
+          "genişlik": 30.339,
+          "yükseklik": 49.94,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 314,
+          "ad": "Energy Programs",
+          "derinlik": 1,
+          "x": 646.661,
+          "y": 364.847,
+          "genişlik": 14.752,
+          "yükseklik": 38.434,
+          "renk": [
+            72,
+            162,
+            89,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 315,
+          "ad": "National Nuclear Security Administration",
+          "derinlik": 1,
+          "x": 662.413,
+          "y": 364.847,
+          "genişlik": 14.587,
+          "yükseklik": 38.434,
+          "renk": [
+            95,
+            164,
+            108,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 316,
+          "ad": "Environmental and Other Defense Activities",
+          "derinlik": 1,
+          "x": 646.661,
+          "y": 404.281,
+          "genişlik": 27.584,
+          "yükseklik": 10.506,
+          "renk": [
+            160,
+            112,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 317,
+          "ad": "Power Marketing Administration",
+          "derinlik": 1,
+          "x": 675.245,
+          "y": 404.281,
+          "genişlik": 1.755,
+          "yükseklik": 10.506,
+          "renk": [
+            154,
+            80,
+            87,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 321,
+          "ad": "Interior",
+          "derinlik": 0,
+          "x": 611.191,
+          "y": 417.787,
+          "genişlik": 36.973,
+          "yükseklik": 22.625,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 322,
+          "ad": "National Park Service",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 417.787,
+          "genişlik": 15.826,
+          "yükseklik": 8.098,
+          "renk": [
+            113,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 323,
+          "ad": "Bureau of Indian Affairs and Bureau of Indian Education",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 426.885,
+          "genişlik": 15.826,
+          "yükseklik": 6.868,
+          "renk": [
+            160,
+            115,
+            120,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 324,
+          "ad": "Departmental Offices",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 434.753,
+          "genişlik": 15.826,
+          "yükseklik": 5.66,
+          "renk": [
+            100,
+            164,
+            111,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 325,
+          "ad": "United States Fish and Wildlife Service",
+          "derinlik": 1,
+          "x": 628.017,
+          "y": 417.787,
+          "genişlik": 8.086,
+          "yükseklik": 8.874,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 326,
+          "ad": "Bureau of Land Management",
+          "derinlik": 1,
+          "x": 637.103,
+          "y": 417.787,
+          "genişlik": 5.068,
+          "yükseklik": 8.874,
+          "renk": [
+            161,
+            118,
+            122,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 327,
+          "ad": "United States Geological Survey",
+          "derinlik": 1,
+          "x": 643.171,
+          "y": 417.787,
+          "genişlik": 4.993,
+          "yükseklik": 8.874,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 328,
+          "ad": "Bureau of Reclamation",
+          "derinlik": 1,
+          "x": 628.017,
+          "y": 427.661,
+          "genişlik": 6.752,
+          "yükseklik": 5.951,
+          "renk": [
+            160,
+            112,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 329,
+          "ad": "United States Fish and Wildlife Service",
+          "derinlik": 1,
+          "x": 628.017,
+          "y": 434.612,
+          "genişlik": 6.752,
+          "yükseklik": 5.801,
+          "renk": [
+            155,
+            88,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 330,
+          "ad": "Department-Wide Programs",
+          "derinlik": 1,
+          "x": 635.769,
+          "y": 427.661,
+          "genişlik": 5.47,
+          "yükseklik": 6.453,
+          "renk": [
+            160,
+            114,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 331,
+          "ad": "Office of Surface Mining Reclamation and Enforcement",
+          "derinlik": 1,
+          "x": 642.239,
+          "y": 427.661,
+          "genişlik": 2.821,
+          "yükseklik": 6.453,
+          "renk": [
+            161,
+            120,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 332,
+          "ad": "Department-Wide Programs",
+          "derinlik": 1,
+          "x": 646.06,
+          "y": 427.661,
+          "genişlik": 2.104,
+          "yükseklik": 6.453,
+          "renk": [
+            155,
+            84,
+            91,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 333,
+          "ad": "Insular Affairs",
+          "derinlik": 1,
+          "x": 635.769,
+          "y": 435.114,
+          "genişlik": 5.723,
+          "yükseklik": 2.189,
+          "renk": [
+            160,
+            114,
+            118,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 334,
+          "ad": "National Park Service",
+          "derinlik": 1,
+          "x": 635.769,
+          "y": 438.303,
+          "genişlik": 5.723,
+          "yükseklik": 2.11,
+          "renk": [
+            117,
+            166,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 335,
+          "ad": "Office of the Special Trustee for American Indians",
+          "derinlik": 1,
+          "x": 642.492,
+          "y": 435.114,
+          "genişlik": 4.042,
+          "yükseklik": 2.758,
+          "renk": [
+            156,
+            89,
+            96,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 336,
+          "ad": "Departmental Offices",
+          "derinlik": 1,
+          "x": 642.492,
+          "y": 438.872,
+          "genişlik": 4.042,
+          "yükseklik": 1.54,
+          "renk": [
+            48,
+            160,
+            69,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 337,
+          "ad": "Bureau of Reclamation",
+          "derinlik": 1,
+          "x": 647.349,
+          "y": 435.114,
+          "genişlik": 0.63,
+          "yükseklik": 5.299,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 350,
+          "ad": "Federal Communications Commission",
+          "derinlik": 0,
+          "x": 611.191,
+          "y": 443.413,
+          "genişlik": 36.973,
+          "yükseklik": 13.598,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 351,
+          "ad": "Federal Communications Commission",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 443.413,
+          "genişlik": 36.973,
+          "yükseklik": 13.598,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 352,
+          "ad": "Commerce",
+          "derinlik": 0,
+          "x": 611.191,
+          "y": 460.01,
+          "genişlik": 36.973,
+          "yükseklik": 11.99,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 353,
+          "ad": "National Oceanic and Atmospheric Administration",
+          "derinlik": 1,
+          "x": 611.191,
+          "y": 460.01,
+          "genişlik": 20.392,
+          "yükseklik": 11.99,
+          "renk": [
+            116,
+            165,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 354,
+          "ad": "National Telecommunications and Information Administration",
+          "derinlik": 1,
+          "x": 632.583,
+          "y": 460.01,
+          "genişlik": 8.415,
+          "yükseklik": 6.499,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 355,
+          "ad": "Bureau of the Census",
+          "derinlik": 1,
+          "x": 632.583,
+          "y": 467.51,
+          "genişlik": 8.415,
+          "yükseklik": 4.49,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 356,
+          "ad": "National Institute of Standards and Technology",
+          "derinlik": 1,
+          "x": 641.997,
+          "y": 460.01,
+          "genişlik": 6.167,
+          "yükseklik": 6.065,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 357,
+          "ad": "International Trade Administration",
+          "derinlik": 1,
+          "x": 641.997,
+          "y": 467.075,
+          "genişlik": 6.167,
+          "yükseklik": 2.638,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 358,
+          "ad": "Economic Development Administration",
+          "derinlik": 1,
+          "x": 641.997,
+          "y": 470.713,
+          "genişlik": 6.167,
+          "yükseklik": 1.287,
+          "renk": [
+            160,
+            115,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 370,
+          "ad": "Judicial Branch",
+          "derinlik": 0,
+          "x": 651.164,
+          "y": 417.787,
+          "genişlik": 12.512,
+          "yükseklik": 27.623,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 371,
+          "ad": "Courts of Appeals, District Courts, and other Judicial Services",
+          "derinlik": 1,
+          "x": 651.164,
+          "y": 417.787,
+          "genişlik": 12.512,
+          "yükseklik": 22.528,
+          "renk": [
+            97,
+            164,
+            109,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 372,
+          "ad": "Courts of Appeals, District Courts, and other Judicial Services",
+          "derinlik": 1,
+          "x": 651.164,
+          "y": 441.315,
+          "genişlik": 10.161,
+          "yükseklik": 4.095,
+          "renk": [
+            108,
+            165,
+            118,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 373,
+          "ad": "Judicial Retirement Funds",
+          "derinlik": 1,
+          "x": 662.325,
+          "y": 441.315,
+          "genişlik": 1.352,
+          "yükseklik": 4.095,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 383,
+          "ad": "Railroad Retirement Board",
+          "derinlik": 0,
+          "x": 666.677,
+          "y": 417.787,
+          "genişlik": 10.323,
+          "yükseklik": 27.623,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 384,
+          "ad": "Railroad Retirement Board",
+          "derinlik": 1,
+          "x": 666.677,
+          "y": 417.787,
+          "genişlik": 10.323,
+          "yükseklik": 27.623,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 386,
+          "ad": "Legislative Branch",
+          "derinlik": 0,
+          "x": 651.164,
+          "y": 448.41,
+          "genişlik": 18.042,
+          "yükseklik": 11.098,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 387,
+          "ad": "House of Representatives",
+          "derinlik": 1,
+          "x": 651.164,
+          "y": 448.41,
+          "genişlik": 8.521,
+          "yükseklik": 6.001,
+          "renk": [
+            160,
+            115,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 388,
+          "ad": "Senate",
+          "derinlik": 1,
+          "x": 651.164,
+          "y": 455.411,
+          "genişlik": 8.521,
+          "yükseklik": 4.096,
+          "renk": [
+            114,
+            165,
+            123,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 389,
+          "ad": "Architect of the Capitol",
+          "derinlik": 1,
+          "x": 660.685,
+          "y": 448.41,
+          "genişlik": 3.855,
+          "yükseklik": 6.143,
+          "renk": [
+            106,
+            165,
+            117,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 390,
+          "ad": "Library of Congress",
+          "derinlik": 1,
+          "x": 665.54,
+          "y": 448.41,
+          "genişlik": 3.666,
+          "yükseklik": 6.143,
+          "renk": [
+            115,
+            165,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 391,
+          "ad": "Government Accountability Office",
+          "derinlik": 1,
+          "x": 660.685,
+          "y": 455.553,
+          "genişlik": 4.618,
+          "yükseklik": 3.954,
+          "renk": [
+            161,
+            120,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 392,
+          "ad": "Capitol Police",
+          "derinlik": 1,
+          "x": 666.303,
+          "y": 455.553,
+          "genişlik": 2.903,
+          "yükseklik": 3.954,
+          "renk": [
+            109,
+            165,
+            119,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 404,
+          "ad": "Corps of Engineers--Civil Works",
+          "derinlik": 0,
+          "x": 651.164,
+          "y": 462.508,
+          "genişlik": 18.042,
+          "yükseklik": 9.492,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 405,
+          "ad": "Corps of Engineers--Civil Works",
+          "derinlik": 1,
+          "x": 651.164,
+          "y": 462.508,
+          "genişlik": 18.042,
+          "yükseklik": 9.492,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 407,
+          "ad": "District of Columbia",
+          "derinlik": 0,
+          "x": 672.206,
+          "y": 448.41,
+          "genişlik": 4.794,
+          "yükseklik": 4.872,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 408,
+          "ad": "District of Columbia General and Special Payments",
+          "derinlik": 1,
+          "x": 672.206,
+          "y": 448.41,
+          "genişlik": 2.939,
+          "yükseklik": 4.872,
+          "renk": [
+            38,
+            159,
+            60,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 409,
+          "ad": "District of Columbia Courts",
+          "derinlik": 1,
+          "x": 676.072,
+          "y": 448.41,
+          "genişlik": 0.855,
+          "yükseklik": 4.872,
+          "renk": [
+            148,
+            46,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 412,
+          "ad": "Federal Deposit Insurance Corporation",
+          "derinlik": 0,
+          "x": 672.206,
+          "y": 456.283,
+          "genişlik": 4.794,
+          "yükseklik": 3.732,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 413,
+          "ad": "Orderly Liquidation",
+          "derinlik": 1,
+          "x": 672.206,
+          "y": 456.283,
+          "genişlik": 4.794,
+          "yükseklik": 3.732,
+          "renk": [
+            170,
+            170,
+            170,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 416,
+          "ad": "General Services Administration",
+          "derinlik": 0,
+          "x": 671.288,
+          "y": 463.015,
+          "genişlik": 1.165,
+          "yükseklik": 5.991,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 417,
+          "ad": "General Activities",
+          "derinlik": 1,
+          "x": 671.288,
+          "y": 463.015,
+          "genişlik": 1.165,
+          "yükseklik": 5.991,
+          "renk": [
+            117,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 422,
+          "ad": "Executive Office of the President",
+          "derinlik": 0,
+          "x": 675.185,
+          "y": 463.015,
+          "genişlik": 0.629,
+          "yükseklik": 5.991,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 423,
+          "ad": "Office of Administration",
+          "derinlik": 1,
+          "x": 675,
+          "y": 463.015,
+          "genişlik": 0.629,
+          "yükseklik": 5.991,
+          "renk": [
+            117,
+            166,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 436,
+          "ad": "National Archives and Records Administration",
+          "derinlik": 0,
+          "x": 672.206,
+          "y": 470.506,
+          "genişlik": 4.794,
+          "yükseklik": 0,
+          "renk": null,
+          "kenarlık_rengi": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 1,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        }
+      ]
+    }
+  ]
+}

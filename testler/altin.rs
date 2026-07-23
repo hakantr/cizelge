@@ -1011,7 +1011,7 @@ fn güneş_patlaması_odak() {
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
     // Merkezde "geri" düğmesi: tıklanınca yol bir üst düzeye kırpılır.
     assert_eq!(çıktı.kırıntılar.len(), 1);
-    assert_eq!(çıktı.kırıntılar.first().map(|(_, u)| *u), Some(0));
+    assert_eq!(çıktı.kırıntılar.first().map(|(_, _, u)| *u), Some(0));
     assert!(yüzey.döküm().contains("⌂"));
 }
 

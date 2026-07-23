@@ -50,6 +50,26 @@ impl Kök {
                     ölçek,
                 } => format!("Tree {seri_sırası} roam → ({kayma_x:.1}, {kayma_y:.1}), {ölçek:.2}×")
                     .into(),
+                GrafikOlayı::AğaçHaritasıKöküDeğişti {
+                    seri_sırası,
+                    yol,
+                    yön,
+                    ..
+                } => format!(
+                    "Treemap {seri_sırası} kökü → {} ({yön:?})",
+                    if yol.is_empty() {
+                        "Tümü".to_owned()
+                    } else {
+                        yol.join(" / ")
+                    }
+                )
+                .into(),
+                GrafikOlayı::Bağlantıİstendi {
+                    seri_sırası,
+                    url,
+                    hedef,
+                    ..
+                } => format!("Treemap {seri_sırası} bağlantısı → {url} ({hedef})").into(),
                 GrafikOlayı::MatrisHücresiTıklandı {
                     bileşen_sırası,
                     hedef_türü,

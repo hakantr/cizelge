@@ -1,0 +1,43 @@
+{
+  "id": "treemap-obama",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 10468,
+  "değişen_piksel_oranı": 0.03877037037037037,
+  "ssim": 0.9157612224999533,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 11397,
+    "değişen_piksel_oranı": 0.04221111111111111,
+    "ssim": 0.9127378281401483
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "treemap_hücre_sınırları_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Toplam raster oranından bağımsız olarak her hücrenin x/y/width/height sınırı, dolgu, kenarlık, gap, upperLabel ve leafRoot katmanı kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 245,
+      "gerçek_düğüm": 245,
+      "karşılaştırılan_alan": 3675,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-obama.png",
+    "gerçek": "testler/gorsel/gerçek/default/treemap-obama.png",
+    "fark": "testler/gorsel/fark/default/treemap-obama.png",
+    "normalize_fark": "testler/gorsel/fark/default/treemap-obama-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/treemap-obama.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/treemap-obama.json"
+  }
+}

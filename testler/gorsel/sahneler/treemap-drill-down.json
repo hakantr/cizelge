@@ -1,0 +1,4516 @@
+{
+  "şema_sürümü": 1,
+  "tür": "treemap",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 20.0,
+        "y": 50.0,
+        "genişlik": 660.0,
+        "yükseklik": 425.0
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 106,
+          "ad": "series",
+          "derinlik": 0,
+          "x": 24.0,
+          "y": 54.0,
+          "genişlik": 299.336,
+          "yükseklik": 309.48,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            127,
+            150,
+            230,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1256,
+          "ad": "series.line",
+          "derinlik": 1,
+          "x": 26.0,
+          "y": 56.0,
+          "genişlik": 144.519,
+          "yükseklik": 173.774,
+          "renk": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 107,
+          "ad": "series.bar",
+          "derinlik": 1,
+          "x": 172.519,
+          "y": 56.0,
+          "genişlik": 73.87,
+          "yükseklik": 173.774,
+          "renk": [
+            38,
+            73,
+            193,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            115,
+            221,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 766,
+          "ad": "series.pie",
+          "derinlik": 1,
+          "x": 248.389,
+          "y": 56.0,
+          "genişlik": 72.947,
+          "yükseklik": 173.774,
+          "renk": [
+            37,
+            73,
+            192,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            116,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 420,
+          "ad": "series.graph",
+          "derinlik": 1,
+          "x": 26.0,
+          "y": 231.774,
+          "genişlik": 95.435,
+          "yükseklik": 67.084,
+          "renk": [
+            31,
+            60,
+            160,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3487,
+          "ad": "series",
+          "derinlik": 1,
+          "x": 26.0,
+          "y": 300.859,
+          "genişlik": 95.435,
+          "yükseklik": 60.621,
+          "renk": [
+            30,
+            59,
+            157,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1666,
+          "ad": "series.map",
+          "derinlik": 1,
+          "x": 123.435,
+          "y": 231.774,
+          "genişlik": 75.051,
+          "yükseklik": 77.079,
+          "renk": [
+            30,
+            59,
+            157,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 1930,
+          "ad": "series.scatter",
+          "derinlik": 1,
+          "x": 123.435,
+          "y": 310.853,
+          "genişlik": 75.051,
+          "yükseklik": 50.627,
+          "renk": [
+            28,
+            55,
+            146,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 2214,
+          "ad": "series.gauge",
+          "derinlik": 1,
+          "x": 200.486,
+          "y": 231.774,
+          "genişlik": 49.33,
+          "yükseklik": 67.242,
+          "renk": [
+            28,
+            54,
+            144,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 2445,
+          "ad": "series.lines",
+          "derinlik": 1,
+          "x": 251.816,
+          "y": 231.774,
+          "genişlik": 34.674,
+          "yükseklik": 67.242,
+          "renk": [
+            27,
+            52,
+            139,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 1067,
+          "ad": "series.effectScatter",
+          "derinlik": 1,
+          "x": 288.49,
+          "y": 231.774,
+          "genişlik": 32.846,
+          "yükseklik": 67.242,
+          "renk": [
+            27,
+            52,
+            138,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 2665,
+          "ad": "series.radar",
+          "derinlik": 1,
+          "x": 200.486,
+          "y": 301.016,
+          "genişlik": 42.777,
+          "yükseklik": 31.57,
+          "renk": [
+            26,
+            50,
+            133,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 1768,
+          "ad": "series.treemap",
+          "derinlik": 1,
+          "x": 200.486,
+          "y": 334.587,
+          "genişlik": 42.777,
+          "yükseklik": 26.893,
+          "renk": [
+            26,
+            50,
+            132,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            116,
+            221,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3039,
+          "ad": "series.heatmap",
+          "derinlik": 1,
+          "x": 245.262,
+          "y": 301.016,
+          "genişlik": 32.822,
+          "yükseklik": 31.277,
+          "renk": [
+            26,
+            50,
+            132,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            116,
+            221,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 2890,
+          "ad": "series.candlestick",
+          "derinlik": 1,
+          "x": 245.262,
+          "y": 334.293,
+          "genişlik": 32.822,
+          "yükseklik": 27.187,
+          "renk": [
+            25,
+            49,
+            131,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3323,
+          "ad": "series.funnel",
+          "derinlik": 1,
+          "x": 280.084,
+          "y": 301.016,
+          "genişlik": 20.383,
+          "yükseklik": 37.952,
+          "renk": [
+            25,
+            49,
+            130,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3212,
+          "ad": "series.sankey",
+          "derinlik": 1,
+          "x": 302.468,
+          "y": 301.016,
+          "genişlik": 18.868,
+          "yükseklik": 37.952,
+          "renk": [
+            25,
+            49,
+            130,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 2829,
+          "ad": "series.boxplot",
+          "derinlik": 1,
+          "x": 280.084,
+          "y": 340.968,
+          "genişlik": 20.441,
+          "yükseklik": 20.512,
+          "renk": [
+            25,
+            48,
+            128,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3173,
+          "ad": "series.parallel",
+          "derinlik": 1,
+          "x": 302.526,
+          "y": 340.968,
+          "genişlik": 18.81,
+          "yükseklik": 20.512,
+          "renk": [
+            25,
+            48,
+            128,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 0,
+          "ad": "xAxis",
+          "derinlik": 0,
+          "x": 24.0,
+          "y": 367.48,
+          "genişlik": 299.336,
+          "yükseklik": 103.52,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            209,
+            229,
+            128,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 105,
+          "ad": "xAxis",
+          "derinlik": 1,
+          "x": 26.0,
+          "y": 369.48,
+          "genişlik": 85.073,
+          "yükseklik": 59.321,
+          "renk": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "xAxis.axisLabel",
+          "derinlik": 1,
+          "x": 26.0,
+          "y": 430.801,
+          "genişlik": 85.073,
+          "yükseklik": 38.199,
+          "renk": [
+            176,
+            209,
+            42,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "xAxis.axisLine",
+          "derinlik": 1,
+          "x": 113.073,
+          "y": 369.48,
+          "genişlik": 56.54,
+          "yükseklik": 38.651,
+          "renk": [
+            153,
+            181,
+            37,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            220,
+            86,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 50,
+          "ad": "xAxis.data",
+          "derinlik": 1,
+          "x": 113.073,
+          "y": 410.131,
+          "genişlik": 56.54,
+          "yükseklik": 28.94,
+          "renk": [
+            141,
+            167,
+            34,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            220,
+            86,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 63,
+          "ad": "xAxis.axisTick",
+          "derinlik": 1,
+          "x": 113.073,
+          "y": 441.071,
+          "genişlik": 56.54,
+          "yükseklik": 27.929,
+          "renk": [
+            140,
+            166,
+            33,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 32,
+          "ad": "xAxis.type",
+          "derinlik": 1,
+          "x": 171.612,
+          "y": 369.48,
+          "genişlik": 42.413,
+          "yükseklik": 36.377,
+          "renk": [
+            139,
+            164,
+            33,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 91,
+          "ad": "xAxis.nameTextStyle",
+          "derinlik": 1,
+          "x": 171.612,
+          "y": 407.857,
+          "genişlik": 42.413,
+          "yükseklik": 31.082,
+          "renk": [
+            134,
+            159,
+            32,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 35,
+          "ad": "xAxis.splitLine",
+          "derinlik": 1,
+          "x": 171.612,
+          "y": 440.939,
+          "genişlik": 42.413,
+          "yükseklik": 28.061,
+          "renk": [
+            131,
+            155,
+            31,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 30,
+          "ad": "xAxis.boundaryGap",
+          "derinlik": 1,
+          "x": 216.025,
+          "y": 369.48,
+          "genişlik": 39.878,
+          "yükseklik": 24.632,
+          "renk": [
+            126,
+            150,
+            30,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 33,
+          "ad": "xAxis.position",
+          "derinlik": 1,
+          "x": 216.025,
+          "y": 396.112,
+          "genişlik": 39.878,
+          "yükseklik": 24.241,
+          "renk": [
+            126,
+            149,
+            30,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 100,
+          "ad": "xAxis.gridIndex",
+          "derinlik": 1,
+          "x": 216.025,
+          "y": 422.353,
+          "genişlik": 39.878,
+          "yükseklik": 24.081,
+          "renk": [
+            126,
+            149,
+            30,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 79,
+          "ad": "xAxis.splitArea",
+          "derinlik": 1,
+          "x": 216.025,
+          "y": 448.434,
+          "genişlik": 39.878,
+          "yükseklik": 20.566,
+          "renk": [
+            123,
+            146,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 34,
+          "ad": "xAxis.splitNumber",
+          "derinlik": 1,
+          "x": 257.903,
+          "y": 369.48,
+          "genişlik": 20.298,
+          "yükseklik": 37.191,
+          "renk": [
+            121,
+            144,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 49,
+          "ad": "xAxis.name",
+          "derinlik": 1,
+          "x": 280.201,
+          "y": 369.48,
+          "genişlik": 19.807,
+          "yükseklik": 37.191,
+          "renk": [
+            121,
+            143,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "xAxis.interval",
+          "derinlik": 1,
+          "x": 302.008,
+          "y": 369.48,
+          "genişlik": 19.328,
+          "yükseklik": 37.191,
+          "renk": [
+            120,
+            143,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            193,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 99,
+          "ad": "xAxis.nameLocation",
+          "derinlik": 1,
+          "x": 257.903,
+          "y": 408.671,
+          "genişlik": 35.284,
+          "yükseklik": 20.303,
+          "renk": [
+            120,
+            143,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            193,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 103,
+          "ad": "xAxis.nameGap",
+          "derinlik": 1,
+          "x": 257.903,
+          "y": 430.974,
+          "genişlik": 35.284,
+          "yükseklik": 19.245,
+          "renk": [
+            120,
+            142,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            220,
+            86,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 101,
+          "ad": "xAxis.scale",
+          "derinlik": 1,
+          "x": 257.903,
+          "y": 452.219,
+          "genişlik": 35.284,
+          "yükseklik": 16.781,
+          "renk": [
+            118,
+            140,
+            28,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 98,
+          "ad": "xAxis.inverse",
+          "derinlik": 1,
+          "x": 295.187,
+          "y": 408.671,
+          "genişlik": 26.148,
+          "yükseklik": 21.271,
+          "renk": [
+            117,
+            138,
+            28,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 102,
+          "ad": "xAxis.min",
+          "derinlik": 1,
+          "x": 295.187,
+          "y": 431.942,
+          "genişlik": 26.148,
+          "yükseklik": 20.878,
+          "renk": [
+            116,
+            138,
+            28,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 62,
+          "ad": "xAxis.max",
+          "derinlik": 1,
+          "x": 295.187,
+          "y": 454.82,
+          "genişlik": 26.148,
+          "yükseklik": 14.18,
+          "renk": [
+            112,
+            134,
+            27,
+            255
+          ],
+          "kenarlık_rengi": [
+            193,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4056,
+          "ad": "legend",
+          "derinlik": 0,
+          "x": 327.336,
+          "y": 54.0,
+          "genişlik": 142.564,
+          "yükseklik": 170.119,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            165,
+            167,
+            192,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4094,
+          "ad": "legend",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 56.0,
+          "genişlik": 95.223,
+          "yükseklik": 68.841,
+          "renk": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4059,
+          "ad": "legend.data",
+          "derinlik": 1,
+          "x": 426.559,
+          "y": 56.0,
+          "genişlik": 41.341,
+          "yükseklik": 68.841,
+          "renk": [
+            91,
+            94,
+            129,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 4066,
+          "ad": "legend.textStyle",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 126.841,
+          "genişlik": 42.074,
+          "yükseklik": 28.595,
+          "renk": [
+            74,
+            77,
+            106,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 4057,
+          "ad": "legend.show",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 157.436,
+          "genişlik": 42.074,
+          "yükseklik": 21.352,
+          "renk": [
+            71,
+            74,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4080,
+          "ad": "legend.orient",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 180.788,
+          "genişlik": 42.074,
+          "yükseklik": 21.002,
+          "renk": [
+            71,
+            74,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4087,
+          "ad": "legend.formatter",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 203.79,
+          "genişlik": 42.074,
+          "yükseklik": 18.329,
+          "renk": [
+            70,
+            73,
+            100,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            139,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4075,
+          "ad": "legend.left",
+          "derinlik": 1,
+          "x": 373.41,
+          "y": 126.841,
+          "genişlik": 24.565,
+          "yükseklik": 29.706,
+          "renk": [
+            70,
+            72,
+            99,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4065,
+          "ad": "legend.selected",
+          "derinlik": 1,
+          "x": 399.975,
+          "y": 126.841,
+          "genişlik": 22.934,
+          "yükseklik": 29.706,
+          "renk": [
+            69,
+            72,
+            99,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4086,
+          "ad": "legend.selectedMode",
+          "derinlik": 1,
+          "x": 424.909,
+          "y": 126.841,
+          "genişlik": 20.754,
+          "yükseklik": 29.706,
+          "renk": [
+            69,
+            71,
+            98,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4081,
+          "ad": "legend.align",
+          "derinlik": 1,
+          "x": 447.663,
+          "y": 126.841,
+          "genişlik": 20.237,
+          "yükseklik": 29.706,
+          "renk": [
+            68,
+            71,
+            98,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4058,
+          "ad": "legend.top",
+          "derinlik": 1,
+          "x": 373.41,
+          "y": 158.547,
+          "genişlik": 26.215,
+          "yükseklik": 20.292,
+          "renk": [
+            68,
+            70,
+            97,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4083,
+          "ad": "legend.itemGap",
+          "derinlik": 1,
+          "x": 373.41,
+          "y": 180.839,
+          "genişlik": 26.215,
+          "yükseklik": 20.045,
+          "renk": [
+            68,
+            70,
+            96,
+            255
+          ],
+          "kenarlık_rengi": [
+            136,
+            138,
+            170,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4077,
+          "ad": "legend.bottom",
+          "derinlik": 1,
+          "x": 373.41,
+          "y": 202.884,
+          "genişlik": 26.215,
+          "yükseklik": 19.235,
+          "renk": [
+            67,
+            70,
+            96,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            139,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4082,
+          "ad": "legend.padding",
+          "derinlik": 1,
+          "x": 401.625,
+          "y": 158.547,
+          "genişlik": 29.627,
+          "yükseklik": 15.262,
+          "renk": [
+            67,
+            69,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4073,
+          "ad": "legend.zlevel",
+          "derinlik": 1,
+          "x": 401.625,
+          "y": 175.809,
+          "genişlik": 29.627,
+          "yükseklik": 14.711,
+          "renk": [
+            67,
+            69,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4084,
+          "ad": "legend.itemWidth",
+          "derinlik": 1,
+          "x": 401.625,
+          "y": 192.52,
+          "genişlik": 29.627,
+          "yükseklik": 14.114,
+          "renk": [
+            67,
+            69,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4078,
+          "ad": "legend.width",
+          "derinlik": 1,
+          "x": 401.625,
+          "y": 208.634,
+          "genişlik": 29.627,
+          "yükseklik": 13.485,
+          "renk": [
+            66,
+            69,
+            95,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4076,
+          "ad": "legend.right",
+          "derinlik": 1,
+          "x": 433.253,
+          "y": 158.547,
+          "genişlik": 16.825,
+          "yükseklik": 22.774,
+          "renk": [
+            66,
+            69,
+            94,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            139,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4064,
+          "ad": "legend.backgroundColor",
+          "derinlik": 1,
+          "x": 452.078,
+          "y": 158.547,
+          "genişlik": 15.822,
+          "yükseklik": 22.774,
+          "renk": [
+            66,
+            68,
+            94,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4074,
+          "ad": "legend.z",
+          "derinlik": 1,
+          "x": 433.253,
+          "y": 183.322,
+          "genişlik": 16.7,
+          "yükseklik": 19.803,
+          "renk": [
+            66,
+            68,
+            94,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4079,
+          "ad": "legend.height",
+          "derinlik": 1,
+          "x": 451.952,
+          "y": 183.322,
+          "genişlik": 15.947,
+          "yükseklik": 19.803,
+          "renk": [
+            66,
+            68,
+            93,
+            255
+          ],
+          "kenarlık_rengi": [
+            136,
+            138,
+            170,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4085,
+          "ad": "legend.itemHeight",
+          "derinlik": 1,
+          "x": 433.253,
+          "y": 205.125,
+          "genişlik": 18.522,
+          "yükseklik": 16.995,
+          "renk": [
+            65,
+            68,
+            93,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            139,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4088,
+          "ad": "legend.borderColor",
+          "derinlik": 1,
+          "x": 453.775,
+          "y": 205.125,
+          "genişlik": 14.125,
+          "yükseklik": 16.995,
+          "renk": [
+            65,
+            67,
+            92,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3711,
+          "ad": "yAxis",
+          "derinlik": 0,
+          "x": 473.9,
+          "y": 54.0,
+          "genişlik": 106.31,
+          "yükseklik": 170.119,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            167,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3816,
+          "ad": "yAxis",
+          "derinlik": 1,
+          "x": 475.9,
+          "y": 56.0,
+          "genişlik": 57.225,
+          "yükseklik": 58.891,
+          "renk": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3728,
+          "ad": "yAxis.axisLabel",
+          "derinlik": 1,
+          "x": 535.124,
+          "y": 56.0,
+          "genişlik": 25.218,
+          "yükseklik": 58.891,
+          "renk": [
+            220,
+            94,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3759,
+          "ad": "yAxis.axisLine",
+          "derinlik": 1,
+          "x": 562.342,
+          "y": 56.0,
+          "genişlik": 15.867,
+          "yükseklik": 58.891,
+          "renk": [
+            195,
+            83,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3802,
+          "ad": "yAxis.data",
+          "derinlik": 1,
+          "x": 475.9,
+          "y": 116.891,
+          "genişlik": 22.395,
+          "yükseklik": 37.945,
+          "renk": [
+            190,
+            81,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3712,
+          "ad": "yAxis.type",
+          "derinlik": 1,
+          "x": 500.295,
+          "y": 116.891,
+          "genişlik": 19.839,
+          "yükseklik": 37.945,
+          "renk": [
+            186,
+            79,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3715,
+          "ad": "yAxis.nameTextStyle",
+          "derinlik": 1,
+          "x": 522.134,
+          "y": 116.891,
+          "genişlik": 18.579,
+          "yükseklik": 37.945,
+          "renk": [
+            183,
+            78,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3743,
+          "ad": "yAxis.axisTick",
+          "derinlik": 1,
+          "x": 542.713,
+          "y": 116.891,
+          "genişlik": 17.402,
+          "yükseklik": 37.945,
+          "renk": [
+            181,
+            77,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3774,
+          "ad": "yAxis.position",
+          "derinlik": 1,
+          "x": 562.115,
+          "y": 116.891,
+          "genişlik": 16.094,
+          "yükseklik": 37.945,
+          "renk": [
+            179,
+            76,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3773,
+          "ad": "yAxis.gridIndex",
+          "derinlik": 1,
+          "x": 475.9,
+          "y": 156.836,
+          "genişlik": 26.705,
+          "yükseklik": 21.36,
+          "renk": [
+            177,
+            75,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            137,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3776,
+          "ad": "yAxis.splitLine",
+          "derinlik": 1,
+          "x": 475.9,
+          "y": 180.196,
+          "genişlik": 26.705,
+          "yükseklik": 21.211,
+          "renk": [
+            176,
+            75,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3723,
+          "ad": "yAxis.boundaryGap",
+          "derinlik": 1,
+          "x": 475.9,
+          "y": 203.406,
+          "genişlik": 26.705,
+          "yükseklik": 18.713,
+          "renk": [
+            173,
+            74,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3727,
+          "ad": "yAxis.splitNumber",
+          "derinlik": 1,
+          "x": 504.605,
+          "y": 156.836,
+          "genişlik": 31.758,
+          "yükseklik": 15.514,
+          "renk": [
+            173,
+            74,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3714,
+          "ad": "yAxis.nameLocation",
+          "derinlik": 1,
+          "x": 504.605,
+          "y": 174.35,
+          "genişlik": 31.758,
+          "yükseklik": 15.049,
+          "renk": [
+            172,
+            74,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            139,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3713,
+          "ad": "yAxis.name",
+          "derinlik": 1,
+          "x": 504.605,
+          "y": 191.399,
+          "genişlik": 31.758,
+          "yükseklik": 14.557,
+          "renk": [
+            172,
+            73,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3726,
+          "ad": "yAxis.interval",
+          "derinlik": 1,
+          "x": 504.605,
+          "y": 207.956,
+          "genişlik": 31.758,
+          "yükseklik": 14.163,
+          "renk": [
+            171,
+            73,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3775,
+          "ad": "yAxis.nameGap",
+          "derinlik": 1,
+          "x": 538.363,
+          "y": 156.836,
+          "genişlik": 19.0,
+          "yükseklik": 22.739,
+          "renk": [
+            170,
+            73,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            139,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3725,
+          "ad": "yAxis.scale",
+          "derinlik": 1,
+          "x": 559.363,
+          "y": 156.836,
+          "genişlik": 18.847,
+          "yükseklik": 22.739,
+          "renk": [
+            170,
+            72,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            137,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3724,
+          "ad": "yAxis.min",
+          "derinlik": 1,
+          "x": 538.363,
+          "y": 181.575,
+          "genişlik": 13.464,
+          "yükseklik": 31.012,
+          "renk": [
+            170,
+            72,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            137,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3790,
+          "ad": "yAxis.splitArea",
+          "derinlik": 1,
+          "x": 553.827,
+          "y": 181.575,
+          "genişlik": 11.407,
+          "yükseklik": 31.012,
+          "renk": [
+            167,
+            71,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3722,
+          "ad": "yAxis.inverse",
+          "derinlik": 1,
+          "x": 567.234,
+          "y": 181.575,
+          "genişlik": 10.976,
+          "yükseklik": 31.012,
+          "renk": [
+            166,
+            71,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3814,
+          "ad": "yAxis.max",
+          "derinlik": 1,
+          "x": 538.363,
+          "y": 214.587,
+          "genişlik": 39.847,
+          "yükseklik": 7.532,
+          "renk": [
+            165,
+            70,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3578,
+          "ad": "tooltip",
+          "derinlik": 0,
+          "x": 584.21,
+          "y": 54.0,
+          "genişlik": 91.79,
+          "yükseklik": 170.119,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            110,
+            211,
+            247,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3646,
+          "ad": "tooltip",
+          "derinlik": 1,
+          "x": 586.21,
+          "y": 56.0,
+          "genişlik": 59.952,
+          "yükseklik": 69.147,
+          "renk": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3585,
+          "ad": "tooltip.axisPointer",
+          "derinlik": 1,
+          "x": 648.162,
+          "y": 56.0,
+          "genişlik": 25.838,
+          "yükseklik": 69.147,
+          "renk": [
+            11,
+            157,
+            209,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3580,
+          "ad": "tooltip.formatter",
+          "derinlik": 1,
+          "x": 586.21,
+          "y": 127.147,
+          "genişlik": 37.144,
+          "yükseklik": 42.955,
+          "renk": [
+            11,
+            152,
+            201,
+            255
+          ],
+          "kenarlık_rengi": [
+            62,
+            197,
+            244,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3581,
+          "ad": "tooltip.trigger",
+          "derinlik": 1,
+          "x": 625.354,
+          "y": 127.147,
+          "genişlik": 28.987,
+          "yükseklik": 42.955,
+          "renk": [
+            10,
+            142,
+            189,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3629,
+          "ad": "tooltip.show",
+          "derinlik": 1,
+          "x": 656.341,
+          "y": 127.147,
+          "genişlik": 17.659,
+          "yükseklik": 42.955,
+          "renk": [
+            9,
+            129,
+            172,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            196,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3579,
+          "ad": "tooltip.showContent",
+          "derinlik": 1,
+          "x": 586.21,
+          "y": 172.102,
+          "genişlik": 34.249,
+          "yükseklik": 16.559,
+          "renk": [
+            9,
+            124,
+            165,
+            255
+          ],
+          "kenarlık_rengi": [
+            62,
+            196,
+            244,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3633,
+          "ad": "tooltip.triggerOn",
+          "derinlik": 1,
+          "x": 586.21,
+          "y": 190.661,
+          "genişlik": 34.249,
+          "yükseklik": 15.195,
+          "renk": [
+            9,
+            123,
+            163,
+            255
+          ],
+          "kenarlık_rengi": [
+            62,
+            197,
+            244,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3583,
+          "ad": "tooltip.position",
+          "derinlik": 1,
+          "x": 586.21,
+          "y": 207.856,
+          "genişlik": 34.249,
+          "yükseklik": 14.263,
+          "renk": [
+            9,
+            122,
+            162,
+            255
+          ],
+          "kenarlık_rengi": [
+            62,
+            197,
+            244,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3635,
+          "ad": "tooltip.textStyle",
+          "derinlik": 1,
+          "x": 622.459,
+          "y": 172.102,
+          "genişlik": 25.091,
+          "yükseklik": 19.671,
+          "renk": [
+            9,
+            122,
+            162,
+            255
+          ],
+          "kenarlık_rengi": [
+            62,
+            197,
+            244,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3630,
+          "ad": "tooltip.alwaysShowContent",
+          "derinlik": 1,
+          "x": 622.459,
+          "y": 193.773,
+          "genişlik": 25.091,
+          "yükseklik": 14.357,
+          "renk": [
+            8,
+            118,
+            157,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3584,
+          "ad": "tooltip.transitionDuration",
+          "derinlik": 1,
+          "x": 622.459,
+          "y": 210.13,
+          "genişlik": 25.091,
+          "yükseklik": 11.989,
+          "renk": [
+            8,
+            117,
+            155,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3582,
+          "ad": "tooltip.enterable",
+          "derinlik": 1,
+          "x": 649.55,
+          "y": 172.102,
+          "genişlik": 11.637,
+          "yükseklik": 24.786,
+          "renk": [
+            8,
+            116,
+            154,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3631,
+          "ad": "tooltip.backgroundColor",
+          "derinlik": 1,
+          "x": 663.186,
+          "y": 172.102,
+          "genişlik": 10.814,
+          "yükseklik": 24.786,
+          "renk": [
+            8,
+            116,
+            154,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3634,
+          "ad": "tooltip.hideDelay",
+          "derinlik": 1,
+          "x": 649.55,
+          "y": 198.888,
+          "genişlik": 24.45,
+          "yükseklik": 10.828,
+          "renk": [
+            8,
+            116,
+            154,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3632,
+          "ad": "tooltip.extraCssText",
+          "derinlik": 1,
+          "x": 649.55,
+          "y": 211.716,
+          "genişlik": 24.45,
+          "yükseklik": 10.403,
+          "renk": [
+            8,
+            115,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3647,
+          "ad": "title",
+          "derinlik": 0,
+          "x": 327.336,
+          "y": 228.119,
+          "genişlik": 136.083,
+          "yükseklik": 97.007,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            226,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3684,
+          "ad": "title",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 230.119,
+          "genişlik": 59.6,
+          "yükseklik": 56.497,
+          "renk": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3649,
+          "ad": "title.textStyle",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 288.617,
+          "genişlik": 59.6,
+          "yükseklik": 34.509,
+          "renk": [
+            246,
+            200,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3648,
+          "ad": "title.show",
+          "derinlik": 1,
+          "x": 390.935,
+          "y": 230.119,
+          "genişlik": 25.134,
+          "yükseklik": 36.412,
+          "renk": [
+            193,
+            157,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3656,
+          "ad": "title.text",
+          "derinlik": 1,
+          "x": 418.07,
+          "y": 230.119,
+          "genişlik": 21.791,
+          "yükseklik": 36.412,
+          "renk": [
+            187,
+            152,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3673,
+          "ad": "title.subtextStyle",
+          "derinlik": 1,
+          "x": 441.861,
+          "y": 230.119,
+          "genişlik": 19.558,
+          "yükseklik": 36.412,
+          "renk": [
+            184,
+            149,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            216,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3657,
+          "ad": "title.left",
+          "derinlik": 1,
+          "x": 390.935,
+          "y": 268.531,
+          "genişlik": 28.672,
+          "yükseklik": 18.483,
+          "renk": [
+            175,
+            142,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3662,
+          "ad": "title.subtext",
+          "derinlik": 1,
+          "x": 390.935,
+          "y": 289.014,
+          "genişlik": 28.672,
+          "yükseklik": 17.021,
+          "renk": [
+            173,
+            140,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            216,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3659,
+          "ad": "title.link",
+          "derinlik": 1,
+          "x": 390.935,
+          "y": 308.035,
+          "genişlik": 28.672,
+          "yükseklik": 15.09,
+          "renk": [
+            170,
+            138,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3658,
+          "ad": "title.target",
+          "derinlik": 1,
+          "x": 421.607,
+          "y": 268.531,
+          "genişlik": 19.066,
+          "yükseklik": 22.121,
+          "renk": [
+            169,
+            138,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            218,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3665,
+          "ad": "title.padding",
+          "derinlik": 1,
+          "x": 442.673,
+          "y": 268.531,
+          "genişlik": 18.745,
+          "yükseklik": 22.121,
+          "renk": [
+            169,
+            137,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            216,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3670,
+          "ad": "title.top",
+          "derinlik": 1,
+          "x": 421.607,
+          "y": 292.652,
+          "genişlik": 21.266,
+          "yükseklik": 14.796,
+          "renk": [
+            164,
+            133,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            216,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3664,
+          "ad": "title.itemGap",
+          "derinlik": 1,
+          "x": 421.607,
+          "y": 309.448,
+          "genişlik": 21.266,
+          "yükseklik": 13.678,
+          "renk": [
+            163,
+            133,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3668,
+          "ad": "title.zlevel",
+          "derinlik": 1,
+          "x": 444.873,
+          "y": 292.652,
+          "genişlik": 16.545,
+          "yükseklik": 14.297,
+          "renk": [
+            160,
+            130,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3661,
+          "ad": "title.backgroundColor",
+          "derinlik": 1,
+          "x": 444.873,
+          "y": 308.948,
+          "genişlik": 16.545,
+          "yükseklik": 14.177,
+          "renk": [
+            160,
+            130,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3685,
+          "ad": "grid",
+          "derinlik": 0,
+          "x": 327.336,
+          "y": 329.126,
+          "genişlik": 136.083,
+          "yükseklik": 76.317,
+          "renk": [
+            251,
+            98,
+            139,
+            255
+          ],
+          "kenarlık_rengi": [
+            251,
+            106,
+            145,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3703,
+          "ad": "grid",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 331.126,
+          "genişlik": 74.774,
+          "yükseklik": 72.317,
+          "renk": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3695,
+          "ad": "grid.show",
+          "derinlik": 1,
+          "x": 406.11,
+          "y": 331.126,
+          "genişlik": 21.231,
+          "yükseklik": 34.004,
+          "renk": [
+            168,
+            4,
+            48,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3688,
+          "ad": "grid.containLabel",
+          "derinlik": 1,
+          "x": 429.341,
+          "y": 331.126,
+          "genişlik": 16.289,
+          "yükseklik": 34.004,
+          "renk": [
+            163,
+            4,
+            47,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3687,
+          "ad": "grid.left",
+          "derinlik": 1,
+          "x": 447.63,
+          "y": 331.126,
+          "genişlik": 13.789,
+          "yükseklik": 34.004,
+          "renk": [
+            161,
+            4,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3686,
+          "ad": "grid.top",
+          "derinlik": 1,
+          "x": 406.11,
+          "y": 367.13,
+          "genişlik": 19.42,
+          "yükseklik": 17.651,
+          "renk": [
+            157,
+            4,
+            45,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3690,
+          "ad": "grid.backgroundColor",
+          "derinlik": 1,
+          "x": 406.11,
+          "y": 386.78,
+          "genişlik": 19.42,
+          "yükseklik": 16.663,
+          "renk": [
+            156,
+            4,
+            45,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3697,
+          "ad": "grid.width",
+          "derinlik": 1,
+          "x": 427.53,
+          "y": 367.13,
+          "genişlik": 17.064,
+          "yükseklik": 18.343,
+          "renk": [
+            156,
+            4,
+            45,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3691,
+          "ad": "grid.borderColor",
+          "derinlik": 1,
+          "x": 446.594,
+          "y": 367.13,
+          "genişlik": 14.824,
+          "yükseklik": 18.343,
+          "renk": [
+            155,
+            4,
+            44,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            107,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3693,
+          "ad": "grid.zlevel",
+          "derinlik": 1,
+          "x": 427.53,
+          "y": 387.473,
+          "genişlik": 16.352,
+          "yükseklik": 15.97,
+          "renk": [
+            155,
+            4,
+            44,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            107,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3696,
+          "ad": "grid.right",
+          "derinlik": 1,
+          "x": 445.881,
+          "y": 387.473,
+          "genişlik": 15.537,
+          "yükseklik": 15.97,
+          "renk": [
+            154,
+            4,
+            44,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4095,
+          "ad": "toolbox",
+          "derinlik": 0,
+          "x": 327.336,
+          "y": 409.443,
+          "genişlik": 136.083,
+          "yükseklik": 61.557,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            169,
+            152,
+            205,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4096,
+          "ad": "toolbox.feature",
+          "derinlik": 1,
+          "x": 329.336,
+          "y": 411.443,
+          "genişlik": 71.306,
+          "yükseklik": 57.557,
+          "renk": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 4298,
+          "ad": "toolbox",
+          "derinlik": 1,
+          "x": 402.641,
+          "y": 411.443,
+          "genişlik": 47.315,
+          "yükseklik": 57.557,
+          "renk": [
+            112,
+            84,
+            172,
+            255
+          ],
+          "kenarlık_rengi": [
+            140,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4264,
+          "ad": "toolbox.show",
+          "derinlik": 1,
+          "x": 451.957,
+          "y": 411.443,
+          "genişlik": 9.462,
+          "yükseklik": 28.181,
+          "renk": [
+            72,
+            54,
+            110,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4265,
+          "ad": "toolbox.iconStyle",
+          "derinlik": 1,
+          "x": 451.957,
+          "y": 441.624,
+          "genişlik": 9.462,
+          "yükseklik": 27.376,
+          "renk": [
+            72,
+            54,
+            110,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3488,
+          "ad": "visualMap",
+          "derinlik": 0,
+          "x": 467.418,
+          "y": 228.119,
+          "genişlik": 76.844,
+          "yükseklik": 102.233,
+          "renk": [
+            63,
+            190,
+            149,
+            255
+          ],
+          "kenarlık_rengi": [
+            140,
+            217,
+            192,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3489,
+          "ad": "visualMap.continuous",
+          "derinlik": 1,
+          "x": 469.418,
+          "y": 230.119,
+          "genişlik": 39.395,
+          "yükseklik": 72.77,
+          "renk": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_rengi": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3577,
+          "ad": "visualMap",
+          "derinlik": 1,
+          "x": 510.814,
+          "y": 230.119,
+          "genişlik": 31.448,
+          "yükseklik": 72.77,
+          "renk": [
+            57,
+            172,
+            135,
+            255
+          ],
+          "kenarlık_rengi": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3530,
+          "ad": "visualMap.piecewise",
+          "derinlik": 1,
+          "x": 469.418,
+          "y": 304.889,
+          "genişlik": 72.844,
+          "yükseklik": 23.463,
+          "renk": [
+            38,
+            115,
+            90,
+            255
+          ],
+          "kenarlık_rengi": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 4299,
+          "ad": "dataZoom",
+          "derinlik": 0,
+          "x": 548.262,
+          "y": 228.119,
+          "genişlik": 72.937,
+          "yükseklik": 102.233,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            127,
+            150,
+            230,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4354,
+          "ad": "dataZoom",
+          "derinlik": 1,
+          "x": 550.262,
+          "y": 230.119,
+          "genişlik": 36.549,
+          "yükseklik": 67.527,
+          "renk": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4300,
+          "ad": "dataZoom.slider",
+          "derinlik": 1,
+          "x": 588.811,
+          "y": 230.119,
+          "genişlik": 30.388,
+          "yükseklik": 67.527,
+          "renk": [
+            29,
+            55,
+            147,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            115,
+            221,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 4339,
+          "ad": "dataZoom.inside",
+          "derinlik": 1,
+          "x": 550.262,
+          "y": 299.646,
+          "genişlik": 68.937,
+          "yükseklik": 28.706,
+          "renk": [
+            25,
+            48,
+            128,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3937,
+          "ad": "geo",
+          "derinlik": 0,
+          "x": 625.199,
+          "y": 228.119,
+          "genişlik": 50.801,
+          "yükseklik": 102.233,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            209,
+            229,
+            128,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3996,
+          "ad": "geo",
+          "derinlik": 1,
+          "x": 627.199,
+          "y": 230.119,
+          "genişlik": 46.801,
+          "yükseklik": 49.466,
+          "renk": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3938,
+          "ad": "geo.itemStyle",
+          "derinlik": 1,
+          "x": 627.199,
+          "y": 281.585,
+          "genişlik": 29.848,
+          "yükseklik": 27.518,
+          "renk": [
+            146,
+            174,
+            35,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3960,
+          "ad": "geo.label",
+          "derinlik": 1,
+          "x": 627.199,
+          "y": 311.103,
+          "genişlik": 29.848,
+          "yükseklik": 17.249,
+          "renk": [
+            132,
+            157,
+            32,
+            255
+          ],
+          "kenarlık_rengi": [
+            193,
+            220,
+            86,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3982,
+          "ad": "geo.map",
+          "derinlik": 1,
+          "x": 659.047,
+          "y": 281.585,
+          "genişlik": 14.953,
+          "yükseklik": 25.981,
+          "renk": [
+            126,
+            150,
+            30,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3985,
+          "ad": "geo.scaleLimit",
+          "derinlik": 1,
+          "x": 659.047,
+          "y": 309.566,
+          "genişlik": 14.953,
+          "yükseklik": 18.787,
+          "renk": [
+            121,
+            143,
+            29,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 3817,
+          "ad": "timeline",
+          "derinlik": 0,
+          "x": 467.418,
+          "y": 334.352,
+          "genişlik": 70.751,
+          "yükseklik": 49.168,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            165,
+            167,
+            192,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3935,
+          "ad": "timeline",
+          "derinlik": 1,
+          "x": 469.418,
+          "y": 336.352,
+          "genişlik": 58.753,
+          "yükseklik": 45.168,
+          "renk": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3818,
+          "ad": "timeline.label",
+          "derinlik": 1,
+          "x": 530.171,
+          "y": 336.352,
+          "genişlik": 5.998,
+          "yükseklik": 45.168,
+          "renk": [
+            71,
+            74,
+            101,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            139,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": true
+        },
+        {
+          "veri_sırası": 4449,
+          "ad": "radar",
+          "derinlik": 0,
+          "x": 467.418,
+          "y": 387.521,
+          "genişlik": 70.751,
+          "yükseklik": 42.657,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            167,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4541,
+          "ad": "radar",
+          "derinlik": 1,
+          "x": 469.418,
+          "y": 389.521,
+          "genişlik": 58.795,
+          "yükseklik": 38.657,
+          "renk": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4487,
+          "ad": "radar.nameGap",
+          "derinlik": 1,
+          "x": 530.214,
+          "y": 389.521,
+          "genişlik": 5.955,
+          "yükseklik": 38.657,
+          "renk": [
+            171,
+            73,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3936,
+          "ad": "color",
+          "derinlik": 0,
+          "x": 467.418,
+          "y": 434.178,
+          "genişlik": 70.751,
+          "yükseklik": 36.822,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            110,
+            211,
+            247,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4361,
+          "ad": "radiusAxis",
+          "derinlik": 0,
+          "x": 542.169,
+          "y": 334.352,
+          "genişlik": 33.532,
+          "yükseklik": 64.995,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            226,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4448,
+          "ad": "radiusAxis",
+          "derinlik": 1,
+          "x": 544.169,
+          "y": 336.352,
+          "genişlik": 29.532,
+          "yükseklik": 60.995,
+          "renk": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4355,
+          "ad": "polar",
+          "derinlik": 0,
+          "x": 579.701,
+          "y": 334.352,
+          "genişlik": 32.777,
+          "yükseklik": 64.995,
+          "renk": [
+            251,
+            98,
+            139,
+            255
+          ],
+          "kenarlık_rengi": [
+            251,
+            106,
+            145,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4360,
+          "ad": "polar",
+          "derinlik": 1,
+          "x": 581.701,
+          "y": 336.352,
+          "genişlik": 28.777,
+          "yükseklik": 60.995,
+          "renk": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_rengi": [
+            250,
+            56,
+            108,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3704,
+          "ad": "textStyle",
+          "derinlik": 0,
+          "x": 616.478,
+          "y": 334.352,
+          "genişlik": 28.782,
+          "yükseklik": 64.995,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            169,
+            152,
+            205,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3710,
+          "ad": "textStyle",
+          "derinlik": 1,
+          "x": 618.478,
+          "y": 336.352,
+          "genişlik": 24.782,
+          "yükseklik": 60.995,
+          "renk": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4543,
+          "ad": "angleAxis",
+          "derinlik": 0,
+          "x": 649.26,
+          "y": 334.352,
+          "genişlik": 26.74,
+          "yükseklik": 64.995,
+          "renk": [
+            63,
+            190,
+            149,
+            255
+          ],
+          "kenarlık_rengi": [
+            140,
+            217,
+            192,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4623,
+          "ad": "angleAxis",
+          "derinlik": 1,
+          "x": 651.26,
+          "y": 336.352,
+          "genişlik": 22.74,
+          "yükseklik": 60.995,
+          "renk": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_rengi": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4542,
+          "ad": "backgroundColor",
+          "derinlik": 0,
+          "x": 542.169,
+          "y": 403.347,
+          "genişlik": 43.968,
+          "yükseklik": 32.445,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            127,
+            150,
+            230,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3997,
+          "ad": "parallel",
+          "derinlik": 0,
+          "x": 542.169,
+          "y": 439.792,
+          "genişlik": 43.968,
+          "yükseklik": 31.208,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            209,
+            229,
+            128,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4055,
+          "ad": "parallel",
+          "derinlik": 1,
+          "x": 544.169,
+          "y": 441.792,
+          "genişlik": 39.968,
+          "yükseklik": 27.208,
+          "renk": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4624,
+          "ad": "parallelAxis",
+          "derinlik": 0,
+          "x": 590.137,
+          "y": 403.347,
+          "genişlik": 36.39,
+          "yükseklik": 35.296,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            165,
+            167,
+            192,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4694,
+          "ad": "parallelAxis",
+          "derinlik": 1,
+          "x": 592.137,
+          "y": 405.347,
+          "genişlik": 32.39,
+          "yükseklik": 31.296,
+          "renk": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 0.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4696,
+          "ad": "animation",
+          "derinlik": 0,
+          "x": 590.137,
+          "y": 442.643,
+          "genişlik": 36.39,
+          "yükseklik": 28.357,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            167,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4697,
+          "ad": "animationDuration",
+          "derinlik": 0,
+          "x": 630.527,
+          "y": 403.347,
+          "genişlik": 22.058,
+          "yükseklik": 34.863,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            110,
+            211,
+            247,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4698,
+          "ad": "animationEasing",
+          "derinlik": 0,
+          "x": 656.585,
+          "y": 403.347,
+          "genişlik": 19.415,
+          "yükseklik": 34.863,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            226,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4695,
+          "ad": "animationDurationUpdate",
+          "derinlik": 0,
+          "x": 630.527,
+          "y": 442.209,
+          "genişlik": 45.473,
+          "yükseklik": 12.787,
+          "renk": [
+            251,
+            98,
+            139,
+            255
+          ],
+          "kenarlık_rengi": [
+            251,
+            106,
+            145,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4699,
+          "ad": "animationEasingUpdate",
+          "derinlik": 0,
+          "x": 630.527,
+          "y": 458.996,
+          "genişlik": 45.473,
+          "yükseklik": 12.004,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            169,
+            152,
+            205,
+            255
+          ],
+          "kenarlık_kalınlığı": 2.0,
+          "boşluk_genişliği": 2.0,
+          "üst_yükseklik": 2.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "treemap-sunburst-transition",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 10786,
+  "değişen_piksel_oranı": 0.03994814814814815,
+  "ssim": 0.8241043353639822,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 11918,
+    "değişen_piksel_oranı": 0.04414074074074074,
+    "ssim": 0.7808474613364109
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "treemap_hücre_sınırları_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Toplam raster oranından bağımsız olarak her hücrenin x/y/width/height sınırı, dolgu, kenarlık, gap, upperLabel ve leafRoot katmanı kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 731,
+      "gerçek_düğüm": 731,
+      "karşılaştırılan_alan": 10965,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-sunburst-transition.png",
+    "gerçek": "testler/gorsel/gerçek/default/treemap-sunburst-transition.png",
+    "fark": "testler/gorsel/fark/default/treemap-sunburst-transition.png",
+    "normalize_fark": "testler/gorsel/fark/default/treemap-sunburst-transition-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/treemap-sunburst-transition.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/treemap-sunburst-transition.json"
+  }
+}

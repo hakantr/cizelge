@@ -15809,17 +15809,36 @@
     "ts_türü": "TreemapSeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::AğaçHaritası, From<AğaçHaritasıSerisi>)",
+    "veri_biçimleri": [
+      "AğaçHaritasıSerisi"
+    ],
+    "koordinat_dalları": [
+      "none",
+      "calendar-box",
+      "matrix-box",
+      "boyama",
+      "olay/isabet"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 241,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d32d59f0cfaf9a0b8778",
@@ -28040,17 +28059,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.borderColorSaturation)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (kenarlık_rengi_doygunluğu); src/grafik/agac_haritasi.rs (açıklık_ile)",
+    "veri_biçimleri": [
+      "f32"
+    ],
+    "koordinat_dalları": [
+      "dolgu-türetimi",
+      "borderColor önceliği",
+      "seviye/düğüm"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 70,
       "sembol": "TreemapSeriesItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "808edbcc2fb6bc9ffb18",
@@ -28061,17 +28091,34 @@
     "ts_türü": "number | number[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.borderRadius)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıÖğeStili::kenarlık_yarıçapı)",
+    "veri_biçimleri": [
+      "number",
+      "[number;4]"
+    ],
+    "koordinat_dalları": [
+      "background",
+      "leaf-content",
+      "durum-yaması"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 65,
       "sembol": "TreemapSeriesItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d4d02c65c7f5c4804eb1",
@@ -28082,17 +28129,37 @@
     "ts_türü": "BoxLayoutOptionMixin & {\n        show?: boolean\n        height?: number\n\n        emptyItemWidth?: number  // With of empty width\n        itemStyle?: BreadcrumbItemStyleOption\n\n        emphasis?: {\n            disabled?: boolean\n            focus?: DefaultEmphasisFocus\n            blurScope?: BlurScope\n            itemStyle?: BreadcrumbItemStyleOption\n        }\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            height: 22,\n            left: 'center',\n            bottom: tokens.size.m,\n            // right\n            // bottom\n            emptyItemWidth: 25,             // Width of empty node.\n            itemStyle: {\n                color: tokens.color.backgroundShade,\n                textStyle: {\n                    color: tokens.color.secondary\n                }\n            },\n            emphasis: {\n                itemStyle: {\n                    color: tokens.color.background\n                }\n            }\n        }",
-    "rust_api": "src/model/seri.rs (treemap.breadcrumb)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıKırıntısı); src/grafik/agac_haritasi.rs (kırıntıları_çiz)",
+    "veri_biçimleri": [
+      "box layout",
+      "ÖğeStili",
+      "YazıStili"
+    ],
+    "koordinat_dalları": [
+      "show",
+      "left/right/top/bottom",
+      "emptyItemWidth",
+      "vurgu",
+      "kök-yukarı-tıklama"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 202,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "179a77ff25651f49f17c",
@@ -28103,17 +28170,34 @@
     "ts_türü": "TreemapSeriesNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.children)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::çocuklar, dal)",
+    "veri_biçimleri": [
+      "Vec<AğaçDüğümü>"
+    ],
+    "koordinat_dalları": [
+      "yaprak",
+      "dal",
+      "özyinelemeli-alt-soy"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 146,
       "sembol": "TreemapSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e41fd9c5773e6641b7d4",
@@ -28124,17 +28208,34 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.childrenVisibleMin)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (çocuk_görünür_en_az); src/grafik/agac_haritasi.rs (alt-soy gizleme)",
+    "veri_biçimleri": [
+      "f32 piksel²"
+    ],
+    "koordinat_dalları": [
+      "düğüm-iç-alanı",
+      "leafDepth önceliği",
+      "görünür-yaprak"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 129,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::visible_min_leaf_depth_ve_seviye_gorseli_uygulanir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "14c204f6809f4332a7d6",
@@ -28145,17 +28246,34 @@
     "ts_türü": "'origin' | 'fullscreen'",
     "zorunlu": false,
     "echarts_varsayılanı": "'origin'",
-    "rust_api": "src/model/seri.rs (treemap.clipWindow)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıKırpmaPenceresi); src/grafik/agac_haritasi.rs (kırpılı çizim/isabet)",
+    "veri_biçimleri": [
+      "origin",
+      "fullscreen"
+    ],
+    "koordinat_dalları": [
+      "seri-kutusu",
+      "tam-tuval",
+      "roam-isabeti"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 178,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::root_rect_donusumu_scale_limit_ve_clip_isabetini_birlikte_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8c31f61e5102f259cd5c",
@@ -28166,17 +28284,31 @@
     "ts_türü": "ColorString[] | 'none'",
     "zorunlu": false,
     "echarts_varsayılanı": "[]",
-    "rust_api": "src/model/seri.rs (treemap.color)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::renkler/renk_yok); src/grafik/agac_haritasi.rs (çocuk_renkleri)",
+    "veri_biçimleri": [
+      "ColorString[]",
+      "none"
+    ],
+    "koordinat_dalları": [
+      "global-palet",
+      "seviye-aralığı",
+      "parent-designated",
+      "none"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 135,
       "sembol": "TreemapSeriesLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::visible_min_leaf_depth_ve_seviye_gorseli_uygulanir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-obama",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ce6beb54c0511e84a0fc",
@@ -28187,17 +28319,31 @@
     "ts_türü": "ColorString[] | 'none'",
     "zorunlu": false,
     "echarts_varsayılanı": "[]",
-    "rust_api": "src/model/seri.rs (treemap.color)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::renkler/renk_yok); src/grafik/agac_haritasi.rs (çocuk_renkleri)",
+    "veri_biçimleri": [
+      "ColorString[]",
+      "none"
+    ],
+    "koordinat_dalları": [
+      "global-palet",
+      "seviye-aralığı",
+      "parent-designated",
+      "none"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 148,
       "sembol": "TreemapSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::visible_min_leaf_depth_ve_seviye_gorseli_uygulanir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-obama",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "02e189088d1046bbb1d4",
@@ -28208,17 +28354,29 @@
     "ts_türü": "number[] | 'none'",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.colorAlpha)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::alfa_aralığı, AğaçHaritasıÖğeStili::renk_alfası)",
+    "veri_biçimleri": [
+      "[number, number]",
+      "number",
+      "none"
+    ],
+    "koordinat_dalları": [
+      "doğrusal-aralık",
+      "itemStyle-mutlak-alfa",
+      "miras"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 116,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::item_style_renk_alpha_ve_doygunluk_designated_rengi_degistirir"
+    ],
+    "galeri_örnekleri": [
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "954c8c450b1abe8ae4ce",
@@ -28229,17 +28387,29 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.colorAlpha)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::alfa_aralığı, AğaçHaritasıÖğeStili::renk_alfası)",
+    "veri_biçimleri": [
+      "[number, number]",
+      "number",
+      "none"
+    ],
+    "koordinat_dalları": [
+      "doğrusal-aralık",
+      "itemStyle-mutlak-alfa",
+      "miras"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 67,
       "sembol": "TreemapSeriesItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::item_style_renk_alpha_ve_doygunluk_designated_rengi_degistirir"
+    ],
+    "galeri_örnekleri": [
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e52a3c4199490cb48c90",
@@ -28250,17 +28420,35 @@
     "ts_türü": "'value' | 'index' | 'id'",
     "zorunlu": false,
     "echarts_varsayılanı": "'index'",
-    "rust_api": "src/model/seri.rs (treemap.colorMappingBy)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıRenkEşlemesi); src/grafik/agac_haritasi.rs (KimlikSıraları)",
+    "veri_biçimleri": [
+      "value",
+      "index",
+      "id"
+    ],
+    "koordinat_dalları": [
+      "doğrusal-değer",
+      "kardeş-sırası",
+      "kararlı-kimlik"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 111,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "47ad8e4041a09ffb2240",
@@ -28271,17 +28459,32 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.colorSaturation)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::doygunluk_aralığı, AğaçHaritasıÖğeStili::renk_doygunluğu)",
+    "veri_biçimleri": [
+      "[number, number]",
+      "number",
+      "none"
+    ],
+    "koordinat_dalları": [
+      "doğrusal-aralık",
+      "zrender-HSL-açıklığı",
+      "itemStyle",
+      "miras"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 68,
       "sembol": "TreemapSeriesItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::item_style_renk_alpha_ve_doygunluk_designated_rengi_degistirir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d95c2557ecefda94c2d8",
@@ -28292,17 +28495,32 @@
     "ts_türü": "number[] | 'none'",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.colorSaturation)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::doygunluk_aralığı, AğaçHaritasıÖğeStili::renk_doygunluğu)",
+    "veri_biçimleri": [
+      "[number, number]",
+      "number",
+      "none"
+    ],
+    "koordinat_dalları": [
+      "doğrusal-aralık",
+      "zrender-HSL-açıklığı",
+      "itemStyle",
+      "miras"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 117,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::item_style_renk_alpha_ve_doygunluk_designated_rengi_degistirir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "70448b5258c3937aa08b",
@@ -28334,17 +28552,37 @@
     "ts_türü": "TreemapSeriesNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (AğaçHaritasıSerisi::kökler); src/model/agac.rs (AğaçDüğümü)",
+    "veri_biçimleri": [
+      "number",
+      "number[]",
+      "TreemapSeriesNodeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "sanal-kök",
+      "preorder-dataIndex",
+      "çok-boyutlu-değer",
+      "iç-düğüm-toplamı"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 219,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3fc88869c276064e1bb6",
@@ -28397,17 +28635,28 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": "'▶'",
-    "rust_api": "src/model/seri.rs (treemap.drillDownIcon)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (inme_simgesi); src/grafik/agac_haritasi.rs (etiket_metni)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "varsayılan ▶",
+      "özel metin",
+      "boş simge",
+      "yalnız isLeafRoot"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 187,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1231042c4646e42f486f",
@@ -28439,17 +28688,31 @@
     "ts_türü": "string | ((params: CallbackDataParams) => string)",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.formatter)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Biçimleyici); src/grafik/agac_haritasi.rs (etiket_metni)",
+    "veri_biçimleri": [
+      "şablon",
+      "tipli Rust işlevi",
+      "rich şablon"
+    ],
+    "koordinat_dalları": [
+      "{a}/{b}/{c}",
+      "normal",
+      "upperLabel",
+      "rich"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 61,
       "sembol": "TreemapSeriesLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-obama",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "89c71b11eaa54c921926",
@@ -28460,17 +28723,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.gapWidth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (boşluk_genişliği); src/grafik/agac_haritasi.rs (yarım-gap squarify)",
+    "veri_biçimleri": [
+      "f32"
+    ],
+    "koordinat_dalları": [
+      "yarım-boşluk",
+      "parent içerik kutusu",
+      "seviye/düğüm"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 72,
       "sembol": "TreemapSeriesItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0502f20b12754e54c3ad",
@@ -28481,17 +28755,28 @@
     "ts_türü": "OptionId",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.id)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::kimlik); src/model/seri.rs (AğaçHaritasıSerisi::kimlik)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "seri-kimliği",
+      "düğüm-kimliği",
+      "targetNodeId",
+      "ad-yedeği"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 141,
       "sembol": "TreemapSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::treemap_dort_view_actioni_kok_hedef_ve_root_rect_durumunu_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "dac11dfa0be8b457e018",
@@ -28502,17 +28787,36 @@
     "ts_türü": "TreemapSeriesItemStyleOption<TCbParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            color: null,            // Can be 'none' if not necessary.\n            colorAlpha: null,       // Can be 'none' if not necessary.\n            colorSaturation: null,  // Can be 'none' if not necessary.\n            borderWidth: 0,\n            gapWidth: 0,\n            borderColor: tokens.color.neutral00,\n            borderColorSaturation: null // If specified, borderColor will be ineffective, and the\n                                        // border color is evaluated by color of current node and\n                                        // borderColorSaturation.\n        }",
-    "rust_api": "src/model/seri.rs (treemap.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıÖğeStili); src/grafik/agac_haritasi.rs (background/content iki katman)",
+    "veri_biçimleri": [
+      "ÖğeStili",
+      "AğaçHaritasıÖğeStili"
+    ],
+    "koordinat_dalları": [
+      "dolgu/gradyan/desen",
+      "border/gap/radius",
+      "opacity/shadow",
+      "seviye/düğüm/durum-yaması"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 97,
       "sembol": "TreemapStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::item_style_renk_alpha_ve_doygunluk_designated_rengi_degistirir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "bd3181a3476724549d76",
@@ -28523,17 +28827,38 @@
     "ts_türü": "TreemapSeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            // Do not use textDistance, for ellipsis rect just the same as treemap node rect.\n            distance: 0,\n            padding: 5,\n            position: 'inside', // Can be [5, '5%'] or position string like 'insideTopLeft', ...\n            // formatter: null,\n            color: tokens.color.neutral00,\n            overflow: 'truncate'\n            // align\n            // verticalAlign\n        }",
-    "rust_api": "src/model/seri.rs (treemap.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs ve src/model/agac.rs (etiket/durum yamaları); src/grafik/agac_haritasi.rs (etiketi_çiz)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "rich formatter"
+    ],
+    "koordinat_dalları": [
+      "inside konumları",
+      "padding/overflow",
+      "rich text",
+      "drillDownIcon",
+      "emphasis"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 98,
       "sembol": "TreemapStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "bfd653cf466d5f3aace7",
@@ -28544,17 +28869,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.leafDepth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (yaprak_derinliği); src/grafik/agac_haritasi.rs (view-root göreli derinlik/isLeafRoot)",
+    "veri_biçimleri": [
+      "Option<usize>"
+    ],
+    "koordinat_dalları": [
+      "sınırsız",
+      "view-root göreli",
+      "visibleMin sonrası leafRoot"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 185,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::leaf_depth_view_root_degistiginde_yeniden_sifirdan_sayilir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7d46ef6f17f15fc95f27",
@@ -28565,17 +28901,30 @@
     "ts_türü": "TreemapSeriesLevelOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": "[]",
-    "rust_api": "src/model/seri.rs (treemap.levels)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıSeviyesi); src/grafik/agac_haritasi.rs (derinlik_katmanı)",
+    "veri_biçimleri": [
+      "Vec<AğaçHaritasıSeviyesi>"
+    ],
+    "koordinat_dalları": [
+      "seri→seviye→düğüm mirası",
+      "normal/emphasis/blur/select modeli"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 217,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::visible_min_leaf_depth_ve_seviye_gorseli_uygulanir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "af16925c9661da62e175",
@@ -28586,17 +28935,35 @@
     "ts_türü": "OptionName",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.name)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçDüğümü::ad); src/model/seri.rs (AğaçHaritasıSerisi::ad)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "etiket",
+      "tooltip",
+      "breadcrumb",
+      "seri-seçici"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 142,
       "sembol": "TreemapSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b1d6de3612f63123abc6",
@@ -28607,17 +28974,31 @@
     "ts_türü": "'zoomToNode' | 'link' | false",
     "zorunlu": false,
     "echarts_varsayılanı": "'zoomToNode'",
-    "rust_api": "src/model/seri.rs (treemap.nodeClick)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıDüğümTıklaması); src/cizim/pencere.rs (zoom/link/kapalı)",
+    "veri_biçimleri": [
+      "zoomToNode",
+      "link",
+      "false"
+    ],
+    "koordinat_dalları": [
+      "leafRoot-rootToNode",
+      "zoomToNode",
+      "host-güvenli bağlantı olayı",
+      "kapalı"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 200,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::treemap_dort_view_actioni_kok_hedef_ve_root_rect_durumunu_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f63d12e860f90803e552",
@@ -28628,17 +29009,37 @@
     "ts_türü": "boolean | 'asc' | 'desc'",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (treemap.sort)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıSırası); src/grafik/agac_haritasi.rs (squarify sırası)",
+    "veri_biçimleri": [
+      "true/desc",
+      "asc",
+      "false/veri"
+    ],
+    "koordinat_dalları": [
+      "azalan",
+      "artan",
+      "ham-sıra",
+      "eşit-dataIndex"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 173,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::squarify_alan_toplamini_korur_ve_sabit_siralidir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f122794d7aed88029cb6",
@@ -28649,17 +29050,34 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0.5 * (1 + Math.sqrt(5))",
-    "rust_api": "src/model/seri.rs (treemap.squareRatio)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (kare_oranı); src/grafik/agac_haritasi.rs (en_kötü_oran/kareselleştir)",
+    "veri_biçimleri": [
+      "f32"
+    ],
+    "koordinat_dalları": [
+      "altın-oran-varsayılanı",
+      "özel-oran",
+      "f64-ara-geometri"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 180,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::squarify_alan_toplamini_korur_ve_sabit_siralidir",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "74fc1492ed2b75979228",
@@ -28670,17 +29088,34 @@
     "ts_türü": "LabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.textStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıKırıntısı::yazı); src/grafik/agac_haritasi.rs (kırıntıları_çiz)",
+    "veri_biçimleri": [
+      "YazıStili"
+    ],
+    "koordinat_dalları": [
+      "breadcrumb normal",
+      "renk",
+      "boyut",
+      "kalınlık"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 57,
       "sembol": "BreadcrumbItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7c17d17e49069e5f11db",
@@ -28691,17 +29126,33 @@
     "ts_türü": "'treemap'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::AğaçHaritası, AğaçHaritasıSerisi)",
+    "veri_biçimleri": [
+      "sabit 'treemap'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "boyama",
+      "isabet/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 167,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d469675b127c93db393c",
@@ -28712,17 +29163,34 @@
     "ts_türü": "TreemapSeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{                   // Label when node is parent.\n            show: false,\n            position: [0, '50%'],\n            height: 20,\n            // formatter: null,\n            // color: '#fff',\n            overflow: 'truncate',\n            // align: null,\n            verticalAlign: 'middle'\n        }",
-    "rust_api": "src/model/seri.rs (treemap.upperLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs ve src/model/agac.rs (üst_etiket); src/grafik/agac_haritasi.rs (üst şerit)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması"
+    ],
+    "koordinat_dalları": [
+      "parent-only",
+      "height",
+      "middle",
+      "truncate",
+      "emphasis"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 99,
       "sembol": "TreemapStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "9e4d4fbfe3194754b3f1",
@@ -28733,17 +29201,37 @@
     "ts_türü": "TreemapSeriesDataValue",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (treemap.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (değer, değerler, etkin_değer, görsel_değer)",
+    "veri_biçimleri": [
+      "number",
+      "number[]",
+      "null boyut"
+    ],
+    "koordinat_dalları": [
+      "alan-boyutu",
+      "görsel-boyut",
+      "iç-düğüm-toplamı",
+      "NaN-süzme"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 144,
       "sembol": "TreemapSeriesNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-sunburst-transition",
+      "treemap-disk",
+      "treemap-drill-down",
+      "treemap-obama",
+      "treemap-show-parent",
+      "treemap-simple",
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ed40cccddb2cd9ad2aa1",
@@ -28754,17 +29242,30 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "10",
-    "rust_api": "src/model/seri.rs (treemap.visibleMin)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (görünür_en_az/görünür_eşiği_kapalı); src/grafik/agac_haritasi.rs (filterByThreshold portu)",
+    "veri_biçimleri": [
+      "f32 piksel²"
+    ],
+    "koordinat_dalları": [
+      "asc/desc",
+      "sort=false kapalı",
+      "sıfırla açık-kapatma",
+      "leafRoot sonrası"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 125,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::agac_haritasi::testler::visible_min_kapatma_kalitimi_sifir_degerle_ezer",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-disk",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "91502b6a9967ef42e191",
@@ -28775,17 +29276,29 @@
     "ts_türü": "number | string",
     "zorunlu": false,
     "echarts_varsayılanı": "0",
-    "rust_api": "src/model/seri.rs (treemap.visualDimension)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörselBoyutu, AğaçDüğümü::görsel_değer)",
+    "veri_biçimleri": [
+      "number",
+      "string/value"
+    ],
+    "koordinat_dalları": [
+      "sıra",
+      "ad",
+      "çok-boyutlu-value"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 106,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur",
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1e1985dfb1da1a3412cd",
@@ -28796,17 +29309,26 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.visualMax)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::en_çok); src/grafik/agac_haritasi.rs (çocuk_renkleri kapsamı)",
+    "veri_biçimleri": [
+      "f64"
+    ],
+    "koordinat_dalları": [
+      "ham-kardeş-kapsamı",
+      "açık-üst-sınır"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 114,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "53994f28b6f1ec723631",
@@ -28817,17 +29339,26 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (treemap.visualMin)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/agac.rs (AğaçHaritasıGörseli::en_az); src/grafik/agac_haritasi.rs (çocuk_renkleri kapsamı)",
+    "veri_biçimleri": [
+      "f64"
+    ],
+    "koordinat_dalları": [
+      "ham-kardeş-kapsamı",
+      "açık-alt-sınır"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 113,
       "sembol": "TreemapSeriesVisualOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "treemap_fixture_testleri::yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-visual"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a82aae0f3d40609e1e2e",
@@ -28838,17 +29369,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0.32 * 0.32",
-    "rust_api": "src/model/seri.rs (treemap.zoomToNodeRatio)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (düğüme_yakınlaştırma_oranı); src/cizim/pencere.rs (nodeClick hedef görünümü)",
+    "veri_biçimleri": [
+      "f32"
+    ],
+    "koordinat_dalları": [
+      "tıklama",
+      "treemapZoomToNode",
+      "scaleLimit-kıstırma"
+    ],
     "kaynak": {
       "dosya": "src/chart/treemap/TreemapSeries.ts",
       "satır": 193,
       "sembol": "TreemapSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::treemap_dort_view_actioni_kok_hedef_ve_root_rect_durumunu_korur"
+    ],
+    "galeri_örnekleri": [
+      "treemap-simple",
+      "treemap-drill-down"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ba5fb60b72a656f719c1",

@@ -1,0 +1,43 @@
+{
+  "id": "treemap-disk",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 9276,
+  "değişen_piksel_oranı": 0.034355555555555556,
+  "ssim": 0.9179599990333968,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 9031,
+    "değişen_piksel_oranı": 0.03344814814814815,
+    "ssim": 0.894156867390817
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "treemap_hücre_sınırları_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Toplam raster oranından bağımsız olarak her hücrenin x/y/width/height sınırı, dolgu, kenarlık, gap, upperLabel ve leafRoot katmanı kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 265,
+      "gerçek_düğüm": 265,
+      "karşılaştırılan_alan": 3975,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-disk.png",
+    "gerçek": "testler/gorsel/gerçek/default/treemap-disk.png",
+    "fark": "testler/gorsel/fark/default/treemap-disk.png",
+    "normalize_fark": "testler/gorsel/fark/default/treemap-disk-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/treemap-disk.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/treemap-disk.json"
+  }
+}

@@ -334,6 +334,14 @@ impl MatrisHücreBölgesi {
 ///     println!("{olay:?}");
 /// }).detach();
 /// ```
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AğaçHaritasıKökYönü {
+    /// `treemapRootToNode.direction = 'drillDown'`.
+    Aşağı,
+    /// `treemapRootToNode.direction = 'rollUp'`.
+    Yukarı,
+}
+
 #[derive(Clone, Debug)]
 pub enum GrafikOlayı {
     /// Bir veri öğesine tıklandı (`'click'`).
@@ -352,12 +360,28 @@ pub enum GrafikOlayı {
         ad: String,
         daraltılmış: bool,
     },
-    /// Tree görünümü sürüklendi veya tekerlekle ölçeklendi (`treeRoam`).
+    /// Tree/Treemap görünümü sürüklendi veya tekerlekle ölçeklendi
+    /// (`treeRoam` / `treemapMove` / `treemapRender`).
     AğaçGezinmeDeğişti {
         seri_sırası: usize,
         kayma_x: f32,
         kayma_y: f32,
         ölçek: f32,
+    },
+    /// Treemap view root değişti (`treemapRootToNode`).
+    AğaçHaritasıKöküDeğişti {
+        seri_sırası: usize,
+        veri_sırası: Option<usize>,
+        yol: Vec<String>,
+        yön: AğaçHaritasıKökYönü,
+    },
+    /// `nodeClick: 'link'` dış URL açma isteği. Kitaplık pencereyi doğrudan
+    /// açmak yerine güvenlik ve platform kararı için isteği konağa iletir.
+    Bağlantıİstendi {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        url: String,
+        hedef: String,
     },
     /// `matrix.triggerEvent: true` ile bir matrix hücresine tıklandı.
     MatrisHücresiTıklandı {

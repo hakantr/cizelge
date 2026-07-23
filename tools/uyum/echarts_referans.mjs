@@ -33,12 +33,15 @@ const CHROME_ADAYLARI = [
 ].filter(Boolean);
 
 function argümanlarıOku() {
-  const sonuç = { id: '', output: '', frame: 1, state: 'başlangıç', width: 700, height: 525 };
+  const sonuç = {
+    id: '', output: '', sceneOutput: '', frame: 1, state: 'başlangıç', width: 700, height: 525
+  };
   for (let sıra = 2; sıra < process.argv.length; sıra += 1) {
     const argüman = process.argv[sıra];
     const değer = process.argv[sıra + 1];
     if (argüman === '--id') sonuç.id = değer;
     else if (argüman === '--output') sonuç.output = değer;
+    else if (argüman === '--scene-output') sonuç.sceneOutput = değer;
     else if (argüman === '--frame') sonuç.frame = Number(değer);
     else if (argüman === '--state') sonuç.state = değer;
     else if (argüman === '--width') sonuç.width = Number(değer);
@@ -670,7 +673,11 @@ async function çalıştır() {
           ölçümBağlamı.font = '12px sans-serif';
           sonuç.push({
             bileşen: 'fontMetrics',
-            yazılar: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine', 'Ads', 'Union', 'Video', 'Search', 'Engine']
+            yazılar: [
+              'Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine',
+              'Ads', 'Union', 'Video', 'Search', 'Engine', 'Kyoko.Speec...',
+              'Kyoko.Sp...', 'Kyoko.Speec', '...', 'Versi...', 'Vers...'
+            ]
               .map((metin) => ({metin, genişlik: ölçümBağlamı.measureText(metin).width}))
           });
         }
@@ -790,6 +797,45 @@ async function çalıştır() {
             grup: view?.group ? {x: view.group.x, y: view.group.y} : null,
             sınır: sınır ? {x: sınır.x, y: sınır.y, width: sınır.width, height: sınır.height} : null,
             öğeler
+          });
+        });
+        chart.getModel().eachSeries((model) => {
+          if (model.subType !== 'treemap') return;
+          const köküÖzetle = (kök) => {
+            const çıktı = [];
+            const gez = (düğüm, üstX = 0, üstY = 0) => {
+              const yerleşim = düğüm?.getLayout?.();
+              if (!yerleşim) return;
+              const x = üstX + (yerleşim.x || 0);
+              const y = üstY + (yerleşim.y || 0);
+              const stil = düğüm.hostTree?.data?.getItemVisual?.(düğüm.dataIndex, 'style');
+              çıktı.push({
+                ad: düğüm.name,
+                kimlik: düğüm.getId?.(),
+                derinlik: düğüm.depth,
+                veriSırası: düğüm.dataIndex,
+                değer: düğüm.getValue?.(),
+                x, y,
+                genişlik: yerleşim.width,
+                yükseklik: yerleşim.height,
+                alan: yerleşim.area,
+                kenarlık: yerleşim.borderWidth,
+                üstYükseklik: yerleşim.upperHeight,
+                veriKapsamı: yerleşim.dataExtent,
+                dolgu: stil?.fill,
+                çizgi: stil?.stroke,
+                görünürÇocuk: düğüm.viewChildren?.length || 0
+              });
+              for (const çocuk of düğüm.viewChildren || []) gez(çocuk, x, y);
+            };
+            gez(kök);
+            return çıktı;
+          };
+          sonuç.push({
+            bileşen: 'treemapLayout',
+            sıra: model.seriesIndex,
+            yerleşim: model.layoutInfo,
+            düğümler: köküÖzetle(model.getData?.()?.tree?.root)
           });
         });
         chart.getModel().eachSeries((model) => {
@@ -1094,6 +1140,69 @@ async function çalıştır() {
         return sonuç;
       }, Boolean(process.env.UYUM_DEBUG_DATAZOOM));
       process.stderr.write(`${JSON.stringify(yerleşim, null, 2)}\n`);
+    }
+    if (args.sceneOutput) {
+      const sahne = await sayfa.evaluate(() => {
+        const chart = window.__chart;
+        const yuvarla = (değer) => Math.round((Number(değer) || 0) * 1000) / 1000;
+        const renk = (değer) => {
+          if (değer == null || değer === 'none') return null;
+          const çözülen = window.echarts?.color?.parse?.(değer);
+          if (!çözülen) return null;
+          return [
+            Math.round(çözülen[0]),
+            Math.round(çözülen[1]),
+            Math.round(çözülen[2]),
+            Math.round((çözülen[3] ?? 1) * 255)
+          ];
+        };
+        const seriler = [];
+        chart.getModel().eachSeries((model) => {
+          if (model.subType !== 'treemap') return;
+          const viewRoot = model.getViewRoot?.() || model.getData?.()?.tree?.root;
+          const yerleşim = model.layoutInfo || {};
+          const düğümler = [];
+          const gez = (düğüm, üstX, üstY) => {
+            const kutu = düğüm?.getLayout?.();
+            if (!kutu) return;
+            const x = üstX + (kutu.x || 0);
+            const y = üstY + (kutu.y || 0);
+            const stil = düğüm.hostTree?.data?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
+            const modelcik = düğüm.getModel?.();
+            düğümler.push({
+              veri_sırası: Math.max(0, (düğüm.dataIndex ?? 1) - 1),
+              ad: düğüm.name || '',
+              derinlik: Math.max(0, (düğüm.depth ?? 1) - (viewRoot.depth ?? 0) - 1),
+              x: yuvarla((yerleşim.x || 0) + x),
+              y: yuvarla((yerleşim.y || 0) + y),
+              genişlik: yuvarla(kutu.width),
+              yükseklik: yuvarla(kutu.height),
+              renk: renk(stil.fill),
+              kenarlık_rengi: renk(stil.stroke),
+              kenarlık_kalınlığı: yuvarla(kutu.borderWidth),
+              boşluk_genişliği: yuvarla(modelcik?.get?.(['itemStyle', 'gapWidth']) || 0),
+              üst_yükseklik: yuvarla(kutu.upperHeight),
+              yaprak: !(düğüm.viewChildren?.length),
+              inilebilir_yaprak: kutu.isLeafRoot === true
+            });
+            for (const çocuk of düğüm.viewChildren || []) gez(çocuk, x, y);
+          };
+          for (const çocuk of viewRoot?.viewChildren || []) gez(çocuk, 0, 0);
+          seriler.push({
+            seri_sırası: model.seriesIndex,
+            alan: {
+              x: yuvarla(yerleşim.x),
+              y: yuvarla(yerleşim.y),
+              genişlik: yuvarla(yerleşim.width),
+              yükseklik: yuvarla(yerleşim.height)
+            },
+            düğümler
+          });
+        });
+        return { şema_sürümü: 1, tür: 'treemap', koordinat_adımı: 0.001, seriler };
+      });
+      fs.mkdirSync(path.dirname(path.resolve(args.sceneOutput)), { recursive: true });
+      fs.writeFileSync(path.resolve(args.sceneOutput), `${JSON.stringify(sahne, null, 2)}\n`);
     }
     fs.mkdirSync(path.dirname(path.resolve(args.output)), { recursive: true });
     await sayfa.screenshot({

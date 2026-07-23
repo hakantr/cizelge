@@ -1934,6 +1934,92 @@ yeşile çevrilemez. Aile kapatılmadan önce glif rasteri sabit eşiklere
 yaklaştırılmalı; aç/kapat ve roam için başlangıç/son görüntüleriyle olay ve
 option/state günlükleri de kanıt paketine eklenmelidir.
 
+#### Treemap aile kapısı
+
+Normatif model, yerleşim, görsel ve etkileşim kaynakları
+`../echarts/src/chart/treemap/TreemapSeries.ts`, `treemapLayout.ts`,
+`treemapVisual.ts`, `TreemapView.ts`, `Breadcrumb.ts`, `treemapAction.ts` ile
+`../echarts/src/chart/helper/treeHelper.ts` dosyalarıdır. Resmî galeri kanıtı
+`../echarts-examples/public/examples/ts/treemap-{simple,disk,drill-down,obama,
+show-parent,visual}.ts` ve `treemap-sunburst-transition.ts` kaynaklarını;
+`disk.tree.json`, `obama_budget_proposal_2012.json`,
+`ec-option-doc-statistics-201604.json` ve `echarts-package-size.json` sabit
+verilerini doğrudan kullanır.
+
+Uygulanan Treemap çekirdeği şu yüzeyi birlikte taşır:
+
+- Sanal kök, kararlı preorder `dataIndex`, açık `id`/ad yedeği, sayı veya
+  çok boyutlu değer, iç düğüm toplamı ve sonlu olmayan düğüm süzmesi; `sort`
+  için azalan/artan/veri sırası ve ECharts eşit-değer indeks kararı;
+- JavaScript `number` hassasiyetini koruyan `f64` squarify; altın oran ya da
+  açık `squareRatio`; yarım `gapWidth`, `borderWidth`, üst etiket yüksekliği,
+  `visibleMin`, `childrenVisibleMin` ve ham kardeş kapsamından hesaplanan
+  görsel extent. `leafDepth`, her view-root değişiminde yeniden sıfırdan
+  sayılır; `isLeafRoot`, ham çocuk varlığıyla değil `visibleMin` sonrasında
+  kalan `viewChildren` ile belirlenir;
+- Seri → level → düğüm mirasında color/colorAlpha/colorSaturation,
+  visualMin/visualMax, sayı veya ad `visualDimension`, value/index/id
+  `colorMappingBy`, doğrudan itemStyle colorAlpha/colorSaturation,
+  borderColorSaturation, radius, opacity, shadow ve düz/gradyan/desen dolgu.
+  Parent arka plan/kenarlık ile leaf içerik dolgusu iki ayrı katmandır;
+  parent fill toplam raster içinde varmış gibi kabul edilmez;
+- Normal/level/node label ve upperLabel; formatter, padding, taşma/kısaltma,
+  rich-text koşuları, üst şerit ve yalnız gerçek leaf-root üzerinde
+  `drillDownIcon`. Breadcrumb box yerleşimi, boş öğe genişliği, normal/vurgu
+  stili ve hedef seri/kırıntı indeksini taşıyan geri çıkış isabeti;
+- `roam` move/scale/true/false, `scaleLimit`, `clipWindow` origin/fullscreen,
+  affine `rootRect`, düğüme merkezli `zoomToNodeRatio`; seri başına bağımsız
+  view-root ve görünüm durumu. `nodeClick` zoomToNode/link/false, leaf-root
+  inişi, breadcrumb çıkışı ve host tarafından güvenli biçimde ele alınan
+  bağlantı isteği ayrı tipli olaylardır;
+- ECharts action adlarıyla `treemapRootToNode`, `treemapZoomToNode`,
+  `treemapRender` ve `treemapMove`; `seriesIndex`/`seriesId`/`seriesName`,
+  `dataIndex`/`targetNodeId`, `rootRect`, batch ve `silent` davranışı.
+  `setOption`, `replaceMerge`, restore ve clear yolları seri durumunu aynı
+  kimlik/index yaşam döngüsüyle temizler veya korur;
+- ECharts 6.1 `coordinateSystemUsage: 'box'` dalı: Treemap kutusu tüm tuval,
+  Calendar gün hücresinin `contentRect`i veya Matrix hücre/aralık
+  dikdörtgeni içinde aynı left/right/top/bottom/width/height kurallarıyla
+  çözülür. Eksik calendar/matrix index ya da `coord` sessiz düşüş değil tipli
+  doğrulama hatasıdır.
+
+Yedi resmî fixture için iki bağımsız kanıt katmanı vardır. Referans yenileme,
+aynı ECharts kaynağını iki ayrı Chromium çalıştırmasında üretip bit düzeyinde
+kararlı olduğunu görmeden kilit yazmaz. Rasterdan ayrıca
+`tools/uyum/echarts_referans.mjs --scene-output`, çalışan resmî ECharts
+modelinden her görünür hücrenin dataIndex/ad/göreli derinlik,
+`x/y/width/height`, fill/stroke, border/gap/upperHeight ve leaf/isLeafRoot
+alanlarını 0,001 mantıksal piksel çözünürlükte çıkarır. Cizelge aynı şemayı
+fixture'dan üretir; `tools/uyum/kanit.mjs` bu alanları hücre hücre karşılaştırır.
+Sıfır alanlı ve iki renderer'ın da boyamadığı leaf dolgusu ile ECharts
+renderer'ının zaten boyamadığı parent fill karşılaştırmaya sokulmaz; parent
+border/background ve bütün geometrisi yine zorunludur. Sonuç; disk 265,
+drill-down 173, Obama 245, show-parent 132, simple 6, transition 731 ve visual
+245 olmak üzere **1.797/1.797 görünür hücrede sıfır yapısal uyuşmazlıktır**.
+Toplam fark oranı bu kapıyı geçersiz kılamaz veya ince sınır farkını saklayamaz.
+
+600×450 kilitli Treemap raster durumu:
+
+| Örnek | Değişen piksel oranı | SSIM | Hücre kapısı | Statik durum |
+|---|---:|---:|---:|---|
+| `treemap-disk` | %3,4356 | 0,917960 | 265/265 | kanıt bekliyor |
+| `treemap-drill-down` | %3,8448 | 0,902181 | 173/173 | kanıt bekliyor |
+| `treemap-obama` | %3,8770 | 0,915761 | 245/245 | kanıt bekliyor |
+| `treemap-show-parent` | %4,4381 | 0,910958 | 132/132 | kanıt bekliyor |
+| `treemap-simple` | %0,3626 | 0,990192 | 6/6 | geçti |
+| `treemap-sunburst-transition` | %3,9948 | 0,824104 | 731/731 | kanıt bekliyor |
+| `treemap-visual` | %4,0233 | 0,901938 | 245/245 | kanıt bekliyor |
+
+`treemap-simple` sabit `%1 / 0,99` raster kapısını geçer. Diğer altı kartın
+hücre geometrisi ve boya katmanları doğrudan resmî sahneyle eşleşse de yoğun
+küçük metinde Chrome Canvas ile tiny-skia glif rasteri farkı genel kapıyı
+aşar; eşik, maske veya asimetrik bulanıklaştırma uygulanmaz. Bu nedenle yedi
+karttan yalnız biri `statik_görsel: tam_kanıtlı`, diğerleri `kısmi` kalır.
+`cursor`, ARIA/decal, bütün programatik emphasis/blur/select odak zincirleri,
+universal transition ara kareleri ve ölçümlü/iptal edilebilir büyük veri işi
+Faz 7/8 kapılarında tamamlanmadan Treemap ailesi genel olarak
+`tam_kanıtlı` sayılmaz.
+
 Kabul:
 
 - Graph 12, Tree 7, Treemap 7, Sunburst 7, Sankey 7 ve Chord 4 görünür

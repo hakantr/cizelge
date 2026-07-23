@@ -253,8 +253,9 @@ impl GrafikSeçenekleri {
     }
 
     pub fn seri(mut self, seri: impl Into<Seri>) -> Self {
-        self.seriler.push(seri.into());
-        self.seri_kimlikleri.push(None);
+        let seri = seri.into();
+        self.seri_kimlikleri.push(seri.kimlik().map(str::to_owned));
+        self.seriler.push(seri);
         self
     }
 
@@ -268,8 +269,9 @@ impl GrafikSeçenekleri {
 
     pub fn seriler<S: Into<Seri>>(mut self, seriler: impl IntoIterator<Item = S>) -> Self {
         for seri in seriler {
-            self.seriler.push(seri.into());
-            self.seri_kimlikleri.push(None);
+            let seri = seri.into();
+            self.seri_kimlikleri.push(seri.kimlik().map(str::to_owned));
+            self.seriler.push(seri);
         }
         self
     }
@@ -1393,6 +1395,7 @@ impl GrafikSeçenekleri {
                 Seri::Pasta(pasta) => pasta.matris_sırası,
                 Seri::Grafo(grafo) => grafo.matris_sırası,
                 Seri::Özel(özel) => özel.matris_sırası,
+                Seri::AğaçHaritası(ağaç_haritası) => ağaç_haritası.matris_sırası,
                 _ => None,
             };
             if let Some(matris_sırası) = matris_sırası
@@ -1513,6 +1516,45 @@ impl GrafikSeçenekleri {
                     return Err(BilesenHatasi::GeçersizSeçenek {
                         alan: "series.pie.percentPrecision",
                         ayrıntı: "yüzde hassasiyeti 0..=20 aralığında olmalı".to_owned(),
+                    });
+                }
+            }
+            if let Seri::AğaçHaritası(ağaç_haritası) = seri {
+                if let Some(takvim_sırası) = ağaç_haritası.takvim_sırası {
+                    if self.takvimler.get(takvim_sırası).is_none() {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "calendar",
+                            sıra: takvim_sırası,
+                        });
+                    }
+                    if !ağaç_haritası.takvim_koordinatı.is_some_and(f64::is_finite) {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.treemap.coord",
+                            ayrıntı: "takvim Treemap'i sonlu bir tarih koordinatı taşımalı"
+                                .to_owned(),
+                        });
+                    }
+                } else if ağaç_haritası.takvim_koordinatı.is_some() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.treemap.coordinateSystem",
+                        ayrıntı: "takvim koordinatı bir calendarIndex ile bağlanmalı".to_owned(),
+                    });
+                }
+                if ağaç_haritası.matris_sırası.is_some()
+                    && ağaç_haritası.matris_koordinatı.is_none()
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.treemap.coord",
+                        ayrıntı: "Matrix Treemap'i bir hücre/aralık koordinatı taşımalı"
+                            .to_owned(),
+                    });
+                }
+                if ağaç_haritası.matris_sırası.is_none()
+                    && ağaç_haritası.matris_koordinatı.is_some()
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.treemap.coordinateSystem",
+                        ayrıntı: "Matrix koordinatı bir matrixIndex ile bağlanmalı".to_owned(),
                     });
                 }
             }
@@ -2161,6 +2203,35 @@ mod testler {
                 ..
             })
         ));
+    }
+
+    #[test]
+    fn treemap_calendar_ve_matrix_kutu_koordinatlarini_dogrular() {
+        let eksik_takvim = GrafikSeçenekleri::yeni()
+            .seri(crate::model::seri::AğaçHaritasıSerisi::yeni().takvim_hücresi(0.0));
+        assert!(matches!(
+            eksik_takvim.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "calendar",
+                sıra: 0
+            })
+        ));
+
+        let eksik_koordinat = GrafikSeçenekleri::yeni()
+            .matris(MatrisKoordinatı::yeni())
+            .seri(crate::model::seri::AğaçHaritasıSerisi::yeni().matris_sırası(0));
+        assert!(matches!(
+            eksik_koordinat.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "series.treemap.coord",
+                ..
+            })
+        ));
+
+        let geçerli = GrafikSeçenekleri::yeni()
+            .matris(MatrisKoordinatı::yeni())
+            .seri(crate::model::seri::AğaçHaritasıSerisi::yeni().matris_hücresi(0usize, 0usize));
+        assert!(geçerli.doğrula().is_ok());
     }
 
     #[test]

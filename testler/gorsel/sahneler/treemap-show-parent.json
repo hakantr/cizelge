@@ -1,0 +1,3450 @@
+{
+  "şema_sürümü": 1,
+  "tür": "treemap",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 20.0,
+        "y": 50.0,
+        "genişlik": 660.0,
+        "yükseklik": 425.0
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 3083,
+          "ad": "Speech",
+          "derinlik": 0,
+          "x": 20.0,
+          "y": 50.0,
+          "genişlik": 320.072,
+          "yükseklik": 297.271,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3090,
+          "ad": "Voices",
+          "derinlik": 1,
+          "x": 25.0,
+          "y": 80.0,
+          "genişlik": 308.695,
+          "yükseklik": 262.271,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3141,
+          "ad": "Ting-Ting.SpeechVoice",
+          "derinlik": 2,
+          "x": 30.0,
+          "y": 110.0,
+          "genişlik": 208.88,
+          "yükseklik": 135.244,
+          "renk": [
+            41,
+            81,
+            214,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3093,
+          "ad": "Alex.SpeechVoice",
+          "derinlik": 2,
+          "x": 30.0,
+          "y": 246.244,
+          "genişlik": 208.88,
+          "yükseklik": 91.027,
+          "renk": [
+            37,
+            73,
+            193,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3118,
+          "ad": "Kyoko.SpeechVoice",
+          "derinlik": 2,
+          "x": 239.88,
+          "y": 110.0,
+          "genişlik": 88.814,
+          "yükseklik": 212.331,
+          "renk": [
+            37,
+            73,
+            192,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3144,
+          "ad": "Vicki.SpeechVoice",
+          "derinlik": 2,
+          "x": 239.88,
+          "y": 323.331,
+          "genişlik": 88.814,
+          "yükseklik": 13.94,
+          "renk": [
+            30,
+            58,
+            152,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3086,
+          "ad": "Synthesizers",
+          "derinlik": 1,
+          "x": 334.383,
+          "y": 80.0,
+          "genişlik": 0.377,
+          "yükseklik": 262.271,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1666,
+          "ad": "Frameworks",
+          "derinlik": 0,
+          "x": 20.0,
+          "y": 348.271,
+          "genişlik": 320.072,
+          "yükseklik": 126.729,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1840,
+          "ad": "Python.framework",
+          "derinlik": 1,
+          "x": 25.0,
+          "y": 378.271,
+          "genişlik": 71.741,
+          "yükseklik": 91.729,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1841,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 30.0,
+          "y": 408.271,
+          "genişlik": 61.741,
+          "yükseklik": 56.729,
+          "renk": [
+            152,
+            180,
+            36,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1826,
+          "ad": "OpenCL.framework",
+          "derinlik": 1,
+          "x": 97.741,
+          "y": 378.271,
+          "genişlik": 86.259,
+          "yükseklik": 45.716,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1827,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 102.741,
+          "y": 408.271,
+          "genişlik": 76.259,
+          "yükseklik": 10.716,
+          "renk": [
+            152,
+            180,
+            36,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1685,
+          "ad": "ApplicationServices.framework",
+          "derinlik": 1,
+          "x": 97.741,
+          "y": 424.987,
+          "genişlik": 86.259,
+          "yükseklik": 45.013,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1686,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 102.741,
+          "y": 454.987,
+          "genişlik": 76.259,
+          "yükseklik": 10.013,
+          "renk": [
+            152,
+            180,
+            36,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1767,
+          "ad": "GameKit.framework",
+          "derinlik": 1,
+          "x": 185.0,
+          "y": 378.271,
+          "genişlik": 55.358,
+          "yükseklik": 39.829,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1675,
+          "ad": "AppKit.framework",
+          "derinlik": 1,
+          "x": 185.0,
+          "y": 419.1,
+          "genişlik": 55.358,
+          "yükseklik": 26.98,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1703,
+          "ad": "Carbon.framework",
+          "derinlik": 1,
+          "x": 185.0,
+          "y": 447.08,
+          "genişlik": 55.358,
+          "yükseklik": 22.92,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1830,
+          "ad": "OpenGL.framework",
+          "derinlik": 1,
+          "x": 241.358,
+          "y": 378.271,
+          "genişlik": 36.582,
+          "yükseklik": 34.465,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1844,
+          "ad": "Quartz.framework",
+          "derinlik": 1,
+          "x": 241.358,
+          "y": 413.736,
+          "genişlik": 36.582,
+          "yükseklik": 31.814,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1897,
+          "ad": "WebKit.framework",
+          "derinlik": 1,
+          "x": 241.358,
+          "y": 446.55,
+          "genişlik": 36.582,
+          "yükseklik": 23.45,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1721,
+          "ad": "CoreLocation.framework",
+          "derinlik": 1,
+          "x": 278.94,
+          "y": 378.271,
+          "genişlik": 19.918,
+          "yükseklik": 35.18,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1852,
+          "ad": "Ruby.framework",
+          "derinlik": 1,
+          "x": 299.858,
+          "y": 378.271,
+          "genişlik": 17.929,
+          "yükseklik": 35.18,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1731,
+          "ad": "CoreServices.framework",
+          "derinlik": 1,
+          "x": 318.787,
+          "y": 378.271,
+          "genişlik": 16.284,
+          "yükseklik": 35.18,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1694,
+          "ad": "Automator.framework",
+          "derinlik": 1,
+          "x": 278.94,
+          "y": 414.451,
+          "genişlik": 27.915,
+          "yükseklik": 19.677,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1671,
+          "ad": "AddressBook.framework",
+          "derinlik": 1,
+          "x": 278.94,
+          "y": 435.128,
+          "genişlik": 27.915,
+          "yükseklik": 17.245,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1667,
+          "ad": "Accelerate.framework",
+          "derinlik": 1,
+          "x": 278.94,
+          "y": 453.373,
+          "genişlik": 27.915,
+          "yükseklik": 16.627,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1719,
+          "ad": "CoreGraphics.framework",
+          "derinlik": 1,
+          "x": 307.855,
+          "y": 414.451,
+          "genişlik": 13.498,
+          "yükseklik": 31.831,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1869,
+          "ad": "SecurityInterface.framework",
+          "derinlik": 1,
+          "x": 322.353,
+          "y": 414.451,
+          "genişlik": 12.718,
+          "yükseklik": 31.831,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1846,
+          "ad": "QuartzCore.framework",
+          "derinlik": 1,
+          "x": 307.855,
+          "y": 447.282,
+          "genişlik": 27.216,
+          "yükseklik": 11.246,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1864,
+          "ad": "Security.framework",
+          "derinlik": 1,
+          "x": 307.855,
+          "y": 459.528,
+          "genişlik": 27.216,
+          "yükseklik": 10.472,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2303,
+          "ad": "PrivateFrameworks",
+          "derinlik": 0,
+          "x": 341.072,
+          "y": 50.0,
+          "genişlik": 141.789,
+          "yükseklik": 258.86,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2763,
+          "ad": "ProKit.framework",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 80.0,
+          "genişlik": 82.162,
+          "yükseklik": 83.276,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2764,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 351.072,
+          "y": 110.0,
+          "genişlik": 72.162,
+          "yükseklik": 48.276,
+          "renk": [
+            89,
+            93,
+            127,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2814,
+          "ad": "Slideshows.framework",
+          "derinlik": 1,
+          "x": 429.234,
+          "y": 80.0,
+          "genişlik": 48.627,
+          "yükseklik": 83.276,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2815,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 434.234,
+          "y": 110.0,
+          "genişlik": 38.627,
+          "yükseklik": 48.276,
+          "renk": [
+            89,
+            93,
+            127,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2564,
+          "ad": "GeoServices.framework",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 164.276,
+          "genişlik": 37.377,
+          "yükseklik": 46.691,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2565,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 351.072,
+          "y": 194.276,
+          "genişlik": 27.377,
+          "yükseklik": 11.691,
+          "renk": [
+            89,
+            93,
+            127,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2788,
+          "ad": "ScreenReader.framework",
+          "derinlik": 1,
+          "x": 384.449,
+          "y": 164.276,
+          "genişlik": 33.133,
+          "yükseklik": 46.691,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2789,
+          "ad": "Versions",
+          "derinlik": 2,
+          "x": 389.449,
+          "y": 194.276,
+          "genişlik": 23.133,
+          "yükseklik": 11.691,
+          "renk": [
+            89,
+            93,
+            127,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2537,
+          "ad": "FaceCore.framework",
+          "derinlik": 1,
+          "x": 418.582,
+          "y": 164.276,
+          "genişlik": 32.148,
+          "yükseklik": 46.691,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2446,
+          "ad": "CoreFP.framework",
+          "derinlik": 1,
+          "x": 451.73,
+          "y": 164.276,
+          "genişlik": 26.131,
+          "yükseklik": 46.691,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2598,
+          "ad": "iLifeMediaBrowser.framework",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 211.968,
+          "genişlik": 45.466,
+          "yükseklik": 23.224,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2325,
+          "ad": "AOSUI.framework",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 236.192,
+          "genişlik": 45.466,
+          "yükseklik": 22.831,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2448,
+          "ad": "CoreHandwriting.framework",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 260.023,
+          "genişlik": 45.466,
+          "yükseklik": 22.288,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2562,
+          "ad": "GeoKit.framework",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 283.311,
+          "genişlik": 45.466,
+          "yükseklik": 20.549,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2545,
+          "ad": "FinderKit.framework",
+          "derinlik": 1,
+          "x": 392.538,
+          "y": 211.968,
+          "genişlik": 23.657,
+          "yükseklik": 31.793,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2411,
+          "ad": "CommerceKit.framework",
+          "derinlik": 1,
+          "x": 417.195,
+          "y": 211.968,
+          "genişlik": 21.037,
+          "yükseklik": 31.793,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2765,
+          "ad": "ProofReader.framework",
+          "derinlik": 1,
+          "x": 439.232,
+          "y": 211.968,
+          "genişlik": 19.023,
+          "yükseklik": 31.793,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2761,
+          "ad": "PrintingPrivate.framework",
+          "derinlik": 1,
+          "x": 459.255,
+          "y": 211.968,
+          "genişlik": 18.606,
+          "yükseklik": 31.793,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2826,
+          "ad": "SpeechObjects.framework",
+          "derinlik": 1,
+          "x": 392.538,
+          "y": 244.76,
+          "genişlik": 25.773,
+          "yükseklik": 20.287,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2452,
+          "ad": "CoreLSKD.framework",
+          "derinlik": 1,
+          "x": 392.538,
+          "y": 266.047,
+          "genişlik": 25.773,
+          "yükseklik": 18.692,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2769,
+          "ad": "PSNormalizer.framework",
+          "derinlik": 1,
+          "x": 392.538,
+          "y": 285.739,
+          "genişlik": 25.773,
+          "yükseklik": 18.121,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2728,
+          "ad": "OfficeImport.framework",
+          "derinlik": 1,
+          "x": 419.311,
+          "y": 244.76,
+          "genişlik": 15.557,
+          "yükseklik": 26.061,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2780,
+          "ad": "Safari.framework",
+          "derinlik": 1,
+          "x": 435.868,
+          "y": 244.76,
+          "genişlik": 14.297,
+          "yükseklik": 26.061,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2857,
+          "ad": "SystemMigration.framework",
+          "derinlik": 1,
+          "x": 451.164,
+          "y": 244.76,
+          "genişlik": 13.027,
+          "yükseklik": 26.061,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2806,
+          "ad": "ShareKit.framework",
+          "derinlik": 1,
+          "x": 465.191,
+          "y": 244.76,
+          "genişlik": 12.67,
+          "yükseklik": 26.061,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2852,
+          "ad": "SyncServicesUI.framework",
+          "derinlik": 1,
+          "x": 419.311,
+          "y": 271.821,
+          "genişlik": 19.817,
+          "yükseklik": 15.996,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2480,
+          "ad": "CoreUI.framework",
+          "derinlik": 1,
+          "x": 419.311,
+          "y": 288.818,
+          "genişlik": 19.817,
+          "yükseklik": 15.042,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2492,
+          "ad": "DataDetectorsCore.framework",
+          "derinlik": 1,
+          "x": 440.128,
+          "y": 271.821,
+          "genişlik": 18.956,
+          "yükseklik": 15.654,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2396,
+          "ad": "CalendarPersistence.framework",
+          "derinlik": 1,
+          "x": 440.128,
+          "y": 288.475,
+          "genişlik": 18.956,
+          "yükseklik": 15.385,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2319,
+          "ad": "AOSKit.framework",
+          "derinlik": 1,
+          "x": 460.084,
+          "y": 271.821,
+          "genişlik": 17.777,
+          "yükseklik": 15.698,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2591,
+          "ad": "IDSCore.framework",
+          "derinlik": 1,
+          "x": 460.084,
+          "y": 288.519,
+          "genişlik": 17.777,
+          "yükseklik": 15.341,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            138,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 763,
+          "ad": "CoreServices",
+          "derinlik": 0,
+          "x": 483.861,
+          "y": 50.0,
+          "genişlik": 98.659,
+          "yükseklik": 258.86,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 818,
+          "ad": "CoreTypes.bundle",
+          "derinlik": 1,
+          "x": 488.861,
+          "y": 80.0,
+          "genişlik": 88.659,
+          "yükseklik": 118.286,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 819,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 493.861,
+          "y": 110.0,
+          "genişlik": 78.659,
+          "yükseklik": 83.286,
+          "renk": [
+            217,
+            93,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 835,
+          "ad": "Finder.app",
+          "derinlik": 1,
+          "x": 488.861,
+          "y": 199.286,
+          "genişlik": 33.837,
+          "yükseklik": 62.029,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 836,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 493.861,
+          "y": 229.286,
+          "genişlik": 23.837,
+          "yükseklik": 27.029,
+          "renk": [
+            217,
+            93,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1028,
+          "ad": "SetupAssistant.app",
+          "derinlik": 1,
+          "x": 523.698,
+          "y": 199.286,
+          "genişlik": 26.934,
+          "yükseklik": 62.029,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1029,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 528.698,
+          "y": 229.286,
+          "genişlik": 16.934,
+          "yükseklik": 27.029,
+          "renk": [
+            217,
+            93,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 810,
+          "ad": "CertificateAssistant.app",
+          "derinlik": 1,
+          "x": 551.632,
+          "y": 199.286,
+          "genişlik": 25.888,
+          "yükseklik": 62.029,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 811,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 556.632,
+          "y": 229.286,
+          "genişlik": 15.888,
+          "yükseklik": 27.029,
+          "renk": [
+            217,
+            93,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 786,
+          "ad": "Applications",
+          "derinlik": 1,
+          "x": 488.861,
+          "y": 262.315,
+          "genişlik": 34.502,
+          "yükseklik": 25.042,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 911,
+          "ad": "NetworkSetup Assistant.app",
+          "derinlik": 1,
+          "x": 488.861,
+          "y": 288.357,
+          "genişlik": 34.502,
+          "yükseklik": 15.503,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 826,
+          "ad": "Dock.app",
+          "derinlik": 1,
+          "x": 524.363,
+          "y": 262.315,
+          "genişlik": 23.56,
+          "yükseklik": 20.547,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 871,
+          "ad": "loginwindow.app",
+          "derinlik": 1,
+          "x": 524.363,
+          "y": 283.862,
+          "genişlik": 23.56,
+          "yükseklik": 19.998,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 850,
+          "ad": "Installer.app",
+          "derinlik": 1,
+          "x": 548.923,
+          "y": 262.315,
+          "genişlik": 14.665,
+          "yükseklik": 28.668,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 790,
+          "ad": "ArchiveUtility.app",
+          "derinlik": 1,
+          "x": 564.589,
+          "y": 262.315,
+          "genişlik": 12.931,
+          "yükseklik": 28.668,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 822,
+          "ad": "DirectoryUtility.app",
+          "derinlik": 1,
+          "x": 548.923,
+          "y": 291.984,
+          "genişlik": 28.597,
+          "yükseklik": 11.877,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            138,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1167,
+          "ad": "Extensions",
+          "derinlik": 0,
+          "x": 583.52,
+          "y": 50.0,
+          "genişlik": 96.48,
+          "yükseklik": 258.86,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1463,
+          "ad": "GeForceGLDriver.bundle",
+          "derinlik": 1,
+          "x": 588.52,
+          "y": 80.0,
+          "genişlik": 42.805,
+          "yükseklik": 101.944,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1464,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 593.52,
+          "y": 110.0,
+          "genişlik": 32.805,
+          "yükseklik": 66.944,
+          "renk": [
+            11,
+            155,
+            206,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1467,
+          "ad": "GeForceTeslaGLDriver.bundle",
+          "derinlik": 1,
+          "x": 632.325,
+          "y": 80.0,
+          "genişlik": 42.675,
+          "yükseklik": 101.944,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1468,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 637.325,
+          "y": 110.0,
+          "genişlik": 32.675,
+          "yükseklik": 66.944,
+          "renk": [
+            11,
+            155,
+            206,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1278,
+          "ad": "AppleIntelHD4000GraphicsGLDriver.bundle",
+          "derinlik": 1,
+          "x": 588.52,
+          "y": 182.944,
+          "genişlik": 32.07,
+          "yükseklik": 45.656,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1284,
+          "ad": "AppleIntelHD5000GraphicsGLDriver.bundle",
+          "derinlik": 1,
+          "x": 621.59,
+          "y": 182.944,
+          "genişlik": 28.756,
+          "yükseklik": 45.656,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1204,
+          "ad": "AMDRadeonX4000GLDriver.bundle",
+          "derinlik": 1,
+          "x": 651.346,
+          "y": 182.944,
+          "genişlik": 23.654,
+          "yükseklik": 45.656,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1529,
+          "ad": "IOSCSIArchitectureModelFamily.kext",
+          "derinlik": 1,
+          "x": 588.52,
+          "y": 229.6,
+          "genişlik": 29.963,
+          "yükseklik": 27.213,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1200,
+          "ad": "AMDRadeonX3000GLDriver.bundle",
+          "derinlik": 1,
+          "x": 588.52,
+          "y": 257.813,
+          "genişlik": 29.963,
+          "yükseklik": 23.321,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1475,
+          "ad": "IO80211Family.kext",
+          "derinlik": 1,
+          "x": 588.52,
+          "y": 282.134,
+          "genişlik": 29.963,
+          "yükseklik": 21.726,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1501,
+          "ad": "IODVDStorageFamily.kext",
+          "derinlik": 1,
+          "x": 619.483,
+          "y": 229.6,
+          "genişlik": 18.54,
+          "yükseklik": 32.155,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1272,
+          "ad": "AppleIntelHD3000GraphicsGLDriver.bundle",
+          "derinlik": 1,
+          "x": 639.024,
+          "y": 229.6,
+          "genişlik": 17.545,
+          "yükseklik": 32.155,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1294,
+          "ad": "AppleIntelHDGraphicsGLDriver.bundle",
+          "derinlik": 1,
+          "x": 657.569,
+          "y": 229.6,
+          "genişlik": 17.432,
+          "yükseklik": 32.155,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1286,
+          "ad": "AppleIntelHD5000GraphicsVADriver.bundle",
+          "derinlik": 1,
+          "x": 619.483,
+          "y": 262.754,
+          "genişlik": 25.681,
+          "yükseklik": 14.39,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1412,
+          "ad": "ATIRadeonX2000GLDriver.bundle",
+          "derinlik": 1,
+          "x": 619.483,
+          "y": 278.144,
+          "genişlik": 25.681,
+          "yükseklik": 13.605,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1499,
+          "ad": "IOCDStorageFamily.kext",
+          "derinlik": 1,
+          "x": 619.483,
+          "y": 292.749,
+          "genişlik": 25.681,
+          "yükseklik": 11.111,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1493,
+          "ad": "IOBDStorageFamily.kext",
+          "derinlik": 1,
+          "x": 646.164,
+          "y": 262.754,
+          "genişlik": 13.999,
+          "yükseklik": 20.507,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1198,
+          "ad": "AMDRadeonX3000.kext",
+          "derinlik": 1,
+          "x": 661.163,
+          "y": 262.754,
+          "genişlik": 13.837,
+          "yükseklik": 20.507,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1549,
+          "ad": "IOUSBFamily.kext",
+          "derinlik": 1,
+          "x": 646.164,
+          "y": 284.262,
+          "genişlik": 28.836,
+          "yükseklik": 9.407,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1202,
+          "ad": "AMDRadeonX4000.kext",
+          "derinlik": 1,
+          "x": 646.164,
+          "y": 294.669,
+          "genişlik": 28.836,
+          "yükseklik": 9.191,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            61,
+            197,
+            245,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2232,
+          "ad": "PreferencePanes",
+          "derinlik": 0,
+          "x": 341.072,
+          "y": 309.86,
+          "genişlik": 162.004,
+          "yükseklik": 86.991,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2293,
+          "ad": "Trackpad.prefPane",
+          "derinlik": 1,
+          "x": 346.072,
+          "y": 339.86,
+          "genişlik": 83.834,
+          "yükseklik": 51.991,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2294,
+          "ad": "Contents",
+          "derinlik": 2,
+          "x": 351.072,
+          "y": 369.86,
+          "genişlik": 73.834,
+          "yükseklik": 16.991,
+          "renk": [
+            217,
+            176,
+            0,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0.0,
+          "boşluk_genişliği": 0.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2267,
+          "ad": "Mouse.prefPane",
+          "derinlik": 1,
+          "x": 430.905,
+          "y": 339.86,
+          "genişlik": 38.791,
+          "yükseklik": 27.065,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2269,
+          "ad": "Network.prefPane",
+          "derinlik": 1,
+          "x": 430.905,
+          "y": 367.925,
+          "genişlik": 38.791,
+          "yükseklik": 23.926,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2281,
+          "ad": "SharingPref.prefPane",
+          "derinlik": 1,
+          "x": 470.696,
+          "y": 339.86,
+          "genişlik": 14.772,
+          "yükseklik": 28.347,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2295,
+          "ad": "UniversalAccessPref.prefPane",
+          "derinlik": 1,
+          "x": 486.469,
+          "y": 339.86,
+          "genişlik": 11.607,
+          "yükseklik": 28.347,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2273,
+          "ad": "ParentalControls.prefPane",
+          "derinlik": 1,
+          "x": 470.696,
+          "y": 369.207,
+          "genişlik": 27.38,
+          "yükseklik": 11.983,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2279,
+          "ad": "Security.prefPane",
+          "derinlik": 1,
+          "x": 470.696,
+          "y": 382.19,
+          "genişlik": 27.38,
+          "yükseklik": 9.661,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            217,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1665,
+          "ad": "Fonts",
+          "derinlik": 0,
+          "x": 341.072,
+          "y": 397.851,
+          "genişlik": 162.004,
+          "yükseklik": 77.149,
+          "renk": [
+            251,
+            98,
+            139,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2036,
+          "ad": "LinguisticData",
+          "derinlik": 0,
+          "x": 504.076,
+          "y": 309.86,
+          "genişlik": 83.803,
+          "yükseklik": 71.066,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2053,
+          "ad": "zh",
+          "derinlik": 1,
+          "x": 509.076,
+          "y": 339.86,
+          "genişlik": 30.314,
+          "yükseklik": 36.066,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2038,
+          "ad": "de",
+          "derinlik": 1,
+          "x": 540.39,
+          "y": 339.86,
+          "genişlik": 24.684,
+          "yükseklik": 20.099,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2044,
+          "ad": "fr",
+          "derinlik": 1,
+          "x": 540.39,
+          "y": 360.959,
+          "genişlik": 24.684,
+          "yükseklik": 14.967,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2042,
+          "ad": "es",
+          "derinlik": 1,
+          "x": 566.075,
+          "y": 339.86,
+          "genişlik": 16.804,
+          "yükseklik": 17.984,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2039,
+          "ad": "en",
+          "derinlik": 1,
+          "x": 566.075,
+          "y": 358.844,
+          "genişlik": 16.804,
+          "yükseklik": 17.082,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            141,
+            118,
+            188,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2014,
+          "ad": "Java",
+          "derinlik": 0,
+          "x": 504.076,
+          "y": 381.926,
+          "genişlik": 83.803,
+          "yükseklik": 50.345,
+          "renk": [
+            63,
+            190,
+            149,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2016,
+          "ad": "JavaVirtualMachines",
+          "derinlik": 1,
+          "x": 509.076,
+          "y": 411.926,
+          "genişlik": 73.803,
+          "yükseklik": 15.345,
+          "renk": [
+            63,
+            190,
+            149,
+            255
+          ],
+          "kenarlık_rengi": [
+            102,
+            204,
+            171,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2115,
+          "ad": "Perl",
+          "derinlik": 0,
+          "x": 504.076,
+          "y": 433.271,
+          "genişlik": 83.803,
+          "yükseklik": 41.729,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2229,
+          "ad": "Extras",
+          "derinlik": 1,
+          "x": 509.076,
+          "y": 463.271,
+          "genişlik": 73.803,
+          "yükseklik": 6.729,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            84,
+            115,
+            222,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "Automator",
+          "derinlik": 0,
+          "x": 588.879,
+          "y": 309.86,
+          "genişlik": 48.551,
+          "yükseklik": 67.007,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 426,
+          "ad": "NewPDF from Images.action",
+          "derinlik": 1,
+          "x": 593.879,
+          "y": 339.86,
+          "genişlik": 28.194,
+          "yükseklik": 17.02,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 456,
+          "ad": "PDFto Images.action",
+          "derinlik": 1,
+          "x": 593.879,
+          "y": 357.88,
+          "genişlik": 28.194,
+          "yükseklik": 13.987,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 486,
+          "ad": "RenderQuartz Compositions to Image Files.action",
+          "derinlik": 1,
+          "x": 623.073,
+          "y": 339.86,
+          "genişlik": 9.358,
+          "yükseklik": 32.007,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            194,
+            221,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 760,
+          "ad": "Compositions",
+          "derinlik": 0,
+          "x": 638.431,
+          "y": 309.86,
+          "genişlik": 41.569,
+          "yükseklik": 67.007,
+          "renk": [
+            80,
+            83,
+            114,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1928,
+          "ad": "InputMethods",
+          "derinlik": 0,
+          "x": 588.879,
+          "y": 377.867,
+          "genişlik": 31.335,
+          "yükseklik": 45.34,
+          "renk": [
+            255,
+            153,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 615,
+          "ad": "Caches",
+          "derinlik": 0,
+          "x": 621.215,
+          "y": 377.867,
+          "genişlik": 29.04,
+          "yükseklik": 45.34,
+          "renk": [
+            12,
+            168,
+            223,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 743,
+          "ad": "Components",
+          "derinlik": 0,
+          "x": 651.255,
+          "y": 377.867,
+          "genişlik": 28.745,
+          "yükseklik": 45.34,
+          "renk": [
+            255,
+            209,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3055,
+          "ad": "Services",
+          "derinlik": 0,
+          "x": 588.879,
+          "y": 424.207,
+          "genişlik": 43.122,
+          "yükseklik": 25.126,
+          "renk": [
+            251,
+            98,
+            139,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2962,
+          "ad": "QuickTime",
+          "derinlik": 0,
+          "x": 588.879,
+          "y": 450.333,
+          "genişlik": 43.122,
+          "yükseklik": 24.667,
+          "renk": [
+            120,
+            93,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1959,
+          "ad": "InternetAccounts",
+          "derinlik": 0,
+          "x": 633.001,
+          "y": 424.207,
+          "genişlik": 27.592,
+          "yükseklik": 38.121,
+          "renk": [
+            63,
+            190,
+            149,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1625,
+          "ad": "Filesystems",
+          "derinlik": 0,
+          "x": 661.593,
+          "y": 424.207,
+          "genişlik": 18.407,
+          "yükseklik": 38.121,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 3328,
+          "ad": "Tcl",
+          "derinlik": 0,
+          "x": 633.001,
+          "y": 463.327,
+          "genişlik": 46.999,
+          "yükseklik": 11.673,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            85,
+            85,
+            85,
+            255
+          ],
+          "kenarlık_kalınlığı": 5.0,
+          "boşluk_genişliği": 1.0,
+          "üst_yükseklik": 30.0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        }
+      ]
+    }
+  ]
+}

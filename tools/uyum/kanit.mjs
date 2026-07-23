@@ -14,6 +14,7 @@ const KÖK = path.resolve(ARAÇ, '../..');
 const COMMIT = '74e9e09a0b5687fdd34319121ac73b3022d1483c';
 const TABAN = path.join(KÖK, 'testler/gorsel');
 const REFERANS = path.join(TABAN, 'referans', COMMIT, 'default');
+const REFERANS_SAHNE = path.join(REFERANS, 'sahneler');
 const GERÇEK = path.join(TABAN, 'gerçek', 'default');
 const FARK = path.join(TABAN, 'fark', 'default');
 const METRİK = path.join(TABAN, 'metrikler');
@@ -29,6 +30,13 @@ const ağaçKarşılaştırması = (özet) => ({
     koordinat_adımı: 0.001,
     ...özet
   }
+});
+
+const treemapKarşılaştırması = () => ({
+  tipografiSigma: 0.8,
+  // Her hücrenin sınırı ve fill/border katmanı, kilitli ECharts sahnesiyle
+  // doğrudan karşılaştırılır; toplam raster oranı ince çizgiyi gizleyemez.
+  sahneReferansı: true
 });
 
 const SENARYOLAR = [
@@ -126,6 +134,15 @@ const SENARYOLAR = [
       koordinat_sayısı: 1435, fnv1a_64: 'cecc82c59e976726' }),
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   },
+  ...[
+    'treemap-sunburst-transition', 'treemap-disk', 'treemap-drill-down',
+    'treemap-obama', 'treemap-show-parent', 'treemap-simple', 'treemap-visual'
+  ].map((id) => ({
+    id,
+    tür: 'statik',
+    karşılaştırma: treemapKarşılaştırması(),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  })),
   { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'themeRiver-lastfm', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'gauge', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -494,13 +511,14 @@ function aynıPiksellerMi(aDosyası, bDosyası) {
     && Buffer.compare(a.data, b.data) === 0;
 }
 
-async function referansıYenile(senaryo, kare, referans, sonek) {
+async function referansıYenile(senaryo, kare, referans, referansSahne, sonek) {
   const adaylar = [];
+  const sahneAdayları = [];
   const dosyaId = dosyaKimliği(senaryo.id);
   for (const geçiş of [1, 2]) {
     const ham = path.join(REFERANS, `.ham-${dosyaId}${sonek}-${geçiş}.png`);
     const aday = path.join(REFERANS, `.aday-${dosyaId}${sonek}-${geçiş}.png`);
-    execFileSync('node', [
+    const argümanlar = [
       path.join(ARAÇ, 'echarts_referans.mjs'),
       '--id', senaryo.id,
       '--output', ham,
@@ -508,17 +526,33 @@ async function referansıYenile(senaryo, kare, referans, sonek) {
       '--state', kare.durum,
       '--width', String(senaryo.genişlik ?? 700),
       '--height', String(senaryo.yükseklik ?? 525)
-    ], { cwd: KÖK, stdio: 'inherit' });
+    ];
+    if (referansSahne) {
+      const sahneAdayı = `${referansSahne}.aday-${geçiş}`;
+      argümanlar.push('--scene-output', sahneAdayı);
+      sahneAdayları.push(sahneAdayı);
+    }
+    execFileSync('node', argümanlar, { cwd: KÖK, stdio: 'inherit' });
     await sharp(ham).resize(600, 450).toFile(aday);
     fs.rmSync(ham, { force: true });
     adaylar.push(aday);
   }
   if (!aynıPiksellerMi(adaylar[0], adaylar[1])) {
     for (const aday of adaylar) fs.rmSync(aday, { force: true });
+    for (const aday of sahneAdayları) fs.rmSync(aday, { force: true });
     throw new Error(`${senaryo.id}${sonek}: ECharts referansı iki ardışık üretimde kararlı değil`);
   }
   fs.renameSync(adaylar[0], referans);
   fs.rmSync(adaylar[1], { force: true });
+  if (referansSahne) {
+    if (Buffer.compare(fs.readFileSync(sahneAdayları[0]), fs.readFileSync(sahneAdayları[1])) !== 0) {
+      for (const aday of sahneAdayları) fs.rmSync(aday, { force: true });
+      throw new Error(`${senaryo.id}${sonek}: ECharts Treemap sahnesi kararlı değil`);
+    }
+    dizin(path.dirname(referansSahne));
+    fs.renameSync(sahneAdayları[0], referansSahne);
+    fs.rmSync(sahneAdayları[1], { force: true });
+  }
 }
 
 function görüntüMetrikleri(referans, gerçek, farkDosyası) {
@@ -861,7 +895,111 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
   return [];
 }
 
-function sahneÖzetiKontrolleri(senaryo, sahneDosyası) {
+function treemapSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
+  if (!senaryo.karşılaştırma?.sahneReferansı) return [];
+  if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
+    return [{
+      ad: 'treemap_hücre_sınırları_ve_katmanları',
+      geçti: false,
+      açıklama: 'Her Treemap hücresinin sınırı, fill/border katmanı ve leaf durumu doğrulanmalı',
+      hata: 'Cizelge sahne kanıtı eksik'
+    }];
+  }
+  if (!referansSahneDosyası || !fs.existsSync(referansSahneDosyası)) {
+    return [{
+      ad: 'treemap_hücre_sınırları_ve_katmanları',
+      geçti: false,
+      açıklama: 'Her Treemap hücresinin sınırı, fill/border katmanı ve leaf durumu doğrulanmalı',
+      hata: 'kilitli ECharts sahne kanıtı eksik'
+    }];
+  }
+  const gerçek = JSON.parse(fs.readFileSync(sahneDosyası, 'utf8'));
+  const beklenen = JSON.parse(fs.readFileSync(referansSahneDosyası, 'utf8'));
+  const uyuşmazlıklar = [];
+  const ekle = (yol, beklenenDeğer, gerçekDeğer) => {
+    if (uyuşmazlıklar.length < 40) {
+      uyuşmazlıklar.push({ yol, beklenen: beklenenDeğer, gerçek: gerçekDeğer });
+    }
+  };
+  for (const alan of ['şema_sürümü', 'tür', 'koordinat_adımı']) {
+    if (gerçek[alan] !== beklenen[alan]) ekle(alan, beklenen[alan], gerçek[alan]);
+  }
+  const beklenenSeriler = beklenen.seriler || [];
+  const gerçekSeriler = gerçek.seriler || [];
+  if (gerçekSeriler.length !== beklenenSeriler.length) {
+    ekle('seriler.length', beklenenSeriler.length, gerçekSeriler.length);
+  }
+  const koordinatlar = new Set([
+    'alan.x', 'alan.y', 'alan.genişlik', 'alan.yükseklik',
+    'x', 'y', 'genişlik', 'yükseklik', 'kenarlık_kalınlığı',
+    'boşluk_genişliği', 'üst_yükseklik'
+  ]);
+  const eşitMi = (alan, a, b) => {
+    if (koordinatlar.has(alan) && typeof a === 'number' && typeof b === 'number') {
+      return Math.abs(a - b) <= 0.0011;
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+  };
+  for (let seriSırası = 0; seriSırası < Math.min(beklenenSeriler.length, gerçekSeriler.length); seriSırası += 1) {
+    const bSeri = beklenenSeriler[seriSırası];
+    const gSeri = gerçekSeriler[seriSırası];
+    if (bSeri.seri_sırası !== gSeri.seri_sırası) {
+      ekle(`seriler[${seriSırası}].seri_sırası`, bSeri.seri_sırası, gSeri.seri_sırası);
+    }
+    for (const alan of ['x', 'y', 'genişlik', 'yükseklik']) {
+      if (!eşitMi(`alan.${alan}`, bSeri.alan?.[alan], gSeri.alan?.[alan])) {
+        ekle(`seriler[${seriSırası}].alan.${alan}`, bSeri.alan?.[alan], gSeri.alan?.[alan]);
+      }
+    }
+    const bDüğümler = bSeri.düğümler || [];
+    const gDüğümler = gSeri.düğümler || [];
+    if (bDüğümler.length !== gDüğümler.length) {
+      ekle(`seriler[${seriSırası}].düğümler.length`, bDüğümler.length, gDüğümler.length);
+    }
+    for (let düğümSırası = 0; düğümSırası < Math.min(bDüğümler.length, gDüğümler.length); düğümSırası += 1) {
+      const bDüğüm = bDüğümler[düğümSırası];
+      const gDüğüm = gDüğümler[düğümSırası];
+      for (const alan of [
+        'veri_sırası', 'ad', 'derinlik', 'x', 'y', 'genişlik', 'yükseklik',
+        'renk', 'kenarlık_rengi', 'kenarlık_kalınlığı', 'boşluk_genişliği',
+        'üst_yükseklik', 'yaprak', 'inilebilir_yaprak'
+      ]) {
+        // Parent `style.fill`, ECharts veri görselinde tutulsa da renderer'da
+        // boyanmaz; parent yalnız border/background katmanıdır. Fill rengi
+        // ancak içerik dikdörtgeni çizilen, pozitif alanlı leaf/leafRoot için
+        // kanıttır. Sıfır alanlı yaprağı iki renderer da çizmez.
+        if (alan === 'renk' && (
+          (!bDüğüm.yaprak && !gDüğüm.yaprak)
+          || bDüğüm.genişlik <= 0 || bDüğüm.yükseklik <= 0
+          || gDüğüm.genişlik <= 0 || gDüğüm.yükseklik <= 0
+        )) continue;
+        if (!eşitMi(alan, bDüğüm[alan], gDüğüm[alan])) {
+          ekle(
+            `seriler[${seriSırası}].düğümler[${düğümSırası}](${bDüğüm.ad}).${alan}`,
+            bDüğüm[alan],
+            gDüğüm[alan]
+          );
+        }
+      }
+    }
+  }
+  const beklenenDüğüm = beklenenSeriler.reduce((toplam, seri) => toplam + (seri.düğümler?.length || 0), 0);
+  const gerçekDüğüm = gerçekSeriler.reduce((toplam, seri) => toplam + (seri.düğümler?.length || 0), 0);
+  return [{
+    ad: 'treemap_hücre_sınırları_ve_katmanları',
+    geçti: uyuşmazlıklar.length === 0,
+    açıklama: 'Toplam raster oranından bağımsız olarak her hücrenin x/y/width/height sınırı, dolgu, kenarlık, gap, upperLabel ve leafRoot katmanı kilitli ECharts sahnesiyle eşleşmeli',
+    beklenen_düğüm: beklenenDüğüm,
+    gerçek_düğüm: gerçekDüğüm,
+    karşılaştırılan_alan: Math.min(beklenenDüğüm, gerçekDüğüm) * 15,
+    uyuşmazlıklar
+  }];
+}
+
+function sahneÖzetiKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
+  if (senaryo.karşılaştırma?.sahneReferansı) {
+    return treemapSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
+  }
   const beklenen = senaryo.karşılaştırma?.sahneÖzeti;
   if (!beklenen) return [];
   if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
@@ -900,7 +1038,7 @@ function göreli(dosya) {
 }
 
 async function çalıştır() {
-  for (const d of [REFERANS, GERÇEK, FARK, METRİK, SAHNE, RAPOR]) dizin(d);
+  for (const d of [REFERANS, REFERANS_SAHNE, GERÇEK, FARK, METRİK, SAHNE, RAPOR]) dizin(d);
   const sonuçlar = [];
   const idSırası = process.argv.indexOf('--id');
   const önekSırası = process.argv.indexOf('--id-prefix');
@@ -933,10 +1071,14 @@ async function çalıştır() {
       const fark = path.join(FARK, `${dosyaId}${sonek}.png`);
       const normalizeFark = path.join(FARK, `${dosyaId}${sonek}-tipografi.png`);
       const sahne = senaryo.karşılaştırma?.sahneÖzeti
+        || senaryo.karşılaştırma?.sahneReferansı
         ? path.join(SAHNE, `${dosyaId}${sonek}.json`)
         : null;
+      const referansSahne = senaryo.karşılaştırma?.sahneReferansı
+        ? path.join(REFERANS_SAHNE, `${dosyaId}${sonek}.json`)
+        : null;
       if (REFERANS_YENİLE) {
-        await referansıYenile(senaryo, kare, referans, sonek);
+        await referansıYenile(senaryo, kare, referans, referansSahne, sonek);
       } else if (!fs.existsSync(referans)) {
         throw new Error(
           `kilitli referans eksik: ${path.relative(KÖK, referans)}; `
@@ -966,7 +1108,7 @@ async function çalıştır() {
       );
       const yapısal_kontroller = [
         ...yapısalKontroller(senaryo, referans, gerçek),
-        ...sahneÖzetiKontrolleri(senaryo, sahne)
+        ...sahneÖzetiKontrolleri(senaryo, sahne, referansSahne)
       ];
       metrik.geçti = metrik.geçti
         && yapısal_kontroller.every((kontrol) => kontrol.geçti);
@@ -984,7 +1126,10 @@ async function çalıştır() {
           ...(metrik.tipografi_normalizasyonu
             ? { normalize_fark: path.relative(KÖK, normalizeFark) }
             : {}),
-          ...(sahne ? { sahne: path.relative(KÖK, sahne) } : {})
+          ...(sahne ? { sahne: path.relative(KÖK, sahne) } : {}),
+          ...(referansSahne
+            ? { referans_sahne: path.relative(KÖK, referansSahne) }
+            : {})
         }
       });
     }

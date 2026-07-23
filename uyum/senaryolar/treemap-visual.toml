@@ -1,18 +1,18 @@
 # Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
 id = "treemap-visual"
-kapsam_durumu = "yok"
+kapsam_durumu = "kısmi"
 sahip_faz = 5
 resmi_kaynak = "public/examples/ts/treemap-visual.ts"
-fixture = ""
+fixture = "examples/uyum_fixture.rs#treemap_visual"
 viewport_genişlik = 700
 viewport_yükseklik = 525
 shot_delay_ms = 0
 profiller = ["açık", "koyu"]
 
 [kanıt]
-api = "yok"
-statik_görsel = "yok"
-animasyon = "yok"
-etkileşim = "yok"
-erişilebilirlik = "yok"
-performans = "yok"
+api = "kısmi"
+statik_görsel = "kısmi"
+animasyon = "kısmi"
+etkileşim = "kısmi"
+erişilebilirlik = "kısmi"
+performans = "kısmi"

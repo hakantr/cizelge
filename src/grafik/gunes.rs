@@ -107,7 +107,7 @@ pub fn güneş_patlaması_çiz(
     ilerleme: f32,
     kök_yolu: &[String],
     isabetler: &mut Vec<İsabetBölgesi>,
-    kırıntılar: &mut Vec<(Dikdörtgen, usize)>,
+    kırıntılar: &mut Vec<(Dikdörtgen, usize, usize)>,
 ) {
     let merkez = (
         tuval.x + seri.merkez.0.çöz(tuval.genişlik),
@@ -165,6 +165,7 @@ pub fn güneş_patlaması_çiz(
                 yarıçap * 2.0,
                 yarıçap * 2.0,
             ),
+            genel_sıra,
             inilen.saturating_sub(1),
         ));
     }

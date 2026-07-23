@@ -850,6 +850,10 @@ pub struct BoyamaGirdisi {
     /// Hiyerarşik gezinme yolu (ağaç haritası inme / güneş patlaması odak):
     /// kökten itibaren ad zinciri.
     pub hiyerarşi_yolu: Vec<String>,
+    /// Birden çok hiyerarşik seride bağımsız kök durumu:
+    /// `(seriesIndex, kökten itibaren ad zinciri)`. İlgili seri için kayıt
+    /// yoksa geriye uyumlu [`Self::hiyerarşi_yolu`] kullanılır.
+    pub hiyerarşi_yolları: Vec<(usize, Vec<String>)>,
     /// Grafo gezinmesi (roam): `(kayma_x, kayma_y, ölçek)`.
     pub grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları: `(düğüm sırası, dx, dy)`.
@@ -871,6 +875,7 @@ impl Default for BoyamaGirdisi {
             fırça_alanları: Vec::new(),
             zaman_şeridi: None,
             hiyerarşi_yolu: Vec::new(),
+            hiyerarşi_yolları: Vec::new(),
             grafo_görünümü: (0.0, 0.0, 1.0),
             grafo_kaymaları: Vec::new(),
             ağaç_görünümleri: Vec::new(),
@@ -878,12 +883,14 @@ impl Default for BoyamaGirdisi {
     }
 }
 
-/// Tree `roam` isabet alanı ve izin verilen hareket türü.
+/// Tree/Treemap `roam` isabet alanı, hareket türü ve ölçek sınırı.
 #[derive(Clone, Copy, Debug)]
 pub struct AğaçGezinmeAlanı {
     pub seri_sırası: usize,
     pub alan: Dikdörtgen,
     pub gezinme: AğaçGezinmesi,
+    pub en_küçük_ölçek: f32,
+    pub en_büyük_ölçek: f32,
 }
 
 impl AğaçGezinmeAlanı {
@@ -1000,8 +1007,9 @@ pub struct BoyamaÇıktısı {
     pub araç_düğmeleri: Vec<(Dikdörtgen, AraçTürü)>,
     /// Zaman şeridi düğmeleri (oynat/durdur + kare noktaları).
     pub zaman_düğmeleri: Vec<(Dikdörtgen, ZamanŞeridiEylemi)>,
-    /// Hiyerarşi kırıntıları (breadcrumb / geri): `(kutu, yeni yol uzunluğu)`.
-    pub kırıntılar: Vec<(Dikdörtgen, usize)>,
+    /// Hiyerarşi kırıntıları (breadcrumb / geri):
+    /// `(kutu, seriesIndex, yeni yol uzunluğu)`.
+    pub kırıntılar: Vec<(Dikdörtgen, usize, usize)>,
     /// `graphic` bileşeninin dönüşümlü isabet sınamasında da kullanılan
     /// gerçek sahnesi.
     pub grafik_sahnesi: Option<GrafikSahnesi>,
@@ -6238,6 +6246,8 @@ pub fn grafiği_boya(
                         seri_sırası: i,
                         alan: ağaç_alanı(a, tüm_alan),
                         gezinme: a.gezinme,
+                        en_küçük_ölçek: 0.2,
+                        en_büyük_ölçek: 8.0,
                     });
                 }
                 let önce = çıktı.isabetler.len();
@@ -6277,16 +6287,82 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
+                let yerleşim_referansı = if let Some(matris_sırası) = a.matris_sırası {
+                    let Some((x, y)) = &a.matris_koordinatı else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                        continue;
+                    };
+                    let Some(kutu) = yerleşim.veriden_yerleşime(x, y, true) else {
+                        continue;
+                    };
+                    kutu
+                } else if let Some(takvim_sırası) = a.takvim_sırası {
+                    let Some(tarih) = a.takvim_koordinatı else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+                        continue;
+                    };
+                    let Some(kutu) = yerleşim.hücre(tarih) else {
+                        continue;
+                    };
+                    // Calendar.dataToLayout `contentRect`, gün hücresinin
+                    // itemStyle vuruşunu her kenarda yarım kalınlık içeri alır.
+                    let kenar = seçenekler
+                        .takvimler
+                        .get(takvim_sırası)
+                        .map_or(0.0, |takvim| {
+                            takvim.öğe_stili.kenarlık_kalınlığı.max(0.0) / 2.0
+                        });
+                    Dikdörtgen::yeni(
+                        kutu.x + kenar,
+                        kutu.y + kenar,
+                        (kutu.genişlik - 2.0 * kenar).max(0.0),
+                        (kutu.yükseklik - 2.0 * kenar).max(0.0),
+                    )
+                } else {
+                    tüm_alan
+                };
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                let kök_yolu = girdi
+                    .hiyerarşi_yolları
+                    .iter()
+                    .find(|(seri_sırası, _)| *seri_sırası == i)
+                    .map(|(_, yol)| yol.as_slice())
+                    .unwrap_or(&girdi.hiyerarşi_yolu);
+                let görünüm = girdi
+                    .ağaç_görünümleri
+                    .iter()
+                    .find(|(seri_sırası, ..)| *seri_sırası == i)
+                    .map(|(_, dx, dy, ölçek)| (*dx, *dy, *ölçek))
+                    .unwrap_or((0.0, 0.0, 1.0));
+                // nodeClick.zoomToNode, `roam: false` iken de alanı
+                // hedefler; hareket izinleri aşağıdaki kayıt üzerinde ayrıca
+                // sınandığı için Treemap alanı her durumda saklanır.
+                çıktı.ağaç_alanları.push(AğaçGezinmeAlanı {
+                    seri_sırası: i,
+                    alan: crate::grafik::agac_haritasi::ağaç_haritası_alanı(
+                        a,
+                        yerleşim_referansı,
+                    ),
+                    gezinme: a.gezinme,
+                    en_küçük_ölçek: a.en_küçük_ölçek,
+                    en_büyük_ölçek: a.en_büyük_ölçek,
+                });
                 ağaç_haritası_çiz(
                     yüzey,
                     a,
                     i,
                     tüm_alan,
+                    yerleşim_referansı,
                     &palet,
                     ilerleme,
-                    &girdi.hiyerarşi_yolu,
+                    kök_yolu,
+                    görünüm,
+                    fare,
                     &mut çıktı.isabetler,
                     &mut çıktı.kırıntılar,
                 );
@@ -6317,6 +6393,12 @@ pub fn grafiği_boya(
                 }
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
+                let kök_yolu = girdi
+                    .hiyerarşi_yolları
+                    .iter()
+                    .find(|(seri_sırası, _)| *seri_sırası == i)
+                    .map(|(_, yol)| yol.as_slice())
+                    .unwrap_or(&girdi.hiyerarşi_yolu);
                 güneş_patlaması_çiz(
                     yüzey,
                     g,
@@ -6324,7 +6406,7 @@ pub fn grafiği_boya(
                     tüm_alan,
                     &palet,
                     ilerleme,
-                    &girdi.hiyerarşi_yolu,
+                    kök_yolu,
                     &mut çıktı.isabetler,
                     &mut çıktı.kırıntılar,
                 );

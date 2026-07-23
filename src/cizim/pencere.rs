@@ -25,12 +25,14 @@ use crate::cizim::gorunum::{
     grafiği_boya, gösterge_adları, İçYakınlaştırmaAlanı,
 };
 use crate::cizim::olay::{
-    GrafikOlayı, MatrisHücreBölgesi, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, İsabetBölgesi,
+    AğaçHaritasıKökYönü, GrafikOlayı, MatrisHücreBölgesi, ParalelEksenBölgesi,
+    ParalelGenişletmeBölgesi, İsabetBölgesi, İsabetGeometrisi,
 };
 use crate::grafik::isi::{GörselEşlemeSürgüParçası, SürekliGörselEşlemeBölgesi};
 use crate::hata::{BilesenHatasi, BilesenTanisi};
 use crate::koordinat::Dikdörtgen;
 use crate::koordinat::ParalelGenişletmeDavranışı;
+use crate::model::agac::AğaçHaritasıDüğümTıklaması;
 use crate::model::paralel::ParalelGenişletmeTetikleyicisi;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::Seri;
@@ -63,8 +65,9 @@ type AraçKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, AraçTürü)>>>;
 /// Zaman şeridi düğmelerinin pencere-mutlak kutuları.
 type FilmDüğmeleri = Rc<RefCell<Vec<(Bounds<Pixels>, ZamanŞeridiEylemi)>>>;
 
-/// Hiyerarşi kırıntılarının pencere-mutlak kutuları: `(kutu, yeni yol uzunluğu)`.
-type KırıntıKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize)>>>;
+/// Hiyerarşi kırıntılarının pencere-mutlak kutuları:
+/// `(kutu, seriesIndex, yeni yol uzunluğu)`.
+type KırıntıKutuları = Rc<RefCell<Vec<(Bounds<Pixels>, usize, usize)>>>;
 
 /// Son boyamadaki `graphic` sahnesi ve pencere-mutlak tuval kökeni.
 type GrafikSahneKaydı = Rc<RefCell<Option<(GrafikSahnesi, (f32, f32))>>>;
@@ -174,8 +177,8 @@ pub struct GrafikGörünümü {
     son_boyut: Rc<Cell<(f32, f32)>>,
     /// Pencere-mutlak zaman şeridi düğmeleri.
     film_düğmeleri: FilmDüğmeleri,
-    /// Hiyerarşik gezinme yolu (ağaç haritası inme / güneş odak).
-    hiyerarşi_yolu: Vec<String>,
+    /// Hiyerarşik seri başına kök yolu (Treemap inme / Sunburst odak).
+    hiyerarşi_yolları: HashMap<usize, Vec<String>>,
     /// Pencere-mutlak kırıntı kutuları.
     kırıntı_kutuları: KırıntıKutuları,
     /// Dönüşümlü `graphic` isabet sınamasında kullanılan sahnenin kendisi.
@@ -184,9 +187,9 @@ pub struct GrafikGörünümü {
     grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları.
     grafo_kaymaları: std::collections::HashMap<usize, (f32, f32)>,
-    /// Tree serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
+    /// Tree/Treemap serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
     ağaç_görünümleri: HashMap<usize, (f32, f32, f32)>,
-    /// Pencere-mutlak Tree gezinme alanları.
+    /// Pencere-mutlak Tree/Treemap gezinme alanları.
     ağaç_alanları: AğaçGezinmeKayıtları,
 }
 
@@ -279,7 +282,7 @@ impl GrafikGörünümü {
             film: None,
             film_düğmeleri: Rc::new(RefCell::new(Vec::new())),
             son_boyut: Rc::new(Cell::new((800.0, 600.0))),
-            hiyerarşi_yolu: Vec::new(),
+            hiyerarşi_yolları: HashMap::new(),
             kırıntı_kutuları: Rc::new(RefCell::new(Vec::new())),
             grafik_sahnesi: Rc::new(RefCell::new(None)),
             grafo_görünümü: (0.0, 0.0, 1.0),
@@ -655,7 +658,7 @@ impl GrafikGörünümü {
 
     /// Gezinme durumunu (hiyerarşi yolu, grafo/Tree görünümü) sıfırlar.
     fn gezinmeyi_sıfırla(&mut self) {
-        self.hiyerarşi_yolu.clear();
+        self.hiyerarşi_yolları.clear();
         self.grafo_görünümü = (0.0, 0.0, 1.0);
         self.grafo_kaymaları.clear();
         self.ağaç_görünümleri.clear();
@@ -762,7 +765,11 @@ impl Render for GrafikGörünümü {
         let kırıntı_kutuları = self.kırıntı_kutuları.clone();
         let grafik_sahnesi = self.grafik_sahnesi.clone();
         let son_boyut = self.son_boyut.clone();
-        let hiyerarşi_yolu = self.hiyerarşi_yolu.clone();
+        let hiyerarşi_yolları = self
+            .hiyerarşi_yolları
+            .iter()
+            .map(|(seri_sırası, yol)| (*seri_sırası, yol.clone()))
+            .collect::<Vec<_>>();
         let grafo_görünümü = self.grafo_görünümü;
         let grafo_kaymaları: Vec<(usize, f32, f32)> = self
             .grafo_kaymaları
@@ -804,7 +811,8 @@ impl Render for GrafikGörünümü {
                                 .map(|alan| alan.kaydır(-köken.0, -köken.1))
                                 .collect(),
                             zaman_şeridi,
-                            hiyerarşi_yolu: hiyerarşi_yolu.clone(),
+                            hiyerarşi_yolu: Vec::new(),
+                            hiyerarşi_yolları: hiyerarşi_yolları.clone(),
                             grafo_görünümü,
                             grafo_kaymaları: grafo_kaymaları.clone(),
                             ağaç_görünümleri: ağaç_görünümleri.clone(),
@@ -976,8 +984,8 @@ impl Render for GrafikGörünümü {
                         match kırıntı_kutuları.try_borrow_mut() {
                             Ok(mut kayıt) => {
                                 kayıt.clear();
-                                for (kutu, uzunluk) in çıktı.kırıntılar {
-                                    kayıt.push((çizici.sınırlar(kutu), uzunluk));
+                                for (kutu, seri_sırası, uzunluk) in çıktı.kırıntılar {
+                                    kayıt.push((çizici.sınırlar(kutu), seri_sırası, uzunluk));
                                 }
                             }
                             Err(_) => tanı_bildir("kırıntı_kutuları"),
@@ -1240,7 +1248,8 @@ impl Render for GrafikGörünümü {
                             .entry(alan.seri_sırası)
                             .or_insert((0.0, 0.0, 1.0));
                         let eski_ölçek = görünüm.2.max(1e-6);
-                        let yeni_ölçek = (eski_ölçek * çarpan).clamp(0.2, 8.0);
+                        let yeni_ölçek =
+                            (eski_ölçek * çarpan).clamp(alan.en_küçük_ölçek, alan.en_büyük_ölçek);
                         let gerçek_çarpan = yeni_ölçek / eski_ölçek;
                         let merkez = alan.alan.merkez();
                         let göreli = (konum.0 - merkez.0, konum.1 - merkez.1);
@@ -1601,12 +1610,29 @@ impl Render for GrafikGörünümü {
                     let kırıntı_vuruşu = match bu.kırıntı_kutuları.try_borrow() {
                         Ok(kutular) => kutular
                             .iter()
-                            .find(|(kutu, _)| kutu.contains(&olay.position))
-                            .map(|(_, uzunluk)| *uzunluk),
+                            .find(|(kutu, ..)| kutu.contains(&olay.position))
+                            .map(|(_, seri_sırası, uzunluk)| (*seri_sırası, *uzunluk)),
                         Err(_) => None,
                     };
-                    if let Some(uzunluk) = kırıntı_vuruşu {
-                        bu.hiyerarşi_yolu.truncate(uzunluk);
+                    if let Some((seri_sırası, uzunluk)) = kırıntı_vuruşu {
+                        let yol = bu.hiyerarşi_yolları.entry(seri_sırası).or_default();
+                        let eski_uzunluk = yol.len();
+                        yol.truncate(uzunluk);
+                        let yeni_yol = yol.clone();
+                        bu.ağaç_görünümleri.remove(&seri_sırası);
+                        if eski_uzunluk != yeni_yol.len()
+                            && matches!(
+                                bu.seçenekler.seriler.get(seri_sırası),
+                                Some(Seri::AğaçHaritası(_))
+                            )
+                        {
+                            cx.emit(GrafikOlayı::AğaçHaritasıKöküDeğişti {
+                                seri_sırası,
+                                veri_sırası: None,
+                                yol: yeni_yol,
+                                yön: AğaçHaritasıKökYönü::Yukarı,
+                            });
+                        }
                         cx.notify();
                         return;
                     }
@@ -1835,10 +1861,125 @@ impl Render for GrafikGörünümü {
                     };
                     if let Some(b) = bölge {
                         match bu.seçenekler.seriler.get(b.seri_sırası) {
-                            // Ağaç haritası / güneş patlaması: dala in (odakla).
-                            Some(Seri::AğaçHaritası(_) | Seri::GüneşPatlaması(_)) => {
-                                if let Some(ad) = &b.ad {
-                                    bu.hiyerarşi_yolu.push(ad.clone());
+                            Some(Seri::AğaçHaritası(ağaç_haritası)) => {
+                                let geçerli_yol = bu
+                                    .hiyerarşi_yolları
+                                    .get(&b.seri_sırası)
+                                    .cloned()
+                                    .unwrap_or_default();
+                                let düğüm_yolu = ağaç_haritası.düğüm_yolu(b.veri_sırası);
+                                let inilebilir = ağaç_haritası
+                                    .inilebilir_yaprak_mı(b.veri_sırası, &geçerli_yol);
+                                let davranış = ağaç_haritası.düğüm_tıklaması;
+                                let bağlantı =
+                                    ağaç_haritası.düğüm(b.veri_sırası).and_then(|düğüm| {
+                                        düğüm.bağlantı.as_ref().map(|url| {
+                                            (
+                                                url.clone(),
+                                                düğüm
+                                                    .hedef
+                                                    .clone()
+                                                    .unwrap_or_else(|| "blank".to_owned()),
+                                            )
+                                        })
+                                    });
+                                let yakınlaştırma_oranı = ağaç_haritası.düğüme_yakınlaştırma_oranı;
+
+                                if inilebilir {
+                                    if let Some(yol) = düğüm_yolu {
+                                        bu.hiyerarşi_yolları.insert(b.seri_sırası, yol.clone());
+                                        bu.ağaç_görünümleri.remove(&b.seri_sırası);
+                                        cx.emit(GrafikOlayı::AğaçHaritasıKöküDeğişti {
+                                            seri_sırası: b.seri_sırası,
+                                            veri_sırası: Some(b.veri_sırası),
+                                            yol,
+                                            yön: AğaçHaritasıKökYönü::Aşağı,
+                                        });
+                                        cx.notify();
+                                    }
+                                } else {
+                                    match davranış {
+                                        AğaçHaritasıDüğümTıklaması::DüğümeYakınlaştır => {
+                                            let alan = bu
+                                                .ağaç_alanları
+                                                .try_borrow()
+                                                .ok()
+                                                .and_then(|alanlar| {
+                                                    alanlar
+                                                        .iter()
+                                                        .rev()
+                                                        .find(|alan| {
+                                                            alan.seri_sırası == b.seri_sırası
+                                                        })
+                                                        .copied()
+                                                });
+                                            if let (
+                                                Some(alan),
+                                                İsabetGeometrisi::Dikdörtgen(hücre),
+                                            ) = (alan, &b.geometri)
+                                            {
+                                                let görünüm = bu
+                                                    .ağaç_görünümleri
+                                                    .entry(b.seri_sırası)
+                                                    .or_insert((0.0, 0.0, 1.0));
+                                                let eski_ölçek = görünüm.2.max(1e-6);
+                                                let görünüm_alanı =
+                                                    alan.alan.genişlik * alan.alan.yükseklik;
+                                                let hücre_alanı =
+                                                    hücre.genişlik * hücre.yükseklik;
+                                                if görünüm_alanı > 0.0 && hücre_alanı > 0.0 {
+                                                    let çarpan = (yakınlaştırma_oranı
+                                                        * görünüm_alanı
+                                                        / hücre_alanı)
+                                                        .max(0.0)
+                                                        .sqrt();
+                                                    let yeni_ölçek = (eski_ölçek * çarpan)
+                                                        .max(1.0)
+                                                        .clamp(
+                                                            alan.en_küçük_ölçek,
+                                                            alan.en_büyük_ölçek,
+                                                        );
+                                                    let gerçek_çarpan =
+                                                        yeni_ölçek / eski_ölçek;
+                                                    let merkez = alan.alan.merkez();
+                                                    let hedef = hücre.merkez();
+                                                    görünüm.0 = -((hedef.0 - merkez.0)
+                                                        - görünüm.0)
+                                                        * gerçek_çarpan;
+                                                    görünüm.1 = -((hedef.1 - merkez.1)
+                                                        - görünüm.1)
+                                                        * gerçek_çarpan;
+                                                    görünüm.2 = yeni_ölçek;
+                                                    cx.emit(
+                                                        GrafikOlayı::AğaçGezinmeDeğişti {
+                                                            seri_sırası: b.seri_sırası,
+                                                            kayma_x: görünüm.0,
+                                                            kayma_y: görünüm.1,
+                                                            ölçek: görünüm.2,
+                                                        },
+                                                    );
+                                                    cx.notify();
+                                                }
+                                            }
+                                        }
+                                        AğaçHaritasıDüğümTıklaması::BağlantıyıAç => {
+                                            if let Some((url, hedef)) = bağlantı {
+                                                cx.emit(GrafikOlayı::Bağlantıİstendi {
+                                                    seri_sırası: b.seri_sırası,
+                                                    veri_sırası: b.veri_sırası,
+                                                    url,
+                                                    hedef,
+                                                });
+                                            }
+                                        }
+                                        AğaçHaritasıDüğümTıklaması::Kapalı => {}
+                                    }
+                                }
+                            }
+                            // Sunburst da her seri için bağımsız kök yolu tutar.
+                            Some(Seri::GüneşPatlaması(güneş)) => {
+                                if let Some(yol) = güneş.düğüm_yolu(b.veri_sırası) {
+                                    bu.hiyerarşi_yolları.insert(b.seri_sırası, yol);
                                     cx.notify();
                                 }
                             }

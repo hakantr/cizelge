@@ -10,6 +10,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use crate::animasyon::Yumuşatma;
+use crate::cizim::olay::AğaçHaritasıKökYönü;
 use crate::hata::BilesenHatasi;
 use crate::koordinat::Kartezyen2B;
 use crate::model::bilesen::{
@@ -331,14 +332,18 @@ impl SeçenekYaması {
         self
     }
 
-    /// Yamadaki seri dizisini sıfırlar ve kimliksiz bir seri ekler.
+    /// Yamadaki seri dizisini sıfırlar ve bir seri ekler. Seri modeli açık
+    /// `id` taşıyorsa normal merge kimliği olarak korunur.
     pub fn seri(mut self, seri: impl Into<Seri>) -> Self {
         if !self.sağlanan.contains(&SeçenekAlanı::Seriler) {
             self.değer.seriler.clear();
             self.değer.seri_kimlikleri.clear();
         }
-        self.değer.seriler.push(seri.into());
-        self.değer.seri_kimlikleri.push(None);
+        let seri = seri.into();
+        self.değer
+            .seri_kimlikleri
+            .push(seri.kimlik().map(str::to_owned));
+        self.değer.seriler.push(seri);
         self.sağlanan.insert(SeçenekAlanı::Seriler);
         self
     }
@@ -877,6 +882,34 @@ pub enum GöstergeSeçimEylemi {
     TersiniSeç,
 }
 
+/// `treemapRender` / `treemapMove` yükündeki yerel `rootRect`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct AğaçHaritasıKökDikdörtgeni {
+    pub x: f32,
+    pub y: f32,
+    pub genişlik: f32,
+    pub yükseklik: f32,
+}
+
+impl AğaçHaritasıKökDikdörtgeni {
+    pub fn yeni(x: f32, y: f32, genişlik: f32, yükseklik: f32) -> Self {
+        Self {
+            x,
+            y,
+            genişlik,
+            yükseklik,
+        }
+    }
+
+    fn geçerli_mi(self) -> bool {
+        [self.x, self.y, self.genişlik, self.yükseklik]
+            .into_iter()
+            .all(f32::is_finite)
+            && self.genişlik > 0.0
+            && self.yükseklik > 0.0
+    }
+}
+
 /// Axis-break action seçicisinin hedef koordinat boyutu.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EksenBoyutu {
@@ -958,6 +991,17 @@ pub enum ÇalışmaOlayı {
         ad: String,
         daraltılmış: bool,
     },
+    AğaçHaritasıKöküDeğişti {
+        seri_sırası: usize,
+        veri_sırası: Option<usize>,
+        yol: Vec<String>,
+        yön: AğaçHaritasıKökYönü,
+    },
+    AğaçHaritasıGörünümüDeğişti {
+        seri_sırası: usize,
+        kök_dikdörtgeni: Option<AğaçHaritasıKökDikdörtgeni>,
+        yakınlaştırma_hedefi: Option<usize>,
+    },
     EksenKırılmasıDeğişti {
         değişiklikler: Vec<EksenKırılmaDeğişikliği>,
     },
@@ -981,6 +1025,10 @@ pub struct GrafikÇalışmaZamanı {
     yeniden_çizim_bekliyor: bool,
     bekleyen_olay_sessiz: bool,
     yükleme: Option<String>,
+    /// Treemap view state, `getOption` sonucuna karışmaz.
+    ağaç_haritası_kökleri: BTreeMap<usize, Vec<String>>,
+    ağaç_haritası_kök_dikdörtgenleri: BTreeMap<usize, AğaçHaritasıKökDikdörtgeni>,
+    ağaç_haritası_yakınlaştırma_hedefleri: BTreeMap<usize, usize>,
     olaylar: Vec<ÇalışmaOlayı>,
 }
 
@@ -1007,6 +1055,9 @@ impl GrafikÇalışmaZamanı {
             yeniden_çizim_bekliyor: false,
             bekleyen_olay_sessiz: true,
             yükleme: None,
+            ağaç_haritası_kökleri: BTreeMap::new(),
+            ağaç_haritası_kök_dikdörtgenleri: BTreeMap::new(),
+            ağaç_haritası_yakınlaştırma_hedefleri: BTreeMap::new(),
             olaylar: Vec::new(),
         })
     }
@@ -1050,6 +1101,12 @@ impl GrafikÇalışmaZamanı {
         yamayı_uygula(&mut aday, &yama, &kip)?;
         seçenekleri_doğrula(&aday)?;
         self.seçenekler = aday;
+        if kip.birleştirme_yok || kip.değiştirerek_birleştir.contains(&SeçenekAlanı::Seriler)
+        {
+            self.ağaç_haritası_durumunu_temizle();
+        } else {
+            self.ağaç_haritası_durumunu_süz();
+        }
 
         if kip.tembel_güncelle {
             self.yeniden_çizim_bekliyor = true;
@@ -1510,6 +1567,7 @@ impl GrafikÇalışmaZamanı {
         self.seçenekler = self.geri_yükleme_seçenekleri.clone();
         self.yeniden_çizim_bekliyor = false;
         self.bekleyen_olay_sessiz = true;
+        self.ağaç_haritası_durumunu_temizle();
         if !sessiz {
             self.olaylar.push(ÇalışmaOlayı::GeriYüklendi);
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
@@ -1595,6 +1653,7 @@ impl GrafikÇalışmaZamanı {
         self.seçenekler = boş;
         self.yeniden_çizim_bekliyor = false;
         self.bekleyen_olay_sessiz = true;
+        self.ağaç_haritası_durumunu_temizle();
         if !sessiz {
             self.olaylar.push(ÇalışmaOlayı::Temizlendi);
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
@@ -1658,6 +1717,7 @@ impl GrafikÇalışmaZamanı {
         )?;
         seçenekleri_doğrula(&aday)?;
         self.seçenekler = aday;
+        self.ağaç_haritası_durumunu_temizle();
         if !sessiz {
             self.olaylar.push(ÇalışmaOlayı::SeçenekDeğişti);
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
@@ -1792,6 +1852,258 @@ impl GrafikÇalışmaZamanı {
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok((sıra, ad, daraltılmış))
+    }
+
+    /// `treemapRootToNode` action'ının başsız view-root karşılığı.
+    /// `veri_sırası=None`, serinin sanal köküne ("Tümü") döner.
+    pub fn ağaç_haritası_köküne_git(
+        &mut self,
+        seçici: SeriSeçici,
+        veri_sırası: Option<usize>,
+        sessiz: bool,
+    ) -> Result<(usize, Vec<String>, AğaçHaritasıKökYönü), BilesenHatasi> {
+        self.açık_mı("treemapRootToNode")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "treemapRootToNode.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let Some(Seri::AğaçHaritası(ağaç_haritası)) = self.seçenekler.seriler.get(sıra)
+        else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "treemapRootToNode",
+                ayrıntı: format!("{sıra}. seri `treemap` değildir"),
+            });
+        };
+        let yeni_yol = match veri_sırası {
+            Some(veri_sırası) => {
+                let düğüm = ağaç_haritası
+                    .düğüm(veri_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "treemapRootToNode.dataIndex",
+                        sıra: veri_sırası,
+                    })?;
+                if düğüm.çocuklar.is_empty() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "treemapRootToNode.dataIndex",
+                        ayrıntı: "view root en az bir çocuk içermeli".to_owned(),
+                    });
+                }
+                ağaç_haritası
+                    .düğüm_yolu(veri_sırası)
+                    .ok_or(BilesenHatasi::EksikVeri {
+                        bileşen: "treemapRootToNode.dataIndex",
+                        sıra: veri_sırası,
+                    })?
+            }
+            None => Vec::new(),
+        };
+        let eski_yol = self
+            .ağaç_haritası_kökleri
+            .get(&sıra)
+            .cloned()
+            .unwrap_or_default();
+        let yön = if eski_yol.starts_with(&yeni_yol) && yeni_yol.len() < eski_yol.len() {
+            AğaçHaritasıKökYönü::Yukarı
+        } else {
+            AğaçHaritasıKökYönü::Aşağı
+        };
+        if yeni_yol.is_empty() {
+            self.ağaç_haritası_kökleri.remove(&sıra);
+        } else {
+            self.ağaç_haritası_kökleri.insert(sıra, yeni_yol.clone());
+        }
+        self.ağaç_haritası_kök_dikdörtgenleri.remove(&sıra);
+        self.ağaç_haritası_yakınlaştırma_hedefleri.remove(&sıra);
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::AğaçHaritasıKöküDeğişti {
+                seri_sırası: sıra,
+                veri_sırası,
+                yol: yeni_yol.clone(),
+                yön,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok((sıra, yeni_yol, yön))
+    }
+
+    /// `treemapZoomToNode`: hedef düğümü saklar; renderer hedefin alanından
+    /// `zoomToNodeRatio` ve `scaleLimit` ile kök dikdörtgenini hesaplar.
+    pub fn ağaç_haritası_düğümüne_yakınlaştır(
+        &mut self,
+        seçici: SeriSeçici,
+        veri_sırası: usize,
+        sessiz: bool,
+    ) -> Result<usize, BilesenHatasi> {
+        self.açık_mı("treemapZoomToNode")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "treemapZoomToNode.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let Some(Seri::AğaçHaritası(ağaç_haritası)) = self.seçenekler.seriler.get(sıra)
+        else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "treemapZoomToNode",
+                ayrıntı: format!("{sıra}. seri `treemap` değildir"),
+            });
+        };
+        if ağaç_haritası.düğüm(veri_sırası).is_none() {
+            return Err(BilesenHatasi::EksikVeri {
+                bileşen: "treemapZoomToNode.dataIndex",
+                sıra: veri_sırası,
+            });
+        }
+        self.ağaç_haritası_yakınlaştırma_hedefleri
+            .insert(sıra, veri_sırası);
+        self.ağaç_haritası_kök_dikdörtgenleri.remove(&sıra);
+        if !sessiz {
+            self.olaylar
+                .push(ÇalışmaOlayı::AğaçHaritasıGörünümüDeğişti {
+                    seri_sırası: sıra,
+                    kök_dikdörtgeni: None,
+                    yakınlaştırma_hedefi: Some(veri_sırası),
+                });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(sıra)
+    }
+
+    /// `treemapRender` / `treemapMove`: resmî yerel `rootRect` görünümünü
+    /// ayarlar. `None`, varsayılan kök dikdörtgenine döner.
+    pub fn ağaç_haritası_kök_dikdörtgenini_ayarla(
+        &mut self,
+        seçici: SeriSeçici,
+        kök_dikdörtgeni: Option<AğaçHaritasıKökDikdörtgeni>,
+        sessiz: bool,
+    ) -> Result<usize, BilesenHatasi> {
+        self.açık_mı("treemapRender")?;
+        if let Some(dikdörtgen) = kök_dikdörtgeni
+            && !dikdörtgen.geçerli_mi()
+        {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "treemap.rootRect",
+                ayrıntı: "x/y sonlu, width/height pozitif olmalı".to_owned(),
+            });
+        }
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "treemapRender.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        if !matches!(
+            self.seçenekler.seriler.get(sıra),
+            Some(Seri::AğaçHaritası(_))
+        ) {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "treemapRender",
+                ayrıntı: format!("{sıra}. seri `treemap` değildir"),
+            });
+        }
+        match kök_dikdörtgeni {
+            Some(dikdörtgen) => {
+                self.ağaç_haritası_kök_dikdörtgenleri
+                    .insert(sıra, dikdörtgen);
+            }
+            None => {
+                self.ağaç_haritası_kök_dikdörtgenleri.remove(&sıra);
+            }
+        }
+        self.ağaç_haritası_yakınlaştırma_hedefleri.remove(&sıra);
+        if !sessiz {
+            self.olaylar
+                .push(ÇalışmaOlayı::AğaçHaritasıGörünümüDeğişti {
+                    seri_sırası: sıra,
+                    kök_dikdörtgeni,
+                    yakınlaştırma_hedefi: None,
+                });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok(sıra)
+    }
+
+    /// Treemap action durumunu renderer bağlayıcılarının okuyabileceği biçimde
+    /// döndürür: `(viewRoot yolu, rootRect, zoom hedefi)`.
+    pub fn ağaç_haritası_görünümü(
+        &self,
+        seçici: SeriSeçici,
+    ) -> Result<
+        (
+            usize,
+            Vec<String>,
+            Option<AğaçHaritasıKökDikdörtgeni>,
+            Option<usize>,
+        ),
+        BilesenHatasi,
+    > {
+        self.açık_mı("treemapView")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "treemapView.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        if !matches!(
+            self.seçenekler.seriler.get(sıra),
+            Some(Seri::AğaçHaritası(_))
+        ) {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "treemapView",
+                ayrıntı: format!("{sıra}. seri `treemap` değildir"),
+            });
+        }
+        Ok((
+            sıra,
+            self.ağaç_haritası_kökleri
+                .get(&sıra)
+                .cloned()
+                .unwrap_or_default(),
+            self.ağaç_haritası_kök_dikdörtgenleri.get(&sıra).copied(),
+            self.ağaç_haritası_yakınlaştırma_hedefleri
+                .get(&sıra)
+                .copied(),
+        ))
+    }
+
+    fn ağaç_haritası_durumunu_temizle(&mut self) {
+        self.ağaç_haritası_kökleri.clear();
+        self.ağaç_haritası_kök_dikdörtgenleri.clear();
+        self.ağaç_haritası_yakınlaştırma_hedefleri.clear();
+    }
+
+    fn ağaç_haritası_durumunu_süz(&mut self) {
+        let geçerli_seriler = self
+            .seçenekler
+            .seriler
+            .iter()
+            .enumerate()
+            .filter_map(|(sıra, seri)| matches!(seri, Seri::AğaçHaritası(_)).then_some(sıra))
+            .collect::<BTreeSet<_>>();
+        let geçerli_kökler = self
+            .ağaç_haritası_kökleri
+            .iter()
+            .filter_map(|(sıra, yol)| {
+                let Some(Seri::AğaçHaritası(seri)) = self.seçenekler.seriler.get(*sıra) else {
+                    return None;
+                };
+                let (_, inilen) = crate::model::agac::yolu_çöz(&seri.kökler, yol);
+                (inilen == yol.len()).then_some(*sıra)
+            })
+            .collect::<BTreeSet<_>>();
+        self.ağaç_haritası_kökleri
+            .retain(|sıra, _| geçerli_kökler.contains(sıra));
+        self.ağaç_haritası_kök_dikdörtgenleri
+            .retain(|sıra, _| geçerli_seriler.contains(sıra));
+        self.ağaç_haritası_yakınlaştırma_hedefleri
+            .retain(|sıra, veri_sırası| {
+                matches!(
+                    self.seçenekler.seriler.get(*sıra),
+                    Some(Seri::AğaçHaritası(seri)) if seri.düğüm(*veri_sırası).is_some()
+                )
+            });
     }
 
     /// Bağ tabanlı çekirdek `series.lines` için tipli `appendData`.

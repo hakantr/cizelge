@@ -7,8 +7,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
 use crate::calisma_zamani::{
-    EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi, GrafikÇalışmaZamanı,
-    GöstergeSeçimEylemi, SeriSeçici,
+    AğaçHaritasıKökDikdörtgeni, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
+    GrafikÇalışmaZamanı, GöstergeSeçimEylemi, SeriSeçici,
 };
 use crate::hata::BilesenHatasi;
 use crate::model::bilesen::{
@@ -744,6 +744,223 @@ pub fn ağaç_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), 
     )
 }
 
+fn ağaç_haritası_seçicileri(
+    çalışma: &GrafikÇalışmaZamanı,
+    yük: &EylemYükü,
+    bileşen: &'static str,
+) -> Result<Vec<SeriSeçici>, BilesenHatasi> {
+    if let Some(seçici) = yük.seri_seçici() {
+        return Ok(vec![seçici]);
+    }
+    let seçiciler = çalışma
+        .seçenekleri_al()?
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, seri)| {
+            matches!(seri, crate::model::seri::Seri::AğaçHaritası(_))
+                .then_some(SeriSeçici::Sıra(sıra))
+        })
+        .collect::<Vec<_>>();
+    if seçiciler.is_empty() {
+        return Err(BilesenHatasi::EksikVeri { bileşen, sıra: 0 });
+    }
+    Ok(seçiciler)
+}
+
+fn ağaç_haritası_hedefi(
+    çalışma: &GrafikÇalışmaZamanı,
+    seçici: &SeriSeçici,
+    yük: &EylemYükü,
+) -> Result<Option<usize>, BilesenHatasi> {
+    if let Some(sıra) = isteğe_bağlı_sıra(yük, "dataIndex")? {
+        return Ok(Some(sıra));
+    }
+    let hedef_kimliği = yük
+        .al("targetNodeId")
+        .or_else(|| yük.al("targetNode"))
+        .and_then(EylemDeğeri::metin);
+    let Some(hedef_kimliği) = hedef_kimliği else {
+        return Ok(None);
+    };
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seri_sırası = match seçici {
+        SeriSeçici::Sıra(sıra) => Some(*sıra),
+        SeriSeçici::Kimlik(kimlik) => (0..seçenekler.seriler.len())
+            .find(|&sıra| seçenekler.seri_kimliği(sıra) == Some(kimlik.as_str())),
+        SeriSeçici::Ad(ad) => seçenekler
+            .seriler
+            .iter()
+            .position(|seri| seri.ad() == Some(ad.as_str())),
+    }
+    .ok_or(BilesenHatasi::EksikVeri {
+        bileşen: "treemap.series",
+        sıra: 0,
+    })?;
+    let Some(crate::model::seri::Seri::AğaçHaritası(seri)) = seçenekler.seriler.get(seri_sırası)
+    else {
+        return Err(BilesenHatasi::Desteklenmeyen {
+            özellik: "treemap targetNodeId",
+            ayrıntı: format!("{seri_sırası}. seri `treemap` değildir"),
+        });
+    };
+    seri.düğüm_sırası_kimlikle(hedef_kimliği)
+        .map(Some)
+        .ok_or(BilesenHatasi::GeçersizSeçenek {
+            alan: "treemap.targetNodeId",
+            ayrıntı: format!("`{hedef_kimliği}` düğümü bulunamadı"),
+        })
+}
+
+fn ağaç_haritası_kök_dikdörtgenini_oku(
+    yük: &EylemYükü,
+) -> Result<Option<AğaçHaritasıKökDikdörtgeni>, BilesenHatasi> {
+    let Some(değer) = yük.al("rootRect") else {
+        return Ok(None);
+    };
+    let nesne = değer
+        .nesne()
+        .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+            alan: "treemap.rootRect",
+            ayrıntı: "rootRect nesne olmalı".to_owned(),
+        })?;
+    let sayı = |alan: &'static str| {
+        nesne
+            .get(alan)
+            .and_then(EylemDeğeri::sayı)
+            .filter(|değer| değer.is_finite())
+            .map(|değer| değer as f32)
+            .ok_or_else(|| BilesenHatasi::GeçersizSeçenek {
+                alan: "treemap.rootRect",
+                ayrıntı: format!("`{alan}` sonlu sayı olmalı"),
+            })
+    };
+    Ok(Some(AğaçHaritasıKökDikdörtgeni::yeni(
+        sayı("x")?,
+        sayı("y")?,
+        sayı("width")?,
+        sayı("height")?,
+    )))
+}
+
+fn ağaç_haritası_olayı(
+    çalışma: &GrafikÇalışmaZamanı,
+    seri_sırası: usize,
+    veri_sırası: Option<usize>,
+) -> Result<OlayYükü, BilesenHatasi> {
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seri = seçenekler.seriler.get(seri_sırası);
+    let veri_adı = veri_sırası.and_then(|veri_sırası| match seri {
+        Some(crate::model::seri::Seri::AğaçHaritası(seri)) => {
+            seri.düğüm(veri_sırası).map(|düğüm| düğüm.ad.clone())
+        }
+        _ => None,
+    });
+    Ok(OlayYükü {
+        bileşen_türü: Some("series".to_owned()),
+        bileşen_alt_türü: Some("treemap".to_owned()),
+        seri_sırası: Some(seri_sırası),
+        seri_kimliği: seri.and_then(|seri| match seri {
+            crate::model::seri::Seri::AğaçHaritası(seri) => seri.kimlik.clone(),
+            _ => None,
+        }),
+        seri_adı: seri.and_then(|seri| seri.ad().map(str::to_owned)),
+        veri_sırası,
+        veri_adı,
+        ..OlayYükü::default()
+    })
+}
+
+/// Treemap'in dört resmî view action'ını (`treemapRootToNode`,
+/// `treemapZoomToNode`, `treemapRender`, `treemapMove`) kaydeder.
+pub fn ağaç_haritası_eylemlerini_kaydet(
+    kayıt: &mut EylemKayıtDefteri,
+) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "treemapRootToNode",
+        "treemapRootToNode",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| {
+            let seçiciler = ağaç_haritası_seçicileri(çalışma, yük, "treemapRootToNode.series")?;
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let hedef = ağaç_haritası_hedefi(çalışma, &seçici, yük)?;
+                let (seri_sırası, yol, yön) =
+                    çalışma.ağaç_haritası_köküne_git(seçici, hedef, true)?;
+                let mut olay = ağaç_haritası_olayı(çalışma, seri_sırası, hedef)?;
+                olay.alanlar.insert(
+                    "direction".to_owned(),
+                    EylemDeğeri::from(match yön {
+                        crate::cizim::olay::AğaçHaritasıKökYönü::Aşağı => "drillDown",
+                        crate::cizim::olay::AğaçHaritasıKökYönü::Yukarı => "rollUp",
+                    }),
+                );
+                olay.alanlar.insert(
+                    "path".to_owned(),
+                    EylemDeğeri::Dizi(yol.into_iter().map(EylemDeğeri::from).collect()),
+                );
+                olaylar.push(olay);
+            }
+            Ok(olaylar)
+        },
+    )?;
+    kayıt.kaydet(
+        "treemapZoomToNode",
+        "treemapZoomToNode",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| {
+            let seçiciler = ağaç_haritası_seçicileri(çalışma, yük, "treemapZoomToNode.series")?;
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let hedef = ağaç_haritası_hedefi(çalışma, &seçici, yük)?.ok_or_else(|| {
+                    BilesenHatasi::GeçersizSeçenek {
+                        alan: "treemapZoomToNode.dataIndex",
+                        ayrıntı: "dataIndex veya targetNodeId gerekli".to_owned(),
+                    }
+                })?;
+                let seri_sırası =
+                    çalışma.ağaç_haritası_düğümüne_yakınlaştır(seçici, hedef, true)?;
+                olaylar.push(ağaç_haritası_olayı(çalışma, seri_sırası, Some(hedef))?);
+            }
+            Ok(olaylar)
+        },
+    )?;
+    for tür in ["treemapRender", "treemapMove"] {
+        kayıt.kaydet(
+            tür,
+            tür,
+            EylemGüncellemesi::Görünüm,
+            |çalışma, yük| {
+                let seçiciler = ağaç_haritası_seçicileri(çalışma, yük, "treemapRender.series")?;
+                let dikdörtgen = ağaç_haritası_kök_dikdörtgenini_oku(yük)?;
+                let mut olaylar = Vec::with_capacity(seçiciler.len());
+                for seçici in seçiciler {
+                    let seri_sırası = çalışma.ağaç_haritası_kök_dikdörtgenini_ayarla(
+                        seçici,
+                        dikdörtgen,
+                        true,
+                    )?;
+                    let mut olay = ağaç_haritası_olayı(çalışma, seri_sırası, None)?;
+                    if let Some(dikdörtgen) = dikdörtgen {
+                        olay.alanlar.insert(
+                            "rootRect".to_owned(),
+                            EylemDeğeri::Nesne(BTreeMap::from([
+                                ("x".to_owned(), EylemDeğeri::from(dikdörtgen.x)),
+                                ("y".to_owned(), EylemDeğeri::from(dikdörtgen.y)),
+                                ("width".to_owned(), EylemDeğeri::from(dikdörtgen.genişlik)),
+                                ("height".to_owned(), EylemDeğeri::from(dikdörtgen.yükseklik)),
+                            ])),
+                        );
+                    }
+                    olaylar.push(olay);
+                }
+                Ok(olaylar)
+            },
+        )?;
+    }
+    Ok(())
+}
+
 fn paralel_aralıklarını_oku(değer: &EylemDeğeri) -> Result<Vec<[f64; 2]>, BilesenHatasi> {
     değer
         .dizi()
@@ -1372,6 +1589,7 @@ pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<
     fırça_eylemini_kaydet(kayıt)?;
     paralel_eylemlerini_kaydet(kayıt)?;
     ağaç_eylemlerini_kaydet(kayıt)?;
+    ağaç_haritası_eylemlerini_kaydet(kayıt)?;
     eksen_kırılma_eylemlerini_kaydet(kayıt)?;
     görsel_aralık_eylemini_kaydet(kayıt)?;
     geri_yükleme_eylemini_kaydet(kayıt)?;
@@ -1573,7 +1791,7 @@ mod testler {
     use crate::model::gorsel_esleme::GörselEşleme;
     use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
     use crate::model::secenekler::GrafikSeçenekleri;
-    use crate::model::seri::{AğaçSerisi, ParalelSerisi, ÇizgiSerisi};
+    use crate::model::seri::{AğaçHaritasıSerisi, AğaçSerisi, ParalelSerisi, ÇizgiSerisi};
     use crate::model::yakinlastirma::VeriYakınlaştırma;
 
     fn çalışma() -> GrafikÇalışmaZamanı {
@@ -1655,6 +1873,137 @@ mod testler {
             panic!("Tree serisi bekleniyordu");
         };
         assert_eq!(ağaç.kökler[0].daraltılmış, Some(false));
+    }
+
+    #[test]
+    fn treemap_dort_view_actioni_kok_hedef_ve_root_rect_durumunu_korur() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(
+            AğaçHaritasıSerisi::yeni()
+                .kimlik("tm")
+                .ad("Treemap")
+                .kökler([AğaçDüğümü::dal(
+                    "root",
+                    vec![
+                        AğaçDüğümü::dal("branch", vec![AğaçDüğümü::yaprak("leaf", 7.0)])
+                            .kimlik("branch-id"),
+                    ],
+                )
+                .kimlik("root-id")]),
+        );
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        ağaç_haritası_eylemlerini_kaydet(&mut kayıt).unwrap();
+
+        let kök_olayı = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("treemapRootToNode")
+                    .alan("seriesId", "tm")
+                    .alan("targetNodeId", "branch-id"),
+            )
+            .unwrap();
+        assert_eq!(kök_olayı[0].tür, "treemapRootToNode");
+        assert_eq!(
+            kök_olayı[0].alanlar.get("direction"),
+            Some(&EylemDeğeri::from("drillDown"))
+        );
+        assert_eq!(
+            çalışma
+                .ağaç_haritası_görünümü(SeriSeçici::kimlik("tm"))
+                .unwrap()
+                .1,
+            vec!["root".to_owned(), "branch".to_owned()]
+        );
+
+        let yakınlaştırma = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("treemapZoomToNode")
+                    .alan("seriesId", "tm")
+                    .alan("dataIndex", 2usize),
+            )
+            .unwrap();
+        assert_eq!(yakınlaştırma[0].veri_adı.as_deref(), Some("leaf"));
+        assert_eq!(
+            çalışma
+                .ağaç_haritası_görünümü(SeriSeçici::kimlik("tm"))
+                .unwrap()
+                .3,
+            Some(2)
+        );
+
+        let root_rect = EylemDeğeri::Nesne(BTreeMap::from([
+            ("x".to_owned(), (-20.0_f64).into()),
+            ("y".to_owned(), (-10.0_f64).into()),
+            ("width".to_owned(), 900.0_f64.into()),
+            ("height".to_owned(), 650.0_f64.into()),
+        ]));
+        kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("treemapMove")
+                    .alan("seriesId", "tm")
+                    .alan("rootRect", root_rect),
+            )
+            .unwrap();
+        let görünüm = çalışma
+            .ağaç_haritası_görünümü(SeriSeçici::kimlik("tm"))
+            .unwrap();
+        assert_eq!(
+            görünüm.2,
+            Some(AğaçHaritasıKökDikdörtgeni::yeni(
+                -20.0, -10.0, 900.0, 650.0
+            ))
+        );
+        assert_eq!(görünüm.3, None);
+
+        let geri = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("treemapRootToNode").alan("seriesId", "tm"),
+            )
+            .unwrap();
+        assert_eq!(
+            geri[0].alanlar.get("direction"),
+            Some(&EylemDeğeri::from("rollUp"))
+        );
+        assert!(
+            çalışma
+                .ağaç_haritası_görünümü(SeriSeçici::kimlik("tm"))
+                .unwrap()
+                .1
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn treemap_action_silent_olayi_bastirir_ama_durumu_gunceller() {
+        let seçenekler =
+            GrafikSeçenekleri::yeni().seri(AğaçHaritasıSerisi::yeni().kimlik("tm").kökler([
+                AğaçDüğümü::dal("root", vec![AğaçDüğümü::yaprak("leaf", 1.0)]),
+            ]));
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        ağaç_haritası_eylemlerini_kaydet(&mut kayıt).unwrap();
+        let olaylar = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("treemapZoomToNode")
+                    .alan("seriesId", "tm")
+                    .alan("dataIndex", 1usize)
+                    .sessiz(true),
+            )
+            .unwrap();
+        assert!(olaylar.is_empty());
+        assert_eq!(
+            çalışma
+                .ağaç_haritası_görünümü(SeriSeçici::kimlik("tm"))
+                .unwrap()
+                .3,
+            Some(1)
+        );
     }
 
     #[test]

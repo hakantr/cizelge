@@ -12698,7 +12698,7 @@
     "videoEnd": 9000,
     "kaynak": "public/examples/ts/treemap-sunburst-transition.ts",
     "kaynak_sha256": "7a0225a7d78d83388c04e371c85003e852423c6f2c050c8af6dea15230e52daf",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_sunburst_transition",
     "seriler": [
       "sunburst",
       "treemap"
@@ -12712,7 +12712,7 @@
     "dış_varlıklar": [
       "/data/asset/data/echarts-package-size.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -12725,15 +12725,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": false,
+          "değişen_piksel": 10786,
+          "değişen_piksel_oranı": 0.03994814814814815,
+          "ssim": 0.8241043353639822,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-sunburst-transition.png",
+            "sha256": "47a8fea5778b6f3e0882842b1886415ba3970fd08d6652887eaf8303d54d0267"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-sunburst-transition.png",
+            "sha256": "8af5796338f48e5b99ceb017a0df43ff27f8b143a5a25c2228dd334547f074ec"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-sunburst-transition.png",
+            "sha256": "afc47cf0acb464557a8dbb030c36b8108c31e1722dece37bda56e8352a557686"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 11918,
+            "değişen_piksel_oranı": 0.04414074074074074,
+            "ssim": 0.7808474613364109
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-sunburst-transition-tipografi.png",
+            "sha256": "96749b01e436c4165e7bf3f8aed5c2882abb8203b0f54d35dc10f67dd8a00714"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-sunburst-transition.json",
+            "sha256": "cea41d895e4099475c970b6cac3ee6b77e740f7dcc0c96153b41632ffaceaccb"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-sunburst-transition-son.json",
+            "sha256": "91e6fb3e77bbfd3324e661ce7f74f713dafb380bb9d8e91573318fb8303f8b97"
+          }
+        }
+      ]
     }
   },
   {
@@ -21940,7 +21983,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/treemap-disk.ts",
     "kaynak_sha256": "0c043c466e2e6bad7f528e00116c6f347e27e60fd6e441385930ab068264bd44",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_disk",
     "seriler": [
       "treemap"
     ],
@@ -21954,7 +21997,7 @@
     "dış_varlıklar": [
       "/data/asset/data/disk.tree.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -21967,15 +22010,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": false,
+          "değişen_piksel": 9276,
+          "değişen_piksel_oranı": 0.034355555555555556,
+          "ssim": 0.9179599990333968,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-disk.png",
+            "sha256": "3139301e9af33b5733ce6ac04691d4cc5109d71acefe1e63b94cccae727e8635"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-disk.png",
+            "sha256": "e2040a4348e1df45153c25fa848282263a11e7c76ab295e47e63a6dc0a2274f8"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-disk.png",
+            "sha256": "86ee3e8bfc7a967966ebb178ca72c07974257a10b041acf8b3d11bdbc4020dd1"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 9031,
+            "değişen_piksel_oranı": 0.03344814814814815,
+            "ssim": 0.894156867390817
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-disk-tipografi.png",
+            "sha256": "7026613d4601242d30d73fdb0d89c118c4fb7250d3857359803604b4e98eee74"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-disk.json",
+            "sha256": "4bb8dc31a69132b8fe3c509365c0bb7f0ad3dac811cf2ca65e11d026f8b877ae"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-disk-son.json",
+            "sha256": "e335f78030e05aa5846494379d1634a1085e90e8b64185c029df2061638a0a6c"
+          }
+        }
+      ]
     }
   },
   {
@@ -22000,7 +22086,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/treemap-drill-down.ts",
     "kaynak_sha256": "fe4bbccce00e8e0bb0521253e402309bd167a842469a880f0ec3e1af28b89730",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_drill_down",
     "seriler": [
       "treemap"
     ],
@@ -22014,7 +22100,7 @@
     "dış_varlıklar": [
       "/data/asset/data/ec-option-doc-statistics-201604.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -22027,15 +22113,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": false,
+          "değişen_piksel": 10381,
+          "değişen_piksel_oranı": 0.03844814814814815,
+          "ssim": 0.9021810803280652,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-drill-down.png",
+            "sha256": "84bfab54ce07fffaa68a9eded4ef530c5a801be82292deeefb904676bfb72dd0"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-drill-down.png",
+            "sha256": "8afb4dc04bbdbcbec49804a024d7e4549476172b51a762be6e591da6977f1d28"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-drill-down.png",
+            "sha256": "469cd5941a16f72d086de020792a7390d52ce77cafa5425c334ec78eecd73cf5"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 9971,
+            "değişen_piksel_oranı": 0.03692962962962963,
+            "ssim": 0.8828334534337154
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-drill-down-tipografi.png",
+            "sha256": "ea22334f50d16d1275b80f32523523328a8ff3ff4492551c74b458dc0596bab4"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-drill-down.json",
+            "sha256": "bcae1c984aeeb48787e9aba9eb94aa42c0b22b751f3e8d61c1fcfc7eceee0069"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-drill-down-son.json",
+            "sha256": "450996e280bea570ee8ce109d482ded2831251e70f4e3b7ec3eab2417550a9f5"
+          }
+        }
+      ]
     }
   },
   {
@@ -22060,7 +22189,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/treemap-obama.ts",
     "kaynak_sha256": "8edae13418e3e404bbb605ec8a0b85f43de7e26ab930cdd3f42f5f4289f0e1d5",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_obama",
     "seriler": [
       "treemap"
     ],
@@ -22075,7 +22204,7 @@
     "dış_varlıklar": [
       "/data/asset/data/obama_budget_proposal_2012.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -22088,15 +22217,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": false,
+          "değişen_piksel": 10468,
+          "değişen_piksel_oranı": 0.03877037037037037,
+          "ssim": 0.9157612224999533,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-obama.png",
+            "sha256": "746fda524e8d5b13e7e6346d321340ea9bdafbc2c8cdb7a3cb0ef885cf94879b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-obama.png",
+            "sha256": "78fa15b5a6a4be64a3c472950d14bb220475927908faff761046234c224940c3"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-obama.png",
+            "sha256": "9034b3c15781d4515bdd5382f27c7368f632d9961c1c1d3014430900d0ffa2c1"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 11397,
+            "değişen_piksel_oranı": 0.04221111111111111,
+            "ssim": 0.9127378281401483
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-obama-tipografi.png",
+            "sha256": "4c0f698a7730e807db818303bb412e1dc115e6767d5b380b48ab4a5e3da31ab3"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-obama.json",
+            "sha256": "f0e5d82c6d8a3916f557db9a6e5aa105e23dfb8a90823b0a09f9754b5f3e9594"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-obama-son.json",
+            "sha256": "3b25cfd7e5fc72ba7909c372e10093a9bbdaaa9487a6417051594ab91fb777ff"
+          }
+        }
+      ]
     }
   },
   {
@@ -22121,7 +22293,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/treemap-show-parent.ts",
     "kaynak_sha256": "c8602a79b00a5b695cdc86482386e7fcdc7deecf8fa0aa28fc002a977b72ff38",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_show_parent",
     "seriler": [
       "treemap"
     ],
@@ -22135,7 +22307,7 @@
     "dış_varlıklar": [
       "/data/asset/data/disk.tree.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -22148,15 +22320,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": false,
+          "değişen_piksel": 11983,
+          "değişen_piksel_oranı": 0.04438148148148148,
+          "ssim": 0.910957725334423,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-show-parent.png",
+            "sha256": "ab517d34340744344f36e607ba5b980d94057b11f2bc5bfbb02590c8ec796488"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-show-parent.png",
+            "sha256": "14798791cb9af74ca36896d90beb36adeaa191b70880e3f7dec408d60e11cdb7"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-show-parent.png",
+            "sha256": "bf158b63e3c1d8fbfe1f906686c9f68bcb40bd54efb1b4e7c8b98dd4fe0d8344"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 12282,
+            "değişen_piksel_oranı": 0.04548888888888889,
+            "ssim": 0.8904318437670264
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-show-parent-tipografi.png",
+            "sha256": "fc47e5c46a544eb9eeeac458a44952d0c6e0503e948c8ac225ad2dda48d04bb9"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-show-parent.json",
+            "sha256": "a0dcf9cf61a7f3bd544ec17692c6a6c62170568681161c9e4c93abda147546cc"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-show-parent-son.json",
+            "sha256": "6f6179f879f0f2f017cc007e53f2b7a342c520fa59fbdcf0630cb06ddf984e0f"
+          }
+        }
+      ]
     }
   },
   {
@@ -22181,7 +22396,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/treemap-simple.ts",
     "kaynak_sha256": "608ff94bcb5fe5478c97400f18347c69236c4c496fa2b303f7813db2c6068e29",
-    "cizelge_fixture": "examples/agac_haritasi.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_simple",
     "seriler": [
       "treemap"
     ],
@@ -22192,7 +22407,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -22206,14 +22421,57 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 979,
+          "değişen_piksel_oranı": 0.003625925925925926,
+          "ssim": 0.9901924749720669,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-simple.png",
+            "sha256": "02403938087e2abb7a8918f9f8c898b61046bcf7c5e0472a1f3df76bd9347af1"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-simple.png",
+            "sha256": "a35886ec76b616e0e4569a29ba3e838a1b5f97c49b1c151f5f81f0c3e6919e49"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-simple.png",
+            "sha256": "fce900b10a8fee9d6d389cd3f4cfb7437418b842795aeb5e5a0b0f5c38fd0fd2"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 1253,
+            "değişen_piksel_oranı": 0.00464074074074074,
+            "ssim": 0.9855208778055741
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-simple-tipografi.png",
+            "sha256": "169a976f22273d112e7ab4b04e59bcf5fa349003e24a898d853f0da531e1f78a"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-simple.json",
+            "sha256": "2bf81de50e823efe7b065380cff65e044ce586f87cb0ebcecd1602d61827ce13"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-simple-son.json",
+            "sha256": "19ea19c932055e2df2218779e4b9115eb72cc8b6a35feacf652c128c427609a1"
+          }
+        }
+      ]
     }
   },
   {
@@ -22238,7 +22496,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/treemap-visual.ts",
     "kaynak_sha256": "662b854c4288f376fc64f0c294125031fafe9d715d575ea56055dac34136f18e",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#treemap_visual",
     "seriler": [
       "treemap"
     ],
@@ -22252,7 +22510,7 @@
     "dış_varlıklar": [
       "/data/asset/data/obama_budget_proposal_2012.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "kısmi",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -22265,15 +22523,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "kısmi",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": false,
+          "değişen_piksel": 10863,
+          "değişen_piksel_oranı": 0.040233333333333336,
+          "ssim": 0.9019380337585783,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-visual.png",
+            "sha256": "3feea9c1c9b993a237b013f99ca70dccb3c8786f293d463bbbc2dbf327ae38a4"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/treemap-visual.png",
+            "sha256": "c08914557a439f098f137d82887c96cc34300f873c025e218906e526991e8f1d"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/treemap-visual.png",
+            "sha256": "909703cdd2f4554173cf5c6a1ed19bb119b81c08a754130b7122f39066ed1ce1"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 9802,
+            "değişen_piksel_oranı": 0.036303703703703706,
+            "ssim": 0.8824039424151079
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/treemap-visual-tipografi.png",
+            "sha256": "a266a416e8fb6d2c78bb5c037fd91ea0da78e730022bc16350a586edd66d308d"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/treemap-visual.json",
+            "sha256": "547a44c3e3650e494d7b417d29438a82d7c73afc4750c7e8958726268626caad"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/treemap-visual-son.json",
+            "sha256": "6e3293bf170b5cc2275b3228d9b06714a3683252f1161676f97f92e3ccb6bce1"
+          }
+        }
+      ]
     }
   },
   {

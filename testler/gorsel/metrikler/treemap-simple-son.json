@@ -1,0 +1,43 @@
+{
+  "id": "treemap-simple",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 979,
+  "değişen_piksel_oranı": 0.003625925925925926,
+  "ssim": 0.9901924749720669,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 1253,
+    "değişen_piksel_oranı": 0.00464074074074074,
+    "ssim": 0.9855208778055741
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "treemap_hücre_sınırları_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Toplam raster oranından bağımsız olarak her hücrenin x/y/width/height sınırı, dolgu, kenarlık, gap, upperLabel ve leafRoot katmanı kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 6,
+      "gerçek_düğüm": 6,
+      "karşılaştırılan_alan": 90,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-simple.png",
+    "gerçek": "testler/gorsel/gerçek/default/treemap-simple.png",
+    "fark": "testler/gorsel/fark/default/treemap-simple.png",
+    "normalize_fark": "testler/gorsel/fark/default/treemap-simple-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/treemap-simple.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/treemap-simple.json"
+  }
+}

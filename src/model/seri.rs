@@ -8,7 +8,9 @@ use crate::cizim::{SvgYolHatası, Yol};
 use crate::koordinat::Dikdörtgen;
 use crate::model::Uzunluk;
 use crate::model::agac::{
-    AğaçGezinmesi, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü
+    AğaçGezinmesi, AğaçHaritasıDurumu, AğaçHaritasıDüğümTıklaması, AğaçHaritasıGörseli,
+    AğaçHaritasıKırpmaPenceresi, AğaçHaritasıKırıntısı, AğaçHaritasıSeviyesi, AğaçHaritasıSırası,
+    AğaçHaritasıÖğeStili, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
 };
 use crate::model::bilesen::İpucu;
 use crate::model::deger::{VeriDeğeri, VeriÖğesi, veri_listesi};
@@ -3685,32 +3687,115 @@ impl ÖzelSeri {
     }
 }
 
-/// Ağaç haritası serisi (`series-treemap`): kareselleştirilmiş yerleşim.
+/// Ağaç haritası serisi (`series-treemap`). Alan, seviye kalıtımı,
+/// görsel kanallar ve gezinme seçenekleri ECharts `TreemapSeriesOption`
+/// yüzeyini izler.
 #[derive(Clone, Debug)]
 pub struct AğaçHaritasıSerisi {
+    pub kimlik: Option<String>,
     pub ad: Option<String>,
     pub kökler: Vec<crate::model::agac::AğaçDüğümü>,
+    pub z: i32,
+    pub sessiz: bool,
     pub sol: Uzunluk,
     pub üst: Uzunluk,
+    pub sağ: Option<Uzunluk>,
+    pub alt: Option<Uzunluk>,
     pub genişlik: Uzunluk,
     pub yükseklik: Uzunluk,
-    /// Hücreler arası boşluk.
-    pub hücre_boşluğu: f32,
-    /// Gösterilecek en çok derinlik (0 = yalnız kökler).
+    pub sıralama: AğaçHaritasıSırası,
+    pub kırpma_penceresi: AğaçHaritasıKırpmaPenceresi,
+    pub kare_oranı: f32,
+    /// `leafDepth`; `None` tüm hiyerarşiyi yerleştirir.
+    pub yaprak_derinliği: Option<usize>,
+    pub inme_simgesi: String,
+    pub düğüme_yakınlaştırma_oranı: f32,
+    pub gezinme: AğaçGezinmesi,
+    pub en_küçük_ölçek: f32,
+    pub en_büyük_ölçek: f32,
+    pub düğüm_tıklaması: AğaçHaritasıDüğümTıklaması,
+    pub kırıntı: AğaçHaritasıKırıntısı,
+    pub etiket: Etiket,
+    pub üst_etiket: Etiket,
+    pub öğe_stili: AğaçHaritasıÖğeStili,
+    pub vurgu: AğaçHaritasıDurumu,
+    pub bulanık: AğaçHaritasıDurumu,
+    pub seçili: AğaçHaritasıDurumu,
+    pub görsel: AğaçHaritasıGörseli,
+    pub seviyeler: Vec<AğaçHaritasıSeviyesi>,
+    pub ipucu: Option<İpucu>,
+    /// ECharts v6 `calendar` / `matrix` kutu sağlayıcısı.
+    pub takvim_sırası: Option<usize>,
+    /// `coord` takvim tarihi; Treemap bu gün hücresini kutu referansı yapar.
+    pub takvim_koordinatı: Option<f64>,
+    pub matris_sırası: Option<usize>,
+    /// `coord` Matrix hücresi/aralığı; Treemap bu dikdörtgeni kutu
+    /// referansı yapar.
+    pub matris_koordinatı: Option<(MatrisAralığı, MatrisAralığı)>,
+    /// Eski Cizelge API'sinin geriye uyumlu sınırı; açık
+    /// `yaprak_derinliği` yoksa kullanılır.
     pub en_çok_derinlik: usize,
 }
 
 impl Default for AğaçHaritasıSerisi {
     fn default() -> Self {
         AğaçHaritasıSerisi {
+            kimlik: None,
             ad: None,
             kökler: Vec::new(),
-            sol: Uzunluk::Yüzde(5.0),
+            z: 2,
+            sessiz: false,
+            sol: Uzunluk::Piksel(20.0),
             üst: Uzunluk::Piksel(50.0),
-            genişlik: Uzunluk::Yüzde(90.0),
-            yükseklik: Uzunluk::Yüzde(80.0),
-            hücre_boşluğu: 2.0,
-            en_çok_derinlik: 2,
+            sağ: Some(Uzunluk::Piksel(20.0)),
+            alt: Some(Uzunluk::Piksel(50.0)),
+            genişlik: Uzunluk::Yüzde(100.0),
+            yükseklik: Uzunluk::Yüzde(100.0),
+            sıralama: AğaçHaritasıSırası::Azalan,
+            kırpma_penceresi: AğaçHaritasıKırpmaPenceresi::Özgün,
+            kare_oranı: 0.5 * (1.0 + 5.0_f32.sqrt()),
+            yaprak_derinliği: None,
+            inme_simgesi: "▶".to_owned(),
+            düğüme_yakınlaştırma_oranı: 0.32 * 0.32,
+            gezinme: AğaçGezinmesi::Açık,
+            en_küçük_ölçek: 0.2,
+            en_büyük_ölçek: 5.0,
+            düğüm_tıklaması: AğaçHaritasıDüğümTıklaması::DüğümeYakınlaştır,
+            kırıntı: AğaçHaritasıKırıntısı::default(),
+            etiket: Etiket::yeni()
+                .göster(true)
+                .konum(EtiketKonumu::İç)
+                .uzaklık(0.0)
+                .yazı(
+                    YazıStili::yeni()
+                        .renk(Renk::BEYAZ)
+                        .eş_iç_boşluk(5.0)
+                        .taşmayı_kısalt(true),
+                ),
+            üst_etiket: Etiket::yeni()
+                .göster(false)
+                .konum(EtiketKonumu::İçSol)
+                .yazı(
+                    YazıStili::yeni()
+                        .yükseklik(20.0)
+                        .dikey_hiza(crate::model::stil::YazıDikeyHizası::Orta)
+                        .taşmayı_kısalt(true),
+                ),
+            öğe_stili: AğaçHaritasıÖğeStili::yeni().kenarlık_rengi(Renk::BEYAZ),
+            vurgu: AğaçHaritasıDurumu {
+                üst_etiket: Some(EtiketYaması::yeni().göster(true)),
+                ..Default::default()
+            },
+            bulanık: AğaçHaritasıDurumu::default(),
+            seçili: AğaçHaritasıDurumu::default(),
+            görsel: AğaçHaritasıGörseli::seri_varsayılanı(),
+            seviyeler: Vec::new(),
+            ipucu: None,
+            takvim_sırası: None,
+            takvim_koordinatı: None,
+            matris_sırası: None,
+            matris_koordinatı: None,
+            en_çok_derinlik: usize::MAX,
         }
     }
 }
@@ -3718,6 +3803,11 @@ impl Default for AğaçHaritasıSerisi {
 impl AğaçHaritasıSerisi {
     pub fn yeni() -> Self {
         Self::default()
+    }
+
+    pub fn kimlik(mut self, kimlik: impl Into<String>) -> Self {
+        self.kimlik = Some(kimlik.into());
+        self
     }
 
     pub fn ad(mut self, ad: impl Into<String>) -> Self {
@@ -3733,9 +3823,294 @@ impl AğaçHaritasıSerisi {
         self
     }
 
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
+    }
+
+    pub fn sessiz(mut self, sessiz: bool) -> Self {
+        self.sessiz = sessiz;
+        self
+    }
+
+    pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
+        self.sol = sol.into();
+        self
+    }
+
+    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+        self.üst = üst.into();
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = Some(alt.into());
+        self
+    }
+
+    pub fn genişlik(mut self, genişlik: impl Into<Uzunluk>) -> Self {
+        self.genişlik = genişlik.into();
+        self.sağ = None;
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = yükseklik.into();
+        self.alt = None;
+        self
+    }
+
+    pub fn sıralama(mut self, sıralama: AğaçHaritasıSırası) -> Self {
+        self.sıralama = sıralama;
+        self
+    }
+
+    pub fn kırpma_penceresi(mut self, pencere: AğaçHaritasıKırpmaPenceresi) -> Self {
+        self.kırpma_penceresi = pencere;
+        self
+    }
+
+    pub fn kare_oranı(mut self, oran: f32) -> Self {
+        self.kare_oranı = if oran.is_finite() {
+            oran.max(0.01)
+        } else {
+            self.kare_oranı
+        };
+        self
+    }
+
+    pub fn yaprak_derinliği(mut self, derinlik: usize) -> Self {
+        self.yaprak_derinliği = Some(derinlik);
+        self
+    }
+
+    pub fn yaprak_derinliği_sınırsız(mut self) -> Self {
+        self.yaprak_derinliği = None;
+        self
+    }
+
+    pub fn inme_simgesi(mut self, simge: impl Into<String>) -> Self {
+        self.inme_simgesi = simge.into();
+        self
+    }
+
+    pub fn düğüme_yakınlaştırma_oranı(mut self, oran: f32) -> Self {
+        self.düğüme_yakınlaştırma_oranı = oran.max(0.0);
+        self
+    }
+
+    pub fn gezinme(mut self, gezinme: AğaçGezinmesi) -> Self {
+        self.gezinme = gezinme;
+        self
+    }
+
+    pub fn ölçek_sınırı(mut self, en_küçük: f32, en_büyük: f32) -> Self {
+        let en_küçük = en_küçük.max(0.01);
+        self.en_küçük_ölçek = en_küçük;
+        self.en_büyük_ölçek = en_büyük.max(en_küçük);
+        self
+    }
+
+    pub fn düğüm_tıklaması(mut self, davranış: AğaçHaritasıDüğümTıklaması) -> Self {
+        self.düğüm_tıklaması = davranış;
+        self
+    }
+
+    pub fn kırıntı(mut self, kırıntı: AğaçHaritasıKırıntısı) -> Self {
+        self.kırıntı = kırıntı;
+        self
+    }
+
+    pub fn etiket(mut self, etiket: Etiket) -> Self {
+        self.etiket = etiket;
+        self
+    }
+
+    pub fn üst_etiket(mut self, etiket: Etiket) -> Self {
+        self.üst_etiket = etiket;
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: AğaçHaritasıÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn vurgu(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.vurgu = durum;
+        self
+    }
+
+    pub fn bulanık(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.bulanık = durum;
+        self
+    }
+
+    pub fn seçili(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.seçili = durum;
+        self
+    }
+
+    pub fn görsel(mut self, görsel: AğaçHaritasıGörseli) -> Self {
+        self.görsel = görsel;
+        self
+    }
+
+    pub fn seviyeler(
+        mut self, seviyeler: impl IntoIterator<Item = AğaçHaritasıSeviyesi>
+    ) -> Self {
+        self.seviyeler = seviyeler.into_iter().collect();
+        self
+    }
+
+    pub fn ipucu(mut self, ipucu: İpucu) -> Self {
+        self.ipucu = Some(ipucu);
+        self
+    }
+
+    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
+        self.takvim_sırası = Some(sıra);
+        self.matris_sırası = None;
+        self.matris_koordinatı = None;
+        self
+    }
+
+    /// Seriyi bir takvim gün hücresinin kutusuna bağlar (`coord`).
+    pub fn takvim_hücresi(mut self, tarih_ms: f64) -> Self {
+        self.takvim_sırası.get_or_insert(0);
+        self.takvim_koordinatı = tarih_ms.is_finite().then_some(tarih_ms);
+        self.matris_sırası = None;
+        self.matris_koordinatı = None;
+        self
+    }
+
+    pub fn matris_sırası(mut self, sıra: usize) -> Self {
+        self.matris_sırası = Some(sıra);
+        self.takvim_sırası = None;
+        self.takvim_koordinatı = None;
+        self
+    }
+
+    /// Seriyi bir Matrix hücresi ya da hücre aralığının kutusuna bağlar
+    /// (`coord`).
+    pub fn matris_hücresi(
+        mut self,
+        x: impl Into<MatrisAralığı>,
+        y: impl Into<MatrisAralığı>,
+    ) -> Self {
+        self.matris_sırası.get_or_insert(0);
+        self.matris_koordinatı = Some((x.into(), y.into()));
+        self.takvim_sırası = None;
+        self.takvim_koordinatı = None;
+        self
+    }
+
     pub fn en_çok_derinlik(mut self, derinlik: usize) -> Self {
         self.en_çok_derinlik = derinlik;
+        self.yaprak_derinliği = Some(derinlik.saturating_add(1));
         self
+    }
+
+    /// Ön-sıralı veri indeksini ad yoluna dönüştürür.
+    pub fn düğüm_yolu(&self, hedef: usize) -> Option<Vec<String>> {
+        fn ara(
+            düğümler: &[crate::model::agac::AğaçDüğümü],
+            hedef: usize,
+            sayaç: &mut usize,
+            yol: &mut Vec<String>,
+        ) -> Option<Vec<String>> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                yol.push(düğüm.ad.clone());
+                if sıra == hedef {
+                    return Some(yol.clone());
+                }
+                if let Some(sonuç) = ara(&düğüm.çocuklar, hedef, sayaç, yol) {
+                    return Some(sonuç);
+                }
+                yol.pop();
+            }
+            None
+        }
+        let mut sayaç = 0;
+        let mut yol = Vec::new();
+        ara(&self.kökler, hedef, &mut sayaç, &mut yol)
+    }
+
+    /// Ön-sıralı veri indeksindeki ham Treemap düğümünü döndürür.
+    pub fn düğüm(&self, hedef: usize) -> Option<&crate::model::agac::AğaçDüğümü> {
+        fn ara<'a>(
+            düğümler: &'a [crate::model::agac::AğaçDüğümü],
+            hedef: usize,
+            sayaç: &mut usize,
+        ) -> Option<&'a crate::model::agac::AğaçDüğümü> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                if sıra == hedef {
+                    return Some(düğüm);
+                }
+                if let Some(sonuç) = ara(&düğüm.çocuklar, hedef, sayaç) {
+                    return Some(sonuç);
+                }
+            }
+            None
+        }
+        let mut sayaç = 0;
+        ara(&self.kökler, hedef, &mut sayaç)
+    }
+
+    /// `treemapRootToNode.targetNodeId` için kararlı ham düğüm indeksini
+    /// çözer. Açık `data.id` yoksa ECharts Tree kimliği gibi ad kullanılır.
+    pub fn düğüm_sırası_kimlikle(&self, hedef: &str) -> Option<usize> {
+        fn ara(
+            düğümler: &[crate::model::agac::AğaçDüğümü],
+            hedef: &str,
+            sayaç: &mut usize,
+        ) -> Option<usize> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                if düğüm.kimlik.as_deref().unwrap_or(&düğüm.ad) == hedef {
+                    return Some(sıra);
+                }
+                if let Some(sıra) = ara(&düğüm.çocuklar, hedef, sayaç) {
+                    return Some(sıra);
+                }
+            }
+            None
+        }
+        let mut sayaç = 0;
+        ara(&self.kökler, hedef, &mut sayaç)
+    }
+
+    /// Düğümün geçerli view root altında ECharts `isLeafRoot` olup
+    /// olmadığını hesaplar. `leafDepth`, her root değişiminde yeniden sıfırdan
+    /// sayılır; veri ağacındaki mutlak derinlik değildir.
+    pub fn inilebilir_yaprak_mı(&self, hedef: usize, kök_yolu: &[String]) -> bool {
+        let Some(düğüm) = self.düğüm(hedef) else {
+            return false;
+        };
+        if düğüm.çocuklar.is_empty() {
+            return false;
+        }
+        let Some(yol) = self.düğüm_yolu(hedef) else {
+            return false;
+        };
+        if !yol.starts_with(kök_yolu) {
+            return false;
+        }
+        let yaprak_derinliği = self
+            .yaprak_derinliği
+            .unwrap_or_else(|| self.en_çok_derinlik.saturating_add(1));
+        yaprak_derinliği != usize::MAX
+            && yaprak_derinliği <= yol.len().saturating_sub(kök_yolu.len())
     }
 }
 
@@ -3781,6 +4156,33 @@ impl GüneşPatlamasıSerisi {
     pub fn halka(mut self, iç: impl Into<Uzunluk>, dış: impl Into<Uzunluk>) -> Self {
         self.yarıçap = (iç.into(), dış.into());
         self
+    }
+
+    /// Ön-sıralı veri indeksini kökten başlayan ad yoluna dönüştürür.
+    pub fn düğüm_yolu(&self, hedef: usize) -> Option<Vec<String>> {
+        fn ara(
+            düğümler: &[crate::model::agac::AğaçDüğümü],
+            hedef: usize,
+            sayaç: &mut usize,
+            yol: &mut Vec<String>,
+        ) -> Option<Vec<String>> {
+            for düğüm in düğümler {
+                let sıra = *sayaç;
+                *sayaç = sayaç.saturating_add(1);
+                yol.push(düğüm.ad.clone());
+                if sıra == hedef {
+                    return Some(yol.clone());
+                }
+                if let Some(sonuç) = ara(&düğüm.çocuklar, hedef, sayaç, yol) {
+                    return Some(sonuç);
+                }
+                yol.pop();
+            }
+            None
+        }
+        let mut sayaç = 0;
+        let mut yol = Vec::new();
+        ara(&self.kökler, hedef, &mut sayaç, &mut yol)
     }
 }
 
@@ -4990,6 +5392,16 @@ pub enum Seri {
 }
 
 impl Seri {
+    /// Seri modelinin kendi `id` alanı. Kimliği modelinde taşıyan ailelerde
+    /// `GrafikSeçenekleri::seri` bunu normal merge kimliği olarak kullanır.
+    pub fn kimlik(&self) -> Option<&str> {
+        match self {
+            Seri::AğaçHaritası(s) => s.kimlik.as_deref(),
+            Seri::Ağaç(s) => s.kimlik.as_deref(),
+            _ => None,
+        }
+    }
+
     pub fn ad(&self) -> Option<&str> {
         match self {
             Seri::Çizgi(s) => s.ad.as_deref(),

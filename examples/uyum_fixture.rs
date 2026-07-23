@@ -8,7 +8,7 @@
 //! ECharts referanslarıyla karşılaştırılacak kareleri bu ikili üzerinden
 //! üretir; boyama hattı gerçek `PikselYüzeyi` ve `grafiği_boya` yoludur.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -14794,28 +14794,73 @@ fn paralel_aqi_eksen_varsayılanı(koyu: bool) -> Eksen {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+enum ResmiAğaçDeğeri {
+    Tek(f64),
+    Çok(Vec<Option<f64>>),
+}
+
+#[derive(Deserialize)]
 struct ResmiAğaçDüğümü {
     name: String,
     #[serde(default)]
-    value: Option<f64>,
+    id: Option<String>,
+    #[serde(default)]
+    value: Option<ResmiAğaçDeğeri>,
+    #[serde(default)]
+    size: Option<f64>,
     #[serde(default)]
     children: Vec<ResmiAğaçDüğümü>,
 }
 
 impl ResmiAğaçDüğümü {
     fn cizelge(self) -> AğaçDüğümü {
-        if self.children.is_empty() {
-            AğaçDüğümü::yaprak(self.name, self.value.unwrap_or_default())
+        let çocuklar = self
+            .children
+            .into_iter()
+            .map(Self::cizelge)
+            .collect::<Vec<_>>();
+        let mut düğüm = if çocuklar.is_empty() {
+            AğaçDüğümü::yaprak(self.name, 0.0)
         } else {
-            let mut düğüm = AğaçDüğümü::dal(
-                self.name,
-                self.children.into_iter().map(Self::cizelge).collect(),
-            );
-            if let Some(değer) = self.value {
-                düğüm = düğüm.değerli(değer);
-            }
-            düğüm
+            AğaçDüğümü::dal(self.name, çocuklar)
+        };
+        if let Some(kimlik) = self.id {
+            düğüm = düğüm.kimlik(kimlik);
         }
+        düğüm = match self.value {
+            Some(ResmiAğaçDeğeri::Tek(değer)) => düğüm.değerli(değer),
+            Some(ResmiAğaçDeğeri::Çok(değerler)) => düğüm.çoklu_değerler(değerler),
+            None if self.size.is_some() => düğüm.değerli(self.size.unwrap_or_default()),
+            None => düğüm,
+        };
+        düğüm
+    }
+
+    fn cizelge_dizisi(veri: Vec<Self>) -> Vec<AğaçDüğümü> {
+        veri.into_iter().map(Self::cizelge).collect()
+    }
+
+    fn resmi_diziyi_oku(dosya: &str) -> Result<Vec<AğaçDüğümü>, String> {
+        let yol = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../echarts-examples/public/data/asset/data")
+            .join(dosya);
+        let kaynak = std::fs::read_to_string(&yol)
+            .map_err(|hata| format!("{} okunamadı: {hata}", yol.display()))?;
+        serde_json::from_str::<Vec<Self>>(&kaynak)
+            .map(Self::cizelge_dizisi)
+            .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", yol.display()))
+    }
+
+    fn resmi_kökü_oku(dosya: &str) -> Result<AğaçDüğümü, String> {
+        let yol = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../echarts-examples/public/data/asset/data")
+            .join(dosya);
+        let kaynak = std::fs::read_to_string(&yol)
+            .map_err(|hata| format!("{} okunamadı: {hata}", yol.display()))?;
+        serde_json::from_str::<Self>(&kaynak)
+            .map(Self::cizelge)
+            .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", yol.display()))
     }
 }
 
@@ -15151,6 +15196,491 @@ fn tree_polyline() -> Result<GrafikSeçenekleri, String> {
                 ))
                 .vurgu_odağı(AğaçVurguOdağı::AltSoy),
         ))
+}
+
+fn treemap_verisini_oku(dosya: &str) -> Result<Vec<AğaçDüğümü>, String> {
+    ResmiAğaçDüğümü::resmi_diziyi_oku(dosya)
+}
+
+fn treemap_etiketi() -> Etiket {
+    Etiket::yeni()
+        .göster(true)
+        .konum(EtiketKonumu::İç)
+        .biçimleyici("{b}")
+        .uzaklık(0.0)
+        .yazı(
+            YazıStili::yeni()
+                .renk("#fff")
+                .eş_iç_boşluk(5.0)
+                .taşmayı_kısalt(true),
+        )
+}
+
+fn treemap_simple() -> GrafikSeçenekleri {
+    GrafikSeçenekleri::yeni().animasyon(false).seri(
+        AğaçHaritasıSerisi::yeni().kökler([
+            AğaçDüğümü::dal(
+                "nodeA",
+                vec![
+                    AğaçDüğümü::yaprak("nodeAa", 4.0),
+                    AğaçDüğümü::yaprak("nodeAb", 6.0),
+                ],
+            )
+            .değerli(10.0),
+            AğaçDüğümü::dal(
+                "nodeB",
+                vec![
+                    AğaçDüğümü::dal("nodeBa", vec![AğaçDüğümü::yaprak("nodeBa1", 20.0)])
+                        .değerli(20.0),
+                ],
+            )
+            .değerli(20.0),
+        ]),
+    )
+}
+
+fn treemap_disk_seviyeleri() -> Vec<AğaçHaritasıSeviyesi> {
+    vec![
+        AğaçHaritasıSeviyesi::yeni().öğe_stili(
+            AğaçHaritasıÖğeStili::yeni()
+                .kenarlık_kalınlığı(0.0)
+                .boşluk_genişliği(5.0),
+        ),
+        AğaçHaritasıSeviyesi::yeni()
+            .öğe_stili(AğaçHaritasıÖğeStili::yeni().boşluk_genişliği(1.0)),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(AğaçHaritasıGörseli::yeni().doygunluk_aralığı(0.35, 0.5))
+            .öğe_stili(
+                AğaçHaritasıÖğeStili::yeni()
+                    .boşluk_genişliği(1.0)
+                    .kenarlık_rengi_doygunluğu(0.6),
+            ),
+    ]
+}
+
+fn treemap_disk() -> Result<GrafikSeçenekleri, String> {
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Disk Usage").sol("center"))
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .seri(
+            AğaçHaritasıSerisi::yeni()
+                .ad("Disk Usage")
+                .görsel(AğaçHaritasıGörseli::seri_varsayılanı().görünür_en_az(300.0))
+                .etiket(treemap_etiketi())
+                .öğe_stili(AğaçHaritasıÖğeStili::yeni().kenarlık_rengi("#fff"))
+                .seviyeler(treemap_disk_seviyeleri())
+                .kökler(treemap_verisini_oku("disk.tree.json")?),
+        ))
+}
+
+fn treemap_show_parent() -> Result<GrafikSeçenekleri, String> {
+    let seviyeler = vec![
+        AğaçHaritasıSeviyesi::yeni()
+            .öğe_stili(
+                AğaçHaritasıÖğeStili::yeni()
+                    .kenarlık_rengi("#777")
+                    .kenarlık_kalınlığı(0.0)
+                    .boşluk_genişliği(1.0),
+            )
+            .üst_etiket(EtiketYaması::yeni().göster(false)),
+        AğaçHaritasıSeviyesi::yeni()
+            .öğe_stili(
+                AğaçHaritasıÖğeStili::yeni()
+                    .kenarlık_rengi("#555")
+                    .kenarlık_kalınlığı(5.0)
+                    .boşluk_genişliği(1.0),
+            )
+            .vurgu(
+                AğaçHaritasıDurumu::yeni()
+                    .öğe_stili(AğaçHaritasıÖğeStili::yeni().kenarlık_rengi("#ddd")),
+            ),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(AğaçHaritasıGörseli::yeni().doygunluk_aralığı(0.35, 0.5))
+            .öğe_stili(
+                AğaçHaritasıÖğeStili::yeni()
+                    .kenarlık_kalınlığı(5.0)
+                    .boşluk_genişliği(1.0)
+                    .kenarlık_rengi_doygunluğu(0.6),
+            ),
+    ];
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(Başlık::yeni().metin("Disk Usage").sol("center"))
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .seri(
+            AğaçHaritasıSerisi::yeni()
+                .ad("Disk Usage")
+                .görsel(AğaçHaritasıGörseli::seri_varsayılanı().görünür_en_az(300.0))
+                .etiket(treemap_etiketi())
+                .üst_etiket(
+                    Etiket::yeni().göster(true).konum(EtiketKonumu::İçSol).yazı(
+                        YazıStili::yeni()
+                            .renk("#fff")
+                            .yükseklik(30.0)
+                            .dikey_hiza(YazıDikeyHizası::Orta)
+                            .taşmayı_kısalt(true),
+                    ),
+                )
+                .öğe_stili(AğaçHaritasıÖğeStili::yeni().kenarlık_rengi("#fff"))
+                .seviyeler(seviyeler)
+                .kökler(treemap_verisini_oku("disk.tree.json")?),
+        ))
+}
+
+fn treemap_option_düğümleri() -> Result<Vec<AğaçDüğümü>, String> {
+    fn dönüştür(
+        nesne: &serde_json::Map<String, serde_json::Value>,
+        taban: &str,
+    ) -> Vec<AğaçDüğümü> {
+        let mut çıktı = Vec::new();
+        for (anahtar, değer) in nesne {
+            if anahtar.starts_with('$') {
+                continue;
+            }
+            let yol = if taban.is_empty() {
+                anahtar.clone()
+            } else {
+                format!("{taban}.{anahtar}")
+            };
+            let Some(çocuk_nesne) = değer.as_object() else {
+                continue;
+            };
+            let mut çocuklar = dönüştür(çocuk_nesne, &yol);
+            let açık_sayı = çocuk_nesne
+                .get("$count")
+                .and_then(serde_json::Value::as_f64);
+            if çocuklar.is_empty() {
+                // Kaynak `source.$count || 1`: yaprakta eksik/sıfır 1 olur.
+                çıktı.push(AğaçDüğümü::yaprak(
+                    yol,
+                    açık_sayı.filter(|sayı| *sayı != 0.0).unwrap_or(1.0),
+                ));
+            } else {
+                // İç düğümde resmî örnek `{ value: source.$count }` ekler;
+                // eksik değer Tree deposunda NaN kalır ve yerleşimden
+                // süzülür, fakat ham dataIndex sırasını korur.
+                çocuklar.push(AğaçDüğümü::yaprak(
+                    yol.clone(),
+                    açık_sayı.unwrap_or(f64::NAN),
+                ));
+                çıktı.push(AğaçDüğümü::dal(yol, çocuklar));
+            }
+        }
+        çıktı
+    }
+
+    let yol = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../echarts-examples/public/data/asset/data/ec-option-doc-statistics-201604.json");
+    let kaynak = std::fs::read_to_string(&yol)
+        .map_err(|hata| format!("{} okunamadı: {hata}", yol.display()))?;
+    let ham: serde_json::Value = serde_json::from_str(&kaynak)
+        .map_err(|hata| format!("{} ayrıştırılamadı: {hata}", yol.display()))?;
+    ham.as_object()
+        .map(|nesne| dönüştür(nesne, ""))
+        .ok_or_else(|| "ec-option-doc-statistics kökü nesne değil".to_owned())
+}
+
+fn treemap_drill_down() -> Result<GrafikSeçenekleri, String> {
+    let seviyeler = vec![
+        AğaçHaritasıSeviyesi::yeni().öğe_stili(
+            AğaçHaritasıÖğeStili::yeni()
+                .kenarlık_rengi("#555")
+                .kenarlık_kalınlığı(4.0)
+                .boşluk_genişliği(4.0),
+        ),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(AğaçHaritasıGörseli::yeni().doygunluk_aralığı(0.3, 0.6))
+            .öğe_stili(
+                AğaçHaritasıÖğeStili::yeni()
+                    .kenarlık_rengi_doygunluğu(0.7)
+                    .kenarlık_kalınlığı(2.0)
+                    .boşluk_genişliği(2.0),
+            ),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(AğaçHaritasıGörseli::yeni().doygunluk_aralığı(0.3, 0.5))
+            .öğe_stili(
+                AğaçHaritasıÖğeStili::yeni()
+                    .kenarlık_rengi_doygunluğu(0.6)
+                    .boşluk_genişliği(1.0),
+            ),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(AğaçHaritasıGörseli::yeni().doygunluk_aralığı(0.3, 0.5)),
+    ];
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("ECharts Options")
+                .alt_metin("2016/04")
+                .sol("leafDepth"),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .seri(
+            AğaçHaritasıSerisi::yeni()
+                .ad("option")
+                .görsel(AğaçHaritasıGörseli::seri_varsayılanı().görünür_en_az(300.0))
+                .yaprak_derinliği(2)
+                .seviyeler(seviyeler)
+                .kökler(treemap_option_düğümleri()?),
+        ))
+}
+
+fn obama_verisini_oku() -> Result<Vec<AğaçDüğümü>, String> {
+    treemap_verisini_oku("obama_budget_proposal_2012.json")
+}
+
+fn treemap_görsel_verisini_hazırla(düğümler: &mut [AğaçDüğümü]) {
+    let değerler = düğümler
+        .iter()
+        .filter_map(|düğüm| düğüm.değerler.get(2).copied().flatten())
+        .collect::<Vec<_>>();
+    let en_az = değerler.iter().copied().fold(f64::INFINITY, f64::min);
+    let en_çok = değerler.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+    for düğüm in düğümler {
+        let değer = düğüm.değerler.get(2).copied().flatten().unwrap_or(0.0);
+        let görsel = if değer > 0.0 && en_çok > 0.0 {
+            40.0 + değer / en_çok * 60.0
+        } else if değer < 0.0 && en_az < 0.0 {
+            -100.0 + (değer - en_az) / -en_az * 60.0
+        } else {
+            0.0
+        };
+        if düğüm.değerler.len() < 4 {
+            düğüm.değerler.resize(4, None);
+        }
+        düğüm.değerler[3] = Some(if görsel.is_finite() { görsel } else { 0.0 });
+        treemap_görsel_verisini_hazırla(&mut düğüm.çocuklar);
+    }
+}
+
+fn treemap_visual() -> Result<GrafikSeçenekleri, String> {
+    let mut veri = obama_verisini_oku()?;
+    treemap_görsel_verisini_hazırla(&mut veri);
+    let seviyeler = vec![
+        AğaçHaritasıSeviyesi::yeni().öğe_stili(
+            AğaçHaritasıÖğeStili::yeni()
+                .kenarlık_rengi("#333")
+                .kenarlık_kalınlığı(3.0)
+                .boşluk_genişliği(3.0),
+        ),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(
+                AğaçHaritasıGörseli::yeni()
+                    .renkler(["#942e38", "#aaa", "#269f3c"])
+                    .eşleme(AğaçHaritasıRenkEşlemesi::Değer),
+            )
+            .öğe_stili(AğaçHaritasıÖğeStili::yeni().boşluk_genişliği(1.0)),
+    ];
+    Ok(GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("Gradient Mapping")
+                .alt_metin("Growth > 0: green; Growth < 0: red; Growth = 0: grey")
+                .sol("center"),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe))
+        .seri(
+            AğaçHaritasıSerisi::yeni()
+                .ad("ALL")
+                .üst(80)
+                .etiket(treemap_etiketi())
+                .öğe_stili(AğaçHaritasıÖğeStili::yeni().kenarlık_rengi("black"))
+                .görsel(
+                    AğaçHaritasıGörseli::seri_varsayılanı()
+                        .boyut(3)
+                        .aralık(-100.0, 100.0),
+                )
+                .seviyeler(seviyeler)
+                .kökler(veri),
+        ))
+}
+
+fn obama_modu(mut veri: Vec<AğaçDüğümü>, kip: usize) -> Vec<AğaçDüğümü> {
+    fn dönüştür(düğümler: &mut [AğaçDüğümü], kip: usize) {
+        const HANE: f64 = 113_616_229.0;
+        for düğüm in düğümler {
+            if düğüm.değerler.len() < 4 {
+                düğüm.değerler.resize(4, None);
+            }
+            düğüm.değerler[3] = düğüm.değerler[0].map(|değer| değer / HANE);
+            if kip == 1 {
+                düğüm.değerler.swap(0, 1);
+                düğüm.değer = düğüm.değerler[0];
+            }
+            dönüştür(&mut düğüm.çocuklar, kip);
+        }
+    }
+    dönüştür(&mut veri, kip);
+    veri
+}
+
+fn obama_seviyeleri(kip: usize) -> Vec<AğaçHaritasıSeviyesi> {
+    let birinci = if kip == 2 {
+        AğaçHaritasıGörseli::yeni()
+            .renkler([
+                "#c23531", "#314656", "#61a0a8", "#dd8668", "#91c7ae", "#6e7074", "#61a0a8",
+                "#bda29a", "#44525d", "#c4ccd3",
+            ])
+            .eşleme(AğaçHaritasıRenkEşlemesi::Kimlik)
+    } else {
+        AğaçHaritasıGörseli::yeni().eşleme(AğaçHaritasıRenkEşlemesi::Kimlik)
+    };
+    let ikinci = if kip == 2 {
+        AğaçHaritasıGörseli::yeni().alfa_aralığı(0.5, 1.0)
+    } else {
+        AğaçHaritasıGörseli::yeni()
+    };
+    vec![
+        AğaçHaritasıSeviyesi::yeni().görsel(birinci).öğe_stili(
+            AğaçHaritasıÖğeStili::yeni()
+                .kenarlık_kalınlığı(3.0)
+                .boşluk_genişliği(3.0),
+        ),
+        AğaçHaritasıSeviyesi::yeni()
+            .görsel(ikinci)
+            .öğe_stili(AğaçHaritasıÖğeStili::yeni().boşluk_genişliği(1.0)),
+    ]
+}
+
+fn obama_etiketi(veri: &[AğaçDüğümü], kip: usize) -> Etiket {
+    fn topla(düğümler: &[AğaçDüğümü], kip: usize, çıktı: &mut HashMap<u64, String>) {
+        for düğüm in düğümler {
+            let değer = düğüm
+                .değerler
+                .first()
+                .copied()
+                .flatten()
+                .unwrap_or_default();
+            let hane = düğüm.değerler.get(3).copied().flatten().unwrap_or_default();
+            let mut metin = format!(
+                "{{name|{}}}\n{{hr|}}\n{{budget|$ {}}} {{label|budget}}",
+                düğüm.ad,
+                cizelge::yardimci::bicim::binlik_ayır(değer)
+            );
+            if kip != 1 {
+                metin.push_str(&format!(
+                    "\n{{household|$ {}}} {{label|per household}}",
+                    cizelge::yardimci::bicim::binlik_ayır((hane * 10_000.0).round() / 10.0)
+                ));
+            }
+            çıktı.entry(değer.to_bits()).or_insert(metin);
+            topla(&düğüm.çocuklar, kip, çıktı);
+        }
+    }
+    let mut metinler = HashMap::new();
+    topla(veri, kip, &mut metinler);
+    Etiket::yeni()
+        .göster(true)
+        .konum(EtiketKonumu::İçSolÜst)
+        .biçimleyici(Biçimleyici::İşlev(Arc::new(move |değer, _| {
+            metinler
+                .get(&değer.to_bits())
+                .cloned()
+                .unwrap_or_else(|| cizelge::yardimci::bicim::binlik_ayır(değer))
+        })))
+        .yazı(
+            YazıStili::yeni()
+                .renk("#fff")
+                .eş_iç_boşluk(5.0)
+                .taşmayı_kısalt(true),
+        )
+        .zengin_stil(
+            "budget",
+            YazıStili::yeni()
+                .renk("yellow")
+                .boyut(22.0)
+                .satır_yüksekliği(30.0),
+        )
+        .zengin_stil("household", YazıStili::yeni().renk("#fff").boyut(14.0))
+        .zengin_stil(
+            "label",
+            YazıStili::yeni()
+                .renk("#fff")
+                .boyut(9.0)
+                .arkaplan("rgba(0,0,0,0.3)")
+                .kenarlık_yarıçapı(2.0)
+                .iç_boşluk([2.0, 4.0, 2.0, 4.0])
+                .satır_yüksekliği(25.0)
+                .yatay_hiza(YazıYatayHizası::Sağ),
+        )
+        .zengin_stil("name", YazıStili::yeni().renk("#fff").boyut(12.0))
+        .zengin_stil(
+            "hr",
+            YazıStili::yeni()
+                .genişlik("100%")
+                .kenarlık_rengi("rgba(255,255,255,0.2)")
+                .kenarlık_kalınlığı(0.5)
+                .yükseklik(0.0)
+                .satır_yüksekliği(10.0),
+        )
+}
+
+fn treemap_obama() -> Result<GrafikSeçenekleri, String> {
+    let özgün = obama_verisini_oku()?;
+    let kipler = ["2012Budget", "2011Budget", "Growth"];
+    let mut seçenekler = GrafikSeçenekleri::yeni()
+        .animasyon(false)
+        .başlık(
+            Başlık::yeni()
+                .metin("How $3.7 Trillion is Spent")
+                .alt_metin("Obama’s 2012 Budget Proposal")
+                .sol("center")
+                .üst(5),
+        )
+        .gösterge(
+            Gösterge::yeni()
+                .veri(kipler)
+                .seçim_kipi(GöstergeSeçimKipi::Tek)
+                .seçili("2012Budget", true)
+                .seçili("2011Budget", false)
+                .seçili("Growth", false)
+                .üst(55)
+                .öğe_boşluğu(5.0),
+        )
+        .ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe));
+    for (kip, ad) in kipler.into_iter().enumerate() {
+        let veri = obama_modu(özgün.clone(), kip);
+        let görsel = if kip == 2 {
+            AğaçHaritasıGörseli::seri_varsayılanı().boyut(2)
+        } else {
+            AğaçHaritasıGörseli::seri_varsayılanı()
+        };
+        seçenekler = seçenekler.seri(
+            AğaçHaritasıSerisi::yeni()
+                .ad(ad)
+                .üst(80)
+                .görsel(görsel)
+                .etiket(obama_etiketi(&veri, kip))
+                .öğe_stili(AğaçHaritasıÖğeStili::yeni().kenarlık_rengi("black"))
+                .seviyeler(obama_seviyeleri(kip))
+                .kökler(veri),
+        );
+    }
+    Ok(seçenekler)
+}
+
+fn treemap_sunburst_transition(durum: &str) -> Result<GrafikSeçenekleri, String> {
+    let kök = ResmiAğaçDüğümü::resmi_kökü_oku("echarts-package-size.json")?;
+    let veri = kök.çocuklar;
+    if durum == "son" || durum == "sunburst" {
+        Ok(GrafikSeçenekleri::yeni().animasyon(false).seri(
+            GüneşPatlamasıSerisi::yeni()
+                .ad("echarts-package-size")
+                .halka("20%", "90%")
+                .kökler(veri),
+        ))
+    } else {
+        Ok(GrafikSeçenekleri::yeni().animasyon(false).seri(
+            AğaçHaritasıSerisi::yeni()
+                .kimlik("echarts-package-size")
+                .gezinme(AğaçGezinmesi::Kapalı)
+                .düğüm_tıklaması(AğaçHaritasıDüğümTıklaması::Kapalı)
+                .kırıntı(AğaçHaritasıKırıntısı::yeni().göster(false))
+                .kökler(veri),
+        ))
+    }
 }
 
 fn parallel_simple() -> GrafikSeçenekleri {
@@ -15522,6 +16052,161 @@ struct AğaçSahneÖzeti {
     fnv1a_64: String,
 }
 
+#[derive(Serialize)]
+struct AğaçHaritasıSahneDüğümü {
+    veri_sırası: usize,
+    ad: String,
+    derinlik: usize,
+    x: f32,
+    y: f32,
+    genişlik: f32,
+    yükseklik: f32,
+    renk: [u8; 4],
+    kenarlık_rengi: [u8; 4],
+    kenarlık_kalınlığı: f32,
+    boşluk_genişliği: f32,
+    üst_yükseklik: f32,
+    yaprak: bool,
+    inilebilir_yaprak: bool,
+}
+
+#[derive(Serialize)]
+struct AğaçHaritasıSahneSerisi {
+    seri_sırası: usize,
+    alan: AğaçHaritasıSahneAlanı,
+    düğümler: Vec<AğaçHaritasıSahneDüğümü>,
+}
+
+#[derive(Serialize)]
+struct AğaçHaritasıSahneAlanı {
+    x: f32,
+    y: f32,
+    genişlik: f32,
+    yükseklik: f32,
+}
+
+#[derive(Serialize)]
+struct AğaçHaritasıSahneKanıtı {
+    şema_sürümü: u8,
+    tür: &'static str,
+    koordinat_adımı: f32,
+    seriler: Vec<AğaçHaritasıSahneSerisi>,
+}
+
+fn binde_yuvarla(değer: f32) -> f32 {
+    (değer * 1_000.0).round() / 1_000.0
+}
+
+fn renk_kanalları(renk: Renk) -> [u8; 4] {
+    [
+        (renk.kırmızı * 255.0).round() as u8,
+        (renk.yeşil * 255.0).round() as u8,
+        (renk.mavi * 255.0).round() as u8,
+        (renk.alfa * 255.0).round() as u8,
+    ]
+}
+
+fn ağaç_haritası_sahne_kanıtı(
+    seçenekler: &GrafikSeçenekleri,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<AğaçHaritasıSahneKanıtı, String> {
+    let tuval = cizelge::koordinat::Dikdörtgen::yeni(0.0, 0.0, genişlik, yükseklik);
+    let seriler = seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(seri_sırası, seri)| match seri {
+            Seri::AğaçHaritası(seri)
+                if seri.ad.as_deref().map_or(true, |ad| {
+                    seçenekler
+                        .gösterge
+                        .as_ref()
+                        .map_or(true, |gösterge| gösterge.seçili_mi(ad))
+                }) =>
+            {
+                Some((seri_sırası, seri))
+            }
+            _ => None,
+        })
+        .map(|(seri_sırası, seri)| {
+            let alan = cizelge::grafik::agac_haritasi::ağaç_haritası_alanı(seri, tuval);
+            let düğümler = cizelge::grafik::agac_haritasi::ağaç_haritası_hücreleri(
+                seri,
+                tuval,
+                &[],
+                &|palet_sırası| seçenekler.palet_rengi(palet_sırası),
+            )
+            .into_iter()
+            .map(|hücre| {
+                let görsel_renk = hücre
+                    .öğe_stili
+                    .taban
+                    .renk
+                    .as_ref()
+                    .map(Dolgu::temsilî)
+                    .unwrap_or(hücre.renk)
+                    .opaklık(hücre.öğe_stili.taban.opaklık.unwrap_or(1.0));
+                let kenarlık_rengi = hücre
+                    .öğe_stili
+                    .kenarlık_rengi_doygunluğu
+                    .map(|doygunluk| görsel_renk.açıklık_ile(doygunluk))
+                    .or(hücre.öğe_stili.taban.kenarlık_rengi)
+                    .unwrap_or(Renk::BEYAZ)
+                    .opaklık(hücre.öğe_stili.taban.opaklık.unwrap_or(1.0));
+                let üst_yükseklik = if hücre.üst_etiket.göster {
+                    hücre
+                        .üst_etiket
+                        .yazı
+                        .yükseklik
+                        .unwrap_or(20.0)
+                        .max(hücre.öğe_stili.taban.kenarlık_kalınlığı)
+                } else {
+                    hücre.öğe_stili.taban.kenarlık_kalınlığı
+                };
+                AğaçHaritasıSahneDüğümü {
+                    veri_sırası: hücre.veri_sırası,
+                    ad: hücre.ad,
+                    derinlik: hücre.yol.len().saturating_sub(1),
+                    x: binde_yuvarla(hücre.alan.x),
+                    y: binde_yuvarla(hücre.alan.y),
+                    genişlik: binde_yuvarla(hücre.alan.genişlik),
+                    yükseklik: binde_yuvarla(hücre.alan.yükseklik),
+                    renk: renk_kanalları(görsel_renk),
+                    kenarlık_rengi: renk_kanalları(kenarlık_rengi),
+                    kenarlık_kalınlığı: binde_yuvarla(
+                        hücre.öğe_stili.taban.kenarlık_kalınlığı,
+                    ),
+                    boşluk_genişliği: binde_yuvarla(hücre.öğe_stili.boşluk_genişliği),
+                    üst_yükseklik: binde_yuvarla(üst_yükseklik),
+                    yaprak: hücre.yaprak,
+                    inilebilir_yaprak: hücre.inilebilir_yaprak,
+                }
+            })
+            .collect();
+            AğaçHaritasıSahneSerisi {
+                seri_sırası,
+                alan: AğaçHaritasıSahneAlanı {
+                    x: binde_yuvarla(alan.x),
+                    y: binde_yuvarla(alan.y),
+                    genişlik: binde_yuvarla(alan.genişlik),
+                    yükseklik: binde_yuvarla(alan.yükseklik),
+                },
+                düğümler,
+            }
+        })
+        .collect::<Vec<_>>();
+    if seriler.is_empty() {
+        return Err("sahne kanıtı için Treemap serisi bulunamadı".to_owned());
+    }
+    Ok(AğaçHaritasıSahneKanıtı {
+        şema_sürümü: 1,
+        tür: "treemap",
+        koordinat_adımı: 0.001,
+        seriler,
+    })
+}
+
 fn ağaç_sahne_özeti(
     seçenekler: &GrafikSeçenekleri,
     genişlik: f32,
@@ -15829,6 +16514,110 @@ mod tree_fixture_testleri {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
+mod treemap_fixture_testleri {
+    use super::*;
+
+    type Fixture = fn() -> Result<GrafikSeçenekleri, String>;
+
+    fn treemap_geçiş_başlangıcı() -> Result<GrafikSeçenekleri, String> {
+        treemap_sunburst_transition("başlangıç")
+    }
+
+    fn treemap_simple_sonuç() -> Result<GrafikSeçenekleri, String> {
+        Ok(treemap_simple())
+    }
+
+    #[test]
+    fn yedi_resmi_treemap_fixture_seceneklerini_ve_verisini_korur() {
+        let disk = treemap_disk().expect("treemap-disk kurulmalı");
+        let Seri::AğaçHaritası(disk) = &disk.seriler[0] else {
+            panic!("Treemap serisi bekleniyordu");
+        };
+        assert!(!disk.üst_etiket.göster);
+        assert_eq!(disk.görsel.görünür_en_az, Some(300.0));
+        assert_eq!(disk.seviyeler.len(), 3);
+
+        let parent = treemap_show_parent().expect("treemap-show-parent kurulmalı");
+        let Seri::AğaçHaritası(parent) = &parent.seriler[0] else {
+            panic!("Treemap serisi bekleniyordu");
+        };
+        assert!(parent.üst_etiket.göster);
+
+        let drill = treemap_drill_down().expect("treemap-drill-down kurulmalı");
+        let Seri::AğaçHaritası(drill) = &drill.seriler[0] else {
+            panic!("Treemap serisi bekleniyordu");
+        };
+        assert_eq!(drill.yaprak_derinliği, Some(2));
+        assert_eq!(drill.seviyeler.len(), 4);
+
+        let obama = treemap_obama().expect("treemap-obama kurulmalı");
+        assert_eq!(obama.seriler.len(), 3);
+        assert_eq!(
+            obama
+                .gösterge
+                .as_ref()
+                .map(|gösterge| gösterge.seçili_mi("2012Budget")),
+            Some(true)
+        );
+        assert_eq!(
+            obama
+                .gösterge
+                .as_ref()
+                .map(|gösterge| gösterge.seçili_mi("2011Budget")),
+            Some(false)
+        );
+
+        let geçiş = treemap_sunburst_transition("başlangıç").expect("transition kurulmalı");
+        assert_eq!(geçiş.seriler.len(), 1);
+        assert!(matches!(geçiş.seriler[0], Seri::AğaçHaritası(_)));
+        let geçiş_sonu = treemap_sunburst_transition("son").expect("transition sonu kurulmalı");
+        assert!(matches!(geçiş_sonu.seriler[0], Seri::GüneşPatlaması(_)));
+    }
+
+    #[test]
+    fn yedi_resmi_treemap_sahnesi_tum_gorunur_hucreleri_korur() {
+        let durumlar: [(Fixture, usize, usize, usize); 7] = [
+            (treemap_disk, 265, 130, 0),
+            (treemap_drill_down, 173, 154, 46),
+            (treemap_obama, 245, 216, 0),
+            (treemap_show_parent, 132, 107, 0),
+            (treemap_simple_sonuç, 6, 3, 0),
+            (treemap_geçiş_başlangıcı, 731, 635, 0),
+            (treemap_visual, 245, 216, 0),
+        ];
+        let mut toplam = 0;
+        for (fixture, düğüm, yaprak, inilebilir) in durumlar {
+            let seçenekler = fixture().expect("resmî Treemap fixture kurulmalı");
+            let kanıt = ağaç_haritası_sahne_kanıtı(&seçenekler, 700.0, 525.0)
+                .expect("Treemap sahne kanıtı üretilmeli");
+            let gerçek_düğüm = kanıt
+                .seriler
+                .iter()
+                .map(|seri| seri.düğümler.len())
+                .sum::<usize>();
+            let gerçek_yaprak = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.düğümler)
+                .filter(|düğüm| düğüm.yaprak)
+                .count();
+            let gerçek_inilebilir = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.düğümler)
+                .filter(|düğüm| düğüm.inilebilir_yaprak)
+                .count();
+            assert_eq!(gerçek_düğüm, düğüm);
+            assert_eq!(gerçek_yaprak, yaprak);
+            assert_eq!(gerçek_inilebilir, inilebilir);
+            toplam += gerçek_düğüm;
+        }
+        assert_eq!(toplam, 1_797);
+    }
+}
+
+#[cfg(test)]
 mod parallel_fixture_testleri {
     use super::*;
 
@@ -16056,6 +16845,13 @@ fn seçenekler(
         "tree-orient-right-left" => tree_orient_right_left(),
         "tree-legend" => tree_legend(),
         "tree-polyline" => tree_polyline(),
+        "treemap-simple" => Ok(treemap_simple()),
+        "treemap-disk" => treemap_disk(),
+        "treemap-drill-down" => treemap_drill_down(),
+        "treemap-obama" => treemap_obama(),
+        "treemap-show-parent" => treemap_show_parent(),
+        "treemap-visual" => treemap_visual(),
+        "treemap-sunburst-transition" => treemap_sunburst_transition(durum),
         "parallel-simple" => Ok(parallel_simple()),
         "parallel-aqi" => parallel_aqi(),
         "parallel-nutrients" => parallel_nutrients(),
@@ -16232,6 +17028,10 @@ fn çalıştır() -> Result<(), String> {
         let json = if girdi.id.starts_with("tree-") {
             let özet = ağaç_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
             serde_json::to_vec_pretty(&özet)
+        } else if girdi.id.starts_with("treemap-") {
+            let özet =
+                ağaç_haritası_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
         } else {
             let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
             serde_json::to_vec_pretty(&özet)
@@ -16284,6 +17084,36 @@ fn çalıştır() -> Result<(), String> {
                         .collect::<Vec<_>>();
                     eprintln!("çizgi[{sıra}] örnekleri={örnekler:?}");
                 }
+                Seri::AğaçHaritası(ağaç_haritası) => {
+                    let tuval = cizelge::koordinat::Dikdörtgen::yeni(
+                        0.0,
+                        0.0,
+                        girdi.genişlik,
+                        girdi.yükseklik,
+                    );
+                    let hücreler = cizelge::grafik::agac_haritasi::ağaç_haritası_hücreleri(
+                        ağaç_haritası,
+                        tuval,
+                        &[],
+                        &|palet_sırası| seçenekler.palet_rengi(palet_sırası),
+                    );
+                    eprintln!(
+                        "treemap[{sıra}] hücreler={:#?}",
+                        hücreler
+                            .iter()
+                            .filter(|hücre| hücre.derinlik <= 2)
+                            .map(|hücre| (
+                                &hücre.ad,
+                                hücre.derinlik,
+                                hücre.veri_sırası,
+                                hücre.değer,
+                                hücre.alan,
+                                hücre.renk,
+                                hücre.yaprak,
+                            ))
+                            .collect::<Vec<_>>()
+                    );
+                }
                 _ => {}
             }
         }
@@ -16332,6 +17162,12 @@ fn çalıştır() -> Result<(), String> {
                 "-0.18",
                 "Actinides",
                 "86%",
+                "Kyoko.Speec...",
+                "Kyoko.Sp...",
+                "Kyoko.Speec",
+                "...",
+                "Versi...",
+                "Vers...",
             ]
             .map(|metin| (metin, yüzey.yazı_ölç(metin, 12.0).0))
         );

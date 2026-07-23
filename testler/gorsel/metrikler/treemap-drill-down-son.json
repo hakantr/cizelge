@@ -1,0 +1,43 @@
+{
+  "id": "treemap-drill-down",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": false,
+  "değişen_piksel": 10381,
+  "değişen_piksel_oranı": 0.03844814814814815,
+  "ssim": 0.9021810803280652,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 9971,
+    "değişen_piksel_oranı": 0.03692962962962963,
+    "ssim": 0.8828334534337154
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "treemap_hücre_sınırları_ve_katmanları",
+      "geçti": true,
+      "açıklama": "Toplam raster oranından bağımsız olarak her hücrenin x/y/width/height sınırı, dolgu, kenarlık, gap, upperLabel ve leafRoot katmanı kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 173,
+      "gerçek_düğüm": 173,
+      "karşılaştırılan_alan": 2595,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/treemap-drill-down.png",
+    "gerçek": "testler/gorsel/gerçek/default/treemap-drill-down.png",
+    "fark": "testler/gorsel/fark/default/treemap-drill-down.png",
+    "normalize_fark": "testler/gorsel/fark/default/treemap-drill-down-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/treemap-drill-down.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/treemap-drill-down.json"
+  }
+}

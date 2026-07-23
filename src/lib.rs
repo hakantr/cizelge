@@ -45,9 +45,10 @@ pub use bilesen::erisilebilirlik::{erişilebilirlik_özeti, seri_tür_adı};
 pub use bilesen::grafik::{GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla};
 pub use bilesen::zaman_seridi::ZamanŞeridiEylemi;
 pub use calisma_zamani::{
-    BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
-    GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu, SeriSeçici, SeçenekAlanı,
-    SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü, ÖrnekBaşlatmaSeçenekleri,
+    AğaçHaritasıKökDikdörtgeni, BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği,
+    EksenKırılmaEylemi, GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu,
+    SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
+    ÖrnekBaşlatmaSeçenekleri,
 };
 pub use cizim::gorunum::{
     AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya,
@@ -58,18 +59,19 @@ pub use cizim::pencere::GrafikGörünümü;
 #[cfg(feature = "png")]
 pub use cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
 pub use cizim::{
-    AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü,
-    MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, Sahne,
-    SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
-    Sahneİsabeti, SahneŞekli, SihirliSeriTürü, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol,
-    svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi, İsabetBölgesi, İsabetGeometrisi,
+    AfinMatris, AğaçHaritasıKökYönü, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu,
+    MatrisHedefTürü, MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi,
+    ParalelGenişletmeBölgesi, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
+    SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SihirliSeriTürü,
+    SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
+    İsabetBölgesi, İsabetGeometrisi,
 };
 pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
-    OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, eksen_imleci_eylemini_kaydet,
-    eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
-    görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
-    veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+    OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, ağaç_haritası_eylemlerini_kaydet,
+    eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
+    geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
+    paralel_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -78,7 +80,10 @@ pub use genisletme::{
 };
 pub use hata::{BilesenHatasi, BilesenTanisi};
 pub use model::agac::{
-    AğaçDüğümü, AğaçGezinmesi, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+    AğaçDüğümü, AğaçGezinmesi, AğaçHaritasıDurumu, AğaçHaritasıDüğümTıklaması,
+    AğaçHaritasıGörselBoyutu, AğaçHaritasıGörseli, AğaçHaritasıKırpmaPenceresi,
+    AğaçHaritasıKırıntısı, AğaçHaritasıRenkEşlemesi, AğaçHaritasıSeviyesi, AğaçHaritasıSırası,
+    AğaçHaritasıÖğeStili, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
 };
 pub use model::bilesen::{
     AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaBağı,
@@ -174,9 +179,9 @@ pub mod hazir {
     pub use crate::bilesen::grafik::{GrafikSahnesi, GrafikÖğeBilgisi, grafik_sahnesi_hazırla};
     pub use crate::bilesen::zaman_seridi::ZamanŞeridiEylemi;
     pub use crate::calisma_zamani::{
-        BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği, EksenKırılmaEylemi,
-        GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu, SeriSeçici,
-        SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
+        AğaçHaritasıKökDikdörtgeni, BileşikSeçenekler, EksenBoyutu, EksenKırılmaDeğişikliği,
+        EksenKırılmaEylemi, GrafikÇalışmaZamanı, GöstergeSeçimEylemi, MedyaKuralı, MedyaSorgusu,
+        SeriSeçici, SeçenekAlanı, SeçenekAyarlamaKipi, SeçenekYaması, ÇalışmaOlayı, ÇiziciTürü,
         ÖrnekBaşlatmaSeçenekleri,
     };
     pub use crate::cizim::gorunum::{
@@ -187,18 +192,19 @@ pub mod hazir {
     #[cfg(feature = "png")]
     pub use crate::cizim::piksel::{PikselYüzeyi, png_dışa_aktar};
     pub use crate::cizim::{
-        AfinMatris, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu, MatrisHedefTürü,
-        MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi, ParalelGenişletmeBölgesi, Sahne,
-        SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi, SahneStilYaması, SahneStili, SahneÖğesi,
-        Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi, YerelDönüşüm, Yol, svg_dışa_aktar,
-        yolu_dönüştür, ÇizimYüzeyi,
+        AfinMatris, AğaçHaritasıKökYönü, GrafikOlayı, GörselDurum, KayıtYüzeyi, KırpmaYolu,
+        MatrisHedefTürü, MatrisHücreBölgesi, OdakKapsamı, ParalelEksenBölgesi,
+        ParalelGenişletmeBölgesi, Sahne, SahneDüğümü, SahneFarkı, SahneMetni, SahneResmi,
+        SahneStilYaması, SahneStili, SahneÖğesi, Sahneİsabeti, SahneŞekli, SvgYolHatası, SvgYüzeyi,
+        YerelDönüşüm, Yol, svg_dışa_aktar, yolu_dönüştür, ÇizimYüzeyi,
     };
     pub use crate::eylem::{
         BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü,
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
-        eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
-        geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-        paralel_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+        ağaç_haritası_eylemlerini_kaydet, eksen_imleci_eylemini_kaydet,
+        eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
+        görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+        veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
     pub use crate::genisletme::{
         Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -207,7 +213,10 @@ pub mod hazir {
     };
     pub use crate::hata::{BilesenHatasi, BilesenTanisi};
     pub use crate::model::agac::{
-        AğaçDüğümü, AğaçGezinmesi, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
+        AğaçDüğümü, AğaçGezinmesi, AğaçHaritasıDurumu, AğaçHaritasıDüğümTıklaması,
+        AğaçHaritasıGörselBoyutu, AğaçHaritasıGörseli, AğaçHaritasıKırpmaPenceresi,
+        AğaçHaritasıKırıntısı, AğaçHaritasıRenkEşlemesi, AğaçHaritasıSeviyesi, AğaçHaritasıSırası,
+        AğaçHaritasıÖğeStili, AğaçKenarBiçimi, AğaçVurguOdağı, AğaçYerleşimi, AğaçYönü,
     };
     pub use crate::model::bilesen::{
         AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü,

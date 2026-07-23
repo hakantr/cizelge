@@ -1,0 +1,174 @@
+{
+  "şema_sürümü": 1,
+  "tür": "treemap",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 20,
+        "y": 50,
+        "genişlik": 660,
+        "yükseklik": 425
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 3,
+          "ad": "nodeB",
+          "derinlik": 0,
+          "x": 20,
+          "y": 50,
+          "genişlik": 440,
+          "yükseklik": 425,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "nodeBa",
+          "derinlik": 1,
+          "x": 20,
+          "y": 50,
+          "genişlik": 440,
+          "yükseklik": 425,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "nodeBa1",
+          "derinlik": 2,
+          "x": 20,
+          "y": 50,
+          "genişlik": 440,
+          "yükseklik": 425,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 0,
+          "ad": "nodeA",
+          "derinlik": 0,
+          "x": 460,
+          "y": 50,
+          "genişlik": 220,
+          "yükseklik": 425,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": false,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "nodeAb",
+          "derinlik": 1,
+          "x": 460,
+          "y": 50,
+          "genişlik": 220,
+          "yükseklik": 255,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "nodeAa",
+          "derinlik": 1,
+          "x": 460,
+          "y": 305,
+          "genişlik": 220,
+          "yükseklik": 170,
+          "renk": [
+            182,
+            214,
+            52,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "kenarlık_kalınlığı": 0,
+          "boşluk_genişliği": 0,
+          "üst_yükseklik": 0,
+          "yaprak": true,
+          "inilebilir_yaprak": false
+        }
+      ]
+    }
+  ]
+}

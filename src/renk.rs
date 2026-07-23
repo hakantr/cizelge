@@ -200,6 +200,44 @@ impl Renk {
         )
     }
 
+    /// Rengin HSL doygunluğunu (`colorSaturation`) değiştirir; ton,
+    /// açıklık ve alfa korunur. zrender'ın `modifyHSL` kanal sırası ve CSS
+    /// bayt yuvarlamasıyla aynı kararlı sonucu üretir.
+    pub fn doygunluk_ile(self, doygunluk: f32) -> Renk {
+        let en_büyük = self.kırmızı.max(self.yeşil).max(self.mavi);
+        let en_küçük = self.kırmızı.min(self.yeşil).min(self.mavi);
+        let fark = en_büyük - en_küçük;
+        let açıklık = (en_büyük + en_küçük) / 2.0;
+        let ton = if fark <= f32::EPSILON {
+            0.0
+        } else if (en_büyük - self.kırmızı).abs() <= f32::EPSILON {
+            ((self.yeşil - self.mavi) / fark).rem_euclid(6.0)
+        } else if (en_büyük - self.yeşil).abs() <= f32::EPSILON {
+            (self.mavi - self.kırmızı) / fark + 2.0
+        } else {
+            (self.kırmızı - self.yeşil) / fark + 4.0
+        };
+        let doygunluk = doygunluk.clamp(0.0, 1.0);
+        let kroma = (1.0 - (2.0 * açıklık - 1.0).abs()) * doygunluk;
+        let x = kroma * (1.0 - (ton.rem_euclid(2.0) - 1.0).abs());
+        let (kırmızı, yeşil, mavi) = match ton {
+            t if t < 1.0 => (kroma, x, 0.0),
+            t if t < 2.0 => (x, kroma, 0.0),
+            t if t < 3.0 => (0.0, kroma, x),
+            t if t < 4.0 => (0.0, x, kroma),
+            t if t < 5.0 => (x, 0.0, kroma),
+            _ => (kroma, 0.0, x),
+        };
+        let eşik = açıklık - kroma / 2.0;
+        let bayt = |kanal: f32| (kanal.clamp(0.0, 1.0) * 255.0).round() / 255.0;
+        Renk::kyma(
+            bayt(kırmızı + eşik),
+            bayt(yeşil + eşik),
+            bayt(mavi + eşik),
+            self.alfa,
+        )
+    }
+
     /// Rengin HSL tonunu derece cinsinden mutlak olarak değiştirir.
     /// ECharts/zrender `color.modifyHSL(color, hue)` davranışını izleyerek
     /// dereceyi en yakın tam sayıya yuvarlar ve `0..=360` aralığına kıstırır;

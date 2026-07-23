@@ -4,7 +4,7 @@
 
 use crate::model::Uzunluk;
 use crate::model::seri::Sembol;
-use crate::model::stil::{EtiketYaması, ÇizgiStili, ÖğeStili};
+use crate::model::stil::{EtiketYaması, YazıStili, ÇizgiStili, ÖğeStili};
 use crate::renk::Renk;
 
 /// Tree yerleşimi (`series-tree.layout`).
@@ -72,6 +72,453 @@ pub enum AğaçVurguOdağı {
     Öz,
 }
 
+/// Treemap kardeş düğümlerinin yerleşim sırası (`series-treemap.sort`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum AğaçHaritasıSırası {
+    /// ECharts `true` / `'desc'` öntanımlısı.
+    #[default]
+    Azalan,
+    /// ECharts `'asc'`.
+    Artan,
+    /// ECharts `false`; veri sırasını korur ve `visibleMin` süzmesini kapatır.
+    Veri,
+}
+
+/// Yakınlaştırılmış Treemap görünümünün kırpma penceresi (`clipWindow`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum AğaçHaritasıKırpmaPenceresi {
+    #[default]
+    Özgün,
+    TamEkran,
+}
+
+/// Treemap düğüm tıklamasının resmî davranışı (`nodeClick`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum AğaçHaritasıDüğümTıklaması {
+    #[default]
+    DüğümeYakınlaştır,
+    BağlantıyıAç,
+    Kapalı,
+}
+
+/// Treemap paletinin kardeşler arasında dağıtılma anahtarı.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum AğaçHaritasıRenkEşlemesi {
+    Değer,
+    #[default]
+    Sıra,
+    Kimlik,
+}
+
+/// `visualDimension`: sayısal boyut sırası ya da adlandırılmış boyut.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum AğaçHaritasıGörselBoyutu {
+    Sıra(usize),
+    Ad(String),
+}
+
+impl Default for AğaçHaritasıGörselBoyutu {
+    fn default() -> Self {
+        Self::Sıra(0)
+    }
+}
+
+/// Treemap'e özgü `itemStyle` uzantıları. Ortak şekil özellikleri `taban`
+/// üzerinde, hücreler arası geometri ve türetilmiş kenarlık rengi burada
+/// tutulur.
+#[derive(Clone, PartialEq, Debug)]
+pub struct AğaçHaritasıÖğeStili {
+    pub taban: ÖğeStili,
+    /// `itemStyle.colorAlpha`: kalıtılmış/dolgu renginin mutlak alfa kanalı.
+    pub renk_alfası: Option<f32>,
+    /// ECharts'ın tarihsel `itemStyle.colorSaturation` alanı; resmî
+    /// `modifyHSL(color, null, null, value)` akışı nedeniyle HSL açıklığına
+    /// uygulanır.
+    pub renk_doygunluğu: Option<f32>,
+    pub boşluk_genişliği: f32,
+    pub kenarlık_rengi_doygunluğu: Option<f32>,
+    pub(crate) kenarlık_kalınlığı_belirtildi: bool,
+    pub(crate) kenarlık_yarıçapı_belirtildi: bool,
+    pub(crate) boşluk_genişliği_belirtildi: bool,
+}
+
+impl Default for AğaçHaritasıÖğeStili {
+    fn default() -> Self {
+        Self {
+            // Bu tür aynı zamanda level/node yaması olduğundan belirtilmemiş
+            // `borderColor` burada `None` kalır; ECharts seri öntanımlısı
+            // AğaçHaritasıSerisi üzerinde açıkça beyaza kurulur.
+            taban: ÖğeStili::default(),
+            renk_alfası: None,
+            renk_doygunluğu: None,
+            boşluk_genişliği: 0.0,
+            kenarlık_rengi_doygunluğu: None,
+            kenarlık_kalınlığı_belirtildi: false,
+            kenarlık_yarıçapı_belirtildi: false,
+            boşluk_genişliği_belirtildi: false,
+        }
+    }
+}
+
+impl AğaçHaritasıÖğeStili {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn taban(mut self, stil: ÖğeStili) -> Self {
+        self.kenarlık_kalınlığı_belirtildi = stil.kenarlık_kalınlığı != 0.0;
+        self.kenarlık_yarıçapı_belirtildi = stil.kenarlık_yarıçapı != [0.0; 4];
+        self.taban = stil;
+        self
+    }
+
+    pub fn renk(mut self, renk: impl Into<crate::renk::Dolgu>) -> Self {
+        self.taban = self.taban.renk(renk);
+        self
+    }
+
+    pub fn kenarlık_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.taban = self.taban.kenarlık_rengi(renk);
+        self
+    }
+
+    pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
+        self.taban = self.taban.kenarlık_kalınlığı(kalınlık.max(0.0));
+        self.kenarlık_kalınlığı_belirtildi = true;
+        self
+    }
+
+    pub fn kenarlık_yarıçapı(
+        mut self,
+        yarıçap: impl Into<crate::model::stil::KöşeYarıçapı>,
+    ) -> Self {
+        self.taban = self.taban.kenarlık_yarıçapı(yarıçap);
+        self.kenarlık_yarıçapı_belirtildi = true;
+        self
+    }
+
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        self.taban = self.taban.opaklık(opaklık.clamp(0.0, 1.0));
+        self
+    }
+
+    pub fn renk_alfası(mut self, alfa: f32) -> Self {
+        self.renk_alfası = alfa.is_finite().then(|| alfa.clamp(0.0, 1.0));
+        self
+    }
+
+    pub fn renk_doygunluğu(mut self, doygunluk: f32) -> Self {
+        self.renk_doygunluğu = doygunluk.is_finite().then(|| doygunluk.clamp(0.0, 1.0));
+        self
+    }
+
+    pub fn boşluk_genişliği(mut self, genişlik: f32) -> Self {
+        self.boşluk_genişliği = genişlik.max(0.0);
+        self.boşluk_genişliği_belirtildi = true;
+        self
+    }
+
+    pub fn kenarlık_rengi_doygunluğu(mut self, doygunluk: f32) -> Self {
+        self.kenarlık_rengi_doygunluğu = Some(doygunluk.clamp(0.0, 1.0));
+        self
+    }
+}
+
+/// Bir seri, seviye ya da düğümde miras alınabilen Treemap görsel kanalları.
+#[derive(Clone, PartialEq, Debug)]
+pub struct AğaçHaritasıGörseli {
+    pub boyut: Option<AğaçHaritasıGörselBoyutu>,
+    pub en_az: Option<f64>,
+    pub en_çok: Option<f64>,
+    /// `None`: üst modelden miras; `Some([])`: ECharts `'none'`.
+    pub renkler: Option<Vec<Renk>>,
+    /// `None`: miras/kapalı; çift `colorAlpha` aralığıdır.
+    pub alfa_aralığı: Option<(f32, f32)>,
+    pub doygunluk_aralığı: Option<(f32, f32)>,
+    pub eşleme: Option<AğaçHaritasıRenkEşlemesi>,
+    pub görünür_en_az: Option<f32>,
+    pub çocuk_görünür_en_az: Option<f32>,
+}
+
+impl Default for AğaçHaritasıGörseli {
+    fn default() -> Self {
+        Self {
+            boyut: None,
+            en_az: None,
+            en_çok: None,
+            renkler: None,
+            alfa_aralığı: None,
+            doygunluk_aralığı: None,
+            eşleme: None,
+            görünür_en_az: None,
+            çocuk_görünür_en_az: None,
+        }
+    }
+}
+
+impl AğaçHaritasıGörseli {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    /// ECharts `TreemapSeries.defaultOption` görsel başlangıcı.
+    pub fn seri_varsayılanı() -> Self {
+        Self {
+            boyut: Some(AğaçHaritasıGörselBoyutu::Sıra(0)),
+            eşleme: Some(AğaçHaritasıRenkEşlemesi::Sıra),
+            görünür_en_az: Some(10.0),
+            ..Self::default()
+        }
+    }
+
+    pub fn boyut(mut self, sıra: usize) -> Self {
+        self.boyut = Some(AğaçHaritasıGörselBoyutu::Sıra(sıra));
+        self
+    }
+
+    pub fn boyut_adı(mut self, ad: impl Into<String>) -> Self {
+        self.boyut = Some(AğaçHaritasıGörselBoyutu::Ad(ad.into()));
+        self
+    }
+
+    pub fn aralık(mut self, en_az: f64, en_çok: f64) -> Self {
+        self.en_az = en_az.is_finite().then_some(en_az);
+        self.en_çok = en_çok.is_finite().then_some(en_çok);
+        self
+    }
+
+    pub fn renkler(mut self, renkler: impl IntoIterator<Item = impl Into<Renk>>) -> Self {
+        self.renkler = Some(renkler.into_iter().map(Into::into).collect());
+        self
+    }
+
+    pub fn renk_yok(mut self) -> Self {
+        self.renkler = Some(Vec::new());
+        self
+    }
+
+    pub fn alfa_aralığı(mut self, en_az: f32, en_çok: f32) -> Self {
+        self.alfa_aralığı = Some((en_az.clamp(0.0, 1.0), en_çok.clamp(0.0, 1.0)));
+        self
+    }
+
+    pub fn doygunluk_aralığı(mut self, en_az: f32, en_çok: f32) -> Self {
+        self.doygunluk_aralığı = Some((en_az.clamp(0.0, 1.0), en_çok.clamp(0.0, 1.0)));
+        self
+    }
+
+    pub fn eşleme(mut self, eşleme: AğaçHaritasıRenkEşlemesi) -> Self {
+        self.eşleme = Some(eşleme);
+        self
+    }
+
+    pub fn görünür_en_az(mut self, alan: f32) -> Self {
+        self.görünür_en_az = Some(alan.max(0.0));
+        self
+    }
+
+    pub fn görünür_eşiği_kapalı(mut self) -> Self {
+        // `None` bir seviye/düğüm yamasında üst modelden kalıtım demektir;
+        // eşiği gerçekten kapatan resmî değer `visibleMin: 0`dır.
+        self.görünür_en_az = Some(0.0);
+        self
+    }
+
+    pub fn çocuk_görünür_en_az(mut self, alan: f32) -> Self {
+        self.çocuk_görünür_en_az = Some(alan.max(0.0));
+        self
+    }
+}
+
+/// `emphasis` / `blur` / `select` Treemap yaması.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct AğaçHaritasıDurumu {
+    pub öğe_stili: Option<AğaçHaritasıÖğeStili>,
+    pub etiket: Option<EtiketYaması>,
+    pub üst_etiket: Option<EtiketYaması>,
+    pub odak: AğaçVurguOdağı,
+}
+
+impl AğaçHaritasıDurumu {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn öğe_stili(mut self, stil: AğaçHaritasıÖğeStili) -> Self {
+        self.öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: EtiketYaması) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn üst_etiket(mut self, etiket: EtiketYaması) -> Self {
+        self.üst_etiket = Some(etiket);
+        self
+    }
+
+    pub fn odak(mut self, odak: AğaçVurguOdağı) -> Self {
+        self.odak = odak;
+        self
+    }
+}
+
+/// `series-treemap.levels[i]` miras katmanı.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct AğaçHaritasıSeviyesi {
+    pub görsel: Option<AğaçHaritasıGörseli>,
+    pub öğe_stili: Option<AğaçHaritasıÖğeStili>,
+    pub etiket: Option<EtiketYaması>,
+    pub üst_etiket: Option<EtiketYaması>,
+    pub vurgu: AğaçHaritasıDurumu,
+    pub bulanık: AğaçHaritasıDurumu,
+    pub seçili: AğaçHaritasıDurumu,
+}
+
+impl AğaçHaritasıSeviyesi {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn görsel(mut self, görsel: AğaçHaritasıGörseli) -> Self {
+        self.görsel = Some(görsel);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: AğaçHaritasıÖğeStili) -> Self {
+        self.öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn etiket(mut self, etiket: EtiketYaması) -> Self {
+        self.etiket = Some(etiket);
+        self
+    }
+
+    pub fn üst_etiket(mut self, etiket: EtiketYaması) -> Self {
+        self.üst_etiket = Some(etiket);
+        self
+    }
+
+    pub fn vurgu(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.vurgu = durum;
+        self
+    }
+
+    pub fn bulanık(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.bulanık = durum;
+        self
+    }
+
+    pub fn seçili(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.seçili = durum;
+        self
+    }
+}
+
+/// Treemap kırıntı çubuğu (`breadcrumb`). Konumlar ECharts box-layout
+/// kurallarındaki gibi sol/sağ ve üst/alt çiftlerinden çözülür.
+#[derive(Clone, PartialEq, Debug)]
+pub struct AğaçHaritasıKırıntısı {
+    pub göster: bool,
+    pub sol: Option<Uzunluk>,
+    pub sağ: Option<Uzunluk>,
+    pub üst: Option<Uzunluk>,
+    pub alt: Option<Uzunluk>,
+    pub yükseklik: f32,
+    pub boş_öğe_genişliği: f32,
+    pub öğe_stili: ÖğeStili,
+    pub yazı: YazıStili,
+    pub vurgu_devre_dışı: bool,
+    pub vurgu_öğe_stili: Option<ÖğeStili>,
+}
+
+impl Default for AğaçHaritasıKırıntısı {
+    fn default() -> Self {
+        Self {
+            göster: true,
+            sol: Some(Uzunluk::Yüzde(50.0)),
+            sağ: None,
+            üst: None,
+            alt: Some(Uzunluk::Piksel(16.0)),
+            yükseklik: 22.0,
+            boş_öğe_genişliği: 25.0,
+            // ECharts v6 tokenları: `backgroundShade` / `secondary`.
+            öğe_stili: ÖğeStili::yeni().renk(Renk::onaltılık(0xe8ebf0)),
+            yazı: YazıStili::yeni().renk(Renk::onaltılık(0x54555a)),
+            vurgu_devre_dışı: false,
+            vurgu_öğe_stili: Some(ÖğeStili::yeni().renk(Renk::BEYAZ)),
+        }
+    }
+}
+
+impl AğaçHaritasıKırıntısı {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
+    }
+
+    pub fn sol(mut self, sol: impl Into<Uzunluk>) -> Self {
+        self.sol = Some(sol.into());
+        self.sağ = None;
+        self
+    }
+
+    pub fn sağ(mut self, sağ: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(sağ.into());
+        self.sol = None;
+        self
+    }
+
+    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+        self.üst = Some(üst.into());
+        self.alt = None;
+        self
+    }
+
+    pub fn alt(mut self, alt: impl Into<Uzunluk>) -> Self {
+        self.alt = Some(alt.into());
+        self.üst = None;
+        self
+    }
+
+    pub fn yükseklik(mut self, yükseklik: f32) -> Self {
+        self.yükseklik = yükseklik.max(0.0);
+        self
+    }
+
+    pub fn boş_öğe_genişliği(mut self, genişlik: f32) -> Self {
+        self.boş_öğe_genişliği = genişlik.max(0.0);
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn yazı(mut self, yazı: YazıStili) -> Self {
+        self.yazı = yazı;
+        self
+    }
+
+    pub fn vurgu_devre_dışı(mut self, devre_dışı: bool) -> Self {
+        self.vurgu_devre_dışı = devre_dışı;
+        self
+    }
+
+    pub fn vurgu_öğe_stili(mut self, stil: ÖğeStili) -> Self {
+        self.vurgu_öğe_stili = Some(stil);
+        self
+    }
+}
+
 /// Hiyerarşideki tek düğüm.
 #[derive(Clone, PartialEq, Debug, Default)]
 pub struct AğaçDüğümü {
@@ -81,6 +528,9 @@ pub struct AğaçDüğümü {
     pub ad: String,
     /// Yaprak değeri; dallarda `None` ise çocuk toplamı kullanılır.
     pub değer: Option<f64>,
+    /// Treemap/Sunburst çok boyutlu `value` dizisi. İlk eleman alan
+    /// değeridir; `None` JSON `null` değerini korur.
+    pub değerler: Vec<Option<f64>>,
     pub çocuklar: Vec<AğaçDüğümü>,
     /// Açık renk; verilmezse üst düzey paletten, alt düzeyler üstten türetilir.
     pub renk: Option<Renk>,
@@ -108,6 +558,16 @@ pub struct AğaçDüğümü {
     pub seçili_öğe_stili: Option<ÖğeStili>,
     pub seçili_çizgi_stili: Option<ÇizgiStili>,
     pub seçili_etiketi: Option<EtiketYaması>,
+    /// Treemap düğümüne özgü miras katmanı.
+    pub ağaç_haritası_görseli: Option<AğaçHaritasıGörseli>,
+    pub ağaç_haritası_öğe_stili: Option<AğaçHaritasıÖğeStili>,
+    pub ağaç_haritası_üst_etiketi: Option<EtiketYaması>,
+    pub ağaç_haritası_vurgusu: Option<AğaçHaritasıDurumu>,
+    pub ağaç_haritası_bulanıklığı: Option<AğaçHaritasıDurumu>,
+    pub ağaç_haritası_seçilisi: Option<AğaçHaritasıDurumu>,
+    /// ECharts `cursor`; GPUI katmanı desteklenen CSS adlarını yerel imlece
+    /// dönüştürür, bilinmeyen değerler normal imlece düşer.
+    pub imleç: Option<String>,
 }
 
 impl AğaçDüğümü {
@@ -246,15 +706,81 @@ impl AğaçDüğümü {
 
     pub fn değerli(mut self, değer: f64) -> Self {
         self.değer = Some(değer);
+        if self.değerler.is_empty() {
+            self.değerler.push(Some(değer));
+        } else {
+            self.değerler[0] = Some(değer);
+        }
+        self
+    }
+
+    /// Çok boyutlu `value` dizisini kurar. İlk eleman hücre alanını belirler.
+    pub fn çoklu_değerler(mut self, değerler: impl IntoIterator<Item = Option<f64>>) -> Self {
+        self.değerler = değerler.into_iter().collect();
+        self.değer = self.değerler.first().copied().flatten();
+        self
+    }
+
+    pub fn ağaç_haritası_görseli(mut self, görsel: AğaçHaritasıGörseli) -> Self {
+        self.ağaç_haritası_görseli = Some(görsel);
+        self
+    }
+
+    pub fn ağaç_haritası_öğe_stili(mut self, stil: AğaçHaritasıÖğeStili) -> Self {
+        self.ağaç_haritası_öğe_stili = Some(stil);
+        self
+    }
+
+    pub fn ağaç_haritası_üst_etiketi(mut self, etiket: EtiketYaması) -> Self {
+        self.ağaç_haritası_üst_etiketi = Some(etiket);
+        self
+    }
+
+    pub fn ağaç_haritası_vurgusu(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.ağaç_haritası_vurgusu = Some(durum);
+        self
+    }
+
+    pub fn ağaç_haritası_bulanıklığı(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.ağaç_haritası_bulanıklığı = Some(durum);
+        self
+    }
+
+    pub fn ağaç_haritası_seçilisi(mut self, durum: AğaçHaritasıDurumu) -> Self {
+        self.ağaç_haritası_seçilisi = Some(durum);
+        self
+    }
+
+    pub fn imleç(mut self, imleç: impl Into<String>) -> Self {
+        self.imleç = Some(imleç.into());
         self
     }
 
     /// Etkin değer: verilmişse kendisi, yoksa çocukların toplamı.
     pub fn etkin_değer(&self) -> f64 {
-        match self.değer {
+        match self
+            .değer
+            .or_else(|| self.değerler.first().copied().flatten())
+        {
             Some(d) if d.is_finite() => d,
             _ => self.çocuklar.iter().map(|ç| ç.etkin_değer()).sum(),
         }
+    }
+
+    /// Treemap görsel eşlemesinin istediği boyutu döndürür. Adlandırılmış
+    /// boyutlar için ECharts'ın ortak `value` eş adı desteklenir.
+    pub fn görsel_değer(&self, boyut: &AğaçHaritasıGörselBoyutu) -> Option<f64> {
+        match boyut {
+            AğaçHaritasıGörselBoyutu::Sıra(sıra) => self
+                .değerler
+                .get(*sıra)
+                .copied()
+                .flatten()
+                .or_else(|| (*sıra == 0).then(|| self.etkin_değer())),
+            AğaçHaritasıGörselBoyutu::Ad(ad) if ad == "value" => Some(self.etkin_değer()),
+            AğaçHaritasıGörselBoyutu::Ad(_) => None,
+        }
+        .filter(|değer| değer.is_finite())
     }
 
     pub fn yaprak_mı(&self) -> bool {
