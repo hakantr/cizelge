@@ -458,7 +458,7 @@ echarts.registerPreprocessor((opt) => {
   // Yeni Sunburst geçidi resmi örnek seçeneğini değiştirmeden doğrulanır.
   // Daha önce kilitlenmiş ailelerin snapshot üretilebilirliği, yalnız kendi
   // eski kartlarında kullanılan bileşen padding normalizasyonuyla korunur.
-  if (!${JSON.stringify(id.startsWith('sunburst-') || id.startsWith('sankey-'))}) {
+  if (!${JSON.stringify(id.startsWith('sunburst-') || id.startsWith('sankey-') || id.startsWith('chord-'))}) {
     for (const key of ['title', 'legend', 'toolbox']) {
       const values = Array.isArray(opt[key]) ? opt[key] : opt[key] ? [opt[key]] : [];
       for (const item of values) if (item.padding == null) item.padding = 15;
@@ -1291,6 +1291,89 @@ async function çalıştır() {
             });
             return;
           }
+          if (model.subType === 'chord') {
+            const graph = model.getGraph?.();
+            const düğümVerisi = model.getData?.();
+            const bağVerisi = model.getEdgeData?.() || model.getData?.('edge');
+            const köşeler = (değer) => {
+              const dizi = Array.isArray(değer) ? değer : [değer || 0];
+              if (dizi.length === 1) return [dizi[0], dizi[0], dizi[0], dizi[0]].map(yuvarla);
+              if (dizi.length === 2) return [dizi[0], dizi[0], dizi[1], dizi[1]].map(yuvarla);
+              return [dizi[0] || 0, dizi[1] || 0, dizi[2] || 0, dizi[3] || 0].map(yuvarla);
+            };
+            const düğümler = [];
+            graph?.eachNode?.((düğüm) => {
+              const yerleşim = düğüm.getLayout?.() || {};
+              const grafik = düğümVerisi?.getItemGraphicEl?.(düğüm.dataIndex);
+              const şekil = grafik?.shape || yerleşim;
+              const stil = grafik?.style || düğümVerisi?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
+              const etiket = grafik?.getTextContent?.();
+              düğümler.push({
+                veri_sırası: düğümVerisi?.getRawIndex?.(düğüm.dataIndex) ?? düğüm.dataIndex ?? 0,
+                kimlik: düğüm.id || null,
+                ad: düğüm.name || düğüm.id || '',
+                değer: Number(yerleşim.value ?? düğüm.getValue?.() ?? 0) || 0,
+                cx: yuvarla(şekil.cx ?? yerleşim.cx),
+                cy: yuvarla(şekil.cy ?? yerleşim.cy),
+                r0: yuvarla(şekil.r0 ?? yerleşim.r0),
+                r: yuvarla(şekil.r ?? yerleşim.r),
+                başlangıç_açısı: yuvarla(şekil.startAngle ?? yerleşim.startAngle),
+                bitiş_açısı: yuvarla(şekil.endAngle ?? yerleşim.endAngle),
+                saat_yönünde: (şekil.clockwise ?? yerleşim.clockwise) !== false,
+                renk: etkiliDolguRenkleri(stil.fill, stil.opacity ?? 1)[0] || null,
+                kenarlık_rengi: renk(stil.stroke),
+                kenarlık_kalınlığı: yuvarla(stil.stroke ? (stil.lineWidth || 0) : 0),
+                köşe_yarıçapları: köşeler(şekil.cornerRadius),
+                etiket_göster: Boolean(etiket && !etiket.ignore),
+                etiket_metni: etiket?.style?.text || '',
+                etiket_x: yuvarla(etiket?.x),
+                etiket_y: yuvarla(etiket?.y),
+                etiket_dönüşü: yuvarla(etiket?.rotation),
+                etiket_yatay_hizası: etiket?.style?.align || 'left',
+                etiket_dikey_hizası: etiket?.style?.verticalAlign || 'top',
+                etiket_fontu: etiket?.style?.font || '',
+                etiket_rengi: renk(etiket?.style?.fill)
+              });
+            });
+            const bağlar = [];
+            graph?.eachEdge?.((bağ) => {
+              const yerleşim = bağ.getLayout?.() || {};
+              const grafik = bağVerisi?.getItemGraphicEl?.(bağ.dataIndex);
+              const şekil = grafik?.shape || yerleşim;
+              const stil = grafik?.style || {};
+              const nokta = (değer) => [yuvarla(değer?.[0]), yuvarla(değer?.[1])];
+              bağlar.push({
+                veri_sırası: bağVerisi?.getRawIndex?.(bağ.dataIndex) ?? bağ.dataIndex ?? 0,
+                kaynak: bağ.node1?.id || bağ.node1?.name || '',
+                hedef: bağ.node2?.id || bağ.node2?.name || '',
+                değer: Number(yerleşim.value ?? bağ.getValue?.() ?? 0) || 0,
+                kaynak_başlangıç_açısı: yuvarla(şekil.sStartAngle ?? yerleşim.sStartAngle),
+                kaynak_bitiş_açısı: yuvarla(şekil.sEndAngle ?? yerleşim.sEndAngle),
+                hedef_başlangıç_açısı: yuvarla(şekil.tStartAngle ?? yerleşim.tStartAngle),
+                hedef_bitiş_açısı: yuvarla(şekil.tEndAngle ?? yerleşim.tEndAngle),
+                kaynak1: nokta(şekil.s1 ?? yerleşim.s1),
+                kaynak2: nokta(şekil.s2 ?? yerleşim.s2),
+                hedef1: nokta(şekil.t1 ?? yerleşim.t1),
+                hedef2: nokta(şekil.t2 ?? yerleşim.t2),
+                cx: yuvarla(şekil.cx ?? yerleşim.cx),
+                cy: yuvarla(şekil.cy ?? yerleşim.cy),
+                r: yuvarla(şekil.r ?? yerleşim.r),
+                saat_yönünde: (şekil.clockwise ?? yerleşim.clockwise) !== false,
+                renkler: etkiliDolguRenkleri(stil.fill, stil.opacity ?? 1),
+                kenarlık_kalınlığı: yuvarla(stil.stroke ? (stil.lineWidth || 0) : 0),
+                etiket_göster: Boolean(grafik?.getTextContent?.() && !grafik.getTextContent().ignore),
+                etiket_metni: grafik?.getTextContent?.()?.style?.text || ''
+              });
+            });
+            seriler.push({
+              seri_sırası: model.seriesIndex,
+              alan: { x: 0, y: 0, genişlik: chart.getWidth(), yükseklik: chart.getHeight() },
+              düğümler,
+              bağlar,
+              __tür: 'chord'
+            });
+            return;
+          }
           if (model.subType !== 'sunburst') return;
           const veri = model.getData?.();
           const viewRoot = model.getViewRoot?.() || veri?.tree?.root;
@@ -1342,9 +1425,12 @@ async function çalıştır() {
           for (const çocuk of viewRoot?.children || []) gez(çocuk);
           seriler.push({ seri_sırası: model.seriesIndex, dilimler });
         });
-        const tür = seriler.some((seri) => Array.isArray(seri.dilimler))
+        const tür = seriler.some((seri) => seri.__tür === 'chord')
+          ? 'chord'
+          : seriler.some((seri) => Array.isArray(seri.dilimler))
           ? 'sunburst'
           : seriler.some((seri) => Array.isArray(seri.bağlar)) ? 'sankey' : 'treemap';
+        for (const seri of seriler) delete seri.__tür;
         return { şema_sürümü: 1, tür, koordinat_adımı: 0.001, seriler };
       });
       fs.mkdirSync(path.dirname(path.resolve(args.sceneOutput)), { recursive: true });

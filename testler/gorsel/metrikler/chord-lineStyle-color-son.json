@@ -1,0 +1,45 @@
+{
+  "id": "chord-lineStyle-color",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 192,
+  "değişen_piksel_oranı": 0.0007111111111111111,
+  "ssim": 0.9991116220850651,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 687,
+    "değişen_piksel_oranı": 0.0025444444444444447,
+    "ssim": 0.9985356218329912
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "chord_sektör_ve_şerit_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Chord sektörünün açı/yarıçap/köşe/etiket geometrisi ile her şeridin kaynak-hedef açı istifi, dört uç noktası, çizgi katmanı ve etkin RGBA renk uçları kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 12,
+      "gerçek_düğüm": 12,
+      "beklenen_bağ": 15,
+      "gerçek_bağ": 15,
+      "karşılaştırılan_alan": 588,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/chord-lineStyle-color.png",
+    "gerçek": "testler/gorsel/gerçek/default/chord-lineStyle-color.png",
+    "fark": "testler/gorsel/fark/default/chord-lineStyle-color.png",
+    "normalize_fark": "testler/gorsel/fark/default/chord-lineStyle-color-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/chord-lineStyle-color.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/chord-lineStyle-color.json"
+  }
+}

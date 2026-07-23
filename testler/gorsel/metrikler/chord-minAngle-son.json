@@ -1,0 +1,45 @@
+{
+  "id": "chord-minAngle",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 15,
+  "değişen_piksel_oranı": 0.00005555555555555556,
+  "ssim": 0.999750800841306,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 83,
+    "değişen_piksel_oranı": 0.0003074074074074074,
+    "ssim": 0.9996045995550848
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "chord_sektör_ve_şerit_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Chord sektörünün açı/yarıçap/köşe/etiket geometrisi ile her şeridin kaynak-hedef açı istifi, dört uç noktası, çizgi katmanı ve etkin RGBA renk uçları kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 6,
+      "gerçek_düğüm": 6,
+      "beklenen_bağ": 3,
+      "gerçek_bağ": 3,
+      "karşılaştırılan_alan": 204,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/chord-minAngle.png",
+    "gerçek": "testler/gorsel/gerçek/default/chord-minAngle.png",
+    "fark": "testler/gorsel/fark/default/chord-minAngle.png",
+    "normalize_fark": "testler/gorsel/fark/default/chord-minAngle-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/chord-minAngle.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/chord-minAngle.json"
+  }
+}

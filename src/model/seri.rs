@@ -22,6 +22,7 @@ pub use crate::model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
 };
 use crate::model::imleyici::{İmAlanı, İmNoktası, İmleyiciler, İmÇizgisi};
+pub use crate::model::kiris::KirişSerisi;
 use crate::model::matris::MatrisAralığı;
 use crate::model::stil::{
     AlanStili, Biçimleyici, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması, YazıStili,
@@ -5212,52 +5213,6 @@ impl GrafoSerisi {
     }
 }
 
-/// Kiriş serisi (`series-chord`): çember üzerindeki düğümler arasında
-/// merkezden geçen akış şeritleri.
-#[derive(Clone, Debug)]
-pub struct KirişSerisi {
-    pub ad: Option<String>,
-    /// Akışlar: `(kaynak, hedef, değer)`.
-    pub bağlar: Vec<(String, String, f64)>,
-    pub merkez: (Uzunluk, Uzunluk),
-    pub yarıçap: Uzunluk,
-    pub şerit_kalınlığı: f32,
-}
-
-impl Default for KirişSerisi {
-    fn default() -> Self {
-        KirişSerisi {
-            ad: None,
-            bağlar: Vec::new(),
-            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
-            yarıçap: Uzunluk::Yüzde(72.0),
-            şerit_kalınlığı: 16.0,
-        }
-    }
-}
-
-impl KirişSerisi {
-    pub fn yeni() -> Self {
-        Self::default()
-    }
-
-    pub fn ad(mut self, ad: impl Into<String>) -> Self {
-        self.ad = Some(ad.into());
-        self
-    }
-
-    pub fn bağlar<S: Into<String>>(
-        mut self,
-        bağlar: impl IntoIterator<Item = (S, S, f64)>,
-    ) -> Self {
-        self.bağlar = bağlar
-            .into_iter()
-            .map(|(k, h, d)| (k.into(), h.into(), d))
-            .collect();
-        self
-    }
-}
-
 /// Paralel koordinat boyutu (`parallelAxis` öğesi).
 #[derive(Clone, PartialEq, Debug)]
 pub struct ParalelBoyut {
@@ -5710,6 +5665,7 @@ impl Seri {
             Seri::GüneşPatlaması(s) => s.kimlik.as_deref(),
             Seri::Ağaç(s) => s.kimlik.as_deref(),
             Seri::Sankey(s) => s.kimlik.as_deref(),
+            Seri::Kiriş(s) => s.kimlik.as_deref(),
             _ => None,
         }
     }

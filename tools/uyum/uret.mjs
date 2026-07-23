@@ -1225,6 +1225,157 @@ const SANKEY_SERIES_OPTION_KANITI = Object.freeze({
   }
 });
 
+const CHORD_ÖRNEKLERİ = Object.freeze([
+  'chord-simple', 'chord-minAngle', 'chord-lineStyle-color', 'chord-style'
+]);
+const CHORD_FIXTURE_TESTİ =
+  'kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur';
+const CHORD_SAHNE_TESTİ =
+  'kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur';
+const CHORD_YERLEŞİM_TESTİ =
+  'grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur';
+const CHORD_İSABET_TESTİ =
+  'grafik::kiris::testler::serit_boyali_alani_olay_ve_tooltip_isabeti_uretir';
+const CHORD_SEÇENEK_TESTİ =
+  'grafik::kiris::testler::acik_curveness_kenar_etiketi_ve_disabled_vurgu_dallari_calisir';
+const CHORD_GÖSTERGE_TESTİ =
+  'cizim::gorunum::yakınlaştırma_yönü_testleri::kiris_gosterge_filtresi_dugumu_ve_bagli_seritleri_yerlesimden_cikarir';
+const CHORD_TOOLTIP_TESTİ =
+  'cizim::gorunum::yakınlaştırma_yönü_testleri::kiris_seri_tooltipi_kok_tooltip_olmadan_seridi_gosterir';
+
+const CHORD_SERIES_OPTION_KANITI = Object.freeze({
+  type: {
+    api: 'src/model/seri.rs (Seri::Kiriş/From<KirişSerisi>); src/model/kiris.rs (KirişSerisi); src/grafik/kiris.rs (kiriş_çiz)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ["sabit 'chord'"], dallar: ['kayıtlı-seri', 'boyama', 'isabet/tooltip']
+  },
+  coordinateSystem: {
+    api: "src/model/kiris.rs (KirişSerisi yalnız coordinateSystem='none' değişmezini kabul eder); src/grafik/kiris.rs (kiriş_alanı)",
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ["'none'"], dallar: ['none', 'box-layout görünüm alanı']
+  },
+  data: {
+    api: 'src/model/kiris.rs (KirişDüğümü, KirişSerisi::düğümler); src/grafik/kiris.rs (düğümleri_ve_bağları_kur)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ, CHORD_YERLEŞİM_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['KirişDüğümü[]', 'string shorthand', 'number/number[] value'], dallar: ['id/name', 'açık/türetilen-value', 'ham dataIndex']
+  },
+  nodes: {
+    api: 'src/model/kiris.rs (KirişSerisi::düğümler; data/nodes eşdeğeri)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['KirişDüğümü[]'], dallar: ['data-alias', 'nodes-alias']
+  },
+  links: {
+    api: 'src/model/kiris.rs (KirişBağı, bağlar/ayrıntılı_bağlar); src/grafik/kiris.rs (iki-uç açı istifi)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ, CHORD_YERLEŞİM_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['KirişBağı[]', '(source,target,value)[]'], dallar: ['source/target/value', 'self-edge', 'çoklu-bağ']
+  },
+  edges: {
+    api: 'src/model/kiris.rs (KirişSerisi::bağlar; links/edges eşdeğeri)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['KirişBağı[]'], dallar: ['links-alias', 'edges-alias']
+  },
+  id: {
+    api: 'src/model/kiris.rs (KirişSerisi::kimlik, KirişDüğümü::kimlik); src/model/seri.rs (Seri::kimlik)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['String'], dallar: ['seri-id', 'düğüm-id', 'name-yedeği', 'link endpoint']
+  },
+  name: {
+    api: 'src/model/kiris.rs (KirişDüğümü::ad, KirişSerisi::ad); src/grafik/kiris.rs (etiket/tooltip)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['String'], dallar: ['düğüm-adı', 'seri-adı', 'legend provider']
+  },
+  value: {
+    api: 'src/model/kiris.rs (KirişDüğümü::değer, KirişBağı::değer); src/grafik/kiris.rs (uç toplamı/max açık değer)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ, CHORD_YERLEŞİM_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['number', 'number[]', 'edge number'], dallar: ['iki-uç-toplamı', 'açık-node-max', 'allZero=1']
+  },
+  clockwise: {
+    api: 'src/model/kiris.rs (KirişSerisi::saat_yönünde); src/grafik/kiris.rs (açıları_normalleştir/arc sweep)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ, CHORD_YERLEŞİM_TESTİ], örnekler: ['chord-simple', 'chord-style'],
+    veri_biçimleri: ['bool'], dallar: ['saat-yönü', 'ters-yön', 'şerit-yayı']
+  },
+  startAngle: {
+    api: 'src/model/kiris.rs (başlangıç_açısı); src/grafik/kiris.rs (derece→ekran-radyanı)',
+    testler: [CHORD_SAHNE_TESTİ, CHORD_YERLEŞİM_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['degree'], dallar: ['90-varsayılanı', 'özel-açı']
+  },
+  endAngle: {
+    api: 'src/model/kiris.rs (bitiş_açısı/otomatik_bitiş_açısı); src/grafik/kiris.rs (kilitli ECharts chordLayout tam-tur davranışı)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['number', 'auto'], dallar: ['API-değeri-korunur', 'resmî-runtime-tam-tur']
+  },
+  padAngle: {
+    api: 'src/model/kiris.rs (dolgu_açısı); src/grafik/kiris.rs (çizilen düğüm sayısına göre boşluk azaltımı)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: ['chord-style'],
+    veri_biçimleri: ['nonnegative degree'], dallar: ['3-varsayılanı', 'minAngle-önceliği', 'yetersiz-açı-kıstırma']
+  },
+  minAngle: {
+    api: 'src/model/kiris.rs (en_küçük_açı); src/grafik/kiris.rs (açık/fazla yeniden dağıtımı)',
+    testler: ['grafik::kiris::testler::min_angle_bagsiz_dugumleri_de_cizer', CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: ['chord-minAngle'],
+    veri_biçimleri: ['nonnegative degree'], dallar: ['bağsız-düğüm', 'deficit/surplus', 'padAngle-önceliği']
+  },
+  itemStyle: {
+    api: 'src/model/kiris.rs (KirişÖğeStili); src/grafik/kiris.rs (seri→düğüm→durum kalıtımı)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: ['chord-style'],
+    veri_biçimleri: ['color/border/radius/opacity/shadow'], dallar: ['seri', 'düğüm', 'emphasis/blur/select', 'fill/border/shadow']
+  },
+  borderRadius: {
+    api: 'src/model/kiris.rs (KirişKöşeYarıçapı); src/cizim/yuzey.rs (yuvarlatılmış_dilim_yolu)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: ['chord-style'],
+    veri_biçimleri: ['number', '[inner,outer]', '[4]', 'percent'], dallar: ['dört-sektör-köşesi', 'halka-kalınlığına-yüzde', 'dar-açı-kıstırma']
+  },
+  lineStyle: {
+    api: 'src/model/kiris.rs (KirişÇizgiStili/KirişKenarBoyası); src/grafik/kiris.rs (şerit_yolu/bağ_dolgusu)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: ['chord-simple', 'chord-lineStyle-color', 'chord-style'],
+    veri_biçimleri: ['source/target/gradient/color', 'opacity/width/type/curveness/shadow'], dallar: ['seri', 'bağ', 'durum', 'iki-uç-gradyan']
+  },
+  curveness: {
+    api: 'src/model/kiris.rs (KirişÇizgiStili::eğrilik); src/grafik/kiris.rs (şerit_yolu kübik kontrol oranı)',
+    testler: [CHORD_SAHNE_TESTİ, CHORD_SEÇENEK_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['number'], dallar: ['0', '0.7-varsayılanı', 'kaynak/hedef-kontrol-çifti']
+  },
+  label: {
+    api: 'src/model/stil.rs (Etiket/EtiketYaması); src/model/kiris.rs (düğüm/durum label); src/grafik/kiris.rs (etiket_geometrisi)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['Etiket', 'EtiketYaması', 'formatter/rich/font'], dallar: ['seri→düğüm', 'kenar-label alias', 'emphasis/blur/select', 'renk-kalıtımı']
+  },
+  position: {
+    api: 'src/model/stil.rs (EtiketKonumu); src/grafik/kiris.rs (etiket_geometrisi)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: ['chord-simple', 'chord-style'],
+    veri_biçimleri: ['outside', 'inside/SeriesLabelPosition'], dallar: ['r+distance', 'halka-ortası', 'otomatik-hiza']
+  },
+  silent: {
+    api: 'src/model/stil.rs (Etiket::sessiz/EtiketYaması::sessiz); src/model/kiris.rs (KirişSerisi::sessiz)',
+    testler: [CHORD_FIXTURE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['bool'], dallar: ['etiket-olay-geçişi', 'seri-isabet-kapalı']
+  },
+  edgeLabel: {
+    api: 'src/model/kiris.rs (kenar_etiketi/KirişBağı::kenar_etiketi); src/grafik/kiris.rs (şerit etiketi)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ, CHORD_SEÇENEK_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['Etiket', 'EtiketYaması'], dallar: ['seri', 'bağ', 'durum', 'formatter']
+  },
+  emphasis: {
+    api: 'src/model/kiris.rs (KirişDurumu/KirişVurguOdağı); src/grafik/kiris.rs (node/edge focus kümeleri)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ, CHORD_SEÇENEK_TESTİ], örnekler: ['chord-style'],
+    veri_biçimleri: ['none/self/adjacency/series', 'scale', 'style/label yamaları'], dallar: ['düğüm', 'bağ', 'self', 'adjacency', 'disabled']
+  },
+  blur: {
+    api: 'src/model/kiris.rs (KirişDurumu::bulanık); src/grafik/kiris.rs (odak-dışı katman)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['itemStyle/lineStyle/label/edgeLabel'], dallar: ['düğüm', 'bağ', 'otomatik-0.1-opaklık']
+  },
+  select: {
+    api: 'src/model/kiris.rs (KirişDurumu::seçili, KirişDüğümü::başlangıçta_seçili); src/grafik/kiris.rs (seçili katman)',
+    testler: [CHORD_FIXTURE_TESTİ, CHORD_SAHNE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['itemStyle/lineStyle/label/edgeLabel'], dallar: ['düğüm', 'bağ', 'başlangıç-seçimi']
+  },
+  legendHoverLink: {
+    api: 'src/model/kiris.rs (KirişSerisi::gösterge_vurgusu); src/cizim/gorunum.rs (Chord LegendVisualProvider düğüm öğeleri)',
+    testler: [CHORD_FIXTURE_TESTİ], örnekler: CHORD_ÖRNEKLERİ,
+    veri_biçimleri: ['bool'], dallar: ['node-legend-provider', 'hover-link açık/kapalı']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -1432,6 +1583,10 @@ const YEREL_FIXTURE = Object.freeze({
   'sankey-nodeAlign-right': 'examples/uyum_fixture.rs#sankey_resmi',
   'sankey-simple': 'examples/uyum_fixture.rs#sankey_resmi',
   'sankey-vertical': 'examples/uyum_fixture.rs#sankey_resmi',
+  'chord-simple': 'examples/uyum_fixture.rs#kiriş_resmi',
+  'chord-minAngle': 'examples/uyum_fixture.rs#kiriş_resmi',
+  'chord-lineStyle-color': 'examples/uyum_fixture.rs#kiriş_resmi',
+  'chord-style': 'examples/uyum_fixture.rs#kiriş_resmi',
   'tree-basic': 'examples/uyum_fixture.rs#tree_basic',
   'tree-legend': 'examples/uyum_fixture.rs#tree_legend',
   'tree-orient-bottom-top': 'examples/uyum_fixture.rs#tree_orient_bottom_top',
@@ -1439,8 +1594,7 @@ const YEREL_FIXTURE = Object.freeze({
   'tree-polyline': 'examples/uyum_fixture.rs#tree_polyline',
   'tree-radial': 'examples/uyum_fixture.rs#tree_radial',
   'tree-vertical': 'examples/uyum_fixture.rs#tree_vertical',
-  'graph-simple': 'examples/grafo.rs',
-  'chord-simple': 'examples/kiris.rs'
+  'graph-simple': 'examples/grafo.rs'
 });
 
 function hata(mesaj) {
@@ -1835,6 +1989,17 @@ function rustKarşılığı(kök, özellik) {
       koordinat_dalları: kanıt.dallar
     };
   }
+  if (kök.toLowerCase() === 'series.chord' && CHORD_SERIES_OPTION_KANITI[özellik]) {
+    const kanıt = CHORD_SERIES_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
   if (kök.toLowerCase() === 'echarts' && özellik === 'parallel') {
     return {
       api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle)',
@@ -1903,6 +2068,24 @@ function rustKarşılığı(kök, özellik) {
       galeri_örnekleri: SANKEY_ÖRNEKLERİ,
       veri_biçimleri: ['SankeySerisi'],
       koordinat_dalları: ['view', 'calendar-box', 'matrix-box', 'boyama', 'isabet/tooltip', 'drag/roam']
+    };
+  }
+  if (kök.toLowerCase() === 'registered' && özellik === 'chord') {
+    return {
+      api: 'src/model/seri.rs (Seri::Kiriş, From<KirişSerisi>); src/model/kiris.rs (model); src/grafik/kiris.rs (yerleşim/boyama)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: [
+        CHORD_FIXTURE_TESTİ,
+        CHORD_SAHNE_TESTİ,
+        CHORD_YERLEŞİM_TESTİ,
+        CHORD_İSABET_TESTİ,
+        CHORD_SEÇENEK_TESTİ,
+        CHORD_GÖSTERGE_TESTİ,
+        CHORD_TOOLTIP_TESTİ
+      ],
+      galeri_örnekleri: CHORD_ÖRNEKLERİ,
+      veri_biçimleri: ['KirişSerisi'],
+      koordinat_dalları: ['none', 'box-layout', 'boyama', 'isabet/tooltip', 'durum katmanları']
     };
   }
   if (kök.toLowerCase() === 'calendar' && CALENDAR_OPTION_KANITI[özellik]) {

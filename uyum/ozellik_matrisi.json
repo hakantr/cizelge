@@ -15382,17 +15382,38 @@
     "ts_türü": "ChordSeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Kiriş, From<KirişSerisi>); src/model/kiris.rs (model); src/grafik/kiris.rs (yerleşim/boyama)",
+    "veri_biçimleri": [
+      "KirişSerisi"
+    ],
+    "koordinat_dalları": [
+      "none",
+      "box-layout",
+      "boyama",
+      "isabet/tooltip",
+      "durum katmanları"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 243,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur",
+      "grafik::kiris::testler::serit_boyali_alani_olay_ve_tooltip_isabeti_uretir",
+      "grafik::kiris::testler::acik_curveness_kenar_etiketi_ve_disabled_vurgu_dallari_calisir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::kiris_gosterge_filtresi_dugumu_ve_bagli_seritleri_yerlesimden_cikarir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::kiris_seri_tooltipi_kok_tooltip_olmadan_seridi_gosterir"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "56824e1bd7563a789e7c",
@@ -17549,17 +17570,31 @@
     "ts_türü": "{\n        label?: SeriesLabelOption\n        edgeLabel?: SeriesLabelOption\n        itemStyle?: ItemStyleOption\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.blur)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDurumu::bulanık); src/grafik/kiris.rs (odak-dışı katman)",
+    "veri_biçimleri": [
+      "itemStyle/lineStyle/label/edgeLabel"
+    ],
+    "koordinat_dalları": [
+      "düğüm",
+      "bağ",
+      "otomatik-0.1-opaklık"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 160,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "12a478d25d582fe68948",
@@ -17570,17 +17605,31 @@
     "ts_türü": "(number | string)[] | number | string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.borderRadius)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişKöşeYarıçapı); src/cizim/yuzey.rs (yuvarlatılmış_dilim_yolu)",
+    "veri_biçimleri": [
+      "number",
+      "[inner,outer]",
+      "[4]",
+      "percent"
+    ],
+    "koordinat_dalları": [
+      "dört-sektör-köşesi",
+      "halka-kalınlığına-yüzde",
+      "dar-açı-kıstırma"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 80,
       "sembol": "ChordItemStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ae661aaaae430ab7abb7",
@@ -17591,17 +17640,30 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (chord.clockwise)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişSerisi::saat_yönünde); src/grafik/kiris.rs (açıları_normalleştir/arc sweep)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "saat-yönü",
+      "ters-yön",
+      "şerit-yayı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 133,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "56f6093107103f983bfe",
@@ -17612,17 +17674,30 @@
     "ts_türü": "'none'",
     "zorunlu": false,
     "echarts_varsayılanı": "'none'",
-    "rust_api": "src/model/seri.rs (chord.coordinateSystem)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişSerisi yalnız coordinateSystem='none' değişmezini kabul eder); src/grafik/kiris.rs (kiriş_alanı)",
+    "veri_biçimleri": [
+      "'none'"
+    ],
+    "koordinat_dalları": [
+      "none",
+      "box-layout görünüm alanı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 129,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3c1f7d5d2f22aba3756c",
@@ -17633,17 +17708,31 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.curveness)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişÇizgiStili::eğrilik); src/grafik/kiris.rs (şerit_yolu kübik kontrol oranı)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "0",
+      "0.7-varsayılanı",
+      "kaynak/hedef-kontrol-çifti"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 97,
       "sembol": "ChordEdgeLineStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::acik_curveness_kenar_etiketi_ve_disabled_vurgu_dallari_calisir"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "926fb3b6fa5b06053940",
@@ -17654,17 +17743,34 @@
     "ts_türü": "(ChordNodeItemOption | ChordDataValue)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDüğümü, KirişSerisi::düğümler); src/grafik/kiris.rs (düğümleri_ve_bağları_kur)",
+    "veri_biçimleri": [
+      "KirişDüğümü[]",
+      "string shorthand",
+      "number/number[] value"
+    ],
+    "koordinat_dalları": [
+      "id/name",
+      "açık/türetilen-value",
+      "ham dataIndex"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 139,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "5bfee38bac38480ee419",
@@ -17675,17 +17781,34 @@
     "ts_türü": "SeriesLineLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.edgeLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (kenar_etiketi/KirişBağı::kenar_etiketi); src/grafik/kiris.rs (şerit etiketi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "bağ",
+      "durum",
+      "formatter"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 145,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::acik_curveness_kenar_etiketi_ve_disabled_vurgu_dallari_calisir"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ca3183dd90caf3782c72",
@@ -17696,17 +17819,30 @@
     "ts_türü": "ChordEdgeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.edges)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişSerisi::bağlar; links/edges eşdeğeri)",
+    "veri_biçimleri": [
+      "KirişBağı[]"
+    ],
+    "koordinat_dalları": [
+      "links-alias",
+      "edges-alias"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 142,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "44096770173e88af1290",
@@ -17717,17 +17853,33 @@
     "ts_türü": "{\n        focus?: Exclude<ChordNodeItemOption['emphasis'], undefined>['focus']\n        scale?: boolean | number\n        label?: SeriesLabelOption\n        edgeLabel?: SeriesLabelOption\n        itemStyle?: ItemStyleOption\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            focus: 'adjacency',\n            lineStyle: {\n                opacity: 0.5\n            }\n        }",
-    "rust_api": "src/model/seri.rs (chord.emphasis)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDurumu/KirişVurguOdağı); src/grafik/kiris.rs (node/edge focus kümeleri)",
+    "veri_biçimleri": [
+      "none/self/adjacency/series",
+      "scale",
+      "style/label yamaları"
+    ],
+    "koordinat_dalları": [
+      "düğüm",
+      "bağ",
+      "self",
+      "adjacency",
+      "disabled"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 151,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::acik_curveness_kenar_etiketi_ve_disabled_vurgu_dallari_calisir"
+    ],
+    "galeri_örnekleri": [
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fc90d9149a9b383b4f0a",
@@ -17738,17 +17890,31 @@
     "ts_türü": "number | 'auto'",
     "zorunlu": false,
     "echarts_varsayılanı": "'auto'",
-    "rust_api": "src/model/seri.rs (chord.endAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (bitiş_açısı/otomatik_bitiş_açısı); src/grafik/kiris.rs (kilitli ECharts chordLayout tam-tur davranışı)",
+    "veri_biçimleri": [
+      "number",
+      "auto"
+    ],
+    "koordinat_dalları": [
+      "API-değeri-korunur",
+      "resmî-runtime-tam-tur"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 135,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b2bea5e24db1212677e8",
@@ -17759,17 +17925,32 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.id)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişSerisi::kimlik, KirişDüğümü::kimlik); src/model/seri.rs (Seri::kimlik)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "seri-id",
+      "düğüm-id",
+      "name-yedeği",
+      "link endpoint"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 91,
       "sembol": "ChordNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "69ceda3bbc62bb633fb4",
@@ -17780,17 +17961,29 @@
     "ts_türü": "ChordItemStyleOption<TCbParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            borderRadius: [0, 0, 5, 5]\n        }",
-    "rust_api": "src/model/seri.rs (chord.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişÖğeStili); src/grafik/kiris.rs (seri→düğüm→durum kalıtımı)",
+    "veri_biçimleri": [
+      "color/border/radius/opacity/shadow"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "düğüm",
+      "emphasis/blur/select",
+      "fill/border/shadow"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 84,
       "sembol": "ChordNodeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "843b56bd5ab46033d6b7",
@@ -17801,17 +17994,29 @@
     "ts_türü": "ChordItemStyleOption<CallbackDataParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            borderRadius: [0, 0, 5, 5]\n        }",
-    "rust_api": "src/model/seri.rs (chord.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişÖğeStili); src/grafik/kiris.rs (seri→düğüm→durum kalıtımı)",
+    "veri_biçimleri": [
+      "color/border/radius/opacity/shadow"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "düğüm",
+      "emphasis/blur/select",
+      "fill/border/shadow"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 148,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "177566fc322377b88d47",
@@ -17822,17 +18027,34 @@
     "ts_türü": "ChordNodeLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            position: 'outside',\n            distance: 5\n        }",
-    "rust_api": "src/model/seri.rs (chord.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Etiket/EtiketYaması); src/model/kiris.rs (düğüm/durum label); src/grafik/kiris.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "formatter/rich/font"
+    ],
+    "koordinat_dalları": [
+      "seri→düğüm",
+      "kenar-label alias",
+      "emphasis/blur/select",
+      "renk-kalıtımı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 85,
       "sembol": "ChordNodeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "196340e01f49cd1a36a9",
@@ -17843,17 +18065,34 @@
     "ts_türü": "ChordNodeLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            position: 'outside',\n            distance: 5\n        }",
-    "rust_api": "src/model/seri.rs (chord.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Etiket/EtiketYaması); src/model/kiris.rs (düğüm/durum label); src/grafik/kiris.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "formatter/rich/font"
+    ],
+    "koordinat_dalları": [
+      "seri→düğüm",
+      "kenar-label alias",
+      "emphasis/blur/select",
+      "renk-kalıtımı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 146,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "86f594bf725c32f2f0eb",
@@ -17864,17 +18103,34 @@
     "ts_türü": "SeriesLineLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            position: 'outside',\n            distance: 5\n        }",
-    "rust_api": "src/model/seri.rs (chord.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Etiket/EtiketYaması); src/model/kiris.rs (düğüm/durum label); src/grafik/kiris.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "formatter/rich/font"
+    ],
+    "koordinat_dalları": [
+      "seri→düğüm",
+      "kenar-label alias",
+      "emphasis/blur/select",
+      "renk-kalıtımı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 107,
       "sembol": "ChordEdgeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ebf2a93bf1ef40ea0b2e",
@@ -17885,17 +18141,29 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (chord.legendHoverLink)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişSerisi::gösterge_vurgusu); src/cizim/gorunum.rs (Chord LegendVisualProvider düğüm öğeleri)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "node-legend-provider",
+      "hover-link açık/kapalı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 131,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d78dc1204c2ddcfe44db",
@@ -17906,17 +18174,32 @@
     "ts_türü": "ChordEdgeLineStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            width: 0,\n            color: 'source',\n            opacity: 0.2\n        }",
-    "rust_api": "src/model/seri.rs (chord.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişÇizgiStili/KirişKenarBoyası); src/grafik/kiris.rs (şerit_yolu/bağ_dolgusu)",
+    "veri_biçimleri": [
+      "source/target/gradient/color",
+      "opacity/width/type/curveness/shadow"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "bağ",
+      "durum",
+      "iki-uç-gradyan"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 149,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f2e406ea0f7aab25c1a0",
@@ -17927,17 +18210,32 @@
     "ts_türü": "ChordEdgeLineStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            width: 0,\n            color: 'source',\n            opacity: 0.2\n        }",
-    "rust_api": "src/model/seri.rs (chord.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişÇizgiStili/KirişKenarBoyası); src/grafik/kiris.rs (şerit_yolu/bağ_dolgusu)",
+    "veri_biçimleri": [
+      "source/target/gradient/color",
+      "opacity/width/type/curveness/shadow"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "bağ",
+      "durum",
+      "iki-uç-gradyan"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 106,
       "sembol": "ChordEdgeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "52bc56843ffd6b66a2ce",
@@ -17948,17 +18246,33 @@
     "ts_türü": "ChordEdgeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.links)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişBağı, bağlar/ayrıntılı_bağlar); src/grafik/kiris.rs (iki-uç açı istifi)",
+    "veri_biçimleri": [
+      "KirişBağı[]",
+      "(source,target,value)[]"
+    ],
+    "koordinat_dalları": [
+      "source/target/value",
+      "self-edge",
+      "çoklu-bağ"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 143,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "84b24d5b3e1993011053",
@@ -17969,17 +18283,29 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "0",
-    "rust_api": "src/model/seri.rs (chord.minAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (en_küçük_açı); src/grafik/kiris.rs (açık/fazla yeniden dağıtımı)",
+    "veri_biçimleri": [
+      "nonnegative degree"
+    ],
+    "koordinat_dalları": [
+      "bağsız-düğüm",
+      "deficit/surplus",
+      "padAngle-önceliği"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 137,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::kiris::testler::min_angle_bagsiz_dugumleri_de_cizer",
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-minAngle"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a48d06bcd8bfdded9947",
@@ -17990,17 +18316,31 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.name)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDüğümü::ad, KirişSerisi::ad); src/grafik/kiris.rs (etiket/tooltip)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "düğüm-adı",
+      "seri-adı",
+      "legend provider"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 92,
       "sembol": "ChordNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "46faf8aeb5eeaae58073",
@@ -18011,17 +18351,30 @@
     "ts_türü": "(ChordNodeItemOption | ChordDataValue)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.nodes)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişSerisi::düğümler; data/nodes eşdeğeri)",
+    "veri_biçimleri": [
+      "KirişDüğümü[]"
+    ],
+    "koordinat_dalları": [
+      "data-alias",
+      "nodes-alias"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 140,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d8fe5df3dba296512ebd",
@@ -18032,17 +18385,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "3",
-    "rust_api": "src/model/seri.rs (chord.padAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (dolgu_açısı); src/grafik/kiris.rs (çizilen düğüm sayısına göre boşluk azaltımı)",
+    "veri_biçimleri": [
+      "nonnegative degree"
+    ],
+    "koordinat_dalları": [
+      "3-varsayılanı",
+      "minAngle-önceliği",
+      "yetersiz-açı-kıstırma"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 136,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c0aca984ff6d219b356c",
@@ -18053,17 +18417,30 @@
     "ts_türü": "SeriesLabelOption['position'] | 'outside'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.position)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (EtiketKonumu); src/grafik/kiris.rs (etiket_geometrisi)",
+    "veri_biçimleri": [
+      "outside",
+      "inside/SeriesLabelPosition"
+    ],
+    "koordinat_dalları": [
+      "r+distance",
+      "halka-ortası",
+      "otomatik-hiza"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 102,
       "sembol": "ChordNodeLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "13035d33df3df31f9572",
@@ -18074,17 +18451,31 @@
     "ts_türü": "{\n        label?: SeriesLabelOption\n        edgeLabel?: SeriesLabelOption\n        itemStyle?: ItemStyleOption\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.select)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDurumu::seçili, KirişDüğümü::başlangıçta_seçili); src/grafik/kiris.rs (seçili katman)",
+    "veri_biçimleri": [
+      "itemStyle/lineStyle/label/edgeLabel"
+    ],
+    "koordinat_dalları": [
+      "düğüm",
+      "bağ",
+      "başlangıç-seçimi"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 167,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2d679f33817401e38e88",
@@ -18095,17 +18486,29 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.silent)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Etiket::sessiz/EtiketYaması::sessiz); src/model/kiris.rs (KirişSerisi::sessiz)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "etiket-olay-geçişi",
+      "seri-isabet-kapalı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 101,
       "sembol": "ChordNodeLabelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "916d402ba492d68f58fb",
@@ -18116,17 +18519,30 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "90",
-    "rust_api": "src/model/seri.rs (chord.startAngle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (başlangıç_açısı); src/grafik/kiris.rs (derece→ekran-radyanı)",
+    "veri_biçimleri": [
+      "degree"
+    ],
+    "koordinat_dalları": [
+      "90-varsayılanı",
+      "özel-açı"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 134,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3c3f304898453aef7545",
@@ -18137,17 +18553,31 @@
     "ts_türü": "'chord'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Kiriş/From<KirişSerisi>); src/model/kiris.rs (KirişSerisi); src/grafik/kiris.rs (kiriş_çiz)",
+    "veri_biçimleri": [
+      "sabit 'chord'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "boyama",
+      "isabet/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 127,
       "sembol": "ChordSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2afaade96ac7527d9f7a",
@@ -18158,17 +18588,34 @@
     "ts_türü": "ChordDataValue",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDüğümü::değer, KirişBağı::değer); src/grafik/kiris.rs (uç toplamı/max açık değer)",
+    "veri_biçimleri": [
+      "number",
+      "number[]",
+      "edge number"
+    ],
+    "koordinat_dalları": [
+      "iki-uç-toplamı",
+      "açık-node-max",
+      "allZero=1"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 93,
       "sembol": "ChordNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a5a5fc65185802093994",
@@ -18179,17 +18626,34 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (chord.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/kiris.rs (KirişDüğümü::değer, KirişBağı::değer); src/grafik/kiris.rs (uç toplamı/max açık değer)",
+    "veri_biçimleri": [
+      "number",
+      "number[]",
+      "edge number"
+    ],
+    "koordinat_dalları": [
+      "iki-uç-toplamı",
+      "açık-node-max",
+      "allZero=1"
+    ],
     "kaynak": {
       "dosya": "src/chart/chord/ChordSeries.ts",
       "satır": 114,
       "sembol": "ChordEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "kiriş_fixture_testleri::dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "kiriş_fixture_testleri::dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur",
+      "grafik::kiris::testler::resmi_baslangic_yon_ve_bag_birikimi_korunur"
+    ],
+    "galeri_örnekleri": [
+      "chord-simple",
+      "chord-minAngle",
+      "chord-lineStyle-color",
+      "chord-style"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d550f22c79ba31d1c4fe",

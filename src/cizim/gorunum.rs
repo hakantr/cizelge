@@ -1694,6 +1694,42 @@ fn gösterge_öğeleri(
                     });
                 }
             }
+            Seri::Kiriş(kiriş) => {
+                for (j, düğüm) in kiriş.düğümler.iter().enumerate() {
+                    let ad = düğüm.ad.clone();
+                    if !süzgeç.is_empty() && !süzgeç.contains(&ad) {
+                        continue;
+                    }
+                    let renk = düğüm
+                        .öğe_stili
+                        .as_ref()
+                        .and_then(|stil| stil.renk.as_ref())
+                        .or(kiriş.öğe_stili.renk.as_ref())
+                        .map(Dolgu::temsilî)
+                        .unwrap_or_else(|| {
+                            kiriş
+                                .renkler
+                                .get(j % kiriş.renkler.len().max(1))
+                                .copied()
+                                .unwrap_or_else(|| seçenekler.palet_rengi(j))
+                        });
+                    let stil = düğüm.öğe_stili.as_ref().unwrap_or(&kiriş.öğe_stili);
+                    öğeler.push(GöstergeÖğesi {
+                        kapalı: kapalı.contains(&ad),
+                        ad,
+                        renk,
+                        opaklık: stil.opaklık.unwrap_or(1.0),
+                        simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                        çizgi_kalınlığı: None,
+                        çizgi_sembolü: None,
+                        kenarlık: stil
+                            .kenarlık_rengi
+                            .map(|renk| (stil.kenarlık_kalınlığı.unwrap_or(1.0), renk))
+                            .filter(|(kalınlık, _)| *kalınlık > 0.0),
+                        kapalı_simge_gizli: false,
+                    });
+                }
+            }
             _ => {
                 let Some(ad) = seri.ad().map(str::to_string) else {
                     continue;
@@ -3427,7 +3463,9 @@ pub fn grafiği_boya(
     // katmandaki tooltip penceresine veri bırakır.
     let mut bekleyen_ipucu: Option<Bekleyenİpucu> = None;
     let mut bekleyen_matris_ipucu: Option<(usize, Bekleyenİpucu)> = None;
-    let mut bekleyen_paralel_ipucu: Option<(İpucu, Bekleyenİpucu)> = None;
+    // Seri düzeyindeki tooltip kök tooltip'i geçersiz kılabilir. Bu hat,
+    // kendi tooltip alanı bulunan seriler için etkin seçeneği de taşır.
+    let mut bekleyen_yerel_ipucu: Option<(İpucu, Bekleyenİpucu)> = None;
 
     // 1) Arka plan (koyu temada zemin, açıkça verilmemişse de doldurulur).
     let zemin = seçenekler
@@ -6088,6 +6126,32 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
+                // ECharts'ın `dataFilter('chord')` işlemcisi göstergeyle
+                // kapatılmış düğümleri ve onlara bağlı kenarları yerleşimden
+                // önce çıkarır.
+                let süzülmüş;
+                let s = if s.düğümler.iter().any(|düğüm| kapalı.contains(&düğüm.ad)) {
+                    let açık_anahtarlar = s
+                        .düğümler
+                        .iter()
+                        .filter(|düğüm| !kapalı.contains(&düğüm.ad))
+                        .flat_map(|düğüm| {
+                            std::iter::once(düğüm.ad.clone()).chain(düğüm.kimlik.clone())
+                        })
+                        .collect::<HashSet<_>>();
+                    süzülmüş = {
+                        let mut seri = s.clone();
+                        seri.düğümler.retain(|düğüm| !kapalı.contains(&düğüm.ad));
+                        seri.bağlar.retain(|bağ| {
+                            açık_anahtarlar.contains(&bağ.kaynak)
+                                && açık_anahtarlar.contains(&bağ.hedef)
+                        });
+                        seri
+                    };
+                    &süzülmüş
+                } else {
+                    s
+                };
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
                 kiriş_çiz(
@@ -6097,9 +6161,15 @@ pub fn grafiği_boya(
                     tüm_alan,
                     &palet,
                     ilerleme,
+                    fare,
                     &mut çıktı.isabetler,
                 );
-                if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
+                let ipucu = s
+                    .ipucu
+                    .as_ref()
+                    .filter(|ipucu| ipucu.göster)
+                    .or(ipucu_seçeneği.as_ref());
+                if let (Some(ipucu), Some(f)) = (ipucu, fare)
                     && ipucu.tetikleme != Tetikleme::Kapalı
                     && let Some(b) = çıktı
                         .isabetler
@@ -6113,7 +6183,10 @@ pub fn grafiği_boya(
                         ad: b.ad.clone().unwrap_or_default(),
                         değer: b.değer.map(binlik_ayır).unwrap_or_default(),
                     };
-                    bekleyen_ipucu = Some((seri.ad().map(str::to_string), vec![satır], f));
+                    bekleyen_yerel_ipucu = Some((
+                        ipucu.clone(),
+                        (seri.ad().map(str::to_string), vec![satır], f),
+                    ));
                 }
             }
             Seri::Paralel(s) => {
@@ -6165,7 +6238,7 @@ pub fn grafiği_boya(
                             değer,
                         })
                         .collect();
-                    bekleyen_paralel_ipucu = Some((ipucu.clone(), (s.ad.clone(), satırlar, konum)));
+                    bekleyen_yerel_ipucu = Some((ipucu.clone(), (s.ad.clone(), satırlar, konum)));
                 }
             }
             Seri::Grafo(g) => {
@@ -6750,7 +6823,7 @@ pub fn grafiği_boya(
 
     // 6) İpucu penceresi (her şeyin üstüne). `formatter` verilmişse
     // satırlar şablonla yeniden yazılır.
-    if let Some((ipucu, (başlık, satırlar, konum))) = bekleyen_paralel_ipucu {
+    if let Some((ipucu, (başlık, satırlar, konum))) = bekleyen_yerel_ipucu {
         let satırlar = ipucu_satırlarını_biçimle(&ipucu, başlık.as_deref(), satırlar);
         ipucu_çiz(yüzey, &ipucu, konum, başlık.as_deref(), &satırlar);
     } else if let (Some(ipucu), Some((başlık, satırlar, konum))) = (&ipucu_seçeneği, bekleyen_ipucu)
@@ -6774,6 +6847,61 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn kiris_gosterge_filtresi_dugumu_ve_bagli_seritleri_yerlesimden_cikarir() {
+        let seri = crate::model::kiris::KirişSerisi::yeni()
+            .düğümler(["A", "B", "C"])
+            .bağlar([("A", "B", 10.0), ("B", "C", 5.0)]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .gösterge(crate::model::bilesen::Gösterge::yeni().seçili("C", false))
+            .seri(seri);
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(600.0, 450.0);
+
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.isabetler.len(), 3, "bir şerit ve iki sektör kalmalı");
+        assert!(
+            çıktı
+                .isabetler
+                .iter()
+                .all(|isabet| isabet.ad.as_deref().is_none_or(|ad| !ad.contains('C')))
+        );
+    }
+
+    #[test]
+    fn kiris_seri_tooltipi_kok_tooltip_olmadan_seridi_gosterir() {
+        let seri = crate::model::kiris::KirişSerisi::yeni()
+            .ad("Akış")
+            .düğümler(["A", "B"])
+            .bağlar([("A", "B", 10.0)])
+            .ipucu(İpucu::yeni());
+        let tuval = Dikdörtgen::yeni(0.0, 0.0, 600.0, 450.0);
+        let yerleşim = crate::grafik::kiris::kiriş_yerleşimi(&seri, tuval, &|sıra| {
+            [Renk::from("#5470c6"), Renk::from("#91cc75")][sıra % 2]
+        })
+        .expect("yerleşim");
+        let bağ = &yerleşim.bağlar[0];
+        let açı = (bağ.kaynak_başlangıç_açısı + bağ.kaynak_bitiş_açısı) / 2.0;
+        let fare = (
+            bağ.merkez.0 + (bağ.yarıçap - 1.0) * açı.cos(),
+            bağ.merkez.1 + (bağ.yarıçap - 1.0) * açı.sin(),
+        );
+        let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(seri);
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(600.0, 450.0);
+
+        grafiği_boya(
+            &mut yüzey,
+            &seçenekler,
+            &BoyamaGirdisi {
+                fare: Some(fare),
+                ..Default::default()
+            },
+        );
+
+        assert!(yüzey.döküm().contains("A > B"), "{}", yüzey.döküm());
+    }
 
     #[test]
     fn matrix_yerel_tooltip_formatter_bilesen_baglamiyla_cizilir() {

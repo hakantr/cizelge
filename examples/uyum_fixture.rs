@@ -16495,6 +16495,513 @@ fn sankey_resmi(id: &str) -> Result<GrafikSeçenekleri, String> {
     Ok(seçenekler.seri(seri))
 }
 
+#[derive(Debug, Deserialize)]
+struct ResmiKirişBelgesi {
+    #[serde(rename = "seçenek")]
+    seçenek: ResmiKirişSeçeneği,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiKirişSeçeneği {
+    #[serde(default)]
+    background_color: Option<String>,
+    #[serde(default)]
+    title: Option<serde_json::Value>,
+    #[serde(default)]
+    tooltip: Option<serde_json::Value>,
+    #[serde(default)]
+    legend: Option<serde_json::Value>,
+    series: Vec<ResmiKirişSerisi>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiKirişStili {
+    #[serde(default)]
+    color: Option<String>,
+    #[serde(default)]
+    border_color: Option<String>,
+    #[serde(default)]
+    border_width: Option<f32>,
+    #[serde(default)]
+    border_radius: Option<serde_json::Value>,
+    #[serde(default)]
+    opacity: Option<f32>,
+    #[serde(default)]
+    curveness: Option<f32>,
+    #[serde(default)]
+    width: Option<f32>,
+    #[serde(default)]
+    show: Option<bool>,
+    #[serde(default)]
+    position: Option<String>,
+    #[serde(default)]
+    distance: Option<f32>,
+    #[serde(default)]
+    font_family: Option<String>,
+    #[serde(default)]
+    font_size: Option<f32>,
+    #[serde(default)]
+    font_weight: Option<serde_json::Value>,
+    #[serde(default)]
+    align: Option<String>,
+    #[serde(default)]
+    vertical_align: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiKirişDurumu {
+    #[serde(default)]
+    focus: Option<String>,
+    #[serde(default)]
+    scale: Option<serde_json::Value>,
+    #[serde(default)]
+    disabled: Option<bool>,
+    #[serde(default)]
+    item_style: Option<ResmiKirişStili>,
+    #[serde(default)]
+    line_style: Option<ResmiKirişStili>,
+    #[serde(default)]
+    label: Option<ResmiKirişStili>,
+    #[serde(default)]
+    edge_label: Option<ResmiKirişStili>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiKirişDüğümü {
+    #[serde(default)]
+    id: Option<String>,
+    name: String,
+    #[serde(default)]
+    value: Option<serde_json::Value>,
+    #[serde(default)]
+    item_style: Option<ResmiKirişStili>,
+    #[serde(default)]
+    label: Option<ResmiKirişStili>,
+    #[serde(default)]
+    emphasis: ResmiKirişDurumu,
+    #[serde(default)]
+    blur: ResmiKirişDurumu,
+    #[serde(default)]
+    select: ResmiKirişDurumu,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiKirişBağı {
+    source: String,
+    target: String,
+    value: f64,
+    #[serde(default)]
+    line_style: Option<ResmiKirişStili>,
+    #[serde(default)]
+    label: Option<ResmiKirişStili>,
+    #[serde(default)]
+    emphasis: ResmiKirişDurumu,
+    #[serde(default)]
+    blur: ResmiKirişDurumu,
+    #[serde(default)]
+    select: ResmiKirişDurumu,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiKirişSerisi {
+    #[serde(default)]
+    id: Option<String>,
+    #[serde(default)]
+    name: Option<String>,
+    #[serde(default)]
+    z: Option<i32>,
+    #[serde(default)]
+    silent: Option<bool>,
+    #[serde(default)]
+    legend_hover_link: Option<bool>,
+    #[serde(default)]
+    left: Option<serde_json::Value>,
+    #[serde(default)]
+    top: Option<serde_json::Value>,
+    #[serde(default)]
+    right: Option<serde_json::Value>,
+    #[serde(default)]
+    bottom: Option<serde_json::Value>,
+    #[serde(default)]
+    width: Option<serde_json::Value>,
+    #[serde(default)]
+    height: Option<serde_json::Value>,
+    #[serde(default)]
+    center: Vec<serde_json::Value>,
+    #[serde(default)]
+    radius: Vec<serde_json::Value>,
+    #[serde(default)]
+    clockwise: Option<bool>,
+    #[serde(default)]
+    start_angle: Option<f32>,
+    #[serde(default)]
+    end_angle: Option<serde_json::Value>,
+    #[serde(default)]
+    pad_angle: Option<f32>,
+    #[serde(default)]
+    min_angle: Option<f32>,
+    data: Vec<ResmiKirişDüğümü>,
+    links: Vec<ResmiKirişBağı>,
+    #[serde(default)]
+    item_style: Option<ResmiKirişStili>,
+    #[serde(default)]
+    line_style: Option<ResmiKirişStili>,
+    #[serde(default)]
+    label: Option<ResmiKirişStili>,
+    #[serde(default)]
+    edge_label: Option<ResmiKirişStili>,
+    #[serde(default)]
+    emphasis: ResmiKirişDurumu,
+    #[serde(default)]
+    blur: ResmiKirişDurumu,
+    #[serde(default)]
+    select: ResmiKirişDurumu,
+}
+
+fn resmi_kiriş_belgesini_oku(id: &str) -> Result<ResmiKirişBelgesi, String> {
+    let kaynak = match id {
+        "chord-simple" => include_str!("uyum_veri/chord/chord-simple.json"),
+        "chord-minAngle" => include_str!("uyum_veri/chord/chord-minAngle.json"),
+        "chord-lineStyle-color" => include_str!("uyum_veri/chord/chord-lineStyle-color.json"),
+        "chord-style" => include_str!("uyum_veri/chord/chord-style.json"),
+        _ => return Err(format!("bilinmeyen resmî Chord fixture'ı: {id}")),
+    };
+    serde_json::from_str(kaynak).map_err(|hata| format!("{id} Chord verisi çözülemedi: {hata}"))
+}
+
+fn resmi_kiriş_öğe_stili(stil: &ResmiKirişStili) -> KirişÖğeStili {
+    let mut çıktı = KirişÖğeStili::yeni();
+    if let Some(renk) = &stil.color {
+        çıktı = çıktı.renk(renk.as_str());
+    }
+    if let Some(renk) = &stil.border_color {
+        çıktı = çıktı.kenarlık_rengi(renk.as_str());
+    }
+    if let Some(kalınlık) = stil.border_width {
+        çıktı = çıktı.kenarlık_kalınlığı(kalınlık);
+    }
+    if let Some(yarıçap) = stil
+        .border_radius
+        .as_ref()
+        .and_then(resmi_sankey_köşe_yarıçapı)
+    {
+        // Chord kısa iki değerli diziyi iç/dış köşe çifti olarak yorumlar.
+        let değer = stil
+            .border_radius
+            .as_ref()
+            .and_then(serde_json::Value::as_array);
+        if let Some(dizi) = değer.filter(|dizi| dizi.len() == 2) {
+            çıktı = çıktı.kenarlık_yarıçapı([
+                dizi[0].as_f64().unwrap_or(0.0) as f32,
+                dizi[1].as_f64().unwrap_or(0.0) as f32,
+            ]);
+        } else {
+            çıktı = çıktı.kenarlık_yarıçapı(yarıçap);
+        }
+    }
+    if let Some(opaklık) = stil.opacity {
+        çıktı = çıktı.opaklık(opaklık);
+    }
+    çıktı
+}
+
+fn resmi_kiriş_çizgi_stili(
+    taban: KirişÇizgiStili, stil: &ResmiKirişStili
+) -> KirişÇizgiStili {
+    let mut çıktı = taban;
+    if let Some(renk) = &stil.color {
+        çıktı = çıktı.renk(renk.as_str());
+    }
+    if let Some(opaklık) = stil.opacity {
+        çıktı = çıktı.opaklık(opaklık);
+    }
+    if let Some(kalınlık) = stil.width {
+        çıktı = çıktı.kalınlık(kalınlık);
+    }
+    if let Some(eğrilik) = stil.curveness {
+        çıktı = çıktı.eğrilik(eğrilik);
+    }
+    çıktı
+}
+
+fn resmi_kiriş_etiket_yaması(stil: &ResmiKirişStili) -> EtiketYaması {
+    let mut çıktı = EtiketYaması::yeni();
+    if let Some(göster) = stil.show {
+        çıktı = çıktı.göster(göster);
+    }
+    if let Some(konum) = stil.position.as_deref() {
+        çıktı = çıktı.konum(if konum == "outside" {
+            EtiketKonumu::Dış
+        } else {
+            EtiketKonumu::İç
+        });
+    }
+    if let Some(uzaklık) = stil.distance {
+        çıktı = çıktı.uzaklık(uzaklık);
+    }
+    if let Some(hiza) = stil.align.as_deref() {
+        çıktı = çıktı.yatay_hiza(match hiza {
+            "left" => YazıYatayHizası::Sol,
+            "right" => YazıYatayHizası::Sağ,
+            _ => YazıYatayHizası::Orta,
+        });
+    }
+    if let Some(hiza) = stil.vertical_align.as_deref() {
+        çıktı = çıktı.dikey_hiza(match hiza {
+            "top" => YazıDikeyHizası::Üst,
+            "bottom" => YazıDikeyHizası::Alt,
+            _ => YazıDikeyHizası::Orta,
+        });
+    }
+    let mut yazı = YazıStili::yeni();
+    let mut yazı_var = false;
+    if let Some(renk) = &stil.color {
+        yazı = yazı.renk(renk.as_str());
+        yazı_var = true;
+    }
+    if let Some(aile) = &stil.font_family {
+        yazı = yazı.aile(aile);
+        yazı_var = true;
+    }
+    if let Some(boyut) = stil.font_size {
+        yazı = yazı.boyut(boyut);
+        yazı_var = true;
+    }
+    if let Some(kalınlık) = &stil.font_weight {
+        let kalın = kalınlık.as_str() == Some("bold")
+            || kalınlık.as_f64().is_some_and(|değer| değer >= 600.0);
+        yazı = yazı.kalın(kalın);
+        yazı_var = true;
+    }
+    if yazı_var {
+        çıktı = çıktı.yazı(yazı);
+    }
+    çıktı
+}
+
+fn resmi_kiriş_durumu(taban: KirişDurumu, durum: &ResmiKirişDurumu) -> KirişDurumu {
+    let mut çıktı = taban;
+    if let Some(odak) = durum.focus.as_deref() {
+        çıktı = çıktı.odak(match odak {
+            "self" => KirişVurguOdağı::Kendisi,
+            "adjacency" => KirişVurguOdağı::Komşuluk,
+            "series" => KirişVurguOdağı::Seri,
+            _ => KirişVurguOdağı::Yok,
+        });
+    }
+    if let Some(ölçek) = &durum.scale {
+        çıktı = çıktı.ölçek(if let Some(sayı) = ölçek.as_f64() {
+            sayı as f32
+        } else if ölçek.as_bool() == Some(false) {
+            1.0
+        } else {
+            1.1
+        });
+    }
+    if let Some(değer) = durum.disabled {
+        çıktı = çıktı.devre_dışı(değer);
+    }
+    if let Some(stil) = &durum.item_style {
+        çıktı = çıktı.öğe_stili(resmi_kiriş_öğe_stili(stil));
+    }
+    if let Some(stil) = &durum.line_style {
+        çıktı = çıktı.çizgi_stili(resmi_kiriş_çizgi_stili(KirişÇizgiStili::yeni(), stil));
+    }
+    if let Some(stil) = &durum.label {
+        çıktı = çıktı.etiket(resmi_kiriş_etiket_yaması(stil));
+    }
+    if let Some(stil) = &durum.edge_label {
+        çıktı = çıktı.kenar_etiketi(resmi_kiriş_etiket_yaması(stil));
+    }
+    çıktı
+}
+
+fn resmi_kiriş_değeri(değer: serde_json::Value) -> Option<VeriDeğeri> {
+    if let Some(sayı) = değer.as_f64() {
+        return Some(VeriDeğeri::from(sayı));
+    }
+    değer
+        .as_array()
+        .map(|dizi| VeriDeğeri::Dizi(dizi.iter().filter_map(serde_json::Value::as_f64).collect()))
+}
+
+fn resmi_kiriş_başlıkları(değer: serde_json::Value) -> Vec<Başlık> {
+    let hamlar = değer.as_array().cloned().unwrap_or_else(|| vec![değer]);
+    hamlar
+        .into_iter()
+        .filter_map(|ham| {
+            let nesne = ham.as_object()?;
+            let mut başlık = Başlık::yeni();
+            if let Some(metin) = nesne.get("text").and_then(serde_json::Value::as_str) {
+                başlık = başlık.metin(metin);
+            }
+            if let Some(sol) = nesne.get("left") {
+                if let Some(metin) = sol.as_str() {
+                    başlık = başlık.sol(metin);
+                } else if let Some(sayı) = sol.as_f64() {
+                    başlık = başlık.sol(sayı as f32);
+                }
+            }
+            if let Some(üst) = nesne.get("top") {
+                if let Some(metin) = üst.as_str() {
+                    başlık = başlık.üst(metin);
+                } else if let Some(sayı) = üst.as_f64() {
+                    başlık = başlık.üst(sayı as f32);
+                }
+            }
+            if nesne.get("textAlign").and_then(serde_json::Value::as_str) == Some("center") {
+                başlık = başlık.metin_hizası(BaşlıkMetinHizası::Orta);
+            }
+            if let Some(iç) = nesne.get("padding").and_then(serde_json::Value::as_f64) {
+                başlık = başlık.iç_boşluk(iç as f32);
+            }
+            if let Some(boyut) = nesne
+                .get("textStyle")
+                .and_then(serde_json::Value::as_object)
+                .and_then(|stil| stil.get("fontSize"))
+                .and_then(serde_json::Value::as_f64)
+            {
+                başlık = başlık.yazı(YazıStili::yeni().boyut(boyut as f32));
+            }
+            Some(başlık)
+        })
+        .collect()
+}
+
+fn kiriş_resmi(id: &str) -> Result<GrafikSeçenekleri, String> {
+    let belge = resmi_kiriş_belgesini_oku(id)?;
+    let mut seçenekler = GrafikSeçenekleri::yeni().animasyon(false);
+    if let Some(arkaplan) = &belge.seçenek.background_color {
+        seçenekler = seçenekler.arkaplan(arkaplan.as_str());
+    }
+    if belge.seçenek.tooltip.is_some() {
+        seçenekler = seçenekler.ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe));
+    }
+    if belge.seçenek.legend.is_some() {
+        seçenekler = seçenekler.gösterge(Gösterge::yeni());
+    }
+    if let Some(başlıklar) = belge.seçenek.title {
+        for başlık in resmi_kiriş_başlıkları(başlıklar) {
+            seçenekler = seçenekler.başlık_ekle(başlık);
+        }
+    }
+    for ham in belge.seçenek.series {
+        let mut seri = KirişSerisi::yeni();
+        seri.kimlik = ham.id;
+        seri.ad = ham.name;
+        if let Some(z) = ham.z {
+            seri.z = z;
+        }
+        if let Some(sessiz) = ham.silent {
+            seri.sessiz = sessiz;
+        }
+        if let Some(değer) = ham.legend_hover_link {
+            seri.gösterge_vurgusu = değer;
+        }
+        if let Some(değer) = &ham.left {
+            seri.sol = resmi_sankey_uzunluğu(değer)?;
+        }
+        if let Some(değer) = &ham.top {
+            seri.üst = resmi_sankey_uzunluğu(değer)?;
+        }
+        if let Some(değer) = &ham.right {
+            seri.sağ = Some(resmi_sankey_uzunluğu(değer)?);
+        }
+        if let Some(değer) = &ham.bottom {
+            seri.alt = Some(resmi_sankey_uzunluğu(değer)?);
+        }
+        if let Some(değer) = &ham.width {
+            seri.genişlik = Some(resmi_sankey_uzunluğu(değer)?);
+            seri.sağ = None;
+        }
+        if let Some(değer) = &ham.height {
+            seri.yükseklik = Some(resmi_sankey_uzunluğu(değer)?);
+            seri.alt = None;
+        }
+        if ham.center.len() == 2 {
+            seri.merkez = (
+                resmi_sankey_uzunluğu(&ham.center[0])?,
+                resmi_sankey_uzunluğu(&ham.center[1])?,
+            );
+        }
+        if ham.radius.len() == 2 {
+            seri.yarıçap = (
+                resmi_sankey_uzunluğu(&ham.radius[0])?,
+                resmi_sankey_uzunluğu(&ham.radius[1])?,
+            );
+        }
+        if let Some(değer) = ham.clockwise {
+            seri.saat_yönünde = değer;
+        }
+        if let Some(değer) = ham.start_angle {
+            seri.başlangıç_açısı = değer;
+        }
+        if let Some(değer) = ham.end_angle.and_then(|değer| değer.as_f64()) {
+            seri.bitiş_açısı = Some(değer as f32);
+        }
+        if let Some(değer) = ham.pad_angle {
+            seri.dolgu_açısı = değer;
+        }
+        if let Some(değer) = ham.min_angle {
+            seri.en_küçük_açı = değer;
+        }
+        if let Some(stil) = &ham.item_style {
+            seri.öğe_stili = resmi_kiriş_öğe_stili(stil);
+        }
+        if let Some(stil) = &ham.line_style {
+            seri.çizgi_stili = resmi_kiriş_çizgi_stili(seri.çizgi_stili.clone(), stil);
+        }
+        if let Some(stil) = &ham.label {
+            seri.etiket = resmi_kiriş_etiket_yaması(stil).uygula(&seri.etiket);
+        }
+        if let Some(stil) = &ham.edge_label {
+            seri.kenar_etiketi = resmi_kiriş_etiket_yaması(stil).uygula(&seri.kenar_etiketi);
+        }
+        seri.vurgu = resmi_kiriş_durumu(seri.vurgu.clone(), &ham.emphasis);
+        seri.bulanık = resmi_kiriş_durumu(seri.bulanık.clone(), &ham.blur);
+        seri.seçili = resmi_kiriş_durumu(seri.seçili.clone(), &ham.select);
+        seri.düğümler = ham
+            .data
+            .into_iter()
+            .map(|ham| {
+                let mut düğüm = KirişDüğümü::yeni(ham.name);
+                düğüm.kimlik = ham.id;
+                düğüm.değer = ham.value.and_then(resmi_kiriş_değeri);
+                düğüm.öğe_stili = ham.item_style.as_ref().map(resmi_kiriş_öğe_stili);
+                düğüm.etiket = ham.label.as_ref().map(resmi_kiriş_etiket_yaması);
+                düğüm.vurgu = resmi_kiriş_durumu(KirişDurumu::default(), &ham.emphasis);
+                düğüm.bulanık = resmi_kiriş_durumu(KirişDurumu::default(), &ham.blur);
+                düğüm.seçili = resmi_kiriş_durumu(KirişDurumu::default(), &ham.select);
+                düğüm
+            })
+            .collect();
+        seri.bağlar = ham
+            .links
+            .into_iter()
+            .map(|ham| {
+                let mut bağ = KirişBağı::yeni(ham.source, ham.target, ham.value);
+                bağ.çizgi_stili = ham
+                    .line_style
+                    .as_ref()
+                    .map(|s| resmi_kiriş_çizgi_stili(KirişÇizgiStili::yeni(), s));
+                bağ.kenar_etiketi = ham.label.as_ref().map(resmi_kiriş_etiket_yaması);
+                bağ.vurgu = resmi_kiriş_durumu(KirişDurumu::default(), &ham.emphasis);
+                bağ.bulanık = resmi_kiriş_durumu(KirişDurumu::default(), &ham.blur);
+                bağ.seçili = resmi_kiriş_durumu(KirişDurumu::default(), &ham.select);
+                bağ
+            })
+            .collect();
+        seçenekler = seçenekler.seri(seri);
+    }
+    Ok(seçenekler)
+}
+
 fn parallel_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -17004,6 +17511,74 @@ struct SankeySahneKanıtı {
     seriler: Vec<SankeySahneSerisi>,
 }
 
+#[derive(Serialize)]
+struct KirişSahneDüğümü {
+    veri_sırası: usize,
+    kimlik: Option<String>,
+    ad: String,
+    değer: f64,
+    cx: f32,
+    cy: f32,
+    r0: f32,
+    r: f32,
+    başlangıç_açısı: f32,
+    bitiş_açısı: f32,
+    saat_yönünde: bool,
+    renk: [u8; 4],
+    kenarlık_rengi: Option<[u8; 4]>,
+    kenarlık_kalınlığı: f32,
+    köşe_yarıçapları: [f32; 4],
+    etiket_göster: bool,
+    etiket_metni: String,
+    etiket_x: f32,
+    etiket_y: f32,
+    etiket_dönüşü: f32,
+    etiket_yatay_hizası: &'static str,
+    etiket_dikey_hizası: &'static str,
+    etiket_fontu: String,
+    etiket_rengi: [u8; 4],
+}
+
+#[derive(Serialize)]
+struct KirişSahneBağı {
+    veri_sırası: usize,
+    kaynak: String,
+    hedef: String,
+    değer: f64,
+    kaynak_başlangıç_açısı: f32,
+    kaynak_bitiş_açısı: f32,
+    hedef_başlangıç_açısı: f32,
+    hedef_bitiş_açısı: f32,
+    kaynak1: [f32; 2],
+    kaynak2: [f32; 2],
+    hedef1: [f32; 2],
+    hedef2: [f32; 2],
+    cx: f32,
+    cy: f32,
+    r: f32,
+    saat_yönünde: bool,
+    renkler: Vec<[u8; 4]>,
+    kenarlık_kalınlığı: f32,
+    etiket_göster: bool,
+    etiket_metni: String,
+}
+
+#[derive(Serialize)]
+struct KirişSahneSerisi {
+    seri_sırası: usize,
+    alan: AğaçHaritasıSahneAlanı,
+    düğümler: Vec<KirişSahneDüğümü>,
+    bağlar: Vec<KirişSahneBağı>,
+}
+
+#[derive(Serialize)]
+struct KirişSahneKanıtı {
+    şema_sürümü: u8,
+    tür: &'static str,
+    koordinat_adımı: f32,
+    seriler: Vec<KirişSahneSerisi>,
+}
+
 fn binde_yuvarla(değer: f32) -> f32 {
     (değer * 1_000.0).round() / 1_000.0
 }
@@ -17143,6 +17718,146 @@ fn sankey_sahne_kanıtı(
     Ok(SankeySahneKanıtı {
         şema_sürümü: 1,
         tür: "sankey",
+        koordinat_adımı: 0.001,
+        seriler,
+    })
+}
+
+fn kiriş_sahne_kanıtı(
+    seçenekler: &GrafikSeçenekleri,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<KirişSahneKanıtı, String> {
+    let tuval = cizelge::koordinat::Dikdörtgen::yeni(0.0, 0.0, genişlik, yükseklik);
+    let seriler = seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(seri_sırası, seri)| match seri {
+            Seri::Kiriş(seri) => Some((seri_sırası, seri)),
+            _ => None,
+        })
+        .map(|(seri_sırası, seri)| {
+            let yerleşim = cizelge::grafik::kiris::kiriş_yerleşimi(seri, tuval, &|sıra| {
+                seçenekler.palet_rengi(sıra)
+            })
+            .map_err(|hata| hata.to_string())?;
+            let düğümler = yerleşim
+                .düğümler
+                .iter()
+                .map(|düğüm| {
+                    let opaklık = düğüm.öğe_stili.opaklık.unwrap_or(1.0);
+                    let etiket_rengi = düğüm
+                        .etiket
+                        .yazı
+                        .renk
+                        .unwrap_or_else(|| düğüm.renk.temsilî())
+                        .opaklık(düğüm.etiket.yazı.opaklık.unwrap_or(1.0));
+                    KirişSahneDüğümü {
+                        veri_sırası: düğüm.veri_sırası,
+                        kimlik: düğüm.kimlik.clone(),
+                        ad: düğüm.ad.clone(),
+                        değer: düğüm.değer,
+                        cx: binde_yuvarla(düğüm.merkez.0),
+                        cy: binde_yuvarla(düğüm.merkez.1),
+                        r0: binde_yuvarla(düğüm.iç_yarıçap),
+                        r: binde_yuvarla(düğüm.dış_yarıçap),
+                        başlangıç_açısı: binde_yuvarla(düğüm.başlangıç_açısı),
+                        bitiş_açısı: binde_yuvarla(düğüm.bitiş_açısı),
+                        saat_yönünde: düğüm.saat_yönünde,
+                        renk: renk_kanalları(düğüm.renk.temsilî().opaklık(opaklık)),
+                        kenarlık_rengi: düğüm
+                            .öğe_stili
+                            .kenarlık_rengi
+                            .map(|renk| renk_kanalları(renk.opaklık(opaklık))),
+                        kenarlık_kalınlığı: if düğüm.öğe_stili.kenarlık_rengi.is_some() {
+                            binde_yuvarla(düğüm.öğe_stili.kenarlık_kalınlığı.unwrap_or(1.0))
+                        } else {
+                            0.0
+                        },
+                        köşe_yarıçapları: düğüm.köşe_yarıçapları.map(binde_yuvarla),
+                        etiket_göster: düğüm.etiket.göster,
+                        etiket_metni: if düğüm.etiket.göster {
+                            düğüm.etiket_metni.clone()
+                        } else {
+                            String::new()
+                        },
+                        etiket_x: binde_yuvarla(düğüm.etiket_konumu.0),
+                        etiket_y: binde_yuvarla(düğüm.etiket_konumu.1),
+                        etiket_dönüşü: 0.0,
+                        etiket_yatay_hizası: match düğüm.etiket_yatay_hizası {
+                            cizelge::cizim::YatayHiza::Sol => "left",
+                            cizelge::cizim::YatayHiza::Orta => "center",
+                            cizelge::cizim::YatayHiza::Sağ => "right",
+                        },
+                        etiket_dikey_hizası: match düğüm.etiket_dikey_hizası {
+                            cizelge::cizim::DikeyHiza::Üst => "top",
+                            cizelge::cizim::DikeyHiza::Orta => "middle",
+                            cizelge::cizim::DikeyHiza::Alt => "bottom",
+                        },
+                        etiket_fontu: format!(
+                            "normal {} {}px {}",
+                            if düğüm.etiket.yazı.kalın {
+                                "bold"
+                            } else {
+                                "normal"
+                            },
+                            düğüm.etiket.yazı.boyut.unwrap_or(cizelge::tema::YAZI_KÜÇÜK),
+                            düğüm.etiket.yazı.aile.as_deref().unwrap_or("sans-serif")
+                        ),
+                        etiket_rengi: renk_kanalları(etiket_rengi),
+                    }
+                })
+                .collect();
+            let bağlar = yerleşim
+                .bağlar
+                .iter()
+                .map(|bağ| KirişSahneBağı {
+                    veri_sırası: bağ.veri_sırası,
+                    kaynak: bağ.kaynak.clone(),
+                    hedef: bağ.hedef.clone(),
+                    değer: bağ.değer,
+                    kaynak_başlangıç_açısı: binde_yuvarla(bağ.kaynak_başlangıç_açısı),
+                    kaynak_bitiş_açısı: binde_yuvarla(bağ.kaynak_bitiş_açısı),
+                    hedef_başlangıç_açısı: binde_yuvarla(bağ.hedef_başlangıç_açısı),
+                    hedef_bitiş_açısı: binde_yuvarla(bağ.hedef_bitiş_açısı),
+                    kaynak1: [binde_yuvarla(bağ.kaynak1.0), binde_yuvarla(bağ.kaynak1.1)],
+                    kaynak2: [binde_yuvarla(bağ.kaynak2.0), binde_yuvarla(bağ.kaynak2.1)],
+                    hedef1: [binde_yuvarla(bağ.hedef1.0), binde_yuvarla(bağ.hedef1.1)],
+                    hedef2: [binde_yuvarla(bağ.hedef2.0), binde_yuvarla(bağ.hedef2.1)],
+                    cx: binde_yuvarla(bağ.merkez.0),
+                    cy: binde_yuvarla(bağ.merkez.1),
+                    r: binde_yuvarla(bağ.yarıçap),
+                    saat_yönünde: bağ.saat_yönünde,
+                    renkler: dolgu_renkleri(&bağ.dolgu),
+                    kenarlık_kalınlığı: binde_yuvarla(bağ.çizgi_stili.kalınlık.unwrap_or(0.0)),
+                    etiket_göster: bağ.kenar_etiketi.göster,
+                    etiket_metni: if bağ.kenar_etiketi.göster {
+                        bağ.etiket_metni.clone()
+                    } else {
+                        String::new()
+                    },
+                })
+                .collect();
+            Ok(KirişSahneSerisi {
+                seri_sırası,
+                alan: AğaçHaritasıSahneAlanı {
+                    x: binde_yuvarla(yerleşim.alan.x),
+                    y: binde_yuvarla(yerleşim.alan.y),
+                    genişlik: binde_yuvarla(yerleşim.alan.genişlik),
+                    yükseklik: binde_yuvarla(yerleşim.alan.yükseklik),
+                },
+                düğümler,
+                bağlar,
+            })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    if seriler.is_empty() {
+        return Err("sahne kanıtı için Chord serisi bulunamadı".to_owned());
+    }
+    Ok(KirişSahneKanıtı {
+        şema_sürümü: 1,
+        tür: "chord",
         koordinat_adımı: 0.001,
         seriler,
     })
@@ -18026,6 +18741,138 @@ mod sankey_fixture_testleri {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
+mod kiriş_fixture_testleri {
+    use super::*;
+
+    const DURUMLAR: [(&str, usize, usize, usize); 4] = [
+        ("chord-simple", 1, 4, 3),
+        ("chord-minAngle", 1, 6, 3),
+        ("chord-lineStyle-color", 3, 12, 15),
+        ("chord-style", 1, 7, 14),
+    ];
+
+    #[test]
+    fn dört_resmi_chord_fixture_tum_dugum_bag_ve_seceneklerini_korur() {
+        let mut toplam_düğüm = 0;
+        let mut toplam_bağ = 0;
+        for (id, seri_sayısı, düğüm_sayısı, bağ_sayısı) in DURUMLAR {
+            let seçenekler = kiriş_resmi(id).unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            assert_eq!(seçenekler.seriler.len(), seri_sayısı, "{id}");
+            let düğümler = seçenekler
+                .seriler
+                .iter()
+                .map(|seri| match seri {
+                    Seri::Kiriş(seri) => seri.düğümler.len(),
+                    _ => panic!("{id}: Chord serisi bekleniyordu"),
+                })
+                .sum::<usize>();
+            let bağlar = seçenekler
+                .seriler
+                .iter()
+                .map(|seri| match seri {
+                    Seri::Kiriş(seri) => seri.bağlar.len(),
+                    _ => panic!("{id}: Chord serisi bekleniyordu"),
+                })
+                .sum::<usize>();
+            assert_eq!(düğümler, düğüm_sayısı, "{id}");
+            assert_eq!(bağlar, bağ_sayısı, "{id}");
+            seçenekler
+                .doğrula()
+                .unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            toplam_düğüm += düğümler;
+            toplam_bağ += bağlar;
+        }
+        assert_eq!(toplam_düğüm, 29);
+        assert_eq!(toplam_bağ, 35);
+
+        let basit = kiriş_resmi("chord-simple").expect("simple fixture");
+        let Seri::Kiriş(basit) = &basit.seriler[0] else {
+            panic!("Chord bekleniyordu")
+        };
+        assert!(!basit.saat_yönünde);
+        assert_eq!(basit.çizgi_stili.renk, Some(KirişKenarBoyası::Hedef));
+
+        let en_küçük = kiriş_resmi("chord-minAngle").expect("minAngle fixture");
+        let Seri::Kiriş(en_küçük) = &en_küçük.seriler[0] else {
+            panic!("Chord bekleniyordu")
+        };
+        assert_eq!(en_küçük.en_küçük_açı, 30.0);
+
+        let renkler = kiriş_resmi("chord-lineStyle-color").expect("color fixture");
+        assert_eq!(renkler.başlıklar.len(), 4);
+        assert_eq!(renkler.seriler.len(), 3);
+        assert!(matches!(&renkler.seriler[2], Seri::Kiriş(seri)
+            if seri.çizgi_stili.renk == Some(KirişKenarBoyası::Gradyan)));
+
+        let stil = kiriş_resmi("chord-style").expect("style fixture");
+        let Seri::Kiriş(stil) = &stil.seriler[0] else {
+            panic!("Chord bekleniyordu")
+        };
+        assert_eq!(stil.vurgu.odak, Some(KirişVurguOdağı::Kendisi));
+        assert_eq!(stil.etiket.konum, EtiketKonumu::İç);
+        assert!(stil.etiket.yazı.kalın);
+    }
+
+    #[test]
+    fn dört_resmi_chord_sahnesi_tum_sektor_serit_ve_etiket_tabanlarini_korur() {
+        let mut toplam_alan = 0_usize;
+        for (id, seri_sayısı, düğüm_sayısı, bağ_sayısı) in DURUMLAR {
+            let seçenekler = kiriş_resmi(id).unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            let kanıt = kiriş_sahne_kanıtı(&seçenekler, 700.0, 525.0)
+                .unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            assert_eq!(kanıt.seriler.len(), seri_sayısı, "{id}");
+            let düğümler = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.düğümler)
+                .collect::<Vec<_>>();
+            let bağlar = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.bağlar)
+                .collect::<Vec<_>>();
+            assert_eq!(düğümler.len(), düğüm_sayısı, "{id}");
+            assert_eq!(bağlar.len(), bağ_sayısı, "{id}");
+            assert!(düğümler.iter().all(|düğüm| {
+                [
+                    düğüm.cx,
+                    düğüm.cy,
+                    düğüm.r0,
+                    düğüm.r,
+                    düğüm.başlangıç_açısı,
+                    düğüm.bitiş_açısı,
+                    düğüm.etiket_x,
+                    düğüm.etiket_y,
+                ]
+                .into_iter()
+                .all(f32::is_finite)
+            }));
+            assert!(bağlar.iter().all(|bağ| {
+                [
+                    bağ.kaynak_başlangıç_açısı,
+                    bağ.kaynak_bitiş_açısı,
+                    bağ.hedef_başlangıç_açısı,
+                    bağ.hedef_bitiş_açısı,
+                    bağ.kaynak1[0],
+                    bağ.kaynak1[1],
+                    bağ.kaynak2[0],
+                    bağ.kaynak2[1],
+                    bağ.hedef1[0],
+                    bağ.hedef1[1],
+                    bağ.hedef2[0],
+                    bağ.hedef2[1],
+                ]
+                .into_iter()
+                .all(f32::is_finite)
+            }));
+            toplam_alan += düğümler.len() * 24 + bağlar.len() * 20;
+        }
+        assert_eq!(toplam_alan, 1_396);
+    }
+}
+
+#[cfg(test)]
 mod parallel_fixture_testleri {
     use super::*;
 
@@ -18274,6 +19121,9 @@ fn seçenekler(
         | "sankey-nodeAlign-right"
         | "sankey-simple"
         | "sankey-vertical" => sankey_resmi(id),
+        "chord-simple" | "chord-minAngle" | "chord-lineStyle-color" | "chord-style" => {
+            kiriş_resmi(id)
+        }
         "parallel-simple" => Ok(parallel_simple()),
         "parallel-aqi" => parallel_aqi(),
         "parallel-nutrients" => parallel_nutrients(),
@@ -18460,6 +19310,9 @@ fn çalıştır() -> Result<(), String> {
             serde_json::to_vec_pretty(&özet)
         } else if girdi.id.starts_with("sankey-") {
             let özet = sankey_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
+        } else if girdi.id.starts_with("chord-") {
+            let özet = kiriş_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
             serde_json::to_vec_pretty(&özet)
         } else {
             let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;

@@ -1879,8 +1879,10 @@ Amaç: Yerleşim ve etkileşim ağırlıklı seri ailelerini tamamlama.
    Geo dalı hariçtir.
 6. Sankey: node align/depth/gap/width, layout iterations, edge focus,
    orient ve döngü/hata tanıları.
-7. Chord: ECharts 6 minAngle/padAngle, ribbon/arc state, sort, label ve
-   seçme davranışı.
+7. Chord: ECharts 6 minAngle/padAngle, ribbon/arc durumları, label,
+   legend filtresi ve seçme davranışı. Kilitli `ChordSeriesOption` ile
+   `chordLayout.ts` içinde `sort` seçeneği bulunmadığından sahte bir `sort`
+   API'si eklenmez.
 8. Büyük graph/tree veri kümeleri için artımlı yerleşim, iptal ve kararlı
    belirlenimci test kipi.
 
@@ -2196,6 +2198,101 @@ görsel kanıt sayacı **189/332 (%56,9)** olur. Genel `tam_kanıtlı` sayacı,
 ortak koyu kip/GPUI/SVG, erişilebilirlik, animasyon/universal transition ve
 ölçümlü/iptal edilebilir büyük veri kapıları Faz 7/8/9'da tamamlanana kadar
 ayrı kalır.
+
+#### Chord / Kiriş aile kapısı
+
+Kiriş aktarımının normatif çalışma zamanı kaynakları
+`../echarts/src/chart/chord/ChordSeries.ts`, `chordLayout.ts`,
+`ChordPiece.ts`, `ChordEdge.ts`, `ChordView.ts`, `install.ts` ve legend
+seçiminin düğüm verisine uygulanmasını tanımlayan
+`../echarts/src/processor/dataFilter.ts` dosyalarıdır. Galeri seçenekleri
+`../echarts-examples/public/examples/ts/` altındaki `chord-simple`,
+`chord-minAngle`, `chord-lineStyle-color` ve `chord-style` kaynaklarından
+alınır. Her iki kaynak reponun commit'i Faz 0 manifestinde kilitlidir.
+`tools/uyum/chord_verisi.mjs` bu TypeScript dosyalarını yerelde çalıştırıp
+`examples/uyum_veri/chord/` altında dört belirlenimci JSON fixture üretir;
+düğüm, bağ veya seçenekler temsili veriyle sadeleştirilmez.
+
+Kilitli ECharts kaynağı iki önemli sınırı açıkça belirler. Birincisi,
+`ChordSeriesOption` ve yerleşim hattında `sort` alanı yoktur; bu nedenle
+Çizelge kanıtlanamayan bir `sort` davranışı sunmaz. İkincisi, `endAngle`
+tip yüzeyinde bulunmasına karşın mevcut `chordLayout.ts` bitişi her zaman
+`startAngle + 2π` olarak hesaplar. Rust modeli `endAngle` değerini setOption
+ve API bütünlüğü için korur, fakat kilitli çalışma zamanı gibi tam tur
+yerleştirir. İleride resmi kaynak davranışı değişirse manifest yükseltme
+kapısı bu farkı görünür kılacaktır.
+
+Uygulama kapısı aşağıdaki yüzeyi birlikte kapsar:
+
+- `KirişSerisi`, `KirişDüğümü`, `KirişBağı`, `KirişÖğeStili`,
+  `KirişÇizgiStili`, `KirişDurumu`, `KirişVurguOdağı` ve dört köşeli
+  `KirişKöşeYarıçapı`. `data`/`nodes` ile `links`/`edges` aynı tipli modele
+  gelir; açık `id`, ad yedeği, sayısal/çok boyutlu düğüm değeri, seri/düğüm/
+  bağ stilleri, normal/emphasis/blur/select yamaları, label/edgeLabel,
+  tooltip, silent, z, renk paleti ve box/circle yerleşim alanları korunur;
+- düğüm değerinin gelen ve giden bağ toplamı ile açık düğüm değerinin en
+  büyüğünden türetilmesi, tüm değerlerin sıfır olduğu dal, bağsız düğüm,
+  `minAngle` açık/fazla açı yeniden dağıtımı, `padAngle` kıstırması,
+  saat yönü/ters yön, başlangıç açısı ve her düğümde bağımsız iki-uç bağ açı
+  istifi `chordLayout.ts` aşama sırasını izler. Bilinmeyen uç, yinelenen
+  düğüm/kimlik ve negatif ya da sonlu olmayan bağ değeri sessizce yutulmaz;
+- sektörler iç/dış yarıçap, dört bağımsız/piksel-yüzde köşe yarıçapı,
+  dolgu/kenarlık/opacity/shadow ve label konumuyla çizilir. Şeritler iki yay
+  ile iki kübik Bézier kenarından oluşur; düz renk, `source`, `target` ve iki
+  uçlu `gradient`, opacity, width/type, shadow ve açık `curveness` uygulanır.
+  Şeritler sektörlerin altında kalır; böylece sektör tabanı ve kenarlığı
+  bağlantı dolgusu tarafından örtülmez;
+- normal/emphasis/blur/select katmanları seri → düğüm/bağ mirasıyla çözülür.
+  `self`, `adjacency`, `series` ve kapalı odak, `emphasis.disabled`, seçili
+  başlangıç düğümü, label ile edgeLabel yamaları uygulanır. Kilitli resmi
+  `ChordEdge` eğriliği çalışma zamanında 0,7'ye sabitler ve edgeLabel
+  çizmez; Çizelge tip yüzeyinde bildirilen bu iki alanı da deterministik
+  olarak çalıştırır, fakat resmi raster kanıtı olmayan davranışı ECharts
+  görsel eşitliği diye saymaz;
+- `LegendVisualProvider` karşılığında her düğüm kendi rengiyle gösterge
+  öğesidir. `dataFilter('chord')` gibi kapatılan düğüm ve ona değen bağlar
+  yerleşimden önce çıkarılır; kenarsız kalan tek düğüm çizilmez. Düğüm halka
+  parçası ve şeridin gerçek içbükey boyalı çokgeni ayrı isabet bölgeleridir;
+  node/edge hover, click ve tooltip doğru öğe/değeri üretir. Seri tooltip'i
+  kök tooltip'i geçersiz kılabilir ve `silent` bütün seri isabetlerini kapatır;
+- Piksel, SVG, kayıt ve GPUI yüzeyleri aynı `kiriş_yerleşimi` sonucunu
+  tüketir. Özellik matrisi kilitli TypeScript AST'sindeki **31/31 Chord
+  option satırını** somut Rust API'si, veri biçimi, davranış dalı, test ve
+  resmi kartlarla eşler; yinelenen `itemStyle`, `lineStyle`, `label` ve
+  `value` satırları kaynak arayüz sahipliği korunarak ayrı kalır.
+
+Rasterdan bağımsız sahne kapısı çalışan ECharts modelinden her sektör için
+dataIndex, etkin id/ad/değer, merkez, `r0/r`, başlangıç-bitiş açısı, yön,
+köşe yarıçapları, etkin RGBA dolgu/kenarlık ve label metni/konumu/hizası/
+fontunu; her şerit için kaynak-hedef, değer, dört uç, iki uçtaki açı istifi,
+eğrilik, lineStyle ve etkin düz/gradyan renk uçlarını çıkarır. Çizelge aynı
+şemayı yerleşimden üretir. Sayısal tolerans **0,0011 mantıksal pikseldir**.
+Dört kartta toplam **29 düğüm + 35 bağ ve 1.396 karşılaştırılan alan**, sıfır
+yapısal uyuşmazlıkla eşleşir.
+
+600×450 kilitli Kiriş raster kapısı, iki görüntüye de aynı Gauss çekirdeği
+(`σ=0,8`) uygulandıktan sonra değişmeyen `pixelmatch=0,1`, değişen piksel
+`≤%1` ve `SSIM≥0,99` eşiklerini kullanır. Ham görüntü, ham fark ve ham
+metrik ayrıca saklanır; dolayısıyla küçük taban/kenarlık kaymaları yalnız
+toplam piksel oranına bakılarak gözden kaçırılamaz.
+
+| Örnek | Kapı farkı | Kapı SSIM | Ham fark | Ham SSIM | Düğüm/bağ kapısı | Alan | Statik durum |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `chord-simple` | %0,0044 | 0,999695 | %0,0233 | 0,999520 | 4/4 + 3/3 | 156 | geçti |
+| `chord-minAngle` | %0,0056 | 0,999751 | %0,0307 | 0,999605 | 6/6 + 3/3 | 204 | geçti |
+| `chord-lineStyle-color` | %0,0711 | 0,999112 | %0,2544 | 0,998536 | 12/12 + 15/15 | 588 | geçti |
+| `chord-style` | %0,0007 | 0,999254 | %0,0263 | 0,999087 | 7/7 + 14/14 | 448 | geçti |
+
+Referans yenileme her örneği iki bağımsız Chromium çalıştırmasında üretir
+ve bit düzeyinde aynı değilse kilit yazmaz. Fixture bütünlüğü ve sahne
+toplamları `examples/uyum_fixture.rs`; yerleşim, `minAngle`, gerçek şerit
+isabeti, curveness/edgeLabel ve durum dalları `src/grafik/kiris.rs`; legend
+filtresi ile seri tooltip'i `src/cizim/gorunum.rs`; raster ve yapısal
+karşılaştırma `tools/uyum/kanit.mjs` üzerinden denetlenir. Bu geçitle statik
+görsel kanıt sayacı **193/332 (%58,1)** olur. `tam_kanıtlı` sayacı ortak koyu
+kip/GPUI/SVG, klavye ve erişilebilirlik, legend-hover, animasyon/universal
+transition ve ölçümlü büyük veri kapıları Faz 7/8/9'da kapanana kadar ayrı
+kalır.
 
 Kabul:
 

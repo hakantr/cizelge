@@ -9,6 +9,7 @@ pub mod gorsel_esleme;
 pub mod grafik_bileseni;
 pub mod hatlar;
 pub mod imleyici;
+pub mod kiris;
 pub mod kutupsal;
 pub mod matris;
 pub mod paralel;

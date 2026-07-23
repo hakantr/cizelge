@@ -115,6 +115,10 @@ pub use model::imleyici::{
     İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası,
     İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
 };
+pub use model::kiris::{
+    KirişBağı, KirişDurumu, KirişDüğümü, KirişKenarBoyası, KirişKöşeYarıçapı, KirişSerisi,
+    KirişVurguOdağı, KirişÇizgiStili, KirişÖğeStili,
+};
 pub use model::kutupsal::KutupsalKoordinat;
 pub use model::matris::{
     MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
@@ -141,8 +145,8 @@ pub use model::seri::{
     GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıEtiketParametreleri,
     GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi, GüneşPatlamasıSıralamaParametreleri,
     GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
-    HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
-    MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
+    HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KutuSerisi, MumSerisi,
+    ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
     RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
     TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
     ÖğeRengiİşlevi,
@@ -258,6 +262,10 @@ pub mod hazir {
         İmleyiciler, İmÇizgisi, İmÇizgisiEtiketKonumu, İmÇizgisiEtiketYaması, İmÇizgisiParçası,
         İmÇizgisiTanımı, İmÇizgisiUcu, İmÇizgisiUçSimgesi,
     };
+    pub use crate::model::kiris::{
+        KirişBağı, KirişDurumu, KirişDüğümü, KirişKenarBoyası, KirişKöşeYarıçapı, KirişSerisi,
+        KirişVurguOdağı, KirişÇizgiStili, KirişÖğeStili,
+    };
     pub use crate::model::kutupsal::KutupsalKoordinat;
     pub use crate::model::matris::{
         MatrisAralığı, MatrisBoyutHücresi, MatrisBoyutu, MatrisEtiketiBağlamı,
@@ -285,11 +293,11 @@ pub mod hazir {
         GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıEtiketParametreleri,
         GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi, GüneşPatlamasıSıralamaParametreleri,
         GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
-        HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
-        MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması,
-        RadarSerisi, RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi,
-        TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam,
-        ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+        HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KutuSerisi, MumSerisi,
+        ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
+        RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
+        TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
+        ÖğeRengiİşlevi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

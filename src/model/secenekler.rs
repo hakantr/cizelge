@@ -1746,6 +1746,52 @@ impl GrafikSeçenekleri {
                     });
                 }
             }
+            if let Seri::Kiriş(kiriş) = seri {
+                let uzunluk_geçerli = |uzunluk: crate::model::Uzunluk, negatif_olabilir: bool| {
+                    let değer = match uzunluk {
+                        crate::model::Uzunluk::Piksel(değer)
+                        | crate::model::Uzunluk::Yüzde(değer) => değer,
+                    };
+                    değer.is_finite() && (negatif_olabilir || değer >= 0.0)
+                };
+                if !kiriş.başlangıç_açısı.is_finite()
+                    || kiriş.bitiş_açısı.is_some_and(|değer| !değer.is_finite())
+                    || !kiriş.dolgu_açısı.is_finite()
+                    || kiriş.dolgu_açısı < 0.0
+                    || !kiriş.en_küçük_açı.is_finite()
+                    || kiriş.en_küçük_açı < 0.0
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.chord.startAngle/endAngle/padAngle/minAngle",
+                        ayrıntı:
+                            "Chord açıları sonlu; padAngle/minAngle negatif olmayan sayı olmalı"
+                                .to_owned(),
+                    });
+                }
+                if !uzunluk_geçerli(kiriş.merkez.0, true)
+                    || !uzunluk_geçerli(kiriş.merkez.1, true)
+                    || !uzunluk_geçerli(kiriş.yarıçap.0, false)
+                    || !uzunluk_geçerli(kiriş.yarıçap.1, false)
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.chord.center/radius",
+                        ayrıntı:
+                            "Chord merkezi sonlu, yarıçapları sonlu ve negatif olmayan olmalı"
+                                .to_owned(),
+                    });
+                }
+                let palet = |sıra: usize| self.palet_rengi(sıra);
+                if let Err(hata) = crate::grafik::kiris::kiriş_yerleşimi(
+                    kiriş,
+                    crate::koordinat::Dikdörtgen::yeni(0.0, 0.0, 1000.0, 600.0),
+                    &palet,
+                ) {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.chord.data/links",
+                        ayrıntı: hata.to_string(),
+                    });
+                }
+            }
             if let Seri::Hatlar(hatlar) = seri {
                 match hatlar.koordinat_sistemi {
                     crate::model::hatlar::HatKoordinatSistemi::Kutupsal
