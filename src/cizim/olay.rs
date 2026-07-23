@@ -376,6 +376,20 @@ pub enum GrafikOlayı {
         kayma_y: f32,
         ölçek: f32,
     },
+    /// Graph view, işaretçiyle kaydırıldı veya ölçeklendi (`graphRoam`).
+    GrafoGezinmeDeğişti {
+        seri_sırası: usize,
+        kayma_x: f32,
+        kayma_y: f32,
+        ölçek: f32,
+    },
+    /// Sürüklenebilir Graph düğümünün ekran-uzayı geçici konumu değişti.
+    GrafoDüğümüSürüklendi {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        ad: String,
+        konum: (f32, f32),
+    },
     /// Sankey düğümü sürüklendi (`dragNode` / `dragnode`). Konumlar seri
     /// yerleşim kutusunun genişlik ve yüksekliğine göre yerel orandır.
     SankeyDüğümüSürüklendi {

@@ -50,6 +50,25 @@ impl Kök {
                     ölçek,
                 } => format!("Tree {seri_sırası} roam → ({kayma_x:.1}, {kayma_y:.1}), {ölçek:.2}×")
                     .into(),
+                GrafikOlayı::GrafoGezinmeDeğişti {
+                    seri_sırası,
+                    kayma_x,
+                    kayma_y,
+                    ölçek,
+                } => {
+                    format!("Graph {seri_sırası} roam → ({kayma_x:.1}, {kayma_y:.1}), {ölçek:.2}×")
+                        .into()
+                }
+                GrafikOlayı::GrafoDüğümüSürüklendi {
+                    seri_sırası,
+                    ad,
+                    konum,
+                    ..
+                } => format!(
+                    "Graph {seri_sırası} düğümü → {ad} ({:.1}, {:.1})",
+                    konum.0, konum.1
+                )
+                .into(),
                 GrafikOlayı::SankeyDüğümüSürüklendi {
                     seri_sırası,
                     ad,

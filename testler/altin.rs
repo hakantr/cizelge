@@ -702,6 +702,7 @@ fn grafo() {
     let seçenekler = GrafikSeçenekleri::yeni().animasyon(false).seri(
         GrafoSerisi::yeni()
             .ad("Ağ")
+            .yerleşim(GrafoYerleşimi::Kuvvet)
             .düğümler([
                 GrafoDüğümü::yeni("A", 24.0).kategori(0),
                 GrafoDüğümü::yeni("B", 16.0).kategori(1),
@@ -973,21 +974,25 @@ fn ağaç_haritası_inme() {
         ..Default::default()
     };
     let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
-    // Kırıntı şeridi: "Tümü" + "Medya".
+    // Resmî Treemap breadcrumb kökte seri adını, ardından dalı gösterir:
+    // "Disk" + "Medya".
     assert_eq!(çıktı.kırıntılar.len(), 2);
     let döküm = yüzey.döküm();
-    assert!(döküm.contains("Tümü"), "kırıntı şeridi yok:\n{döküm}");
+    assert!(döküm.contains("Disk"), "kırıntı şeridi yok:\n{döküm}");
     assert!(döküm.contains("Video"), "inilen dal çizilmedi:\n{döküm}");
     altın_karşılaştır("agac_haritasi_inme", &döküm);
 
-    // Yaprağa inme denemesi son geçerli düzeyde durur (görüntü değişmez).
+    // Yaprak yolu, görünüm kökünü son dalda tutar; resmî breadcrumb
+    // hedef bilgisini kullandığı için yaprağı zincirin kuyruğunda gösterir.
     let mut yüzey2 = KayıtYüzeyi::yeni(800.0, 600.0);
     let girdi2 = BoyamaGirdisi {
         hiyerarşi_yolu: vec!["Medya".to_string(), "Video".to_string()],
         ..Default::default()
     };
-    grafiği_boya(&mut yüzey2, &seçenekler, &girdi2);
-    assert_eq!(döküm, yüzey2.döküm());
+    let çıktı2 = grafiği_boya(&mut yüzey2, &seçenekler, &girdi2);
+    assert_eq!(çıktı2.isabetler.len(), çıktı.isabetler.len());
+    assert_eq!(çıktı2.kırıntılar.len(), 3);
+    assert_ne!(döküm, yüzey2.döküm());
 }
 
 #[test]
@@ -1022,6 +1027,7 @@ fn grafo_gezinme_dönüşümü() {
         GrafikSeçenekleri::yeni().animasyon(false).seri(
             GrafoSerisi::yeni()
                 .ad("Ağ")
+                .yerleşim(GrafoYerleşimi::Kuvvet)
                 .düğümler([GrafoDüğümü::yeni("A", 20.0), GrafoDüğümü::yeni("B", 16.0)])
                 .bağlar([("A", "B")]),
         )
@@ -1065,8 +1071,8 @@ fn çentik_hizalama() {
 
 #[test]
 fn otomatik_örnekleme() {
-    // 6000 nokta, örnekleme SEÇİLMEDEN: piksel başına birden çok nokta
-    // düştüğü için LTTB kendiliğinden devreye girer (progressive karşılığı).
+    // ECharts `sampling` seçeneğini kendiliğinden açmaz. 6000 noktalı
+    // seride LTTB açık istendiğinde yol, piksel genişliğine indirilir.
     let veri: Vec<f64> = (0..6000).map(|i| ((i % 97) as f64) * 0.5).collect();
     let kategoriler: Vec<String> = (0..6000).map(|i| format!("N{i}")).collect();
     let seçenekler = GrafikSeçenekleri::yeni()
@@ -1077,6 +1083,7 @@ fn otomatik_örnekleme() {
             ÇizgiSerisi::yeni()
                 .ad("Büyük")
                 .sembol_göster(false)
+                .örnekleme(Örnekleme::Lttb)
                 .veri(veri),
         );
     let döküm = boya_ve_dök(seçenekler);

@@ -1,6 +1,6 @@
 # Bu dosya tools/uyum/uret.mjs tarafından üretilir; elle düzenlemeyin.
 id = "graph-simple"
-kapsam_durumu = "kısmi"
+kapsam_durumu = "uygulandı_kanıt_bekliyor"
 sahip_faz = 5
 resmi_kaynak = "public/examples/ts/graph-simple.ts"
 fixture = "examples/grafo.rs"
@@ -11,7 +11,7 @@ profiller = ["açık", "koyu"]
 
 [kanıt]
 api = "kısmi"
-statik_görsel = "kısmi"
+statik_görsel = "tam_kanıtlı"
 animasyon = "kısmi"
 etkileşim = "kısmi"
 erişilebilirlik = "kısmi"

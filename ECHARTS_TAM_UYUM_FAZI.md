@@ -1886,6 +1886,146 @@ Amaç: Yerleşim ve etkileşim ağırlıklı seri ailelerini tamamlama.
 8. Büyük graph/tree veri kümeleri için artımlı yerleşim, iptal ve kararlı
    belirlenimci test kipi.
 
+#### Graph / Grafo aile kapısı
+
+Normatif çekirdek yüzey
+`../echarts/src/chart/graph/GraphSeries.ts`, `GraphView.ts`, `install.ts`,
+`createView.ts`, `simpleLayout.ts`, `simpleLayoutHelper.ts`,
+`circularLayout.ts`, `circularLayoutHelper.ts`, `forceLayout.ts`,
+`forceHelper.ts`, `adjustEdge.ts`, `edgeVisual.ts`, `categoryFilter.ts`,
+`categoryVisual.ts`, `graphHelper.ts`, `../echarts/src/coord/View.ts` ve
+`../echarts/src/component/helper/roamHelper.ts` dosyalarıdır. Eski
+`focusNodeAdjacency` seçeneğinin kesin dönüşümü ayrıca
+`../echarts/src/preprocessor/backwardCompat.ts` üzerinden doğrulanır. Geo
+koordinatı ve `graphGL` bu kapıya girmez.
+
+Resmî kart seçenekleri doğrudan
+`../echarts-examples/public/examples/ts/graph-force2.ts`, `graph-grid.ts`,
+`graph-simple.ts`, `graph-force.ts`, `graph-label-overlap.ts`, `graph.ts`,
+`graph-circular-layout.ts`, `graph-force-dynamic.ts`,
+`graph-life-expectancy.ts`, `graph-webkit-dep.ts` ve `graph-npm.ts`
+kaynaklarından alınır. `les-miserables.json`, `life-expectancy.json`,
+`webkit-dep.json` ve `npmdepgraph.min10.json` varlıkları aynı kilitli
+`../echarts-examples/public/data/asset/data` ağacından okunur. Kaynak
+TypeScript ve veri varlıklarını elle sadeleştirmek yasaktır;
+`tools/uyum/graph_verisi.mjs` bunları belirlenimci Mulberry32 akışıyla
+çalıştırıp `examples/uyum_veri/graph` belgelerini üretir.
+`graph-force-dynamic` için resmî 200 ms zamanlayıcının 25 güncellemesi
+uygulanır ve son veri/yerleşim ayrı etkileşim karesi olarak kilitlenir.
+
+Model ve yerleşim kapısı şu dalların tamamını birlikte kapsar:
+
+- `GrafoDüğümü`, `GrafoBağı`, `GrafoKategorisi` ve `GrafoUcu` ile
+  `data`/`nodes`, `edges`/`links`, id/ad/değer, sayı veya kimlik tabanlı uç,
+  kategori sayı/ad seçimi ve boş/karma değerler;
+- seri → kategori → düğüm ile seri → bağ kalıtımı; symbol, iki boyutlu
+  symbolSize, itemStyle, lineStyle, label, edgeLabel ve
+  normal/emphasis/blur/select durumları;
+- `layout: none`, açık x/y başlangıçları, `circular.rotateLabel` ve sembol
+  boyutu ağırlıklı dairesel yerleşim;
+- ECharts `forceHelper.ts` sürtünme bitiş koşulu, repulsion ve edgeLength'in
+  sayı/aralık biçimleri, gravity, friction, `initLayout`, `layoutAnimation`,
+  sabit düğüm, `ignoreForceLayout` ve kaynakta açıkça belirlenmiş
+  belirlenimci test tohumu;
+- çoklu bağlar için boolean/sayı/dizi `autoCurveness`, açık
+  `lineStyle.curveness` önceliği, düz/eğri Bézier isabeti, kaynak/hedef
+  renkleri, uç sembolleri ve düğüm sınırında uç kırpma;
+- `coordinateSystem: view`, cartesian2d, polar, singleAxis, calendar ve
+  matrix. View kendi veri kutusu/box-layout/preserveAspect dönüşümünü;
+  diğer beş dal ise bağlı koordinatın gerçek veri → piksel dönüşümünü
+  kullanır ve Graph'ın ikinci kez çizilmesine izin vermez;
+- view için `left/top/right/bottom/width/height`, `center`, `zoom`,
+  `scaleLimit`, `nodeScaleRatio`, `preserveAspect` ve yatay/dikey hizalar;
+  cartesian/polar/singleAxis/calendar/matrix için ilgili index/id bağları.
+
+Görsel ve etkileşim kapısı şunları zorunlu tutar:
+
+- Düğüm kenardan önce isabet alır; kenar kendi `dataType: edge` hedefini,
+  eğri boyunca örneklenmiş isabet geometrisini ve `source > target` tooltip
+  içeriğini taşır. `showTip` düğüm dataIndex'iyle aynı yolu kullanır.
+- Hover odağı `self`, `adjacency` ve `series` kümelerini düğüm ve kenar için
+  ayrı çözer; blur'un açık yaması yoksa resmî `0,1` opaklık düşüşü uygulanır.
+  Vurgu ölçeği, başlangıç seçimi ve item/line/label/edgeLabel durum yamaları
+  gerçek boya komutlarında doğrulanır.
+- `focusNodeAdjacency` var olduğunda, değeri `false` olsa bile açık bir
+  `emphasis.focus` yoksa resmî geriye uyum ön-işleyicisi gibi `adjacency`
+  üretilir. `focusNodeAdjacency` ve `unfocusNodeAdjacency` action'ları
+  seriesIndex/seriesId/seriesName ile dataIndex/dataType olay yükünü korur.
+- Seri ve düğüm `draggable` önceliği; none yerleşimde serbest taşıma,
+  circular yerleşimde yarıçap koruma ve force yerleşimde geçici sabitleme
+  dalları ayrıdır. Her seri kendi düğüm kayma durumunu tutar.
+- `roam: false|true|'pan'|'zoom'`, self/global tetik alanı, işaretçi merkezli
+  yakınlaştırma, scaleLimit ve seri bazlı görünüm durumu GPUI tekerlek/
+  sürükleme yolu ile resmî `graphRoam` action'ında aynı hesapları kullanır.
+  Haricî koordinat Graph'ı kendi view roam alanını üretmez.
+- Düğüm `cursor` değeri gerçek düğüm isabetinden CSS → GPUI imlecine
+  çevrilir; aynı dataIndex'e sahip kenar cursor hedefi sanılmaz. `silent`,
+  node/edge tooltip, kategori legend süzmesi ve `legendHoverLink` model
+  dalları ayrı kalır.
+
+`tools/uyum/uret.mjs`, kilitli `GraphSeries.ts` içindeki **43/43 doğrudan
+Graph option satırını** somut Rust API'si, kabul edilen veri biçimleri,
+koordinat/davranış dalları, testler ve resmî kartlarla eşler. Yinelenen
+`draggable`, `itemStyle`, `lineStyle`, `label`, `name` ve `value` satırları
+kaynak arayüz sahipliği korunarak ayrı kalır. Kalıtılmış roam, box-layout,
+preserveAspect, symbol, calendar/matrix/single/cartesian/polar bağları ve
+ortak seri alanları yukarıdaki davranış kapısından ayrıca geçer.
+`registered.graph` satırı da kayıt, yerleşim, boyama, olay ve tooltip
+yüzeylerine bağlanır.
+
+Rasterdan bağımsız Graph sahne kapısı, çalışan ECharts sahnesinden her
+görünür seri için koordinat türünü; her düğüm için özgün dataIndex, kimlik,
+ad/değer/kategori, dünya merkezi, sembol ve iki boyutlu boyut, etkin RGBA
+dolgu/kenarlık/opaklık, sabitlik ve görünür etiket metni/çapası/dönüşünü;
+her bağ için kaynak/hedef, değer, kırpılmış uçlar, Bézier kontrol noktası,
+etkin renk/kalınlık/opaklık/tür, iki uç sembolü ve edgeLabel alanlarını
+çıkarır. Çizelge aynı şemayı kendi yerleşiminden üretir. Sayısal tolerans
+**0,0011 mantıksal pikseldir**. On bir kartta toplam **1.787 görünür düğüm,
+3.027 görünür bağ ve 69.183 karşılaştırılan alan**, sıfır yapısal
+uyuşmazlıkla eşleşir. `graph-life-expectancy` sayıları resmî başlangıç legend
+seçiminden sonra gerçekten görünür kalan veri kümesini ifade eder.
+
+`graph-grid` için toplam raster oranından bağımsız ikinci kapı bulunur:
+600×450 resimde kartezyen X taban çizgisi üzerindeki altı ayrı örnekte
+referans ve gerçek yerel kontrastı `≥18`, çizgi konumu farkı `≤2 px` olmak
+zorundadır. Böylece düğüm/kenar katmanının ekseni örtmesi veya eksenin küçük
+alan kapladığı için toplam fark hesabında kaybolması kabul edilmez.
+
+Raster kapısı iki görüntüye de aynı Gauss çekirdeğini (`σ=0,8`) uyguladıktan
+sonra değişmeyen `pixelmatch=0,1`, değişen piksel `≤%1` ve `SSIM≥0,99`
+eşiklerini kullanır. Ham görüntü, ham fark ve ham metrik de saklanır;
+normalizasyon yapısal düğüm/bağ/etiket veya taban çizgisi kapılarını
+etkilemez. `graph-label-overlap` ham rasterı eşik dışındadır ve bu gerçek
+raporda açıkça kalır; yalnız tipografi-normalize raster ile tam sahne/taban
+kapıları birlikte geçtiğinde statik kanıt sayılır.
+
+| Örnek | Kapı farkı | Kapı SSIM | Ham fark | Ham SSIM | Düğüm/bağ | Alan | Statik durum |
+|---|---:|---:|---:|---:|---:|---:|---|
+| `graph-circular-layout` | %0,0004 | 0,998717 | %0,0904 | 0,997818 | 77/254 | 4.711 | geçti |
+| `graph-force-dynamic` | %0,0000 | 0,999948 | %0,0011 | 0,999918 | 26/20 | 670 | geçti |
+| `graph-force` | %0,0000 | 0,999884 | %0,0567 | 0,999808 | 77/254 | 4.711 | geçti |
+| `graph-force2` | %0,0000 | 0,999846 | %0,0022 | 0,999766 | 152/151 | 4.394 | geçti |
+| `graph-grid` | %0,2648 | 0,992642 | %0,3741 | 0,991616 | 7/6 | 189 | geçti + taban |
+| `graph-label-overlap` | %0,7778 | 0,993297 | %2,0285 | 0,989643 | 77/254 | 4.711 | geçti; ham eşik dışı |
+| `graph-life-expectancy` | %0,0759 | 0,998428 | %0,2800 | 0,997458 | 81/80 | 2.335 | geçti |
+| `graph-npm` | %0,5956 | 0,992376 | %0,8433 | 0,991212 | 717/942 | 23.943 | geçti |
+| `graph-simple` | %0,1852 | 0,997127 | %0,2630 | 0,996409 | 4/6 | 144 | geçti |
+| `graph` | %0,0933 | 0,998793 | %0,2730 | 0,997834 | 77/254 | 4.711 | geçti |
+| `graph-webkit-dep` | %0,3385 | 0,994484 | %0,4907 | 0,994233 | 492/806 | 18.664 | geçti |
+
+Referans yenileme her kartı iki bağımsız Chromium çalıştırmasında üretir ve
+bit düzeyinde aynı değilse kilit yazmaz. Fixture ve resmî veri bütünlüğü
+`examples/uyum_graph.rs`; yerleşim, durum, isabet ve dairesel sürükleme
+`src/grafik/grafo.rs`; koordinat/tooltip/seri bazlı view durumu
+`src/cizim/gorunum.rs`; GPUI roam/drag/cursor `src/cizim/pencere.rs`; action
+yükleri `src/eylem.rs`; raster, taban çizgisi ve sahne karşılaştırması
+`tools/uyum/kanit.mjs` üzerinden denetlenir. On bir yeni Graph kartı ve daha
+önce kilitlenen `calendar-graph` ile Graph kategori sayısı **12/12**, toplam
+statik görsel kanıt sayacı **204/332 (%61,4)** olur. Koyu kip, klavye/ARIA,
+ortak legend-hover, animasyon/universal transition ve ölçümlü/iptal edilebilir
+büyük veri kapıları Faz 7/8/9'da kapanana kadar `tam_kanıtlı` sayacı ayrı
+kalır.
+
 #### Tree aile kapısı
 
 Normatif kaynak yüzeyi `../echarts/src/chart/tree/TreeSeries.ts`,
@@ -2288,11 +2428,11 @@ ve bit düzeyinde aynı değilse kilit yazmaz. Fixture bütünlüğü ve sahne
 toplamları `examples/uyum_fixture.rs`; yerleşim, `minAngle`, gerçek şerit
 isabeti, curveness/edgeLabel ve durum dalları `src/grafik/kiris.rs`; legend
 filtresi ile seri tooltip'i `src/cizim/gorunum.rs`; raster ve yapısal
-karşılaştırma `tools/uyum/kanit.mjs` üzerinden denetlenir. Bu geçitle statik
-görsel kanıt sayacı **193/332 (%58,1)** olur. `tam_kanıtlı` sayacı ortak koyu
-kip/GPUI/SVG, klavye ve erişilebilirlik, legend-hover, animasyon/universal
-transition ve ölçümlü büyük veri kapıları Faz 7/8/9'da kapanana kadar ayrı
-kalır.
+karşılaştırma `tools/uyum/kanit.mjs` üzerinden denetlenir. Graph kapısı dahil
+Faz 5'in statik görsel kanıt sayacı **204/332 (%61,4)** olur.
+`tam_kanıtlı` sayacı ortak koyu kip/GPUI/SVG, klavye ve erişilebilirlik,
+legend-hover, animasyon/universal transition ve ölçümlü büyük veri kapıları
+Faz 7/8/9'da kapanana kadar ayrı kalır.
 
 Kabul:
 

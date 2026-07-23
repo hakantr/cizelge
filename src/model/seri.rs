@@ -18,6 +18,7 @@ use crate::model::agac::{
 use crate::model::bilesen::İpucu;
 use crate::model::deger::{VeriDeğeri, VeriÖğesi, veri_listesi};
 use crate::model::eksen::Eksen;
+pub use crate::model::grafo::{GrafoDüğümü, GrafoSerisi, GrafoYerleşimi};
 pub use crate::model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
 };
@@ -5001,218 +5002,6 @@ impl AğaçSerisi {
 // ayrıntılı option yüzeyini kendi modülünde tutar.
 pub use crate::model::sankey::{SankeyBağı, SankeySerisi};
 
-/// Grafo düğümü (`graph` `data` öğesi).
-#[derive(Clone, PartialEq, Debug)]
-pub struct GrafoDüğümü {
-    pub ad: String,
-    pub değer: Option<f64>,
-    /// Takvim koordinatındaki tarih (`data[i][0]`, Unix milisaniyesi).
-    pub takvim_tarihi_ms: Option<f64>,
-    /// Matrix koordinatındaki hücre ya da aralık.
-    pub matris_koordinatı: Option<(MatrisAralığı, MatrisAralığı)>,
-    /// Sembol çapı (`symbolSize`).
-    pub boyut: f32,
-    /// Renk grubu (palet sırası); `None` düğüm sırasını kullanır.
-    pub kategori: Option<usize>,
-}
-
-impl GrafoDüğümü {
-    pub fn yeni(ad: impl Into<String>, boyut: f32) -> Self {
-        GrafoDüğümü {
-            ad: ad.into(),
-            değer: None,
-            takvim_tarihi_ms: None,
-            matris_koordinatı: None,
-            boyut,
-            kategori: None,
-        }
-    }
-
-    pub fn kategori(mut self, kategori: usize) -> Self {
-        self.kategori = Some(kategori);
-        self
-    }
-
-    pub fn değerli(mut self, değer: f64) -> Self {
-        self.değer = Some(değer);
-        self
-    }
-
-    /// Düğümü takvim koordinatındaki bir güne bağlar.
-    pub fn takvim_tarihi(mut self, tarih_ms: f64) -> Self {
-        self.takvim_tarihi_ms = Some(tarih_ms);
-        self.matris_koordinatı = None;
-        self
-    }
-
-    pub fn matris_koordinatı(
-        mut self,
-        x: impl Into<MatrisAralığı>,
-        y: impl Into<MatrisAralığı>,
-    ) -> Self {
-        self.matris_koordinatı = Some((x.into(), y.into()));
-        self.takvim_tarihi_ms = None;
-        self
-    }
-}
-
-/// Grafo yerleşimi (`graph.layout`).
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub enum GrafoYerleşimi {
-    /// Veri/koordinat sisteminin verdiği konum (`null` / `'none'`).
-    Yok,
-    /// Kuvvet yönlendirmeli (`'force'`) — belirlenimci.
-    #[default]
-    Kuvvet,
-    /// Çember üzerinde (`'circular'`).
-    Dairesel,
-}
-
-/// Grafo serisi (`series-graph`).
-#[derive(Clone, Debug)]
-pub struct GrafoSerisi {
-    pub ad: Option<String>,
-    pub düğümler: Vec<GrafoDüğümü>,
-    /// Bağlar: `(kaynak ad, hedef ad)`.
-    pub bağlar: Vec<(String, String)>,
-    pub yerleşim: GrafoYerleşimi,
-    pub merkez: (Uzunluk, Uzunluk),
-    pub yarıçap: Uzunluk,
-    /// İtme çarpanı (`force.repulsion` ölçeği).
-    pub itme: f32,
-    /// Bağ uzunluğu çarpanı (`force.edgeLength` ölçeği).
-    pub kenar_uzunluğu: f32,
-    /// Bu çaptan büyük düğümlerde ad etiketi gösterilir.
-    pub etiket_eşiği: f32,
-    /// Normal durumda etiket çizilir mi (`label.show`).
-    pub etiket_göster: bool,
-    /// Düğüm etiketi seçenekleri (`label`). Eski `etiket_göster` alanı
-    /// kaynak uyumu için korunur; çizim ikisinden herhangi biri açıksa
-    /// etiketi üretir.
-    pub etiket: Etiket,
-    /// Takvim koordinatına bağlıysa `calendarIndex`.
-    pub takvim_sırası: Option<usize>,
-    /// Matrix koordinatına bağlıysa `matrixIndex`.
-    pub matris_sırası: Option<usize>,
-    /// Seri çizim sırası (`z`); CalendarView öntanımlı z=2'dir.
-    pub z: i32,
-    /// Düğüm `itemStyle`ı.
-    pub öğe_stili: ÖğeStili,
-    /// Kenar `lineStyle`ı.
-    pub çizgi_stili: ÇizgiStili,
-    /// Hedef uçta öntanımlı 10 px ok (`edgeSymbol: ['none', 'arrow']`).
-    pub hedef_oku: bool,
-    pub hedef_oku_boyutu: f32,
-}
-
-impl Default for GrafoSerisi {
-    fn default() -> Self {
-        GrafoSerisi {
-            ad: None,
-            düğümler: Vec::new(),
-            bağlar: Vec::new(),
-            yerleşim: GrafoYerleşimi::Kuvvet,
-            merkez: (Uzunluk::Yüzde(50.0), Uzunluk::Yüzde(55.0)),
-            yarıçap: Uzunluk::Yüzde(78.0),
-            itme: 1.0,
-            kenar_uzunluğu: 1.0,
-            etiket_eşiği: 12.0,
-            etiket_göster: false,
-            etiket: Etiket::yeni(),
-            takvim_sırası: None,
-            matris_sırası: None,
-            z: 2,
-            öğe_stili: ÖğeStili::default(),
-            çizgi_stili: ÇizgiStili::yeni().kalınlık(1.0).opaklık(0.5),
-            hedef_oku: false,
-            hedef_oku_boyutu: 10.0,
-        }
-    }
-}
-
-impl GrafoSerisi {
-    pub fn yeni() -> Self {
-        Self::default()
-    }
-
-    pub fn ad(mut self, ad: impl Into<String>) -> Self {
-        self.ad = Some(ad.into());
-        self
-    }
-
-    pub fn düğümler(mut self, düğümler: impl IntoIterator<Item = GrafoDüğümü>) -> Self {
-        self.düğümler = düğümler.into_iter().collect();
-        self
-    }
-
-    pub fn bağlar<S: Into<String>>(mut self, bağlar: impl IntoIterator<Item = (S, S)>) -> Self {
-        self.bağlar = bağlar
-            .into_iter()
-            .map(|(k, h)| (k.into(), h.into()))
-            .collect();
-        self
-    }
-
-    pub fn yerleşim(mut self, yerleşim: GrafoYerleşimi) -> Self {
-        self.yerleşim = yerleşim;
-        self
-    }
-
-    pub fn etiket_göster(mut self, göster: bool) -> Self {
-        self.etiket_göster = göster;
-        self.etiket.göster = göster;
-        self
-    }
-
-    pub fn etiket(mut self, etiket: Etiket) -> Self {
-        self.etiket_göster = etiket.göster;
-        self.etiket = etiket;
-        self
-    }
-
-    pub fn etiket_eşiği(mut self, eşik: f32) -> Self {
-        self.etiket_eşiği = eşik.max(0.0);
-        self
-    }
-
-    pub fn takvim_sırası(mut self, sıra: usize) -> Self {
-        self.takvim_sırası = Some(sıra);
-        self.matris_sırası = None;
-        self
-    }
-
-    pub fn matris_sırası(mut self, sıra: usize) -> Self {
-        self.matris_sırası = Some(sıra);
-        self.takvim_sırası = None;
-        self
-    }
-
-    pub fn z(mut self, z: i32) -> Self {
-        self.z = z;
-        self
-    }
-
-    pub fn öğe_stili(mut self, stil: ÖğeStili) -> Self {
-        self.öğe_stili = stil;
-        self
-    }
-
-    pub fn çizgi_stili(mut self, stil: ÇizgiStili) -> Self {
-        self.çizgi_stili = stil;
-        self
-    }
-
-    pub fn hedef_oku(mut self, açık: bool) -> Self {
-        self.hedef_oku = açık;
-        self
-    }
-
-    pub fn hedef_oku_boyutu(mut self, boyut: f32) -> Self {
-        self.hedef_oku_boyutu = boyut.max(0.0);
-        self
-    }
-}
-
 /// Paralel koordinat boyutu (`parallelAxis` öğesi).
 #[derive(Clone, PartialEq, Debug)]
 pub struct ParalelBoyut {
@@ -5665,6 +5454,7 @@ impl Seri {
             Seri::GüneşPatlaması(s) => s.kimlik.as_deref(),
             Seri::Ağaç(s) => s.kimlik.as_deref(),
             Seri::Sankey(s) => s.kimlik.as_deref(),
+            Seri::Grafo(s) => s.kimlik.as_deref(),
             Seri::Kiriş(s) => s.kimlik.as_deref(),
             _ => None,
         }
@@ -5705,6 +5495,9 @@ impl Seri {
                 s.kutupsal && s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none()
             }
             Seri::Hatlar(s) => s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal,
+            Seri::Grafo(s) => {
+                s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::Kutupsal
+            }
             _ => false,
         }
     }
@@ -5721,6 +5514,11 @@ impl Seri {
                 Some(s.kutupsal_sırası)
             }
             Seri::Hatlar(s) if s.koordinat_sistemi == HatKoordinatSistemi::Kutupsal => {
+                Some(s.kutupsal_sırası)
+            }
+            Seri::Grafo(s)
+                if s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::Kutupsal =>
+            {
                 Some(s.kutupsal_sırası)
             }
             _ => None,
@@ -5745,12 +5543,14 @@ impl Seri {
         ) || matches!(self, Seri::Isı(s) if s.matris_sırası.is_none())
             || matches!(self, Seri::Saçılım(s) if s.takvim_sırası.is_none() && s.tek_eksen_sırası.is_none() && s.matris_sırası.is_none())
             || matches!(self, Seri::Özel(s) if s.kartezyen_gerekli)
+            || matches!(self, Seri::Grafo(s) if s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::Kartezyen2B)
     }
 
     /// Tek eksenli koordinat sisteminde mi çizilir?
     pub fn tek_eksen_mi(&self) -> bool {
         matches!(self, Seri::Saçılım(s) if s.tek_eksen_sırası.is_some())
             || matches!(self, Seri::TemaNehri(_))
+            || matches!(self, Seri::Grafo(s) if s.koordinat_sistemi == crate::model::grafo::GrafoKoordinatSistemi::TekEksen)
     }
 
     pub fn veri(&self) -> &[VeriÖğesi] {
@@ -5819,6 +5619,7 @@ impl Seri {
             Seri::Isı(s) => s.eksen_bağı,
             Seri::Özel(s) => s.eksen_bağı,
             Seri::Hatlar(s) => s.eksen_bağı,
+            Seri::Grafo(s) => s.eksen_bağı,
             _ => EksenBağı::default(),
         }
     }

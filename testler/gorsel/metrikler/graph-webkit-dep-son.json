@@ -1,0 +1,45 @@
+{
+  "id": "graph-webkit-dep",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 914,
+  "değişen_piksel_oranı": 0.003385185185185185,
+  "ssim": 0.9944840094266275,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1325,
+    "değişen_piksel_oranı": 0.004907407407407407,
+    "ssim": 0.9942329384060896
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "graph_düğüm_bağ_ve_etiket_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Graph düğümünün kimlik/kategori, dünya merkezi, sembol boyutu, RGBA stili ve görünür etiket tabanı; her bağın kaynak-hedef kimliği, kırpılmış uç/kontrol noktası, uç sembolü ve çizgi stili kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 492,
+      "gerçek_düğüm": 492,
+      "beklenen_bağ": 806,
+      "gerçek_bağ": 806,
+      "karşılaştırılan_alan": 18664,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-webkit-dep.png",
+    "gerçek": "testler/gorsel/gerçek/default/graph-webkit-dep.png",
+    "fark": "testler/gorsel/fark/default/graph-webkit-dep.png",
+    "normalize_fark": "testler/gorsel/fark/default/graph-webkit-dep-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/graph-webkit-dep.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/graph-webkit-dep.json"
+  }
+}

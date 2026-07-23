@@ -1,0 +1,514 @@
+{
+  "şema_sürümü": 1,
+  "tür": "graph",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "ad": "series\u00000",
+      "koordinat_sistemi": "cartesian2d",
+      "alan": {
+        "x": 0.0,
+        "y": 0.0,
+        "genişlik": 700.0,
+        "yükseklik": 525.0
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "kimlik": "0",
+          "ad": "0",
+          "değer": null,
+          "kategori": null,
+          "x": 105.0,
+          "y": 413.68798828125,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Mon",
+            "x": 105.0,
+            "y": 413.68798828125,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 1,
+          "kimlik": "1",
+          "ad": "1",
+          "değer": null,
+          "kategori": null,
+          "x": 192.5,
+          "y": 317.0159912109375,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Tue",
+            "x": 192.5,
+            "y": 317.0159912109375,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 2,
+          "kimlik": "2",
+          "ad": "2",
+          "değer": null,
+          "kategori": null,
+          "x": 280.0,
+          "y": 395.6759948730469,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Wed",
+            "x": 280.0,
+            "y": 395.6759948730469,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 3,
+          "kimlik": "3",
+          "ad": "3",
+          "değer": null,
+          "kategori": null,
+          "x": 367.5,
+          "y": 146.16799926757812,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Very Loooong Thu",
+            "x": 367.5,
+            "y": 146.16799926757812,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 4,
+          "kimlik": "4",
+          "ad": "4",
+          "değer": null,
+          "kategori": null,
+          "x": 455.0,
+          "y": 437.3240051269531,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Fri",
+            "x": 455.0,
+            "y": 437.3240051269531,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 5,
+          "kimlik": "5",
+          "ad": "5",
+          "değer": null,
+          "kategori": null,
+          "x": 542.5,
+          "y": 78.83200073242188,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Sat",
+            "x": 542.5,
+            "y": 78.83200073242188,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 6,
+          "kimlik": "6",
+          "ad": "6",
+          "değer": null,
+          "kategori": null,
+          "x": 630.0,
+          "y": 400.1600036621094,
+          "genişlik": 40.0,
+          "yükseklik": 40.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Sun",
+            "x": 630.0,
+            "y": 400.1600036621094,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        }
+      ],
+      "bağlar": [
+        {
+          "veri_sırası": 0,
+          "kaynak": "0",
+          "hedef": "1",
+          "değer": null,
+          "x1": 118.42120361328125,
+          "y1": 398.85992431640625,
+          "x2": 179.07879638671875,
+          "y2": 331.84405517578125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 118.42120361328125,
+            "y": 398.85992431640625,
+            "boyut": [
+              4.0,
+              4.0
+            ]
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 179.07879638671875,
+            "y": 331.84405517578125,
+            "boyut": [
+              10.0,
+              10.0
+            ]
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 145.04298400878906,
+            "y": 361.9966735839844,
+            "dönüş": -0.835158109664917,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 1,
+          "kaynak": "1",
+          "hedef": "2",
+          "değer": null,
+          "x1": 207.3734893798828,
+          "y1": 330.3868408203125,
+          "x2": 265.12652587890625,
+          "y2": 382.3051452636719,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 207.3734893798828,
+            "y": 330.3868408203125,
+            "boyut": [
+              4.0,
+              4.0
+            ]
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 265.12652587890625,
+            "y": 382.3051452636719,
+            "boyut": [
+              10.0,
+              10.0
+            ]
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 239.59271240234375,
+            "y": 352.62762451171875,
+            "dönüş": 0.7322462797164917,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 2,
+          "kaynak": "2",
+          "hedef": "3",
+          "değer": null,
+          "x1": 286.6186218261719,
+          "y1": 376.8028869628906,
+          "x2": 360.8813781738281,
+          "y2": 165.04110717773438,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 286.6186218261719,
+            "y": 376.8028869628906,
+            "boyut": [
+              4.0,
+              4.0
+            ]
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 360.8813781738281,
+            "y": 165.04110717773438,
+            "boyut": [
+              10.0,
+              10.0
+            ]
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 319.03173828125,
+            "y": 269.267333984375,
+            "dönüş": -1.2335069179534912,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 3,
+          "kaynak": "3",
+          "hedef": "4",
+          "değer": null,
+          "x1": 373.2561950683594,
+          "y1": 165.32174682617188,
+          "x2": 449.2438049316406,
+          "y2": 418.1702575683594,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 373.2561950683594,
+            "y": 165.32174682617188,
+            "boyut": [
+              4.0,
+              4.0
+            ]
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 449.2438049316406,
+            "y": 418.1702575683594,
+            "boyut": [
+              10.0,
+              10.0
+            ]
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 416.0384521484375,
+            "y": 290.30694580078125,
+            "dönüş": 1.278856873512268,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 4,
+          "kaynak": "4",
+          "hedef": "5",
+          "değer": null,
+          "x1": 459.7423400878906,
+          "y1": 417.8943786621094,
+          "x2": 537.7576293945312,
+          "y2": 98.26162719726562,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 459.7423400878906,
+            "y": 417.8943786621094,
+            "boyut": [
+              4.0,
+              4.0
+            ]
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 537.7576293945312,
+            "y": 98.26162719726562,
+            "boyut": [
+              10.0,
+              10.0
+            ]
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 493.8926086425781,
+            "y": 256.8924255371094,
+            "dönüş": -1.3313990831375122,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 5,
+          "kaynak": "5",
+          "hedef": "6",
+          "değer": null,
+          "x1": 547.7548217773438,
+          "y1": 98.12933349609375,
+          "x2": 624.7451782226562,
+          "y2": 380.8626708984375,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 547.7548217773438,
+            "y": 98.12933349609375,
+            "boyut": [
+              4.0,
+              4.0
+            ]
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 624.7451782226562,
+            "y": 380.8626708984375,
+            "boyut": [
+              10.0,
+              10.0
+            ]
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 591.0743408203125,
+            "y": 238.1822967529297,
+            "dönüş": 1.3049352169036865,
+            "renk": null
+          }
+        }
+      ]
+    }
+  ]
+}

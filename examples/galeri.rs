@@ -568,6 +568,7 @@ fn grafo(d: &Durum) -> GrafikSeçenekleri {
         .seri(
             GrafoSerisi::yeni()
                 .ad("Ağ")
+                .yerleşim(GrafoYerleşimi::Kuvvet)
                 .düğümler([
                     GrafoDüğümü::yeni("Çekirdek", değer(d, 841, 24.0, 16.0) as f32).kategori(0),
                     GrafoDüğümü::yeni("Model", değer(d, 842, 14.0, 12.0) as f32).kategori(1),

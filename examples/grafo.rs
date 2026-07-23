@@ -13,6 +13,7 @@ fn seçenekler() -> GrafikSeçenekleri {
         .seri(
             GrafoSerisi::yeni()
                 .ad("Ağ")
+                .yerleşim(GrafoYerleşimi::Kuvvet)
                 .etiket_göster(true)
                 .düğümler([
                     GrafoDüğümü::yeni("Çekirdek", 34.0).kategori(0),

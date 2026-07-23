@@ -2263,14 +2263,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9998456041864973,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-force2.png",
+            "sha256": "f0b7593ad05cc367bdc6ef9b01626be9ba3fe44e239d4b06191539edf8e9060f"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-force2.png",
+            "sha256": "8fbe755d7820b525cc8cee722e6ab40a8f76048de51c7c9e768c51650b5a1d9b"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-force2.png",
+            "sha256": "9803be903f9699b847e0cabd21356f02b46caa400e20a1ff6405935f608d7e50"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 6,
+            "değişen_piksel_oranı": 0.000022222222222222223,
+            "ssim": 0.9997655855185966
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-force2-tipografi.png",
+            "sha256": "41cad223b8df2e477b5802d7c026ce53a6fea15ebb452ef6974663860304f699"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-force2.json",
+            "sha256": "48885ab06998286e681bb61553374dc6dc286204fe2841957ee4be1cf1cba9cb"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-force2-son.json",
+            "sha256": "9b158914a6de7ae665c087239755e12b90dcc5be559b297be5fa6d57e38a81f9"
+          }
+        }
+      ]
     }
   },
   {
@@ -4564,14 +4607,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 715,
+          "değişen_piksel_oranı": 0.002648148148148148,
+          "ssim": 0.992641976967515,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-grid.png",
+            "sha256": "69661cb446cd03a839d28a0039bbf9b084d02a3024eb7955d430f924e576f2fe"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-grid.png",
+            "sha256": "fe5fd75fe80edbd419597dd193fe506a18577ae703f00c7768aba23bc6d0b3b4"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-grid.png",
+            "sha256": "457df988148e078925d7da512997d9475e88d889a7952d3ff91a3fcb1f53d22e"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 1010,
+            "değişen_piksel_oranı": 0.0037407407407407407,
+            "ssim": 0.9916161733876938
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-grid-tipografi.png",
+            "sha256": "d299573046dcd0e8b19e3391460b3631818ed311b69a599588fed0cf53444d4a"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-grid.json",
+            "sha256": "8d9161a0452170a36ee64720290f87b6bd9778b53f080be7dba1157a8a384b36"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-grid-son.json",
+            "sha256": "d91135bcb1179a78bb6670fa1183332f169760ab2e16043716f154aa4734732e"
+          }
+        }
+      ]
     }
   },
   {
@@ -4608,7 +4694,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -4622,14 +4708,57 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 500,
+          "değişen_piksel_oranı": 0.001851851851851852,
+          "ssim": 0.9971271469680911,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-simple.png",
+            "sha256": "763a9a049ca185cc7014e65bfefa4d4009a0ed198ab9c3bdfdcdf5b07d9a1335"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-simple.png",
+            "sha256": "566ab4857194b397ef520682a9074ab6c215b66744a371541ad56cb84649a4d3"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-simple.png",
+            "sha256": "2141c0ee48d1ce2dc0e6d79263f33626305fb594a027c54ec0862a9673cf95e8"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 710,
+            "değişen_piksel_oranı": 0.0026296296296296298,
+            "ssim": 0.9964085857416692
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-simple-tipografi.png",
+            "sha256": "4c89ae217da59183d130dd13d26c4fa39ec2445f50797ab7c5b11817662a8182"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-simple.json",
+            "sha256": "4a3470b1408f1272395939a79dad6207fe34a033667b256604e23c349e606213"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-simple-son.json",
+            "sha256": "0f71d827059c7835a86280f45be6b87dbb78db8c082204c0519173ea34353ca2"
+          }
+        }
+      ]
     }
   },
   {
@@ -8743,14 +8872,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.9998843661099043,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-force.png",
+            "sha256": "4299b1d9fb8ca9f434a307fb60b31f74ae13916813a6eb8f579cd65c9553245b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-force.png",
+            "sha256": "26820ae86e9fe51ca3d5114b395fe155023791c36855f11905ffbbb3de368064"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-force.png",
+            "sha256": "544c17f8ee00aa2143141c734aa7bf2ebf6cd72f64e83d31f7eacb54577df536"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 153,
+            "değişen_piksel_oranı": 0.0005666666666666667,
+            "ssim": 0.9998078448564841
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-force-tipografi.png",
+            "sha256": "6c72145c5819adc219533816a08068677086acec7f73b6a9b1d4b8d7efaeb904"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-force.json",
+            "sha256": "b5119fb715671dabb6f6fb50ad1caeb0b4463a5f70b04c5ba94595a06fc1cf69"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-force-son.json",
+            "sha256": "e7c4023de4cff4428654149993f98f3c84b99a31865956074bdbd44498b47af4"
+          }
+        }
+      ]
     }
   },
   {
@@ -8804,14 +8976,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 2100,
+          "değişen_piksel_oranı": 0.0077777777777777776,
+          "ssim": 0.9932968347925243,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-label-overlap.png",
+            "sha256": "8ba2f5c7ac3aa81aebf3651ca2b26b58cd6e0b55c7cf7054353abfd66182f0bb"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-label-overlap.png",
+            "sha256": "adff156b2efefe07a2b1f0ee864f6f485468237af6075955cc9bb250a6dc33de"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-label-overlap.png",
+            "sha256": "380d8376d394a397ed88f42dc8b1c5c15ee3806d586232fb8c3e892fc2a7f2ea"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 5477,
+            "değişen_piksel_oranı": 0.020285185185185184,
+            "ssim": 0.9896426742086628
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-label-overlap-tipografi.png",
+            "sha256": "05614a511da7b684dd4512ae35cf74a170026fce752744ff414cb8b807863a56"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-label-overlap.json",
+            "sha256": "2e8d413d40e08180a4fc3e96a7c915557d2eabe96b5736bbbd75c2717a38f697"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-label-overlap-son.json",
+            "sha256": "e70b077b124a3d8bb3d046d5a5453da5413e04adb8a3a1adb67dcc700ec10a9a"
+          }
+        }
+      ]
     }
   },
   {
@@ -11545,14 +11760,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 252,
+          "değişen_piksel_oranı": 0.0009333333333333333,
+          "ssim": 0.9987932431189678,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph.png",
+            "sha256": "63307717fc3ef7432e8bf7904023030d64ea1bc6b6e9abaf036863ab4984d789"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph.png",
+            "sha256": "af1a6c99714acf514b01397bf93309e1b0d74f37536cc71141d53af9c206da1a"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph.png",
+            "sha256": "19f5297fb2ecf66a4dab24562b11a8f12b78ced3b71c3aacafca5c8438fc33ad"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 737,
+            "değişen_piksel_oranı": 0.0027296296296296296,
+            "ssim": 0.9978344737453076
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-tipografi.png",
+            "sha256": "6ce7ce8278edb0506e3fc39dad990aa63ae15ce5a1e83d5bd9a61315743d2d3d"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph.json",
+            "sha256": "ea76eea8df8822d1bd440bd759750fa009bd3cdf364a2c07e913075d1e46afd1"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-son.json",
+            "sha256": "24a85c31af6e624b5d21c7546e4cf37461c0ff2f70eeb7ada5570cdc5d3afe3f"
+          }
+        }
+      ]
     }
   },
   {
@@ -14523,14 +14781,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1,
+          "değişen_piksel_oranı": 0.0000037037037037037037,
+          "ssim": 0.9987169034719673,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-circular-layout.png",
+            "sha256": "fcf3d95e011d23bd161b8c22311aefacf4e7538e4f9e5b92833dcf0c501fe9f8"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-circular-layout.png",
+            "sha256": "1b04785cdb708b71f7d6fc3e6fc5fc63bc7a11874513180b7ef4f53d059646ce"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-circular-layout.png",
+            "sha256": "3fed0a24f1d22cf7bbe123f82f8c8f7ca1994c0dfdfc5575f50be97ebcb51b49"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 244,
+            "değişen_piksel_oranı": 0.0009037037037037037,
+            "ssim": 0.9978182684803839
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-circular-layout-tipografi.png",
+            "sha256": "4b26c6349b6fa11451df6b2383357412f5f434d31739843fb0c7626211c90409"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-circular-layout.json",
+            "sha256": "8c492117fa919df507f44075d48fcd0d15090e8dca6150ccbc44a83acd188162"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-circular-layout-son.json",
+            "sha256": "e73c41ba7e5a01df390d1d983ca7b52b72c058305b25dfbacbda32754b91b660"
+          }
+        }
+      ]
     }
   },
   {
@@ -16126,14 +16427,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
-      "etkileşim": "yok",
+      "etkileşim": "uygulandı_kanıt_bekliyor",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "etkileşim",
+          "geçti": true,
+          "değişen_piksel": 0,
+          "değişen_piksel_oranı": 0,
+          "ssim": 0.99994818613773,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-force-dynamic.png",
+            "sha256": "1143567b75c974a7c550756c78cb633f1ea2429527997a080bec1041035e7514"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-force-dynamic.png",
+            "sha256": "b5f6735de746708b131657b5bd33aabd99055af52892a9a57f9839b6a4eff9ae"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-force-dynamic.png",
+            "sha256": "85beb54a873efbf389fd6f0c20f80b7bdc438a205ca431bcbe179aa9c764166c"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 3,
+            "değişen_piksel_oranı": 0.000011111111111111112,
+            "ssim": 0.999918194157237
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-force-dynamic-tipografi.png",
+            "sha256": "be826f54bb16caf4400f57084de46b5a46ea135d4fbea9f75db9fd792745421b"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-force-dynamic.json",
+            "sha256": "1d4f8968595d5c4756621167caf532fca9691f71667a394933750e71c600d793"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-force-dynamic-son.json",
+            "sha256": "65ad5fa41ac32b879f84f50521b8fb11da1dc6bcd2e28d8b705e31d760f4ad64"
+          }
+        }
+      ]
     }
   },
   {
@@ -17195,14 +17539,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 205,
+          "değişen_piksel_oranı": 0.0007592592592592592,
+          "ssim": 0.9984280078443563,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-life-expectancy.png",
+            "sha256": "5275833f37106187113be930ce252c6c1e581f315d0f3a883f8be559953c2008"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-life-expectancy.png",
+            "sha256": "d2009c21b2bb3547f2d5a807b178de2c9701b640dadfd137c6e606b95522a8ce"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-life-expectancy.png",
+            "sha256": "c90b822652390ce841f41a44549acc05454313ee55d23abb643e358d226eeeb1"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 756,
+            "değişen_piksel_oranı": 0.0028,
+            "ssim": 0.9974576702055175
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-life-expectancy-tipografi.png",
+            "sha256": "6cf3f68489a6efd30f0f977926038b2e589dde5ee94016270ca112d408f09dc5"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-life-expectancy.json",
+            "sha256": "aea80596d6cb41da0fddb25e8bb91670adc74fb7f2225a06c3a07cd5bbde1975"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-life-expectancy-son.json",
+            "sha256": "7680e7e2115129274923f5b881be477c5b0d1ff92e1c2e430cca9eb56889cdec"
+          }
+        }
+      ]
     }
   },
   {
@@ -18111,14 +18498,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 914,
+          "değişen_piksel_oranı": 0.003385185185185185,
+          "ssim": 0.9944840094266275,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-webkit-dep.png",
+            "sha256": "6c4d259d27b676d9877cd342a50a2c78f3bf2057c7a315c221fc56824f57e20c"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-webkit-dep.png",
+            "sha256": "481ff5cbb8fdf9f98c35f5a703c1fd0199e3f3c58307ec690d8034748938e98b"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-webkit-dep.png",
+            "sha256": "0ffd227ccc1bd2fc67738115a995f02c80a8b65e711e65772b750dd9c2e33824"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 1325,
+            "değişen_piksel_oranı": 0.004907407407407407,
+            "ssim": 0.9942329384060896
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-webkit-dep-tipografi.png",
+            "sha256": "483c78b307953c0bdb6f251b65c564007eb44cae42c220a82a44f3ae28820abc"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-webkit-dep.json",
+            "sha256": "2fd4b21f297411af2f6fef867a86096cb23026b8b02abcdaf90dc0f964c319f8"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-webkit-dep-son.json",
+            "sha256": "11d1a34743e4c8e8c66a0300cba4ca1fa6e84e4d5a33db66e7e4de7b8a0cf29f"
+          }
+        }
+      ]
     }
   },
   {
@@ -18529,14 +18959,57 @@
     ],
     "kanıt": {
       "api": "yok",
-      "statik_görsel": "yok",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "yok",
       "etkileşim": "yok",
       "erişilebilirlik": "yok",
       "performans": "yok"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1608,
+          "değişen_piksel_oranı": 0.005955555555555556,
+          "ssim": 0.9923761265191623,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-npm.png",
+            "sha256": "d0aabbb7037e416ccff21e8a13ee1c0fb8285f0c7cc58543eaf6e6a2e8c2fc2a"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/graph-npm.png",
+            "sha256": "65077fb7c042b9502bfa3e6e02620d7442a7d9a940a30b46ce7dee298eab4454"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/graph-npm.png",
+            "sha256": "18fe71eb983b58619e17d4e432f3f66d86d49a038d39af0c8c7b9ce3533e2839"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 2277,
+            "değişen_piksel_oranı": 0.008433333333333333,
+            "ssim": 0.9912121719669319
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/graph-npm-tipografi.png",
+            "sha256": "25f35a99578fbb3bc65e73238214218cd98bef1864971e6dbbaf9cc4b5c02de2"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/graph-npm.json",
+            "sha256": "db135b75065b3bf6f673c14c12e1915dc205a11258796443570607c59d5233d4"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/graph-npm-son.json",
+            "sha256": "d3808220fcdd8a3d84a4345f649dabefdb6fded7ae6aedd43888efe846789e34"
+          }
+        }
+      ]
     }
   },
   {

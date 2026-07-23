@@ -60,6 +60,14 @@ const chordKarşılaştırması = () => ({
   sahneReferansı: true
 });
 
+const graphKarşılaştırması = () => ({
+  tipografiSigma: 0.8,
+  // Her düğüm merkezi/boyutu/style/etiket tabanı ile her bağın kırpılmış
+  // uçları, kontrol noktası, uç sembolleri ve çizgi stili raster toplamından
+  // bağımsız olarak kilitli ECharts sahnesine karşı denetlenir.
+  sahneReferansı: true
+});
+
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -195,6 +203,24 @@ const SENARYOLAR = [
     tür: 'statik',
     karşılaştırma: chordKarşılaştırması(),
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  })),
+  ...[
+    { id: 'graph-force2' },
+    { id: 'graph-grid' },
+    { id: 'graph-simple' },
+    { id: 'graph-force' },
+    { id: 'graph-label-overlap' },
+    { id: 'graph' },
+    { id: 'graph-circular-layout', genişlik: 900, yükseklik: 675 },
+    { id: 'graph-force-dynamic' },
+    { id: 'graph-life-expectancy' },
+    { id: 'graph-webkit-dep', genişlik: 900, yükseklik: 675 },
+    { id: 'graph-npm' }
+  ].map((senaryo) => ({
+    ...senaryo,
+    tür: senaryo.id === 'graph-force-dynamic' ? 'etkileşim' : 'statik',
+    karşılaştırma: graphKarşılaştırması(),
+    kareler: [{ ad: 'son', kare: 1, durum: 'son' }]
   })),
   { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'themeRiver-lastfm', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -873,6 +899,16 @@ function yapısalKontroller(senaryo, referansDosyası, gerçekDosyası) {
     )];
   }
 
+  if (senaryo.id === 'graph-grid') {
+    return [paralelEksenKapısı(
+      'graph_kartezyen_x_taban_çizgisi',
+      'Graph düğüm ve kenar katmanından bağımsız olarak kartezyen X ekseni tabanı kesintisiz görünmeli',
+      [381],
+      [120, 150, 270, 300, 450, 500],
+      false
+    )];
+  }
+
   if (senaryo.id === 'themeRiver-basic') {
     const beklenenRenkler = [
       [80, 112, 221],
@@ -1351,6 +1387,146 @@ function chordSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
   }];
 }
 
+function graphSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
+  if (!senaryo.karşılaştırma?.sahneReferansı) return [];
+  const açıklama = 'Her Graph düğümünün kimlik/kategori, dünya merkezi, sembol boyutu, RGBA stili ve görünür etiket tabanı; her bağın kaynak-hedef kimliği, kırpılmış uç/kontrol noktası, uç sembolü ve çizgi stili kilitli ECharts sahnesiyle eşleşmeli';
+  if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
+    return [{ad: 'graph_düğüm_bağ_ve_etiket_geometrisi', geçti: false, açıklama,
+      hata: 'Cizelge sahne kanıtı eksik'}];
+  }
+  if (!referansSahneDosyası || !fs.existsSync(referansSahneDosyası)) {
+    return [{ad: 'graph_düğüm_bağ_ve_etiket_geometrisi', geçti: false, açıklama,
+      hata: 'kilitli ECharts sahne kanıtı eksik'}];
+  }
+  const gerçek = JSON.parse(fs.readFileSync(sahneDosyası, 'utf8'));
+  const beklenen = JSON.parse(fs.readFileSync(referansSahneDosyası, 'utf8'));
+  const uyuşmazlıklar = [];
+  const ekle = (yol, beklenenDeğer, gerçekDeğer) => {
+    if (uyuşmazlıklar.length < 120) {
+      uyuşmazlıklar.push({yol, beklenen: beklenenDeğer, gerçek: gerçekDeğer});
+    }
+  };
+  const eşitMi = (a, b) => {
+    if (typeof a === 'number' && typeof b === 'number') {
+      const qa = Math.round(a * 1000) / 1000;
+      const qb = Math.round(b * 1000) / 1000;
+      return Math.abs(qa - qb) <= 0.0011;
+    }
+    if (Array.isArray(a) && Array.isArray(b)) {
+      return a.length === b.length && a.every((değer, sıra) => eşitMi(değer, b[sıra]));
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+  };
+  for (const alan of ['şema_sürümü', 'tür', 'koordinat_adımı']) {
+    if (!eşitMi(beklenen[alan], gerçek[alan])) ekle(alan, beklenen[alan], gerçek[alan]);
+  }
+  const bSeriler = beklenen.seriler || [];
+  const gSeriler = gerçek.seriler || [];
+  if (bSeriler.length !== gSeriler.length) ekle('seriler.length', bSeriler.length, gSeriler.length);
+  const düğümAlanları = [
+    'veri_sırası', 'kimlik', 'ad', 'değer', 'kategori', 'x', 'y', 'genişlik',
+    'yükseklik', 'sembol', 'renk', 'kenarlık_rengi', 'kenarlık_kalınlığı',
+    'opaklık', 'sabit'
+  ];
+  const bağAlanları = [
+    'veri_sırası', 'kaynak', 'hedef', 'değer', 'x1', 'y1', 'x2', 'y2',
+    'cpx1', 'cpy1', 'renk', 'kalınlık', 'opaklık', 'tür'
+  ];
+  const etiketKarşılaştır = (yol, bEtiket, gEtiket) => {
+    if (!eşitMi(Boolean(bEtiket?.göster), Boolean(gEtiket?.göster))) {
+      ekle(`${yol}.göster`, bEtiket?.göster, gEtiket?.göster);
+      return;
+    }
+    if (!bEtiket?.göster && !gEtiket?.göster) return;
+    for (const alan of ['metin', 'x', 'y', 'dönüş', 'renk']) {
+      const açıEşit = alan === 'dönüş'
+        && typeof bEtiket?.[alan] === 'number'
+        && typeof gEtiket?.[alan] === 'number'
+        && Math.abs(Math.atan2(
+          Math.sin(bEtiket[alan] - gEtiket[alan]),
+          Math.cos(bEtiket[alan] - gEtiket[alan])
+        )) <= 0.0011;
+      if (!açıEşit && !eşitMi(bEtiket?.[alan], gEtiket?.[alan])) {
+        ekle(`${yol}.${alan}`, bEtiket?.[alan], gEtiket?.[alan]);
+      }
+    }
+  };
+  const uçKarşılaştır = (yol, bUç, gUç) => {
+    if (!bUç && !gUç) return;
+    if (!bUç || !gUç) {
+      ekle(yol, bUç, gUç);
+      return;
+    }
+    for (const alan of ['sembol', 'x', 'y', 'boyut']) {
+      if (!eşitMi(bUç[alan], gUç[alan])) ekle(`${yol}.${alan}`, bUç[alan], gUç[alan]);
+    }
+  };
+  for (let seriSırası = 0; seriSırası < Math.min(bSeriler.length, gSeriler.length); seriSırası += 1) {
+    const bSeri = bSeriler[seriSırası];
+    const gSeri = gSeriler[seriSırası];
+    for (const alan of ['seri_sırası', 'ad', 'koordinat_sistemi']) {
+      if (!eşitMi(bSeri[alan], gSeri[alan])) {
+        ekle(`seriler[${seriSırası}].${alan}`, bSeri[alan], gSeri[alan]);
+      }
+    }
+    // External cartesian2d `getBoundingRect` reports the grid, whereas a
+    // view Graph reports its raw data box. The gate compares the actual
+    // world node/edge geometry below instead of this implementation detail.
+    const bDüğümler = bSeri.düğümler || [];
+    const gDüğümler = gSeri.düğümler || [];
+    if (bDüğümler.length !== gDüğümler.length) {
+      ekle(`seriler[${seriSırası}].düğümler.length`, bDüğümler.length, gDüğümler.length);
+    }
+    for (let sıra = 0; sıra < Math.min(bDüğümler.length, gDüğümler.length); sıra += 1) {
+      for (const alan of düğümAlanları) {
+        if (!eşitMi(bDüğümler[sıra][alan], gDüğümler[sıra][alan])) {
+          ekle(`seriler[${seriSırası}].düğümler[${sıra}](${bDüğümler[sıra].ad}).${alan}`,
+            bDüğümler[sıra][alan], gDüğümler[sıra][alan]);
+        }
+      }
+      etiketKarşılaştır(
+        `seriler[${seriSırası}].düğümler[${sıra}](${bDüğümler[sıra].ad}).etiket`,
+        bDüğümler[sıra].etiket, gDüğümler[sıra].etiket
+      );
+    }
+    const bBağlar = bSeri.bağlar || [];
+    const gBağlar = gSeri.bağlar || [];
+    if (bBağlar.length !== gBağlar.length) {
+      ekle(`seriler[${seriSırası}].bağlar.length`, bBağlar.length, gBağlar.length);
+    }
+    for (let sıra = 0; sıra < Math.min(bBağlar.length, gBağlar.length); sıra += 1) {
+      for (const alan of bağAlanları) {
+        if (!eşitMi(bBağlar[sıra][alan], gBağlar[sıra][alan])) {
+          ekle(`seriler[${seriSırası}].bağlar[${sıra}](${bBağlar[sıra].kaynak}->${bBağlar[sıra].hedef}).${alan}`,
+            bBağlar[sıra][alan], gBağlar[sıra][alan]);
+        }
+      }
+      uçKarşılaştır(`seriler[${seriSırası}].bağlar[${sıra}].kaynak_sembolü`,
+        bBağlar[sıra].kaynak_sembolü, gBağlar[sıra].kaynak_sembolü);
+      uçKarşılaştır(`seriler[${seriSırası}].bağlar[${sıra}].hedef_sembolü`,
+        bBağlar[sıra].hedef_sembolü, gBağlar[sıra].hedef_sembolü);
+      etiketKarşılaştır(`seriler[${seriSırası}].bağlar[${sıra}].etiket`,
+        bBağlar[sıra].etiket, gBağlar[sıra].etiket);
+    }
+  }
+  const bDüğüm = bSeriler.reduce((toplam, seri) => toplam + (seri.düğümler?.length || 0), 0);
+  const gDüğüm = gSeriler.reduce((toplam, seri) => toplam + (seri.düğümler?.length || 0), 0);
+  const bBağ = bSeriler.reduce((toplam, seri) => toplam + (seri.bağlar?.length || 0), 0);
+  const gBağ = gSeriler.reduce((toplam, seri) => toplam + (seri.bağlar?.length || 0), 0);
+  return [{
+    ad: 'graph_düğüm_bağ_ve_etiket_geometrisi',
+    geçti: uyuşmazlıklar.length === 0,
+    açıklama,
+    beklenen_düğüm: bDüğüm,
+    gerçek_düğüm: gDüğüm,
+    beklenen_bağ: bBağ,
+    gerçek_bağ: gBağ,
+    karşılaştırılan_alan: Math.min(bDüğüm, gDüğüm) * düğümAlanları.length
+      + Math.min(bBağ, gBağ) * bağAlanları.length,
+    uyuşmazlıklar
+  }];
+}
+
 function sahneÖzetiKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
   if (senaryo.karşılaştırma?.sahneReferansı) {
     if (senaryo.id.startsWith('sunburst-')) {
@@ -1361,6 +1537,9 @@ function sahneÖzetiKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
     }
     if (senaryo.id.startsWith('chord-')) {
       return chordSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
+    }
+    if (senaryo.id === 'graph' || senaryo.id.startsWith('graph-')) {
+      return graphSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
     }
     return treemapSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
   }

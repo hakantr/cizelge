@@ -722,6 +722,32 @@ pub fn kutupsal_kur(
             }
             continue;
         }
+        if let Seri::Grafo(grafo) = seri {
+            en_uzun = en_uzun.max(grafo.düğümler.len());
+            for düğüm in &grafo.düğümler {
+                if let Some(radyal) = düğüm.koordinat_boyutu(
+                    0,
+                    if radyal_kategorik {
+                        &koordinat.radyal_eksen.veri
+                    } else {
+                        &[]
+                    },
+                ) {
+                    kapsa(&mut kapsam, radyal);
+                }
+                if let Some(açısal) = düğüm.koordinat_boyutu(
+                    1,
+                    if açısal_kategorik {
+                        &koordinat.açısal_eksen.veri
+                    } else {
+                        &[]
+                    },
+                ) {
+                    kapsa(&mut açısal_kapsam, açısal);
+                }
+            }
+            continue;
+        }
         let çiftli = seri
             .veri()
             .iter()

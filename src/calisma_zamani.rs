@@ -1004,6 +1004,11 @@ pub enum ÇalışmaOlayı {
         merkez: (f32, f32),
         yakınlaştırma: f32,
     },
+    GrafoGörünümüDeğişti {
+        seri_sırası: usize,
+        merkez: (f32, f32),
+        yakınlaştırma: f32,
+    },
     AğaçHaritasıKöküDeğişti {
         seri_sırası: usize,
         veri_sırası: Option<usize>,
@@ -2019,6 +2024,148 @@ impl GrafikÇalışmaZamanı {
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok((sıra, yerel_merkez, yeni_ölçek))
+    }
+
+    /// Resmî `graphRoam` action'ını Graph view koordinatının `center` ve
+    /// `zoom` seçeneklerine geri yazar. Pan ekran pikselindedir; zoom,
+    /// `originX`/`originY` noktasını sabit tutar ve `scaleLimit`e uyar.
+    #[allow(clippy::too_many_arguments)]
+    pub fn grafo_görünümünü_değiştir(
+        &mut self,
+        seçici: SeriSeçici,
+        dx: Option<f32>,
+        dy: Option<f32>,
+        zoom: Option<f32>,
+        origin_x: Option<f32>,
+        origin_y: Option<f32>,
+        sessiz: bool,
+    ) -> Result<(usize, (f32, f32), f32), BilesenHatasi> {
+        self.açık_mı("dispatchAction.graphRoam")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "graphRoam.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let tuval = crate::koordinat::Dikdörtgen::yeni(
+            0.0,
+            0.0,
+            self.başlatma.genişlik,
+            self.başlatma.yükseklik,
+        );
+        let grafo = match self.seçenekler.seriler.get(sıra) {
+            Some(Seri::Grafo(grafo))
+                if grafo.koordinat_sistemi
+                    == crate::model::grafo::GrafoKoordinatSistemi::Görünüm =>
+            {
+                grafo.clone()
+            }
+            Some(Seri::Grafo(_)) => {
+                return Err(BilesenHatasi::Desteklenmeyen {
+                    özellik: "graphRoam",
+                    ayrıntı: "graphRoam yalnız Graph view koordinatında çalışır".to_owned(),
+                });
+            }
+            _ => {
+                return Err(BilesenHatasi::Desteklenmeyen {
+                    özellik: "graphRoam",
+                    ayrıntı: format!("{sıra}. seri `graph` değildir"),
+                });
+            }
+        };
+        let palet = |_: usize| Renk::SİYAH;
+        let yerleşim = crate::grafik::grafo::grafo_yerleşimi_kur(
+            &grafo,
+            tuval,
+            &palet,
+            (0.0, 0.0, 1.0),
+            &[],
+            None,
+            &HashSet::new(),
+        )
+        .map_err(|hata| BilesenHatasi::GeçersizSeçenek {
+            alan: "graphRoam.series",
+            ayrıntı: hata.to_string(),
+        })?;
+        let veri_alanı = yerleşim.veri_alanı;
+        let görünüm_alanı = yerleşim.görünüm_alanı;
+        let sx = görünüm_alanı.genişlik / veri_alanı.genişlik.max(f32::EPSILON);
+        let sy = görünüm_alanı.yükseklik / veri_alanı.yükseklik.max(f32::EPSILON);
+        let mut merkez = grafo.merkez.map_or_else(
+            || veri_alanı.merkez(),
+            |(x, y)| {
+                (
+                    match x {
+                        Uzunluk::Piksel(değer) => değer,
+                        Uzunluk::Yüzde(yüzde) => {
+                            veri_alanı.x + veri_alanı.genişlik * yüzde / 100.0
+                        }
+                    },
+                    match y {
+                        Uzunluk::Piksel(değer) => değer,
+                        Uzunluk::Yüzde(yüzde) => {
+                            veri_alanı.y + veri_alanı.yükseklik * yüzde / 100.0
+                        }
+                    },
+                )
+            },
+        );
+        let en_küçük = grafo.en_küçük_yakınlaştırma.unwrap_or(f32::EPSILON);
+        let en_büyük = grafo.en_büyük_yakınlaştırma.unwrap_or(f32::MAX);
+        let eski_ölçek = grafo.yakınlaştırma.clamp(en_küçük, en_büyük);
+        let pan_x = dx.unwrap_or(0.0);
+        let pan_y = dy.unwrap_or(0.0);
+        if !pan_x.is_finite() || !pan_y.is_finite() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "graphRoam.dx/dy",
+                ayrıntı: "dx ve dy sonlu sayı olmalı".to_owned(),
+            });
+        }
+        merkez.0 -= pan_x / (sx * eski_ölçek).max(f32::EPSILON);
+        merkez.1 -= pan_y / (sy * eski_ölçek).max(f32::EPSILON);
+
+        let mut yeni_ölçek = eski_ölçek;
+        if let Some(zoom) = zoom {
+            if !zoom.is_finite() || zoom <= 0.0 {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "graphRoam.zoom",
+                    ayrıntı: "zoom pozitif sonlu sayı olmalı".to_owned(),
+                });
+            }
+            let köken = (
+                origin_x.unwrap_or_else(|| görünüm_alanı.merkez().0),
+                origin_y.unwrap_or_else(|| görünüm_alanı.merkez().1),
+            );
+            if !köken.0.is_finite() || !köken.1.is_finite() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "graphRoam.originX/originY",
+                    ayrıntı: "zoom kökeni sonlu sayı olmalı".to_owned(),
+                });
+            }
+            yeni_ölçek = (eski_ölçek * zoom).clamp(en_küçük, en_büyük);
+            let görünüm_merkezi = görünüm_alanı.merkez();
+            merkez.0 += (köken.0 - görünüm_merkezi.0) / sx.max(f32::EPSILON)
+                * (1.0 / eski_ölçek - 1.0 / yeni_ölçek);
+            merkez.1 += (köken.1 - görünüm_merkezi.1) / sy.max(f32::EPSILON)
+                * (1.0 / eski_ölçek - 1.0 / yeni_ölçek);
+        }
+        let Some(Seri::Grafo(grafo)) = self.seçenekler.seriler.get_mut(sıra) else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "graphRoam",
+                ayrıntı: format!("{sıra}. seri güncelleme sırasında `graph` değil"),
+            });
+        };
+        grafo.merkez = Some((Uzunluk::Piksel(merkez.0), Uzunluk::Piksel(merkez.1)));
+        grafo.yakınlaştırma = yeni_ölçek;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::GrafoGörünümüDeğişti {
+                seri_sırası: sıra,
+                merkez,
+                yakınlaştırma: yeni_ölçek,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok((sıra, merkez, yeni_ölçek))
     }
 
     /// `treemapRootToNode` action'ının başsız view-root karşılığı.

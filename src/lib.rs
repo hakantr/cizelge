@@ -51,8 +51,8 @@ pub use calisma_zamani::{
     ÖrnekBaşlatmaSeçenekleri,
 };
 pub use cizim::gorunum::{
-    AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, SürgüBölgesi, SürgüParçası, grafiği_boya,
-    İçYakınlaştırmaAlanı,
+    AraçTürü, BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, GrafoGezinmeAlanı, SürgüBölgesi,
+    SürgüParçası, grafiği_boya, İçYakınlaştırmaAlanı,
 };
 #[cfg(feature = "gpui")]
 pub use cizim::pencere::GrafikGörünümü;
@@ -70,9 +70,9 @@ pub use eylem::{
     BağlıGrafikler, EylemDeğeri, EylemGüncellemesi, EylemKayıtDefteri, EylemYükü, OlayKayıtDefteri,
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, ağaç_haritası_eylemlerini_kaydet,
     eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
-    geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-    güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet, sankey_eylemlerini_kaydet,
-    veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
+    geri_yükleme_eylemini_kaydet, grafo_eylemlerini_kaydet, görsel_aralık_eylemini_kaydet,
+    gösterge_eylemlerini_kaydet, güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+    sankey_eylemlerini_kaydet, veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
     Genişletme, GenişletmeBağlamı, GenişletmeKayıtDefteri, KoordinatSistemiKayıtDefteri,
@@ -92,8 +92,8 @@ pub use model::agac::{
 pub use model::bilesen::{
     AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü, FırçaBağı,
     FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaStili, FırçaTürü, Gösterge,
-    GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi, İpucuKonumu,
-    İpucuParametresi,
+    GöstergeSeçimKipi, Izgara, KüçükResim, KüçükResimStili, Tetikleme, Yön, İmleçTürü, İpucu,
+    İpucuBiçimleyicisi, İpucuKonumu, İpucuParametresi,
 };
 pub use model::deger::{VeriDeğeri, VeriÖğesi};
 pub use model::eksen::{
@@ -106,6 +106,13 @@ pub use model::gorsel_esleme::{EşlemeParçası, GörselEşleme};
 pub use model::grafik_bileseni::{
     GrafikBağlıMetni, GrafikBileşeni, GrafikMetinKonumu, GrafikYerleşimi, GrafikÖğesi,
     GrafikÖğeİçeriği,
+};
+pub use model::grafo::{
+    GrafoAralığı, GrafoBağı, GrafoDaireselAyarı, GrafoDurumu, GrafoDüğümü, GrafoEnBoyDikeyHizası,
+    GrafoEnBoyKoruma, GrafoEnBoyYatayHizası, GrafoGezinmeTetikleyicisi, GrafoGezinmesi,
+    GrafoKategoriSeçimi, GrafoKategorisi, GrafoKenarBoyası, GrafoKoordinatSistemi,
+    GrafoKuvvetBaşlangıcı, GrafoKuvveti, GrafoOtomatikEğrilik, GrafoSerisi, GrafoUcu,
+    GrafoVurguOdağı, GrafoYerleşimi, GrafoÇizgiStili, GrafoÖğeStili,
 };
 pub use model::hatlar::{
     HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
@@ -140,16 +147,15 @@ pub use model::sankey::{
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, DüzSaçılımVerisi, EtiketYerleşimParametreleri,
-    EtiketYerleşimSonucu, EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi,
-    GrafoYerleşimi, GöstergeMetinYaması, GöstergeSaatiSerisi, GöstergeVeriÖğesi,
-    GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıEtiketParametreleri,
-    GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi, GüneşPatlamasıSıralamaParametreleri,
-    GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
-    HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KutuSerisi, MumSerisi,
-    ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
-    RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
-    TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
-    ÖğeRengiİşlevi,
+    EtiketYerleşimSonucu, EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GöstergeMetinYaması,
+    GöstergeSaatiSerisi, GöstergeVeriÖğesi, GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü,
+    GüneşPatlamasıEtiketParametreleri, GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi,
+    GüneşPatlamasıSıralamaParametreleri, GüneşPatlamasıYolBilgisi, HuniDurumYaması,
+    HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi, HuniSıralaması, HuniVeriYaması, HuniYönü,
+    IsıHaritasıSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram,
+    RadarDurumYaması, RadarSerisi, RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri,
+    SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme,
+    ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -199,7 +205,7 @@ pub mod hazir {
         ÖrnekBaşlatmaSeçenekleri,
     };
     pub use crate::cizim::gorunum::{
-        BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, grafiği_boya
+        BoyamaGirdisi, BoyamaÇıktısı, FırçaAlanı, GrafoGezinmeAlanı, grafiği_boya,
     };
     #[cfg(feature = "gpui")]
     pub use crate::cizim::pencere::GrafikGörünümü;
@@ -217,7 +223,7 @@ pub mod hazir {
         OlayKayıtDefteri, OlaySorgusu, OlayYükü, append_data_eylemini_kaydet,
         ağaç_haritası_eylemlerini_kaydet, eksen_imleci_eylemini_kaydet,
         eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
-        görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
+        grafo_eylemlerini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
         güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet, sankey_eylemlerini_kaydet,
         veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
@@ -239,8 +245,8 @@ pub mod hazir {
     pub use crate::model::bilesen::{
         AraçKutusu, AraçKutusuÖzelliği, Başlık, BaşlıkMetinHizası, Fırça, FırçaAracıTürü,
         FırçaBağı, FırçaKoordinatAralığı, FırçaKoordinatı, FırçaSeçimAlanı, FırçaStili, FırçaTürü,
-        Gösterge, GöstergeSeçimKipi, Izgara, Tetikleme, Yön, İmleçTürü, İpucu, İpucuBiçimleyicisi,
-        İpucuKonumu, İpucuParametresi,
+        Gösterge, GöstergeSeçimKipi, Izgara, KüçükResim, KüçükResimStili, Tetikleme, Yön,
+        İmleçTürü, İpucu, İpucuBiçimleyicisi, İpucuKonumu, İpucuParametresi,
     };
     pub use crate::model::deger::{VeriDeğeri, VeriÖğesi};
     pub use crate::model::eksen::{
@@ -253,6 +259,13 @@ pub mod hazir {
     pub use crate::model::grafik_bileseni::{
         GrafikBağlıMetni, GrafikBileşeni, GrafikMetinKonumu, GrafikYerleşimi, GrafikÖğesi,
         GrafikÖğeİçeriği,
+    };
+    pub use crate::model::grafo::{
+        GrafoAralığı, GrafoBağı, GrafoDaireselAyarı, GrafoDurumu, GrafoDüğümü,
+        GrafoEnBoyDikeyHizası, GrafoEnBoyKoruma, GrafoEnBoyYatayHizası, GrafoGezinmeTetikleyicisi,
+        GrafoGezinmesi, GrafoKategoriSeçimi, GrafoKategorisi, GrafoKenarBoyası,
+        GrafoKoordinatSistemi, GrafoKuvvetBaşlangıcı, GrafoKuvveti, GrafoOtomatikEğrilik,
+        GrafoSerisi, GrafoUcu, GrafoVurguOdağı, GrafoYerleşimi, GrafoÇizgiStili, GrafoÖğeStili,
     };
     pub use crate::model::hatlar::{
         HatEfekti, HatKoordinatSistemi, HatKoordinatı, HatNoktası, HatVerisi, HatlarSerisi,
@@ -288,16 +301,15 @@ pub mod hazir {
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
-        EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GrafoDüğümü, GrafoSerisi, GrafoYerleşimi,
-        GöstergeMetinYaması, GöstergeSaatiSerisi, GöstergeVeriÖğesi, GöstergeİbreYaması,
-        GöstergeİlerlemeYaması, GülTürü, GüneşPatlamasıEtiketParametreleri,
-        GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi, GüneşPatlamasıSıralamaParametreleri,
-        GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
-        HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KutuSerisi, MumSerisi,
-        ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
-        RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
-        TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
-        ÖğeRengiİşlevi,
+        EtiketÇizgisi, EtiketÖrtüşmeKaydırması, GöstergeMetinYaması, GöstergeSaatiSerisi,
+        GöstergeVeriÖğesi, GöstergeİbreYaması, GöstergeİlerlemeYaması, GülTürü,
+        GüneşPatlamasıEtiketParametreleri, GüneşPatlamasıEtiketİşlevi, GüneşPatlamasıSerisi,
+        GüneşPatlamasıSıralamaParametreleri, GüneşPatlamasıYolBilgisi, HuniDurumYaması,
+        HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi, HuniSıralaması, HuniVeriYaması, HuniYönü,
+        IsıHaritasıSerisi, KutuSerisi, MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi,
+        Piktogram, RadarDurumYaması, RadarSerisi, RadarVeriYaması, SaçılımSerisi, Sembol,
+        SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,
+        ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

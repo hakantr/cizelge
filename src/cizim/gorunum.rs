@@ -33,7 +33,10 @@ use crate::grafik::agac::{ağaç_alanı, ağaç_çiz};
 use crate::grafik::agac_haritasi::{ağaç_haritası_çiz, hücre_değer_metni};
 use crate::grafik::cizgi::{nokta_listeleri, ÇizgiKatmanı, çizgi_serisi_çiz};
 use crate::grafik::gosterge_saati::gösterge_saati_çiz;
-use crate::grafik::grafo::grafo_çiz;
+use crate::grafik::grafo::{
+    GrafoKoordinatHaritası, Grafoİsabeti, grafo_etkileşim_alanı, grafo_isabetini_bul,
+    grafo_yerleşimi_kur, grafo_yerleşimini_durumla_çiz, grafo_yerleşimini_çiz,
+};
 use crate::grafik::gunes::güneş_patlaması_çiz;
 use crate::grafik::hatlar::hatlar_çiz;
 use crate::grafik::huni::{huni_yerleşimi, huni_çiz};
@@ -77,15 +80,19 @@ use crate::koordinat::{
 use crate::model::agac::AğaçGezinmesi;
 use crate::model::bilesen::{
     AraçKutusuÖzelliği, FırçaAracıTürü, FırçaBağı, FırçaKoordinatAralığı, FırçaKoordinatı,
-    FırçaSeçimAlanı, FırçaStili, FırçaTürü, GöstergeSimgesi, Tetikleme, Yön, İmleçTürü, İpucu,
-    İpucuParametresi,
+    FırçaSeçimAlanı, FırçaStili, FırçaTürü, GöstergeSimgesi, KüçükResim, KüçükResimStili,
+    Tetikleme, Yön, İmleçTürü, İpucu, İpucuParametresi,
 };
 use crate::model::eksen::{Eksen, EksenKonumu, EksenTürü};
+use crate::model::grafo::{
+    GrafoDüğümü, GrafoGezinmeTetikleyicisi, GrafoGezinmesi, GrafoKoordinatSistemi,
+};
 use crate::model::hatlar::{HatKoordinatSistemi, HatKoordinatı, HatNoktası};
 use crate::model::matris::{MatrisAralığı, MatrisKonumu};
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::{EksenBağı, GrafoSerisi, SaçılımSerisi, Sembol, Seri, ÖzelBağlam};
 use crate::model::stil::ÇizgiTürü;
+use crate::model::veri_kumesi::BoyutSeçici;
 use crate::model::yakinlastirma::{YakınlaştırmaSüzmeKipi, YakınlaştırmaTürü};
 use crate::model::{DikeyKonum, YatayKonum};
 use crate::olcek::{
@@ -353,7 +360,9 @@ fn çokgen_noktayı_içeriyor(noktalar: &[(f32, f32)], nokta: (f32, f32)) -> boo
         return false;
     }
     let mut içeride = false;
-    let mut önceki = *noktalar.last().expect("uzunluk denetlendi");
+    let Some(mut önceki) = noktalar.last().copied() else {
+        return false;
+    };
     for &şimdiki in noktalar {
         // Kenardaki nokta da seçilmiş sayılır.
         let vx = şimdiki.0 - önceki.0;
@@ -406,6 +415,211 @@ fn fırça_alanını_çiz(
             ÇizgiTürü::Düz,
         );
     }
+}
+
+fn küçük_resim_stil_rengi(stil: &KüçükResimStili, varsayılan: Renk) -> Renk {
+    let renk = stil.renk.unwrap_or(varsayılan);
+    // `Renk::opaklık` mevcut alfayı zaten çarpar. Alfayı bir kez daha
+    // çarpana katmak rgba rengini karesine indiriyordu (0.5 -> 0.25).
+    renk.opaklık(stil.opaklık.unwrap_or(1.0))
+}
+
+fn küçük_resim_alanı(
+    küçük: &KüçükResim,
+    tuval_genişliği: f32,
+    tuval_yüksekliği: f32,
+) -> Dikdörtgen {
+    let genişlik = küçük.genişlik.çöz(tuval_genişliği).max(0.0);
+    let yükseklik = küçük.yükseklik.çöz(tuval_yüksekliği).max(0.0);
+    let x = küçük.sol.map_or_else(
+        || tuval_genişliği - küçük.sağ.map_or(0.0, |değer| değer.çöz(tuval_genişliği)) - genişlik,
+        |değer| değer.çöz(tuval_genişliği),
+    );
+    let y = küçük.üst.map_or_else(
+        || {
+            tuval_yüksekliği
+                - küçük.alt.map_or(0.0, |değer| değer.çöz(tuval_yüksekliği))
+                - yükseklik
+        },
+        |değer| değer.çöz(tuval_yüksekliği),
+    );
+    Dikdörtgen::yeni(x, y, genişlik, yükseklik)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn graph_küçük_resmini_çiz(
+    yüzey: &mut dyn ÇizimYüzeyi,
+    seçenekler: &GrafikSeçenekleri,
+    küçük: &KüçükResim,
+    girdi: &BoyamaGirdisi,
+    kapalı: &HashSet<String>,
+) {
+    if !küçük.göster {
+        return;
+    }
+    let alan = küçük_resim_alanı(küçük, yüzey.genişlik(), yüzey.yükseklik());
+    if alan.genişlik <= 0.0 || alan.yükseklik <= 0.0 {
+        return;
+    }
+    let öğe_dolgusu = Dolgu::Düz(küçük_resim_stil_rengi(&küçük.öğe_stili, Renk::BEYAZ));
+    let öğe_kenarlığı = küçük
+        .öğe_stili
+        .kenarlık_kalınlığı
+        .filter(|kalınlık| *kalınlık > 0.0)
+        .map(|kalınlık| {
+            (
+                kalınlık,
+                küçük
+                    .öğe_stili
+                    .kenarlık_rengi
+                    .unwrap_or_else(crate::tema::nötr_30),
+            )
+        });
+    yüzey.dikdörtgen(alan, &öğe_dolgusu, [0.0; 4], öğe_kenarlığı);
+
+    let tam_tuval = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
+    let mut yerleşimler = Vec::new();
+    for (seri_sırası, kaynak) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Grafo(seri) = kaynak else {
+            continue;
+        };
+        if !ad_görünür(seri.ad.as_deref(), kapalı) {
+            continue;
+        }
+        let palet = |sıra: usize| {
+            if seri.kategoriler.is_empty() {
+                seçenekler.seri_rengi(seri_sırası)
+            } else {
+                seçenekler.palet_rengi(sıra)
+            }
+        };
+        let mut küçük_seri = seri.clone();
+        let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, seri_sırası);
+        // ThumbnailView, GraphView'in ekrana dönüştürülmeden önceki yerel
+        // grubunu klonlar. `layout: none` için bu, düğümlerin ham x/y
+        // koordinatlarıdır; kilitli doğrulama sahnesindeki ekran noktalarını
+        // kullanmak sembolleri yaklaşık ana görünüm ölçeğinde bırakırdı.
+        if seri.yerleşim == crate::model::grafo::GrafoYerleşimi::Yok
+            && seri.düğümler.iter().all(|düğüm| {
+                düğüm
+                    .x
+                    .zip(düğüm.y)
+                    .is_some_and(|(x, y)| x.is_finite() && y.is_finite())
+            })
+        {
+            küçük_seri.korunmuş_noktalar = Some(
+                seri.düğümler
+                    .iter()
+                    .filter_map(|düğüm| düğüm.x.zip(düğüm.y))
+                    .collect(),
+            );
+        }
+        if let Ok(yerleşim) = grafo_yerleşimi_kur(
+            &küçük_seri,
+            tam_tuval,
+            &palet,
+            görünüm,
+            &kaymalar,
+            None,
+            kapalı,
+        ) {
+            yerleşimler.push((seri_sırası, küçük_seri, yerleşim));
+        }
+    }
+    let mut en_az_x = f32::INFINITY;
+    let mut en_az_y = f32::INFINITY;
+    let mut en_çok_x = f32::NEG_INFINITY;
+    let mut en_çok_y = f32::NEG_INFINITY;
+    for (_, _, yerleşim) in &yerleşimler {
+        for düğüm in &yerleşim.düğümler {
+            let yarı = düğüm.boyut / 2.0;
+            en_az_x = en_az_x.min(düğüm.konum.0 - yarı);
+            en_çok_x = en_çok_x.max(düğüm.konum.0 + yarı);
+            en_az_y = en_az_y.min(düğüm.konum.1 - yarı);
+            en_çok_y = en_çok_y.max(düğüm.konum.1 + yarı);
+        }
+    }
+    if en_az_x.is_finite() && en_az_y.is_finite() {
+        let kaynak_genişliği = (en_çok_x - en_az_x).max(1.0);
+        let kaynak_yüksekliği = (en_çok_y - en_az_y).max(1.0);
+        let öğe_kenarlık_kalınlığı = küçük.öğe_stili.kenarlık_kalınlığı.unwrap_or(0.0).max(0.0);
+        let içerik = Dikdörtgen::yeni(
+            alan.x + öğe_kenarlık_kalınlığı / 2.0,
+            alan.y + öğe_kenarlık_kalınlığı / 2.0,
+            (alan.genişlik - öğe_kenarlık_kalınlığı).max(1.0),
+            (alan.yükseklik - öğe_kenarlık_kalınlığı).max(1.0),
+        );
+        // View koordinat sistemi varsayılan olarak içeriğin %80'ine sığar;
+        // kalan %10'luk pay her kenarda bırakılır.
+        let iç = Dikdörtgen::yeni(
+            içerik.x + içerik.genişlik * 0.1,
+            içerik.y + içerik.yükseklik * 0.1,
+            (içerik.genişlik * 0.8).max(1.0),
+            (içerik.yükseklik * 0.8).max(1.0),
+        );
+        let ölçek = (iç.genişlik / kaynak_genişliği)
+            .min(iç.yükseklik / kaynak_yüksekliği)
+            .max(0.000_001);
+        let kaynak_merkez = ((en_az_x + en_çok_x) / 2.0, (en_az_y + en_çok_y) / 2.0);
+        let hedef_merkez = iç.merkez();
+        let dönüştür = |nokta: (f32, f32)| {
+            (
+                hedef_merkez.0 + (nokta.0 - kaynak_merkez.0) * ölçek,
+                hedef_merkez.1 + (nokta.1 - kaynak_merkez.1) * ölçek,
+            )
+        };
+        let mut kırpılı_çiz = |yüzey: &mut dyn ÇizimYüzeyi| {
+            for (seri_sırası, mut seri, mut yerleşim) in yerleşimler.clone() {
+                for düğüm in &mut yerleşim.düğümler {
+                    düğüm.konum = dönüştür(düğüm.konum);
+                    düğüm.etiket_konumu = dönüştür(düğüm.etiket_konumu);
+                    düğüm.boyut *= ölçek;
+                }
+                for bağ in &mut yerleşim.bağlar {
+                    bağ.başlangıç = dönüştür(bağ.başlangıç);
+                    bağ.bitiş = dönüştür(bağ.bitiş);
+                    bağ.kontrol = bağ.kontrol.map(dönüştür);
+                    bağ.etiket_konumu = dönüştür(bağ.etiket_konumu);
+                    bağ.kaynak_sembol_boyutu *= ölçek;
+                    bağ.hedef_sembol_boyutu *= ölçek;
+                    bağ.çizgi_stili.kalınlık =
+                        bağ.çizgi_stili.kalınlık.map(|kalınlık| kalınlık * ölçek);
+                }
+                seri.etiket_göster = false;
+                seri.etiket.göster = false;
+                seri.kenar_etiketi.göster = false;
+                for düğüm in &mut yerleşim.düğümler {
+                    düğüm.etiket.göster = false;
+                }
+                for bağ in &mut yerleşim.bağlar {
+                    bağ.etiket.göster = false;
+                }
+                grafo_yerleşimini_çiz(yüzey, &seri, &yerleşim, seri_sırası, 1.0, &mut Vec::new());
+            }
+        };
+        yüzey.kırpılı(alan, &mut kırpılı_çiz);
+    }
+
+    // Statik başlangıç karesinde roam penceresi bütün geçerli görünümü
+    // kaplar. GPUI pan/zoom durumu bu dikdörtgeni daha sonra daraltıp taşır.
+    let pencere_dolgusu = Dolgu::Düz(küçük_resim_stil_rengi(
+        &küçük.pencere_stili,
+        crate::tema::nötr_30(),
+    ));
+    let pencere_kenarlığı = küçük
+        .pencere_stili
+        .kenarlık_kalınlığı
+        .filter(|kalınlık| *kalınlık > 0.0)
+        .map(|kalınlık| {
+            (
+                kalınlık,
+                küçük
+                    .pencere_stili
+                    .kenarlık_rengi
+                    .unwrap_or_else(crate::tema::nötr_40),
+            )
+        });
+    yüzey.dikdörtgen(alan, &pencere_dolgusu, [0.0; 4], pencere_kenarlığı);
 }
 
 #[derive(Default)]
@@ -858,6 +1072,12 @@ pub struct BoyamaGirdisi {
     pub grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları: `(düğüm sırası, dx, dy)`.
     pub grafo_kaymaları: Vec<(usize, f32, f32)>,
+    /// Seri başına bağımsız Graph gezinmesi:
+    /// `(seriesIndex, kayma_x, kayma_y, ölçek)`.
+    pub grafo_görünümleri: Vec<(usize, f32, f32, f32)>,
+    /// Seri başına Graph düğüm sürükleme kaymaları:
+    /// `(seriesIndex, dataIndex, dx, dy)`.
+    pub grafo_seri_kaymaları: Vec<(usize, usize, f32, f32)>,
     /// Tree serisi başına gezinme: `(seriesIndex, dx, dy, scale)`.
     pub ağaç_görünümleri: Vec<(usize, f32, f32, f32)>,
 }
@@ -878,9 +1098,38 @@ impl Default for BoyamaGirdisi {
             hiyerarşi_yolları: Vec::new(),
             grafo_görünümü: (0.0, 0.0, 1.0),
             grafo_kaymaları: Vec::new(),
+            grafo_görünümleri: Vec::new(),
+            grafo_seri_kaymaları: Vec::new(),
             ağaç_görünümleri: Vec::new(),
         }
     }
+}
+
+type GrafoGörünümü = (f32, f32, f32);
+type GrafoDüğümKayması = (usize, f32, f32);
+
+fn grafo_boyama_durumu(
+    girdi: &BoyamaGirdisi,
+    seri_sırası: usize,
+) -> (GrafoGörünümü, Vec<GrafoDüğümKayması>) {
+    let görünüm = girdi
+        .grafo_görünümleri
+        .iter()
+        .find(|(sıra, ..)| *sıra == seri_sırası)
+        .map(|(_, x, y, ölçek)| (*x, *y, *ölçek))
+        .unwrap_or(girdi.grafo_görünümü);
+    let kaymalar = if girdi.grafo_seri_kaymaları.is_empty() {
+        girdi.grafo_kaymaları.clone()
+    } else {
+        girdi
+            .grafo_seri_kaymaları
+            .iter()
+            .filter_map(|(sıra, veri_sırası, x, y)| {
+                (*sıra == seri_sırası).then_some((*veri_sırası, *x, *y))
+            })
+            .collect()
+    };
+    (görünüm, kaymalar)
 }
 
 /// Tree/Treemap/Sankey `roam` isabet alanı, tetikleme kapsamı, hareket türü
@@ -897,6 +1146,32 @@ pub struct AğaçGezinmeAlanı {
 }
 
 impl AğaçGezinmeAlanı {
+    pub fn kaydır(self, dx: f32, dy: f32) -> Self {
+        Self {
+            alan: Dikdörtgen::yeni(
+                self.alan.x + dx,
+                self.alan.y + dy,
+                self.alan.genişlik,
+                self.alan.yükseklik,
+            ),
+            ..self
+        }
+    }
+}
+
+/// `series.graph` view koordinatının seri başına roam isabet alanı.
+#[derive(Clone, Copy, Debug)]
+pub struct GrafoGezinmeAlanı {
+    pub seri_sırası: usize,
+    pub alan: Dikdörtgen,
+    pub global_tetikleyici: bool,
+    pub gezinme: GrafoGezinmesi,
+    /// Geçici görünüm ölçeğinin, model `zoom` değerine göre sınırları.
+    pub en_küçük_ölçek: f32,
+    pub en_büyük_ölçek: f32,
+}
+
+impl GrafoGezinmeAlanı {
     pub fn kaydır(self, dx: f32, dy: f32) -> Self {
         Self {
             alan: Dikdörtgen::yeni(
@@ -986,6 +1261,8 @@ pub struct BoyamaÇıktısı {
     pub isabetler: Vec<İsabetBölgesi>,
     /// Tree `roam` için seri kutuları.
     pub ağaç_alanları: Vec<AğaçGezinmeAlanı>,
+    /// Graph view `roam` için seri kutuları.
+    pub grafo_alanları: Vec<GrafoGezinmeAlanı>,
     /// Matrix bileşen hücrelerinin seri dışı tooltip/triggerEvent/cursor
     /// hedefleri; çizim z-sırasıyla saklanır.
     pub matris_hücreleri: Vec<MatrisHücreBölgesi>,
@@ -1341,6 +1618,32 @@ fn tek_eksen_yerleşimlerini_kur(
                         }
                     }
                 }
+                Seri::Grafo(grafo)
+                    if grafo.tek_eksen_sırası == Some(tek_sırası)
+                        && ad_görünür(seri.ad(), kapalı) =>
+                {
+                    for düğüm in &grafo.düğümler {
+                        let Some(değer) = düğüm.koordinat_boyutu(
+                            0,
+                            if tek.eksen.tür == EksenTürü::Kategori {
+                                &tek.eksen.veri
+                            } else {
+                                &[]
+                            },
+                        ) else {
+                            continue;
+                        };
+                        kapsam[0] = kapsam[0].min(değer);
+                        kapsam[1] = kapsam[1].max(değer);
+                        if tek.eksen.tür == EksenTürü::Kategori
+                            && değer >= 0.0
+                            && değer.fract().abs() <= 1e-9
+                        {
+                            en_büyük_kategori =
+                                Some(en_büyük_kategori.unwrap_or_default().max(değer as usize));
+                        }
+                    }
+                }
                 _ => {}
             }
         }
@@ -1379,6 +1682,7 @@ fn tek_eksenleri_çiz(
     ipucu_seçeneği: Option<&İpucu>,
     fare: Option<(f32, f32)>,
     programatik_ipucu: Option<(usize, usize)>,
+    girdi: &BoyamaGirdisi,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) -> Option<Bekleyenİpucu> {
     if yerleşimler.is_empty() {
@@ -1485,6 +1789,58 @@ fn tek_eksenleri_çiz(
             konum,
         ));
     }
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Grafo(grafo) = seri else {
+            continue;
+        };
+        let Some(tek_sırası) = grafo.tek_eksen_sırası else {
+            continue;
+        };
+        if !ad_görünür(seri.ad(), kapalı) {
+            continue;
+        }
+        let (Some(yerleşim), Some(tek)) = (
+            yerleşimler.get(tek_sırası),
+            seçenekler.tek_eksenler.get(tek_sırası),
+        ) else {
+            continue;
+        };
+        let harita = |_: usize, düğüm: &GrafoDüğümü| {
+            let değer = düğüm.koordinat_boyutu(
+                0,
+                if tek.eksen.tür == EksenTürü::Kategori {
+                    &tek.eksen.veri
+                } else {
+                    &[]
+                },
+            )?;
+            Some(yerleşim.veriden_noktaya(değer))
+        };
+        let ipucu = ipucu_seçeneği.filter(|_| tek.ipucu_göster);
+        let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, seri_sırası);
+        if let Some(graph_ipucu) = grafo_serisini_çiz(
+            yüzey,
+            grafo,
+            seri_sırası,
+            yerleşim.alan,
+            seçenekler,
+            ilerleme,
+            görünüm,
+            &kaymalar,
+            Some(&harita),
+            None,
+            None,
+            kapalı,
+            ipucu,
+            fare,
+            programatik_ipucu
+                .filter(|(hedef_seri, _)| *hedef_seri == seri_sırası)
+                .map(|(_, veri_sırası)| veri_sırası),
+            isabetler,
+        ) {
+            bekleyen = Some(graph_ipucu);
+        }
+    }
     bekleyen
 }
 
@@ -1498,46 +1854,130 @@ fn grafo_serisini_çiz(
     ilerleme: f32,
     görünüm: (f32, f32, f32),
     kaymalar: &[(usize, f32, f32)],
+    koordinat_haritası: Option<&GrafoKoordinatHaritası<'_>>,
     takvim: Option<&TakvimYerleşimi>,
     matris: Option<&crate::koordinat::MatrisYerleşimi>,
+    kapalı_kategoriler: &HashSet<String>,
     ipucu_seçeneği: Option<&İpucu>,
     fare: Option<(f32, f32)>,
+    programatik_veri_sırası: Option<usize>,
     isabetler: &mut Vec<İsabetBölgesi>,
 ) -> Option<Bekleyenİpucu> {
     let önce = isabetler.len();
-    let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
-    grafo_çiz(
-        yüzey,
+    let palet = |sıra: usize| {
+        if seri.kategoriler.is_empty() {
+            seçenekler.seri_rengi(seri_sırası)
+        } else {
+            seçenekler.palet_rengi(sıra)
+        }
+    };
+    let harita = |sıra: usize, düğüm: &GrafoDüğümü| -> Option<(f32, f32)> {
+        if let Some(harita) = koordinat_haritası {
+            return harita(sıra, düğüm);
+        }
+        if let Some(takvim) = takvim {
+            return düğüm
+                .takvim_tarihi_ms
+                .and_then(|tarih| takvim.veriden_noktaya(tarih));
+        }
+        if let Some(matris) = matris {
+            return düğüm
+                .matris_koordinatı
+                .as_ref()
+                .and_then(|(x, y)| matris.veriden_noktaya(x.clone(), y.clone()));
+        }
+        None
+    };
+    let harita_ref = (koordinat_haritası.is_some() || takvim.is_some() || matris.is_some())
+        .then_some(&harita as &GrafoKoordinatHaritası<'_>);
+    let Ok(mut yerleşim) = grafo_yerleşimi_kur(
         seri,
-        seri_sırası,
         tuval,
         &palet,
-        ilerleme,
         görünüm,
         kaymalar,
-        takvim,
-        matris,
-        isabetler,
-    );
-    let (Some(ipucu), Some(f)) = (ipucu_seçeneği, fare) else {
+        harita_ref,
+        kapalı_kategoriler,
+    ) else {
         return None;
     };
+
+    // Graph da Scatter gibi visualMap'in renk/opaklık/symbolSize
+    // kanallarını ham value boyutundan alır.
+    for eşleme in seçenekler.seri_görsel_eşlemeleri(seri_sırası) {
+        let boyut = match eşleme.boyut.as_ref() {
+            Some(BoyutSeçici::Sıra(sıra)) => *sıra,
+            Some(BoyutSeçici::Ad(ad)) if ad == "value" => 0,
+            Some(BoyutSeçici::Ad(ad)) => ad.parse::<usize>().unwrap_or(0),
+            None => 0,
+        };
+        let mut kapsam = [f64::INFINITY, f64::NEG_INFINITY];
+        for düğüm in &seri.düğümler {
+            if let Some(değer) = düğüm.sayısal_boyut(boyut).or(düğüm.değer) {
+                kapsam[0] = kapsam[0].min(değer);
+                kapsam[1] = kapsam[1].max(değer);
+            }
+        }
+        let kapsam = eşleme.kapsam_çöz(kapsam);
+        for düğüm in &mut yerleşim.düğümler {
+            let Some(değer) = seri
+                .düğümler
+                .get(düğüm.veri_sırası)
+                .and_then(|kaynak| kaynak.sayısal_boyut(boyut).or(kaynak.değer))
+            else {
+                continue;
+            };
+            düğüm.renk = Dolgu::Düz(eşleme.rengi_uygula(değer, kapsam, düğüm.renk.temsilî()));
+            düğüm.boyut = eşleme.sembol_boyutu_çöz(değer, kapsam, düğüm.boyut);
+        }
+    }
+    let vurgulu = (!seri.sessiz)
+        .then(|| fare.and_then(|nokta| grafo_isabetini_bul(&yerleşim, nokta)))
+        .flatten();
+    grafo_yerleşimini_durumla_çiz(
+        yüzey,
+        seri,
+        &yerleşim,
+        seri_sırası,
+        ilerleme,
+        vurgulu,
+        isabetler,
+    );
+    let ipucu = ipucu_seçeneği?;
     if ipucu.tetikleme == Tetikleme::Kapalı {
         return None;
     }
-    let b = isabetler
-        .iter()
-        .skip(önce)
-        .rev()
-        .find(|b| b.geometri.içeriyor_mu(f))?;
+    let programatik = programatik_veri_sırası.and_then(|veri_sırası| {
+        yerleşim
+            .düğümler
+            .iter()
+            .position(|düğüm| düğüm.veri_sırası == veri_sırası)
+            .map(Grafoİsabeti::Düğüm)
+    });
+    let isabet = vurgulu.or(programatik)?;
+    let (ad, değer, öğe_konumu) = match isabet {
+        Grafoİsabeti::Düğüm(sıra) => {
+            let düğüm = yerleşim.düğümler.get(sıra)?;
+            (düğüm.ad.clone(), düğüm.değer, düğüm.konum)
+        }
+        Grafoİsabeti::Bağ(sıra) => {
+            let bağ = yerleşim.bağlar.get(sıra)?;
+            (
+                format!("{} > {}", bağ.kaynak, bağ.hedef),
+                bağ.değer,
+                bağ.etiket_konumu,
+            )
+        }
+    };
+    debug_assert!(isabetler.len() >= önce);
     Some((
         seri.ad.clone(),
         vec![İpucuSatırı {
             im_rengi: None,
-            ad: b.ad.clone().unwrap_or_default(),
-            değer: b.değer.map(binlik_ayır).unwrap_or_default(),
+            ad,
+            değer: değer.map(binlik_ayır).unwrap_or_default(),
         }],
-        f,
+        fare.unwrap_or(öğe_konumu),
     ))
 }
 
@@ -1730,6 +2170,42 @@ fn gösterge_öğeleri(
                     });
                 }
             }
+            Seri::Grafo(grafo) if !grafo.kategoriler.is_empty() => {
+                for (kategori_sırası, kategori) in grafo.kategoriler.iter().enumerate() {
+                    let ad = kategori.ad.clone();
+                    if !süzgeç.is_empty() && !süzgeç.contains(&ad) {
+                        continue;
+                    }
+                    let renk = kategori
+                        .öğe_stili
+                        .as_ref()
+                        .and_then(|stil| stil.renk.as_ref())
+                        .or(grafo.grafo_öğe_stili.renk.as_ref())
+                        .map(Dolgu::temsilî)
+                        .unwrap_or_else(|| seçenekler.palet_rengi(kategori_sırası));
+                    let stil = kategori
+                        .öğe_stili
+                        .as_ref()
+                        .unwrap_or(&grafo.grafo_öğe_stili);
+                    öğeler.push(GöstergeÖğesi {
+                        kapalı: kapalı.contains(&ad),
+                        ad,
+                        renk,
+                        opaklık: stil.opaklık.unwrap_or(1.0),
+                        // Graph kategori legend sağlayıcısı ECharts'ta
+                        // veri-renk kutusu üretir; seri sembolü olan daireyi
+                        // yalnız kategori içermeyen Graph kullanır.
+                        simge: GöstergeSimgesi::YuvarlakKöşeliKare,
+                        çizgi_kalınlığı: None,
+                        çizgi_sembolü: None,
+                        kenarlık: stil
+                            .kenarlık_rengi
+                            .map(|renk| (stil.kenarlık_kalınlığı.unwrap_or(1.0), renk))
+                            .filter(|(kalınlık, _)| *kalınlık > 0.0),
+                        kapalı_simge_gizli: false,
+                    });
+                }
+            }
             _ => {
                 let Some(ad) = seri.ad().map(str::to_string) else {
                     continue;
@@ -1740,6 +2216,7 @@ fn gösterge_öğeleri(
                 let simge = match seri {
                     Seri::Çizgi(_) => GöstergeSimgesi::Çizgi,
                     Seri::Saçılım(_) => GöstergeSimgesi::Daire,
+                    Seri::Grafo(_) => GöstergeSimgesi::Daire,
                     _ => GöstergeSimgesi::YuvarlakKöşeliKare,
                 };
                 let çizgi_kalınlığı = match seri {
@@ -1756,6 +2233,7 @@ fn gösterge_öğeleri(
                         .opaklık
                         .unwrap_or(if saçılım.efektli { 1.0 } else { 0.8 }),
                     Seri::Sütun(sütun) => sütun.öğe_stili.opaklık.unwrap_or(1.0),
+                    Seri::Grafo(grafo) => grafo.grafo_öğe_stili.opaklık.unwrap_or(1.0),
                     _ => 1.0,
                 };
                 let kenarlık = match seri {
@@ -1768,6 +2246,19 @@ fn gösterge_öğeleri(
                             .kenarlık_rengi
                             .map(|renk| (sütun.öğe_stili.kenarlık_kalınlığı, renk))
                     }
+                    Seri::Grafo(grafo) => grafo
+                        .grafo_öğe_stili
+                        .kenarlık_rengi
+                        .map(|renk| {
+                            (
+                                // Graph sembolünün strokeNoScale görseli,
+                                // LegendView'in 25×14 yolunda iki piksellik
+                                // legend vuruşuna dönüşür.
+                                grafo.grafo_öğe_stili.kenarlık_kalınlığı.unwrap_or(1.0) * 2.0,
+                                renk,
+                            )
+                        })
+                        .filter(|(kalınlık, _)| *kalınlık > 0.0),
                     _ => None,
                 };
                 öğeler.push(GöstergeÖğesi {
@@ -1972,6 +2463,27 @@ fn hat_eksen_değeri(değer: &HatKoordinatı, eksen: &ÇalışmaEkseni) -> Optio
 fn kartezyen_hat_noktası(nokta: &HatNoktası, kartezyen: &Kartezyen2B) -> Option<(f32, f32)> {
     let x = hat_eksen_değeri(&nokta.x, &kartezyen.x)?;
     let y = hat_eksen_değeri(&nokta.y, &kartezyen.y)?;
+    Some(kartezyen.nokta(x, y))
+}
+
+fn grafo_kartezyen_değerleri(
+    düğüm: &GrafoDüğümü,
+    veri_sırası: usize,
+    kartezyen: &Kartezyen2B,
+) -> Option<(f64, f64)> {
+    düğüm.kartezyen_değerleri(
+        veri_sırası,
+        kartezyen.x.ölçek.kategorik_mi(),
+        kartezyen.y.ölçek.kategorik_mi(),
+    )
+}
+
+fn grafo_kartezyen_noktası(
+    düğüm: &GrafoDüğümü,
+    veri_sırası: usize,
+    kartezyen: &Kartezyen2B,
+) -> Option<(f32, f32)> {
+    let (x, y) = grafo_kartezyen_değerleri(düğüm, veri_sırası, kartezyen)?;
     Some(kartezyen.nokta(x, y))
 }
 
@@ -2213,6 +2725,22 @@ fn kartezyen_kur_matrisli(
                 }
                 if !y_kategorik && let Some(değer) = nokta.y.sayı() {
                     kapsa(y_kapsam, değer);
+                }
+            }
+            continue;
+        }
+        if let Seri::Grafo(grafo) = seri {
+            for (veri_sırası, düğüm) in grafo.düğümler.iter().enumerate() {
+                let Some((x, y)) =
+                    düğüm.kartezyen_değerleri(veri_sırası, x_kategorik, y_kategorik)
+                else {
+                    continue;
+                };
+                if !x_kategorik {
+                    kapsa(x_kapsam, x);
+                }
+                if !y_kategorik {
+                    kapsa(y_kapsam, y);
                 }
             }
             continue;
@@ -2476,6 +3004,29 @@ fn kartezyen_kur_matrisli(
                 }
                 continue;
             }
+            if let Seri::Grafo(grafo) = seri {
+                let kategoriler = grafo
+                    .düğümler
+                    .iter()
+                    .enumerate()
+                    .map(|(sıra, düğüm)| {
+                        if x_mi {
+                            if düğüm.ad.is_empty() {
+                                sıra.to_string()
+                            } else {
+                                düğüm.ad.clone()
+                            }
+                        } else {
+                            sıra.to_string()
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                if kategoriler.len() > en_uzun {
+                    en_uzun = kategoriler.len();
+                    adlar = Some(kategoriler);
+                }
+                continue;
+            }
             if veri.len() > en_uzun {
                 en_uzun = veri.len();
                 adlar = Some(
@@ -2635,6 +3186,26 @@ fn kartezyen_kur_matrisli(
                         kapsa(x_kapsam, x);
                     }
                     if !y_kategorik && let Some(y) = y {
+                        kapsa(y_kapsam, y);
+                    }
+                }
+                continue;
+            }
+            if let Seri::Grafo(grafo) = seri {
+                for (veri_sırası, düğüm) in grafo.düğümler.iter().enumerate() {
+                    let Some((x, y)) =
+                        düğüm.kartezyen_değerleri(veri_sırası, x_kategorik, y_kategorik)
+                    else {
+                        continue;
+                    };
+                    if !pencereden_geçer(x_penceresi, &[x]) || !pencereden_geçer(y_penceresi, &[y])
+                    {
+                        continue;
+                    }
+                    if !x_kategorik {
+                        kapsa(x_kapsam, x);
+                    }
+                    if !y_kategorik {
                         kapsa(y_kapsam, y);
                     }
                 }
@@ -2811,10 +3382,10 @@ fn kartezyen_kur_matrisli(
                 .yükseklik
                 .map(|uzunluk| uzunluk.çöz(ana_alan.yükseklik));
             let mut genişlik = açık_genişlik
-                .unwrap_or_else(|| ana_alan.genişlik - sol_boşluk - sağ_boşluk)
+                .unwrap_or(ana_alan.genişlik - sol_boşluk - sağ_boşluk)
                 .max(1.0);
             let mut yükseklik = açık_yükseklik
-                .unwrap_or_else(|| ana_alan.yükseklik - üst_boşluk - alt_boşluk)
+                .unwrap_or(ana_alan.yükseklik - üst_boşluk - alt_boşluk)
                 .max(1.0);
             let mut sol = if açık_genişlik.is_some() && ızgara.sağ_açık && !ızgara.sol_açık
             {
@@ -3560,6 +4131,7 @@ pub fn grafiği_boya(
         ipucu_seçeneği.as_ref(),
         fare,
         girdi.ipucu_öğesi,
+        girdi,
         &mut çıktı.isabetler,
     ) {
         bekleyen_ipucu = Some(ipucu);
@@ -4492,6 +5064,35 @@ pub fn grafiği_boya(
                                 çizim(yüzey, &bağlam);
                             }
                         }
+                        Seri::Grafo(s) => {
+                            let harita = |veri_sırası: usize, düğüm: &GrafoDüğümü| {
+                                grafo_kartezyen_noktası(düğüm, veri_sırası, &kartezyen)
+                            };
+                            let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, i);
+                            if let Some(ipucu) = grafo_serisini_çiz(
+                                yüzey,
+                                s,
+                                i,
+                                kartezyen.alan,
+                                seçenekler,
+                                ilerleme,
+                                görünüm,
+                                &kaymalar,
+                                Some(&harita),
+                                None,
+                                None,
+                                kapalı,
+                                ipucu_seçeneği.as_ref(),
+                                fare,
+                                girdi
+                                    .ipucu_öğesi
+                                    .filter(|(seri_sırası, _)| *seri_sırası == i)
+                                    .map(|(_, veri_sırası)| veri_sırası),
+                                isabetler,
+                            ) {
+                                *bekleyen = Some(ipucu);
+                            }
+                        }
                         Seri::Hatlar(s) => {
                             hatlar_çiz(
                                 yüzey,
@@ -4512,7 +5113,6 @@ pub fn grafiği_boya(
                         | Seri::GüneşPatlaması(_)
                         | Seri::Ağaç(_)
                         | Seri::Sankey(_)
-                        | Seri::Grafo(_)
                         | Seri::Kiriş(_)
                         | Seri::Paralel(_)
                         | Seri::Takvim(_)
@@ -5573,6 +6173,55 @@ pub fn grafiği_boya(
             zaman_sn,
             &mut çıktı.isabetler,
         );
+        for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+            let Seri::Grafo(grafo) = seri else {
+                continue;
+            };
+            if !görünürler.get(seri_sırası).copied().unwrap_or(false) {
+                continue;
+            }
+            let koordinat = seçenekler.tüm_kutupsallar().nth(grafo.kutupsal_sırası);
+            let harita = |_: usize, düğüm: &GrafoDüğümü| {
+                let radyal = düğüm.koordinat_boyutu(
+                    0,
+                    koordinat
+                        .filter(|koordinat| koordinat.radyal_eksen.tür == EksenTürü::Kategori)
+                        .map_or(&[][..], |koordinat| koordinat.radyal_eksen.veri.as_slice()),
+                )?;
+                let açısal = düğüm.koordinat_boyutu(
+                    1,
+                    koordinat
+                        .filter(|koordinat| koordinat.açısal_eksen.tür == EksenTürü::Kategori)
+                        .map_or(&[][..], |koordinat| koordinat.açısal_eksen.veri.as_slice()),
+                )?;
+                Some(düzen.nokta(açısal, radyal))
+            };
+            let grafo_tuval = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
+            let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, seri_sırası);
+            if let Some(ipucu) = grafo_serisini_çiz(
+                yüzey,
+                grafo,
+                seri_sırası,
+                grafo_tuval,
+                seçenekler,
+                ilerleme,
+                görünüm,
+                &kaymalar,
+                Some(&harita),
+                None,
+                None,
+                kapalı,
+                ipucu_seçeneği.as_ref(),
+                fare,
+                girdi
+                    .ipucu_öğesi
+                    .filter(|(hedef_seri, _)| *hedef_seri == seri_sırası)
+                    .map(|(_, veri_sırası)| veri_sırası),
+                &mut çıktı.isabetler,
+            ) {
+                bekleyen_ipucu = Some(ipucu);
+            }
+        }
         if let Some(ipucu) = ipucu_seçeneği.as_ref()
             && let Some(bekleyen) = kutupsal_ipucu_hazırla(
                 seçenekler,
@@ -5668,6 +6317,7 @@ pub fn grafiği_boya(
                 let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
                     continue;
                 };
+                let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, i);
                 if let Some(ipucu) = grafo_serisini_çiz(
                     yüzey,
                     grafo,
@@ -5675,12 +6325,18 @@ pub fn grafiği_boya(
                     yerleşim.dış_kutu,
                     seçenekler,
                     ilerleme,
-                    girdi.grafo_görünümü,
-                    &girdi.grafo_kaymaları,
+                    görünüm,
+                    &kaymalar,
+                    None,
                     None,
                     Some(yerleşim),
+                    kapalı,
                     ipucu_seçeneği.as_ref(),
                     fare,
+                    girdi
+                        .ipucu_öğesi
+                        .filter(|(seri_sırası, _)| *seri_sırası == i)
+                        .map(|(_, veri_sırası)| veri_sırası),
                     &mut çıktı.isabetler,
                 ) {
                     bekleyen_ipucu = Some(ipucu);
@@ -5780,6 +6436,27 @@ pub fn grafiği_boya(
 
     // 5) Pasta serileri.
     let tüm_alan = Dikdörtgen::yeni(0.0, 0.0, yüzey.genişlik(), yüzey.yükseklik());
+    for (seri_sırası, seri) in seçenekler.seriler.iter().enumerate() {
+        let Seri::Grafo(grafo) = seri else {
+            continue;
+        };
+        if grafo.koordinat_sistemi != GrafoKoordinatSistemi::Görünüm
+            || grafo.gezinme == GrafoGezinmesi::Kapalı
+            || !ad_görünür(seri.ad(), kapalı)
+        {
+            continue;
+        }
+        let model_ölçeği = grafo.yakınlaştırma.max(f32::EPSILON);
+        çıktı.grafo_alanları.push(GrafoGezinmeAlanı {
+            seri_sırası,
+            alan: grafo_etkileşim_alanı(grafo, tüm_alan),
+            global_tetikleyici: grafo.gezinme_tetikleyicisi == GrafoGezinmeTetikleyicisi::Global,
+            gezinme: grafo.gezinme,
+            en_küçük_ölçek: grafo.en_küçük_yakınlaştırma.unwrap_or(f32::EPSILON)
+                / model_ölçeği,
+            en_büyük_ölçek: grafo.en_büyük_yakınlaştırma.unwrap_or(f32::MAX) / model_ölçeği,
+        });
+    }
     let mut pasta_etiket_kutuları = Vec::new();
     for (i, seri) in seçenekler.seriler.iter().enumerate() {
         let Seri::Pasta(p) = seri else { continue };
@@ -6244,7 +6921,12 @@ pub fn grafiği_boya(
             Seri::Grafo(g) => {
                 // Takvim bileşeninden daha yüksek z değerleri aşağıdaki üst
                 // katman geçişinde çizilir.
-                if g.matris_sırası.is_some()
+                if matches!(
+                    g.koordinat_sistemi,
+                    crate::model::grafo::GrafoKoordinatSistemi::Kartezyen2B
+                        | crate::model::grafo::GrafoKoordinatSistemi::Kutupsal
+                        | crate::model::grafo::GrafoKoordinatSistemi::TekEksen
+                ) || g.matris_sırası.is_some()
                     || (g.takvim_sırası.is_some() && g.z > 2)
                     || !ad_görünür(seri.ad(), kapalı)
                 {
@@ -6257,6 +6939,7 @@ pub fn grafiği_boya(
                 if g.takvim_sırası.is_some() && takvim.is_none() {
                     continue;
                 }
+                let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, i);
                 if let Some(ipucu) = grafo_serisini_çiz(
                     yüzey,
                     g,
@@ -6264,12 +6947,18 @@ pub fn grafiği_boya(
                     tüm_alan,
                     seçenekler,
                     ilerleme,
-                    girdi.grafo_görünümü,
-                    &girdi.grafo_kaymaları,
+                    görünüm,
+                    &kaymalar,
+                    None,
                     takvim,
                     None,
+                    kapalı,
                     ipucu_seçeneği.as_ref(),
                     fare,
+                    girdi
+                        .ipucu_öğesi
+                        .filter(|(seri_sırası, _)| *seri_sırası == i)
+                        .map(|(_, veri_sırası)| veri_sırası),
                     &mut çıktı.isabetler,
                 ) {
                     bekleyen_ipucu = Some(ipucu);
@@ -6712,6 +7401,7 @@ pub fn grafiği_boya(
         let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
             continue;
         };
+        let (görünüm, kaymalar) = grafo_boyama_durumu(girdi, seri_sırası);
         if let Some(ipucu) = grafo_serisini_çiz(
             yüzey,
             grafo,
@@ -6719,12 +7409,18 @@ pub fn grafiği_boya(
             tüm_alan,
             seçenekler,
             ilerleme,
-            girdi.grafo_görünümü,
-            &girdi.grafo_kaymaları,
+            görünüm,
+            &kaymalar,
+            None,
             Some(yerleşim),
             None,
+            kapalı,
             ipucu_seçeneği.as_ref(),
             fare,
+            girdi
+                .ipucu_öğesi
+                .filter(|(hedef_seri, _)| *hedef_seri == seri_sırası)
+                .map(|(_, veri_sırası)| veri_sırası),
             &mut çıktı.isabetler,
         ) {
             bekleyen_ipucu = Some(ipucu);
@@ -6774,6 +7470,12 @@ pub fn grafiği_boya(
         let gösterge_çıktısı = gösterge_çiz(yüzey, g, &gösterge_öğeleri, girdi.gösterge_sayfası);
         çıktı.gösterge_kutuları = gösterge_çıktısı.kutular;
         çıktı.gösterge_okları = gösterge_çıktısı.oklar;
+    }
+
+    // ECharts 6.1 thumbnail z=10: Graph kopyası ve roam penceresi legend
+    // dahil normal bileşenlerin üstünde, tooltip'in altında kalır.
+    if let Some(küçük) = &seçenekler.küçük_resim {
+        graph_küçük_resmini_çiz(yüzey, seçenekler, küçük, girdi, kapalı);
     }
 
     // 5c) Zaman şeridi (timeline) — option modeli varsa ECharts slider
@@ -6847,6 +7549,118 @@ pub use crate::cizim::pencere::GrafikGörünümü;
 #[cfg(test)]
 mod yakınlaştırma_yönü_testleri {
     use super::*;
+
+    #[test]
+    fn graph_polar_ve_single_axis_koordinatlari_dugum_ve_kenar_uretir() {
+        let polar = GrafoSerisi::yeni()
+            .kutupsal(0)
+            .yerleşim(crate::model::grafo::GrafoYerleşimi::Yok)
+            .düğümler([
+                GrafoDüğümü::yeni("P0", 20.0).ham_değer([25.0, 0.0]),
+                GrafoDüğümü::yeni("P1", 20.0).ham_değer([75.0, 180.0]),
+            ])
+            .bağlar([("P0", "P1")]);
+        let tek = GrafoSerisi::yeni()
+            .tek_eksen(0)
+            .yerleşim(crate::model::grafo::GrafoYerleşimi::Yok)
+            .düğümler([
+                GrafoDüğümü::yeni("S0", 18.0).ham_değer("A"),
+                GrafoDüğümü::yeni("S1", 18.0).ham_değer("C"),
+            ])
+            .bağlar([("S0", "S1")]);
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .kutupsal(
+                crate::model::kutupsal::KutupsalKoordinat::yeni()
+                    .radyal_eksen(Eksen::değer().en_az(0.0).en_çok(100.0))
+                    .açısal_eksen(Eksen::değer().en_az(0.0).en_çok(360.0)),
+            )
+            .tek_eksen(crate::model::tek_eksen::TekEksen::kategori().veri(["A", "B", "C"]))
+            .seri(polar)
+            .seri(tek);
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        for seri_sırası in [0, 1] {
+            let bölgeler = çıktı
+                .isabetler
+                .iter()
+                .filter(|bölge| bölge.seri_sırası == seri_sırası)
+                .collect::<Vec<_>>();
+            assert_eq!(bölgeler.len(), 3, "iki düğüm ve bir kenar beklenir");
+            assert_eq!(
+                bölgeler
+                    .iter()
+                    .filter(|bölge| matches!(bölge.geometri, İsabetGeometrisi::Daire { .. }))
+                    .count(),
+                2
+            );
+            assert!(
+                bölgeler
+                    .iter()
+                    .any(|bölge| matches!(bölge.geometri, İsabetGeometrisi::ÇokluÇizgi { .. }))
+            );
+        }
+        let tek_merkezleri = çıktı
+            .isabetler
+            .iter()
+            .filter(|bölge| bölge.seri_sırası == 1)
+            .filter_map(|bölge| match bölge.geometri {
+                İsabetGeometrisi::Daire { merkez, .. } => Some(merkez),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(tek_merkezleri.len(), 2);
+        assert!((tek_merkezleri[0].1 - tek_merkezleri[1].1).abs() < 0.001);
+        assert!(tek_merkezleri[0].0 < tek_merkezleri[1].0);
+    }
+
+    #[test]
+    fn graph_roam_alanlari_ve_gecici_durum_seri_bazinda_ayrilir() {
+        let seri = |ad: &str, sol: &str, gezinme| {
+            GrafoSerisi::yeni()
+                .ad(ad)
+                .yerleşim(crate::model::grafo::GrafoYerleşimi::Yok)
+                .kutu(sol, "10%", "35%", "70%")
+                .gezinme_kipi(gezinme)
+                .düğümler([GrafoDüğümü::yeni(ad, 20.0).konum(0.0, 0.0)])
+        };
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .seri(seri("sol", "5%", GrafoGezinmesi::Kaydır))
+            .seri(seri("sağ", "60%", GrafoGezinmesi::Ölçekle));
+        let girdi = BoyamaGirdisi {
+            grafo_görünümleri: vec![(0, 30.0, 0.0, 1.0), (1, 0.0, 0.0, 1.5)],
+            grafo_seri_kaymaları: vec![(1, 0, 0.0, 25.0)],
+            ..Default::default()
+        };
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(700.0, 525.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &girdi);
+
+        assert_eq!(çıktı.grafo_alanları.len(), 2);
+        assert!(çıktı.grafo_alanları[0].gezinme.kaydırılabilir());
+        assert!(!çıktı.grafo_alanları[0].gezinme.ölçeklenebilir());
+        assert!(!çıktı.grafo_alanları[1].gezinme.kaydırılabilir());
+        assert!(çıktı.grafo_alanları[1].gezinme.ölçeklenebilir());
+        let merkez = |seri_sırası| {
+            çıktı
+                .isabetler
+                .iter()
+                .find(|bölge| {
+                    bölge.seri_sırası == seri_sırası
+                        && matches!(bölge.geometri, İsabetGeometrisi::Daire { .. })
+                })
+                .and_then(|bölge| match bölge.geometri {
+                    İsabetGeometrisi::Daire { merkez, .. } => Some(merkez),
+                    _ => None,
+                })
+                .expect("Graph düğüm isabeti")
+        };
+        let sol = merkez(0);
+        let sağ = merkez(1);
+        assert!(sol.0 < sağ.0);
+        assert!(sağ.1 > çıktı.grafo_alanları[1].alan.merkez().1);
+    }
 
     #[test]
     fn kiris_gosterge_filtresi_dugumu_ve_bagli_seritleri_yerlesimden_cikarir() {

@@ -2,8 +2,8 @@
 
 use crate::cizim::{DikeyHiza, YatayHiza, ÇizimYüzeyi};
 use crate::koordinat::Dikdörtgen;
-use crate::model::YatayKonum;
 use crate::model::bilesen::{Başlık, BaşlıkMetinHizası};
+use crate::model::{DikeyKonum, Uzunluk, YatayKonum};
 use crate::renk::{Dolgu, Renk};
 use crate::tema;
 
@@ -144,10 +144,24 @@ pub fn başlık_çiz_alanda(
         }
     };
 
+    let üst_alt_çapası = başlık.üst.and_then(|üst| match üst {
+        DikeyKonum::Üst => Some((alan.y + başlık.iç_boşluk, 0.0)),
+        DikeyKonum::Orta => Some((alan.y + tuval_yüksekliği / 2.0, -alt_yükseklik / 2.0)),
+        DikeyKonum::Alt => Some((alan.y + tuval_yüksekliği - başlık.iç_boşluk, -alt_yükseklik)),
+        DikeyKonum::Değer(_) => None,
+    });
     let mut y = if let Some(alt) = başlık.alt {
         alan.y + tuval_yüksekliği - alt.çöz(tuval_yüksekliği) - başlık.iç_boşluk - blok_yüksekliği
     } else {
-        alan.y + başlık.üst.map(|u| u.çöz(tuval_yüksekliği)).unwrap_or(0.0) + başlık.iç_boşluk
+        match başlık
+            .üst
+            .unwrap_or(DikeyKonum::Değer(Uzunluk::Piksel(0.0)))
+        {
+            DikeyKonum::Üst => alan.y + başlık.iç_boşluk,
+            DikeyKonum::Orta => alan.y + tuval_yüksekliği / 2.0 - ana_yükseklik / 2.0,
+            DikeyKonum::Alt => alan.y + tuval_yüksekliği - başlık.iç_boşluk - ana_yükseklik,
+            DikeyKonum::Değer(u) => alan.y + u.çöz(tuval_yüksekliği) + başlık.iç_boşluk,
+        }
     };
 
     let kutu_solu = match hiza {
@@ -193,6 +207,9 @@ pub fn başlık_çiz_alanda(
         y += başlık.öğe_boşluğu;
     }
     if let Some(alt) = &başlık.alt_metin {
+        if let Some((çapa, alt_düzeltmesi)) = üst_alt_çapası {
+            y = çapa + ana_yükseklik + başlık.öğe_boşluğu + alt_düzeltmesi;
+        }
         let renk = başlık.alt_yazı.renk.unwrap_or(tema::üçüncül_metin());
         çok_satırlı_yazı(
             çizici,

@@ -1,0 +1,84 @@
+{
+  "şema_sürümü": 1,
+  "kaynak": "../echarts-examples/public/examples/ts/graph-grid.ts",
+  "dinamik_güncelleme_sayısı": 0,
+  "seçenek": {
+    "title": {
+      "text": "Graph on Cartesian"
+    },
+    "tooltip": {},
+    "xAxis": {
+      "type": "category",
+      "boundaryGap": false,
+      "data": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Very Loooong Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ]
+    },
+    "yAxis": {
+      "type": "value"
+    },
+    "series": [
+      {
+        "type": "graph",
+        "layout": "none",
+        "coordinateSystem": "cartesian2d",
+        "symbolSize": 40,
+        "label": {
+          "show": true
+        },
+        "edgeSymbol": [
+          "circle",
+          "arrow"
+        ],
+        "edgeSymbolSize": [
+          4,
+          10
+        ],
+        "data": [
+          412,
+          1684,
+          649,
+          3932,
+          101,
+          4818,
+          590
+        ],
+        "links": [
+          {
+            "source": 0,
+            "target": 1
+          },
+          {
+            "source": 1,
+            "target": 2
+          },
+          {
+            "source": 2,
+            "target": 3
+          },
+          {
+            "source": 3,
+            "target": 4
+          },
+          {
+            "source": 4,
+            "target": 5
+          },
+          {
+            "source": 5,
+            "target": 6
+          }
+        ],
+        "lineStyle": {
+          "color": "#2f4554"
+        }
+      }
+    ]
+  }
+}

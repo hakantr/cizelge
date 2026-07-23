@@ -145,6 +145,16 @@ function html(id, kaynak, frame, state, width, height) {
           // Dinamik gauge galerilerinin resmî ilk setOption güncellemesi.
           zamanlayıcı.callback();
         }`
+    : id === 'graph-force-dynamic'
+      ? `{
+          const zamanlayıcı = window.__capturedIntervals[0];
+          if (!zamanlayıcı || zamanlayıcı.ms !== 200) {
+            throw new Error('graph-force-dynamic 200 ms zamanlayıcısı yakalanamadı');
+          }
+          // Galeri metadata'sındaki shotDelay=5000, 200 ms'lik tam 25
+          // kaynak güncellemesine karşılık gelir.
+          for (let tik = 0; tik < 25; tik += 1) zamanlayıcı.callback();
+        }`
     : id === 'mix-zoom-on-value' && state === 'son'
     ? `myChart.dispatchAction({type:'dataZoom', start:70, end:100});`
     : id === 'bar-brush' && state === 'seçim'
@@ -454,18 +464,22 @@ echarts.registerPreprocessor((opt) => {
   for (const item of series) {
     item.animation = false;
     item.progressive = 100000;
+    // GraphView, layoutAnimation=false iken kuvvet çözücüsünü aynı çağrı
+    // içinde durana kadar ilerletir. Zamanlayıcı yarışını kanıt karesinden
+    // çıkarırken resmî forceHelper matematiğini değiştirmez.
+    if (item.type === 'graph' && item.force) item.force.layoutAnimation = false;
   }
   // Yeni Sunburst geçidi resmi örnek seçeneğini değiştirmeden doğrulanır.
   // Daha önce kilitlenmiş ailelerin snapshot üretilebilirliği, yalnız kendi
   // eski kartlarında kullanılan bileşen padding normalizasyonuyla korunur.
-  if (!${JSON.stringify(id.startsWith('sunburst-') || id.startsWith('sankey-') || id.startsWith('chord-'))}) {
+  if (!${JSON.stringify(id.startsWith('sunburst-') || id.startsWith('sankey-') || id.startsWith('chord-') || id.startsWith('graph-') || id === 'graph')}) {
     for (const key of ['title', 'legend', 'toolbox']) {
       const values = Array.isArray(opt[key]) ? opt[key] : opt[key] ? [opt[key]] : [];
       for (const item of values) if (item.padding == null) item.padding = 15;
     }
   }
 });
-${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' || Number.isInteger(gaugeZamanlayıcıMs) ? `
+${id === 'dynamic-data2' || id === 'dynamic-data' || id === 'graph-force-dynamic' || id === 'scatter-aggregate-bar' || id === 'scatter-symbol-morph' || Number.isInteger(gaugeZamanlayıcıMs) ? `
 // Yalnız örnek kaynağının kurduğu zamanlayıcıyı yakala; ECharts çekirdeği
 // ve renderer başlatılırken kullanılan olası iç zamanlayıcılar bu kapsama
 // girmez. Callback değişmeden saklanıp son durum eyleminde yeniden oynatılır.
@@ -647,7 +661,7 @@ async function çalıştır() {
       }
     }
     if (process.env.UYUM_DEBUG_LAYOUT) {
-      const yerleşim = await sayfa.evaluate((yalnızDataZoom) => {
+      const yerleşim = await sayfa.evaluate((yalnızDataZoom, yalnızThumbnail) => {
         const chart = window.__chart;
         const sonuç = [];
         const tooltipAdayları = [...document.querySelectorAll('div')]
@@ -685,6 +699,99 @@ async function çalıştır() {
             ]
               .map((metin) => ({metin, genişlik: ölçümBağlamı.measureText(metin).width}))
           });
+        }
+        chart.getModel().eachComponent('legend', (model) => {
+          const view = chart.getViewOfComponentModel(model);
+          const öğeler = [];
+          view?.group?.traverse?.((öğe) => {
+            const yerel = öğe?.getBoundingRect?.();
+            if (!yerel || (!öğe.style?.text && öğe.type !== 'path')) return;
+            const dünya = yerel.clone();
+            const dönüşüm = öğe.getComputedTransform?.();
+            if (dönüşüm) dünya.applyTransform(dönüşüm);
+            öğeler.push({
+              tür: öğe.type,
+              metin: öğe.style?.text || null,
+              yerel: {x: yerel.x, y: yerel.y, width: yerel.width, height: yerel.height},
+              dünya: {x: dünya.x, y: dünya.y, width: dünya.width, height: dünya.height},
+              stil: öğe.style ? {
+                fill: öğe.style.fill, stroke: öğe.style.stroke,
+                lineWidth: öğe.style.lineWidth, opacity: öğe.style.opacity
+              } : null
+            });
+          });
+          const sınır = view?.group?.getBoundingRect?.();
+          sonuç.push({
+            bileşen: 'legend',
+            sıra: model.componentIndex,
+            seçenek: model.option,
+            grup: view?.group ? {x: view.group.x, y: view.group.y} : null,
+            sınır: sınır ? {x: sınır.x, y: sınır.y, width: sınır.width, height: sınır.height} : null,
+            öğeler
+          });
+        });
+        chart.getModel().eachComponent('thumbnail', (model) => {
+          const view = chart.getViewOfComponentModel(model);
+          const özetle = (öğe) => {
+            if (!öğe) return null;
+            const yerel = öğe.getBoundingRect?.();
+            const dünya = yerel?.clone?.();
+            const dönüşüm = öğe.getComputedTransform?.();
+            if (dünya && dönüşüm) dünya.applyTransform(dönüşüm);
+            return {
+              tür: öğe.type,
+              şekil: öğe.shape,
+              stil: öğe.style ? {
+                fill: öğe.style.fill, stroke: öğe.style.stroke,
+                lineWidth: öğe.style.lineWidth, opacity: öğe.style.opacity
+              } : null,
+              dönüşüm,
+              yerel: yerel ? {x: yerel.x, y: yerel.y, width: yerel.width, height: yerel.height} : null,
+              dünya: dünya ? {x: dünya.x, y: dünya.y, width: dünya.width, height: dünya.height} : null,
+              çocukSayısı: öğe.children?.().length || 0
+            };
+          };
+          const hedef = view?._targetGroup;
+          const kökler = hedef?.children?.() || [];
+          const köprü = kökler[0];
+          const hedefÖğeleri = [];
+          hedef?.traverse?.((öğe) => {
+            if (öğe === hedef || öğe.type === 'group' || !öğe.getBoundingRect) return;
+            const yerel = öğe.getBoundingRect();
+            const dünya = yerel.clone();
+            const dönüşüm = öğe.getComputedTransform?.();
+            if (dönüşüm) dünya.applyTransform(dönüşüm);
+            hedefÖğeleri.push({
+              tür: öğe.type,
+              stil: öğe.style ? {
+                fill: öğe.style.fill, stroke: öğe.style.stroke,
+                lineWidth: öğe.style.lineWidth, opacity: öğe.style.opacity
+              } : null,
+              dönüşüm,
+              yerel: {x: yerel.x, y: yerel.y, width: yerel.width, height: yerel.height},
+              dünya: {x: dünya.x, y: dünya.y, width: dünya.width, height: dünya.height}
+            });
+          });
+          hedefÖğeleri.sort((a, b) => b.dünya.width * b.dünya.height - a.dünya.width * a.dünya.height);
+          sonuç.push({
+            bileşen: 'thumbnail',
+            sıra: model.componentIndex,
+            seçenek: model.option,
+            içerik: view?._contentRect?.plain?.() || view?._contentRect || null,
+            grup: özetle(view?.group),
+            arkaplan: özetle(view?._bgRect),
+            pencere: özetle(view?._windowRect),
+            hedef: özetle(hedef),
+            köprü: özetle(köprü),
+            köprüGrupları: köprü?.children?.().map(özetle) || [],
+            büyükHedefÖğeleri: hedefÖğeleri.slice(0, 16),
+            büyükHedefDüğümleri: hedefÖğeleri
+              .filter((öğe) => öğe.stil?.fill && öğe.stil.fill !== 'none')
+              .slice(0, 16)
+          });
+        });
+        if (yalnızThumbnail) {
+          return sonuç;
         }
         const kırılmaŞekilleri = chart.getZr().storage.getDisplayList()
           .filter((öğe) => Array.isArray(öğe?.shape?.points) && öğe.z >= 100)
@@ -1143,7 +1250,7 @@ async function çalıştır() {
           }));
         sonuç.push({ kesikliYollar });
         return sonuç;
-      }, Boolean(process.env.UYUM_DEBUG_DATAZOOM));
+      }, Boolean(process.env.UYUM_DEBUG_DATAZOOM), process.env.UYUM_DEBUG_LAYOUT === 'thumbnail');
       process.stderr.write(`${JSON.stringify(yerleşim, null, 2)}\n`);
     }
     if (args.sceneOutput) {
@@ -1211,6 +1318,134 @@ async function çalıştır() {
                 yükseklik: yuvarla(yerleşim.height)
               },
               düğümler
+            });
+            return;
+          }
+          if (model.subType === 'graph') {
+            const graph = model.getGraph?.();
+            const düğümVerisi = model.getData?.();
+            const bağVerisi = model.getEdgeData?.() || model.getData?.('edge');
+            const koordinat = model.coordinateSystem;
+            const matrisle = (nokta, matris) => {
+              if (!matris) return [yuvarla(nokta?.[0]), yuvarla(nokta?.[1])];
+              return [
+                yuvarla(matris[0] * nokta[0] + matris[2] * nokta[1] + matris[4]),
+                yuvarla(matris[1] * nokta[0] + matris[3] * nokta[1] + matris[5])
+              ];
+            };
+            const dünyaKutusu = (öğe) => {
+              const kutu = öğe?.getBoundingRect?.()?.clone?.();
+              const dönüşüm = öğe?.getComputedTransform?.();
+              if (!kutu) return null;
+              if (dönüşüm) kutu.applyTransform(dönüşüm);
+              return {
+                x: yuvarla(kutu.x), y: yuvarla(kutu.y),
+                genişlik: yuvarla(kutu.width), yükseklik: yuvarla(kutu.height)
+              };
+            };
+            const etiketÖzeti = (sahip) => {
+              const etiket = sahip?.getTextContent?.();
+              const dönüşüm = etiket?.getComputedTransform?.();
+              const merkez = dönüşüm ? matrisle([0, 0], dönüşüm) : [0, 0];
+              return {
+                göster: Boolean(etiket && !etiket.ignore),
+                metin: etiket?.style?.text || '',
+                x: merkez[0], y: merkez[1],
+                dönüş: yuvarla(etiket?.rotation),
+                yatay_hiza: etiket?.style?.align || 'left',
+                dikey_hiza: etiket?.style?.verticalAlign || 'top',
+                font: etiket?.style?.font || '',
+                renk: renk(etiket?.style?.fill),
+                sınır: dünyaKutusu(etiket)
+              };
+            };
+            const düğümler = [];
+            graph?.eachNode?.((düğüm) => {
+              const grafik = düğümVerisi?.getItemGraphicEl?.(düğüm.dataIndex);
+              const sembol = grafik?.getSymbolPath?.() || grafik?.childAt?.(0);
+              const dönüşüm = grafik?.getComputedTransform?.();
+              const merkez = dönüşüm
+                ? matrisle([0, 0], dönüşüm)
+                : matrisle(düğüm.getLayout?.() || [0, 0], null);
+              const stil = sembol?.style
+                || düğümVerisi?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
+              const hamBoyut = düğümVerisi?.getItemVisual?.(düğüm.dataIndex, 'symbolSize');
+              const boyut = Array.isArray(hamBoyut) ? hamBoyut : [hamBoyut, hamBoyut];
+              const sınır = dünyaKutusu(sembol);
+              düğümler.push({
+                veri_sırası: düğümVerisi?.getRawIndex?.(düğüm.dataIndex) ?? düğüm.dataIndex ?? 0,
+                kimlik: düğüm.id || null,
+                ad: düğüm.name || düğüm.id || '',
+                değer: düğüm.getValue?.() ?? null,
+                kategori: düğümVerisi?.get?.('category', düğüm.dataIndex) ?? null,
+                x: merkez[0], y: merkez[1],
+                genişlik: yuvarla(sınır?.genişlik ?? boyut[0]),
+                yükseklik: yuvarla(sınır?.yükseklik ?? boyut[1]),
+                sembol: grafik?.getSymbolType?.()
+                  || düğümVerisi?.getItemVisual?.(düğüm.dataIndex, 'symbol') || 'circle',
+                renk: renk(stil.fill),
+                kenarlık_rengi: renk(stil.stroke),
+                kenarlık_kalınlığı: yuvarla(stil.stroke ? (stil.lineWidth || 0) : 0),
+                opaklık: yuvarla(stil.opacity ?? 1),
+                sabit: Boolean(düğüm.getModel?.()?.get?.('fixed')),
+                etiket: etiketÖzeti(sembol)
+              });
+            });
+            const bağlar = [];
+            graph?.eachEdge?.((bağ) => {
+              const grafik = bağVerisi?.getItemGraphicEl?.(bağ.dataIndex);
+              const çizgi = grafik?.getLinePath?.()
+                || grafik?.childOfName?.('line') || grafik?.childAt?.(0);
+              const şekil = çizgi?.shape || {};
+              const dönüşüm = çizgi?.getComputedTransform?.();
+              const p1 = matrisle([şekil.x1, şekil.y1], dönüşüm);
+              const p2 = matrisle([şekil.x2, şekil.y2], dönüşüm);
+              const kontrol = Number.isFinite(şekil.cpx1) && Number.isFinite(şekil.cpy1)
+                ? matrisle([şekil.cpx1, şekil.cpy1], dönüşüm) : null;
+              const stil = çizgi?.style || {};
+              const uç = (ad) => {
+                const öğe = grafik?.childOfName?.(ad);
+                const merkez = öğe?.getComputedTransform?.();
+                const boyut = ad === 'fromSymbol'
+                  ? bağVerisi?.getItemVisual?.(bağ.dataIndex, 'fromSymbolSize')
+                  : bağVerisi?.getItemVisual?.(bağ.dataIndex, 'toSymbolSize');
+                return öğe ? {
+                  sembol: ad === 'fromSymbol'
+                    ? bağVerisi?.getItemVisual?.(bağ.dataIndex, 'fromSymbol')
+                    : bağVerisi?.getItemVisual?.(bağ.dataIndex, 'toSymbol'),
+                  x: yuvarla(merkez?.[4]), y: yuvarla(merkez?.[5]),
+                  boyut: (Array.isArray(boyut) ? boyut : [boyut, boyut]).map(yuvarla),
+                  sınır: dünyaKutusu(öğe)
+                } : null;
+              };
+              bağlar.push({
+                veri_sırası: bağVerisi?.getRawIndex?.(bağ.dataIndex) ?? bağ.dataIndex ?? 0,
+                kaynak: bağ.node1?.id || bağ.node1?.name || '',
+                hedef: bağ.node2?.id || bağ.node2?.name || '',
+                değer: bağ.getValue?.() ?? null,
+                x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1],
+                cpx1: kontrol?.[0] ?? null, cpy1: kontrol?.[1] ?? null,
+                renk: renk(stil.stroke),
+                kalınlık: yuvarla(stil.lineWidth ?? 1),
+                opaklık: yuvarla(stil.opacity ?? 1),
+                tür: Array.isArray(stil.lineDash) ? 'dashed' : 'solid',
+                kaynak_sembolü: uç('fromSymbol'),
+                hedef_sembolü: uç('toSymbol'),
+                etiket: etiketÖzeti(grafik)
+              });
+            });
+            const kutu = koordinat?.getBoundingRect?.();
+            seriler.push({
+              seri_sırası: model.seriesIndex,
+              ad: model.name || '',
+              koordinat_sistemi: koordinat?.type || 'view',
+              alan: kutu ? {
+                x: yuvarla(kutu.x), y: yuvarla(kutu.y),
+                genişlik: yuvarla(kutu.width), yükseklik: yuvarla(kutu.height)
+              } : {x: 0, y: 0, genişlik: chart.getWidth(), yükseklik: chart.getHeight()},
+              düğümler,
+              bağlar,
+              __tür: 'graph'
             });
             return;
           }
@@ -1425,7 +1660,9 @@ async function çalıştır() {
           for (const çocuk of viewRoot?.children || []) gez(çocuk);
           seriler.push({ seri_sırası: model.seriesIndex, dilimler });
         });
-        const tür = seriler.some((seri) => seri.__tür === 'chord')
+        const tür = seriler.some((seri) => seri.__tür === 'graph')
+          ? 'graph'
+          : seriler.some((seri) => seri.__tür === 'chord')
           ? 'chord'
           : seriler.some((seri) => Array.isArray(seri.dilimler))
           ? 'sunburst'

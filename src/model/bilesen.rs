@@ -34,8 +34,8 @@ pub struct Başlık {
     /// yerini alır.
     pub sağ: Option<Uzunluk>,
     pub metin_hizası: Option<BaşlıkMetinHizası>,
-    /// Üst kenardan uzaklık; öntanımlı iç boşluk kadar.
-    pub üst: Option<Uzunluk>,
+    /// Üst kenardan uzaklık veya `top`/`middle`/`bottom` kutu hizası.
+    pub üst: Option<DikeyKonum>,
     /// Alt kenardan uzaklık (`bottom`). Açık olduğunda `top` yerleşiminin
     /// yerini alır.
     pub alt: Option<Uzunluk>,
@@ -69,7 +69,7 @@ impl Default for Başlık {
             sol: YatayKonum::Orta,
             sağ: None,
             metin_hizası: None,
-            üst: Some(Uzunluk::Piksel(15.0)),
+            üst: Some(DikeyKonum::Değer(Uzunluk::Piksel(15.0))),
             alt: None,
             genişlik: None,
             iç_boşluk: 5.0,
@@ -122,7 +122,7 @@ impl Başlık {
         self
     }
 
-    pub fn üst(mut self, üst: impl Into<Uzunluk>) -> Self {
+    pub fn üst(mut self, üst: impl Into<DikeyKonum>) -> Self {
         self.üst = Some(üst.into());
         self.alt = None;
         self
@@ -279,7 +279,7 @@ impl Default for Gösterge {
             seçim_kipi: GöstergeSeçimKipi::Çoklu,
             seçili: BTreeMap::new(),
             seçiciler: false,
-            devre_dışı_rengi: Renk::onaltılık(0xcccccc),
+            devre_dışı_rengi: Renk::onaltılık(0xcfd2d7),
             biçimleyici: None,
         }
     }
@@ -436,6 +436,144 @@ impl Gösterge {
         for ad in adlar {
             self.seçili.insert(ad.clone(), !self.seçili_mi(ad));
         }
+    }
+}
+
+/// `thumbnail.itemStyle` / `thumbnail.windowStyle` boya katmanı.
+#[derive(Clone, PartialEq, Debug, Default)]
+pub struct KüçükResimStili {
+    pub renk: Option<Renk>,
+    pub kenarlık_rengi: Option<Renk>,
+    pub kenarlık_kalınlığı: Option<f32>,
+    pub opaklık: Option<f32>,
+}
+
+impl KüçükResimStili {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn renk(mut self, renk: impl Into<Renk>) -> Self {
+        self.renk = Some(renk.into());
+        self
+    }
+
+    pub fn kenarlık_rengi(mut self, renk: impl Into<Renk>) -> Self {
+        self.kenarlık_rengi = Some(renk.into());
+        self
+    }
+
+    pub fn kenarlık_kalınlığı(mut self, kalınlık: f32) -> Self {
+        self.kenarlık_kalınlığı = kalınlık.is_finite().then(|| kalınlık.max(0.0));
+        self
+    }
+
+    pub fn opaklık(mut self, opaklık: f32) -> Self {
+        self.opaklık = opaklık.is_finite().then(|| opaklık.clamp(0.0, 1.0));
+        self
+    }
+}
+
+/// ECharts 6.1 `thumbnail` bileşeni.
+///
+/// Bileşen, Graph görünümünün küçük bir kopyasını ve geçerli roam
+/// penceresini çizer. Yerleşim varsayılanları kilitli
+/// `ThumbnailModel.defaultOption` ile aynıdır.
+#[derive(Clone, PartialEq, Debug)]
+pub struct KüçükResim {
+    pub göster: bool,
+    pub sol: Option<Uzunluk>,
+    pub sağ: Option<Uzunluk>,
+    pub üst: Option<Uzunluk>,
+    pub alt: Option<Uzunluk>,
+    pub genişlik: Uzunluk,
+    pub yükseklik: Uzunluk,
+    pub öğe_stili: KüçükResimStili,
+    pub pencere_stili: KüçükResimStili,
+    pub z: i32,
+}
+
+impl Default for KüçükResim {
+    fn default() -> Self {
+        Self {
+            göster: true,
+            sol: None,
+            sağ: Some(Uzunluk::Piksel(1.0)),
+            üst: None,
+            alt: Some(Uzunluk::Piksel(1.0)),
+            genişlik: Uzunluk::Yüzde(25.0),
+            yükseklik: Uzunluk::Yüzde(25.0),
+            öğe_stili: KüçükResimStili::yeni()
+                .renk(Renk::BEYAZ)
+                .kenarlık_rengi(crate::tema::nötr_30())
+                .kenarlık_kalınlığı(2.0),
+            pencere_stili: KüçükResimStili::yeni()
+                .renk(crate::tema::nötr_30())
+                .kenarlık_rengi(crate::tema::nötr_40())
+                .kenarlık_kalınlığı(1.0)
+                .opaklık(0.3),
+            z: 10,
+        }
+    }
+}
+
+impl KüçükResim {
+    pub fn yeni() -> Self {
+        Self::default()
+    }
+
+    pub fn göster(mut self, göster: bool) -> Self {
+        self.göster = göster;
+        self
+    }
+
+    pub fn sol(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.sol = Some(değer.into());
+        self.sağ = None;
+        self
+    }
+
+    pub fn sağ(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.sağ = Some(değer.into());
+        self.sol = None;
+        self
+    }
+
+    pub fn üst(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.üst = Some(değer.into());
+        self.alt = None;
+        self
+    }
+
+    pub fn alt(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.alt = Some(değer.into());
+        self.üst = None;
+        self
+    }
+
+    pub fn genişlik(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.genişlik = değer.into();
+        self
+    }
+
+    pub fn yükseklik(mut self, değer: impl Into<Uzunluk>) -> Self {
+        self.yükseklik = değer.into();
+        self
+    }
+
+    pub fn öğe_stili(mut self, stil: KüçükResimStili) -> Self {
+        self.öğe_stili = stil;
+        self
+    }
+
+    pub fn pencere_stili(mut self, stil: KüçükResimStili) -> Self {
+        self.pencere_stili = stil;
+        self
+    }
+
+    pub fn z(mut self, z: i32) -> Self {
+        self.z = z;
+        self
     }
 }
 

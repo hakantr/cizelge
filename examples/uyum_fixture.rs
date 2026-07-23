@@ -27,6 +27,8 @@ mod candlestick_sh_verisi;
 mod custom_calendar_icon_verisi;
 #[path = "uyum_veri/perlin.rs"]
 mod perlin;
+#[path = "uyum_graph.rs"]
+mod uyum_graph;
 
 struct Girdi {
     id: String,
@@ -9568,7 +9570,7 @@ fn scatter_polynomial_regression() -> Result<GrafikSeçenekleri, String> {
     if let Some(başlık) = seçenekler.başlık.as_mut() {
         // Resmî örnek `title.top: 16` verir; diğer regresyon kartlarında
         // kullanılan başlık öntanımlısından bir piksel aşağıdadır.
-        başlık.üst = Some(Uzunluk::Piksel(16.0));
+        başlık.üst = Some(DikeyKonum::Değer(Uzunluk::Piksel(16.0)));
     }
     if let Some(Seri::Çizgi(çizgi)) = seçenekler.seriler.get_mut(1) {
         // Zrender labelLayout dx=-20 dönüşümünde 3. derece eğrinin son
@@ -19124,6 +19126,17 @@ fn seçenekler(
         "chord-simple" | "chord-minAngle" | "chord-lineStyle-color" | "chord-style" => {
             kiriş_resmi(id)
         }
+        "graph-force2"
+        | "graph-grid"
+        | "graph-simple"
+        | "graph-force"
+        | "graph-label-overlap"
+        | "graph"
+        | "graph-circular-layout"
+        | "graph-force-dynamic"
+        | "graph-life-expectancy"
+        | "graph-webkit-dep"
+        | "graph-npm" => uyum_graph::resmi(id),
         "parallel-simple" => Ok(parallel_simple()),
         "parallel-aqi" => parallel_aqi(),
         "parallel-nutrients" => parallel_nutrients(),
@@ -19313,6 +19326,9 @@ fn çalıştır() -> Result<(), String> {
             serde_json::to_vec_pretty(&özet)
         } else if girdi.id.starts_with("chord-") {
             let özet = kiriş_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
+        } else if girdi.id == "graph" || girdi.id.starts_with("graph-") {
+            let özet = uyum_graph::sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
             serde_json::to_vec_pretty(&özet)
         } else {
             let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;

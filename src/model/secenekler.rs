@@ -3,7 +3,9 @@
 use std::collections::BTreeMap;
 
 use crate::animasyon::{Yumuşatma, ÖNTANIMLI_SÜRE_MS};
-use crate::model::bilesen::{AraçKutusu, Başlık, Fırça, Gösterge, Izgara, İpucu};
+use crate::model::bilesen::{
+    AraçKutusu, Başlık, Fırça, Gösterge, Izgara, KüçükResim, İpucu
+};
 use crate::model::eksen::{Eksen, EksenTürü};
 use crate::model::gorsel_esleme::GörselEşleme;
 use crate::model::grafik_bileseni::GrafikBileşeni;
@@ -90,6 +92,8 @@ pub struct GrafikSeçenekleri {
     pub veri_yakınlaştırmaları: Vec<VeriYakınlaştırma>,
     /// Araç kutusu (`toolbox`).
     pub araç_kutusu: Option<AraçKutusu>,
+    /// Graph görünümünün küçük önizlemesi (`thumbnail`).
+    pub küçük_resim: Option<KüçükResim>,
     /// Fırça (`brush`): dikdörtgen seçim.
     pub fırça: Option<Fırça>,
     /// Serbest zrender öğeleri (`graphic`).
@@ -146,6 +150,7 @@ impl Default for GrafikSeçenekleri {
             veri_kümeleri: Vec::new(),
             veri_yakınlaştırmaları: Vec::new(),
             araç_kutusu: None,
+            küçük_resim: None,
             fırça: None,
             grafik: None,
             zaman_şeridi: None,
@@ -858,6 +863,11 @@ impl GrafikSeçenekleri {
 
     pub fn araç_kutusu(mut self, araçlar: AraçKutusu) -> Self {
         self.araç_kutusu = Some(araçlar);
+        self
+    }
+
+    pub fn küçük_resim(mut self, küçük_resim: KüçükResim) -> Self {
+        self.küçük_resim = Some(küçük_resim);
         self
     }
 

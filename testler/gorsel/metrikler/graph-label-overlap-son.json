@@ -1,0 +1,45 @@
+{
+  "id": "graph-label-overlap",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 2100,
+  "değişen_piksel_oranı": 0.0077777777777777776,
+  "ssim": 0.9932968347925243,
+  "ham": {
+    "geçti": false,
+    "değişen_piksel": 5477,
+    "değişen_piksel_oranı": 0.020285185185185184,
+    "ssim": 0.9896426742086628
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "graph_düğüm_bağ_ve_etiket_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Graph düğümünün kimlik/kategori, dünya merkezi, sembol boyutu, RGBA stili ve görünür etiket tabanı; her bağın kaynak-hedef kimliği, kırpılmış uç/kontrol noktası, uç sembolü ve çizgi stili kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 77,
+      "gerçek_düğüm": 77,
+      "beklenen_bağ": 254,
+      "gerçek_bağ": 254,
+      "karşılaştırılan_alan": 4711,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-label-overlap.png",
+    "gerçek": "testler/gorsel/gerçek/default/graph-label-overlap.png",
+    "fark": "testler/gorsel/fark/default/graph-label-overlap.png",
+    "normalize_fark": "testler/gorsel/fark/default/graph-label-overlap-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/graph-label-overlap.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/graph-label-overlap.json"
+  }
+}

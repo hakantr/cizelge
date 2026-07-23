@@ -1,0 +1,1422 @@
+{
+  "şema_sürümü": 1,
+  "tür": "graph",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "ad": "series\u00000",
+      "koordinat_sistemi": "view",
+      "alan": {
+        "x": 349.0,
+        "y": 261.5,
+        "genişlik": 2.0,
+        "yükseklik": 2.0
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "kimlik": "-1",
+          "ad": "-1",
+          "değer": null,
+          "kategori": null,
+          "x": 350.0,
+          "y": 262.5,
+          "genişlik": 20.0,
+          "yükseklik": 20.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": true,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 350.0,
+            "y": 262.5,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 1,
+          "kimlik": "1",
+          "ad": "1",
+          "değer": null,
+          "kategori": null,
+          "x": 328.5929870605469,
+          "y": 289.2170104980469,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 328.5929870605469,
+            "y": 289.2170104980469,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 2,
+          "kimlik": "2",
+          "ad": "2",
+          "değer": null,
+          "kategori": null,
+          "x": 362.9079895019531,
+          "y": 69.59500122070312,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 362.9079895019531,
+            "y": 69.59500122070312,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 3,
+          "kimlik": "3",
+          "ad": "3",
+          "değer": null,
+          "kategori": null,
+          "x": 285.8190002441406,
+          "y": 289.57501220703125,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 285.8190002441406,
+            "y": 289.57501220703125,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 4,
+          "kimlik": "4",
+          "ad": "4",
+          "değer": null,
+          "kategori": null,
+          "x": 346.39300537109375,
+          "y": 306.35400390625,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 346.39300537109375,
+            "y": 306.35400390625,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 5,
+          "kimlik": "5",
+          "ad": "5",
+          "değer": null,
+          "kategori": null,
+          "x": 321.88800048828125,
+          "y": 327.6730041503906,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 321.88800048828125,
+            "y": 327.6730041503906,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 6,
+          "kimlik": "6",
+          "ad": "6",
+          "değer": null,
+          "kategori": null,
+          "x": 490.0419921875,
+          "y": 140.20899963378906,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 490.0419921875,
+            "y": 140.20899963378906,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 7,
+          "kimlik": "7",
+          "ad": "7",
+          "değer": null,
+          "kategori": null,
+          "x": 412.6289978027344,
+          "y": 365.6910095214844,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 412.6289978027344,
+            "y": 365.6910095214844,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 8,
+          "kimlik": "8",
+          "ad": "8",
+          "değer": null,
+          "kategori": null,
+          "x": 442.6180114746094,
+          "y": 387.54998779296875,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 442.6180114746094,
+            "y": 387.54998779296875,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 9,
+          "kimlik": "9",
+          "ad": "9",
+          "değer": null,
+          "kategori": null,
+          "x": 371.9549865722656,
+          "y": 335.30499267578125,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 371.9549865722656,
+            "y": 335.30499267578125,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 10,
+          "kimlik": "10",
+          "ad": "10",
+          "değer": null,
+          "kategori": null,
+          "x": 322.9100036621094,
+          "y": 366.9289855957031,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 322.9100036621094,
+            "y": 366.9289855957031,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 11,
+          "kimlik": "11",
+          "ad": "11",
+          "değer": null,
+          "kategori": null,
+          "x": 465.49700927734375,
+          "y": 403.12200927734375,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 465.49700927734375,
+            "y": 403.12200927734375,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 12,
+          "kimlik": "12",
+          "ad": "12",
+          "değer": null,
+          "kategori": null,
+          "x": 380.5150146484375,
+          "y": 296.156005859375,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 380.5150146484375,
+            "y": 296.156005859375,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 13,
+          "kimlik": "13",
+          "ad": "13",
+          "değer": null,
+          "kategori": null,
+          "x": 344.09100341796875,
+          "y": 370.302001953125,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 344.09100341796875,
+            "y": 370.302001953125,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 14,
+          "kimlik": "14",
+          "ad": "14",
+          "değer": null,
+          "kategori": null,
+          "x": 160.2449951171875,
+          "y": 290.88800048828125,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 160.2449951171875,
+            "y": 290.88800048828125,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 15,
+          "kimlik": "15",
+          "ad": "15",
+          "değer": null,
+          "kategori": null,
+          "x": 427.97698974609375,
+          "y": 104.83700561523438,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 427.97698974609375,
+            "y": 104.83700561523438,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 16,
+          "kimlik": "16",
+          "ad": "16",
+          "değer": null,
+          "kategori": null,
+          "x": 258.0799865722656,
+          "y": 94.56600952148438,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 258.0799865722656,
+            "y": 94.56600952148438,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 17,
+          "kimlik": "17",
+          "ad": "17",
+          "değer": null,
+          "kategori": null,
+          "x": 301.6730041503906,
+          "y": 255.89500427246094,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 301.6730041503906,
+            "y": 255.89500427246094,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 18,
+          "kimlik": "18",
+          "ad": "18",
+          "değer": null,
+          "kategori": null,
+          "x": 386.8810119628906,
+          "y": 254.0330047607422,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 386.8810119628906,
+            "y": 254.0330047607422,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 19,
+          "kimlik": "19",
+          "ad": "19",
+          "değer": null,
+          "kategori": null,
+          "x": 408.6090087890625,
+          "y": 225.96600341796875,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 408.6090087890625,
+            "y": 225.96600341796875,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 20,
+          "kimlik": "20",
+          "ad": "20",
+          "değer": null,
+          "kategori": null,
+          "x": 175.06100463867188,
+          "y": 211.97300720214844,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 175.06100463867188,
+            "y": 211.97300720214844,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 21,
+          "kimlik": "21",
+          "ad": "21",
+          "değer": null,
+          "kategori": null,
+          "x": 193.96099853515625,
+          "y": 386.83599853515625,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 193.96099853515625,
+            "y": 386.83599853515625,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 22,
+          "kimlik": "22",
+          "ad": "22",
+          "değer": null,
+          "kategori": null,
+          "x": 540.8159790039062,
+          "y": 289.58599853515625,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 540.8159790039062,
+            "y": 289.58599853515625,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 23,
+          "kimlik": "23",
+          "ad": "23",
+          "değer": null,
+          "kategori": null,
+          "x": 527.302001953125,
+          "y": 207.19900512695312,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 527.302001953125,
+            "y": 207.19900512695312,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 24,
+          "kimlik": "24",
+          "ad": "24",
+          "değer": null,
+          "kategori": null,
+          "x": 319.9360046386719,
+          "y": 124.843994140625,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 319.9360046386719,
+            "y": 124.843994140625,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 25,
+          "kimlik": "25",
+          "ad": "25",
+          "değer": null,
+          "kategori": null,
+          "x": 208.86000061035156,
+          "y": 149.42799377441406,
+          "genişlik": 10.0,
+          "yükseklik": 10.0,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "opaklık": 1.0,
+          "sabit": false,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 208.86000061035156,
+            "y": 149.42799377441406,
+            "dönüş": 0.0,
+            "renk": null
+          }
+        }
+      ],
+      "bağlar": [
+        {
+          "veri_sırası": 0,
+          "kaynak": "1",
+          "hedef": "-1",
+          "değer": null,
+          "x1": 328.5929870605469,
+          "y1": 289.2170104980469,
+          "x2": 350.0,
+          "y2": 262.5,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 339.2779235839844,
+            "y": 275.8436279296875,
+            "dönüş": -0.8952934741973877,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 1,
+          "kaynak": "-1",
+          "hedef": "1",
+          "değer": null,
+          "x1": 350.0,
+          "y1": 262.5,
+          "x2": 328.5929870605469,
+          "y2": 289.2170104980469,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 339.2779235839844,
+            "y": 275.8436279296875,
+            "dönüş": -0.8952934741973877,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 2,
+          "kaynak": "1",
+          "hedef": "4",
+          "değer": null,
+          "x1": 328.5929870605469,
+          "y1": 289.2170104980469,
+          "x2": 346.39300537109375,
+          "y2": 306.35400390625,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 337.5094909667969,
+            "y": 297.76837158203125,
+            "dönüş": 0.7664227485656738,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 3,
+          "kaynak": "5",
+          "hedef": "1",
+          "değer": null,
+          "x1": 321.88800048828125,
+          "y1": 327.6730041503906,
+          "x2": 328.5929870605469,
+          "y2": 289.2170104980469,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 325.2170104980469,
+            "y": 308.44091796875,
+            "dönüş": -1.3981767892837524,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 4,
+          "kaynak": "4",
+          "hedef": "5",
+          "değer": null,
+          "x1": 346.39300537109375,
+          "y1": 306.35400390625,
+          "x2": 321.88800048828125,
+          "y2": 327.6730041503906,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 334.1248779296875,
+            "y": 316.9955139160156,
+            "dönüş": -0.7159829139709473,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 5,
+          "kaynak": "7",
+          "hedef": "8",
+          "değer": null,
+          "x1": 412.6289978027344,
+          "y1": 365.6910095214844,
+          "x2": 442.6180114746094,
+          "y2": 387.54998779296875,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 427.6375427246094,
+            "y": 376.60125732421875,
+            "dönüş": 0.6298595070838928,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 6,
+          "kaynak": "1",
+          "hedef": "9",
+          "değer": null,
+          "x1": 328.5929870605469,
+          "y1": 289.2170104980469,
+          "x2": 371.9549865722656,
+          "y2": 335.30499267578125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 350.29132080078125,
+            "y": 312.2446594238281,
+            "dönüş": 0.8158636689186096,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 7,
+          "kaynak": "1",
+          "hedef": "3",
+          "değer": null,
+          "x1": 328.5929870605469,
+          "y1": 289.2170104980469,
+          "x2": 285.8190002441406,
+          "y2": 289.57501220703125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 307.2057800292969,
+            "y": 289.3721923828125,
+            "dönüş": -0.00836944580078125,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 8,
+          "kaynak": "8",
+          "hedef": "11",
+          "değer": null,
+          "x1": 442.6180114746094,
+          "y1": 387.54998779296875,
+          "x2": 465.49700927734375,
+          "y2": 403.12200927734375,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 454.0708923339844,
+            "y": 395.3163146972656,
+            "dönüş": 0.5976040363311768,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 9,
+          "kaynak": "13",
+          "hedef": "9",
+          "değer": null,
+          "x1": 344.09100341796875,
+          "y1": 370.302001953125,
+          "x2": 371.9549865722656,
+          "y2": 335.30499267578125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 358.00439453125,
+            "y": 352.7886657714844,
+            "dönüş": -0.8983878493309021,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 10,
+          "kaynak": "12",
+          "hedef": "4",
+          "değer": null,
+          "x1": 380.5150146484375,
+          "y1": 296.156005859375,
+          "x2": 346.39300537109375,
+          "y2": 306.35400390625,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 363.44720458984375,
+            "y": 301.232177734375,
+            "dönüş": -0.2904186248779297,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 11,
+          "kaynak": "12",
+          "hedef": "9",
+          "değer": null,
+          "x1": 380.5150146484375,
+          "y1": 296.156005859375,
+          "x2": 371.9549865722656,
+          "y2": 335.30499267578125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 376.21173095703125,
+            "y": 315.72540283203125,
+            "dönüş": -1.3555316925048828,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 12,
+          "kaynak": "10",
+          "hedef": "13",
+          "değer": null,
+          "x1": 322.9100036621094,
+          "y1": 366.9289855957031,
+          "x2": 344.09100341796875,
+          "y2": 370.302001953125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 333.5042419433594,
+            "y": 368.59197998046875,
+            "dönüş": 0.15792123973369598,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 13,
+          "kaynak": "9",
+          "hedef": "7",
+          "değer": null,
+          "x1": 371.9549865722656,
+          "y1": 335.30499267578125,
+          "x2": 412.6289978027344,
+          "y2": 365.6910095214844,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 392.3062438964844,
+            "y": 350.4789123535156,
+            "dönüş": 0.6416183114051819,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 14,
+          "kaynak": "18",
+          "hedef": "19",
+          "değer": null,
+          "x1": 386.8810119628906,
+          "y1": 254.0330047607422,
+          "x2": 408.6090087890625,
+          "y2": 225.96600341796875,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 397.7261657714844,
+            "y": 239.9849395751953,
+            "dönüş": -0.9120191335678101,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 15,
+          "kaynak": "-1",
+          "hedef": "18",
+          "değer": null,
+          "x1": 350.0,
+          "y1": 262.5,
+          "x2": 386.8810119628906,
+          "y2": 254.0330047607422,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 368.4351501464844,
+            "y": 258.2433166503906,
+            "dönüş": -0.22566565871238708,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 16,
+          "kaynak": "1",
+          "hedef": "17",
+          "değer": null,
+          "x1": 328.5929870605469,
+          "y1": 289.2170104980469,
+          "x2": 301.6730041503906,
+          "y2": 255.89500427246094,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 315.1515197753906,
+            "y": 272.5410461425781,
+            "dönüş": 0.8912725448608398,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 17,
+          "kaynak": "10",
+          "hedef": "13",
+          "değer": null,
+          "x1": 322.9100036621094,
+          "y1": 366.9289855957031,
+          "x2": 344.09100341796875,
+          "y2": 370.302001953125,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 333.5042419433594,
+            "y": 368.59197998046875,
+            "dönüş": 0.15792123973369598,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 18,
+          "kaynak": "12",
+          "hedef": "18",
+          "değer": null,
+          "x1": 380.5150146484375,
+          "y1": 296.156005859375,
+          "x2": 386.8810119628906,
+          "y2": 254.0330047607422,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 383.6744689941406,
+            "y": 275.0909423828125,
+            "dönüş": -1.4208025932312012,
+            "renk": null
+          }
+        },
+        {
+          "veri_sırası": 19,
+          "kaynak": "5",
+          "hedef": "10",
+          "değer": null,
+          "x1": 321.88800048828125,
+          "y1": 327.6730041503906,
+          "x2": 322.9100036621094,
+          "y2": 366.9289855957031,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            134,
+            135,
+            140,
+            255
+          ],
+          "kalınlık": 1.0,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": null,
+          "hedef_sembolü": null,
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 322.42279052734375,
+            "y": 347.3003845214844,
+            "dönüş": 1.5447678565979004,
+            "renk": null
+          }
+        }
+      ]
+    }
+  ]
+}

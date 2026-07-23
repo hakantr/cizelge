@@ -135,7 +135,11 @@ pub fn gösterge_çiz(
     // paylaşır; kısa son satır ayrıca ortalanmaz.
     let yatay_satırlar: Vec<(usize, usize, f32)> =
         if seçenek.yön == Yön::Yatay && !seçenek.kaydırılabilir {
-            let kullanılabilir = (çizici.genişlik() - seçenek.iç_boşluk * 2.0).max(1.0);
+            // LegendView önce box-layout parametrelerinden `maxSize`
+            // çıkarır. Açık `right`, width verilmemiş yatay legendin satır
+            // kırma alanını sağ kenar uzaklığı kadar daraltır.
+            let sağ_payı = seçenek.sağ.map_or(0.0, |sağ| sağ.çöz(çizici.genişlik()));
+            let kullanılabilir = (çizici.genişlik() - sağ_payı - seçenek.iç_boşluk * 2.0).max(1.0);
             let mut satırlar = Vec::new();
             let mut başlangıç = 0usize;
             let mut genişlik = 0.0f32;
@@ -718,7 +722,7 @@ fn öğe_çiz(
                     (simge_x + seçenek.simge_genişliği / 2.0, orta_y),
                     yarıçap,
                     Some(&Dolgu::Düz(renk)),
-                    None,
+                    kenarlık,
                 );
             }
             GöstergeSimgesi::Çizgi => {

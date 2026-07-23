@@ -11,7 +11,7 @@ profiller = ["açık", "koyu"]
 
 [kanıt]
 api = "yok"
-statik_görsel = "yok"
+statik_görsel = "tam_kanıtlı"
 animasyon = "yok"
 etkileşim = "yok"
 erişilebilirlik = "yok"

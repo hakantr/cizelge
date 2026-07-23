@@ -841,6 +841,180 @@ pub fn sankey_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), 
     )
 }
 
+fn grafo_seçicileri(
+    çalışma: &GrafikÇalışmaZamanı,
+    yük: &EylemYükü,
+) -> Result<Vec<SeriSeçici>, BilesenHatasi> {
+    if let Some(seçici) = yük.seri_seçici() {
+        return Ok(vec![seçici]);
+    }
+    let seçiciler = çalışma
+        .seçenekleri_al()?
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, seri)| {
+            matches!(seri, crate::model::seri::Seri::Grafo(_)).then_some(SeriSeçici::Sıra(sıra))
+        })
+        .collect::<Vec<_>>();
+    if seçiciler.is_empty() {
+        return Err(BilesenHatasi::EksikVeri {
+            bileşen: "graphRoam.series",
+            sıra: 0,
+        });
+    }
+    Ok(seçiciler)
+}
+
+fn grafo_olayı(
+    çalışma: &GrafikÇalışmaZamanı,
+    seri_sırası: usize,
+) -> Result<OlayYükü, BilesenHatasi> {
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seri = seçenekler.seriler.get(seri_sırası);
+    Ok(OlayYükü {
+        bileşen_türü: Some("series".to_owned()),
+        bileşen_alt_türü: Some("graph".to_owned()),
+        seri_sırası: Some(seri_sırası),
+        seri_kimliği: seri.and_then(|seri| match seri {
+            crate::model::seri::Seri::Grafo(grafo) => grafo.kimlik.clone(),
+            _ => None,
+        }),
+        seri_adı: seri.and_then(|seri| seri.ad().map(str::to_owned)),
+        ..OlayYükü::default()
+    })
+}
+
+fn grafo_eski_odak_olayları(
+    çalışma: &GrafikÇalışmaZamanı,
+    yük: &EylemYükü,
+) -> Result<Vec<OlayYükü>, BilesenHatasi> {
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seçici = yük.seri_seçici();
+    let veri_sırası = isteğe_bağlı_sıra(yük, "dataIndex")?;
+    let veri_türü = yük.al("dataType").and_then(EylemDeğeri::metin);
+    let sıralar = seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, seri)| {
+            let crate::model::seri::Seri::Grafo(_) = seri else {
+                return None;
+            };
+            let uyuyor = seçici.as_ref().is_none_or(|seçici| match seçici {
+                SeriSeçici::Sıra(beklenen) => sıra == *beklenen,
+                SeriSeçici::Kimlik(beklenen) => seri.kimlik() == Some(beklenen.as_str()),
+                SeriSeçici::Ad(beklenen) => seri.ad() == Some(beklenen.as_str()),
+            });
+            uyuyor.then_some(sıra)
+        })
+        .collect::<Vec<_>>();
+    if sıralar.is_empty() {
+        return Err(BilesenHatasi::EksikVeri {
+            bileşen: "focusNodeAdjacency.series",
+            sıra: 0,
+        });
+    }
+    sıralar
+        .into_iter()
+        .map(|sıra| {
+            let mut olay = grafo_olayı(çalışma, sıra)?;
+            olay.veri_sırası = veri_sırası;
+            olay.öğe = veri_türü.map(str::to_owned);
+            if let Some(veri_sırası) = veri_sırası
+                && let Some(crate::model::seri::Seri::Grafo(grafo)) = seçenekler.seriler.get(sıra)
+            {
+                olay.veri_adı = grafo
+                    .düğümler
+                    .get(veri_sırası)
+                    .map(|düğüm| düğüm.ad.clone());
+            }
+            Ok(olay)
+        })
+        .collect()
+}
+
+/// Graph'ın resmî `graphRoam` ve geriye dönük focus action'larını kaydeder.
+pub fn grafo_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "graphRoam",
+        "graphRoam",
+        EylemGüncellemesi::Yok,
+        |çalışma, yük| {
+            let dx = isteğe_bağlı_sayı(yük, "dx")?.map(|değer| değer as f32);
+            let dy = isteğe_bağlı_sayı(yük, "dy")?.map(|değer| değer as f32);
+            if dx.is_some() != dy.is_some() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "graphRoam.dx/dy",
+                    ayrıntı: "pan için dx ve dy birlikte gerekli".to_owned(),
+                });
+            }
+            let zoom = isteğe_bağlı_sayı(yük, "zoom")?.map(|değer| değer as f32);
+            if dx.is_none() && zoom.is_none() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "graphRoam",
+                    ayrıntı: "dx/dy veya zoom gerekli".to_owned(),
+                });
+            }
+            let origin_x = isteğe_bağlı_sayı(yük, "originX")?.map(|değer| değer as f32);
+            let origin_y = isteğe_bağlı_sayı(yük, "originY")?.map(|değer| değer as f32);
+            if origin_x.is_some() != origin_y.is_some() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "graphRoam.originX/originY",
+                    ayrıntı: "zoom kökeni için originX ve originY birlikte gerekli".to_owned(),
+                });
+            }
+            let seçiciler = grafo_seçicileri(çalışma, yük)?;
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let (seri_sırası, merkez, yakınlaştırma) = çalışma.grafo_görünümünü_değiştir(
+                    seçici, dx, dy, zoom, origin_x, origin_y, true,
+                )?;
+                let mut olay = grafo_olayı(çalışma, seri_sırası)?;
+                if let (Some(dx), Some(dy)) = (dx, dy) {
+                    olay.alanlar.extend([
+                        ("dx".to_owned(), EylemDeğeri::from(dx)),
+                        ("dy".to_owned(), EylemDeğeri::from(dy)),
+                    ]);
+                }
+                if let Some(zoom) = zoom {
+                    olay.alanlar
+                        .insert("zoom".to_owned(), EylemDeğeri::from(zoom));
+                }
+                if let (Some(origin_x), Some(origin_y)) = (origin_x, origin_y) {
+                    olay.alanlar.extend([
+                        ("originX".to_owned(), EylemDeğeri::from(origin_x)),
+                        ("originY".to_owned(), EylemDeğeri::from(origin_y)),
+                    ]);
+                }
+                olay.alanlar.extend([
+                    (
+                        "center".to_owned(),
+                        EylemDeğeri::Dizi(vec![merkez.0.into(), merkez.1.into()]),
+                    ),
+                    ("currentZoom".to_owned(), yakınlaştırma.into()),
+                ]);
+                olaylar.push(olay);
+            }
+            Ok(olaylar)
+        },
+    )?;
+    // ECharts 6.1 `install.ts` bu iki eski action'ı model değiştirmeyen
+    // işleyiciler olarak tutar; seçici ve olay yükü yine korunur.
+    kayıt.kaydet(
+        "focusNodeAdjacency",
+        "focusNodeAdjacency",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| grafo_eski_odak_olayları(çalışma, yük),
+    )?;
+    kayıt.kaydet(
+        "unfocusNodeAdjacency",
+        "unfocusNodeAdjacency",
+        EylemGüncellemesi::Görünüm,
+        |çalışma, yük| grafo_eski_odak_olayları(çalışma, yük),
+    )
+}
+
 /// Tree dal aç/kapat action'ını kaydeder. `seriesIndex`/`seriesId`/
 /// `seriesName` verilmezse ECharts `eachComponent` gibi bütün Tree
 /// serilerine aynı `dataIndex` uygulanır.
@@ -1912,6 +2086,7 @@ pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<
     fırça_eylemini_kaydet(kayıt)?;
     paralel_eylemlerini_kaydet(kayıt)?;
     sankey_eylemlerini_kaydet(kayıt)?;
+    grafo_eylemlerini_kaydet(kayıt)?;
     ağaç_eylemlerini_kaydet(kayıt)?;
     ağaç_haritası_eylemlerini_kaydet(kayıt)?;
     güneş_patlaması_eylemlerini_kaydet(kayıt)?;
@@ -2114,6 +2289,7 @@ mod testler {
     use crate::model::bilesen::{Başlık, Fırça, Gösterge, GöstergeSeçimKipi, Izgara};
     use crate::model::eksen::{Eksen, EksenKırılması};
     use crate::model::gorsel_esleme::GörselEşleme;
+    use crate::model::grafo::{GrafoDüğümü, GrafoSerisi, GrafoYerleşimi};
     use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
     use crate::model::secenekler::GrafikSeçenekleri;
     use crate::model::seri::{
@@ -2282,6 +2458,89 @@ mod testler {
                 )
                 .is_err()
         );
+    }
+
+    #[test]
+    fn graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(
+            GrafoSerisi::yeni()
+                .kimlik("graph-id")
+                .ad("Graph")
+                .yerleşim(GrafoYerleşimi::Yok)
+                .gezinme(true)
+                .yakınlaştırma_sınırı(0.5, 2.0)
+                .düğümler([
+                    GrafoDüğümü::yeni("A", 20.0).konum(0.0, 0.0),
+                    GrafoDüğümü::yeni("B", 20.0).konum(100.0, 100.0),
+                ])
+                .bağlar([("A", "B")]),
+        );
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        grafo_eylemlerini_kaydet(&mut kayıt).unwrap();
+
+        let kaydırma = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("graphRoam")
+                    .alan("seriesId", "graph-id")
+                    .alan("dx", 24.0_f64)
+                    .alan("dy", -12.0_f64),
+            )
+            .unwrap();
+        assert_eq!(kaydırma.len(), 1);
+        assert_eq!(kaydırma[0].tür, "graphRoam");
+        assert_eq!(kaydırma[0].bileşen_alt_türü.as_deref(), Some("graph"));
+        assert_eq!(kaydırma[0].seri_kimliği.as_deref(), Some("graph-id"));
+        assert_eq!(kaydırma[0].alanlar["dx"].sayı(), Some(24.0));
+        let ilk_merkez = kaydırma[0].alanlar["center"].dizi().expect("merkez dizisi");
+        assert_ne!(ilk_merkez[0].sayı(), Some(50.0));
+
+        let yakınlaştırma = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("graphRoam")
+                    .alan("seriesName", "Graph")
+                    .alan("zoom", 10.0_f64)
+                    .alan("originX", 400.0_f64)
+                    .alan("originY", 300.0_f64),
+            )
+            .unwrap();
+        assert_eq!(yakınlaştırma[0].alanlar["currentZoom"].sayı(), Some(2.0));
+        let seçenekler = çalışma.seçenekleri_al().unwrap();
+        let crate::model::seri::Seri::Grafo(grafo) = &seçenekler.seriler[0] else {
+            panic!("Graph serisi bekleniyordu");
+        };
+        assert!((grafo.yakınlaştırma - 2.0).abs() < 1e-6);
+        assert!(grafo.merkez.is_some());
+
+        let eksik = EylemYükü::yeni("graphRoam")
+            .alan("seriesIndex", 0usize)
+            .alan("dx", 1.0_f64);
+        assert!(kayıt.gönder(&mut çalışma, &eksik).is_err());
+
+        let eski_odak = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("focusNodeAdjacency")
+                    .alan("seriesId", "graph-id")
+                    .alan("dataIndex", 1usize)
+                    .alan("dataType", "node"),
+            )
+            .unwrap();
+        assert_eq!(eski_odak[0].tür, "focusNodeAdjacency");
+        assert_eq!(eski_odak[0].veri_sırası, Some(1));
+        assert_eq!(eski_odak[0].veri_adı.as_deref(), Some("B"));
+        assert_eq!(eski_odak[0].öğe.as_deref(), Some("node"));
+
+        let eski_odak_kaldır = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("unfocusNodeAdjacency").alan("seriesName", "Graph"),
+            )
+            .unwrap();
+        assert_eq!(eski_odak_kaldır[0].tür, "unfocusNodeAdjacency");
     }
 
     #[test]

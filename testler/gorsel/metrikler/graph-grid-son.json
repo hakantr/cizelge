@@ -1,0 +1,304 @@
+{
+  "id": "graph-grid",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 715,
+  "değişen_piksel_oranı": 0.002648148148148148,
+  "ssim": 0.992641976967515,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 1010,
+    "değişen_piksel_oranı": 0.0037407407407407407,
+    "ssim": 0.9916161733876938
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "graph_kartezyen_x_taban_çizgisi",
+      "geçti": true,
+      "açıklama": "Graph düğüm ve kenar katmanından bağımsız olarak kartezyen X ekseni tabanı kesintisiz görünmeli",
+      "örnekler": [
+        {
+          "x": 120,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 120,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 120,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "geçti": true
+        },
+        {
+          "x": 150,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 150,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 150,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "geçti": true
+        },
+        {
+          "x": 270,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 270,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 270,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "geçti": true
+        },
+        {
+          "x": 300,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 300,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 300,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "geçti": true
+        },
+        {
+          "x": 450,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 450,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 450,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "geçti": true
+        },
+        {
+          "x": 500,
+          "y": 381,
+          "yön": "yatay",
+          "referans": {
+            "kayma": 0,
+            "x": 500,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "gerçek": {
+            "kayma": 0,
+            "x": 500,
+            "y": 381,
+            "rgb": [
+              141,
+              141,
+              145
+            ],
+            "arkaplan": [
+              255,
+              255,
+              255
+            ],
+            "kontrast": 114,
+            "parlaklık": 142.33333333333334,
+            "nötrlük_sapması": 4
+          },
+          "geçti": true
+        }
+      ]
+    },
+    {
+      "ad": "graph_düğüm_bağ_ve_etiket_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Graph düğümünün kimlik/kategori, dünya merkezi, sembol boyutu, RGBA stili ve görünür etiket tabanı; her bağın kaynak-hedef kimliği, kırpılmış uç/kontrol noktası, uç sembolü ve çizgi stili kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 7,
+      "gerçek_düğüm": 7,
+      "beklenen_bağ": 6,
+      "gerçek_bağ": 6,
+      "karşılaştırılan_alan": 189,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-grid.png",
+    "gerçek": "testler/gorsel/gerçek/default/graph-grid.png",
+    "fark": "testler/gorsel/fark/default/graph-grid.png",
+    "normalize_fark": "testler/gorsel/fark/default/graph-grid-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/graph-grid.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/graph-grid.json"
+  }
+}

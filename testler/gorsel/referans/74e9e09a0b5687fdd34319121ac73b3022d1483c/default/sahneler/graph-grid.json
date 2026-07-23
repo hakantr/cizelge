@@ -1,0 +1,673 @@
+{
+  "şema_sürümü": 1,
+  "tür": "graph",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "ad": "series\u00000",
+      "koordinat_sistemi": "cartesian2d",
+      "alan": {
+        "x": 0,
+        "y": 0,
+        "genişlik": 700,
+        "yükseklik": 525
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "kimlik": "0",
+          "ad": "0",
+          "değer": null,
+          "kategori": null,
+          "x": 105,
+          "y": 413.688,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Mon",
+            "x": 105,
+            "y": 413.688,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 93.328,
+              "y": 407.688,
+              "genişlik": 23.344,
+              "yükseklik": 12
+            }
+          }
+        },
+        {
+          "veri_sırası": 1,
+          "kimlik": "1",
+          "ad": "1",
+          "değer": null,
+          "kategori": null,
+          "x": 192.5,
+          "y": 317.016,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Tue",
+            "x": 192.5,
+            "y": 317.016,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 182.384,
+              "y": 311.016,
+              "genişlik": 20.232,
+              "yükseklik": 12
+            }
+          }
+        },
+        {
+          "veri_sırası": 2,
+          "kimlik": "2",
+          "ad": "2",
+          "değer": null,
+          "kategori": null,
+          "x": 280,
+          "y": 395.676,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Wed",
+            "x": 280,
+            "y": 395.676,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 267.771,
+              "y": 389.676,
+              "genişlik": 24.457,
+              "yükseklik": 12
+            }
+          }
+        },
+        {
+          "veri_sırası": 3,
+          "kimlik": "3",
+          "ad": "3",
+          "değer": null,
+          "kategori": null,
+          "x": 367.5,
+          "y": 146.168,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Very Loooong Thu",
+            "x": 367.5,
+            "y": 146.168,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 318.463,
+              "y": 140.168,
+              "genişlik": 98.074,
+              "yükseklik": 12
+            }
+          }
+        },
+        {
+          "veri_sırası": 4,
+          "kimlik": "4",
+          "ad": "4",
+          "değer": null,
+          "kategori": null,
+          "x": 455,
+          "y": 437.324,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Fri",
+            "x": 455,
+            "y": 437.324,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 448.004,
+              "y": 431.324,
+              "genişlik": 13.992,
+              "yükseklik": 12
+            }
+          }
+        },
+        {
+          "veri_sırası": 5,
+          "kimlik": "5",
+          "ad": "5",
+          "değer": null,
+          "kategori": null,
+          "x": 542.5,
+          "y": 78.832,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Sat",
+            "x": 542.5,
+            "y": 78.832,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 533.494,
+              "y": 72.832,
+              "genişlik": 18.012,
+              "yükseklik": 12
+            }
+          }
+        },
+        {
+          "veri_sırası": 6,
+          "kimlik": "6",
+          "ad": "6",
+          "değer": null,
+          "kategori": null,
+          "x": 630,
+          "y": 400.16,
+          "genişlik": 40,
+          "yükseklik": 40,
+          "sembol": "circle",
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "opaklık": 1,
+          "sabit": false,
+          "etiket": {
+            "göster": true,
+            "metin": "Sun",
+            "x": 630,
+            "y": 400.16,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "normal normal 12px sans-serif",
+            "renk": null,
+            "sınır": {
+              "x": 619.324,
+              "y": 394.16,
+              "genişlik": 21.352,
+              "yükseklik": 12
+            }
+          }
+        }
+      ],
+      "bağlar": [
+        {
+          "veri_sırası": 0,
+          "kaynak": "0",
+          "hedef": "1",
+          "değer": null,
+          "x1": 118.421,
+          "y1": 398.86,
+          "x2": 179.079,
+          "y2": 331.844,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 118.421,
+            "y": 398.86,
+            "boyut": [
+              4,
+              4
+            ],
+            "sınır": {
+              "x": 115.596,
+              "y": 396.035,
+              "genişlik": 5.65,
+              "yükseklik": 5.65
+            }
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 179.079,
+            "y": 331.844,
+            "boyut": [
+              10,
+              10
+            ],
+            "sınır": {
+              "x": 167.426,
+              "y": 327.37,
+              "genişlik": 16.596,
+              "yükseklik": 16.361
+            }
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 0,
+            "y": 0,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "",
+            "renk": null,
+            "sınır": null
+          }
+        },
+        {
+          "veri_sırası": 1,
+          "kaynak": "1",
+          "hedef": "2",
+          "değer": null,
+          "x1": 207.373,
+          "y1": 330.387,
+          "x2": 265.127,
+          "y2": 382.305,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 207.373,
+            "y": 330.387,
+            "boyut": [
+              4,
+              4
+            ],
+            "sınır": {
+              "x": 204.549,
+              "y": 327.562,
+              "genişlik": 5.649,
+              "yükseklik": 5.649
+            }
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 265.127,
+            "y": 382.305,
+            "boyut": [
+              10,
+              10
+            ],
+            "sınır": {
+              "x": 253.233,
+              "y": 370.662,
+              "genişlik": 16.351,
+              "yükseklik": 16.601
+            }
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 0,
+            "y": 0,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "",
+            "renk": null,
+            "sınır": null
+          }
+        },
+        {
+          "veri_sırası": 2,
+          "kaynak": "2",
+          "hedef": "3",
+          "değer": null,
+          "x1": 286.619,
+          "y1": 376.803,
+          "x2": 360.881,
+          "y2": 165.041,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 286.619,
+            "y": 376.803,
+            "boyut": [
+              4,
+              4
+            ],
+            "sınır": {
+              "x": 284.069,
+              "y": 374.254,
+              "genişlik": 5.098,
+              "yükseklik": 5.098
+            }
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 360.881,
+            "y": 165.041,
+            "boyut": [
+              10,
+              10
+            ],
+            "sınır": {
+              "x": 351.281,
+              "y": 162.835,
+              "genişlik": 15.891,
+              "yükseklik": 13.849
+            }
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 0,
+            "y": 0,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "",
+            "renk": null,
+            "sınır": null
+          }
+        },
+        {
+          "veri_sırası": 3,
+          "kaynak": "3",
+          "hedef": "4",
+          "değer": null,
+          "x1": 373.256,
+          "y1": 165.322,
+          "x2": 449.244,
+          "y2": 418.17,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 373.256,
+            "y": 165.322,
+            "boyut": [
+              4,
+              4
+            ],
+            "sınır": {
+              "x": 370.765,
+              "y": 162.831,
+              "genişlik": 4.982,
+              "yükseklik": 4.982
+            }
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 449.244,
+            "y": 418.17,
+            "boyut": [
+              10,
+              10
+            ],
+            "sınır": {
+              "x": 439.981,
+              "y": 406.675,
+              "genişlik": 15.647,
+              "yükseklik": 13.414
+            }
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 0,
+            "y": 0,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "",
+            "renk": null,
+            "sınır": null
+          }
+        },
+        {
+          "veri_sırası": 4,
+          "kaynak": "4",
+          "hedef": "5",
+          "değer": null,
+          "x1": 459.742,
+          "y1": 417.894,
+          "x2": 537.758,
+          "y2": 98.262,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 459.742,
+            "y": 417.894,
+            "boyut": [
+              4,
+              4
+            ],
+            "sınır": {
+              "x": 457.325,
+              "y": 415.477,
+              "genişlik": 4.834,
+              "yükseklik": 4.834
+            }
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 537.758,
+            "y": 98.262,
+            "boyut": [
+              10,
+              10
+            ],
+            "sınır": {
+              "x": 528.91,
+              "y": 96.681,
+              "genişlik": 15.324,
+              "yükseklik": 12.876
+            }
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 0,
+            "y": 0,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "",
+            "renk": null,
+            "sınır": null
+          }
+        },
+        {
+          "veri_sırası": 5,
+          "kaynak": "5",
+          "hedef": "6",
+          "değer": null,
+          "x1": 547.755,
+          "y1": 98.129,
+          "x2": 624.745,
+          "y2": 380.863,
+          "cpx1": null,
+          "cpy1": null,
+          "renk": [
+            47,
+            69,
+            84,
+            255
+          ],
+          "kalınlık": 1,
+          "opaklık": 0.5,
+          "tür": "solid",
+          "kaynak_sembolü": {
+            "sembol": "circle",
+            "x": 547.755,
+            "y": 98.129,
+            "boyut": [
+              4,
+              4
+            ],
+            "sınır": {
+              "x": 545.3,
+              "y": 95.674,
+              "genişlik": 4.91,
+              "yükseklik": 4.91
+            }
+          },
+          "hedef_sembolü": {
+            "sembol": "arrow",
+            "x": 624.745,
+            "y": 380.863,
+            "boyut": [
+              10,
+              10
+            ],
+            "sınır": {
+              "x": 615.685,
+              "y": 369.462,
+              "genişlik": 15.492,
+              "yükseklik": 13.152
+            }
+          },
+          "etiket": {
+            "göster": false,
+            "metin": "",
+            "x": 0,
+            "y": 0,
+            "dönüş": 0,
+            "yatay_hiza": "left",
+            "dikey_hiza": "top",
+            "font": "",
+            "renk": null,
+            "sınır": null
+          }
+        }
+      ]
+    }
+  ]
+}

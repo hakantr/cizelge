@@ -1,0 +1,45 @@
+{
+  "id": "graph-life-expectancy",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 205,
+  "değişen_piksel_oranı": 0.0007592592592592592,
+  "ssim": 0.9984280078443563,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 756,
+    "değişen_piksel_oranı": 0.0028,
+    "ssim": 0.9974576702055175
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "graph_düğüm_bağ_ve_etiket_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Graph düğümünün kimlik/kategori, dünya merkezi, sembol boyutu, RGBA stili ve görünür etiket tabanı; her bağın kaynak-hedef kimliği, kırpılmış uç/kontrol noktası, uç sembolü ve çizgi stili kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 81,
+      "gerçek_düğüm": 81,
+      "beklenen_bağ": 80,
+      "gerçek_bağ": 80,
+      "karşılaştırılan_alan": 2335,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/graph-life-expectancy.png",
+    "gerçek": "testler/gorsel/gerçek/default/graph-life-expectancy.png",
+    "fark": "testler/gorsel/fark/default/graph-life-expectancy.png",
+    "normalize_fark": "testler/gorsel/fark/default/graph-life-expectancy-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/graph-life-expectancy.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/graph-life-expectancy.json"
+  }
+}

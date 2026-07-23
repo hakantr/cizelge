@@ -15508,17 +15508,54 @@
     "ts_türü": "GraphSeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Grafo, From<GrafoSerisi>); src/model/grafo.rs (model); src/grafik/grafo.rs (yerleşim/boyama)",
+    "veri_biçimleri": [
+      "GrafoSerisi"
+    ],
+    "koordinat_dalları": [
+      "view",
+      "cartesian2d",
+      "polar",
+      "singleAxis",
+      "calendar",
+      "matrix",
+      "none/circular/force",
+      "boyama",
+      "düğüm/kenar isabeti",
+      "tooltip",
+      "drag/roam"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 242,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::resmi_kuvvet_sürtünmesi_durana_dek_ve_sabit_düğümle_çalışır",
+      "grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur",
+      "grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir",
+      "eylem::testler::graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::graph_polar_ve_single_axis_koordinatlari_dugum_ve_kenar_uretir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::graph_roam_alanlari_ve_gecici_durum_seri_bazinda_ayrilir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7e7e952d45a2bba95dd2",
@@ -21919,17 +21956,42 @@
     "ts_türü": "boolean | number | number[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.autoCurveness)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoOtomatikEğrilik); src/grafik/grafo.rs (çoklu-kenar eğrilik listesi)",
+    "veri_biçimleri": [
+      "boolean",
+      "number",
+      "number[]"
+    ],
+    "koordinat_dalları": [
+      "kapalı",
+      "otomatik-uzunluk",
+      "açık-değer-listesi",
+      "lineStyle.curveness önceliği"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 232,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f8b2562b1d363e597de8",
@@ -21940,17 +22002,40 @@
     "ts_türü": "{\n        label?: SeriesLabelOption\n        edgeLabel?: SeriesLabelOption\n        itemStyle?: ItemStyleOption\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.blur)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDurumu::bulanık); src/grafik/grafo.rs (odak dışı durum)",
+    "veri_biçimleri": [
+      "GraphNodeStateOption",
+      "GraphEdgeStateOption"
+    ],
+    "koordinat_dalları": [
+      "özel-yama",
+      "varsayılan 0.1 opaklık",
+      "düğüm/kenar",
+      "item/line/label/edgeLabel"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 195,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e98c390322d3f7b74543",
@@ -21961,17 +22046,41 @@
     "ts_türü": "GraphCategoryItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.categories)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoKategorisi, GrafoSerisi::kategoriler); src/grafik/grafo.rs (kategori kalıtımı/süzme)",
+    "veri_biçimleri": [
+      "GraphCategoryItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "ad/değer",
+      "palet",
+      "symbol/symbolSize",
+      "itemStyle/label/state",
+      "legend-süzme"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 168,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "78957bdf2ceec77cbb99",
@@ -21982,17 +22091,40 @@
     "ts_türü": "number | string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.category)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoKategoriSeçimi, GrafoDüğümü::kategori/kategori_adı)",
+    "veri_biçimleri": [
+      "number",
+      "string"
+    ],
+    "koordinat_dalları": [
+      "kategori-indisi",
+      "kategori-adı",
+      "eksik-kategori"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 110,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f49c92dbb50a10f43ebf",
@@ -22003,17 +22135,28 @@
     "ts_türü": "{\n        rotateLabel?: boolean\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            rotateLabel: false\n        }",
-    "rust_api": "src/model/seri.rs (graph.circular)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDaireselAyarı); src/grafik/grafo.rs (dairesel_yerleşim)",
+    "veri_biçimleri": [
+      "rotateLabel: bool"
+    ],
+    "koordinat_dalları": [
+      "etiket-dönüşü-kapalı",
+      "etiket-dönüşü-açık",
+      "sembol-boyutu-ağırlığı"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 210,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-circular-layout"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6d4f92889cd54d20dbac",
@@ -22024,17 +22167,51 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": "'view'",
-    "rust_api": "src/model/seri.rs (graph.coordinateSystem)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoKoordinatSistemi); src/cizim/gorunum.rs (Graph koordinat eşleyicileri)",
+    "veri_biçimleri": [
+      "view",
+      "cartesian2d",
+      "polar",
+      "singleAxis",
+      "calendar",
+      "matrix"
+    ],
+    "koordinat_dalları": [
+      "öz Graph view",
+      "kartezyen",
+      "kutupsal",
+      "tek-eksen",
+      "takvim-hücresi",
+      "matris-hücresi"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 156,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::graph_polar_ve_single_axis_koordinatlari_dugum_ve_kenar_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-grid",
+      "calendar-graph",
+      "matrix-graph",
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2b913fc7230db1084cb8",
@@ -22045,17 +22222,39 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.cursor)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::imleç); src/cizim/pencere.rs (Graph isabeti CSS→GPUI imleç eşlemesi)",
+    "veri_biçimleri": [
+      "string"
+    ],
+    "koordinat_dalları": [
+      "pointer",
+      "default",
+      "bilinmeyen-güvenli-düşüş"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 113,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::graph_roam_alanlari_ve_gecici_durum_seri_bazinda_ayrilir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ffe7d15e5db94ad03855",
@@ -22066,17 +22265,40 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.curveness)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoÇizgiStili::eğrilik); src/grafik/grafo.rs (Bézier kenar geometrisi)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "düz",
+      "pozitif/negatif-eğri",
+      "eğri-isabeti",
+      "etiket-teğeti"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 67,
       "sembol": "GraphEdgeLineStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fcbb473b8574b1226779",
@@ -22087,17 +22309,41 @@
     "ts_türü": "(GraphNodeItemOption | GraphDataValue)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::düğümler, GrafoDüğümü)",
+    "veri_biçimleri": [
+      "GraphNodeItemOption[]",
+      "GraphDataValue[]"
+    ],
+    "koordinat_dalları": [
+      "data-alias",
+      "yalın-değer",
+      "nesne-öğesi",
+      "boş-graph"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 162,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "944f46d8f75299f3b8a1",
@@ -22108,17 +22354,42 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "false",
-    "rust_api": "src/model/seri.rs (graph.draggable)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/düğüm sürüklenebilir); src/cizim/pencere.rs (none/circular/force düğüm sürükleme)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "seri-varsayılanı",
+      "düğüm-override",
+      "none-serbest",
+      "circular-yarıçap",
+      "force-sabit"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 112,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::graph_roam_alanlari_ve_gecici_durum_seri_bazinda_ayrilir",
+      "grafik::grafo::testler::dairesel_dugum_suruklemesi_yaricapi_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fa36b54792c03aad29c4",
@@ -22129,17 +22400,42 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "false",
-    "rust_api": "src/model/seri.rs (graph.draggable)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/düğüm sürüklenebilir); src/cizim/pencere.rs (none/circular/force düğüm sürükleme)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "seri-varsayılanı",
+      "düğüm-override",
+      "none-serbest",
+      "circular-yarıçap",
+      "force-sabit"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 175,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "cizim::gorunum::yakınlaştırma_yönü_testleri::graph_roam_alanlari_ve_gecici_durum_seri_bazinda_ayrilir",
+      "grafik::grafo::testler::dairesel_dugum_suruklemesi_yaricapi_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "dff53ce1862cb71f72a1",
@@ -22150,17 +22446,42 @@
     "ts_türü": "SeriesLineLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            position: 'middle',\n            distance: 5\n        }",
-    "rust_api": "src/model/seri.rs (graph.edgeLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::kenar_etiketi, GrafoBağı::etiket, GrafoDurumu::kenar_etiketi); src/grafik/grafo.rs (kenar orta-nokta etiketi)",
+    "veri_biçimleri": [
+      "SeriesLineLabelOption"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "kenar",
+      "emphasis/blur/select",
+      "formatter",
+      "Bézier-teğet-dönüşü"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 180,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3d24aeab62d2a14dc1ee",
@@ -22171,17 +22492,40 @@
     "ts_türü": "GraphEdgeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.edges)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::ayrıntılı_bağlar, GrafoBağı)",
+    "veri_biçimleri": [
+      "GraphEdgeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "edges-alias",
+      "source/target",
+      "düğüm-indisi/id-adı"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 165,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "53db85872b4f61f840df",
@@ -22192,17 +22536,41 @@
     "ts_türü": "string | string[]",
     "zorunlu": false,
     "echarts_varsayılanı": "['none', 'none']",
-    "rust_api": "src/model/seri.rs (graph.edgeSymbol)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::kenar_sembolleri, GrafoBağı::semboller); src/grafik/grafo.rs (kenar_sembolünü_çiz)",
+    "veri_biçimleri": [
+      "string",
+      "[from,to]"
+    ],
+    "koordinat_dalları": [
+      "seri-varsayılanı",
+      "kenar-override",
+      "kaynak/hedef-kırpma",
+      "none"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 177,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "87572ec6ad229a553faa",
@@ -22213,17 +22581,40 @@
     "ts_türü": "number | number[]",
     "zorunlu": false,
     "echarts_varsayılanı": "10",
-    "rust_api": "src/model/seri.rs (graph.edgeSymbolSize)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::kenar_sembol_boyutları, GrafoBağı::sembol_boyutları)",
+    "veri_biçimleri": [
+      "number",
+      "[from,to]"
+    ],
+    "koordinat_dalları": [
+      "tek-değer-normalizasyonu",
+      "iki-uç",
+      "kenar-override"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 178,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "7fae6fefbc0bcee5a07e",
@@ -22234,17 +22625,43 @@
     "ts_türü": "{\n        focus?: Exclude<GraphNodeItemOption['emphasis'], undefined>['focus']\n        scale?: boolean | number\n        label?: SeriesLabelOption\n        edgeLabel?: SeriesLabelOption\n        itemStyle?: ItemStyleOption\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            scale: true,\n            label: {\n                show: true\n            }\n        }",
-    "rust_api": "src/model/seri.rs (graph.emphasis)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDurumu/GrafoVurguOdağı); src/grafik/grafo.rs (düğüm/kenar odak kümeleri)",
+    "veri_biçimleri": [
+      "GraphNodeStateOption",
+      "GraphEdgeStateOption"
+    ],
+    "koordinat_dalları": [
+      "self",
+      "adjacency",
+      "series",
+      "scale",
+      "item/line/label/edgeLabel",
+      "disabled"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 186,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir",
+      "grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4cfc20867b0f88cc0296",
@@ -22255,17 +22672,39 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.fixed)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::sabit); src/grafik/grafo.rs (force sabit-düğüm)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "hareketli",
+      "sabit",
+      "drag-sırasında-sabit"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 105,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::resmi_kuvvet_sürtünmesi_durana_dek_ve_sabit_düğümle_çalışır",
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3e10704c28989d72e960",
@@ -22276,17 +22715,41 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.focusNodeAdjacency)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::eski_komşuluk_odağı); src/grafik/grafo.rs (GrafoVurguOdağı::Komşuluk); src/eylem.rs (eski focus/unfocus action olayları)",
+    "veri_biçimleri": [
+      "bool",
+      "legacy dispatchAction"
+    ],
+    "koordinat_dalları": [
+      "eski-option→emphasis.focus adjacency",
+      "focusNodeAdjacency olayı",
+      "unfocusNodeAdjacency olayı"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 173,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir",
+      "grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir",
+      "eylem::testler::graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "5952a87c5a5b671a6080",
@@ -22297,17 +22760,39 @@
     "ts_türü": "{\n        initLayout?: 'circular' | 'none'\n        // Node repulsion. Can be an array to represent range.\n        repulsion?: number | number[]\n        gravity?: number\n        // Initial friction\n        friction?: number\n\n        // Edge length. Can be an array to represent range.\n        edgeLength?: number | number[]\n\n        layoutAnimation?: boolean\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            initLayout: null,\n            // Node repulsion. Can be an array to represent range.\n            repulsion: [0, 50],\n            gravity: 0.1,\n            // Initial friction\n            friction: 0.6,\n\n            // Edge length. Can be an array to represent range.\n            edgeLength: 30,\n\n            layoutAnimation: true\n        }",
-    "rust_api": "src/model/seri.rs (graph.force)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoKuvveti/GrafoKuvvetBaşlangıcı/GrafoAralığı); src/grafik/grafo.rs (ECharts forceHelper portu)",
+    "veri_biçimleri": [
+      "initLayout",
+      "repulsion number|range",
+      "gravity",
+      "friction",
+      "edgeLength number|range",
+      "layoutAnimation"
+    ],
+    "koordinat_dalları": [
+      "rastgele/none başlangıç",
+      "dairesel-başlangıç",
+      "sabit-düğüm",
+      "durana-dek-yineleme",
+      "belirlenimci-tohum"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 215,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::resmi_kuvvet_sürtünmesi_durana_dek_ve_sabit_düğümle_çalışır",
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-force",
+      "graph-force-dynamic",
+      "graph-label-overlap"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "d4f93b017d30755633c9",
@@ -22318,17 +22803,39 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.id)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi/GrafoDüğümü::kimlik, GrafoUcu::Kimlik); src/eylem.rs (seriesId seçicisi)",
+    "veri_biçimleri": [
+      "string"
+    ],
+    "koordinat_dalları": [
+      "seri-kimliği",
+      "düğüm-kimliği",
+      "kenar-uç-çözümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 89,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "eylem::testler::graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8954d911d1e3aa12d1c6",
@@ -22339,17 +22846,38 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.ignoreForceLayout)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoBağı::kuvvet_yerleşimini_yoksay); src/grafik/grafo.rs (force edge adımı)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "normal-kuvvet-bağı",
+      "yerleşimde-yoksayılıp-görselde-korunan-bağ"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 134,
       "sembol": "GraphEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::resmi_kuvvet_sürtünmesi_durana_dek_ve_sabit_düğümle_çalışır",
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4c0580905b50b3bce141",
@@ -22360,17 +22888,42 @@
     "ts_türü": "ItemStyleOption<CallbackDataParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{}",
-    "rust_api": "src/model/seri.rs (graph.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoÖğeStili; seri/kategori/düğüm/durum kalıtımı); src/grafik/grafo.rs (sembol boyası)",
+    "veri_biçimleri": [
+      "ItemStyleOption"
+    ],
+    "koordinat_dalları": [
+      "renk/kenarlık",
+      "opaklık",
+      "gölge",
+      "seri→kategori→düğüm",
+      "emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 183,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "778b10a66173de3bcc53",
@@ -22381,17 +22934,42 @@
     "ts_türü": "ItemStyleOption<TCbParams>",
     "zorunlu": false,
     "echarts_varsayılanı": "{}",
-    "rust_api": "src/model/seri.rs (graph.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoÖğeStili; seri/kategori/düğüm/durum kalıtımı); src/grafik/grafo.rs (sembol boyası)",
+    "veri_biçimleri": [
+      "ItemStyleOption"
+    ],
+    "koordinat_dalları": [
+      "renk/kenarlık",
+      "opaklık",
+      "gölge",
+      "seri→kategori→düğüm",
+      "emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 71,
       "sembol": "GraphNodeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "41a9370b3be087d86709",
@@ -22402,17 +22980,43 @@
     "ts_türü": "SeriesLineLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: false,\n            formatter: '{b}'\n        }",
-    "rust_api": "src/model/seri.rs (graph.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/kategori/düğüm/durum etiketleri); src/grafik/grafo.rs (etiket geometrisi)",
+    "veri_biçimleri": [
+      "SeriesLabelOption"
+    ],
+    "koordinat_dalları": [
+      "seri→kategori→düğüm",
+      "formatter",
+      "konum/hiza/dönüş",
+      "dairesel-rotateLabel",
+      "emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 118,
       "sembol": "GraphEdgeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "954c2f9bc406e8a97144",
@@ -22423,17 +23027,43 @@
     "ts_türü": "SeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: false,\n            formatter: '{b}'\n        }",
-    "rust_api": "src/model/seri.rs (graph.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/kategori/düğüm/durum etiketleri); src/grafik/grafo.rs (etiket geometrisi)",
+    "veri_biçimleri": [
+      "SeriesLabelOption"
+    ],
+    "koordinat_dalları": [
+      "seri→kategori→düğüm",
+      "formatter",
+      "konum/hiza/dönüş",
+      "dairesel-rotateLabel",
+      "emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 72,
       "sembol": "GraphNodeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fdb5237ebf415697f59d",
@@ -22444,17 +23074,43 @@
     "ts_türü": "SeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: false,\n            formatter: '{b}'\n        }",
-    "rust_api": "src/model/seri.rs (graph.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/kategori/düğüm/durum etiketleri); src/grafik/grafo.rs (etiket geometrisi)",
+    "veri_biçimleri": [
+      "SeriesLabelOption"
+    ],
+    "koordinat_dalları": [
+      "seri→kategori→düğüm",
+      "formatter",
+      "konum/hiza/dönüş",
+      "dairesel-rotateLabel",
+      "emphasis/blur/select"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 181,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3f9d454ef79ad90cc85e",
@@ -22465,17 +23121,44 @@
     "ts_türü": "'none' | 'force' | 'circular'",
     "zorunlu": false,
     "echarts_varsayılanı": "null",
-    "rust_api": "src/model/seri.rs (graph.layout)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoYerleşimi); src/grafik/grafo.rs (none/circular/force yerleşimleri)",
+    "veri_biçimleri": [
+      "none",
+      "circular",
+      "force"
+    ],
+    "koordinat_dalları": [
+      "açık-konum",
+      "dairesel",
+      "kuvvet",
+      "dış-koordinat"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 160,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::resmi_kuvvet_sürtünmesi_durana_dek_ve_sabit_düğümle_çalışır",
+      "grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2095ada06dbb9663ab2d",
@@ -22486,17 +23169,39 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (graph.legendHoverLink)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::gösterge_vurgusu); src/grafik/grafo.rs (kategori ve komşuluk odak durumu)",
+    "veri_biçimleri": [
+      "bool"
+    ],
+    "koordinat_dalları": [
+      "açık-varsayılan",
+      "kapalı",
+      "kategori-legend-süzme"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 158,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "0209692585a9b03d05d2",
@@ -22507,17 +23212,43 @@
     "ts_türü": "GraphEdgeLineStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            // Don't use tokens.color.border because of the opacity\n            color: tokens.color.neutral50,\n            width: 1,\n            opacity: 0.5\n        }",
-    "rust_api": "src/model/seri.rs (graph.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoÇizgiStili; seri/kenar/durum kalıtımı); src/grafik/grafo.rs (kenar çizimi)",
+    "veri_biçimleri": [
+      "GraphEdgeLineStyleOption",
+      "LineStyleOption"
+    ],
+    "koordinat_dalları": [
+      "normal",
+      "emphasis/blur/select",
+      "source/target renk",
+      "solid/dashed/dotted",
+      "gölge"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 184,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fad412f755949a66f83d",
@@ -22528,17 +23259,43 @@
     "ts_türü": "GraphEdgeLineStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            // Don't use tokens.color.border because of the opacity\n            color: tokens.color.neutral50,\n            width: 1,\n            opacity: 0.5\n        }",
-    "rust_api": "src/model/seri.rs (graph.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoÇizgiStili; seri/kenar/durum kalıtımı); src/grafik/grafo.rs (kenar çizimi)",
+    "veri_biçimleri": [
+      "GraphEdgeLineStyleOption",
+      "LineStyleOption"
+    ],
+    "koordinat_dalları": [
+      "normal",
+      "emphasis/blur/select",
+      "source/target renk",
+      "solid/dashed/dotted",
+      "gölge"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 117,
       "sembol": "GraphEdgeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "bede8d4a2d10c2b029da",
@@ -22549,17 +23306,40 @@
     "ts_türü": "GraphEdgeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.links)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::ayrıntılı_bağlar; edges/links eşdeğeri)",
+    "veri_biçimleri": [
+      "GraphEdgeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "links-alias",
+      "source/target",
+      "düğüm-indisi/id-adı"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 166,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "72c8348519d6ff7bb8b2",
@@ -22570,17 +23350,41 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.name)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::ad, GrafoDüğümü/GrafoKategorisi::ad)",
+    "veri_biçimleri": [
+      "string"
+    ],
+    "koordinat_dalları": [
+      "seri-adı",
+      "düğüm-adı",
+      "kategori-adı",
+      "tooltip/label/legend"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 139,
       "sembol": "GraphCategoryItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "eylem::testler::graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fb6f8a09503ea57af152",
@@ -22591,17 +23395,41 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.name)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::ad, GrafoDüğümü/GrafoKategorisi::ad)",
+    "veri_biçimleri": [
+      "string"
+    ],
+    "koordinat_dalları": [
+      "seri-adı",
+      "düğüm-adı",
+      "kategori-adı",
+      "tooltip/label/legend"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 90,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir",
+      "eylem::testler::graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "579e87d32ea4dc6d81ed",
@@ -22612,17 +23440,39 @@
     "ts_türü": "(GraphNodeItemOption | GraphDataValue)[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.nodes)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoSerisi::düğümler; data/nodes eşdeğeri)",
+    "veri_biçimleri": [
+      "GraphNodeItemOption[]",
+      "GraphDataValue[]"
+    ],
+    "koordinat_dalları": [
+      "nodes-alias",
+      "data-alias"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 163,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c549c0949557ccbed9fb",
@@ -22633,17 +23483,39 @@
     "ts_türü": "{\n        label?: SeriesLabelOption\n        edgeLabel?: SeriesLabelOption\n        itemStyle?: ItemStyleOption\n        lineStyle?: LineStyleOption\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            itemStyle: {\n                borderColor: tokens.color.primary\n            }\n        }",
-    "rust_api": "src/model/seri.rs (graph.select)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDurumu::seçili, GrafoDüğümü::başlangıçta_seçili); src/grafik/grafo.rs (seçili boya)",
+    "veri_biçimleri": [
+      "GraphNodeStateOption",
+      "GraphEdgeStateOption"
+    ],
+    "koordinat_dalları": [
+      "başlangıç-seçimi",
+      "düğüm/kenar",
+      "item/line/label/edgeLabel"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 202,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1bd3035c7f6cf68d16af",
@@ -22654,17 +23526,42 @@
     "ts_türü": "string | string[]",
     "zorunlu": false,
     "echarts_varsayılanı": "'circle'",
-    "rust_api": "src/model/seri.rs (graph.symbol)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/kategori/düğüm sembol kalıtımı); src/grafik/grafo.rs (sembol yolu)",
+    "veri_biçimleri": [
+      "Icon"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "kategori",
+      "düğüm",
+      "built-in",
+      "path://",
+      "none"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 130,
       "sembol": "GraphEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "772a56fb46c35e5603e2",
@@ -22675,17 +23572,42 @@
     "ts_türü": "number | number[]",
     "zorunlu": false,
     "echarts_varsayılanı": "10",
-    "rust_api": "src/model/seri.rs (graph.symbolSize)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (seri/kategori/düğüm boyutu ve boyut_çifti); src/grafik/grafo.rs (sembol/kenar kırpma)",
+    "veri_biçimleri": [
+      "number",
+      "[width,height]"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "kategori",
+      "düğüm",
+      "iki-boyutlu-sembol",
+      "visualMap-override"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 132,
       "sembol": "GraphEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "97c32e520f4d044b0f1c",
@@ -22696,17 +23618,40 @@
     "ts_türü": "'graph'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Grafo, From<GrafoSerisi>); src/model/grafo.rs (GrafoSerisi)",
+    "veri_biçimleri": [
+      "sabit 'graph'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "boyama",
+      "düğüm/kenar isabeti",
+      "tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 154,
       "sembol": "GraphSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "806e0e89fc3a0f122503",
@@ -22717,17 +23662,41 @@
     "ts_türü": "OptionDataValue",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::değer/ham_değer, GrafoBağı::değer, GrafoKategorisi::değer)",
+    "veri_biçimleri": [
+      "OptionDataValue",
+      "GraphDataValue"
+    ],
+    "koordinat_dalları": [
+      "düğüm-sayı/karma-değer",
+      "kenar-değeri",
+      "kategori-değeri",
+      "visualMap/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 141,
       "sembol": "GraphCategoryItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "cfb3a2b724b4a7ea875b",
@@ -22738,17 +23707,41 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::değer/ham_değer, GrafoBağı::değer, GrafoKategorisi::değer)",
+    "veri_biçimleri": [
+      "OptionDataValue",
+      "GraphDataValue"
+    ],
+    "koordinat_dalları": [
+      "düğüm-sayı/karma-değer",
+      "kenar-değeri",
+      "kategori-değeri",
+      "visualMap/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 125,
       "sembol": "GraphEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "fba2d196158c23667e91",
@@ -22759,17 +23752,41 @@
     "ts_türü": "GraphDataValue",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.value)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::değer/ham_değer, GrafoBağı::değer, GrafoKategorisi::değer)",
+    "veri_biçimleri": [
+      "OptionDataValue",
+      "GraphDataValue"
+    ],
+    "koordinat_dalları": [
+      "düğüm-sayı/karma-değer",
+      "kenar-değeri",
+      "kategori-değeri",
+      "visualMap/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 91,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "9038542fa2dc25edaf9c",
@@ -22780,17 +23797,39 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.x)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::x/konum); src/grafik/grafo.rs (none/force başlangıç konumu)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "none-açık-konum",
+      "force-başlangıç",
+      "view-veri-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 96,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6a91570fb57093d9bb4c",
@@ -22801,17 +23840,39 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (graph.y)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/grafo.rs (GrafoDüğümü::y/konum); src/grafik/grafo.rs (none/force başlangıç konumu)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "none-açık-konum",
+      "force-başlangıç",
+      "view-veri-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/graph/GraphSeries.ts",
       "satır": 100,
       "sembol": "GraphNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir",
+      "uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir"
+    ],
+    "galeri_örnekleri": [
+      "graph-force2",
+      "graph-grid",
+      "graph-simple",
+      "graph-force",
+      "graph-label-overlap",
+      "graph",
+      "graph-circular-layout",
+      "graph-force-dynamic",
+      "graph-life-expectancy",
+      "graph-webkit-dep",
+      "graph-npm",
+      "calendar-graph"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "e8aa504c54293db3f560",

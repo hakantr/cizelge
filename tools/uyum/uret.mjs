@@ -1069,6 +1069,215 @@ const SUNBURST_SERIES_OPTION_KANITI = Object.freeze({
   }
 });
 
+const GRAPH_ÖRNEKLERİ = Object.freeze([
+  'graph-force2', 'graph-grid', 'graph-simple', 'graph-force',
+  'graph-label-overlap', 'graph', 'graph-circular-layout',
+  'graph-force-dynamic', 'graph-life-expectancy', 'graph-webkit-dep',
+  'graph-npm', 'calendar-graph'
+]);
+const GRAPH_FIXTURE_TESTİ =
+  'uyum_graph::testler::on_bir_resmi_graph_fixture_tum_dugum_ve_baglari_tasir';
+const GRAPH_SAHNE_TESTİ =
+  'uyum_graph::testler::on_bir_kilitli_sahne_tum_graph_geometrisini_uretir';
+const GRAPH_KUVVET_TESTİ =
+  'grafik::grafo::testler::resmi_kuvvet_sürtünmesi_durana_dek_ve_sabit_düğümle_çalışır';
+const GRAPH_DAİRESEL_TESTİ =
+  'grafik::grafo::testler::dairesel_sembol_boyutunu_ve_döndürülmüş_etiketi_korur';
+const GRAPH_İSABET_TESTİ =
+  'grafik::grafo::testler::dugum_kenardan_once_isabet_alir_ve_kenar_ayri_hedeftir';
+const GRAPH_DURUM_TESTİ =
+  'grafik::grafo::testler::emphasis_blur_select_stilleri_ve_kenar_isabetleri_boyanir';
+const GRAPH_ROAM_TESTİ =
+  'eylem::testler::graph_roam_action_seri_secicisi_merkez_ve_olcek_sinirini_korur';
+const GRAPH_KOORDİNAT_TESTİ =
+  'cizim::gorunum::yakınlaştırma_yönü_testleri::graph_polar_ve_single_axis_koordinatlari_dugum_ve_kenar_uretir';
+const GRAPH_GÖRÜNÜM_TESTİ =
+  'cizim::gorunum::yakınlaştırma_yönü_testleri::graph_roam_alanlari_ve_gecici_durum_seri_bazinda_ayrilir';
+
+function graphKanıtı(api, testler, veri_biçimleri, dallar, örnekler = GRAPH_ÖRNEKLERİ) {
+  return { api, testler, örnekler, veri_biçimleri, dallar };
+}
+
+const GRAPH_SERIES_OPTION_KANITI = Object.freeze({
+  type: graphKanıtı(
+    'src/model/seri.rs (Seri::Grafo, From<GrafoSerisi>); src/model/grafo.rs (GrafoSerisi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ["sabit 'graph'"],
+    ['kayıtlı-seri', 'boyama', 'düğüm/kenar isabeti', 'tooltip']
+  ),
+  data: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::düğümler, GrafoDüğümü)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ],
+    ['GraphNodeItemOption[]', 'GraphDataValue[]'],
+    ['data-alias', 'yalın-değer', 'nesne-öğesi', 'boş-graph']
+  ),
+  nodes: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::düğümler; data/nodes eşdeğeri)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ],
+    ['GraphNodeItemOption[]', 'GraphDataValue[]'], ['nodes-alias', 'data-alias']
+  ),
+  edges: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::ayrıntılı_bağlar, GrafoBağı)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_İSABET_TESTİ],
+    ['GraphEdgeItemOption[]'], ['edges-alias', 'source/target', 'düğüm-indisi/id-adı']
+  ),
+  links: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::ayrıntılı_bağlar; edges/links eşdeğeri)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_İSABET_TESTİ],
+    ['GraphEdgeItemOption[]'], ['links-alias', 'source/target', 'düğüm-indisi/id-adı']
+  ),
+  categories: graphKanıtı(
+    'src/model/grafo.rs (GrafoKategorisi, GrafoSerisi::kategoriler); src/grafik/grafo.rs (kategori kalıtımı/süzme)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['GraphCategoryItemOption[]'],
+    ['ad/değer', 'palet', 'symbol/symbolSize', 'itemStyle/label/state', 'legend-süzme']
+  ),
+  category: graphKanıtı(
+    'src/model/grafo.rs (GrafoKategoriSeçimi, GrafoDüğümü::kategori/kategori_adı)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['number', 'string'],
+    ['kategori-indisi', 'kategori-adı', 'eksik-kategori']
+  ),
+  coordinateSystem: graphKanıtı(
+    'src/model/grafo.rs (GrafoKoordinatSistemi); src/cizim/gorunum.rs (Graph koordinat eşleyicileri)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_KOORDİNAT_TESTİ],
+    ['view', 'cartesian2d', 'polar', 'singleAxis', 'calendar', 'matrix'],
+    ['öz Graph view', 'kartezyen', 'kutupsal', 'tek-eksen', 'takvim-hücresi', 'matris-hücresi'],
+    ['graph-grid', 'calendar-graph', 'matrix-graph', ...GRAPH_ÖRNEKLERİ]
+  ),
+  layout: graphKanıtı(
+    'src/model/grafo.rs (GrafoYerleşimi); src/grafik/grafo.rs (none/circular/force yerleşimleri)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_KUVVET_TESTİ, GRAPH_DAİRESEL_TESTİ],
+    ['none', 'circular', 'force'], ['açık-konum', 'dairesel', 'kuvvet', 'dış-koordinat']
+  ),
+  circular: graphKanıtı(
+    'src/model/grafo.rs (GrafoDaireselAyarı); src/grafik/grafo.rs (dairesel_yerleşim)',
+    [GRAPH_DAİRESEL_TESTİ, GRAPH_SAHNE_TESTİ], ['rotateLabel: bool'],
+    ['etiket-dönüşü-kapalı', 'etiket-dönüşü-açık', 'sembol-boyutu-ağırlığı'],
+    ['graph-circular-layout']
+  ),
+  force: graphKanıtı(
+    'src/model/grafo.rs (GrafoKuvveti/GrafoKuvvetBaşlangıcı/GrafoAralığı); src/grafik/grafo.rs (ECharts forceHelper portu)',
+    [GRAPH_KUVVET_TESTİ, GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ],
+    ['initLayout', 'repulsion number|range', 'gravity', 'friction', 'edgeLength number|range', 'layoutAnimation'],
+    ['rastgele/none başlangıç', 'dairesel-başlangıç', 'sabit-düğüm', 'durana-dek-yineleme', 'belirlenimci-tohum'],
+    ['graph-force2', 'graph-force', 'graph-force-dynamic', 'graph-label-overlap']
+  ),
+  autoCurveness: graphKanıtı(
+    'src/model/grafo.rs (GrafoOtomatikEğrilik); src/grafik/grafo.rs (çoklu-kenar eğrilik listesi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['boolean', 'number', 'number[]'],
+    ['kapalı', 'otomatik-uzunluk', 'açık-değer-listesi', 'lineStyle.curveness önceliği']
+  ),
+  curveness: graphKanıtı(
+    'src/model/grafo.rs (GrafoÇizgiStili::eğrilik); src/grafik/grafo.rs (Bézier kenar geometrisi)',
+    [GRAPH_SAHNE_TESTİ, GRAPH_İSABET_TESTİ], ['number'],
+    ['düz', 'pozitif/negatif-eğri', 'eğri-isabeti', 'etiket-teğeti']
+  ),
+  edgeSymbol: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::kenar_sembolleri, GrafoBağı::semboller); src/grafik/grafo.rs (kenar_sembolünü_çiz)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['string', '[from,to]'],
+    ['seri-varsayılanı', 'kenar-override', 'kaynak/hedef-kırpma', 'none']
+  ),
+  edgeSymbolSize: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::kenar_sembol_boyutları, GrafoBağı::sembol_boyutları)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['number', '[from,to]'],
+    ['tek-değer-normalizasyonu', 'iki-uç', 'kenar-override']
+  ),
+  edgeLabel: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::kenar_etiketi, GrafoBağı::etiket, GrafoDurumu::kenar_etiketi); src/grafik/grafo.rs (kenar orta-nokta etiketi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_DURUM_TESTİ], ['SeriesLineLabelOption'],
+    ['seri', 'kenar', 'emphasis/blur/select', 'formatter', 'Bézier-teğet-dönüşü']
+  ),
+  lineStyle: graphKanıtı(
+    'src/model/grafo.rs (GrafoÇizgiStili; seri/kenar/durum kalıtımı); src/grafik/grafo.rs (kenar çizimi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_DURUM_TESTİ],
+    ['GraphEdgeLineStyleOption', 'LineStyleOption'],
+    ['normal', 'emphasis/blur/select', 'source/target renk', 'solid/dashed/dotted', 'gölge']
+  ),
+  ignoreForceLayout: graphKanıtı(
+    'src/model/grafo.rs (GrafoBağı::kuvvet_yerleşimini_yoksay); src/grafik/grafo.rs (force edge adımı)',
+    [GRAPH_KUVVET_TESTİ, GRAPH_FIXTURE_TESTİ], ['bool'],
+    ['normal-kuvvet-bağı', 'yerleşimde-yoksayılıp-görselde-korunan-bağ']
+  ),
+  draggable: graphKanıtı(
+    'src/model/grafo.rs (seri/düğüm sürüklenebilir); src/cizim/pencere.rs (none/circular/force düğüm sürükleme)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_GÖRÜNÜM_TESTİ, 'grafik::grafo::testler::dairesel_dugum_suruklemesi_yaricapi_korur'],
+    ['bool'], ['seri-varsayılanı', 'düğüm-override', 'none-serbest', 'circular-yarıçap', 'force-sabit']
+  ),
+  fixed: graphKanıtı(
+    'src/model/grafo.rs (GrafoDüğümü::sabit); src/grafik/grafo.rs (force sabit-düğüm)',
+    [GRAPH_KUVVET_TESTİ, GRAPH_FIXTURE_TESTİ], ['bool'], ['hareketli', 'sabit', 'drag-sırasında-sabit']
+  ),
+  x: graphKanıtı(
+    'src/model/grafo.rs (GrafoDüğümü::x/konum); src/grafik/grafo.rs (none/force başlangıç konumu)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['number'], ['none-açık-konum', 'force-başlangıç', 'view-veri-dönüşümü']
+  ),
+  y: graphKanıtı(
+    'src/model/grafo.rs (GrafoDüğümü::y/konum); src/grafik/grafo.rs (none/force başlangıç konumu)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['number'], ['none-açık-konum', 'force-başlangıç', 'view-veri-dönüşümü']
+  ),
+  id: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi/GrafoDüğümü::kimlik, GrafoUcu::Kimlik); src/eylem.rs (seriesId seçicisi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_ROAM_TESTİ], ['string'], ['seri-kimliği', 'düğüm-kimliği', 'kenar-uç-çözümü']
+  ),
+  name: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::ad, GrafoDüğümü/GrafoKategorisi::ad)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_ROAM_TESTİ], ['string'],
+    ['seri-adı', 'düğüm-adı', 'kategori-adı', 'tooltip/label/legend']
+  ),
+  value: graphKanıtı(
+    'src/model/grafo.rs (GrafoDüğümü::değer/ham_değer, GrafoBağı::değer, GrafoKategorisi::değer)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['OptionDataValue', 'GraphDataValue'],
+    ['düğüm-sayı/karma-değer', 'kenar-değeri', 'kategori-değeri', 'visualMap/tooltip']
+  ),
+  symbol: graphKanıtı(
+    'src/model/grafo.rs (seri/kategori/düğüm sembol kalıtımı); src/grafik/grafo.rs (sembol yolu)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['Icon'],
+    ['seri', 'kategori', 'düğüm', 'built-in', 'path://', 'none']
+  ),
+  symbolSize: graphKanıtı(
+    'src/model/grafo.rs (seri/kategori/düğüm boyutu ve boyut_çifti); src/grafik/grafo.rs (sembol/kenar kırpma)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ], ['number', '[width,height]'],
+    ['seri', 'kategori', 'düğüm', 'iki-boyutlu-sembol', 'visualMap-override']
+  ),
+  cursor: graphKanıtı(
+    'src/model/grafo.rs (GrafoDüğümü::imleç); src/cizim/pencere.rs (Graph isabeti CSS→GPUI imleç eşlemesi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_GÖRÜNÜM_TESTİ], ['string'],
+    ['pointer', 'default', 'bilinmeyen-güvenli-düşüş']
+  ),
+  itemStyle: graphKanıtı(
+    'src/model/grafo.rs (GrafoÖğeStili; seri/kategori/düğüm/durum kalıtımı); src/grafik/grafo.rs (sembol boyası)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_DURUM_TESTİ], ['ItemStyleOption'],
+    ['renk/kenarlık', 'opaklık', 'gölge', 'seri→kategori→düğüm', 'emphasis/blur/select']
+  ),
+  label: graphKanıtı(
+    'src/model/grafo.rs (seri/kategori/düğüm/durum etiketleri); src/grafik/grafo.rs (etiket geometrisi)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_SAHNE_TESTİ, GRAPH_DAİRESEL_TESTİ, GRAPH_DURUM_TESTİ], ['SeriesLabelOption'],
+    ['seri→kategori→düğüm', 'formatter', 'konum/hiza/dönüş', 'dairesel-rotateLabel', 'emphasis/blur/select']
+  ),
+  emphasis: graphKanıtı(
+    'src/model/grafo.rs (GrafoDurumu/GrafoVurguOdağı); src/grafik/grafo.rs (düğüm/kenar odak kümeleri)',
+    [GRAPH_DURUM_TESTİ, GRAPH_İSABET_TESTİ], ['GraphNodeStateOption', 'GraphEdgeStateOption'],
+    ['self', 'adjacency', 'series', 'scale', 'item/line/label/edgeLabel', 'disabled']
+  ),
+  blur: graphKanıtı(
+    'src/model/grafo.rs (GrafoDurumu::bulanık); src/grafik/grafo.rs (odak dışı durum)',
+    [GRAPH_DURUM_TESTİ], ['GraphNodeStateOption', 'GraphEdgeStateOption'],
+    ['özel-yama', 'varsayılan 0.1 opaklık', 'düğüm/kenar', 'item/line/label/edgeLabel']
+  ),
+  select: graphKanıtı(
+    'src/model/grafo.rs (GrafoDurumu::seçili, GrafoDüğümü::başlangıçta_seçili); src/grafik/grafo.rs (seçili boya)',
+    [GRAPH_DURUM_TESTİ], ['GraphNodeStateOption', 'GraphEdgeStateOption'],
+    ['başlangıç-seçimi', 'düğüm/kenar', 'item/line/label/edgeLabel']
+  ),
+  focusNodeAdjacency: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::eski_komşuluk_odağı); src/grafik/grafo.rs (GrafoVurguOdağı::Komşuluk); src/eylem.rs (eski focus/unfocus action olayları)',
+    [GRAPH_DURUM_TESTİ, GRAPH_İSABET_TESTİ, GRAPH_ROAM_TESTİ], ['bool', 'legacy dispatchAction'],
+    ['eski-option→emphasis.focus adjacency', 'focusNodeAdjacency olayı', 'unfocusNodeAdjacency olayı']
+  ),
+  legendHoverLink: graphKanıtı(
+    'src/model/grafo.rs (GrafoSerisi::gösterge_vurgusu); src/grafik/grafo.rs (kategori ve komşuluk odak durumu)',
+    [GRAPH_FIXTURE_TESTİ, GRAPH_DURUM_TESTİ], ['bool'], ['açık-varsayılan', 'kapalı', 'kategori-legend-süzme']
+  )
+});
+
 const SANKEY_ÖRNEKLERİ = Object.freeze([
   'sankey-energy', 'sankey-itemstyle', 'sankey-levels',
   'sankey-nodeAlign-left', 'sankey-nodeAlign-right', 'sankey-simple', 'sankey-vertical'
@@ -1978,6 +2187,17 @@ function rustKarşılığı(kök, özellik) {
       koordinat_dalları: kanıt.dallar
     };
   }
+  if (kök.toLowerCase() === 'series.graph' && GRAPH_SERIES_OPTION_KANITI[özellik]) {
+    const kanıt = GRAPH_SERIES_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
   if (kök.toLowerCase() === 'series.sankey' && SANKEY_SERIES_OPTION_KANITI[özellik]) {
     const kanıt = SANKEY_SERIES_OPTION_KANITI[özellik];
     return {
@@ -2058,6 +2278,29 @@ function rustKarşılığı(kök, özellik) {
       galeri_örnekleri: SUNBURST_ÖRNEKLERİ,
       veri_biçimleri: ['GüneşPatlamasıSerisi'],
       koordinat_dalları: ['none', 'calendar-box', 'matrix-box', 'boyama', 'olay/isabet']
+    };
+  }
+  if (kök.toLowerCase() === 'registered' && özellik === 'graph') {
+    return {
+      api: 'src/model/seri.rs (Seri::Grafo, From<GrafoSerisi>); src/model/grafo.rs (model); src/grafik/grafo.rs (yerleşim/boyama)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: [
+        GRAPH_FIXTURE_TESTİ,
+        GRAPH_SAHNE_TESTİ,
+        GRAPH_KUVVET_TESTİ,
+        GRAPH_DAİRESEL_TESTİ,
+        GRAPH_İSABET_TESTİ,
+        GRAPH_DURUM_TESTİ,
+        GRAPH_ROAM_TESTİ,
+        GRAPH_KOORDİNAT_TESTİ,
+        GRAPH_GÖRÜNÜM_TESTİ
+      ],
+      galeri_örnekleri: GRAPH_ÖRNEKLERİ,
+      veri_biçimleri: ['GrafoSerisi'],
+      koordinat_dalları: [
+        'view', 'cartesian2d', 'polar', 'singleAxis', 'calendar', 'matrix',
+        'none/circular/force', 'boyama', 'düğüm/kenar isabeti', 'tooltip', 'drag/roam'
+      ]
     };
   }
   if (kök.toLowerCase() === 'registered' && özellik === 'sankey') {

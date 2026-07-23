@@ -21,8 +21,8 @@ use crate::calisma_zamani::{
 };
 use crate::cizim::cizici::{Çizici, ÖlçümÖnbelleği};
 use crate::cizim::gorunum::{
-    AraçTürü, AğaçGezinmeAlanı, BoyamaGirdisi, FırçaAlanı, SürgüBölgesi, SürgüParçası,
-    grafiği_boya, gösterge_adları, İçYakınlaştırmaAlanı,
+    AraçTürü, AğaçGezinmeAlanı, BoyamaGirdisi, FırçaAlanı, GrafoGezinmeAlanı, SürgüBölgesi,
+    SürgüParçası, grafiği_boya, gösterge_adları, İçYakınlaştırmaAlanı,
 };
 use crate::cizim::olay::{
     AğaçHaritasıKökYönü, GrafikOlayı, GüneşPatlamasıKökYönü, MatrisHücreBölgesi,
@@ -48,6 +48,27 @@ fn model_kapalı_adları(seçenekler: &GrafikSeçenekleri) -> HashSet<String> {
         .flat_map(|gösterge| gösterge.seçili.iter())
         .filter_map(|(ad, seçili)| (!*seçili).then_some(ad.clone()))
         .collect()
+}
+
+/// Graph düğümünün `cursor` seçeneğini son boyamanın gerçek isabet
+/// geometrisinden çözer. Kenarların dataIndex uzayı düğümlerle çakışabildiği
+/// için yalnız düğüm olarak kaydedilen dairesel isabetler cursor taşır.
+fn grafo_imlecini_bul<'a>(
+    seçenekler: &'a GrafikSeçenekleri,
+    isabetler: &[İsabetBölgesi],
+    fare: (f32, f32),
+) -> Option<&'a str> {
+    let isabet = isabetler
+        .iter()
+        .rev()
+        .find(|isabet| isabet.geometri.içeriyor_mu(fare))?;
+    if !matches!(isabet.geometri, İsabetGeometrisi::Daire { .. }) {
+        return None;
+    }
+    let Seri::Grafo(grafo) = seçenekler.seriler.get(isabet.seri_sırası)? else {
+        return None;
+    };
+    grafo.düğümler.get(isabet.veri_sırası)?.imleç.as_deref()
 }
 
 /// Gösterge öğelerinin pencere-mutlak isabet kutuları (tıklama için).
@@ -86,6 +107,9 @@ type ParalelGenişletmeKayıtları = Rc<RefCell<Vec<ParalelGenişletmeBölgesi>>
 
 /// Tree/Treemap/Sankey `roam` kutularının pencere-mutlak kayıtları.
 type AğaçGezinmeKayıtları = Rc<RefCell<Vec<AğaçGezinmeAlanı>>>;
+
+/// Graph view `roam` kutularının pencere-mutlak kayıtları.
+type GrafoGezinmeKayıtları = Rc<RefCell<Vec<GrafoGezinmeAlanı>>>;
 
 /// Dönüştürülmüş Sankey düğümünün ekran konumunu, ECharts `dragNode`
 /// action'ının sakladığı seri-kutusu yerel oranına geri çevirir.
@@ -229,10 +253,12 @@ pub struct GrafikGörünümü {
     kırıntı_kutuları: KırıntıKutuları,
     /// Dönüşümlü `graphic` isabet sınamasında kullanılan sahnenin kendisi.
     grafik_sahnesi: GrafikSahneKaydı,
-    /// Grafo gezinmesi: `(kayma_x, kayma_y, ölçek)`.
-    grafo_görünümü: (f32, f32, f32),
-    /// Grafo düğümü sürükleme kaymaları.
-    grafo_kaymaları: std::collections::HashMap<usize, (f32, f32)>,
+    /// Graph serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
+    grafo_görünümleri: HashMap<usize, (f32, f32, f32)>,
+    /// Graph serisi ve düğümü başına sürükleme kaymaları.
+    grafo_kaymaları: HashMap<(usize, usize), (f32, f32)>,
+    /// Pencere-mutlak Graph view gezinme alanları.
+    grafo_alanları: GrafoGezinmeKayıtları,
     /// Tree/Treemap/Sankey serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
     ağaç_görünümleri: HashMap<usize, (f32, f32, f32)>,
     /// Pencere-mutlak Tree/Treemap/Sankey gezinme alanları.
@@ -244,7 +270,9 @@ pub struct GrafikGörünümü {
 enum Sürükleme {
     /// Grafo düğümünü taşıma.
     GrafoDüğüm {
-        veri_sırası: usize, son: (f32, f32)
+        seri_sırası: usize,
+        veri_sırası: usize,
+        son: (f32, f32),
     },
     /// Sankey düğümünü `dragNode.localX/localY` olarak taşıma.
     SankeyDüğüm {
@@ -255,7 +283,9 @@ enum Sürükleme {
         son: (f32, f32),
     },
     /// Grafo görünümünü kaydırma (roam).
-    GrafoKaydırma { son: (f32, f32) },
+    GrafoKaydırma {
+        seri_sırası: usize, son: (f32, f32)
+    },
     /// Tek Tree/Treemap/Sankey serisinin görünümünü kaydırma (`series.*.roam`).
     AğaçKaydırma {
         seri_sırası: usize, son: (f32, f32)
@@ -339,8 +369,9 @@ impl GrafikGörünümü {
             hiyerarşi_yolları: HashMap::new(),
             kırıntı_kutuları: Rc::new(RefCell::new(Vec::new())),
             grafik_sahnesi: Rc::new(RefCell::new(None)),
-            grafo_görünümü: (0.0, 0.0, 1.0),
+            grafo_görünümleri: HashMap::new(),
             grafo_kaymaları: std::collections::HashMap::new(),
+            grafo_alanları: Rc::new(RefCell::new(Vec::new())),
             ağaç_görünümleri: HashMap::new(),
             ağaç_alanları: Rc::new(RefCell::new(Vec::new())),
         }
@@ -713,7 +744,7 @@ impl GrafikGörünümü {
     /// Gezinme durumunu (hiyerarşi yolu, grafo/Tree görünümü) sıfırlar.
     fn gezinmeyi_sıfırla(&mut self) {
         self.hiyerarşi_yolları.clear();
-        self.grafo_görünümü = (0.0, 0.0, 1.0);
+        self.grafo_görünümleri.clear();
         self.grafo_kaymaları.clear();
         self.ağaç_görünümleri.clear();
     }
@@ -782,19 +813,27 @@ impl Render for GrafikGörünümü {
         let zaman_sn = self.başlangıç.elapsed().as_secs_f32();
 
         let fare = self.fare;
-        let etkin_imleç = fare
-            .and_then(|fare| {
-                self.matris_hücreleri
-                    .try_borrow()
-                    .ok()
-                    .and_then(|bölgeler| {
-                        bölgeler
-                            .iter()
-                            .rev()
-                            .find(|bölge| bölge.geometri.içeriyor_mu(fare))
-                            .and_then(|bölge| bölge.imleç.as_deref().map(gpui_imleci))
-                    })
+        let matris_imleci = fare.and_then(|fare| {
+            self.matris_hücreleri
+                .try_borrow()
+                .ok()
+                .and_then(|bölgeler| {
+                    bölgeler
+                        .iter()
+                        .rev()
+                        .find(|bölge| bölge.geometri.içeriyor_mu(fare))
+                        .and_then(|bölge| bölge.imleç.clone())
+                })
+        });
+        let grafo_imleci = fare.and_then(|fare| {
+            self.isabetler.try_borrow().ok().and_then(|isabetler| {
+                grafo_imlecini_bul(&etkin_seçenekler, &isabetler, fare).map(str::to_owned)
             })
+        });
+        let etkin_imleç = matris_imleci
+            .or(grafo_imleci)
+            .as_deref()
+            .map(gpui_imleci)
             .unwrap_or(CursorStyle::Arrow);
         let kapalı = self.kapalı.clone();
         let gösterge_sayfası = self.gösterge_sayfası;
@@ -824,18 +863,23 @@ impl Render for GrafikGörünümü {
             .iter()
             .map(|(seri_sırası, yol)| (*seri_sırası, yol.clone()))
             .collect::<Vec<_>>();
-        let grafo_görünümü = self.grafo_görünümü;
-        let grafo_kaymaları: Vec<(usize, f32, f32)> = self
+        let grafo_görünümleri = self
+            .grafo_görünümleri
+            .iter()
+            .map(|(sıra, (dx, dy, ölçek))| (*sıra, *dx, *dy, *ölçek))
+            .collect::<Vec<_>>();
+        let grafo_seri_kaymaları = self
             .grafo_kaymaları
             .iter()
-            .map(|(sıra, (dx, dy))| (*sıra, *dx, *dy))
-            .collect();
+            .map(|((seri_sırası, veri_sırası), (dx, dy))| (*seri_sırası, *veri_sırası, *dx, *dy))
+            .collect::<Vec<_>>();
         let ağaç_görünümleri = self
             .ağaç_görünümleri
             .iter()
             .map(|(sıra, (dx, dy, ölçek))| (*sıra, *dx, *dy, *ölçek))
             .collect::<Vec<_>>();
         let ağaç_alanları = self.ağaç_alanları.clone();
+        let grafo_alanları = self.grafo_alanları.clone();
         let önbellek = self.ölçüm_önbelleği.clone();
 
         div()
@@ -867,8 +911,10 @@ impl Render for GrafikGörünümü {
                             zaman_şeridi,
                             hiyerarşi_yolu: Vec::new(),
                             hiyerarşi_yolları: hiyerarşi_yolları.clone(),
-                            grafo_görünümü,
-                            grafo_kaymaları: grafo_kaymaları.clone(),
+                            grafo_görünümü: (0.0, 0.0, 1.0),
+                            grafo_kaymaları: Vec::new(),
+                            grafo_görünümleri: grafo_görünümleri.clone(),
+                            grafo_seri_kaymaları: grafo_seri_kaymaları.clone(),
                             ağaç_görünümleri: ağaç_görünümleri.clone(),
                         };
                         let mut çıktı = grafiği_boya(&mut çizici, &etkin_seçenekler, &girdi);
@@ -914,6 +960,19 @@ impl Render for GrafikGörünümü {
                                 );
                             }
                             Err(_) => tanı_bildir("ağaç_gezinme_alanları"),
+                        }
+                        match grafo_alanları.try_borrow_mut() {
+                            Ok(mut alanlar) => {
+                                alanlar.clear();
+                                alanlar.extend(
+                                    çıktı
+                                        .grafo_alanları
+                                        .iter()
+                                        .copied()
+                                        .map(|alan| alan.kaydır(köken.0, köken.1)),
+                                );
+                            }
+                            Err(_) => tanı_bildir("grafo_gezinme_alanları"),
                         }
                         match matris_hücreleri.try_borrow_mut() {
                             Ok(mut bölgeler) => {
@@ -1080,14 +1139,38 @@ impl Render for GrafikGörünümü {
                 // Etkin sürükleme: kaydırma ya da sürgü.
                 if olay.pressed_button == Some(MouseButton::Left) {
                     match bu.sürükleme {
-                        Some(Sürükleme::GrafoDüğüm { veri_sırası, son }) => {
+                        Some(Sürükleme::GrafoDüğüm {
+                            seri_sırası,
+                            veri_sırası,
+                            son,
+                        }) => {
                             let fark = (yeni.0 - son.0, yeni.1 - son.1);
-                            let kayıt = bu.grafo_kaymaları.entry(veri_sırası).or_insert((0.0, 0.0));
+                            let kayıt = bu
+                                .grafo_kaymaları
+                                .entry((seri_sırası, veri_sırası))
+                                .or_insert((0.0, 0.0));
                             kayıt.0 += fark.0;
                             kayıt.1 += fark.1;
+                            let ad = bu
+                                .seçenekler
+                                .seriler
+                                .get(seri_sırası)
+                                .and_then(|seri| match seri {
+                                    Seri::Grafo(grafo) => grafo.düğümler.get(veri_sırası),
+                                    _ => None,
+                                })
+                                .map(|düğüm| düğüm.ad.clone())
+                                .unwrap_or_default();
                             bu.sürükleme = Some(Sürükleme::GrafoDüğüm {
+                                seri_sırası,
                                 veri_sırası,
                                 son: yeni,
+                            });
+                            cx.emit(GrafikOlayı::GrafoDüğümüSürüklendi {
+                                seri_sırası,
+                                veri_sırası,
+                                ad,
+                                konum: yeni,
                             });
                             cx.notify();
                             return;
@@ -1138,10 +1221,24 @@ impl Render for GrafikGörünümü {
                             }
                             return;
                         }
-                        Some(Sürükleme::GrafoKaydırma { son }) => {
-                            bu.grafo_görünümü.0 += yeni.0 - son.0;
-                            bu.grafo_görünümü.1 += yeni.1 - son.1;
-                            bu.sürükleme = Some(Sürükleme::GrafoKaydırma { son: yeni });
+                        Some(Sürükleme::GrafoKaydırma { seri_sırası, son }) => {
+                            let görünüm = bu
+                                .grafo_görünümleri
+                                .entry(seri_sırası)
+                                .or_insert((0.0, 0.0, 1.0));
+                            görünüm.0 += yeni.0 - son.0;
+                            görünüm.1 += yeni.1 - son.1;
+                            let (kayma_x, kayma_y, ölçek) = *görünüm;
+                            bu.sürükleme = Some(Sürükleme::GrafoKaydırma {
+                                seri_sırası,
+                                son: yeni,
+                            });
+                            cx.emit(GrafikOlayı::GrafoGezinmeDeğişti {
+                                seri_sırası,
+                                kayma_x,
+                                kayma_y,
+                                ölçek,
+                            });
                             cx.notify();
                             return;
                         }
@@ -1367,13 +1464,17 @@ impl Render for GrafikGörünümü {
                         cx.notify();
                         return;
                     }
-                    // Grafo gezinmesi (roam): tekerlek görünümü ölçekler.
-                    if bu
-                        .seçenekler
-                        .seriler
-                        .iter()
-                        .any(|s| matches!(s, Seri::Grafo(_)))
-                    {
+                    let grafo_alanı = bu.grafo_alanları.try_borrow().ok().and_then(|alanlar| {
+                        alanlar
+                            .iter()
+                            .rev()
+                            .find(|alan| {
+                                (alan.global_tetikleyici || alan.alan.içeriyor_mu(konum))
+                                    && alan.gezinme.ölçeklenebilir()
+                            })
+                            .copied()
+                    });
+                    if let Some(alan) = grafo_alanı {
                         let yön = match olay.delta {
                             gpui::ScrollDelta::Pixels(p) => f32::from(p.y),
                             gpui::ScrollDelta::Lines(l) => l.y * 20.0,
@@ -1382,13 +1483,28 @@ impl Render for GrafikGörünümü {
                             return;
                         }
                         let çarpan = if yön > 0.0 { 1.0 / 0.85 } else { 0.85 };
-                        let (kayma_x, kayma_y, ölçek) = bu.grafo_görünümü;
-                        let yeni_ölçek = (ölçek * çarpan).clamp(0.2, 8.0);
-                        let gerçek_çarpan = yeni_ölçek / ölçek.max(1e-6);
-                        // Merkez odaklı: kaymalar ölçekle birlikte büyür.
-                        bu.grafo_görünümü =
-                            (kayma_x * gerçek_çarpan, kayma_y * gerçek_çarpan, yeni_ölçek);
+                        let görünüm = bu
+                            .grafo_görünümleri
+                            .entry(alan.seri_sırası)
+                            .or_insert((0.0, 0.0, 1.0));
+                        let eski_ölçek = görünüm.2.max(f32::EPSILON);
+                        let yeni_ölçek =
+                            (eski_ölçek * çarpan).clamp(alan.en_küçük_ölçek, alan.en_büyük_ölçek);
+                        let gerçek_çarpan = yeni_ölçek / eski_ölçek;
+                        let merkez = alan.alan.merkez();
+                        let göreli = (konum.0 - merkez.0, konum.1 - merkez.1);
+                        görünüm.0 = göreli.0 - (göreli.0 - görünüm.0) * gerçek_çarpan;
+                        görünüm.1 = göreli.1 - (göreli.1 - görünüm.1) * gerçek_çarpan;
+                        görünüm.2 = yeni_ölçek;
+                        let (kayma_x, kayma_y, ölçek) = *görünüm;
+                        cx.emit(GrafikOlayı::GrafoGezinmeDeğişti {
+                            seri_sırası: alan.seri_sırası,
+                            kayma_x,
+                            kayma_y,
+                            ölçek,
+                        });
                         cx.notify();
+                        return;
                     }
                     return;
                 };
@@ -2155,8 +2271,14 @@ impl Render for GrafikGörünümü {
                                 }
                             }
                             // Grafo düğümü: sürüklemeyi başlat.
-                            Some(Seri::Grafo(_)) => {
+                            Some(Seri::Grafo(grafo))
+                                if matches!(b.geometri, İsabetGeometrisi::Daire { .. })
+                                    && grafo.düğümler.get(b.veri_sırası).is_some_and(|düğüm| {
+                                        düğüm.sürüklenebilir.unwrap_or(grafo.sürüklenebilir)
+                                    }) =>
+                            {
                                 bu.sürükleme = Some(Sürükleme::GrafoDüğüm {
+                                    seri_sırası: b.seri_sırası,
                                     veri_sırası: b.veri_sırası,
                                     son: nokta,
                                 });
@@ -2272,15 +2394,23 @@ impl Render for GrafikGörünümü {
                             seri_sırası: alan.seri_sırası,
                             son: nokta,
                         });
-                    } else if bu
-                        .seçenekler
-                        .seriler
-                        .iter()
-                        .any(|s| matches!(s, Seri::Grafo(_)))
-                        && !bu.seçenekler.seriler.iter().any(Seri::kartezyen_mi)
+                    } else if let Some(alan) =
+                        bu.grafo_alanları.try_borrow().ok().and_then(|alanlar| {
+                            alanlar
+                                .iter()
+                                .rev()
+                                .find(|alan| {
+                                    (alan.global_tetikleyici || alan.alan.içeriyor_mu(nokta))
+                                        && alan.gezinme.kaydırılabilir()
+                                })
+                                .copied()
+                        })
                     {
                         // Grafo boş alanı: görünümü kaydırma (roam).
-                        bu.sürükleme = Some(Sürükleme::GrafoKaydırma { son: nokta });
+                        bu.sürükleme = Some(Sürükleme::GrafoKaydırma {
+                            seri_sırası: alan.seri_sırası,
+                            son: nokta,
+                        });
                     }
                 }),
             )
@@ -2298,6 +2428,7 @@ impl Render for GrafikGörünümü {
 mod testler {
     use super::*;
     use crate::model::Uzunluk;
+    use crate::model::grafo::{GrafoDüğümü, GrafoSerisi};
 
     #[test]
     fn sankey_ekran_yerel_donusumu_model_ve_gecici_gorunumu_tersine_cevirir() {
@@ -2320,5 +2451,40 @@ mod testler {
         let çözülen = sankey_ekrandan_yerele(&seri, alan, görünüm, ekran);
         assert!((çözülen.0 - yerel.0).abs() < 1e-6);
         assert!((çözülen.1 - yerel.1).abs() < 1e-6);
+    }
+
+    #[test]
+    fn graph_dugum_cursoru_kenar_data_indisiyle_karismaz() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(GrafoSerisi::yeni().düğümler([
+            GrafoDüğümü::yeni("A", 20.0).imleç("pointer"),
+            GrafoDüğümü::yeni("B", 20.0),
+        ]));
+        let kenar = İsabetBölgesi {
+            seri_sırası: 0,
+            veri_sırası: 0,
+            seri_adı: None,
+            ad: Some("A > B".to_owned()),
+            değer: None,
+            geometri: İsabetGeometrisi::ÇokluÇizgi {
+                noktalar: vec![(0.0, 0.0), (100.0, 0.0)],
+                tolerans: 5.0,
+            },
+        };
+        let düğüm = İsabetBölgesi {
+            seri_sırası: 0,
+            veri_sırası: 0,
+            seri_adı: None,
+            ad: Some("A".to_owned()),
+            değer: None,
+            geometri: İsabetGeometrisi::Daire {
+                merkez: (0.0, 0.0),
+                yarıçap: 10.0,
+            },
+        };
+        assert_eq!(
+            grafo_imlecini_bul(&seçenekler, &[kenar.clone(), düğüm], (0.0, 0.0)),
+            Some("pointer")
+        );
+        assert_eq!(grafo_imlecini_bul(&seçenekler, &[kenar], (50.0, 0.0)), None);
     }
 }
