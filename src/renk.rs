@@ -96,7 +96,10 @@ impl Renk {
                     kırmızı / 255.0,
                     yeşil / 255.0,
                     mavi / 255.0,
-                    kalan.first().copied().unwrap_or(1.0),
+                    // CSS Color, 1'in üzerindeki alfa kanalını tam opaklığa
+                    // sıkıştırır. ECharts örnek verisinde `rgba(...,255)`
+                    // biçimi de bulunduğu için zrender davranışını koru.
+                    kalan.first().copied().unwrap_or(1.0).clamp(0.0, 1.0),
                 ));
             }
             return None;
@@ -615,6 +618,10 @@ mod testler {
         assert_eq!(
             Renk::çöz("rgba(255, 0, 0, 0.5)"),
             Some(Renk::kyma(1.0, 0.0, 0.0, 0.5))
+        );
+        assert_eq!(
+            Renk::çöz("rgba(128, 155, 72, 255)"),
+            Some(Renk::kyma(128.0 / 255.0, 155.0 / 255.0, 72.0 / 255.0, 1.0))
         );
     }
 

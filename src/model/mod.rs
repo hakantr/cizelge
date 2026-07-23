@@ -13,6 +13,7 @@ pub mod kutupsal;
 pub mod matris;
 pub mod paralel;
 pub mod radar;
+pub mod sankey;
 pub mod secenekler;
 pub mod seri;
 pub mod stil;

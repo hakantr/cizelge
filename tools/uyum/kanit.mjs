@@ -46,6 +46,13 @@ const sunburstKarşılaştırması = () => ({
   sahneReferansı: true
 });
 
+const sankeyKarşılaştırması = () => ({
+  tipografiSigma: 0.8,
+  // Düğüm kutuları ve her bağlantının tam Bézier şeridi, renk uçlarıyla
+  // birlikte kilitli ECharts sahnesine karşı denetlenir.
+  sahneReferansı: true
+});
+
 const SENARYOLAR = [
   { id: 'bar-histogram', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
   { id: 'funnel', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -162,6 +169,16 @@ const SENARYOLAR = [
     ...senaryo,
     tür: 'statik',
     karşılaştırma: sunburstKarşılaştırması(),
+    kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
+  })),
+  ...[
+    'sankey-energy', 'sankey-itemstyle', 'sankey-levels',
+    'sankey-nodeAlign-left', 'sankey-nodeAlign-right',
+    'sankey-simple', 'sankey-vertical'
+  ].map((id) => ({
+    id,
+    tür: 'statik',
+    karşılaştırma: sankeyKarşılaştırması(),
     kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }]
   })),
   { id: 'themeRiver-basic', tür: 'statik', kareler: [{ ad: 'son', kare: 1, durum: 'başlangıç' }] },
@@ -1109,10 +1126,120 @@ function sunburstSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası)
   }];
 }
 
+function sankeySahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
+  if (!senaryo.karşılaştırma?.sahneReferansı) return [];
+  const açıklama = 'Her Sankey düğüm kutusu ile bağlantı şeridinin veri kimliği, değer/derinlik, Bézier kontrol noktaları, kalınlığı, etkin RGBA dolgusu; ayrıca etiket tabanı, dönüşü ve fontu kilitli ECharts sahnesiyle eşleşmeli';
+  if (!sahneDosyası || !fs.existsSync(sahneDosyası)) {
+    return [{
+      ad: 'sankey_düğüm_ve_bağ_geometrisi', geçti: false, açıklama,
+      hata: 'Cizelge sahne kanıtı eksik'
+    }];
+  }
+  if (!referansSahneDosyası || !fs.existsSync(referansSahneDosyası)) {
+    return [{
+      ad: 'sankey_düğüm_ve_bağ_geometrisi', geçti: false, açıklama,
+      hata: 'kilitli ECharts sahne kanıtı eksik'
+    }];
+  }
+  const gerçek = JSON.parse(fs.readFileSync(sahneDosyası, 'utf8'));
+  const beklenen = JSON.parse(fs.readFileSync(referansSahneDosyası, 'utf8'));
+  const uyuşmazlıklar = [];
+  const ekle = (yol, beklenenDeğer, gerçekDeğer) => {
+    if (uyuşmazlıklar.length < 80) {
+      uyuşmazlıklar.push({ yol, beklenen: beklenenDeğer, gerçek: gerçekDeğer });
+    }
+  };
+  const sayısalAlanlar = new Set([
+    'x', 'y', 'genişlik', 'yükseklik', 'değer', 'kenarlık_kalınlığı',
+    'x1', 'y1', 'x2', 'y2', 'cpx1', 'cpy1', 'cpx2', 'cpy2', 'kalınlık',
+    'etiket_x', 'etiket_y', 'etiket_dönüşü'
+  ]);
+  const eşitMi = (alan, a, b) => {
+    if (sayısalAlanlar.has(alan) && typeof a === 'number' && typeof b === 'number') {
+      return Math.abs(a - b) <= 0.0011;
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+  };
+  for (const alan of ['şema_sürümü', 'tür', 'koordinat_adımı']) {
+    if (!eşitMi(alan, beklenen[alan], gerçek[alan])) ekle(alan, beklenen[alan], gerçek[alan]);
+  }
+  const bSeriler = beklenen.seriler || [];
+  const gSeriler = gerçek.seriler || [];
+  if (bSeriler.length !== gSeriler.length) ekle('seriler.length', bSeriler.length, gSeriler.length);
+  for (let seriSırası = 0; seriSırası < Math.min(bSeriler.length, gSeriler.length); seriSırası += 1) {
+    const bSeri = bSeriler[seriSırası];
+    const gSeri = gSeriler[seriSırası];
+    if (bSeri.seri_sırası !== gSeri.seri_sırası) {
+      ekle(`seriler[${seriSırası}].seri_sırası`, bSeri.seri_sırası, gSeri.seri_sırası);
+    }
+    for (const alan of ['x', 'y', 'genişlik', 'yükseklik']) {
+      if (!eşitMi(alan, bSeri.alan?.[alan], gSeri.alan?.[alan])) {
+        ekle(`seriler[${seriSırası}].alan.${alan}`, bSeri.alan?.[alan], gSeri.alan?.[alan]);
+      }
+    }
+    const bDüğümler = bSeri.düğümler || [];
+    const gDüğümler = gSeri.düğümler || [];
+    if (bDüğümler.length !== gDüğümler.length) {
+      ekle(`seriler[${seriSırası}].düğümler.length`, bDüğümler.length, gDüğümler.length);
+    }
+    for (let sıra = 0; sıra < Math.min(bDüğümler.length, gDüğümler.length); sıra += 1) {
+      const bDüğüm = bDüğümler[sıra];
+      const gDüğüm = gDüğümler[sıra];
+      for (const alan of [
+        'veri_sırası', 'ad', 'değer', 'derinlik', 'x', 'y', 'genişlik', 'yükseklik',
+        'renk', 'kenarlık_rengi', 'kenarlık_kalınlığı', 'etiket_göster', 'etiket_metni',
+        'etiket_x', 'etiket_y', 'etiket_dönüşü', 'etiket_fontu'
+      ]) {
+        if (!eşitMi(alan, bDüğüm[alan], gDüğüm[alan])) {
+          ekle(`seriler[${seriSırası}].düğümler[${sıra}](${bDüğüm.ad}).${alan}`,
+            bDüğüm[alan], gDüğüm[alan]);
+        }
+      }
+    }
+    const bBağlar = bSeri.bağlar || [];
+    const gBağlar = gSeri.bağlar || [];
+    if (bBağlar.length !== gBağlar.length) {
+      ekle(`seriler[${seriSırası}].bağlar.length`, bBağlar.length, gBağlar.length);
+    }
+    for (let sıra = 0; sıra < Math.min(bBağlar.length, gBağlar.length); sıra += 1) {
+      const bBağ = bBağlar[sıra];
+      const gBağ = gBağlar[sıra];
+      for (const alan of [
+        'veri_sırası', 'kaynak', 'hedef', 'değer', 'yön',
+        'x1', 'y1', 'x2', 'y2', 'cpx1', 'cpy1', 'cpx2', 'cpy2', 'kalınlık',
+        'renkler', 'etiket_göster', 'etiket_metni'
+      ]) {
+        if (!eşitMi(alan, bBağ[alan], gBağ[alan])) {
+          ekle(`seriler[${seriSırası}].bağlar[${sıra}](${bBağ.kaynak}->${bBağ.hedef}).${alan}`,
+            bBağ[alan], gBağ[alan]);
+        }
+      }
+    }
+  }
+  const bDüğüm = bSeriler.reduce((toplam, seri) => toplam + (seri.düğümler?.length || 0), 0);
+  const gDüğüm = gSeriler.reduce((toplam, seri) => toplam + (seri.düğümler?.length || 0), 0);
+  const bBağ = bSeriler.reduce((toplam, seri) => toplam + (seri.bağlar?.length || 0), 0);
+  const gBağ = gSeriler.reduce((toplam, seri) => toplam + (seri.bağlar?.length || 0), 0);
+  return [{
+    ad: 'sankey_düğüm_ve_bağ_geometrisi',
+    geçti: uyuşmazlıklar.length === 0,
+    açıklama,
+    beklenen_düğüm: bDüğüm,
+    gerçek_düğüm: gDüğüm,
+    beklenen_bağ: bBağ,
+    gerçek_bağ: gBağ,
+    karşılaştırılan_alan: Math.min(bDüğüm, gDüğüm) * 17 + Math.min(bBağ, gBağ) * 17,
+    uyuşmazlıklar
+  }];
+}
+
 function sahneÖzetiKontrolleri(senaryo, sahneDosyası, referansSahneDosyası) {
   if (senaryo.karşılaştırma?.sahneReferansı) {
     if (senaryo.id.startsWith('sunburst-')) {
       return sunburstSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
+    }
+    if (senaryo.id.startsWith('sankey-')) {
+      return sankeySahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
     }
     return treemapSahneKontrolleri(senaryo, sahneDosyası, referansSahneDosyası);
   }

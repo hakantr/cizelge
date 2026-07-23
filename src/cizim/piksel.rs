@@ -1465,6 +1465,14 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         renk: Renk,
         kalın: bool,
     ) -> (f32, f32) {
+        // Küçük Arial, CoreText/Skia'da 12 px glifin doğrusal küçültülmüş
+        // maskesi değildir: 10 px'te hinting tabanı yaklaşık 0,3 px aşağı
+        // taşır ve kenar örtüsünü biraz azaltır. Bu geçiş, Sankey gibi yoğun
+        // 10 px etiketlerde Canvas çıktısını korurken 12 px ve üstündeki
+        // mevcut ECharts kalibrasyonunu değiştirmez.
+        let küçük_yazı_oranı = ((12.0 - boyut) / 2.0).clamp(0.0, 1.0);
+        let taban_düzeltmesi = YAZI_TABAN_DÜZELTMESİ + 0.3 * küçük_yazı_oranı;
+        let kapsama_çarpanı = YAZI_KAPSAMA_ÇARPANI - 0.1 * küçük_yazı_oranı;
         let (genişlik, yükseklik) = self.yazı_ölç_ağırlıklı(metin, boyut, kalın);
         let Some(yazılar) = self.yazılar.clone() else {
             return (genişlik, yükseklik);
@@ -1493,7 +1501,7 @@ impl ÇizimYüzeyi for PikselYüzeyi {
         let taban_y = üst
             + (yükseklik * self.ölçek - satır) / 2.0
             + birincil_ölçekli.ascent()
-            + YAZI_TABAN_DÜZELTMESİ * self.ölçek;
+            + taban_düzeltmesi * self.ölçek;
 
         let (kırmızı, yeşil, mavi, alfa) = (
             (renk.kırmızı.clamp(0.0, 1.0) * 255.0) as u16,
@@ -1561,8 +1569,8 @@ impl ÇizimYüzeyi for PikselYüzeyi {
                     return;
                 }
                 let dizin = (py * harita_g + px) as usize;
-                let örtü = (YAZI_KAPSAMA_ÇARPANI * örtü.clamp(0.0, 1.0).powf(YAZI_KAPSAMA_KUVVETİ))
-                    .min(1.0);
+                let örtü =
+                    (kapsama_çarpanı * örtü.clamp(0.0, 1.0).powf(YAZI_KAPSAMA_KUVVETİ)).min(1.0);
                 let mut a = örtü * alfa;
                 if let Some(maske) = &kırpma_verisi {
                     let m = maske.get(dizin).copied().unwrap_or(0) as f32 / 255.0;

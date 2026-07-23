@@ -61,7 +61,7 @@ use crate::grafik::sacilim::{
     saçılım_nokta_boyutlarını_eşle, saçılım_noktaları, saçılım_xy, saçılım_çiz_çoklu_eşlemeli,
     takvim_saçılım_noktaları, tek_eksen_saçılım_noktaları,
 };
-use crate::grafik::sankey::sankey_çiz;
+use crate::grafik::sankey::{sankey_alanı, sankey_çiz};
 use crate::grafik::sutun::{
     SütunGirdisi, sütun_bant_genişliği, sütun_değeri, sütun_görsel_kapsamı, sütun_taban_değeri,
     sütun_yatay_mı, sütunları_çiz, yerleşim_hesapla,
@@ -883,11 +883,14 @@ impl Default for BoyamaGirdisi {
     }
 }
 
-/// Tree/Treemap `roam` isabet alanı, hareket türü ve ölçek sınırı.
+/// Tree/Treemap/Sankey `roam` isabet alanı, tetikleme kapsamı, hareket türü
+/// ve ölçek sınırı.
 #[derive(Clone, Copy, Debug)]
 pub struct AğaçGezinmeAlanı {
     pub seri_sırası: usize,
     pub alan: Dikdörtgen,
+    /// ECharts `roamTrigger: 'global'`: olay seri kutusunun dışında da başlar.
+    pub global_tetikleyici: bool,
     pub gezinme: AğaçGezinmesi,
     pub en_küçük_ölçek: f32,
     pub en_büyük_ölçek: f32,
@@ -6203,15 +6206,70 @@ pub fn grafiği_boya(
                 if !ad_görünür(seri.ad(), kapalı) {
                     continue;
                 }
+                let yerleşim_referansı = if let Some(matris_sırası) = s.matris_sırası {
+                    let Some((x, y)) = &s.matris_koordinatı else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = matris_yerleşimleri.get(matris_sırası) else {
+                        continue;
+                    };
+                    let Some(kutu) = yerleşim.veriden_yerleşime(x, y, true) else {
+                        continue;
+                    };
+                    kutu
+                } else if let Some(takvim_sırası) = s.takvim_sırası {
+                    let Some(tarih) = s.takvim_koordinatı else {
+                        continue;
+                    };
+                    let Some(Some(yerleşim)) = takvim_yerleşimleri.get(takvim_sırası) else {
+                        continue;
+                    };
+                    let Some(kutu) = yerleşim.hücre(tarih) else {
+                        continue;
+                    };
+                    let kenar = seçenekler
+                        .takvimler
+                        .get(takvim_sırası)
+                        .map_or(0.0, |takvim| {
+                            takvim.öğe_stili.kenarlık_kalınlığı.max(0.0) / 2.0
+                        });
+                    Dikdörtgen::yeni(
+                        kutu.x + kenar,
+                        kutu.y + kenar,
+                        (kutu.genişlik - 2.0 * kenar).max(0.0),
+                        (kutu.yükseklik - 2.0 * kenar).max(0.0),
+                    )
+                } else {
+                    tüm_alan
+                };
+                let görünüm = girdi
+                    .ağaç_görünümleri
+                    .iter()
+                    .find(|(seri_sırası, ..)| *seri_sırası == i)
+                    .map(|(_, dx, dy, ölçek)| (*dx, *dy, *ölçek))
+                    .unwrap_or((0.0, 0.0, 1.0));
+                // Düğüm sürükleme de aynı yerel kutuyu kullandığından alan,
+                // roam kapalıyken dahi tutulur; izinler kaydırma/ölçekleme
+                // başlangıcında ayrıca denetlenir.
+                çıktı.ağaç_alanları.push(AğaçGezinmeAlanı {
+                    seri_sırası: i,
+                    alan: sankey_alanı(s, yerleşim_referansı),
+                    global_tetikleyici: s.gezinme_tetikleyicisi_global,
+                    gezinme: s.gezinme,
+                    en_küçük_ölçek: s.en_küçük_ölçek / s.yakınlaştırma.max(0.01),
+                    en_büyük_ölçek: s.en_büyük_ölçek / s.yakınlaştırma.max(0.01),
+                });
                 let önce = çıktı.isabetler.len();
                 let palet = |sıra: usize| seçenekler.palet_rengi(sıra);
-                sankey_çiz(
+                let _ = sankey_çiz(
                     yüzey,
                     s,
                     i,
-                    tüm_alan,
+                    yerleşim_referansı,
                     &palet,
                     ilerleme,
+                    görünüm,
+                    fare,
                     &mut çıktı.isabetler,
                 );
                 if let (Some(ipucu), Some(f)) = (&ipucu_seçeneği, fare)
@@ -6245,6 +6303,7 @@ pub fn grafiği_boya(
                     çıktı.ağaç_alanları.push(AğaçGezinmeAlanı {
                         seri_sırası: i,
                         alan: ağaç_alanı(a, tüm_alan),
+                        global_tetikleyici: false,
                         gezinme: a.gezinme,
                         en_küçük_ölçek: 0.2,
                         en_büyük_ölçek: 8.0,
@@ -6348,6 +6407,7 @@ pub fn grafiği_boya(
                         a,
                         yerleşim_referansı,
                     ),
+                    global_tetikleyici: false,
                     gezinme: a.gezinme,
                     en_küçük_ölçek: a.en_küçük_ölçek,
                     en_büyük_ölçek: a.en_büyük_ölçek,
@@ -7830,6 +7890,7 @@ mod yakınlaştırma_yönü_testleri {
         assert_eq!(dönüşlü_merkezler.len(), 2);
         assert_eq!(dönüşlü.ağaç_alanları.len(), 1);
         assert_eq!(dönüşlü.ağaç_alanları[0].seri_sırası, 0);
+        assert!(!dönüşlü.ağaç_alanları[0].global_tetikleyici);
         assert_eq!(dönüşlü.ağaç_alanları[0].gezinme, AğaçGezinmesi::Açık);
         let temel_uzaklık = temel_merkezler[1].0 - temel_merkezler[0].0;
         let dönüşlü_uzaklık = dönüşlü_merkezler[1].0 - dönüşlü_merkezler[0].0;
@@ -7847,5 +7908,32 @@ mod yakınlaştırma_yönü_testleri {
                 .abs()
                 < 1e-3
         );
+    }
+
+    #[test]
+    fn sankey_roam_trigger_global_ve_self_isabet_kapsamina_aktarilir() {
+        use crate::model::sankey::SankeySerisi;
+
+        let seçenekler = GrafikSeçenekleri::yeni()
+            .animasyon(false)
+            .seri(
+                SankeySerisi::yeni()
+                    .düğümler(["A", "B"])
+                    .bağlar([("A", "B", 1.0)])
+                    .gezinme(AğaçGezinmesi::Açık),
+            )
+            .seri(
+                SankeySerisi::yeni()
+                    .düğümler(["C", "D"])
+                    .bağlar([("C", "D", 1.0)])
+                    .gezinme(AğaçGezinmesi::Açık)
+                    .gezinme_tetikleyicisi_global(false),
+            );
+        let mut yüzey = crate::cizim::KayıtYüzeyi::yeni(400.0, 300.0);
+        let çıktı = grafiği_boya(&mut yüzey, &seçenekler, &BoyamaGirdisi::default());
+
+        assert_eq!(çıktı.ağaç_alanları.len(), 2);
+        assert!(çıktı.ağaç_alanları[0].global_tetikleyici);
+        assert!(!çıktı.ağaç_alanları[1].global_tetikleyici);
     }
 }

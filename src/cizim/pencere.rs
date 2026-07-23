@@ -36,6 +36,7 @@ use crate::model::agac::{
     AğaçHaritasıDüğümTıklaması, GüneşPatlamasıDüğümTıklaması
 };
 use crate::model::paralel::ParalelGenişletmeTetikleyicisi;
+use crate::model::sankey::SankeySerisi;
 use crate::model::secenekler::GrafikSeçenekleri;
 use crate::model::seri::Seri;
 
@@ -83,8 +84,51 @@ type ParalelEksenKayıtları = Rc<RefCell<Vec<ParalelEksenBölgesi>>>;
 /// `parallel.axisExpandable` koordinat alanlarının pencere-mutlak kayıtları.
 type ParalelGenişletmeKayıtları = Rc<RefCell<Vec<ParalelGenişletmeBölgesi>>>;
 
-/// Tree `roam` kutularının pencere-mutlak kayıtları.
+/// Tree/Treemap/Sankey `roam` kutularının pencere-mutlak kayıtları.
 type AğaçGezinmeKayıtları = Rc<RefCell<Vec<AğaçGezinmeAlanı>>>;
+
+/// Dönüştürülmüş Sankey düğümünün ekran konumunu, ECharts `dragNode`
+/// action'ının sakladığı seri-kutusu yerel oranına geri çevirir.
+fn sankey_toplam_ölçeği(seri: &SankeySerisi, görünüm: (f32, f32, f32)) -> f32 {
+    let en_küçük = seri.en_küçük_ölçek.max(0.01);
+    let en_büyük = seri.en_büyük_ölçek.max(en_küçük);
+    let model_ölçeği = seri.yakınlaştırma.clamp(en_küçük, en_büyük);
+    let geçici_ölçek = if görünüm.2.is_finite() {
+        görünüm
+            .2
+            .clamp(en_küçük / model_ölçeği, en_büyük / model_ölçeği)
+    } else {
+        1.0
+    };
+    (model_ölçeği * geçici_ölçek).max(1e-6)
+}
+
+fn sankey_ekrandan_yerele(
+    seri: &SankeySerisi,
+    alan: Dikdörtgen,
+    görünüm: (f32, f32, f32),
+    ekran: (f32, f32),
+) -> (f32, f32) {
+    let toplam_ölçek = sankey_toplam_ölçeği(seri, görünüm);
+    let kaynak_merkezi = seri
+        .merkez
+        .map(|(x, y)| {
+            (
+                alan.x + x.çöz(alan.genişlik),
+                alan.y + y.çöz(alan.yükseklik),
+            )
+        })
+        .unwrap_or_else(|| alan.merkez());
+    let hedef_merkezi = alan.merkez();
+    let taban = (
+        kaynak_merkezi.0 + (ekran.0 - hedef_merkezi.0 - görünüm.0) / toplam_ölçek,
+        kaynak_merkezi.1 + (ekran.1 - hedef_merkezi.1 - görünüm.1) / toplam_ölçek,
+    );
+    (
+        (taban.0 - alan.x) / alan.genişlik.max(1e-6),
+        (taban.1 - alan.y) / alan.yükseklik.max(1e-6),
+    )
+}
 
 fn gpui_imleci(ad: &str) -> CursorStyle {
     match ad.trim().to_ascii_lowercase().as_str() {
@@ -189,9 +233,9 @@ pub struct GrafikGörünümü {
     grafo_görünümü: (f32, f32, f32),
     /// Grafo düğümü sürükleme kaymaları.
     grafo_kaymaları: std::collections::HashMap<usize, (f32, f32)>,
-    /// Tree/Treemap serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
+    /// Tree/Treemap/Sankey serisi başına `(kayma_x, kayma_y, ölçek)` gezinme durumu.
     ağaç_görünümleri: HashMap<usize, (f32, f32, f32)>,
-    /// Pencere-mutlak Tree/Treemap gezinme alanları.
+    /// Pencere-mutlak Tree/Treemap/Sankey gezinme alanları.
     ağaç_alanları: AğaçGezinmeKayıtları,
 }
 
@@ -202,9 +246,17 @@ enum Sürükleme {
     GrafoDüğüm {
         veri_sırası: usize, son: (f32, f32)
     },
+    /// Sankey düğümünü `dragNode.localX/localY` olarak taşıma.
+    SankeyDüğüm {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        alan: Dikdörtgen,
+        toplam_ölçek: f32,
+        son: (f32, f32),
+    },
     /// Grafo görünümünü kaydırma (roam).
     GrafoKaydırma { son: (f32, f32) },
-    /// Tek Tree serisinin görünümünü kaydırma (`series.tree.roam`).
+    /// Tek Tree/Treemap/Sankey serisinin görünümünü kaydırma (`series.*.roam`).
     AğaçKaydırma {
         seri_sırası: usize, son: (f32, f32)
     },
@@ -1040,6 +1092,52 @@ impl Render for GrafikGörünümü {
                             cx.notify();
                             return;
                         }
+                        Some(Sürükleme::SankeyDüğüm {
+                            seri_sırası,
+                            veri_sırası,
+                            alan,
+                            toplam_ölçek,
+                            son,
+                        }) => {
+                            let fark = (yeni.0 - son.0, yeni.1 - son.1);
+                            let değişiklik = Arc::make_mut(&mut bu.seçenekler)
+                                .seriler
+                                .get_mut(seri_sırası)
+                                .and_then(|seri| match seri {
+                                    Seri::Sankey(sankey) => {
+                                        let düğüm = sankey.düğümler.get(veri_sırası)?;
+                                        let yerel_x = düğüm.yerel_x?
+                                            + fark.0 / (alan.genişlik * toplam_ölçek).max(1e-6);
+                                        let yerel_y = düğüm.yerel_y?
+                                            + fark.1 / (alan.yükseklik * toplam_ölçek).max(1e-6);
+                                        let ad = sankey.düğüm_konumunu_ayarla(
+                                            veri_sırası,
+                                            yerel_x,
+                                            yerel_y,
+                                        )?;
+                                        Some((ad, yerel_x, yerel_y))
+                                    }
+                                    _ => None,
+                                });
+                            bu.sürükleme = Some(Sürükleme::SankeyDüğüm {
+                                seri_sırası,
+                                veri_sırası,
+                                alan,
+                                toplam_ölçek,
+                                son: yeni,
+                            });
+                            if let Some((ad, yerel_x, yerel_y)) = değişiklik {
+                                cx.emit(GrafikOlayı::SankeyDüğümüSürüklendi {
+                                    seri_sırası,
+                                    veri_sırası,
+                                    ad,
+                                    yerel_x,
+                                    yerel_y,
+                                });
+                                cx.notify();
+                            }
+                            return;
+                        }
                         Some(Sürükleme::GrafoKaydırma { son }) => {
                             bu.grafo_görünümü.0 += yeni.0 - son.0;
                             bu.grafo_görünümü.1 += yeni.1 - son.1;
@@ -1225,14 +1323,15 @@ impl Render for GrafikGörünümü {
                     Err(_) => None,
                 };
                 let Some(kayıt) = alan_kaydı else {
-                    // Tree gezinmesi: yalnız alanın `roam` seçeneği ölçeğe
-                    // izin veriyorsa, işaretçinin bulunduğu seriyi büyüt.
+                    // Tree/Treemap/Sankey gezinmesi: `roam` ölçeğe izin
+                    // veriyorsa `self` için alanı, `global` için tuvali hedefle.
                     let ağaç_alanı = bu.ağaç_alanları.try_borrow().ok().and_then(|alanlar| {
                         alanlar
                             .iter()
                             .rev()
                             .find(|alan| {
-                                alan.alan.içeriyor_mu(konum) && alan.gezinme.ölçeklenebilir()
+                                (alan.global_tetikleyici || alan.alan.içeriyor_mu(konum))
+                                    && alan.gezinme.ölçeklenebilir()
                             })
                             .copied()
                     });
@@ -2062,6 +2161,60 @@ impl Render for GrafikGörünümü {
                                     son: nokta,
                                 });
                             }
+                            // Sankey düğümü: boyanmış konumu seri-kutusu
+                            // oranına geri çevirip ECharts `dragNode`
+                            // modeline yaz; sonraki hareketler bu başlangıca
+                            // ekran-piksel farkı ekler.
+                            Some(Seri::Sankey(sankey))
+                                if sankey.düğümler.get(b.veri_sırası).is_some_and(|düğüm| {
+                                    düğüm.sürüklenebilir.unwrap_or(sankey.sürüklenebilir)
+                                }) =>
+                            {
+                                let alan = bu.ağaç_alanları.try_borrow().ok().and_then(|alanlar| {
+                                    alanlar
+                                        .iter()
+                                        .rev()
+                                        .find(|alan| alan.seri_sırası == b.seri_sırası)
+                                        .copied()
+                                });
+                                let görünüm = bu
+                                    .ağaç_görünümleri
+                                    .get(&b.seri_sırası)
+                                    .copied()
+                                    .unwrap_or((0.0, 0.0, 1.0));
+                                if let (Some(alan), İsabetGeometrisi::Dikdörtgen(düğüm_alanı)) =
+                                    (alan, &b.geometri)
+                                {
+                                    let yerel = sankey_ekrandan_yerele(
+                                        sankey,
+                                        alan.alan,
+                                        görünüm,
+                                        (düğüm_alanı.x, düğüm_alanı.y),
+                                    );
+                                    let toplam_ölçek = sankey_toplam_ölçeği(sankey, görünüm);
+                                    let başlatıldı = Arc::make_mut(&mut bu.seçenekler)
+                                        .seriler
+                                        .get_mut(b.seri_sırası)
+                                        .and_then(|seri| match seri {
+                                            Seri::Sankey(sankey) => sankey.düğüm_konumunu_ayarla(
+                                                b.veri_sırası,
+                                                yerel.0,
+                                                yerel.1,
+                                            ),
+                                            _ => None,
+                                        })
+                                        .is_some();
+                                    if başlatıldı {
+                                        bu.sürükleme = Some(Sürükleme::SankeyDüğüm {
+                                            seri_sırası: b.seri_sırası,
+                                            veri_sırası: b.veri_sırası,
+                                            alan: alan.alan,
+                                            toplam_ölçek,
+                                            son: nokta,
+                                        });
+                                    }
+                                }
+                            }
                             // Tree düğümü: resmî treeExpandAndCollapse
                             // eylemi gibi yalnız dal düğümünün durumunu
                             // değiştir; veriIndex gizli alt ağaçlarda da
@@ -2109,7 +2262,8 @@ impl Render for GrafikGörünümü {
                                 .iter()
                                 .rev()
                                 .find(|alan| {
-                                    alan.alan.içeriyor_mu(nokta) && alan.gezinme.kaydırılabilir()
+                                    (alan.global_tetikleyici || alan.alan.içeriyor_mu(nokta))
+                                        && alan.gezinme.kaydırılabilir()
                                 })
                                 .copied()
                         })
@@ -2136,5 +2290,35 @@ impl Render for GrafikGörünümü {
                     cx.notify();
                 }
             }))
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used)]
+mod testler {
+    use super::*;
+    use crate::model::Uzunluk;
+
+    #[test]
+    fn sankey_ekran_yerel_donusumu_model_ve_gecici_gorunumu_tersine_cevirir() {
+        let alan = Dikdörtgen::yeni(10.0, 20.0, 200.0, 100.0);
+        let seri = SankeySerisi::yeni()
+            .merkez(Uzunluk::Yüzde(40.0), Uzunluk::Yüzde(60.0))
+            .yakınlaştırma(2.0);
+        let görünüm = (15.0, -5.0, 1.25);
+        let yerel = (0.25, 0.4);
+        let taban = (
+            alan.x + yerel.0 * alan.genişlik,
+            alan.y + yerel.1 * alan.yükseklik,
+        );
+        let kaynak_merkezi = (alan.x + 0.4 * alan.genişlik, alan.y + 0.6 * alan.yükseklik);
+        let merkez = alan.merkez();
+        let ekran = (
+            merkez.0 + görünüm.0 + 2.0 * görünüm.2 * (taban.0 - kaynak_merkezi.0),
+            merkez.1 + görünüm.1 + 2.0 * görünüm.2 * (taban.1 - kaynak_merkezi.1),
+        );
+        let çözülen = sankey_ekrandan_yerele(&seri, alan, görünüm, ekran);
+        assert!((çözülen.0 - yerel.0).abs() < 1e-6);
+        assert!((çözülen.1 - yerel.1).abs() < 1e-6);
     }
 }

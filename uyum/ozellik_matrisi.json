@@ -15688,17 +15688,38 @@
     "ts_türü": "SankeySeriesOption",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": null,
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Sankey, From<SankeySerisi>); src/grafik/sankey.rs (yerleşim/boyama)",
+    "veri_biçimleri": [
+      "SankeySerisi"
+    ],
+    "koordinat_dalları": [
+      "view",
+      "calendar-box",
+      "matrix-box",
+      "boyama",
+      "isabet/tooltip",
+      "drag/roam"
+    ],
     "kaynak": {
       "dosya": "src/export/option.ts",
       "satır": 247,
       "sembol": "RegisteredSeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "yok"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur",
+      "eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "4c5aef25bb9254a54dd0",
@@ -25829,17 +25850,34 @@
     "ts_türü": "ColorString[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.color)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeySerisi::renkler); src/grafik/sankey.rs (renk_eşle)",
+    "veri_biçimleri": [
+      "ColorString[]"
+    ],
+    "koordinat_dalları": [
+      "seri-paleti",
+      "global-palet",
+      "değer-eşleme"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 113,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "42a4677a1dcc81872a7e",
@@ -25850,17 +25888,36 @@
     "ts_türü": "'view'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.coordinateSystem)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (view/takvim/matris bağları); src/cizim/gorunum.rs (yerleşim_referansı)",
+    "veri_biçimleri": [
+      "'view'",
+      "calendarIndex+coord",
+      "matrixIndex+coord"
+    ],
+    "koordinat_dalları": [
+      "view",
+      "calendar-box",
+      "matrix-box"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 115,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "model::secenekler::testler::sankey_view_calendar_ve_matrix_kutu_koordinatlarini_dogrular",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "50acc16ea20c5fea376a",
@@ -25871,17 +25928,34 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.curveness)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyÇizgiStili::eğrilik); src/grafik/sankey.rs (Bézier kontrol noktaları)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "0",
+      "0.5-varsayılanı",
+      "yatay",
+      "dikey"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 65,
       "sembol": "SankeyEdgeStyleOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "30d6da3116da6f474430",
@@ -25892,17 +25966,35 @@
     "ts_türü": "SankeyNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.data)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDüğümü, SankeySerisi::düğümler); src/grafik/sankey.rs (grafiği_kur)",
+    "veri_biçimleri": [
+      "SankeyNodeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "ad/id",
+      "açık/değerden-türetilen value",
+      "ham dataIndex"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 148,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur",
+      "grafik::sankey::testler::resmi_dag_deger_katman_ve_bag_kalinligini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "8ee20a2338c6c967bd31",
@@ -25913,17 +26005,28 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.depth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDüğümü::derinlik, SankeySeviyesi::derinlik); src/grafik/sankey.rs (derinlik ata)",
+    "veri_biçimleri": [
+      "nonnegative integer"
+    ],
+    "koordinat_dalları": [
+      "DAG-türetilen",
+      "açık-düğüm-depth",
+      "level-eşleme"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 82,
       "sembol": "SankeyNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::sankey::testler::resmi_dag_deger_katman_ve_bag_kalinligini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-levels"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f2411471d98456b5ac28",
@@ -25934,17 +26037,28 @@
     "ts_türü": "number",
     "zorunlu": true,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.depth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDüğümü::derinlik, SankeySeviyesi::derinlik); src/grafik/sankey.rs (derinlik ata)",
+    "veri_biçimleri": [
+      "nonnegative integer"
+    ],
+    "koordinat_dalları": [
+      "DAG-türetilen",
+      "açık-düğüm-depth",
+      "level-eşleme"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 98,
       "sembol": "SankeyLevelOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::sankey::testler::resmi_dag_deger_katman_ve_bag_kalinligini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-levels"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "73e3f1ad314846ee892e",
@@ -25955,17 +26069,35 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (sankey.draggable)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (seri/düğüm sürüklenebilir); src/cizim/pencere.rs (SankeyDüğüm sürükleme); src/eylem.rs (dragNode)",
+    "veri_biçimleri": [
+      "bool",
+      "dragNode localX/localY"
+    ],
+    "koordinat_dalları": [
+      "seri-varsayılanı",
+      "düğüm-override",
+      "pan/zoom ters-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 84,
       "sembol": "SankeyNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur",
+      "cizim::pencere::testler::sankey_ekran_yerel_donusumu_model_ve_gecici_gorunumu_tersine_cevirir"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "79b4e42283b1c97bac8f",
@@ -25976,17 +26108,35 @@
     "ts_türü": "boolean",
     "zorunlu": false,
     "echarts_varsayılanı": "true",
-    "rust_api": "src/model/seri.rs (sankey.draggable)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (seri/düğüm sürüklenebilir); src/cizim/pencere.rs (SankeyDüğüm sürükleme); src/eylem.rs (dragNode)",
+    "veri_biçimleri": [
+      "bool",
+      "dragNode localX/localY"
+    ],
+    "koordinat_dalları": [
+      "seri-varsayılanı",
+      "düğüm-override",
+      "pan/zoom ters-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 130,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur",
+      "cizim::pencere::testler::sankey_ekran_yerel_donusumu_model_ve_gecici_gorunumu_tersine_cevirir"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "428b80609d50111e59bd",
@@ -25997,17 +26147,37 @@
     "ts_türü": "SeriesLabelOption & {\n        position?: 'inside'\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: false,\n            fontSize: 12\n        }",
-    "rust_api": "src/model/seri.rs (sankey.edgeLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (kenar_etiketi); src/grafik/sankey.rs (bağ orta-nokta etiketi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "seviye",
+      "bağ",
+      "durum",
+      "inside"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 156,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6033f86b2f3303c708dd",
@@ -26018,17 +26188,37 @@
     "ts_türü": "SeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: false,\n            fontSize: 12\n        }",
-    "rust_api": "src/model/seri.rs (sankey.edgeLabel)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (kenar_etiketi); src/grafik/sankey.rs (bağ orta-nokta etiketi)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "seviye",
+      "bağ",
+      "durum",
+      "inside"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 94,
       "sembol": "SankeyEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "49f2d18c9477a81dd32c",
@@ -26039,17 +26229,33 @@
     "ts_türü": "SankeyEdgeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.edges)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeySerisi::bağlar; links/edges eşdeğeri)",
+    "veri_biçimleri": [
+      "SankeyEdgeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "links-alias",
+      "edges-alias"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 151,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "ecde11e72680df2b3d2b",
@@ -26060,17 +26266,38 @@
     "ts_türü": "{\n        focus?: DefaultEmphasisFocus | 'adjacency' | 'trajectory'\n    }",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            label: {\n                show: true\n            },\n            lineStyle: {\n                opacity: 0.5\n            }\n        }",
-    "rust_api": "src/model/seri.rs (sankey.emphasis)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDurumu/SankeyVurguOdağı); src/grafik/sankey.rs (odak_kümeleri)",
+    "veri_biçimleri": [
+      "self",
+      "series",
+      "adjacency",
+      "trajectory"
+    ],
+    "koordinat_dalları": [
+      "düğüm",
+      "bağ",
+      "item/line/label/edgeLabel",
+      "blur-komşu-dışı"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 69,
       "sembol": "ExtraStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1b8ec485c8940bc7a912",
@@ -26081,17 +26308,38 @@
     "ts_türü": "FocusNodeAdjacency",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.focusNodeAdjacency)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyKomşulukOdağı; seri/düğüm/bağ); src/grafik/sankey.rs (odak_kümeleri)",
+    "veri_biçimleri": [
+      "false",
+      "inEdges",
+      "outEdges",
+      "allEdges"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "düğüm",
+      "bağ",
+      "eski-option→emphasis eşlemesi"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 135,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1eb3134c8a508f6f9740",
@@ -26102,17 +26350,38 @@
     "ts_türü": "FocusNodeAdjacency",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.focusNodeAdjacency)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyKomşulukOdağı; seri/düğüm/bağ); src/grafik/sankey.rs (odak_kümeleri)",
+    "veri_biçimleri": [
+      "false",
+      "inEdges",
+      "outEdges",
+      "allEdges"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "düğüm",
+      "bağ",
+      "eski-option→emphasis eşlemesi"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 93,
       "sembol": "SankeyEdgeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "bdd9fa98855b15a34ae1",
@@ -26123,17 +26392,38 @@
     "ts_türü": "FocusNodeAdjacency",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.focusNodeAdjacency)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyKomşulukOdağı; seri/düğüm/bağ); src/grafik/sankey.rs (odak_kümeleri)",
+    "veri_biçimleri": [
+      "false",
+      "inEdges",
+      "outEdges",
+      "allEdges"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "düğüm",
+      "bağ",
+      "eski-option→emphasis eşlemesi"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 86,
       "sembol": "SankeyNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "38be571598b33af86d6e",
@@ -26144,17 +26434,34 @@
     "ts_türü": "string",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.id)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeySerisi::kimlik, SankeyDüğümü::kimlik); src/eylem.rs (seriesId seçici)",
+    "veri_biçimleri": [
+      "String"
+    ],
+    "koordinat_dalları": [
+      "seri-kimliği",
+      "düğüm-kimliği",
+      "ad-yedeği"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 77,
       "sembol": "SankeyNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "1e7fc551d94f9ef0d5c4",
@@ -26165,17 +26472,31 @@
     "ts_türü": "ItemStyleOption<TCbParams>",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.itemStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyÖğeStili); src/grafik/sankey.rs (öğe_stili_yama_uygula)",
+    "veri_biçimleri": [
+      "color/border/radius/opacity/shadow"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "seviye",
+      "düğüm",
+      "emphasis/blur/select",
+      "negatif-alan-normalizasyonu"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 55,
       "sembol": "SankeyNodeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-itemstyle",
+      "sankey-levels"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "2a38fbdfc4293580cfc0",
@@ -26186,17 +26507,33 @@
     "ts_türü": "SeriesLabelOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            show: true,\n            position: 'right',\n            fontSize: 12\n        }",
-    "rust_api": "src/model/seri.rs (sankey.label)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/stil.rs (Etiket/EtiketYaması); src/grafik/sankey.rs (düğüm_etiket_geometrisi/etiketi_çiz)",
+    "veri_biçimleri": [
+      "Etiket",
+      "EtiketYaması",
+      "formatter/rich"
+    ],
+    "koordinat_dalları": [
+      "seri→seviye→düğüm",
+      "dört-dış/inside konumu",
+      "kenarlık-dahil-taban",
+      "font/renk/durum"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 54,
       "sembol": "SankeyNodeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::sankey::testler::etiket_tabani_negatif_alani_ve_yarim_kenarligi_hesaba_katar",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "3db1743bbe22d6d41468",
@@ -26207,17 +26544,34 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "32",
-    "rust_api": "src/model/seri.rs (sankey.layoutIterations)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (yerleşim_yinelemesi); src/grafik/sankey.rs (gevşet/çakışma yinelemesi)",
+    "veri_biçimleri": [
+      "nonnegative integer"
+    ],
+    "koordinat_dalları": [
+      "0",
+      "varsayılan-32",
+      "ileri/geri-gevşetme"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 139,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::sankey::testler::resmi_dag_deger_katman_ve_bag_kalinligini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f5ef2cbeb492245edf0d",
@@ -26228,17 +26582,30 @@
     "ts_türü": "SankeyLevelOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": "[]",
-    "rust_api": "src/model/seri.rs (sankey.levels)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeySeviyesi); src/grafik/sankey.rs (seri→seviye→öğe stil kalıtımı)",
+    "veri_biçimleri": [
+      "SankeyLevelOption[]"
+    ],
+    "koordinat_dalları": [
+      "depth",
+      "itemStyle",
+      "lineStyle",
+      "label",
+      "edgeLabel"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 154,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-levels"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c9524ee161f3097dcf29",
@@ -26249,17 +26616,35 @@
     "ts_türü": "SankeyEdgeStyleOption",
     "zorunlu": false,
     "echarts_varsayılanı": "{\n            color: tokens.color.neutral50,\n            opacity: 0.2,\n            curveness: 0.5\n        }",
-    "rust_api": "src/model/seri.rs (sankey.lineStyle)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyÇizgiStili, SankeyKenarBoyası); src/grafik/sankey.rs (bağ_dolgusu/bağ_yolu)",
+    "veri_biçimleri": [
+      "color/source/target/gradient",
+      "opacity",
+      "curveness",
+      "width/type/shadow"
+    ],
+    "koordinat_dalları": [
+      "seri",
+      "seviye",
+      "bağ",
+      "durum",
+      "yatay/dikey-gradyan"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 59,
       "sembol": "SankeyEdgeStateOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-levels",
+      "sankey-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c0149d43e6c7296cb517",
@@ -26270,17 +26655,35 @@
     "ts_türü": "SankeyEdgeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.links)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyBağı, SankeySerisi::bağlar/ayrıntılı_bağlar); src/grafik/sankey.rs (şerit yerleşimi)",
+    "veri_biçimleri": [
+      "SankeyEdgeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "source/target/value",
+      "çoklu-bağ",
+      "DAG-doğrulama"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 152,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur",
+      "grafik::sankey::testler::resmi_dag_deger_katman_ve_bag_kalinligini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "f39d4fe11950030dc323",
@@ -26291,17 +26694,33 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.localX)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDüğümü::yerel_x/düğüm_konumunu_ayarla); src/eylem.rs (dragNode)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "layout-yedeği",
+      "dragNode",
+      "pan/zoom ters-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 79,
       "sembol": "SankeyNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "bfabb835787f51f115e4",
@@ -26312,17 +26731,33 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.localY)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDüğümü::yerel_y/düğüm_konumunu_ayarla); src/eylem.rs (dragNode)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "layout-yedeği",
+      "dragNode",
+      "pan/zoom ters-dönüşümü"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 80,
       "sembol": "SankeyNodeItemOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "421493d80c9ae526d8b5",
@@ -26333,17 +26768,34 @@
     "ts_türü": "'justify' | 'left' | 'right'",
     "zorunlu": false,
     "echarts_varsayılanı": "'justify'",
-    "rust_api": "src/model/seri.rs (sankey.nodeAlign)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyDüğümHizası); src/grafik/sankey.rs (derinlik ata)",
+    "veri_biçimleri": [
+      "justify",
+      "left",
+      "right"
+    ],
+    "koordinat_dalları": [
+      "iki-yana",
+      "sol",
+      "sağ",
+      "sink-hizası"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 146,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::sankey::testler::dikey_yon_ve_sag_hiza_eksenleri_degistirir",
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "9d0cd5cb13228c9902d8",
@@ -26354,17 +26806,33 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "8",
-    "rust_api": "src/model/seri.rs (sankey.nodeGap)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (düğüm_boşluğu); src/grafik/sankey.rs (derinlik_grupları/çakışma_çöz)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "derinlik-içi-boşluk",
+      "negatif-olmayan-doğrulama"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 125,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "a89bf8362f38ba66ec83",
@@ -26375,17 +26843,33 @@
     "ts_türü": "SankeyNodeItemOption[]",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.nodes)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeySerisi::düğümler; data/nodes eşdeğeri)",
+    "veri_biçimleri": [
+      "SankeyNodeItemOption[]"
+    ],
+    "koordinat_dalları": [
+      "data-alias",
+      "nodes-alias"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 149,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c45e317f90708d112eee",
@@ -26396,17 +26880,34 @@
     "ts_türü": "number",
     "zorunlu": false,
     "echarts_varsayılanı": "20",
-    "rust_api": "src/model/seri.rs (sankey.nodeWidth)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (düğüm_genişliği); src/grafik/sankey.rs (düğüm_enini_ata)",
+    "veri_biçimleri": [
+      "number"
+    ],
+    "koordinat_dalları": [
+      "yatay-genişlik",
+      "dikey-yükseklik",
+      "sıfır"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 121,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "45fe6bf6604e2f884a2d",
@@ -26417,17 +26918,31 @@
     "ts_türü": "LayoutOrient",
     "zorunlu": false,
     "echarts_varsayılanı": "'horizontal'",
-    "rust_api": "src/model/seri.rs (sankey.orient)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeyYönü); src/grafik/sankey.rs (dikey/yatay eksen değişimi)",
+    "veri_biçimleri": [
+      "horizontal",
+      "vertical"
+    ],
+    "koordinat_dalları": [
+      "düğüm ekseni",
+      "bağ kontrol noktaları",
+      "etiket konumu"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 117,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "grafik::sankey::testler::dikey_yon_ve_sag_hiza_eksenleri_degistirir",
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "c5227ba433751d5f6c7c",
@@ -26438,17 +26953,35 @@
     "ts_türü": "'desc' | null",
     "zorunlu": false,
     "echarts_varsayılanı": "'desc'",
-    "rust_api": "src/model/seri.rs (sankey.sort)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/sankey.rs (SankeySırası); src/grafik/sankey.rs (düğüm sırası)",
+    "veri_biçimleri": [
+      "desc",
+      "null/veri"
+    ],
+    "koordinat_dalları": [
+      "değer-azalan",
+      "ham-dataIndex",
+      "eşit-kararlılık"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 144,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "b6899d8a7a2409944982",
@@ -26459,17 +26992,34 @@
     "ts_türü": "'sankey'",
     "zorunlu": false,
     "echarts_varsayılanı": null,
-    "rust_api": "src/model/seri.rs (sankey.type)",
-    "veri_biçimleri": [],
-    "koordinat_dalları": [],
+    "rust_api": "src/model/seri.rs (Seri::Sankey); src/model/sankey.rs (SankeySerisi); src/grafik/sankey.rs (sankey_çiz)",
+    "veri_biçimleri": [
+      "sabit 'sankey'"
+    ],
+    "koordinat_dalları": [
+      "kayıtlı-seri",
+      "boyama",
+      "isabet/tooltip"
+    ],
     "kaynak": {
       "dosya": "src/chart/sankey/SankeySeries.ts",
       "satır": 108,
       "sembol": "SankeySeriesOption"
     },
-    "testler": [],
-    "galeri_örnekleri": [],
-    "durum": "kısmi"
+    "testler": [
+      "sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur",
+      "sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur"
+    ],
+    "galeri_örnekleri": [
+      "sankey-energy",
+      "sankey-itemstyle",
+      "sankey-levels",
+      "sankey-nodeAlign-left",
+      "sankey-nodeAlign-right",
+      "sankey-simple",
+      "sankey-vertical"
+    ],
+    "durum": "uygulandı_kanıt_bekliyor"
   },
   {
     "id": "6525a4618d0d2a5f246e",

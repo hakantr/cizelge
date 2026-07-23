@@ -4996,71 +4996,9 @@ impl AğaçSerisi {
     }
 }
 
-/// Sankey bağı (`links` öğesi).
-#[derive(Clone, PartialEq, Debug)]
-pub struct SankeyBağı {
-    pub kaynak: String,
-    pub hedef: String,
-    pub değer: f64,
-}
-
-/// Sankey serisi (`series-sankey`): katmanlı akış diyagramı.
-#[derive(Clone, Debug)]
-pub struct SankeySerisi {
-    pub ad: Option<String>,
-    /// Açık düğüm listesi; boşsa bağlardan türetilir.
-    pub düğümler: Vec<String>,
-    pub bağlar: Vec<SankeyBağı>,
-    pub sol: Uzunluk,
-    pub üst: Uzunluk,
-    pub genişlik: Uzunluk,
-    pub yükseklik: Uzunluk,
-    pub düğüm_genişliği: f32,
-    pub düğüm_boşluğu: f32,
-}
-
-impl Default for SankeySerisi {
-    fn default() -> Self {
-        SankeySerisi {
-            ad: None,
-            düğümler: Vec::new(),
-            bağlar: Vec::new(),
-            sol: Uzunluk::Yüzde(8.0),
-            üst: Uzunluk::Piksel(60.0),
-            genişlik: Uzunluk::Yüzde(80.0),
-            yükseklik: Uzunluk::Yüzde(75.0),
-            düğüm_genişliği: 18.0,
-            düğüm_boşluğu: 10.0,
-        }
-    }
-}
-
-impl SankeySerisi {
-    pub fn yeni() -> Self {
-        Self::default()
-    }
-
-    pub fn ad(mut self, ad: impl Into<String>) -> Self {
-        self.ad = Some(ad.into());
-        self
-    }
-
-    /// Bağlar: `(kaynak, hedef, değer)` üçlüleri.
-    pub fn bağlar<S: Into<String>>(
-        mut self,
-        bağlar: impl IntoIterator<Item = (S, S, f64)>,
-    ) -> Self {
-        self.bağlar = bağlar
-            .into_iter()
-            .map(|(k, h, d)| SankeyBağı {
-                kaynak: k.into(),
-                hedef: h.into(),
-                değer: d,
-            })
-            .collect();
-        self
-    }
-}
+// Bu yeniden dışa aktarma eski `model::seri::SankeySerisi` yolunu korurken
+// ayrıntılı option yüzeyini kendi modülünde tutar.
+pub use crate::model::sankey::{SankeyBağı, SankeySerisi};
 
 /// Grafo düğümü (`graph` `data` öğesi).
 #[derive(Clone, PartialEq, Debug)]
@@ -5771,6 +5709,7 @@ impl Seri {
             Seri::AğaçHaritası(s) => s.kimlik.as_deref(),
             Seri::GüneşPatlaması(s) => s.kimlik.as_deref(),
             Seri::Ağaç(s) => s.kimlik.as_deref(),
+            Seri::Sankey(s) => s.kimlik.as_deref(),
             _ => None,
         }
     }

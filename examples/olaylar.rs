@@ -50,6 +50,14 @@ impl Kök {
                     ölçek,
                 } => format!("Tree {seri_sırası} roam → ({kayma_x:.1}, {kayma_y:.1}), {ölçek:.2}×")
                     .into(),
+                GrafikOlayı::SankeyDüğümüSürüklendi {
+                    seri_sırası,
+                    ad,
+                    yerel_x,
+                    yerel_y,
+                    ..
+                } => format!("Sankey {seri_sırası} düğümü → {ad} ({yerel_x:.3}, {yerel_y:.3})")
+                    .into(),
                 GrafikOlayı::AğaçHaritasıKöküDeğişti {
                     seri_sırası,
                     yol,

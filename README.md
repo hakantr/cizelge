@@ -67,28 +67,27 @@ cargo run --example pano      # tek pencerede dört grafik
 | zrender `Painter` | `cizim::cizici` | gpui `Window` üstünde yol/metin/dilim çizimi |
 | `echarts.init` + `setOption` | `cizim::gorunum::GrafikGörünümü` | `Render` görünümü, animasyon, fare etkileşimi |
 
-## Bugünkü kapsam
+## Uyum durumu ve kapsam
 
-- **Seriler:** çizgi (yumuşak/basamaklı, alan, yığın, boş değer), sütun
-  (gruplu/yığılmış/yatay, köşe yarıçapı, değer etiketi), pasta (halka, gül,
-  dış/iç/merkez etiket, etiket çizgisi), saçılım (işlevsel sembol boyutu).
-- **Eksenler:** değer, kategori, zaman, log; `min/max`, `splitNumber`,
-  `boundaryGap`, ters çevirme, biçimleyiciler, otomatik etiket seyreltme,
-  `containLabel`.
-- **Bileşenler:** başlık, tıklanabilir gösterge (seri/dilim açma-kapama),
-  ızgara, eksen imleçli (çizgi/gölge) ipucu penceresi.
-- **Görsellik:** ECharts v6 tema paleti, gradyan dolgular, kesikli/noktalı
-  çizgiler, `cubicOut` giriş animasyonları.
+Destek durumu README içinde tarihsel bir özellik listesi olarak elle
+tutulmaz. Normatif ve yeniden üretilebilir durum
+[`uyum/galeri_manifest.json`](uyum/galeri_manifest.json),
+[`uyum/ozellik_matrisi.json`](uyum/ozellik_matrisi.json),
+[`uyum/ozet.json`](uyum/ozet.json), senaryo dosyaları ve görsel metriklerden
+okunur. Bunların tümü şu komutla kilitli ECharts/ECharts Examples kaynaklarına
+karşı yeniden üretilir:
 
-## Yol haritası (tam eşdeğerlik için)
+```sh
+node tools/uyum/uret.mjs
+node tools/uyum/uret.mjs --check
+```
 
-Radar, ısı haritası, mum (candlestick), ağaç/halka (treemap/sunburst), grafo,
-sankey, gösterge saati (gauge); `dataZoom`, `visualMap`, fırça, araç kutusu;
-çoklu ızgara/eksen, kutupsal koordinat; `dataset`/dönüşümler.
-
-**Kapsam dışı (kesin):** coğrafi katman (`geo`/`map`) ayrı bir çalışmadır;
-3B görünümler ve GL serileri (`scatterGL`, `linesGL`, `flowGL`, `graphGL`)
-bu projeye dahil değildir.
+Bir kartın yalnız çizilmesi tam destek sayılmaz; API, statik/animasyonlu
+render, davranış ve dayanıklılık kapıları ayrı durum taşır. Kesin kapsam dışı
+alanlar `geo`/`map`, bütün 3B görünümler ve `scatterGL`, `linesGL`, `flowGL`,
+`graphGL` dahil tüm GL serileridir. Bunların dışındaki resmi iki boyutlu
+ECharts kapsamı ve ayrıntılı kabul kapıları
+[`ECHARTS_TAM_UYUM_FAZI.md`](ECHARTS_TAM_UYUM_FAZI.md) içinde tanımlıdır.
 
 Ayrıntılı ECharts uyum planı için
 **[ECHARTS_TAM_UYUM_FAZI.md](ECHARTS_TAM_UYUM_FAZI.md)** dosyasına bakın.

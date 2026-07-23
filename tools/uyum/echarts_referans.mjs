@@ -458,7 +458,7 @@ echarts.registerPreprocessor((opt) => {
   // Yeni Sunburst geçidi resmi örnek seçeneğini değiştirmeden doğrulanır.
   // Daha önce kilitlenmiş ailelerin snapshot üretilebilirliği, yalnız kendi
   // eski kartlarında kullanılan bileşen padding normalizasyonuyla korunur.
-  if (!${JSON.stringify(id.startsWith('sunburst-'))}) {
+  if (!${JSON.stringify(id.startsWith('sunburst-') || id.startsWith('sankey-'))}) {
     for (const key of ['title', 'legend', 'toolbox']) {
       const values = Array.isArray(opt[key]) ? opt[key] : opt[key] ? [opt[key]] : [];
       for (const item of values) if (item.padding == null) item.padding = 15;
@@ -1161,6 +1161,15 @@ async function çalıştır() {
             Math.round((çözülen[3] ?? 1) * 255)
           ];
         };
+        const etkiliDolguRenkleri = (dolgu, opaklık = 1) => {
+          const adaylar = Array.isArray(dolgu?.colorStops)
+            ? dolgu.colorStops.map((durak) => durak?.color)
+            : [dolgu];
+          return adaylar.map(renk).filter(Boolean).map((rgba) => [
+            rgba[0], rgba[1], rgba[2],
+            Math.round(rgba[3] * Math.max(0, Math.min(1, Number(opaklık) || 0)))
+          ]);
+        };
         const seriler = [];
         chart.getModel().eachSeries((model) => {
           if (model.subType === 'treemap') {
@@ -1202,6 +1211,83 @@ async function çalıştır() {
                 yükseklik: yuvarla(yerleşim.height)
               },
               düğümler
+            });
+            return;
+          }
+          if (model.subType === 'sankey') {
+            const graph = model.getGraph?.();
+            const düğümVerisi = model.getData?.();
+            const bağVerisi = model.getData?.('edge');
+            const yerleşim = model.layoutInfo || {};
+            const yön = model.get?.('orient') || 'horizontal';
+            const düğümler = [];
+            graph?.eachNode?.((düğüm) => {
+              const kutu = düğüm.getLayout?.() || {};
+              const grafik = düğümVerisi?.getItemGraphicEl?.(düğüm.dataIndex);
+              const şekil = grafik?.shape || {};
+              const stil = grafik?.style
+                || düğümVerisi?.getItemVisual?.(düğüm.dataIndex, 'style') || {};
+              const etiket = grafik?.getTextContent?.();
+              const etiketDönüşümü = etiket?.getComputedTransform?.();
+              düğümler.push({
+                veri_sırası: düğümVerisi?.getRawIndex?.(düğüm.dataIndex) ?? düğüm.dataIndex ?? 0,
+                ad: düğüm.id || düğüm.name || '',
+                değer: Number(kutu.value ?? düğüm.getValue?.() ?? 0) || 0,
+                derinlik: Number(kutu.depth) || 0,
+                x: yuvarla((yerleşim.x || 0) + (şekil.x ?? kutu.x)),
+                y: yuvarla((yerleşim.y || 0) + (şekil.y ?? kutu.y)),
+                genişlik: yuvarla(şekil.width ?? kutu.dx),
+                yükseklik: yuvarla(şekil.height ?? kutu.dy),
+                renk: renk(stil.fill),
+                kenarlık_rengi: renk(stil.stroke),
+                kenarlık_kalınlığı: yuvarla(stil.stroke ? (stil.lineWidth || 0) : 0),
+                etiket_göster: Boolean(etiket && !etiket.ignore),
+                etiket_metni: etiket?.style?.text || '',
+                // Bağlı zrender Text'in kendi x/y değeri sıfırdır; gerçek
+                // etiket tabanı computed transform'un dünya ötelemesidir.
+                // Böylece ince düğüm/kenarlık farkı toplam raster oranında
+                // kaybolsa bile yapısal kanıt başarısız olur.
+                etiket_x: yuvarla(etiketDönüşümü?.[4]),
+                etiket_y: yuvarla(etiketDönüşümü?.[5]),
+                etiket_dönüşü: yuvarla(etiket?.rotation),
+                etiket_fontu: etiket?.style?.font || ''
+              });
+            });
+            const bağlar = [];
+            graph?.eachEdge?.((bağ) => {
+              const grafik = bağVerisi?.getItemGraphicEl?.(bağ.dataIndex);
+              const şekil = grafik?.shape || {};
+              const stil = grafik?.style || {};
+              bağlar.push({
+                veri_sırası: bağVerisi?.getRawIndex?.(bağ.dataIndex) ?? bağ.dataIndex ?? 0,
+                kaynak: bağ.node1?.id || bağ.node1?.name || '',
+                hedef: bağ.node2?.id || bağ.node2?.name || '',
+                değer: Number(bağ.getValue?.() ?? 0) || 0,
+                yön,
+                x1: yuvarla((yerleşim.x || 0) + şekil.x1),
+                y1: yuvarla((yerleşim.y || 0) + şekil.y1),
+                x2: yuvarla((yerleşim.x || 0) + şekil.x2),
+                y2: yuvarla((yerleşim.y || 0) + şekil.y2),
+                cpx1: yuvarla((yerleşim.x || 0) + şekil.cpx1),
+                cpy1: yuvarla((yerleşim.y || 0) + şekil.cpy1),
+                cpx2: yuvarla((yerleşim.x || 0) + şekil.cpx2),
+                cpy2: yuvarla((yerleşim.y || 0) + şekil.cpy2),
+                kalınlık: yuvarla(şekil.extent),
+                renkler: etkiliDolguRenkleri(stil.fill, stil.opacity ?? 1),
+                etiket_göster: Boolean(grafik?.getTextContent?.() && !grafik.getTextContent().ignore),
+                etiket_metni: grafik?.getTextContent?.()?.style?.text || ''
+              });
+            });
+            seriler.push({
+              seri_sırası: model.seriesIndex,
+              alan: {
+                x: yuvarla(yerleşim.x),
+                y: yuvarla(yerleşim.y),
+                genişlik: yuvarla(yerleşim.width),
+                yükseklik: yuvarla(yerleşim.height)
+              },
+              düğümler,
+              bağlar
             });
             return;
           }
@@ -1256,7 +1342,9 @@ async function çalıştır() {
           for (const çocuk of viewRoot?.children || []) gez(çocuk);
           seriler.push({ seri_sırası: model.seriesIndex, dilimler });
         });
-        const tür = seriler.some((seri) => Array.isArray(seri.dilimler)) ? 'sunburst' : 'treemap';
+        const tür = seriler.some((seri) => Array.isArray(seri.dilimler))
+          ? 'sunburst'
+          : seriler.some((seri) => Array.isArray(seri.bağlar)) ? 'sankey' : 'treemap';
         return { şema_sürümü: 1, tür, koordinat_adımı: 0.001, seriler };
       });
       fs.mkdirSync(path.dirname(path.resolve(args.sceneOutput)), { recursive: true });

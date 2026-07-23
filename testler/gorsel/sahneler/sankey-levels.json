@@ -1,0 +1,3348 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sankey",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 35.0,
+        "y": 26.25,
+        "genişlik": 525.0,
+        "yükseklik": 472.5
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "ad": "Total",
+          "değer": 0.6498581442492419,
+          "derinlik": 0,
+          "x": 35.0,
+          "y": 26.25,
+          "genişlik": 20.0,
+          "yükseklik": 360.5,
+          "renk": [
+            251,
+            180,
+            174,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Total",
+          "etiket_x": 60.0,
+          "etiket_y": 206.5,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "Environment",
+          "değer": 0.3422840472560037,
+          "derinlik": 1,
+          "x": 203.333,
+          "y": 26.25,
+          "genişlik": 20.0,
+          "yükseklik": 189.877,
+          "renk": [
+            179,
+            205,
+            227,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Environment",
+          "etiket_x": 228.333,
+          "etiket_y": 121.189,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "Land use",
+          "değer": 0.32322870366987,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 26.25,
+          "genişlik": 20.0,
+          "yükseklik": 179.307,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Land use",
+          "etiket_x": 396.667,
+          "etiket_y": 115.903,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "Cocoa butter (Organic)",
+          "değer": 0.25287399796583293,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 26.25,
+          "genişlik": 20.0,
+          "yükseklik": 140.278,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Cocoa butter (Organic)",
+          "etiket_x": 565.0,
+          "etiket_y": 96.389,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "Cocoa mass (Organic)",
+          "değer": 0.22049875020332785,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 174.528,
+          "genişlik": 20.0,
+          "yükseklik": 122.319,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Cocoa mass (Organic)",
+          "etiket_x": 565.0,
+          "etiket_y": 235.688,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "Hazelnuts (Organic)",
+          "değer": 0.08779767433284562,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 304.847,
+          "genişlik": 20.0,
+          "yükseklik": 48.705,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Hazelnuts (Organic)",
+          "etiket_x": 565.0,
+          "etiket_y": 329.199,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "Cane sugar (Organic)",
+          "değer": 0.03220918154120758,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 361.552,
+          "genişlik": 20.0,
+          "yükseklik": 17.868,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Cane sugar (Organic)",
+          "etiket_x": 565.0,
+          "etiket_y": 370.486,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "Vegetables (Organic)",
+          "değer": 0.02806193212641737,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 387.419,
+          "genişlik": 20.0,
+          "yükseklik": 15.567,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Vegetables (Organic)",
+          "etiket_x": 565.0,
+          "etiket_y": 395.203,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "Climate change",
+          "değer": 0.0112886157414413,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 213.557,
+          "genişlik": 20.0,
+          "yükseklik": 6.262,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Climate change",
+          "etiket_x": 396.667,
+          "etiket_y": 216.688,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "Harmful substances",
+          "değer": 0.006042755424956563,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 227.819,
+          "genişlik": 20.0,
+          "yükseklik": 3.352,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Harmful substances",
+          "etiket_x": 396.667,
+          "etiket_y": 229.495,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "Water use",
+          "değer": 0.00148345269044703,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 239.171,
+          "genişlik": 20.0,
+          "yükseklik": 0.823,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Water use",
+          "etiket_x": 396.667,
+          "etiket_y": 239.583,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "Resource depletion",
+          "değer": 0.000240519729288764,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 247.994,
+          "genişlik": 20.0,
+          "yükseklik": 0.133,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Resource depletion",
+          "etiket_x": 396.667,
+          "etiket_y": 248.061,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "Refrigeration",
+          "değer": 0.0,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 410.986,
+          "genişlik": 20.0,
+          "yükseklik": 0.0,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Refrigeration",
+          "etiket_x": 565.0,
+          "etiket_y": 410.986,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 13,
+          "ad": "Packaging",
+          "değer": 0.0,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 418.986,
+          "genişlik": 20.0,
+          "yükseklik": 0.0,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Packaging",
+          "etiket_x": 565.0,
+          "etiket_y": 418.986,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 14,
+          "ad": "Human rights",
+          "değer": 0.307574096993239,
+          "derinlik": 1,
+          "x": 203.333,
+          "y": 224.127,
+          "genişlik": 20.0,
+          "yükseklik": 170.623,
+          "renk": [
+            179,
+            205,
+            227,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Human rights",
+          "etiket_x": 228.333,
+          "etiket_y": 309.439,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 15,
+          "ad": "Child labour",
+          "değer": 0.04106412026458331,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 256.127,
+          "genişlik": 20.0,
+          "yükseklik": 22.78,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Child labour",
+          "etiket_x": 396.667,
+          "etiket_y": 267.517,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "Coconut oil (Organic)",
+          "değer": 0.028416608079611102,
+          "derinlik": 3,
+          "x": 540.0,
+          "y": 426.986,
+          "genişlik": 20.0,
+          "yükseklik": 15.764,
+          "renk": [
+            222,
+            203,
+            228,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Coconut oil (Organic)",
+          "etiket_x": 565.0,
+          "etiket_y": 434.868,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 17,
+          "ad": "Forced labour",
+          "değer": 0.0365458590642445,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 286.907,
+          "genişlik": 20.0,
+          "yükseklik": 20.273,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Forced labour",
+          "etiket_x": 396.667,
+          "etiket_y": 297.044,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 18,
+          "ad": "Health safety",
+          "değer": 0.034543532784361106,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 315.181,
+          "genişlik": 20.0,
+          "yükseklik": 19.163,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Health safety",
+          "etiket_x": 396.667,
+          "etiket_y": 324.762,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 19,
+          "ad": "Access to water",
+          "değer": 0.0340206659360667,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 342.343,
+          "genişlik": 20.0,
+          "yükseklik": 18.873,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Access to water",
+          "etiket_x": 396.667,
+          "etiket_y": 351.779,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 20,
+          "ad": "Freedom of association",
+          "değer": 0.0320571523941667,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 369.216,
+          "genişlik": 20.0,
+          "yükseklik": 17.783,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Freedom of association",
+          "etiket_x": 396.667,
+          "etiket_y": 378.107,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 21,
+          "ad": "Access to land",
+          "değer": 0.0315022209894056,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 394.999,
+          "genişlik": 20.0,
+          "yükseklik": 17.475,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Access to land",
+          "etiket_x": 396.667,
+          "etiket_y": 403.737,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 22,
+          "ad": "Sufficient wage",
+          "değer": 0.028777675722733324,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 420.474,
+          "genişlik": 20.0,
+          "yükseklik": 15.964,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Sufficient wage",
+          "etiket_x": 396.667,
+          "etiket_y": 428.456,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 23,
+          "ad": "Equal rights migrants",
+          "değer": 0.02711466451194445,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 444.438,
+          "genişlik": 20.0,
+          "yükseklik": 15.041,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Equal rights migrants",
+          "etiket_x": 396.667,
+          "etiket_y": 451.959,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 24,
+          "ad": "Discrimination",
+          "değer": 0.021121776335983326,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 467.48,
+          "genişlik": 20.0,
+          "yükseklik": 11.717,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Discrimination",
+          "etiket_x": 396.667,
+          "etiket_y": 473.338,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 25,
+          "ad": "Working hours",
+          "değer": 0.02082642898975,
+          "derinlik": 2,
+          "x": 371.667,
+          "y": 487.197,
+          "genişlik": 20.0,
+          "yükseklik": 11.553,
+          "renk": [
+            204,
+            235,
+            197,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0.0,
+          "etiket_göster": true,
+          "etiket_metni": "Working hours",
+          "etiket_x": 396.667,
+          "etiket_y": 492.973,
+          "etiket_dönüşü": 0.0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        }
+      ],
+      "bağlar": [
+        {
+          "veri_sırası": 0,
+          "kaynak": "Total",
+          "hedef": "Environment",
+          "değer": 0.342284047256003,
+          "yön": "horizontal",
+          "x1": 55.0,
+          "y1": 26.25,
+          "x2": 203.333,
+          "y2": 26.25,
+          "cpx1": 129.167,
+          "cpy1": 26.25,
+          "cpx2": 129.167,
+          "cpy2": 26.25,
+          "kalınlık": 189.877,
+          "renkler": [
+            [
+              251,
+              180,
+              174,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 1,
+          "kaynak": "Environment",
+          "hedef": "Land use",
+          "değer": 0.32322870366987,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 26.25,
+          "x2": 371.667,
+          "y2": 26.25,
+          "cpx1": 297.5,
+          "cpy1": 26.25,
+          "cpx2": 297.5,
+          "cpy2": 26.25,
+          "kalınlık": 179.307,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 2,
+          "kaynak": "Land use",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.177682517071359,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 26.25,
+          "x2": 540.0,
+          "y2": 26.25,
+          "cpx1": 465.833,
+          "cpy1": 26.25,
+          "cpx2": 465.833,
+          "cpy2": 26.25,
+          "kalınlık": 98.567,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 3,
+          "kaynak": "Land use",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.137241325342711,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 124.817,
+          "x2": 540.0,
+          "y2": 174.528,
+          "cpx1": 465.833,
+          "cpy1": 124.817,
+          "cpx2": 465.833,
+          "cpy2": 174.528,
+          "kalınlık": 76.133,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 4,
+          "kaynak": "Land use",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.00433076373512774,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 200.95,
+          "x2": 540.0,
+          "y2": 304.847,
+          "cpx1": 465.833,
+          "cpy1": 200.95,
+          "cpx2": 465.833,
+          "cpy2": 304.847,
+          "kalınlık": 2.402,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 5,
+          "kaynak": "Land use",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00296956039863467,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 203.352,
+          "x2": 540.0,
+          "y2": 361.552,
+          "cpx1": 465.833,
+          "cpy1": 203.352,
+          "cpx2": 465.833,
+          "cpy2": 361.552,
+          "kalınlık": 1.647,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 6,
+          "kaynak": "Land use",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00100453712203756,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 205.0,
+          "x2": 540.0,
+          "y2": 387.419,
+          "cpx1": 465.833,
+          "cpy1": 205.0,
+          "cpx2": 465.833,
+          "cpy2": 387.419,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 7,
+          "kaynak": "Environment",
+          "hedef": "Climate change",
+          "değer": 0.0112886157414413,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 205.557,
+          "x2": 371.667,
+          "y2": 213.557,
+          "cpx1": 297.5,
+          "cpy1": 205.557,
+          "cpx2": 297.5,
+          "cpy2": 213.557,
+          "kalınlık": 6.262,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 8,
+          "kaynak": "Climate change",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.00676852971933996,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 213.557,
+          "x2": 540.0,
+          "y2": 124.817,
+          "cpx1": 465.833,
+          "cpy1": 213.557,
+          "cpx2": 465.833,
+          "cpy2": 124.817,
+          "kalınlık": 3.755,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 9,
+          "kaynak": "Climate change",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00394686874786743,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 217.312,
+          "x2": 540.0,
+          "y2": 250.661,
+          "cpx1": 465.833,
+          "cpy1": 217.312,
+          "cpx2": 465.833,
+          "cpy2": 250.661,
+          "kalınlık": 2.189,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 10,
+          "kaynak": "Climate change",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.000315972058711838,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 219.622,
+          "x2": 540.0,
+          "y2": 363.199,
+          "cpx1": 465.833,
+          "cpy1": 219.622,
+          "cpx2": 465.833,
+          "cpy2": 363.199,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 11,
+          "kaynak": "Climate change",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.000218969462265292,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 219.501,
+          "x2": 540.0,
+          "y2": 307.25,
+          "cpx1": 465.833,
+          "cpy1": 219.501,
+          "cpx2": 465.833,
+          "cpy2": 307.25,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 12,
+          "kaynak": "Climate change",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.0000382757532567656,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 219.798,
+          "x2": 540.0,
+          "y2": 387.977,
+          "cpx1": 465.833,
+          "cpy1": 219.798,
+          "cpx2": 465.833,
+          "cpy2": 387.977,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 13,
+          "kaynak": "Environment",
+          "hedef": "Harmful substances",
+          "değer": 0.00604275542495656,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 211.819,
+          "x2": 371.667,
+          "y2": 227.819,
+          "cpx1": 297.5,
+          "cpy1": 211.819,
+          "cpx2": 297.5,
+          "cpy2": 227.819,
+          "kalınlık": 3.352,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 14,
+          "kaynak": "Harmful substances",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.0055125989240741,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 228.002,
+          "x2": 540.0,
+          "y2": 252.851,
+          "cpx1": 465.833,
+          "cpy1": 228.002,
+          "cpx2": 465.833,
+          "cpy2": 252.851,
+          "kalınlık": 3.058,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 15,
+          "kaynak": "Harmful substances",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.000330017607892127,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 227.819,
+          "x2": 540.0,
+          "y2": 128.572,
+          "cpx1": 465.833,
+          "cpy1": 227.819,
+          "cpx2": 465.833,
+          "cpy2": 128.572,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 16,
+          "kaynak": "Harmful substances",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.000200138892990337,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 231.06,
+          "x2": 540.0,
+          "y2": 363.374,
+          "cpx1": 465.833,
+          "cpy1": 231.06,
+          "cpx2": 465.833,
+          "cpy2": 363.374,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 17,
+          "kaynak": "Harmful substances",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 231.06,
+          "x2": 540.0,
+          "y2": 307.371,
+          "cpx1": 465.833,
+          "cpy1": 231.06,
+          "cpx2": 465.833,
+          "cpy2": 307.371,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 18,
+          "kaynak": "Harmful substances",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 231.171,
+          "x2": 540.0,
+          "y2": 387.998,
+          "cpx1": 465.833,
+          "cpy1": 231.171,
+          "cpx2": 465.833,
+          "cpy2": 387.998,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 19,
+          "kaynak": "Environment",
+          "hedef": "Water use",
+          "değer": 0.00148345269044703,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 215.171,
+          "x2": 371.667,
+          "y2": 239.171,
+          "cpx1": 297.5,
+          "cpy1": 215.171,
+          "cpx2": 297.5,
+          "cpy2": 239.171,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 20,
+          "kaynak": "Water use",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.00135309891304186,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 239.171,
+          "x2": 540.0,
+          "y2": 128.755,
+          "cpx1": 465.833,
+          "cpy1": 239.171,
+          "cpx2": 465.833,
+          "cpy2": 128.755,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 21,
+          "kaynak": "Water use",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.000105714137908639,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 239.922,
+          "x2": 540.0,
+          "y2": 255.909,
+          "cpx1": 465.833,
+          "cpy1": 239.922,
+          "cpx2": 465.833,
+          "cpy2": 255.909,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 22,
+          "kaynak": "Water use",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0000133452642581887,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 239.98,
+          "x2": 540.0,
+          "y2": 307.371,
+          "cpx1": 465.833,
+          "cpy1": 239.98,
+          "cpx2": 465.833,
+          "cpy2": 307.371,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 23,
+          "kaynak": "Water use",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 8.78074837009238e-6,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 239.988,
+          "x2": 540.0,
+          "y2": 363.485,
+          "cpx1": 465.833,
+          "cpy1": 239.988,
+          "cpx2": 465.833,
+          "cpy2": 363.485,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 24,
+          "kaynak": "Water use",
+          "hedef": "Vegetables (Organic)",
+          "değer": 2.5136268682477e-6,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 239.993,
+          "x2": 540.0,
+          "y2": 387.998,
+          "cpx1": 465.833,
+          "cpy1": 239.993,
+          "cpx2": 465.833,
+          "cpy2": 387.998,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 25,
+          "kaynak": "Environment",
+          "hedef": "Resource depletion",
+          "değer": 0.000240519729288764,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 215.994,
+          "x2": 371.667,
+          "y2": 247.994,
+          "cpx1": 297.5,
+          "cpy1": 215.994,
+          "cpx2": 297.5,
+          "cpy2": 247.994,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 26,
+          "kaynak": "Resource depletion",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.000226237279345084,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 247.994,
+          "x2": 540.0,
+          "y2": 363.49,
+          "cpx1": 465.833,
+          "cpy1": 247.994,
+          "cpx2": 465.833,
+          "cpy2": 363.49,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 27,
+          "kaynak": "Resource depletion",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.0000142824499436793,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 248.12,
+          "x2": 540.0,
+          "y2": 387.999,
+          "cpx1": 465.833,
+          "cpy1": 248.12,
+          "cpx2": 465.833,
+          "cpy2": 387.999,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 28,
+          "kaynak": "Resource depletion",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 247.994,
+          "x2": 540.0,
+          "y2": 307.378,
+          "cpx1": 465.833,
+          "cpy1": 247.994,
+          "cpx2": 465.833,
+          "cpy2": 307.378,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 29,
+          "kaynak": "Resource depletion",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 247.994,
+          "x2": 540.0,
+          "y2": 255.967,
+          "cpx1": 465.833,
+          "cpy1": 247.994,
+          "cpx2": 465.833,
+          "cpy2": 255.967,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 30,
+          "kaynak": "Resource depletion",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 247.994,
+          "x2": 540.0,
+          "y2": 129.505,
+          "cpx1": 465.833,
+          "cpy1": 247.994,
+          "cpx2": 465.833,
+          "cpy2": 129.505,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 31,
+          "kaynak": "Environment",
+          "hedef": "Refrigeration",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 216.127,
+          "x2": 540.0,
+          "y2": 410.986,
+          "cpx1": 381.667,
+          "cpy1": 216.127,
+          "cpx2": 381.667,
+          "cpy2": 410.986,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 32,
+          "kaynak": "Environment",
+          "hedef": "Packaging",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 216.127,
+          "x2": 540.0,
+          "y2": 418.986,
+          "cpx1": 381.667,
+          "cpy1": 216.127,
+          "cpx2": 381.667,
+          "cpy2": 418.986,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 33,
+          "kaynak": "Total",
+          "hedef": "Human rights",
+          "değer": 0.307574096993239,
+          "yön": "horizontal",
+          "x1": 55.0,
+          "y1": 216.127,
+          "x2": 203.333,
+          "y2": 224.127,
+          "cpx1": 129.167,
+          "cpy1": 216.127,
+          "cpx2": 129.167,
+          "cpy2": 224.127,
+          "kalınlık": 170.623,
+          "renkler": [
+            [
+              251,
+              180,
+              174,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 34,
+          "kaynak": "Human rights",
+          "hedef": "Child labour",
+          "değer": 0.0410641202645833,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 224.127,
+          "x2": 371.667,
+          "y2": 256.127,
+          "cpx1": 297.5,
+          "cpy1": 224.127,
+          "cpx2": 297.5,
+          "cpy2": 256.127,
+          "kalınlık": 22.78,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 35,
+          "kaynak": "Child labour",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0105339381639722,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 266.795,
+          "x2": 540.0,
+          "y2": 307.378,
+          "cpx1": 465.833,
+          "cpy1": 266.795,
+          "cpx2": 465.833,
+          "cpy2": 307.378,
+          "kalınlık": 5.844,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 36,
+          "kaynak": "Child labour",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.0105,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 260.97,
+          "x2": 540.0,
+          "y2": 255.967,
+          "cpx1": 465.833,
+          "cpy1": 260.97,
+          "cpx2": 465.833,
+          "cpy2": 255.967,
+          "kalınlık": 5.825,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 37,
+          "kaynak": "Child labour",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0087294420777,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 256.127,
+          "x2": 540.0,
+          "y2": 129.505,
+          "cpx1": 465.833,
+          "cpy1": 256.127,
+          "cpx2": 465.833,
+          "cpy2": 129.505,
+          "kalınlık": 4.843,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 38,
+          "kaynak": "Child labour",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00474399974233333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 276.276,
+          "x2": 540.0,
+          "y2": 426.986,
+          "cpx1": 465.833,
+          "cpy1": 276.276,
+          "cpx2": 465.833,
+          "cpy2": 426.986,
+          "kalınlık": 2.632,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 39,
+          "kaynak": "Child labour",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00388226450884445,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 272.638,
+          "x2": 540.0,
+          "y2": 363.616,
+          "cpx1": 465.833,
+          "cpy1": 272.638,
+          "cpx2": 465.833,
+          "cpy2": 363.616,
+          "kalınlık": 2.154,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 40,
+          "kaynak": "Child labour",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00267447577173333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 274.792,
+          "x2": 540.0,
+          "y2": 388.007,
+          "cpx1": 465.833,
+          "cpy1": 274.792,
+          "cpx2": 465.833,
+          "cpy2": 388.007,
+          "kalınlık": 1.484,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 41,
+          "kaynak": "Human rights",
+          "hedef": "Forced labour",
+          "değer": 0.0365458590642445,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 246.907,
+          "x2": 371.667,
+          "y2": 286.907,
+          "cpx1": 297.5,
+          "cpy1": 246.907,
+          "cpx2": 297.5,
+          "cpy2": 286.907,
+          "kalınlık": 20.273,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 42,
+          "kaynak": "Forced labour",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0114913076376389,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 295.653,
+          "x2": 540.0,
+          "y2": 313.222,
+          "cpx1": 465.833,
+          "cpy1": 295.653,
+          "cpx2": 465.833,
+          "cpy2": 313.222,
+          "kalınlık": 6.375,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 43,
+          "kaynak": "Forced labour",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0081134807347,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 286.907,
+          "x2": 540.0,
+          "y2": 134.348,
+          "cpx1": 465.833,
+          "cpy1": 286.907,
+          "cpx2": 465.833,
+          "cpy2": 134.348,
+          "kalınlık": 4.501,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 44,
+          "kaynak": "Forced labour",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00765230236575,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 291.408,
+          "x2": 540.0,
+          "y2": 261.792,
+          "cpx1": 465.833,
+          "cpy1": 291.408,
+          "cpx2": 465.833,
+          "cpy2": 261.792,
+          "kalınlık": 4.245,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 45,
+          "kaynak": "Forced labour",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.004,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 302.028,
+          "x2": 540.0,
+          "y2": 365.769,
+          "cpx1": 465.833,
+          "cpy1": 302.028,
+          "cpx2": 465.833,
+          "cpy2": 365.769,
+          "kalınlık": 2.219,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 46,
+          "kaynak": "Forced labour",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00296668823626667,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 304.247,
+          "x2": 540.0,
+          "y2": 389.491,
+          "cpx1": 465.833,
+          "cpy1": 304.247,
+          "cpx2": 465.833,
+          "cpy2": 389.491,
+          "kalınlık": 1.646,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 47,
+          "kaynak": "Forced labour",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00232208008988889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 305.892,
+          "x2": 540.0,
+          "y2": 429.618,
+          "cpx1": 465.833,
+          "cpy1": 305.892,
+          "cpx2": 465.833,
+          "cpy2": 429.618,
+          "kalınlık": 1.288,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 48,
+          "kaynak": "Human rights",
+          "hedef": "Health safety",
+          "değer": 0.0345435327843611,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 267.181,
+          "x2": 371.667,
+          "y2": 315.181,
+          "cpx1": 297.5,
+          "cpy1": 267.181,
+          "cpx2": 297.5,
+          "cpy2": 315.181,
+          "kalınlık": 19.163,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 49,
+          "kaynak": "Health safety",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0121419536385,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 322.554,
+          "x2": 540.0,
+          "y2": 319.597,
+          "cpx1": 465.833,
+          "cpy1": 322.554,
+          "cpx2": 465.833,
+          "cpy2": 319.597,
+          "kalınlık": 6.736,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 50,
+          "kaynak": "Health safety",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00766772850678333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 318.301,
+          "x2": 540.0,
+          "y2": 266.037,
+          "cpx1": 465.833,
+          "cpy1": 318.301,
+          "cpx2": 465.833,
+          "cpy2": 266.037,
+          "kalınlık": 4.254,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 51,
+          "kaynak": "Health safety",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0056245892061,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 315.181,
+          "x2": 540.0,
+          "y2": 138.849,
+          "cpx1": 465.833,
+          "cpy1": 315.181,
+          "cpx2": 465.833,
+          "cpy2": 138.849,
+          "kalınlık": 3.12,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 52,
+          "kaynak": "Health safety",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00361616847688889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 332.337,
+          "x2": 540.0,
+          "y2": 430.906,
+          "cpx1": 465.833,
+          "cpy1": 332.337,
+          "cpx2": 465.833,
+          "cpy2": 430.906,
+          "kalınlık": 2.006,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 53,
+          "kaynak": "Health safety",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00277374682533333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 329.29,
+          "x2": 540.0,
+          "y2": 367.988,
+          "cpx1": 465.833,
+          "cpy1": 329.29,
+          "cpx2": 465.833,
+          "cpy2": 367.988,
+          "kalınlık": 1.539,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 54,
+          "kaynak": "Health safety",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00271934613075556,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 330.829,
+          "x2": 540.0,
+          "y2": 391.136,
+          "cpx1": 465.833,
+          "cpy1": 330.829,
+          "cpx2": 465.833,
+          "cpy2": 391.136,
+          "kalınlık": 1.509,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 55,
+          "kaynak": "Human rights",
+          "hedef": "Access to water",
+          "değer": 0.0340206659360667,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 286.343,
+          "x2": 371.667,
+          "y2": 342.343,
+          "cpx1": 297.5,
+          "cpy1": 286.343,
+          "cpx2": 297.5,
+          "cpy2": 342.343,
+          "kalınlık": 18.873,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 56,
+          "kaynak": "Access to water",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.0105,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 347.295,
+          "x2": 540.0,
+          "y2": 270.291,
+          "cpx1": 465.833,
+          "cpy1": 347.295,
+          "cpx2": 465.833,
+          "cpy2": 270.291,
+          "kalınlık": 5.825,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 57,
+          "kaynak": "Access to water",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0089274160792,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 342.343,
+          "x2": 540.0,
+          "y2": 141.969,
+          "cpx1": 465.833,
+          "cpy1": 342.343,
+          "cpx2": 465.833,
+          "cpy2": 141.969,
+          "kalınlık": 4.952,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 58,
+          "kaynak": "Access to water",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0054148022845,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 353.12,
+          "x2": 540.0,
+          "y2": 326.332,
+          "cpx1": 465.833,
+          "cpy1": 353.12,
+          "cpx2": 465.833,
+          "cpy2": 326.332,
+          "kalınlık": 3.004,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 59,
+          "kaynak": "Access to water",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00333938149786667,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 356.124,
+          "x2": 540.0,
+          "y2": 369.527,
+          "cpx1": 465.833,
+          "cpy1": 356.124,
+          "cpx2": 465.833,
+          "cpy2": 369.527,
+          "kalınlık": 1.852,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 60,
+          "kaynak": "Access to water",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00314663377488889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 357.976,
+          "x2": 540.0,
+          "y2": 392.645,
+          "cpx1": 465.833,
+          "cpy1": 357.976,
+          "cpx2": 465.833,
+          "cpy2": 392.645,
+          "kalınlık": 1.746,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 61,
+          "kaynak": "Access to water",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00269243229961111,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 359.722,
+          "x2": 540.0,
+          "y2": 432.912,
+          "cpx1": 465.833,
+          "cpy1": 359.722,
+          "cpx2": 465.833,
+          "cpy2": 432.912,
+          "kalınlık": 1.494,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 62,
+          "kaynak": "Human rights",
+          "hedef": "Freedom of association",
+          "değer": 0.0320571523941667,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 305.216,
+          "x2": 371.667,
+          "y2": 369.216,
+          "cpx1": 297.5,
+          "cpy1": 305.216,
+          "cpx2": 297.5,
+          "cpy2": 369.216,
+          "kalınlık": 17.783,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 63,
+          "kaynak": "Freedom of association",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0132312483463611,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 376.358,
+          "x2": 540.0,
+          "y2": 329.336,
+          "cpx1": 465.833,
+          "cpy1": 376.358,
+          "cpx2": 465.833,
+          "cpy2": 329.336,
+          "kalınlık": 7.34,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 64,
+          "kaynak": "Freedom of association",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0077695200707,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 369.216,
+          "x2": 540.0,
+          "y2": 146.921,
+          "cpx1": 465.833,
+          "cpy1": 369.216,
+          "cpx2": 465.833,
+          "cpy2": 146.921,
+          "kalınlık": 4.31,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 65,
+          "kaynak": "Freedom of association",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00510606573995,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 373.526,
+          "x2": 540.0,
+          "y2": 276.115,
+          "cpx1": 465.833,
+          "cpy1": 373.526,
+          "cpx2": 465.833,
+          "cpy2": 276.115,
+          "kalınlık": 2.833,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 66,
+          "kaynak": "Freedom of association",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00354321156324444,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 385.033,
+          "x2": 540.0,
+          "y2": 394.391,
+          "cpx1": 465.833,
+          "cpy1": 385.033,
+          "cpx2": 465.833,
+          "cpy2": 394.391,
+          "kalınlık": 1.966,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 67,
+          "kaynak": "Freedom of association",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00240710667391111,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 383.698,
+          "x2": 540.0,
+          "y2": 371.379,
+          "cpx1": 465.833,
+          "cpy1": 383.698,
+          "cpx2": 465.833,
+          "cpy2": 371.379,
+          "kalınlık": 1.335,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 68,
+          "kaynak": "Freedom of association",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 386.999,
+          "x2": 540.0,
+          "y2": 434.406,
+          "cpx1": 465.833,
+          "cpy1": 386.999,
+          "cpx2": 465.833,
+          "cpy2": 434.406,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 69,
+          "kaynak": "Human rights",
+          "hedef": "Access to land",
+          "değer": 0.0315022209894056,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 322.999,
+          "x2": 371.667,
+          "y2": 394.999,
+          "cpx1": 297.5,
+          "cpy1": 322.999,
+          "cpx2": 297.5,
+          "cpy2": 394.999,
+          "kalınlık": 17.475,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 70,
+          "kaynak": "Access to land",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.00964970063322223,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 403.54,
+          "x2": 540.0,
+          "y2": 336.676,
+          "cpx1": 465.833,
+          "cpy1": 403.54,
+          "cpx2": 465.833,
+          "cpy2": 336.676,
+          "kalınlık": 5.353,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 71,
+          "kaynak": "Access to land",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00938530207965,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 398.333,
+          "x2": 540.0,
+          "y2": 278.948,
+          "cpx1": 465.833,
+          "cpy1": 398.333,
+          "cpx2": 465.833,
+          "cpy2": 278.948,
+          "kalınlık": 5.206,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 72,
+          "kaynak": "Access to land",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0060110791848,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 394.999,
+          "x2": 540.0,
+          "y2": 151.231,
+          "cpx1": 465.833,
+          "cpy1": 394.999,
+          "cpx2": 465.833,
+          "cpy2": 151.231,
+          "kalınlık": 3.335,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 73,
+          "kaynak": "Access to land",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00380818314608889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 408.893,
+          "x2": 540.0,
+          "y2": 372.715,
+          "cpx1": 465.833,
+          "cpy1": 408.893,
+          "cpx2": 465.833,
+          "cpy2": 372.715,
+          "kalınlık": 2.113,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 74,
+          "kaynak": "Access to land",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00264795594564445,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 411.005,
+          "x2": 540.0,
+          "y2": 396.356,
+          "cpx1": 465.833,
+          "cpy1": 411.005,
+          "cpx2": 465.833,
+          "cpy2": 396.356,
+          "kalınlık": 1.469,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 75,
+          "kaynak": "Access to land",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.0,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 412.474,
+          "x2": 540.0,
+          "y2": 434.406,
+          "cpx1": 465.833,
+          "cpy1": 412.474,
+          "cpx2": 465.833,
+          "cpy2": 434.406,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 76,
+          "kaynak": "Human rights",
+          "hedef": "Sufficient wage",
+          "değer": 0.0287776757227333,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 340.474,
+          "x2": 371.667,
+          "y2": 420.474,
+          "cpx1": 297.5,
+          "cpy1": 340.474,
+          "cpx2": 297.5,
+          "cpy2": 420.474,
+          "kalınlık": 15.964,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 77,
+          "kaynak": "Sufficient wage",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00883512456493333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 424.82,
+          "x2": 540.0,
+          "y2": 284.154,
+          "cpx1": 465.833,
+          "cpy1": 424.82,
+          "cpx2": 465.833,
+          "cpy2": 284.154,
+          "kalınlık": 4.901,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 78,
+          "kaynak": "Sufficient wage",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0078343367268,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 420.474,
+          "x2": 540.0,
+          "y2": 154.566,
+          "cpx1": 465.833,
+          "cpy1": 420.474,
+          "cpx2": 465.833,
+          "cpy2": 154.566,
+          "kalınlık": 4.346,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 79,
+          "kaynak": "Sufficient wage",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00347879026511111,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 434.508,
+          "x2": 540.0,
+          "y2": 434.406,
+          "cpx1": 465.833,
+          "cpy1": 434.508,
+          "cpx2": 465.833,
+          "cpy2": 434.406,
+          "kalınlık": 1.93,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 80,
+          "kaynak": "Sufficient wage",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.00316254211388889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 429.721,
+          "x2": 540.0,
+          "y2": 342.029,
+          "cpx1": 465.833,
+          "cpy1": 429.721,
+          "cpx2": 465.833,
+          "cpy2": 342.029,
+          "kalınlık": 1.754,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 81,
+          "kaynak": "Sufficient wage",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00281013722808889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 432.95,
+          "x2": 540.0,
+          "y2": 397.825,
+          "cpx1": 465.833,
+          "cpy1": 432.95,
+          "cpx2": 465.833,
+          "cpy2": 397.825,
+          "kalınlık": 1.559,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 82,
+          "kaynak": "Sufficient wage",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00265674482391111,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 431.476,
+          "x2": 540.0,
+          "y2": 374.827,
+          "cpx1": 465.833,
+          "cpy1": 431.476,
+          "cpx2": 465.833,
+          "cpy2": 374.827,
+          "kalınlık": 1.474,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 83,
+          "kaynak": "Human rights",
+          "hedef": "Equal rights migrants",
+          "değer": 0.0271146645119444,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 356.438,
+          "x2": 371.667,
+          "y2": 444.438,
+          "cpx1": 297.5,
+          "cpy1": 356.438,
+          "cpx2": 297.5,
+          "cpy2": 444.438,
+          "kalınlık": 15.041,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 84,
+          "kaynak": "Equal rights migrants",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0071042315061,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 444.438,
+          "x2": 540.0,
+          "y2": 158.912,
+          "cpx1": 465.833,
+          "cpy1": 444.438,
+          "cpx2": 465.833,
+          "cpy2": 158.912,
+          "kalınlık": 3.941,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 85,
+          "kaynak": "Equal rights migrants",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00636673210005,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 448.379,
+          "x2": 540.0,
+          "y2": 289.055,
+          "cpx1": 465.833,
+          "cpy1": 448.379,
+          "cpx2": 465.833,
+          "cpy2": 289.055,
+          "kalınlık": 3.532,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 86,
+          "kaynak": "Equal rights migrants",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.00601459775836111,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 451.911,
+          "x2": 540.0,
+          "y2": 343.783,
+          "cpx1": 465.833,
+          "cpy1": 451.911,
+          "cpx2": 465.833,
+          "cpy2": 343.783,
+          "kalınlık": 3.337,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 87,
+          "kaynak": "Equal rights migrants",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00429185583138889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 457.099,
+          "x2": 540.0,
+          "y2": 436.336,
+          "cpx1": 465.833,
+          "cpy1": 457.099,
+          "cpx2": 465.833,
+          "cpy2": 436.336,
+          "kalınlık": 2.381,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 88,
+          "kaynak": "Equal rights migrants",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00182647471915556,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 455.248,
+          "x2": 540.0,
+          "y2": 376.301,
+          "cpx1": 465.833,
+          "cpy1": 455.248,
+          "cpx2": 465.833,
+          "cpy2": 376.301,
+          "kalınlık": 1.013,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 89,
+          "kaynak": "Equal rights migrants",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00151077259688889,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 456.261,
+          "x2": 540.0,
+          "y2": 399.384,
+          "cpx1": 465.833,
+          "cpy1": 456.261,
+          "cpx2": 465.833,
+          "cpy2": 399.384,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 90,
+          "kaynak": "Human rights",
+          "hedef": "Discrimination",
+          "değer": 0.0211217763359833,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 371.48,
+          "x2": 371.667,
+          "y2": 467.48,
+          "cpx1": 297.5,
+          "cpy1": 371.48,
+          "cpx2": 297.5,
+          "cpy2": 467.48,
+          "kalınlık": 11.717,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 91,
+          "kaynak": "Discrimination",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00609671700306667,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 470.128,
+          "x2": 540.0,
+          "y2": 292.587,
+          "cpx1": 465.833,
+          "cpy1": 470.128,
+          "cpx2": 465.833,
+          "cpy2": 292.587,
+          "kalınlık": 3.382,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 92,
+          "kaynak": "Discrimination",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0047738806325,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 467.48,
+          "x2": 540.0,
+          "y2": 162.853,
+          "cpx1": 465.833,
+          "cpy1": 467.48,
+          "cpx2": 465.833,
+          "cpy2": 162.853,
+          "kalınlık": 2.648,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 93,
+          "kaynak": "Discrimination",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00368119084494444,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 477.155,
+          "x2": 540.0,
+          "y2": 438.716,
+          "cpx1": 465.833,
+          "cpy1": 477.155,
+          "cpx2": 465.833,
+          "cpy2": 438.716,
+          "kalınlık": 2.042,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 94,
+          "kaynak": "Discrimination",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00286009813604444,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 475.568,
+          "x2": 540.0,
+          "y2": 400.222,
+          "cpx1": 465.833,
+          "cpy1": 475.568,
+          "cpx2": 465.833,
+          "cpy2": 400.222,
+          "kalınlık": 1.587,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 95,
+          "kaynak": "Discrimination",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.00283706180951111,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 473.994,
+          "x2": 540.0,
+          "y2": 377.314,
+          "cpx1": 465.833,
+          "cpy1": 473.994,
+          "cpx2": 465.833,
+          "cpy2": 377.314,
+          "kalınlık": 1.574,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 96,
+          "kaynak": "Discrimination",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.000872827909916666,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 473.51,
+          "x2": 540.0,
+          "y2": 347.12,
+          "cpx1": 465.833,
+          "cpy1": 473.51,
+          "cpx2": 465.833,
+          "cpy2": 347.12,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 97,
+          "kaynak": "Human rights",
+          "hedef": "Working hours",
+          "değer": 0.02082642898975,
+          "yön": "horizontal",
+          "x1": 223.333,
+          "y1": 383.197,
+          "x2": 371.667,
+          "y2": 487.197,
+          "cpx1": 297.5,
+          "cpy1": 383.197,
+          "cpx2": 297.5,
+          "cpy2": 487.197,
+          "kalınlık": 11.553,
+          "renkler": [
+            [
+              179,
+              205,
+              227,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 98,
+          "kaynak": "Working hours",
+          "hedef": "Hazelnuts (Organic)",
+          "değer": 0.0107216773848333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 489.102,
+          "x2": 540.0,
+          "y2": 347.604,
+          "cpx1": 465.833,
+          "cpy1": 489.102,
+          "cpx2": 465.833,
+          "cpy2": 347.604,
+          "kalınlık": 5.948,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 99,
+          "kaynak": "Working hours",
+          "hedef": "Coconut oil (Organic)",
+          "değer": 0.00359009052944444,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 496.758,
+          "x2": 540.0,
+          "y2": 440.758,
+          "cpx1": 465.833,
+          "cpy1": 496.758,
+          "cpx2": 465.833,
+          "cpy2": 440.758,
+          "kalınlık": 1.992,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 100,
+          "kaynak": "Working hours",
+          "hedef": "Vegetables (Organic)",
+          "değer": 0.00212300379075556,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 495.581,
+          "x2": 540.0,
+          "y2": 401.809,
+          "cpx1": 465.833,
+          "cpy1": 495.581,
+          "cpx2": 465.833,
+          "cpy2": 401.809,
+          "kalınlık": 1.178,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 101,
+          "kaynak": "Working hours",
+          "hedef": "Cocoa butter (Organic)",
+          "değer": 0.0018518584356,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 487.197,
+          "x2": 540.0,
+          "y2": 165.501,
+          "cpx1": 465.833,
+          "cpy1": 487.197,
+          "cpx2": 465.833,
+          "cpy2": 165.501,
+          "kalınlık": 1.027,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 102,
+          "kaynak": "Working hours",
+          "hedef": "Cocoa mass (Organic)",
+          "değer": 0.00158227069058333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 488.224,
+          "x2": 540.0,
+          "y2": 295.969,
+          "cpx1": 465.833,
+          "cpy1": 488.224,
+          "cpx2": 465.833,
+          "cpy2": 295.969,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 103,
+          "kaynak": "Working hours",
+          "hedef": "Cane sugar (Organic)",
+          "değer": 0.000957528158533333,
+          "yön": "horizontal",
+          "x1": 391.667,
+          "y1": 495.05,
+          "x2": 540.0,
+          "y2": 378.888,
+          "cpx1": 465.833,
+          "cpy1": 495.05,
+          "cpx2": 465.833,
+          "cpy2": 378.888,
+          "kalınlık": 1.0,
+          "renkler": [
+            [
+              204,
+              235,
+              197,
+              153
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        }
+      ]
+    }
+  ]
+}

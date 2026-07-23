@@ -1069,6 +1069,162 @@ const SUNBURST_SERIES_OPTION_KANITI = Object.freeze({
   }
 });
 
+const SANKEY_ÖRNEKLERİ = Object.freeze([
+  'sankey-energy', 'sankey-itemstyle', 'sankey-levels',
+  'sankey-nodeAlign-left', 'sankey-nodeAlign-right', 'sankey-simple', 'sankey-vertical'
+]);
+const SANKEY_FIXTURE_TESTİ =
+  'sankey_fixture_testleri::yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur';
+const SANKEY_SAHNE_TESTİ =
+  'sankey_fixture_testleri::yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur';
+const SANKEY_ACTION_TESTİ =
+  'eylem::testler::sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur';
+const SANKEY_YERLEŞİM_TESTİ =
+  'grafik::sankey::testler::resmi_dag_deger_katman_ve_bag_kalinligini_korur';
+
+const SANKEY_SERIES_OPTION_KANITI = Object.freeze({
+  type: {
+    api: 'src/model/seri.rs (Seri::Sankey); src/model/sankey.rs (SankeySerisi); src/grafik/sankey.rs (sankey_çiz)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ["sabit 'sankey'"], dallar: ['kayıtlı-seri', 'boyama', 'isabet/tooltip']
+  },
+  data: {
+    api: 'src/model/sankey.rs (SankeyDüğümü, SankeySerisi::düğümler); src/grafik/sankey.rs (grafiği_kur)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ, SANKEY_YERLEŞİM_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['SankeyNodeItemOption[]'], dallar: ['ad/id', 'açık/değerden-türetilen value', 'ham dataIndex']
+  },
+  nodes: {
+    api: 'src/model/sankey.rs (SankeySerisi::düğümler; data/nodes eşdeğeri)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['SankeyNodeItemOption[]'], dallar: ['data-alias', 'nodes-alias']
+  },
+  links: {
+    api: 'src/model/sankey.rs (SankeyBağı, SankeySerisi::bağlar/ayrıntılı_bağlar); src/grafik/sankey.rs (şerit yerleşimi)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ, SANKEY_YERLEŞİM_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['SankeyEdgeItemOption[]'], dallar: ['source/target/value', 'çoklu-bağ', 'DAG-doğrulama']
+  },
+  edges: {
+    api: 'src/model/sankey.rs (SankeySerisi::bağlar; links/edges eşdeğeri)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['SankeyEdgeItemOption[]'], dallar: ['links-alias', 'edges-alias']
+  },
+  color: {
+    api: 'src/model/sankey.rs (SankeySerisi::renkler); src/grafik/sankey.rs (renk_eşle)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['ColorString[]'], dallar: ['seri-paleti', 'global-palet', 'değer-eşleme']
+  },
+  coordinateSystem: {
+    api: 'src/model/sankey.rs (view/takvim/matris bağları); src/cizim/gorunum.rs (yerleşim_referansı)',
+    testler: ['model::secenekler::testler::sankey_view_calendar_ve_matrix_kutu_koordinatlarini_dogrular', SANKEY_SAHNE_TESTİ],
+    örnekler: SANKEY_ÖRNEKLERİ, veri_biçimleri: ["'view'", 'calendarIndex+coord', 'matrixIndex+coord'],
+    dallar: ['view', 'calendar-box', 'matrix-box']
+  },
+  orient: {
+    api: 'src/model/sankey.rs (SankeyYönü); src/grafik/sankey.rs (dikey/yatay eksen değişimi)',
+    testler: ['grafik::sankey::testler::dikey_yon_ve_sag_hiza_eksenleri_degistirir', SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ],
+    örnekler: ['sankey-simple', 'sankey-vertical'], veri_biçimleri: ['horizontal', 'vertical'],
+    dallar: ['düğüm ekseni', 'bağ kontrol noktaları', 'etiket konumu']
+  },
+  nodeWidth: {
+    api: 'src/model/sankey.rs (düğüm_genişliği); src/grafik/sankey.rs (düğüm_enini_ata)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['number'], dallar: ['yatay-genişlik', 'dikey-yükseklik', 'sıfır']
+  },
+  nodeGap: {
+    api: 'src/model/sankey.rs (düğüm_boşluğu); src/grafik/sankey.rs (derinlik_grupları/çakışma_çöz)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['number'], dallar: ['derinlik-içi-boşluk', 'negatif-olmayan-doğrulama']
+  },
+  draggable: {
+    api: 'src/model/sankey.rs (seri/düğüm sürüklenebilir); src/cizim/pencere.rs (SankeyDüğüm sürükleme); src/eylem.rs (dragNode)',
+    testler: [SANKEY_ACTION_TESTİ, 'cizim::pencere::testler::sankey_ekran_yerel_donusumu_model_ve_gecici_gorunumu_tersine_cevirir'],
+    örnekler: SANKEY_ÖRNEKLERİ, veri_biçimleri: ['bool', 'dragNode localX/localY'],
+    dallar: ['seri-varsayılanı', 'düğüm-override', 'pan/zoom ters-dönüşümü']
+  },
+  layoutIterations: {
+    api: 'src/model/sankey.rs (yerleşim_yinelemesi); src/grafik/sankey.rs (gevşet/çakışma yinelemesi)',
+    testler: [SANKEY_YERLEŞİM_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['nonnegative integer'], dallar: ['0', 'varsayılan-32', 'ileri/geri-gevşetme']
+  },
+  sort: {
+    api: 'src/model/sankey.rs (SankeySırası); src/grafik/sankey.rs (düğüm sırası)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['desc', 'null/veri'], dallar: ['değer-azalan', 'ham-dataIndex', 'eşit-kararlılık']
+  },
+  nodeAlign: {
+    api: 'src/model/sankey.rs (SankeyDüğümHizası); src/grafik/sankey.rs (derinlik ata)',
+    testler: ['grafik::sankey::testler::dikey_yon_ve_sag_hiza_eksenleri_degistirir', SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ],
+    örnekler: ['sankey-nodeAlign-left', 'sankey-nodeAlign-right', 'sankey-simple'],
+    veri_biçimleri: ['justify', 'left', 'right'], dallar: ['iki-yana', 'sol', 'sağ', 'sink-hizası']
+  },
+  levels: {
+    api: 'src/model/sankey.rs (SankeySeviyesi); src/grafik/sankey.rs (seri→seviye→öğe stil kalıtımı)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: ['sankey-levels'],
+    veri_biçimleri: ['SankeyLevelOption[]'], dallar: ['depth', 'itemStyle', 'lineStyle', 'label', 'edgeLabel']
+  },
+  itemStyle: {
+    api: 'src/model/sankey.rs (SankeyÖğeStili); src/grafik/sankey.rs (öğe_stili_yama_uygula)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: ['sankey-itemstyle', 'sankey-levels'],
+    veri_biçimleri: ['color/border/radius/opacity/shadow'],
+    dallar: ['seri', 'seviye', 'düğüm', 'emphasis/blur/select', 'negatif-alan-normalizasyonu']
+  },
+  lineStyle: {
+    api: 'src/model/sankey.rs (SankeyÇizgiStili, SankeyKenarBoyası); src/grafik/sankey.rs (bağ_dolgusu/bağ_yolu)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: ['sankey-energy', 'sankey-levels', 'sankey-simple'],
+    veri_biçimleri: ['color/source/target/gradient', 'opacity', 'curveness', 'width/type/shadow'],
+    dallar: ['seri', 'seviye', 'bağ', 'durum', 'yatay/dikey-gradyan']
+  },
+  curveness: {
+    api: 'src/model/sankey.rs (SankeyÇizgiStili::eğrilik); src/grafik/sankey.rs (Bézier kontrol noktaları)',
+    testler: [SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['number'], dallar: ['0', '0.5-varsayılanı', 'yatay', 'dikey']
+  },
+  label: {
+    api: 'src/model/stil.rs (Etiket/EtiketYaması); src/grafik/sankey.rs (düğüm_etiket_geometrisi/etiketi_çiz)',
+    testler: ['grafik::sankey::testler::etiket_tabani_negatif_alani_ve_yarim_kenarligi_hesaba_katar', SANKEY_SAHNE_TESTİ],
+    örnekler: ['sankey-itemstyle', 'sankey-levels', 'sankey-vertical'],
+    veri_biçimleri: ['Etiket', 'EtiketYaması', 'formatter/rich'],
+    dallar: ['seri→seviye→düğüm', 'dört-dış/inside konumu', 'kenarlık-dahil-taban', 'font/renk/durum']
+  },
+  edgeLabel: {
+    api: 'src/model/sankey.rs (kenar_etiketi); src/grafik/sankey.rs (bağ orta-nokta etiketi)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['Etiket', 'EtiketYaması'], dallar: ['seri', 'seviye', 'bağ', 'durum', 'inside']
+  },
+  emphasis: {
+    api: 'src/model/sankey.rs (SankeyDurumu/SankeyVurguOdağı); src/grafik/sankey.rs (odak_kümeleri)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['self', 'series', 'adjacency', 'trajectory'],
+    dallar: ['düğüm', 'bağ', 'item/line/label/edgeLabel', 'blur-komşu-dışı']
+  },
+  focusNodeAdjacency: {
+    api: 'src/model/sankey.rs (SankeyKomşulukOdağı; seri/düğüm/bağ); src/grafik/sankey.rs (odak_kümeleri)',
+    testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['false', 'inEdges', 'outEdges', 'allEdges'],
+    dallar: ['seri', 'düğüm', 'bağ', 'eski-option→emphasis eşlemesi']
+  },
+  id: {
+    api: 'src/model/sankey.rs (SankeySerisi::kimlik, SankeyDüğümü::kimlik); src/eylem.rs (seriesId seçici)',
+    testler: [SANKEY_ACTION_TESTİ, SANKEY_FIXTURE_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['String'], dallar: ['seri-kimliği', 'düğüm-kimliği', 'ad-yedeği']
+  },
+  depth: {
+    api: 'src/model/sankey.rs (SankeyDüğümü::derinlik, SankeySeviyesi::derinlik); src/grafik/sankey.rs (derinlik ata)',
+    testler: [SANKEY_YERLEŞİM_TESTİ, SANKEY_SAHNE_TESTİ], örnekler: ['sankey-levels'],
+    veri_biçimleri: ['nonnegative integer'], dallar: ['DAG-türetilen', 'açık-düğüm-depth', 'level-eşleme']
+  },
+  localX: {
+    api: 'src/model/sankey.rs (SankeyDüğümü::yerel_x/düğüm_konumunu_ayarla); src/eylem.rs (dragNode)',
+    testler: [SANKEY_ACTION_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['number'], dallar: ['layout-yedeği', 'dragNode', 'pan/zoom ters-dönüşümü']
+  },
+  localY: {
+    api: 'src/model/sankey.rs (SankeyDüğümü::yerel_y/düğüm_konumunu_ayarla); src/eylem.rs (dragNode)',
+    testler: [SANKEY_ACTION_TESTİ], örnekler: SANKEY_ÖRNEKLERİ,
+    veri_biçimleri: ['number'], dallar: ['layout-yedeği', 'dragNode', 'pan/zoom ters-dönüşümü']
+  }
+});
+
 // Yalnız farklı zaman yüzdelerinden gerçekten örneklenen senaryolar tam
 // animasyon kanıtı sayılır. Çok sayıda kararlı setOption uç durumu (örneğin
 // scatter-symbol-morph şekilleri) kare sayısı yüksek olsa da ara geçişi
@@ -1269,6 +1425,13 @@ const YEREL_FIXTURE = Object.freeze({
   'sunburst-visualMap': 'examples/uyum_fixture.rs#sunburst_visual_map',
   'sunburst-drink': 'examples/uyum_fixture.rs#sunburst_drink',
   'sunburst-book': 'examples/uyum_fixture.rs#sunburst_book',
+  'sankey-energy': 'examples/uyum_fixture.rs#sankey_resmi',
+  'sankey-itemstyle': 'examples/uyum_fixture.rs#sankey_resmi',
+  'sankey-levels': 'examples/uyum_fixture.rs#sankey_resmi',
+  'sankey-nodeAlign-left': 'examples/uyum_fixture.rs#sankey_resmi',
+  'sankey-nodeAlign-right': 'examples/uyum_fixture.rs#sankey_resmi',
+  'sankey-simple': 'examples/uyum_fixture.rs#sankey_resmi',
+  'sankey-vertical': 'examples/uyum_fixture.rs#sankey_resmi',
   'tree-basic': 'examples/uyum_fixture.rs#tree_basic',
   'tree-legend': 'examples/uyum_fixture.rs#tree_legend',
   'tree-orient-bottom-top': 'examples/uyum_fixture.rs#tree_orient_bottom_top',
@@ -1276,7 +1439,6 @@ const YEREL_FIXTURE = Object.freeze({
   'tree-polyline': 'examples/uyum_fixture.rs#tree_polyline',
   'tree-radial': 'examples/uyum_fixture.rs#tree_radial',
   'tree-vertical': 'examples/uyum_fixture.rs#tree_vertical',
-  'sankey-simple': 'examples/sankey.rs',
   'graph-simple': 'examples/grafo.rs',
   'chord-simple': 'examples/kiris.rs'
 });
@@ -1662,6 +1824,17 @@ function rustKarşılığı(kök, özellik) {
       koordinat_dalları: kanıt.dallar
     };
   }
+  if (kök.toLowerCase() === 'series.sankey' && SANKEY_SERIES_OPTION_KANITI[özellik]) {
+    const kanıt = SANKEY_SERIES_OPTION_KANITI[özellik];
+    return {
+      api: kanıt.api,
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: kanıt.testler,
+      galeri_örnekleri: kanıt.örnekler,
+      veri_biçimleri: kanıt.veri_biçimleri,
+      koordinat_dalları: kanıt.dallar
+    };
+  }
   if (kök.toLowerCase() === 'echarts' && özellik === 'parallel') {
     return {
       api: 'src/model/secenekler.rs (GrafikSeçenekleri::paralel, paralel_ekle)',
@@ -1720,6 +1893,16 @@ function rustKarşılığı(kök, özellik) {
       galeri_örnekleri: SUNBURST_ÖRNEKLERİ,
       veri_biçimleri: ['GüneşPatlamasıSerisi'],
       koordinat_dalları: ['none', 'calendar-box', 'matrix-box', 'boyama', 'olay/isabet']
+    };
+  }
+  if (kök.toLowerCase() === 'registered' && özellik === 'sankey') {
+    return {
+      api: 'src/model/seri.rs (Seri::Sankey, From<SankeySerisi>); src/grafik/sankey.rs (yerleşim/boyama)',
+      durum: 'uygulandı_kanıt_bekliyor',
+      testler: [SANKEY_FIXTURE_TESTİ, SANKEY_SAHNE_TESTİ, SANKEY_ACTION_TESTİ],
+      galeri_örnekleri: SANKEY_ÖRNEKLERİ,
+      veri_biçimleri: ['SankeySerisi'],
+      koordinat_dalları: ['view', 'calendar-box', 'matrix-box', 'boyama', 'isabet/tooltip', 'drag/roam']
     };
   }
   if (kök.toLowerCase() === 'calendar' && CALENDAR_OPTION_KANITI[özellik]) {

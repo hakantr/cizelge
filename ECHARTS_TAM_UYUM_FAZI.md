@@ -2106,8 +2106,96 @@ kalır. Yedi kartın fixture ve sahne testleri, çekirdek/action testleri ve
 görsel raporu sırasıyla `examples/uyum_fixture.rs`,
 `src/grafik/gunes.rs`, `src/eylem.rs` ve
 `testler/gorsel/rapor/index.html` üzerinden denetlenir. Bu geçitle statik
-görsel kanıt sayacı **182/332 (%54,8)** olur; tüm kapılar sayacı, Faz 7/8
-etkileşim/animasyon ve çapraz yüzey kapıları tamamlanana kadar ayrı kalır.
+görsel kanıt sayacı Sunburst kapanışında **182/332 (%54,8)** olur; tüm kapılar
+sayacı, Faz 7/8 etkileşim/animasyon ve çapraz yüzey kapıları tamamlanana kadar
+ayrı kalır.
+
+#### Sankey aile kapısı
+
+Sankey aktarımının normatif çekirdeği
+`../echarts/src/chart/sankey/SankeySeries.ts`, `sankeyLayout.ts`,
+`sankeyVisual.ts`, `SankeyView.ts`, `install.ts` ve
+`../echarts/src/component/helper/roamHelper.ts` dosyalarıdır. Galeri seçenekleri
+`../echarts-examples/public/examples/ts/` altındaki `sankey-energy`,
+`sankey-itemstyle`, `sankey-levels`, `sankey-nodeAlign-left`,
+`sankey-nodeAlign-right`, `sankey-simple` ve `sankey-vertical`
+kaynaklarından; dış veriler aynı repodaki `energy.json` ve `product.json`
+varlıklarından alınır. `tools/uyum/sankey_verisi.mjs` kilitli örnek
+kaynaklarını yerelde çalıştırıp yedi belirlenimci JSON fixture üretir; düğüm
+ve bağlar azaltılmaz ya da temsili veriyle değiştirilmez.
+
+Uygulanan Sankey yüzeyi şunları birlikte taşır:
+
+- `SankeySerisi`, `SankeyDüğümü`, `SankeyBağı`, `SankeySeviyesi`, ayrı
+  item/line stilleri ve normal/emphasis/blur/select durumları. `data`/`nodes`
+  ile `links`/`edges` aynı tipli modele gelir; seri ve düğüm kimliği, açık
+  değer/depth/localX/localY/draggable, düğüm/bağ/seviye stil yamaları,
+  label/edgeLabel, tooltip, silent, z ve seri paleti korunur;
+- ECharts DAG kurulumu: bilinmeyen uç, yinelenen düğüm ve döngü tipli hata
+  üretir. Düğüm değeri açık değer ile gelen/giden toplamların en büyüğüdür;
+  ileri derinlik ve ters yükseklik hesapları `justify`/`left`/`right`
+  `nodeAlign` kararını besler. `nodeWidth`, `nodeGap`, `sort`,
+  `layoutIterations`, yatay/dikey yön, ileri-geri gevşetme, çakışma çözümü,
+  bağ kalınlığı ve bağ istifi resmî aşama sırasını izler;
+- Bağ şeridi tam kübik Bézier geometrisiyle çizilir. `lineStyle.color` düz
+  dolgu, `source`, `target` veya yönü izleyen `gradient`; curveness,
+  opacity, width/type ve shadow olabilir. Seri → level → node/edge ve durum
+  kalıtımı bağımsız uygulanır. Vurgu odağı `self`, `series`, `adjacency` ve
+  `trajectory`; eski `focusNodeAdjacency` ise kapalı/gelen/giden/tüm bağ
+  değerleriyle seri, düğüm veya bağ düzeyinde korunur;
+- Düğüm etiketlerinde dış/iç konumlar, distance/offset, yatay-dikey hiza,
+  dönüş, formatter/rich text ve font stili bulunur. Zrender bağlı metin
+  tabanı, negatif yüksekliğe sahip çok ince düğüm önce pozitif sınıra
+  çevrilerek ve görünür vuruşun yarısı sınıra katılarak hesaplanır. Böylece
+  `sankey-itemstyle` içindeki 1 px kenarlık etiket tabanını 0,5 px
+  kaydırdığında bu fark toplam raster oranında kaybolmaz;
+- `roam`, `roamTrigger`, `center`, `zoom` ve `scaleLimit` model ile pencere
+  görünümünde uygulanır. GPUI boş-alan sürüklemesi ve tekerlek yakınlaştırması
+  seri başına görünümü; düğüm sürüklemesi ise modeldeki `localX/localY`
+  değerlerini günceller. Ekran konumu, model ve geçici pan/zoom dönüşümünün
+  tersi alınarak seri kutusu oranına çevrilir. Resmî `dragNode`/`dragnode`
+  ve `sankeyRoam` action/event yükleri series index/id/name, batch ve silent
+  sözleşmesiyle kayıt defterine bağlıdır;
+- Resmî `view` koordinatına ek olarak projenin ECharts 6.1 box-usage hattı
+  tüm tuvali, Calendar içerik kutusunu veya Matrix hücre/aralık kutusunu
+  yerleşim referansı yapabilir. Eksik bileşen indeksi ya da koordinat sessiz
+  geri düşmez; doğrulama hatasıdır. Model, Kayıt/Piksel/SVG/GPUI yüzeylerinin
+  aynı çözülen yerleşimi tüketmesine izin verir.
+
+Rasterdan bağımsız sahne kapısı çalışan ECharts modelinden ve Cizelge
+yerleşiminden aynı şemayı çıkarır. Her düğümde dataIndex, ad, değer, derinlik,
+`x/y/width/height`, etkin RGBA dolgu/kenarlık, etiket görünürlüğü/metni,
+etiketin dünya taban noktası/dönüşü/fontu; her bağda uç adları/değer/yön,
+iki uç ve dört Bézier kontrol koordinatı, kalınlık, etkin gradyan renkleri ve
+kenar etiketi karşılaştırılır. Sayısal tolerans **0,0011 mantıksal
+pikseldir**. Toplam **281 düğüm + 429 bağ ve 12.070 alan** sıfır yapısal
+uyuşmazlıkla eşleşir; bu kapı toplam piksel oranından bağımsızdır.
+
+600×450 kilitli Sankey raster durumu aşağıdadır. Kapı metrikleri iki
+görüntüye de aynı Gauss çekirdeği (`σ=0,8`) uygulandıktan sonra değişmeyen
+`pixelmatch=0,1`, değişen piksel `≤%1` ve `SSIM≥0,99` eşikleriyle hesaplanır.
+Ham görüntü, ham fark ve ham metrik ayrıca saklanır.
+
+| Örnek | Kapı farkı | Kapı SSIM | Ham fark | Ham SSIM | Düğüm/bağ kapısı | Statik durum |
+|---|---:|---:|---:|---:|---:|---|
+| `sankey-energy` | %0,6489 | 0,992746 | %2,2359 | 0,989129 | 48/48 + 68/68 | geçti |
+| `sankey-itemstyle` | %0,6056 | 0,993102 | %2,0115 | 0,990119 | 99/99 + 109/109 | geçti |
+| `sankey-levels` | %0,4926 | 0,991986 | %1,6215 | 0,989160 | 26/26 + 104/104 | geçti |
+| `sankey-nodeAlign-left` | %0,7022 | 0,993248 | %2,3707 | 0,989187 | 48/48 + 68/68 | geçti |
+| `sankey-nodeAlign-right` | %0,8444 | 0,992423 | %2,3693 | 0,988833 | 48/48 + 68/68 | geçti |
+| `sankey-simple` | %0,0048 | 0,999748 | %0,0226 | 0,999586 | 6/6 + 6/6 | geçti |
+| `sankey-vertical` | %0,0156 | 0,999377 | %0,0541 | 0,999244 | 6/6 + 6/6 | geçti |
+
+Referans yenileme her örneği iki bağımsız Chromium çalıştırmasında üretir ve
+bit düzeyinde aynı değilse kilit yazmaz. Yedi resmi fixture'ın kaynak/veri
+sayısı ve seçenek dalları, tam sahne geometrisi, DAG/transform/etiket
+çekirdeği ve action yükleri ayrı testlerle denetlenir. Özellik matrisi
+Sankey'e ait 31 TypeScript option satırının tamamını somut Rust API'si,
+veri biçimi, koordinat dalı, test ve resmi kartlarla eşler. Bu geçitle statik
+görsel kanıt sayacı **189/332 (%56,9)** olur. Genel `tam_kanıtlı` sayacı,
+ortak koyu kip/GPUI/SVG, erişilebilirlik, animasyon/universal transition ve
+ölçümlü/iptal edilebilir büyük veri kapıları Faz 7/8/9'da tamamlanana kadar
+ayrı kalır.
 
 Kabul:
 

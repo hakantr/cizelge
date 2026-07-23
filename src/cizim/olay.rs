@@ -368,13 +368,22 @@ pub enum GrafikOlayı {
         ad: String,
         daraltılmış: bool,
     },
-    /// Tree/Treemap görünümü sürüklendi veya tekerlekle ölçeklendi
-    /// (`treeRoam` / `treemapMove` / `treemapRender`).
+    /// Tree/Treemap/Sankey görünümü sürüklendi veya tekerlekle ölçeklendi
+    /// (`treeRoam` / `treemapMove` / `treemapRender` / `sankeyRoam`).
     AğaçGezinmeDeğişti {
         seri_sırası: usize,
         kayma_x: f32,
         kayma_y: f32,
         ölçek: f32,
+    },
+    /// Sankey düğümü sürüklendi (`dragNode` / `dragnode`). Konumlar seri
+    /// yerleşim kutusunun genişlik ve yüksekliğine göre yerel orandır.
+    SankeyDüğümüSürüklendi {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        ad: String,
+        yerel_x: f32,
+        yerel_y: f32,
     },
     /// Treemap view root değişti (`treemapRootToNode`).
     AğaçHaritasıKöküDeğişti {

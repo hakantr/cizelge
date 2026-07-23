@@ -71,7 +71,7 @@ pub use eylem::{
     OlaySorgusu, OlayYükü, append_data_eylemini_kaydet, ağaç_haritası_eylemlerini_kaydet,
     eksen_imleci_eylemini_kaydet, eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet,
     geri_yükleme_eylemini_kaydet, görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-    güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+    güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet, sankey_eylemlerini_kaydet,
     veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
 };
 pub use genisletme::{
@@ -128,6 +128,11 @@ pub use model::paralel::{
 pub use model::radar::{
     RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri, RadarŞekli,
 };
+pub use model::sankey::{
+    SankeyBağı, SankeyDurumu, SankeyDüğümHizası, SankeyDüğümü, SankeyKenarBoyası,
+    SankeyKomşulukOdağı, SankeySerisi, SankeySeviyesi, SankeySırası, SankeyVurguOdağı, SankeyYönü,
+    SankeyÇizgiStili, SankeyÖğeStili,
+};
 pub use model::secenekler::GrafikSeçenekleri;
 pub use model::seri::{
     AğaçHaritasıSerisi, AğaçSerisi, Basamak, DüzSaçılımVerisi, EtiketYerleşimParametreleri,
@@ -138,9 +143,9 @@ pub use model::seri::{
     GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
     HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
     MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması, RadarSerisi,
-    RadarVeriYaması, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol, SembolBoyutu, Seri,
-    SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme,
-    ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+    RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi, TakvimSerisi,
+    TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim,
+    ÖğeRengiİşlevi,
 };
 pub use model::stil::{
     AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu, EtiketYaması,
@@ -209,7 +214,7 @@ pub mod hazir {
         ağaç_haritası_eylemlerini_kaydet, eksen_imleci_eylemini_kaydet,
         eksen_kırılma_eylemlerini_kaydet, fırça_eylemini_kaydet, geri_yükleme_eylemini_kaydet,
         görsel_aralık_eylemini_kaydet, gösterge_eylemlerini_kaydet,
-        güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet,
+        güneş_patlaması_eylemlerini_kaydet, paralel_eylemlerini_kaydet, sankey_eylemlerini_kaydet,
         veri_yakınlaştırma_eylemini_kaydet, öntanımlı_eylemleri_kaydet,
     };
     pub use crate::genisletme::{
@@ -267,6 +272,11 @@ pub mod hazir {
         RadarBölmeAlanı, RadarEksenAdı, RadarGöstergesi, RadarKoordinatı, RadarÇizgileri,
         RadarŞekli,
     };
+    pub use crate::model::sankey::{
+        SankeyBağı, SankeyDurumu, SankeyDüğümHizası, SankeyDüğümü, SankeyKenarBoyası,
+        SankeyKomşulukOdağı, SankeySerisi, SankeySeviyesi, SankeySırası, SankeyVurguOdağı,
+        SankeyYönü, SankeyÇizgiStili, SankeyÖğeStili,
+    };
     pub use crate::model::secenekler::GrafikSeçenekleri;
     pub use crate::model::seri::{
         AğaçHaritasıSerisi, AğaçSerisi, Basamak, EtiketYerleşimParametreleri, EtiketYerleşimSonucu,
@@ -277,9 +287,9 @@ pub mod hazir {
         GüneşPatlamasıYolBilgisi, HuniDurumYaması, HuniEtiketÇizgisiYaması, HuniHizası, HuniSerisi,
         HuniSıralaması, HuniVeriYaması, HuniYönü, IsıHaritasıSerisi, KirişSerisi, KutuSerisi,
         MumSerisi, ParalelBoyut, ParalelSerisi, PastaSerisi, Piktogram, RadarDurumYaması,
-        RadarSerisi, RadarVeriYaması, SankeyBağı, SankeySerisi, SaçılımSerisi, Sembol,
-        SembolBoyutu, Seri, SütunSerisi, TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı,
-        ÇizgiSerisi, Örnekleme, ÖzelBağlam, ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
+        RadarSerisi, RadarVeriYaması, SaçılımSerisi, Sembol, SembolBoyutu, Seri, SütunSerisi,
+        TakvimSerisi, TemaNehriSerisi, VeriİşlevBağlamı, ÇizgiSerisi, Örnekleme, ÖzelBağlam,
+        ÖzelSeri, ÖzelÇizim, ÖğeRengiİşlevi,
     };
     pub use crate::model::stil::{
         AlanStili, Biçimleyici, DışEtiketHizası, Etiket, EtiketDöndürme, EtiketKonumu,

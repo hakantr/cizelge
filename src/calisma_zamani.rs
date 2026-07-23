@@ -13,6 +13,7 @@ use crate::animasyon::Yumuşatma;
 use crate::cizim::olay::{AğaçHaritasıKökYönü, GüneşPatlamasıKökYönü};
 use crate::hata::BilesenHatasi;
 use crate::koordinat::Kartezyen2B;
+use crate::model::Uzunluk;
 use crate::model::bilesen::{
     AraçKutusu, Başlık, Fırça, FırçaSeçimAlanı, Gösterge, Izgara, İpucu
 };
@@ -991,6 +992,18 @@ pub enum ÇalışmaOlayı {
         ad: String,
         daraltılmış: bool,
     },
+    SankeyDüğümüSürüklendi {
+        seri_sırası: usize,
+        veri_sırası: usize,
+        ad: String,
+        yerel_x: f32,
+        yerel_y: f32,
+    },
+    SankeyGörünümüDeğişti {
+        seri_sırası: usize,
+        merkez: (f32, f32),
+        yakınlaştırma: f32,
+    },
     AğaçHaritasıKöküDeğişti {
         seri_sırası: usize,
         veri_sırası: Option<usize>,
@@ -1861,6 +1874,151 @@ impl GrafikÇalışmaZamanı {
             self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
         }
         Ok((sıra, ad, daraltılmış))
+    }
+
+    /// Resmî `dragNode` action'ının model karşılığı. `localX`/`localY`,
+    /// Sankey yerleşim kutusunun genişlik ve yüksekliğine göre orandır.
+    pub fn sankey_düğümünü_sürükle(
+        &mut self,
+        seçici: SeriSeçici,
+        veri_sırası: usize,
+        yerel_x: f32,
+        yerel_y: f32,
+        sessiz: bool,
+    ) -> Result<(usize, String), BilesenHatasi> {
+        self.açık_mı("dispatchAction.dragNode")?;
+        if !yerel_x.is_finite() || !yerel_y.is_finite() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "dragNode.localX/localY",
+                ayrıntı: "localX ve localY sonlu sayı olmalı".to_owned(),
+            });
+        }
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "dragNode.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let Some(Seri::Sankey(sankey)) = self.seçenekler.seriler.get_mut(sıra) else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "dragNode",
+                ayrıntı: format!("{sıra}. seri `sankey` değildir"),
+            });
+        };
+        let ad = sankey
+            .düğüm_konumunu_ayarla(veri_sırası, yerel_x, yerel_y)
+            .ok_or(BilesenHatasi::EksikVeri {
+                bileşen: "dragNode.dataIndex",
+                sıra: veri_sırası,
+            })?;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::SankeyDüğümüSürüklendi {
+                seri_sırası: sıra,
+                veri_sırası,
+                ad: ad.clone(),
+                yerel_x,
+                yerel_y,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok((sıra, ad))
+    }
+
+    /// Resmî `sankeyRoam` action'ını model `center`/`zoom` alanlarına geri
+    /// yazar. Pan ekran pikselinde, zoom ise `originX`/`originY` çevresinde
+    /// uygulanır; sonuç `scaleLimit` ile sınırlandırılır.
+    #[allow(clippy::too_many_arguments)]
+    pub fn sankey_görünümünü_değiştir(
+        &mut self,
+        seçici: SeriSeçici,
+        dx: Option<f32>,
+        dy: Option<f32>,
+        zoom: Option<f32>,
+        origin_x: Option<f32>,
+        origin_y: Option<f32>,
+        sessiz: bool,
+    ) -> Result<(usize, (f32, f32), f32), BilesenHatasi> {
+        self.açık_mı("dispatchAction.sankeyRoam")?;
+        let sıra = seri_sırasını_bul(&self.seçenekler, &seçici).ok_or_else(|| {
+            BilesenHatasi::EksikVeri {
+                bileşen: "sankeyRoam.series",
+                sıra: seçici_sıra_ipucu(&seçici),
+            }
+        })?;
+        let tuval = crate::koordinat::Dikdörtgen::yeni(
+            0.0,
+            0.0,
+            self.başlatma.genişlik,
+            self.başlatma.yükseklik,
+        );
+        let Some(Seri::Sankey(sankey)) = self.seçenekler.seriler.get_mut(sıra) else {
+            return Err(BilesenHatasi::Desteklenmeyen {
+                özellik: "sankeyRoam",
+                ayrıntı: format!("{sıra}. seri `sankey` değildir"),
+            });
+        };
+        let alan = crate::grafik::sankey::sankey_alanı(sankey, tuval);
+        let mut merkez = sankey
+            .merkez
+            .map(|(x, y)| {
+                (
+                    alan.x + x.çöz(alan.genişlik),
+                    alan.y + y.çöz(alan.yükseklik),
+                )
+            })
+            .unwrap_or_else(|| alan.merkez());
+        let en_küçük = sankey.en_küçük_ölçek.max(0.01);
+        let en_büyük = sankey.en_büyük_ölçek.max(en_küçük);
+        let eski_ölçek = sankey.yakınlaştırma.clamp(en_küçük, en_büyük);
+        let pan_x = dx.unwrap_or(0.0);
+        let pan_y = dy.unwrap_or(0.0);
+        if !pan_x.is_finite() || !pan_y.is_finite() {
+            return Err(BilesenHatasi::GeçersizSeçenek {
+                alan: "sankeyRoam.dx/dy",
+                ayrıntı: "dx ve dy sonlu sayı olmalı".to_owned(),
+            });
+        }
+        merkez.0 -= pan_x / eski_ölçek;
+        merkez.1 -= pan_y / eski_ölçek;
+
+        let mut yeni_ölçek = eski_ölçek;
+        if let Some(zoom) = zoom {
+            if !zoom.is_finite() || zoom <= 0.0 {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "sankeyRoam.zoom",
+                    ayrıntı: "zoom pozitif sonlu sayı olmalı".to_owned(),
+                });
+            }
+            let köken = (
+                origin_x.unwrap_or_else(|| alan.merkez().0),
+                origin_y.unwrap_or_else(|| alan.merkez().1),
+            );
+            if !köken.0.is_finite() || !köken.1.is_finite() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "sankeyRoam.originX/originY",
+                    ayrıntı: "zoom kökeni sonlu sayı olmalı".to_owned(),
+                });
+            }
+            yeni_ölçek = (eski_ölçek * zoom).clamp(en_küçük, en_büyük);
+            let görünüm_merkezi = alan.merkez();
+            merkez.0 += (köken.0 - görünüm_merkezi.0) * (1.0 / eski_ölçek - 1.0 / yeni_ölçek);
+            merkez.1 += (köken.1 - görünüm_merkezi.1) * (1.0 / eski_ölçek - 1.0 / yeni_ölçek);
+        }
+        let yerel_merkez = (merkez.0 - alan.x, merkez.1 - alan.y);
+        sankey.merkez = Some((
+            Uzunluk::Piksel(yerel_merkez.0),
+            Uzunluk::Piksel(yerel_merkez.1),
+        ));
+        sankey.yakınlaştırma = yeni_ölçek;
+        if !sessiz {
+            self.olaylar.push(ÇalışmaOlayı::SankeyGörünümüDeğişti {
+                seri_sırası: sıra,
+                merkez: yerel_merkez,
+                yakınlaştırma: yeni_ölçek,
+            });
+            self.olaylar.push(ÇalışmaOlayı::YenidenÇizildi);
+        }
+        Ok((sıra, yerel_merkez, yeni_ölçek))
     }
 
     /// `treemapRootToNode` action'ının başsız view-root karşılığı.

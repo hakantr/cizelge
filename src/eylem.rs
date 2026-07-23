@@ -680,6 +680,167 @@ pub fn paralel_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(),
     )
 }
 
+fn sankey_seçicileri(
+    çalışma: &GrafikÇalışmaZamanı,
+    yük: &EylemYükü,
+    bileşen: &'static str,
+) -> Result<Vec<SeriSeçici>, BilesenHatasi> {
+    if let Some(seçici) = yük.seri_seçici() {
+        return Ok(vec![seçici]);
+    }
+    let seçiciler = çalışma
+        .seçenekleri_al()?
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(sıra, seri)| {
+            matches!(seri, crate::model::seri::Seri::Sankey(_)).then_some(SeriSeçici::Sıra(sıra))
+        })
+        .collect::<Vec<_>>();
+    if seçiciler.is_empty() {
+        return Err(BilesenHatasi::EksikVeri { bileşen, sıra: 0 });
+    }
+    Ok(seçiciler)
+}
+
+fn sankey_olayı(
+    çalışma: &GrafikÇalışmaZamanı,
+    seri_sırası: usize,
+    veri_sırası: Option<usize>,
+) -> Result<OlayYükü, BilesenHatasi> {
+    let seçenekler = çalışma.seçenekleri_al()?;
+    let seri = seçenekler.seriler.get(seri_sırası);
+    let veri_adı = veri_sırası.and_then(|veri_sırası| match seri {
+        Some(crate::model::seri::Seri::Sankey(seri)) => {
+            seri.düğümler.get(veri_sırası).map(|düğüm| düğüm.ad.clone())
+        }
+        _ => None,
+    });
+    Ok(OlayYükü {
+        bileşen_türü: Some("series".to_owned()),
+        bileşen_alt_türü: Some("sankey".to_owned()),
+        seri_sırası: Some(seri_sırası),
+        seri_kimliği: seri.and_then(|seri| match seri {
+            crate::model::seri::Seri::Sankey(seri) => seri.kimlik.clone(),
+            _ => None,
+        }),
+        seri_adı: seri.and_then(|seri| seri.ad().map(str::to_owned)),
+        veri_sırası,
+        veri_adı,
+        ..OlayYükü::default()
+    })
+}
+
+/// Sankey'in resmî `dragNode` ve `sankeyRoam` action'larını kaydeder.
+pub fn sankey_eylemlerini_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<(), BilesenHatasi> {
+    kayıt.kaydet(
+        "dragNode",
+        "dragnode",
+        EylemGüncellemesi::Tam,
+        |çalışma, yük| {
+            let veri_sırası = isteğe_bağlı_sıra(yük, "dataIndex")?.ok_or_else(|| {
+                BilesenHatasi::GeçersizSeçenek {
+                    alan: "dragNode.dataIndex",
+                    ayrıntı: "negatif olmayan tam dataIndex gerekli".to_owned(),
+                }
+            })?;
+            let yerel_x = isteğe_bağlı_sayı(yük, "localX")?.ok_or_else(|| {
+                BilesenHatasi::GeçersizSeçenek {
+                    alan: "dragNode.localX",
+                    ayrıntı: "localX gerekli".to_owned(),
+                }
+            })? as f32;
+            let yerel_y = isteğe_bağlı_sayı(yük, "localY")?.ok_or_else(|| {
+                BilesenHatasi::GeçersizSeçenek {
+                    alan: "dragNode.localY",
+                    ayrıntı: "localY gerekli".to_owned(),
+                }
+            })? as f32;
+            let seçiciler = sankey_seçicileri(çalışma, yük, "dragNode.series")?;
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let (seri_sırası, _) = çalışma.sankey_düğümünü_sürükle(
+                    seçici,
+                    veri_sırası,
+                    yerel_x,
+                    yerel_y,
+                    true,
+                )?;
+                let mut olay = sankey_olayı(çalışma, seri_sırası, Some(veri_sırası))?;
+                olay.alanlar.extend([
+                    ("localX".to_owned(), EylemDeğeri::from(yerel_x)),
+                    ("localY".to_owned(), EylemDeğeri::from(yerel_y)),
+                ]);
+                olaylar.push(olay);
+            }
+            Ok(olaylar)
+        },
+    )?;
+    kayıt.kaydet(
+        "sankeyRoam",
+        "sankeyRoam",
+        EylemGüncellemesi::Yok,
+        |çalışma, yük| {
+            let dx = isteğe_bağlı_sayı(yük, "dx")?.map(|değer| değer as f32);
+            let dy = isteğe_bağlı_sayı(yük, "dy")?.map(|değer| değer as f32);
+            if dx.is_some() != dy.is_some() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "sankeyRoam.dx/dy",
+                    ayrıntı: "pan için dx ve dy birlikte gerekli".to_owned(),
+                });
+            }
+            let zoom = isteğe_bağlı_sayı(yük, "zoom")?.map(|değer| değer as f32);
+            if dx.is_none() && zoom.is_none() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "sankeyRoam",
+                    ayrıntı: "dx/dy veya zoom gerekli".to_owned(),
+                });
+            }
+            let origin_x = isteğe_bağlı_sayı(yük, "originX")?.map(|değer| değer as f32);
+            let origin_y = isteğe_bağlı_sayı(yük, "originY")?.map(|değer| değer as f32);
+            if origin_x.is_some() != origin_y.is_some() {
+                return Err(BilesenHatasi::GeçersizSeçenek {
+                    alan: "sankeyRoam.originX/originY",
+                    ayrıntı: "zoom kökeni için originX ve originY birlikte gerekli".to_owned(),
+                });
+            }
+            let seçiciler = sankey_seçicileri(çalışma, yük, "sankeyRoam.series")?;
+            let mut olaylar = Vec::with_capacity(seçiciler.len());
+            for seçici in seçiciler {
+                let (seri_sırası, merkez, yakınlaştırma) = çalışma.sankey_görünümünü_değiştir(
+                    seçici, dx, dy, zoom, origin_x, origin_y, true,
+                )?;
+                let mut olay = sankey_olayı(çalışma, seri_sırası, None)?;
+                if let (Some(dx), Some(dy)) = (dx, dy) {
+                    olay.alanlar.extend([
+                        ("dx".to_owned(), EylemDeğeri::from(dx)),
+                        ("dy".to_owned(), EylemDeğeri::from(dy)),
+                    ]);
+                }
+                if let Some(zoom) = zoom {
+                    olay.alanlar
+                        .insert("zoom".to_owned(), EylemDeğeri::from(zoom));
+                }
+                if let (Some(origin_x), Some(origin_y)) = (origin_x, origin_y) {
+                    olay.alanlar.extend([
+                        ("originX".to_owned(), EylemDeğeri::from(origin_x)),
+                        ("originY".to_owned(), EylemDeğeri::from(origin_y)),
+                    ]);
+                }
+                olay.alanlar.extend([
+                    (
+                        "center".to_owned(),
+                        EylemDeğeri::Dizi(vec![merkez.0.into(), merkez.1.into()]),
+                    ),
+                    ("currentZoom".to_owned(), yakınlaştırma.into()),
+                ]);
+                olaylar.push(olay);
+            }
+            Ok(olaylar)
+        },
+    )
+}
+
 /// Tree dal aç/kapat action'ını kaydeder. `seriesIndex`/`seriesId`/
 /// `seriesName` verilmezse ECharts `eachComponent` gibi bütün Tree
 /// serilerine aynı `dataIndex` uygulanır.
@@ -1750,6 +1911,7 @@ pub fn öntanımlı_eylemleri_kaydet(kayıt: &mut EylemKayıtDefteri) -> Result<
     veri_yakınlaştırma_eylemini_kaydet(kayıt)?;
     fırça_eylemini_kaydet(kayıt)?;
     paralel_eylemlerini_kaydet(kayıt)?;
+    sankey_eylemlerini_kaydet(kayıt)?;
     ağaç_eylemlerini_kaydet(kayıt)?;
     ağaç_haritası_eylemlerini_kaydet(kayıt)?;
     güneş_patlaması_eylemlerini_kaydet(kayıt)?;
@@ -1955,7 +2117,8 @@ mod testler {
     use crate::model::paralel::{ParalelEkseni, ParalelKoordinatı};
     use crate::model::secenekler::GrafikSeçenekleri;
     use crate::model::seri::{
-        AğaçHaritasıSerisi, AğaçSerisi, GüneşPatlamasıSerisi, ParalelSerisi, ÇizgiSerisi,
+        AğaçHaritasıSerisi, AğaçSerisi, GüneşPatlamasıSerisi, ParalelSerisi, SankeySerisi,
+        ÇizgiSerisi,
     };
     use crate::model::yakinlastirma::VeriYakınlaştırma;
 
@@ -2038,6 +2201,87 @@ mod testler {
             panic!("Tree serisi bekleniyordu");
         };
         assert_eq!(ağaç.kökler[0].daraltılmış, Some(false));
+    }
+
+    #[test]
+    fn sankey_drag_ve_roam_actionlari_modeli_ve_resmi_olay_yukunu_korur() {
+        let seçenekler = GrafikSeçenekleri::yeni().seri(
+            SankeySerisi::yeni()
+                .kimlik("sk")
+                .ad("Sankey")
+                .düğümler(["A", "B"])
+                .bağlar([("A", "B", 7.0)]),
+        );
+        let mut çalışma =
+            GrafikÇalışmaZamanı::yeni(ÖrnekBaşlatmaSeçenekleri::default(), seçenekler).unwrap();
+        let mut kayıt = EylemKayıtDefteri::yeni();
+        sankey_eylemlerini_kaydet(&mut kayıt).unwrap();
+
+        let sürükleme = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("dragNode")
+                    .alan("seriesId", "sk")
+                    .alan("dataIndex", 0usize)
+                    .alan("localX", 0.25_f64)
+                    .alan("localY", 0.4_f64),
+            )
+            .unwrap();
+        assert_eq!(sürükleme.len(), 1);
+        assert_eq!(sürükleme[0].tür, "dragnode");
+        assert_eq!(sürükleme[0].bileşen_alt_türü.as_deref(), Some("sankey"));
+        assert_eq!(sürükleme[0].veri_adı.as_deref(), Some("A"));
+        assert_eq!(sürükleme[0].alanlar["localX"].sayı(), Some(0.25));
+        let seçenekler = çalışma.seçenekleri_al().unwrap();
+        let crate::model::seri::Seri::Sankey(sankey) = &seçenekler.seriler[0] else {
+            panic!("Sankey serisi bekleniyordu");
+        };
+        assert_eq!(sankey.düğümler[0].yerel_x, Some(0.25));
+        assert_eq!(sankey.düğümler[0].yerel_y, Some(0.4));
+
+        let kaydırma = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("sankeyRoam")
+                    .alan("seriesId", "sk")
+                    .alan("dx", 10.0_f64)
+                    .alan("dy", -5.0_f64),
+            )
+            .unwrap();
+        assert_eq!(kaydırma[0].tür, "sankeyRoam");
+        assert_eq!(kaydırma[0].alanlar["dx"].sayı(), Some(10.0));
+        assert_eq!(kaydırma[0].alanlar["currentZoom"].sayı(), Some(1.0));
+
+        let yakınlaştırma = kayıt
+            .gönder(
+                &mut çalışma,
+                &EylemYükü::yeni("sankeyRoam")
+                    .alan("seriesId", "sk")
+                    .alan("zoom", 1.5_f64)
+                    .alan("originX", 297.5_f64)
+                    .alan("originY", 262.5_f64),
+            )
+            .unwrap();
+        assert_eq!(yakınlaştırma[0].alanlar["currentZoom"].sayı(), Some(1.5));
+        let seçenekler = çalışma.seçenekleri_al().unwrap();
+        let crate::model::seri::Seri::Sankey(sankey) = &seçenekler.seriler[0] else {
+            panic!("Sankey serisi bekleniyordu");
+        };
+        assert!((sankey.yakınlaştırma - 1.5).abs() < 1e-6);
+        let merkez = sankey.merkez.expect("roam merkez üretmeli");
+        assert!((merkez.0.çöz(525.0) - 252.5).abs() < 1e-6);
+        assert!((merkez.1.çöz(472.5) - 241.25).abs() < 1e-6);
+
+        assert!(
+            kayıt
+                .gönder(
+                    &mut çalışma,
+                    &EylemYükü::yeni("sankeyRoam")
+                        .alan("seriesId", "sk")
+                        .alan("dx", 1.0_f64),
+                )
+                .is_err()
+        );
     }
 
     #[test]

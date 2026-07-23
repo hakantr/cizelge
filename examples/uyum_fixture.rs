@@ -16063,6 +16063,438 @@ fn sunburst_book() -> Result<GrafikSeçenekleri, String> {
         ))
 }
 
+#[derive(Debug, Deserialize)]
+struct ResmiSankeyBelgesi {
+    #[serde(rename = "seçenek")]
+    seçenek: ResmiSankeySeçeneği,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeySeçeneği {
+    #[serde(default)]
+    background_color: Option<String>,
+    #[serde(default)]
+    title: Option<ResmiSankeyBaşlığı>,
+    #[serde(default)]
+    tooltip: Option<serde_json::Value>,
+    series: ResmiSankeySerisi,
+}
+
+#[derive(Debug, Deserialize)]
+struct ResmiSankeyBaşlığı {
+    #[serde(default)]
+    text: Option<String>,
+    #[serde(default)]
+    subtext: Option<String>,
+    #[serde(default)]
+    left: Option<serde_json::Value>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeyStili {
+    #[serde(default)]
+    color: Option<String>,
+    #[serde(default)]
+    border_color: Option<String>,
+    #[serde(default)]
+    border_width: Option<f32>,
+    #[serde(default)]
+    border_radius: Option<serde_json::Value>,
+    #[serde(default)]
+    opacity: Option<f32>,
+    #[serde(default)]
+    curveness: Option<f32>,
+    #[serde(default)]
+    width: Option<f32>,
+    #[serde(default)]
+    show: Option<bool>,
+    #[serde(default)]
+    position: Option<String>,
+    #[serde(default)]
+    distance: Option<f32>,
+    #[serde(default)]
+    font_family: Option<String>,
+    #[serde(default)]
+    font_size: Option<f32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeyDurumu {
+    #[serde(default)]
+    focus: Option<String>,
+    #[serde(default)]
+    item_style: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    line_style: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    label: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    edge_label: Option<ResmiSankeyStili>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeyDüğümü {
+    name: String,
+    #[serde(default)]
+    value: Option<f64>,
+    #[serde(default)]
+    depth: Option<usize>,
+    #[serde(default)]
+    item_style: Option<ResmiSankeyStili>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeyBağı {
+    source: String,
+    target: String,
+    value: f64,
+    #[serde(default)]
+    line_style: Option<ResmiSankeyStili>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeySeviyesi {
+    depth: usize,
+    #[serde(default)]
+    item_style: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    line_style: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    label: Option<ResmiSankeyStili>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ResmiSankeySerisi {
+    data: Vec<ResmiSankeyDüğümü>,
+    links: Vec<ResmiSankeyBağı>,
+    #[serde(default)]
+    left: Option<serde_json::Value>,
+    #[serde(default)]
+    top: Option<serde_json::Value>,
+    #[serde(default)]
+    right: Option<serde_json::Value>,
+    #[serde(default)]
+    bottom: Option<serde_json::Value>,
+    #[serde(default)]
+    width: Option<serde_json::Value>,
+    #[serde(default)]
+    height: Option<serde_json::Value>,
+    #[serde(default)]
+    orient: Option<String>,
+    #[serde(default)]
+    node_align: Option<String>,
+    #[serde(default)]
+    node_width: Option<f32>,
+    #[serde(default)]
+    node_gap: Option<f32>,
+    #[serde(default)]
+    layout_iterations: Option<usize>,
+    #[serde(default)]
+    item_style: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    line_style: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    label: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    edge_label: Option<ResmiSankeyStili>,
+    #[serde(default)]
+    emphasis: Option<ResmiSankeyDurumu>,
+    #[serde(default)]
+    levels: Vec<ResmiSankeySeviyesi>,
+}
+
+fn resmi_sankey_belgesini_oku(id: &str) -> Result<ResmiSankeyBelgesi, String> {
+    let kaynak = match id {
+        "sankey-energy" => include_str!("uyum_veri/sankey/sankey-energy.json"),
+        "sankey-itemstyle" => include_str!("uyum_veri/sankey/sankey-itemstyle.json"),
+        "sankey-levels" => include_str!("uyum_veri/sankey/sankey-levels.json"),
+        "sankey-nodeAlign-left" => {
+            include_str!("uyum_veri/sankey/sankey-nodeAlign-left.json")
+        }
+        "sankey-nodeAlign-right" => {
+            include_str!("uyum_veri/sankey/sankey-nodeAlign-right.json")
+        }
+        "sankey-simple" => include_str!("uyum_veri/sankey/sankey-simple.json"),
+        "sankey-vertical" => include_str!("uyum_veri/sankey/sankey-vertical.json"),
+        _ => return Err(format!("bilinmeyen resmi Sankey fixture'ı: {id}")),
+    };
+    serde_json::from_str(kaynak).map_err(|hata| format!("{id} Sankey verisi çözülemedi: {hata}"))
+}
+
+fn resmi_sankey_uzunluğu(değer: &serde_json::Value) -> Result<Uzunluk, String> {
+    if let Some(sayı) = değer.as_f64() {
+        return Ok(Uzunluk::Piksel(sayı as f32));
+    }
+    let Some(metin) = değer.as_str() else {
+        return Err(format!("geçersiz Sankey uzunluğu: {değer}"));
+    };
+    if let Some(yüzde) = metin.strip_suffix('%') {
+        return yüzde
+            .parse::<f32>()
+            .map(Uzunluk::Yüzde)
+            .map_err(|hata| format!("geçersiz Sankey yüzdesi `{metin}`: {hata}"));
+    }
+    metin
+        .parse::<f32>()
+        .map(Uzunluk::Piksel)
+        .map_err(|hata| format!("geçersiz Sankey uzunluğu `{metin}`: {hata}"))
+}
+
+fn resmi_sankey_köşe_yarıçapı(değer: &serde_json::Value) -> Option<[f32; 4]> {
+    if let Some(sayı) = değer.as_f64() {
+        return Some([sayı as f32; 4]);
+    }
+    let dizi = değer.as_array()?;
+    let sayılar = dizi
+        .iter()
+        .filter_map(serde_json::Value::as_f64)
+        .map(|değer| değer as f32)
+        .collect::<Vec<_>>();
+    match sayılar.as_slice() {
+        [tek] => Some([*tek; 4]),
+        [dikey, yatay] => Some([*dikey, *yatay, *dikey, *yatay]),
+        [üst, yatay, alt] => Some([*üst, *yatay, *alt, *yatay]),
+        [sol_üst, sağ_üst, sağ_alt, sol_alt] => Some([*sol_üst, *sağ_üst, *sağ_alt, *sol_alt]),
+        _ => None,
+    }
+}
+
+fn resmi_sankey_öğe_stili(stil: &ResmiSankeyStili) -> SankeyÖğeStili {
+    let mut çıktı = SankeyÖğeStili::yeni();
+    if let Some(renk) = &stil.color {
+        çıktı = çıktı.renk(renk.as_str());
+    }
+    if let Some(renk) = &stil.border_color {
+        çıktı = çıktı.kenarlık_rengi(renk.as_str());
+    }
+    if let Some(kalınlık) = stil.border_width {
+        çıktı = çıktı.kenarlık_kalınlığı(kalınlık);
+    }
+    if let Some(yarıçap) = stil
+        .border_radius
+        .as_ref()
+        .and_then(resmi_sankey_köşe_yarıçapı)
+    {
+        çıktı.kenarlık_yarıçapı = Some(yarıçap);
+    }
+    if let Some(opaklık) = stil.opacity {
+        çıktı = çıktı.opaklık(opaklık);
+    }
+    çıktı
+}
+
+fn resmi_sankey_çizgi_stili(
+    taban: SankeyÇizgiStili,
+    stil: &ResmiSankeyStili,
+) -> SankeyÇizgiStili {
+    let mut çıktı = taban;
+    if let Some(renk) = &stil.color {
+        çıktı = çıktı.renk(renk.as_str());
+    }
+    if let Some(opaklık) = stil.opacity {
+        çıktı = çıktı.opaklık(opaklık);
+    }
+    if let Some(eğrilik) = stil.curveness {
+        çıktı = çıktı.eğrilik(eğrilik);
+    }
+    if let Some(kalınlık) = stil.width {
+        çıktı = çıktı.kalınlık(kalınlık);
+    }
+    çıktı
+}
+
+fn resmi_sankey_etiket_yaması(stil: &ResmiSankeyStili) -> EtiketYaması {
+    let mut çıktı = EtiketYaması::yeni();
+    if let Some(göster) = stil.show {
+        çıktı = çıktı.göster(göster);
+    }
+    if let Some(konum) = stil.position.as_deref() {
+        çıktı = çıktı.konum(match konum {
+            "left" => EtiketKonumu::Sol,
+            "top" => EtiketKonumu::Üst,
+            "bottom" => EtiketKonumu::Alt,
+            "inside" => EtiketKonumu::İç,
+            _ => EtiketKonumu::Sağ,
+        });
+    }
+    if let Some(uzaklık) = stil.distance {
+        çıktı = çıktı.uzaklık(uzaklık);
+    }
+    let mut yazı = YazıStili::yeni();
+    let mut yazı_var = false;
+    if let Some(renk) = &stil.color {
+        yazı = yazı.renk(renk.as_str());
+        yazı_var = true;
+    }
+    if let Some(aile) = &stil.font_family {
+        yazı = yazı.aile(aile.clone());
+        yazı_var = true;
+    }
+    if let Some(boyut) = stil.font_size {
+        yazı = yazı.boyut(boyut);
+        yazı_var = true;
+    }
+    if yazı_var {
+        çıktı = çıktı.yazı(yazı);
+    }
+    çıktı
+}
+
+fn resmi_sankey_durumu(taban: SankeyDurumu, durum: &ResmiSankeyDurumu) -> SankeyDurumu {
+    let mut çıktı = taban;
+    if let Some(odak) = durum.focus.as_deref() {
+        çıktı.odak = Some(match odak {
+            "self" => SankeyVurguOdağı::Öz,
+            "series" => SankeyVurguOdağı::Seri,
+            "adjacency" => SankeyVurguOdağı::Komşuluk,
+            "trajectory" => SankeyVurguOdağı::Yörünge,
+            _ => SankeyVurguOdağı::Yok,
+        });
+    }
+    if let Some(stil) = &durum.item_style {
+        çıktı.öğe_stili = Some(resmi_sankey_öğe_stili(stil));
+    }
+    if let Some(stil) = &durum.line_style {
+        çıktı.çizgi_stili = Some(resmi_sankey_çizgi_stili(SankeyÇizgiStili::yeni(), stil));
+    }
+    if let Some(stil) = &durum.label {
+        çıktı.etiket = Some(resmi_sankey_etiket_yaması(stil));
+    }
+    if let Some(stil) = &durum.edge_label {
+        çıktı.kenar_etiketi = Some(resmi_sankey_etiket_yaması(stil));
+    }
+    çıktı
+}
+
+fn sankey_resmi(id: &str) -> Result<GrafikSeçenekleri, String> {
+    let belge = resmi_sankey_belgesini_oku(id)?;
+    let ham = belge.seçenek.series;
+    let mut seri = SankeySerisi::yeni();
+    if let Some(değer) = &ham.left {
+        seri.sol = resmi_sankey_uzunluğu(değer)?;
+    }
+    if let Some(değer) = &ham.top {
+        seri.üst = resmi_sankey_uzunluğu(değer)?;
+    }
+    if let Some(değer) = &ham.right {
+        seri.sağ = Some(resmi_sankey_uzunluğu(değer)?);
+    }
+    if let Some(değer) = &ham.bottom {
+        seri.alt = Some(resmi_sankey_uzunluğu(değer)?);
+    }
+    if let Some(değer) = &ham.width {
+        seri.genişlik = Some(resmi_sankey_uzunluğu(değer)?);
+        seri.sağ = None;
+    }
+    if let Some(değer) = &ham.height {
+        seri.yükseklik = Some(resmi_sankey_uzunluğu(değer)?);
+        seri.alt = None;
+    }
+    seri.yön = match ham.orient.as_deref() {
+        Some("vertical") => SankeyYönü::Dikey,
+        _ => SankeyYönü::Yatay,
+    };
+    seri.düğüm_hizası = match ham.node_align.as_deref() {
+        Some("left") => SankeyDüğümHizası::Sol,
+        Some("right") => SankeyDüğümHizası::Sağ,
+        _ => SankeyDüğümHizası::İkiYana,
+    };
+    if let Some(genişlik) = ham.node_width {
+        seri.düğüm_genişliği = genişlik;
+    }
+    if let Some(boşluk) = ham.node_gap {
+        seri.düğüm_boşluğu = boşluk;
+    }
+    if let Some(yineleme) = ham.layout_iterations {
+        seri.yerleşim_yinelemesi = yineleme;
+    }
+    if let Some(stil) = &ham.item_style {
+        seri.öğe_stili = resmi_sankey_öğe_stili(stil);
+    }
+    if let Some(stil) = &ham.line_style {
+        seri.çizgi_stili = resmi_sankey_çizgi_stili(seri.çizgi_stili.clone(), stil);
+    }
+    if let Some(stil) = &ham.label {
+        seri.etiket = resmi_sankey_etiket_yaması(stil).uygula(&seri.etiket);
+    }
+    if let Some(stil) = &ham.edge_label {
+        seri.kenar_etiketi = resmi_sankey_etiket_yaması(stil).uygula(&seri.kenar_etiketi);
+    }
+    if let Some(durum) = &ham.emphasis {
+        seri.vurgu = resmi_sankey_durumu(seri.vurgu.clone(), durum);
+    }
+    seri.düğümler = ham
+        .data
+        .into_iter()
+        .map(|ham| {
+            let mut düğüm = SankeyDüğümü::yeni(ham.name);
+            düğüm.değer = ham.value;
+            düğüm.derinlik = ham.depth;
+            düğüm.öğe_stili = ham.item_style.as_ref().map(resmi_sankey_öğe_stili);
+            düğüm
+        })
+        .collect();
+    seri.bağlar = ham
+        .links
+        .into_iter()
+        .map(|ham| {
+            let mut bağ = SankeyBağı::yeni(ham.source, ham.target, ham.value);
+            bağ.çizgi_stili = ham
+                .line_style
+                .as_ref()
+                .map(|stil| resmi_sankey_çizgi_stili(SankeyÇizgiStili::yeni(), stil));
+            bağ
+        })
+        .collect();
+    seri.seviyeler = ham
+        .levels
+        .into_iter()
+        .map(|ham| {
+            let mut seviye = SankeySeviyesi::yeni(ham.depth);
+            seviye.öğe_stili = ham.item_style.as_ref().map(resmi_sankey_öğe_stili);
+            seviye.çizgi_stili = ham
+                .line_style
+                .as_ref()
+                .map(|stil| resmi_sankey_çizgi_stili(SankeyÇizgiStili::yeni(), stil));
+            seviye.etiket = ham.label.as_ref().map(resmi_sankey_etiket_yaması);
+            seviye
+        })
+        .collect();
+
+    let mut seçenekler = GrafikSeçenekleri::yeni().animasyon(false);
+    if let Some(arkaplan) = belge.seçenek.background_color {
+        seçenekler = seçenekler.arkaplan(arkaplan.as_str());
+    }
+    if let Some(başlık) = belge.seçenek.title {
+        let mut çıktı = Başlık::yeni();
+        if let Some(metin) = başlık.text {
+            çıktı = çıktı.metin(metin);
+        }
+        if let Some(metin) = başlık.subtext {
+            çıktı = çıktı.alt_metin(metin);
+        }
+        if let Some(sol) = başlık.left {
+            if let Some(metin) = sol.as_str() {
+                çıktı = çıktı.sol(metin);
+            } else if let Some(sayı) = sol.as_f64() {
+                çıktı = çıktı.sol(sayı as f32);
+            }
+        }
+        seçenekler = seçenekler.başlık(çıktı);
+    }
+    if belge.seçenek.tooltip.is_some() {
+        seçenekler = seçenekler.ipucu(İpucu::yeni().tetikleme(Tetikleme::Öğe));
+    }
+    Ok(seçenekler.seri(seri))
+}
+
 fn parallel_simple() -> GrafikSeçenekleri {
     GrafikSeçenekleri::yeni()
         .animasyon(false)
@@ -16514,6 +16946,64 @@ struct GüneşPatlamasıSahneKanıtı {
     seriler: Vec<GüneşPatlamasıSahneSerisi>,
 }
 
+#[derive(Serialize)]
+struct SankeySahneDüğümü {
+    veri_sırası: usize,
+    ad: String,
+    değer: f64,
+    derinlik: usize,
+    x: f32,
+    y: f32,
+    genişlik: f32,
+    yükseklik: f32,
+    renk: [u8; 4],
+    kenarlık_rengi: Option<[u8; 4]>,
+    kenarlık_kalınlığı: f32,
+    etiket_göster: bool,
+    etiket_metni: String,
+    etiket_x: f32,
+    etiket_y: f32,
+    etiket_dönüşü: f32,
+    etiket_fontu: String,
+}
+
+#[derive(Serialize)]
+struct SankeySahneBağı {
+    veri_sırası: usize,
+    kaynak: String,
+    hedef: String,
+    değer: f64,
+    yön: &'static str,
+    x1: f32,
+    y1: f32,
+    x2: f32,
+    y2: f32,
+    cpx1: f32,
+    cpy1: f32,
+    cpx2: f32,
+    cpy2: f32,
+    kalınlık: f32,
+    renkler: Vec<[u8; 4]>,
+    etiket_göster: bool,
+    etiket_metni: String,
+}
+
+#[derive(Serialize)]
+struct SankeySahneSerisi {
+    seri_sırası: usize,
+    alan: AğaçHaritasıSahneAlanı,
+    düğümler: Vec<SankeySahneDüğümü>,
+    bağlar: Vec<SankeySahneBağı>,
+}
+
+#[derive(Serialize)]
+struct SankeySahneKanıtı {
+    şema_sürümü: u8,
+    tür: &'static str,
+    koordinat_adımı: f32,
+    seriler: Vec<SankeySahneSerisi>,
+}
+
 fn binde_yuvarla(değer: f32) -> f32 {
     (değer * 1_000.0).round() / 1_000.0
 }
@@ -16525,6 +17015,137 @@ fn renk_kanalları(renk: Renk) -> [u8; 4] {
         (renk.mavi * 255.0).round() as u8,
         (renk.alfa * 255.0).round() as u8,
     ]
+}
+
+fn dolgu_renkleri(dolgu: &Dolgu) -> Vec<[u8; 4]> {
+    match dolgu {
+        Dolgu::Düz(renk) => vec![renk_kanalları(*renk)],
+        Dolgu::DoğrusalGradyan { duraklar, .. } | Dolgu::RadyalGradyan { duraklar, .. } => {
+            duraklar
+                .iter()
+                .map(|durak| renk_kanalları(durak.renk))
+                .collect()
+        }
+        Dolgu::Desen(_) => vec![renk_kanalları(dolgu.temsilî())],
+    }
+}
+
+fn sankey_sahne_kanıtı(
+    seçenekler: &GrafikSeçenekleri,
+    genişlik: f32,
+    yükseklik: f32,
+) -> Result<SankeySahneKanıtı, String> {
+    let tuval = cizelge::koordinat::Dikdörtgen::yeni(0.0, 0.0, genişlik, yükseklik);
+    let seriler = seçenekler
+        .seriler
+        .iter()
+        .enumerate()
+        .filter_map(|(seri_sırası, seri)| match seri {
+            Seri::Sankey(seri) => Some((seri_sırası, seri)),
+            _ => None,
+        })
+        .map(|(seri_sırası, seri)| {
+            let yerleşim =
+                cizelge::grafik::sankey::sankey_yerleşimi(seri, tuval, &|palet_sırası| {
+                    seçenekler.palet_rengi(palet_sırası)
+                })
+                .map_err(|hata| hata.to_string())?;
+            let düğümler = yerleşim
+                .düğümler
+                .iter()
+                .map(|düğüm| {
+                    let opaklık = düğüm.öğe_stili.opaklık.unwrap_or(1.0);
+                    let kenarlık_rengi = düğüm
+                        .öğe_stili
+                        .kenarlık_rengi
+                        .map(|renk| renk_kanalları(renk.opaklık(opaklık)));
+                    SankeySahneDüğümü {
+                        veri_sırası: düğüm.veri_sırası,
+                        ad: düğüm.ad.clone(),
+                        değer: düğüm.değer,
+                        derinlik: düğüm.derinlik,
+                        x: binde_yuvarla(düğüm.alan.x),
+                        y: binde_yuvarla(düğüm.alan.y),
+                        genişlik: binde_yuvarla(düğüm.alan.genişlik),
+                        yükseklik: binde_yuvarla(düğüm.alan.yükseklik),
+                        renk: renk_kanalları(düğüm.renk.temsilî().opaklık(opaklık)),
+                        kenarlık_kalınlığı: if kenarlık_rengi.is_some() {
+                            binde_yuvarla(düğüm.öğe_stili.kenarlık_kalınlığı.unwrap_or(1.0))
+                        } else {
+                            0.0
+                        },
+                        kenarlık_rengi,
+                        etiket_göster: düğüm.etiket.göster,
+                        etiket_metni: düğüm.etiket_metni.clone(),
+                        etiket_x: binde_yuvarla(düğüm.etiket_konumu.0),
+                        etiket_y: binde_yuvarla(düğüm.etiket_konumu.1),
+                        etiket_dönüşü: binde_yuvarla(düğüm.etiket_dönüşü),
+                        etiket_fontu: format!(
+                            "normal {} {}px {}",
+                            if düğüm.etiket.yazı.kalın {
+                                "bold"
+                            } else {
+                                "normal"
+                            },
+                            düğüm.etiket.yazı.boyut.unwrap_or(cizelge::tema::YAZI_KÜÇÜK),
+                            düğüm.etiket.yazı.aile.as_deref().unwrap_or("sans-serif")
+                        ),
+                    }
+                })
+                .collect();
+            let bağlar = yerleşim
+                .bağlar
+                .iter()
+                .map(|bağ| SankeySahneBağı {
+                    veri_sırası: bağ.veri_sırası,
+                    kaynak: bağ.kaynak.clone(),
+                    hedef: bağ.hedef.clone(),
+                    değer: bağ.değer,
+                    yön: if bağ.yön == SankeyYönü::Dikey {
+                        "vertical"
+                    } else {
+                        "horizontal"
+                    },
+                    x1: binde_yuvarla(bağ.x1),
+                    y1: binde_yuvarla(bağ.y1),
+                    x2: binde_yuvarla(bağ.x2),
+                    y2: binde_yuvarla(bağ.y2),
+                    cpx1: binde_yuvarla(bağ.cpx1),
+                    cpy1: binde_yuvarla(bağ.cpy1),
+                    cpx2: binde_yuvarla(bağ.cpx2),
+                    cpy2: binde_yuvarla(bağ.cpy2),
+                    kalınlık: binde_yuvarla(bağ.kalınlık),
+                    renkler: dolgu_renkleri(&bağ.dolgu),
+                    etiket_göster: bağ.kenar_etiketi.göster,
+                    etiket_metni: if bağ.kenar_etiketi.göster {
+                        bağ.etiket_metni.clone()
+                    } else {
+                        String::new()
+                    },
+                })
+                .collect();
+            Ok(SankeySahneSerisi {
+                seri_sırası,
+                alan: AğaçHaritasıSahneAlanı {
+                    x: binde_yuvarla(yerleşim.alan.x),
+                    y: binde_yuvarla(yerleşim.alan.y),
+                    genişlik: binde_yuvarla(yerleşim.alan.genişlik),
+                    yükseklik: binde_yuvarla(yerleşim.alan.yükseklik),
+                },
+                düğümler,
+                bağlar,
+            })
+        })
+        .collect::<Result<Vec<_>, String>>()?;
+    if seriler.is_empty() {
+        return Err("sahne kanıtı için Sankey serisi bulunamadı".to_owned());
+    }
+    Ok(SankeySahneKanıtı {
+        şema_sürümü: 1,
+        tür: "sankey",
+        koordinat_adımı: 0.001,
+        seriler,
+    })
 }
 
 fn ağaç_haritası_sahne_kanıtı(
@@ -17286,6 +17907,125 @@ mod sunburst_fixture_testleri {
 }
 
 #[cfg(test)]
+#[allow(clippy::expect_used, clippy::panic)]
+mod sankey_fixture_testleri {
+    use super::*;
+
+    const DURUMLAR: [(&str, usize, usize); 7] = [
+        ("sankey-energy", 48, 68),
+        ("sankey-itemstyle", 99, 109),
+        ("sankey-levels", 26, 104),
+        ("sankey-nodeAlign-left", 48, 68),
+        ("sankey-nodeAlign-right", 48, 68),
+        ("sankey-simple", 6, 6),
+        ("sankey-vertical", 6, 6),
+    ];
+
+    #[test]
+    fn yedi_resmi_sankey_fixture_tum_dugum_bag_ve_seceneklerini_korur() {
+        let mut toplam_düğüm = 0;
+        let mut toplam_bağ = 0;
+        for (id, düğüm_sayısı, bağ_sayısı) in DURUMLAR {
+            let seçenekler = sankey_resmi(id).unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            let Seri::Sankey(seri) = &seçenekler.seriler[0] else {
+                panic!("{id}: Sankey serisi bekleniyordu");
+            };
+            assert_eq!(seri.düğümler.len(), düğüm_sayısı, "{id}");
+            assert_eq!(seri.bağlar.len(), bağ_sayısı, "{id}");
+            seçenekler
+                .doğrula()
+                .unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            toplam_düğüm += seri.düğümler.len();
+            toplam_bağ += seri.bağlar.len();
+        }
+        assert_eq!(toplam_düğüm, 281);
+        assert_eq!(toplam_bağ, 429);
+
+        let enerji = sankey_resmi("sankey-energy").expect("energy fixture");
+        let Seri::Sankey(enerji) = &enerji.seriler[0] else {
+            panic!("Sankey bekleniyordu");
+        };
+        assert_eq!(enerji.çizgi_stili.renk, Some(SankeyKenarBoyası::Gradyan));
+
+        let seviyeler = sankey_resmi("sankey-levels").expect("levels fixture");
+        let Seri::Sankey(seviyeler) = &seviyeler.seriler[0] else {
+            panic!("Sankey bekleniyordu");
+        };
+        assert_eq!(seviyeler.seviyeler.len(), 4);
+
+        let sol = sankey_resmi("sankey-nodeAlign-left").expect("left fixture");
+        let Seri::Sankey(sol) = &sol.seriler[0] else {
+            panic!("Sankey bekleniyordu");
+        };
+        assert_eq!(sol.düğüm_hizası, SankeyDüğümHizası::Sol);
+        let sağ = sankey_resmi("sankey-nodeAlign-right").expect("right fixture");
+        let Seri::Sankey(sağ) = &sağ.seriler[0] else {
+            panic!("Sankey bekleniyordu");
+        };
+        assert_eq!(sağ.düğüm_hizası, SankeyDüğümHizası::Sağ);
+
+        let dikey = sankey_resmi("sankey-vertical").expect("vertical fixture");
+        let Seri::Sankey(dikey) = &dikey.seriler[0] else {
+            panic!("Sankey bekleniyordu");
+        };
+        assert_eq!(dikey.yön, SankeyYönü::Dikey);
+        assert_eq!(dikey.etiket.konum, EtiketKonumu::Üst);
+    }
+
+    #[test]
+    fn yedi_resmi_sankey_sahnesi_tum_geometri_ve_etiket_tabanlarini_korur() {
+        let mut toplam_düğüm = 0;
+        let mut toplam_bağ = 0;
+        for (id, düğüm_sayısı, bağ_sayısı) in DURUMLAR {
+            let seçenekler = sankey_resmi(id).unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            let kanıt = sankey_sahne_kanıtı(&seçenekler, 700.0, 525.0)
+                .unwrap_or_else(|hata| panic!("{id}: {hata}"));
+            let düğümler = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.düğümler)
+                .collect::<Vec<_>>();
+            let bağlar = kanıt
+                .seriler
+                .iter()
+                .flat_map(|seri| &seri.bağlar)
+                .collect::<Vec<_>>();
+            assert_eq!(düğümler.len(), düğüm_sayısı, "{id}");
+            assert_eq!(bağlar.len(), bağ_sayısı, "{id}");
+            assert!(düğümler.iter().all(|düğüm| {
+                düğüm.x.is_finite()
+                    && düğüm.y.is_finite()
+                    && düğüm.genişlik.is_finite()
+                    && düğüm.yükseklik.is_finite()
+                    && düğüm.etiket_x.is_finite()
+                    && düğüm.etiket_y.is_finite()
+                    && düğüm.etiket_dönüşü.is_finite()
+                    && !düğüm.etiket_fontu.is_empty()
+            }));
+            assert!(bağlar.iter().all(|bağ| {
+                [
+                    bağ.x1,
+                    bağ.y1,
+                    bağ.x2,
+                    bağ.y2,
+                    bağ.cpx1,
+                    bağ.cpy1,
+                    bağ.cpx2,
+                    bağ.cpy2,
+                    bağ.kalınlık,
+                ]
+                .into_iter()
+                .all(f32::is_finite)
+            }));
+            toplam_düğüm += düğümler.len();
+            toplam_bağ += bağlar.len();
+        }
+        assert_eq!(toplam_düğüm, 281);
+        assert_eq!(toplam_bağ, 429);
+    }
+}
+
+#[cfg(test)]
 mod parallel_fixture_testleri {
     use super::*;
 
@@ -17527,6 +18267,13 @@ fn seçenekler(
         "sunburst-visualMap" => sunburst_visual_map(),
         "sunburst-drink" => sunburst_drink(),
         "sunburst-book" => sunburst_book(),
+        "sankey-energy"
+        | "sankey-itemstyle"
+        | "sankey-levels"
+        | "sankey-nodeAlign-left"
+        | "sankey-nodeAlign-right"
+        | "sankey-simple"
+        | "sankey-vertical" => sankey_resmi(id),
         "parallel-simple" => Ok(parallel_simple()),
         "parallel-aqi" => parallel_aqi(),
         "parallel-nutrients" => parallel_nutrients(),
@@ -17710,6 +18457,9 @@ fn çalıştır() -> Result<(), String> {
         } else if girdi.id.starts_with("sunburst-") {
             let özet =
                 güneş_patlaması_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
+            serde_json::to_vec_pretty(&özet)
+        } else if girdi.id.starts_with("sankey-") {
+            let özet = sankey_sahne_kanıtı(&seçenekler, girdi.genişlik, girdi.yükseklik)?;
             serde_json::to_vec_pretty(&özet)
         } else {
             let özet = paralel_sahne_özeti(&seçenekler, girdi.genişlik, girdi.yükseklik)?;

@@ -1,0 +1,5725 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sankey",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 50,
+        "y": 20,
+        "genişlik": 500,
+        "yükseklik": 480
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "ad": "Werne",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 166.646,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            241,
+            139,
+            191,
+            255
+          ],
+          "kenarlık_rengi": [
+            241,
+            139,
+            191,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Werne",
+          "etiket_x": 555.5,
+          "etiket_y": 166.372,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "Duesseldorf",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 174.098,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            0,
+            120,
+            215,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            120,
+            215,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Duesseldorf",
+          "etiket_x": 555.5,
+          "etiket_y": 173.825,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "Cambridge",
+          "değer": 500.36999743431807,
+          "derinlik": 2,
+          "x": 530,
+          "y": 327.104,
+          "genişlik": 20,
+          "yükseklik": -1.531,
+          "renk": [
+            56,
+            145,
+            167,
+            255
+          ],
+          "kenarlık_rengi": [
+            56,
+            145,
+            167,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Cambridge",
+          "etiket_x": 555.5,
+          "etiket_y": 326.338,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "Colma",
+          "değer": 0.2199999988079071,
+          "derinlik": 2,
+          "x": 530,
+          "y": 458.868,
+          "genişlik": 20,
+          "yükseklik": -0.001,
+          "renk": [
+            0,
+            55,
+            218,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            55,
+            218,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Colma",
+          "etiket_x": 555.5,
+          "etiket_y": 458.868,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "W. York",
+          "değer": 612.1199932694435,
+          "derinlik": 2,
+          "x": 530,
+          "y": 333.573,
+          "genişlik": 20,
+          "yükseklik": -1.873,
+          "renk": [
+            192,
+            190,
+            175,
+            255
+          ],
+          "kenarlık_rengi": [
+            192,
+            190,
+            175,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "W. York",
+          "etiket_x": 555.5,
+          "etiket_y": 332.636,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "Frankfurt am Main",
+          "değer": 536.7599945068359,
+          "derinlik": 2,
+          "x": 530,
+          "y": 195.909,
+          "genişlik": 20,
+          "yükseklik": -1.642,
+          "renk": [
+            234,
+            0,
+            94,
+            255
+          ],
+          "kenarlık_rengi": [
+            234,
+            0,
+            94,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Frankfurt am Main",
+          "etiket_x": 555.5,
+          "etiket_y": 195.087,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "Metz",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 20,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            209,
+            52,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            209,
+            52,
+            56,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Metz",
+          "etiket_x": 555.5,
+          "etiket_y": 19.726,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "Orleans",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 49.81,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            86,
+            124,
+            115,
+            255
+          ],
+          "kenarlık_rengi": [
+            86,
+            124,
+            115,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Orleans",
+          "etiket_x": 555.5,
+          "etiket_y": 49.263,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "Saint-Denis",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 27.453,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            158,
+            213,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            158,
+            213,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Saint-Denis",
+          "etiket_x": 555.5,
+          "etiket_y": 27.179,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "Hof",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 181.551,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            43,
+            204,
+            127,
+            255
+          ],
+          "kenarlık_rengi": [
+            43,
+            204,
+            127,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Hof",
+          "etiket_x": 555.5,
+          "etiket_y": 181.004,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "Cliffside",
+          "değer": 2906.2699892893434,
+          "derinlik": 2,
+          "x": 530,
+          "y": 506.345,
+          "genişlik": 20,
+          "yükseklik": -8.892,
+          "renk": [
+            128,
+            155,
+            72,
+            255
+          ],
+          "kenarlık_rengi": [
+            128,
+            155,
+            72,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Cliffside",
+          "etiket_x": 555.5,
+          "etiket_y": 501.898,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "Leeds",
+          "değer": 1356.6899970173836,
+          "derinlik": 2,
+          "x": 530,
+          "y": 438.844,
+          "genişlik": 20,
+          "yükseklik": -4.151,
+          "renk": [
+            155,
+            45,
+            31,
+            255
+          ],
+          "kenarlık_rengi": [
+            155,
+            45,
+            31,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Leeds",
+          "etiket_x": 555.5,
+          "etiket_y": 436.769,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "Victoria",
+          "değer": 827.3899968340993,
+          "derinlik": 2,
+          "x": 530,
+          "y": 489.756,
+          "genişlik": 20,
+          "yükseklik": -2.532,
+          "renk": [
+            96,
+            72,
+            120,
+            255
+          ],
+          "kenarlık_rengi": [
+            96,
+            72,
+            120,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Victoria",
+          "etiket_x": 555.5,
+          "etiket_y": 488.491,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 13,
+          "ad": "Erlangen",
+          "değer": 536.7599945068359,
+          "derinlik": 2,
+          "x": 530,
+          "y": 253.339,
+          "genişlik": 20,
+          "yükseklik": -1.642,
+          "renk": [
+            165,
+            100,
+            78,
+            255
+          ],
+          "kenarlık_rengi": [
+            165,
+            100,
+            78,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Erlangen",
+          "etiket_x": 555.5,
+          "etiket_y": 252.518,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 14,
+          "ad": "Saint Germain en Laye",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 34.905,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            45,
+            63,
+            58,
+            255
+          ],
+          "kenarlık_rengi": [
+            45,
+            63,
+            58,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Saint Germain en Laye",
+          "etiket_x": 555.5,
+          "etiket_y": 34.631,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 15,
+          "ad": "Roissy en Brie",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 42.358,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            118,
+            23,
+            33,
+            255
+          ],
+          "kenarlık_rengi": [
+            118,
+            23,
+            33,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Roissy en Brie",
+          "etiket_x": 555.5,
+          "etiket_y": 42.084,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "Wokingham",
+          "değer": 812.6600027084351,
+          "derinlik": 2,
+          "x": 530,
+          "y": 373.975,
+          "genişlik": 20,
+          "yükseklik": -2.487,
+          "renk": [
+            177,
+            186,
+            221,
+            255
+          ],
+          "kenarlık_rengi": [
+            177,
+            186,
+            221,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Wokingham",
+          "etiket_x": 555.5,
+          "etiket_y": 372.732,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 17,
+          "ad": "Runcorn",
+          "değer": 1120.4800013303757,
+          "derinlik": 2,
+          "x": 530,
+          "y": 402.829,
+          "genişlik": 20,
+          "yükseklik": -3.428,
+          "renk": [
+            176,
+            204,
+            176,
+            255
+          ],
+          "kenarlık_rengi": [
+            176,
+            204,
+            176,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Runcorn",
+          "etiket_x": 555.5,
+          "etiket_y": 401.115,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 18,
+          "ad": "Newton",
+          "değer": 1781.909985654056,
+          "derinlik": 2,
+          "x": 530,
+          "y": 505.452,
+          "genişlik": 20,
+          "yükseklik": -5.452,
+          "renk": [
+            129,
+            100,
+            163,
+            255
+          ],
+          "kenarlık_rengi": [
+            129,
+            100,
+            163,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Newton",
+          "etiket_x": 555.5,
+          "etiket_y": 502.726,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 19,
+          "ad": "Morangis",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 56.715,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            142,
+            86,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            142,
+            86,
+            46,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Morangis",
+          "etiket_x": 555.5,
+          "etiket_y": 56.168,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 20,
+          "ad": "Metchosin",
+          "değer": 1750.7899813987315,
+          "derinlik": 2,
+          "x": 530,
+          "y": 503.701,
+          "genişlik": 20,
+          "yükseklik": -5.357,
+          "renk": [
+            193,
+            80,
+            77,
+            255
+          ],
+          "kenarlık_rengi": [
+            193,
+            80,
+            77,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Metchosin",
+          "etiket_x": 555.5,
+          "etiket_y": 501.023,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 21,
+          "ad": "Kirkby",
+          "değer": 753.4000000059605,
+          "derinlik": 2,
+          "x": 530,
+          "y": 379.488,
+          "genişlik": 20,
+          "yükseklik": -2.305,
+          "renk": [
+            204,
+            175,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            204,
+            175,
+            10,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Kirkby",
+          "etiket_x": 555.5,
+          "etiket_y": 378.336,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 22,
+          "ad": "London",
+          "değer": 8619.309983983636,
+          "derinlik": 2,
+          "x": 530,
+          "y": 521.255,
+          "genişlik": 20,
+          "yükseklik": -26.373,
+          "renk": [
+            149,
+            98,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            149,
+            98,
+            81,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "London",
+          "etiket_x": 555.5,
+          "etiket_y": 508.069,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 23,
+          "ad": "Offenbach",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 202.266,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            193,
+            117,
+            41,
+            255
+          ],
+          "kenarlık_rengi": [
+            193,
+            117,
+            41,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Offenbach",
+          "etiket_x": 555.5,
+          "etiket_y": 201.719,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 24,
+          "ad": "Warrington",
+          "değer": 2162.8300000429153,
+          "derinlik": 2,
+          "x": 530,
+          "y": 459.194,
+          "genişlik": 20,
+          "yükseklik": -6.618,
+          "renk": [
+            206,
+            197,
+            151,
+            255
+          ],
+          "kenarlık_rengi": [
+            206,
+            197,
+            151,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Warrington",
+          "etiket_x": 555.5,
+          "etiket_y": 455.886,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 25,
+          "ad": "Vancouver",
+          "değer": 1528.580000281334,
+          "derinlik": 2,
+          "x": 530,
+          "y": 510.239,
+          "genişlik": 20,
+          "yükseklik": -4.677,
+          "renk": [
+            159,
+            41,
+            54,
+            255
+          ],
+          "kenarlık_rengi": [
+            159,
+            41,
+            54,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Vancouver",
+          "etiket_x": 555.5,
+          "etiket_y": 507.9,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 26,
+          "ad": "SuperiorCard",
+          "değer": 17942.459927342832,
+          "derinlik": 0,
+          "x": 50,
+          "y": 458.105,
+          "genişlik": 20,
+          "yükseklik": -54.899,
+          "renk": [
+            128,
+            155,
+            72,
+            255
+          ],
+          "kenarlık_rengi": [
+            128,
+            155,
+            72,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "SuperiorCard",
+          "etiket_x": 75.5,
+          "etiket_y": 430.656,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 27,
+          "ad": "Lille",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 71.073,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            172,
+            116,
+            48,
+            255
+          ],
+          "kenarlık_rengi": [
+            172,
+            116,
+            48,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Lille",
+          "etiket_x": 555.5,
+          "etiket_y": 70.526,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 28,
+          "ad": "Hamburg",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 209.171,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            0,
+            188,
+            242,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            188,
+            242,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Hamburg",
+          "etiket_x": 555.5,
+          "etiket_y": 208.624,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 29,
+          "ad": "Langley",
+          "değer": 1274.8199949413538,
+          "derinlik": 2,
+          "x": 530,
+          "y": 517.156,
+          "genişlik": 20,
+          "yükseklik": -3.901,
+          "renk": [
+            205,
+            123,
+            56,
+            255
+          ],
+          "kenarlık_rengi": [
+            205,
+            123,
+            56,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Langley",
+          "etiket_x": 555.5,
+          "etiket_y": 515.205,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 30,
+          "ad": "Les Ulis",
+          "değer": 715.6799926757812,
+          "derinlik": 2,
+          "x": 530,
+          "y": 136.502,
+          "genişlik": 20,
+          "yükseklik": -2.19,
+          "renk": [
+            66,
+            66,
+            66,
+            255
+          ],
+          "kenarlık_rengi": [
+            66,
+            66,
+            66,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Les Ulis",
+          "etiket_x": 555.5,
+          "etiket_y": 135.407,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "Saarbrücken",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 188.456,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            246,
+            49,
+            133,
+            255
+          ],
+          "kenarlık_rengi": [
+            246,
+            49,
+            133,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Saarbrücken",
+          "etiket_x": 555.5,
+          "etiket_y": 188.182,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 32,
+          "ad": "N. Vancouver",
+          "değer": 1862.4599857926369,
+          "derinlik": 2,
+          "x": 530,
+          "y": 503.795,
+          "genişlik": 20,
+          "yükseklik": -5.699,
+          "renk": [
+            156,
+            188,
+            89,
+            255
+          ],
+          "kenarlık_rengi": [
+            156,
+            188,
+            89,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "N. Vancouver",
+          "etiket_x": 555.5,
+          "etiket_y": 500.946,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 33,
+          "ad": "Chalk Riber",
+          "değer": 0.9200000166893005,
+          "derinlik": 2,
+          "x": 530,
+          "y": 466.868,
+          "genişlik": 20,
+          "yükseklik": -0.003,
+          "renk": [
+            79,
+            75,
+            217,
+            255
+          ],
+          "kenarlık_rengi": [
+            79,
+            75,
+            217,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Chalk Riber",
+          "etiket_x": 555.5,
+          "etiket_y": 466.866,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 34,
+          "ad": "Esher-Molesey",
+          "değer": 911.4700058028102,
+          "derinlik": 2,
+          "x": 530,
+          "y": 397.618,
+          "genişlik": 20,
+          "yükseklik": -2.789,
+          "renk": [
+            62,
+            197,
+            98,
+            255
+          ],
+          "kenarlık_rengi": [
+            62,
+            197,
+            98,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Esher-Molesey",
+          "etiket_x": 555.5,
+          "etiket_y": 396.223,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 35,
+          "ad": "Chatou",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 63.62,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            240,
+            111,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            240,
+            111,
+            46,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Chatou",
+          "etiket_x": 555.5,
+          "etiket_y": 63.347,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 36,
+          "ad": "Hannover",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 216.077,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            195,
+            152,
+            109,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            152,
+            109,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Hannover",
+          "etiket_x": 555.5,
+          "etiket_y": 215.803,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 37,
+          "ad": "Roncq",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 77.978,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            77,
+            41,
+            28,
+            255
+          ],
+          "kenarlık_rengi": [
+            77,
+            41,
+            28,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Roncq",
+          "etiket_x": 555.5,
+          "etiket_y": 77.704,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 38,
+          "ad": "Ingolstadt",
+          "değer": 536.7599945068359,
+          "derinlik": 2,
+          "x": 530,
+          "y": 274.602,
+          "genişlik": 20,
+          "yükseklik": -1.642,
+          "renk": [
+            0,
+            156,
+            122,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            156,
+            122,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Ingolstadt",
+          "etiket_x": 555.5,
+          "etiket_y": 273.781,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 39,
+          "ad": "Drancy",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 85.431,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            152,
+            111,
+            11,
+            255
+          ],
+          "kenarlık_rengi": [
+            152,
+            111,
+            11,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Drancy",
+          "etiket_x": 555.5,
+          "etiket_y": 85.157,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 40,
+          "ad": "Langford",
+          "değer": 2343.4599857851863,
+          "derinlik": 2,
+          "x": 530,
+          "y": 513.562,
+          "genişlik": 20,
+          "yükseklik": -7.17,
+          "renk": [
+            60,
+            142,
+            164,
+            255
+          ],
+          "kenarlık_rengi": [
+            60,
+            142,
+            164,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Langford",
+          "etiket_x": 555.5,
+          "etiket_y": 509.976,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 41,
+          "ad": "Lebanon",
+          "değer": 0.8700000047683716,
+          "derinlik": 2,
+          "x": 530,
+          "y": 474.865,
+          "genişlik": 20,
+          "yükseklik": -0.003,
+          "renk": [
+            79,
+            130,
+            190,
+            255
+          ],
+          "kenarlık_rengi": [
+            79,
+            130,
+            190,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Lebanon",
+          "etiket_x": 555.5,
+          "etiket_y": 474.863,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 42,
+          "ad": "Maidenhead",
+          "değer": 549.8400026857853,
+          "derinlik": 2,
+          "x": 530,
+          "y": 339.7,
+          "genişlik": 20,
+          "yükseklik": -1.682,
+          "renk": [
+            211,
+            128,
+            23,
+            255
+          ],
+          "kenarlık_rengi": [
+            211,
+            128,
+            23,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Maidenhead",
+          "etiket_x": 555.5,
+          "etiket_y": 338.859,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 43,
+          "ad": "Stoke-on-Trent",
+          "değer": 1131.7099939212203,
+          "derinlik": 2,
+          "x": 530,
+          "y": 434.307,
+          "genişlik": 20,
+          "yükseklik": -3.463,
+          "renk": [
+            168,
+            205,
+            215,
+            255
+          ],
+          "kenarlık_rengi": [
+            168,
+            205,
+            215,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Stoke-on-Trent",
+          "etiket_x": 555.5,
+          "etiket_y": 432.576,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 44,
+          "ad": "Peterborough",
+          "değer": 999.159998036921,
+          "derinlik": 2,
+          "x": 530,
+          "y": 407.401,
+          "genişlik": 20,
+          "yükseklik": -3.057,
+          "renk": [
+            122,
+            7,
+            45,
+            255
+          ],
+          "kenarlık_rengi": [
+            122,
+            7,
+            45,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Peterborough",
+          "etiket_x": 555.5,
+          "etiket_y": 405.872,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 45,
+          "ad": "Suresnes",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 92.883,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            133,
+            149,
+            153,
+            255
+          ],
+          "kenarlık_rengi": [
+            133,
+            149,
+            153,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Suresnes",
+          "etiket_x": 555.5,
+          "etiket_y": 92.336,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 46,
+          "ad": "Versailles",
+          "değer": 894.5999908447266,
+          "derinlik": 2,
+          "x": 530,
+          "y": 156.67,
+          "genişlik": 20,
+          "yükseklik": -2.737,
+          "renk": [
+            132,
+            170,
+            51,
+            255
+          ],
+          "kenarlık_rengi": [
+            132,
+            170,
+            51,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Versailles",
+          "etiket_x": 555.5,
+          "etiket_y": 155.301,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 47,
+          "ad": "Neunkirchen",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 223.529,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            255,
+            139,
+            103,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            139,
+            103,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Neunkirchen",
+          "etiket_x": 555.5,
+          "etiket_y": 223.255,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 48,
+          "ad": "Vista",
+          "değer": 18624.78990776837,
+          "derinlik": 0,
+          "x": 50,
+          "y": 437.4,
+          "genişlik": 20,
+          "yükseklik": -56.987,
+          "renk": [
+            106,
+            82,
+            134,
+            255
+          ],
+          "kenarlık_rengi": [
+            106,
+            82,
+            134,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Vista",
+          "etiket_x": 75.5,
+          "etiket_y": 408.907,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 49,
+          "ad": "Westminster",
+          "değer": 1149.7999994903803,
+          "derinlik": 2,
+          "x": 530,
+          "y": 495.225,
+          "genişlik": 20,
+          "yükseklik": -3.518,
+          "renk": [
+            27,
+            88,
+            124,
+            255
+          ],
+          "kenarlık_rengi": [
+            27,
+            88,
+            124,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Westminster",
+          "etiket_x": 555.5,
+          "etiket_y": 493.466,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 50,
+          "ad": "Kiel",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 230.982,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            161,
+            149,
+            116,
+            255
+          ],
+          "kenarlık_rengi": [
+            161,
+            149,
+            116,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Kiel",
+          "etiket_x": 555.5,
+          "etiket_y": 230.708,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 51,
+          "ad": "Newcastle upon Tyne",
+          "değer": 1448.2899911925197,
+          "derinlik": 2,
+          "x": 530,
+          "y": 446.635,
+          "genişlik": 20,
+          "yükseklik": -4.431,
+          "renk": [
+            145,
+            132,
+            133,
+            255
+          ],
+          "kenarlık_rengi": [
+            145,
+            132,
+            133,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Newcastle upon Tyne",
+          "etiket_x": 555.5,
+          "etiket_y": 444.419,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 52,
+          "ad": "Oxon",
+          "değer": 493.6499986946583,
+          "derinlik": 2,
+          "x": 530,
+          "y": 346.018,
+          "genişlik": 20,
+          "yükseklik": -1.51,
+          "renk": [
+            255,
+            169,
+            140,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            169,
+            140,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Oxon",
+          "etiket_x": 555.5,
+          "etiket_y": 345.262,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 53,
+          "ad": "West Sussex",
+          "değer": 592.1700052022934,
+          "derinlik": 2,
+          "x": 530,
+          "y": 385.183,
+          "genişlik": 20,
+          "yükseklik": -1.812,
+          "renk": [
+            176,
+            227,
+            192,
+            255
+          ],
+          "kenarlık_rengi": [
+            176,
+            227,
+            192,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "West Sussex",
+          "etiket_x": 555.5,
+          "etiket_y": 384.277,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 54,
+          "ad": "Oak Bay",
+          "değer": 1565.109990529716,
+          "derinlik": 2,
+          "x": 530,
+          "y": 506.097,
+          "genişlik": 20,
+          "yükseklik": -4.789,
+          "renk": [
+            75,
+            173,
+            199,
+            255
+          ],
+          "kenarlık_rengi": [
+            75,
+            173,
+            199,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Oak Bay",
+          "etiket_x": 555.5,
+          "etiket_y": 503.702,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 55,
+          "ad": "Milton Keynes",
+          "değer": 1648.2200061008334,
+          "derinlik": 2,
+          "x": 530,
+          "y": 453.841,
+          "genişlik": 20,
+          "yükseklik": -5.043,
+          "renk": [
+            186,
+            20,
+            76,
+            255
+          ],
+          "kenarlık_rengi": [
+            186,
+            20,
+            76,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Milton Keynes",
+          "etiket_x": 555.5,
+          "etiket_y": 451.319,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 56,
+          "ad": "Eilenburg",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 238.434,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            240,
+            162,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            240,
+            162,
+            46,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Eilenburg",
+          "etiket_x": 555.5,
+          "etiket_y": 238.16,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 57,
+          "ad": "ColonialVoice",
+          "değer": 19347.629926368594,
+          "derinlik": 0,
+          "x": 50,
+          "y": 449.539,
+          "genişlik": 20,
+          "yükseklik": -59.198,
+          "renk": [
+            64,
+            105,
+            157,
+            255
+          ],
+          "kenarlık_rengi": [
+            64,
+            105,
+            157,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "ColonialVoice",
+          "etiket_x": 75.5,
+          "etiket_y": 419.94,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 58,
+          "ad": "Liverpool",
+          "değer": 857.1999968588352,
+          "derinlik": 2,
+          "x": 530,
+          "y": 412.344,
+          "genişlik": 20,
+          "yükseklik": -2.623,
+          "renk": [
+            162,
+            142,
+            106,
+            255
+          ],
+          "kenarlık_rengi": [
+            162,
+            142,
+            106,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Liverpool",
+          "etiket_x": 555.5,
+          "etiket_y": 411.032,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 59,
+          "ad": "Calgary",
+          "değer": 361.3899962902069,
+          "derinlik": 2,
+          "x": 530,
+          "y": 482.862,
+          "genişlik": 20,
+          "yükseklik": -1.106,
+          "renk": [
+            159,
+            65,
+            62,
+            255
+          ],
+          "kenarlık_rengi": [
+            159,
+            65,
+            62,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Calgary",
+          "etiket_x": 555.5,
+          "etiket_y": 482.309,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 60,
+          "ad": "CAD",
+          "değer": 27615.459851033986,
+          "derinlik": 1,
+          "x": 290,
+          "y": 477.041,
+          "genişlik": 20,
+          "yükseklik": -84.496,
+          "renk": [
+            64,
+            105,
+            157,
+            255
+          ],
+          "kenarlık_rengi": [
+            64,
+            105,
+            157,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "CAD",
+          "etiket_x": 315.5,
+          "etiket_y": 434.793,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 61,
+          "ad": "Paris La Defense",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 99.788,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            152,
+            147,
+            145,
+            255
+          ],
+          "kenarlık_rengi": [
+            152,
+            147,
+            145,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Paris La Defense",
+          "etiket_x": 555.5,
+          "etiket_y": 99.515,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 62,
+          "ad": "Villeneuve-d'Ascq",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 107.241,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            136,
+            108,
+            228,
+            255
+          ],
+          "kenarlık_rengi": [
+            136,
+            108,
+            228,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Villeneuve-d'Ascq",
+          "etiket_x": 555.5,
+          "etiket_y": 106.967,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 63,
+          "ad": "Gloucestershire",
+          "değer": 422.28999888151884,
+          "derinlik": 2,
+          "x": 530,
+          "y": 359.844,
+          "genişlik": 20,
+          "yükseklik": -1.292,
+          "renk": [
+            150,
+            67,
+            5,
+            255
+          ],
+          "kenarlık_rengi": [
+            150,
+            67,
+            5,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Gloucestershire",
+          "etiket_x": 555.5,
+          "etiket_y": 359.198,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 64,
+          "ad": "Gateshead",
+          "değer": 1425.7099913656712,
+          "derinlik": 2,
+          "x": 530,
+          "y": 450.203,
+          "genişlik": 20,
+          "yükseklik": -4.362,
+          "renk": [
+            72,
+            95,
+            181,
+            255
+          ],
+          "kenarlık_rengi": [
+            72,
+            95,
+            181,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Gateshead",
+          "etiket_x": 555.5,
+          "etiket_y": 448.022,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 65,
+          "ad": "Salzgitter",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 245.887,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            135,
+            160,
+            199,
+            255
+          ],
+          "kenarlık_rengi": [
+            135,
+            160,
+            199,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Salzgitter",
+          "etiket_x": 555.5,
+          "etiket_y": 245.613,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 66,
+          "ad": "Woolston",
+          "değer": 833.3199937939644,
+          "derinlik": 2,
+          "x": 530,
+          "y": 423.623,
+          "genişlik": 20,
+          "yükseklik": -2.55,
+          "renk": [
+            255,
+            226,
+            197,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            226,
+            197,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Woolston",
+          "etiket_x": 555.5,
+          "etiket_y": 422.348,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 67,
+          "ad": "Frankfurt",
+          "değer": 715.6799926757812,
+          "derinlik": 2,
+          "x": 530,
+          "y": 294.77,
+          "genişlik": 20,
+          "yükseklik": -2.19,
+          "renk": [
+            64,
+            105,
+            157,
+            255
+          ],
+          "kenarlık_rengi": [
+            64,
+            105,
+            157,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Frankfurt",
+          "etiket_x": 555.5,
+          "etiket_y": 293.675,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 68,
+          "ad": "Münster",
+          "değer": 715.6799926757812,
+          "derinlik": 2,
+          "x": 530,
+          "y": 306.938,
+          "genişlik": 20,
+          "yükseklik": -2.19,
+          "renk": [
+            126,
+            126,
+            178,
+            255
+          ],
+          "kenarlık_rengi": [
+            126,
+            126,
+            178,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Münster",
+          "etiket_x": 555.5,
+          "etiket_y": 305.843,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 69,
+          "ad": "York",
+          "değer": 3172.9999914616346,
+          "derinlik": 2,
+          "x": 530,
+          "y": 460.577,
+          "genişlik": 20,
+          "yükseklik": -9.708,
+          "renk": [
+            88,
+            124,
+            125,
+            255
+          ],
+          "kenarlık_rengi": [
+            88,
+            124,
+            125,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "York",
+          "etiket_x": 555.5,
+          "etiket_y": 455.722,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 70,
+          "ad": "High Wycombe",
+          "değer": 216.83999809622765,
+          "derinlik": 2,
+          "x": 530,
+          "y": 352.507,
+          "genişlik": 20,
+          "yükseklik": -0.663,
+          "renk": [
+            240,
+            127,
+            9,
+            255
+          ],
+          "kenarlık_rengi": [
+            240,
+            127,
+            9,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "High Wycombe",
+          "etiket_x": 555.5,
+          "etiket_y": 352.176,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 71,
+          "ad": "Stuttgart",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 280.96,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            227,
+            0,
+            140,
+            255
+          ],
+          "kenarlık_rengi": [
+            227,
+            0,
+            140,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Stuttgart",
+          "etiket_x": 555.5,
+          "etiket_y": 280.412,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 72,
+          "ad": "Sooke",
+          "değer": 1764.499989286065,
+          "derinlik": 2,
+          "x": 530,
+          "y": 501.194,
+          "genişlik": 20,
+          "yükseklik": -5.399,
+          "renk": [
+            78,
+            133,
+            66,
+            255
+          ],
+          "kenarlık_rengi": [
+            78,
+            133,
+            66,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Sooke",
+          "etiket_x": 555.5,
+          "etiket_y": 498.495,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 73,
+          "ad": "Essen",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 259.697,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            181,
+            139,
+            128,
+            255
+          ],
+          "kenarlık_rengi": [
+            181,
+            139,
+            128,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Essen",
+          "etiket_x": 555.5,
+          "etiket_y": 259.423,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 74,
+          "ad": "München",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 267.15,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            77,
+            192,
+            166,
+            255
+          ],
+          "kenarlık_rengi": [
+            77,
+            192,
+            166,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "München",
+          "etiket_x": 555.5,
+          "etiket_y": 266.876,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 75,
+          "ad": "Haney",
+          "değer": 2310.4499812424183,
+          "derinlik": 2,
+          "x": 530,
+          "y": 509.308,
+          "genişlik": 20,
+          "yükseklik": -7.069,
+          "renk": [
+            106,
+            82,
+            134,
+            255
+          ],
+          "kenarlık_rengi": [
+            106,
+            82,
+            134,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Haney",
+          "etiket_x": 555.5,
+          "etiket_y": 505.773,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 76,
+          "ad": "Port Hammond",
+          "değer": 1711.1399984136224,
+          "derinlik": 2,
+          "x": 530,
+          "y": 514.391,
+          "genişlik": 20,
+          "yükseklik": -5.236,
+          "renk": [
+            248,
+            151,
+            70,
+            255
+          ],
+          "kenarlık_rengi": [
+            248,
+            151,
+            70,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Port Hammond",
+          "etiket_x": 555.5,
+          "etiket_y": 511.773,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 77,
+          "ad": "Saint Ouen",
+          "değer": 179.50999814271927,
+          "derinlik": 2,
+          "x": 530,
+          "y": 114.693,
+          "genişlik": 20,
+          "yükseklik": -0.549,
+          "renk": [
+            116,
+            77,
+            169,
+            255
+          ],
+          "kenarlık_rengi": [
+            116,
+            77,
+            169,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Saint Ouen",
+          "etiket_x": 555.5,
+          "etiket_y": 114.419,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 78,
+          "ad": "Watford",
+          "değer": 1326.5300009772182,
+          "derinlik": 2,
+          "x": 530,
+          "y": 442.693,
+          "genişlik": 20,
+          "yükseklik": -4.059,
+          "renk": [
+            232,
+            183,
+            183,
+            255
+          ],
+          "kenarlık_rengi": [
+            232,
+            183,
+            183,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Watford",
+          "etiket_x": 555.5,
+          "etiket_y": 440.664,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 79,
+          "ad": "GBP",
+          "değer": 36151.6699392423,
+          "derinlik": 1,
+          "x": 290,
+          "y": 475.749,
+          "genişlik": 20,
+          "yükseklik": -110.614,
+          "renk": [
+            195,
+            45,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            195,
+            45,
+            46,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "GBP",
+          "etiket_x": 315.5,
+          "etiket_y": 420.442,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 80,
+          "ad": "Paderborn",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 287.865,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            240,
+            196,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            240,
+            196,
+            46,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Paderborn",
+          "etiket_x": 555.5,
+          "etiket_y": 287.317,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 81,
+          "ad": "Dunkerque",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 122.144,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            136,
+            23,
+            152,
+            255
+          ],
+          "kenarlık_rengi": [
+            136,
+            23,
+            152,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Dunkerque",
+          "etiket_x": 555.5,
+          "etiket_y": 121.597,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 82,
+          "ad": "Colomiers",
+          "değer": 357.8399963378906,
+          "derinlik": 2,
+          "x": 530,
+          "y": 142.312,
+          "genişlik": 20,
+          "yükseklik": -1.095,
+          "renk": [
+            239,
+            168,
+            53,
+            255
+          ],
+          "kenarlık_rengi": [
+            239,
+            168,
+            53,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Colomiers",
+          "etiket_x": 555.5,
+          "etiket_y": 141.765,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 83,
+          "ad": "Oxford",
+          "değer": 1831.3799968883395,
+          "derinlik": 2,
+          "x": 530,
+          "y": 456.798,
+          "genişlik": 20,
+          "yükseklik": -5.604,
+          "renk": [
+            216,
+            178,
+            92,
+            255
+          ],
+          "kenarlık_rengi": [
+            216,
+            178,
+            92,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Oxford",
+          "etiket_x": 555.5,
+          "etiket_y": 453.996,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 84,
+          "ad": "Bury",
+          "değer": 903.9400005489588,
+          "derinlik": 2,
+          "x": 530,
+          "y": 429.073,
+          "genişlik": 20,
+          "yükseklik": -2.766,
+          "renk": [
+            254,
+            184,
+            10,
+            255
+          ],
+          "kenarlık_rengi": [
+            254,
+            184,
+            10,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Bury",
+          "etiket_x": 555.5,
+          "etiket_y": 427.69,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 85,
+          "ad": "Royal Oak",
+          "değer": 2128.459992274642,
+          "derinlik": 2,
+          "x": 530,
+          "y": 499.707,
+          "genişlik": 20,
+          "yükseklik": -6.512,
+          "renk": [
+            0,
+            157,
+            217,
+            255
+          ],
+          "kenarlık_rengi": [
+            0,
+            157,
+            217,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Royal Oak",
+          "etiket_x": 555.5,
+          "etiket_y": 496.45,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 86,
+          "ad": "Shawnee",
+          "değer": 2346.919983509928,
+          "derinlik": 2,
+          "x": 530,
+          "y": 502.882,
+          "genişlik": 20,
+          "yükseklik": -7.181,
+          "renk": [
+            240,
+            127,
+            9,
+            255
+          ],
+          "kenarlık_rengi": [
+            240,
+            127,
+            9,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Shawnee",
+          "etiket_x": 555.5,
+          "etiket_y": 499.292,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 87,
+          "ad": "Lancaster",
+          "değer": 685.6899967193604,
+          "derinlik": 2,
+          "x": 530,
+          "y": 417.721,
+          "genişlik": 20,
+          "yükseklik": -2.098,
+          "renk": [
+            211,
+            72,
+            23,
+            255
+          ],
+          "kenarlık_rengi": [
+            211,
+            72,
+            23,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Lancaster",
+          "etiket_x": 555.5,
+          "etiket_y": 416.672,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 88,
+          "ad": "DEM",
+          "değer": 7693.559921264648,
+          "derinlik": 1,
+          "x": 290,
+          "y": 391.02,
+          "genişlik": 20,
+          "yükseklik": -23.54,
+          "renk": [
+            78,
+            52,
+            46,
+            255
+          ],
+          "kenarlık_rengi": [
+            78,
+            52,
+            46,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "DEM",
+          "etiket_x": 315.5,
+          "etiket_y": 379.25,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 89,
+          "ad": "Grevenbroich",
+          "değer": 536.7599945068359,
+          "derinlik": 2,
+          "x": 530,
+          "y": 300.58,
+          "genişlik": 20,
+          "yükseklik": -1.642,
+          "renk": [
+            255,
+            168,
+            54,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            168,
+            54,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Grevenbroich",
+          "etiket_x": 555.5,
+          "etiket_y": 299.759,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 90,
+          "ad": "Distinguish",
+          "değer": 22523.68987865001,
+          "derinlik": 0,
+          "x": 50,
+          "y": 437.496,
+          "genişlik": 20,
+          "yükseklik": -68.916,
+          "renk": [
+            159,
+            65,
+            62,
+            255
+          ],
+          "kenarlık_rengi": [
+            159,
+            65,
+            62,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Distinguish",
+          "etiket_x": 75.5,
+          "etiket_y": 403.038,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 91,
+          "ad": "Cheltenham",
+          "değer": 573.0499979257584,
+          "derinlik": 2,
+          "x": 530,
+          "y": 391.371,
+          "genişlik": 20,
+          "yükseklik": -1.753,
+          "renk": [
+            255,
+            101,
+            81,
+            255
+          ],
+          "kenarlık_rengi": [
+            255,
+            101,
+            81,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Cheltenham",
+          "etiket_x": 555.5,
+          "etiket_y": 390.495,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 92,
+          "ad": "Reading",
+          "değer": 188.52999836206436,
+          "derinlik": 2,
+          "x": 530,
+          "y": 366.552,
+          "genişlik": 20,
+          "yükseklik": -0.577,
+          "renk": [
+            114,
+            163,
+            118,
+            255
+          ],
+          "kenarlık_rengi": [
+            114,
+            163,
+            118,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Reading",
+          "etiket_x": 555.5,
+          "etiket_y": 366.263,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 93,
+          "ad": "Pantin",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 129.049,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            105,
+            121,
+            126,
+            255
+          ],
+          "kenarlık_rengi": [
+            105,
+            121,
+            126,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Pantin",
+          "etiket_x": 555.5,
+          "etiket_y": 128.776,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 94,
+          "ad": "Kassel",
+          "değer": 536.7599945068359,
+          "derinlik": 2,
+          "x": 530,
+          "y": 312.748,
+          "genişlik": 20,
+          "yükseklik": -1.642,
+          "renk": [
+            230,
+            94,
+            32,
+            255
+          ],
+          "kenarlık_rengi": [
+            230,
+            94,
+            32,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Kassel",
+          "etiket_x": 555.5,
+          "etiket_y": 311.927,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 95,
+          "ad": "Orly",
+          "değer": 0.5899999737739563,
+          "derinlik": 2,
+          "x": 530,
+          "y": 319.106,
+          "genişlik": 20,
+          "yükseklik": -0.002,
+          "renk": [
+            110,
+            106,
+            104,
+            255
+          ],
+          "kenarlık_rengi": [
+            110,
+            106,
+            104,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Orly",
+          "etiket_x": 555.5,
+          "etiket_y": 319.105,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 96,
+          "ad": "FRF",
+          "değer": 6977.879928588867,
+          "derinlik": 1,
+          "x": 290,
+          "y": 357.643,
+          "genişlik": 20,
+          "yükseklik": -21.35,
+          "renk": [
+            91,
+            163,
+            59,
+            255
+          ],
+          "kenarlık_rengi": [
+            91,
+            163,
+            59,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "FRF",
+          "etiket_x": 315.5,
+          "etiket_y": 346.968,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 97,
+          "ad": "Cergy",
+          "değer": 178.9199981689453,
+          "derinlik": 2,
+          "x": 530,
+          "y": 149.217,
+          "genişlik": 20,
+          "yükseklik": -0.547,
+          "renk": [
+            180,
+            0,
+            158,
+            255
+          ],
+          "kenarlık_rengi": [
+            180,
+            0,
+            158,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Cergy",
+          "etiket_x": 555.5,
+          "etiket_y": 148.943,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        },
+        {
+          "veri_sırası": 98,
+          "ad": "Paris",
+          "değer": 1074.1599889993668,
+          "derinlik": 2,
+          "x": 530,
+          "y": 161.933,
+          "genişlik": 20,
+          "yükseklik": -3.287,
+          "renk": [
+            102,
+            102,
+            102,
+            255
+          ],
+          "kenarlık_rengi": [
+            102,
+            102,
+            102,
+            255
+          ],
+          "kenarlık_kalınlığı": 1,
+          "etiket_göster": true,
+          "etiket_metni": "Paris",
+          "etiket_x": 555.5,
+          "etiket_y": 160.289,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 10px Arial"
+        }
+      ],
+      "bağlar": [
+        {
+          "veri_sırası": 0,
+          "kaynak": "FRF",
+          "hedef": "Colomiers",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 343.957,
+          "x2": 530,
+          "y2": 142.312,
+          "cpx1": 420,
+          "cpy1": 343.957,
+          "cpx2": 420,
+          "cpy2": 142.312,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 1,
+          "kaynak": "SuperiorCard",
+          "hedef": "FRF",
+          "değer": 894.5999908447266,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 458.105,
+          "x2": 290,
+          "y2": 339.03,
+          "cpx1": 180,
+          "cpy1": 458.105,
+          "cpx2": 180,
+          "cpy2": 339.03,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              128,
+              155,
+              72,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 2,
+          "kaynak": "DEM",
+          "hedef": "München",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 379.524,
+          "x2": 530,
+          "y2": 267.15,
+          "cpx1": 420,
+          "cpy1": 379.524,
+          "cpx2": 420,
+          "cpy2": 267.15,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 3,
+          "kaynak": "GBP",
+          "hedef": "Reading",
+          "değer": 188.52999836206436,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 467.191,
+          "x2": 530,
+          "y2": 366.552,
+          "cpx1": 420,
+          "cpy1": 467.191,
+          "cpx2": 420,
+          "cpy2": 366.552,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 4,
+          "kaynak": "CAD",
+          "hedef": "Shawnee",
+          "değer": 2346.919983509928,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 457.968,
+          "x2": 530,
+          "y2": 502.882,
+          "cpx1": 420,
+          "cpy1": 457.968,
+          "cpx2": 420,
+          "cpy2": 502.882,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 5,
+          "kaynak": "GBP",
+          "hedef": "Kirkby",
+          "değer": 753.4000000059605,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 464.128,
+          "x2": 530,
+          "y2": 379.488,
+          "cpx1": 420,
+          "cpy1": 464.128,
+          "cpx2": 420,
+          "cpy2": 379.488,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 6,
+          "kaynak": "FRF",
+          "hedef": "Roncq",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 351.621,
+          "x2": 530,
+          "y2": 77.978,
+          "cpx1": 420,
+          "cpy1": 351.621,
+          "cpx2": 420,
+          "cpy2": 77.978,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 7,
+          "kaynak": "GBP",
+          "hedef": "Peterborough",
+          "değer": 999.159998036921,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 452.04,
+          "x2": 530,
+          "y2": 407.401,
+          "cpx1": 420,
+          "cpy1": 452.04,
+          "cpx2": 420,
+          "cpy2": 407.401,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 8,
+          "kaynak": "DEM",
+          "hedef": "Frankfurt am Main",
+          "değer": 536.7599945068359,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 388.283,
+          "x2": 530,
+          "y2": 195.909,
+          "cpx1": 420,
+          "cpy1": 388.283,
+          "cpx2": 420,
+          "cpy2": 195.909,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 9,
+          "kaynak": "GBP",
+          "hedef": "Oxford",
+          "değer": 1831.3799968883395,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 413.438,
+          "x2": 530,
+          "y2": 456.798,
+          "cpx1": 420,
+          "cpy1": 413.438,
+          "cpx2": 420,
+          "cpy2": 456.798,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 10,
+          "kaynak": "Vista",
+          "hedef": "FRF",
+          "değer": 1789.1999816894531,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 437.4,
+          "x2": 290,
+          "y2": 357.643,
+          "cpx1": 180,
+          "cpy1": 437.4,
+          "cpx2": 180,
+          "cpy2": 357.643,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              106,
+              82,
+              134,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 11,
+          "kaynak": "CAD",
+          "hedef": "Langley",
+          "değer": 1274.8199949413538,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 396.446,
+          "x2": 530,
+          "y2": 517.156,
+          "cpx1": 420,
+          "cpy1": 396.446,
+          "cpx2": 420,
+          "cpy2": 517.156,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 12,
+          "kaynak": "DEM",
+          "hedef": "Offenbach",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 386.64,
+          "x2": 530,
+          "y2": 202.266,
+          "cpx1": 420,
+          "cpy1": 386.64,
+          "cpx2": 420,
+          "cpy2": 202.266,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 13,
+          "kaynak": "FRF",
+          "hedef": "Villeneuve-d'Ascq",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 348.884,
+          "x2": 530,
+          "y2": 107.241,
+          "cpx1": 420,
+          "cpy1": 348.884,
+          "cpx2": 420,
+          "cpy2": 107.241,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 14,
+          "kaynak": "FRF",
+          "hedef": "Dunkerque",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 347.789,
+          "x2": 530,
+          "y2": 122.144,
+          "cpx1": 420,
+          "cpy1": 347.789,
+          "cpx2": 420,
+          "cpy2": 122.144,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 15,
+          "kaynak": "DEM",
+          "hedef": "Eilenburg",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 382.808,
+          "x2": 530,
+          "y2": 238.434,
+          "cpx1": 420,
+          "cpy1": 382.808,
+          "cpx2": 420,
+          "cpy2": 238.434,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 16,
+          "kaynak": "FRF",
+          "hedef": "Paris",
+          "değer": 1073.5199890136719,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 339.578,
+          "x2": 530,
+          "y2": 161.933,
+          "cpx1": 420,
+          "cpy1": 339.578,
+          "cpx2": 420,
+          "cpy2": 161.933,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 17,
+          "kaynak": "GBP",
+          "hedef": "Maidenhead",
+          "değer": 549.8400026857853,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 472.34,
+          "x2": 530,
+          "y2": 339.7,
+          "cpx1": 420,
+          "cpy1": 472.34,
+          "cpx2": 420,
+          "cpy2": 339.7,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 18,
+          "kaynak": "CAD",
+          "hedef": "Sooke",
+          "değer": 1764.499989286065,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 463.367,
+          "x2": 530,
+          "y2": 501.194,
+          "cpx1": 420,
+          "cpy1": 463.367,
+          "cpx2": 420,
+          "cpy2": 501.194,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 19,
+          "kaynak": "CAD",
+          "hedef": "Vancouver",
+          "değer": 1528.580000281334,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 413.529,
+          "x2": 530,
+          "y2": 510.239,
+          "cpx1": 420,
+          "cpy1": 413.529,
+          "cpx2": 420,
+          "cpy2": 510.239,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 20,
+          "kaynak": "DEM",
+          "hedef": "Hamburg",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 385.546,
+          "x2": 530,
+          "y2": 209.171,
+          "cpx1": 420,
+          "cpy1": 385.546,
+          "cpx2": 420,
+          "cpy2": 209.171,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 21,
+          "kaynak": "GBP",
+          "hedef": "London",
+          "değer": 8619.309983983636,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 391.508,
+          "x2": 530,
+          "y2": 521.255,
+          "cpx1": 420,
+          "cpy1": 391.508,
+          "cpx2": 420,
+          "cpy2": 521.255,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 22,
+          "kaynak": "CAD",
+          "hedef": "Oak Bay",
+          "değer": 1565.109990529716,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 434.279,
+          "x2": 530,
+          "y2": 506.097,
+          "cpx1": 420,
+          "cpy1": 434.279,
+          "cpx2": 420,
+          "cpy2": 506.097,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 23,
+          "kaynak": "Distinguish",
+          "hedef": "FRF",
+          "değer": 2683.7999725341797,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 437.496,
+          "x2": 290,
+          "y2": 352.169,
+          "cpx1": 180,
+          "cpy1": 437.496,
+          "cpx2": 180,
+          "cpy2": 352.169,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              159,
+              65,
+              62,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 24,
+          "kaynak": "DEM",
+          "hedef": "Neunkirchen",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 383.903,
+          "x2": 530,
+          "y2": 223.529,
+          "cpx1": 420,
+          "cpy1": 383.903,
+          "cpx2": 420,
+          "cpy2": 223.529,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 25,
+          "kaynak": "FRF",
+          "hedef": "Cergy",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 342.862,
+          "x2": 530,
+          "y2": 149.217,
+          "cpx1": 420,
+          "cpy1": 342.862,
+          "cpx2": 420,
+          "cpy2": 149.217,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 26,
+          "kaynak": "DEM",
+          "hedef": "Hof",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 389.925,
+          "x2": 530,
+          "y2": 181.551,
+          "cpx1": 420,
+          "cpy1": 389.925,
+          "cpx2": 420,
+          "cpy2": 181.551,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 27,
+          "kaynak": "FRF",
+          "hedef": "Paris La Defense",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 349.432,
+          "x2": 530,
+          "y2": 99.788,
+          "cpx1": 420,
+          "cpy1": 349.432,
+          "cpx2": 420,
+          "cpy2": 99.788,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 28,
+          "kaynak": "CAD",
+          "hedef": "Westminster",
+          "değer": 1149.7999994903803,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 473.397,
+          "x2": 530,
+          "y2": 495.225,
+          "cpx1": 420,
+          "cpy1": 473.397,
+          "cpx2": 420,
+          "cpy2": 495.225,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 29,
+          "kaynak": "DEM",
+          "hedef": "Ingolstadt",
+          "değer": 536.7599945068359,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 378.976,
+          "x2": 530,
+          "y2": 274.602,
+          "cpx1": 420,
+          "cpy1": 378.976,
+          "cpx2": 420,
+          "cpy2": 274.602,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 30,
+          "kaynak": "GBP",
+          "hedef": "Saint Ouen",
+          "değer": 0.5899999737739563,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 475.749,
+          "x2": 530,
+          "y2": 114.146,
+          "cpx1": 420,
+          "cpy1": 475.749,
+          "cpx2": 420,
+          "cpy2": 114.146,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 31,
+          "kaynak": "FRF",
+          "hedef": "Lille",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 352.716,
+          "x2": 530,
+          "y2": 71.073,
+          "cpx1": 420,
+          "cpy1": 352.716,
+          "cpx2": 420,
+          "cpy2": 71.073,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 32,
+          "kaynak": "GBP",
+          "hedef": "Leeds",
+          "değer": 1356.6899970173836,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 435.484,
+          "x2": 530,
+          "y2": 438.844,
+          "cpx1": 420,
+          "cpy1": 435.484,
+          "cpx2": 420,
+          "cpy2": 438.844,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 33,
+          "kaynak": "FRF",
+          "hedef": "Morangis",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 354.359,
+          "x2": 530,
+          "y2": 56.715,
+          "cpx1": 420,
+          "cpy1": 354.359,
+          "cpx2": 420,
+          "cpy2": 56.715,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 34,
+          "kaynak": "GBP",
+          "hedef": "Orly",
+          "değer": 0.5899999737739563,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 475.746,
+          "x2": 530,
+          "y2": 319.106,
+          "cpx1": 420,
+          "cpy1": 475.746,
+          "cpx2": 420,
+          "cpy2": 319.106,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 35,
+          "kaynak": "SuperiorCard",
+          "hedef": "DEM",
+          "değer": 1431.3599853515625,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 455.368,
+          "x2": 290,
+          "y2": 371.859,
+          "cpx1": 180,
+          "cpy1": 455.368,
+          "cpx2": 180,
+          "cpy2": 371.859,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              128,
+              155,
+              72,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 36,
+          "kaynak": "Vista",
+          "hedef": "CAD",
+          "değer": 5369.929964579642,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 396.844,
+          "x2": 290,
+          "y2": 477.041,
+          "cpx1": 180,
+          "cpy1": 396.844,
+          "cpx2": 180,
+          "cpy2": 477.041,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              106,
+              82,
+              134,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 37,
+          "kaynak": "GBP",
+          "hedef": "Paris",
+          "değer": 0.6399999856948853,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 475.747,
+          "x2": 530,
+          "y2": 158.648,
+          "cpx1": 420,
+          "cpy1": 475.747,
+          "cpx2": 420,
+          "cpy2": 158.648,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 38,
+          "kaynak": "GBP",
+          "hedef": "Liverpool",
+          "değer": 857.1999968588352,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 448.983,
+          "x2": 530,
+          "y2": 412.344,
+          "cpx1": 420,
+          "cpy1": 448.983,
+          "cpx2": 420,
+          "cpy2": 412.344,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 39,
+          "kaynak": "GBP",
+          "hedef": "Stoke-on-Trent",
+          "değer": 1131.7099939212203,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 438.947,
+          "x2": 530,
+          "y2": 434.307,
+          "cpx1": 420,
+          "cpy1": 438.947,
+          "cpx2": 420,
+          "cpy2": 434.307,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 40,
+          "kaynak": "Distinguish",
+          "hedef": "DEM",
+          "değer": 2504.8799743652344,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 429.285,
+          "x2": 290,
+          "y2": 384.998,
+          "cpx1": 180,
+          "cpy1": 429.285,
+          "cpx2": 180,
+          "cpy2": 384.998,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              159,
+              65,
+              62,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 41,
+          "kaynak": "CAD",
+          "hedef": "Langford",
+          "değer": 2343.4599857851863,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 408.852,
+          "x2": 530,
+          "y2": 513.562,
+          "cpx1": 420,
+          "cpy1": 408.852,
+          "cpx2": 420,
+          "cpy2": 513.562,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 42,
+          "kaynak": "DEM",
+          "hedef": "Kassel",
+          "değer": 536.7599945068359,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 369.122,
+          "x2": 530,
+          "y2": 312.748,
+          "cpx1": 420,
+          "cpy1": 369.122,
+          "cpx2": 420,
+          "cpy2": 312.748,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 43,
+          "kaynak": "GBP",
+          "hedef": "High Wycombe",
+          "değer": 216.83999809622765,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 469.147,
+          "x2": 530,
+          "y2": 352.507,
+          "cpx1": 420,
+          "cpy1": 469.147,
+          "cpx2": 420,
+          "cpy2": 352.507,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 44,
+          "kaynak": "CAD",
+          "hedef": "Port Hammond",
+          "değer": 1711.1399984136224,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 401.681,
+          "x2": 530,
+          "y2": 514.391,
+          "cpx1": 420,
+          "cpy1": 401.681,
+          "cpx2": 420,
+          "cpy2": 514.391,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 45,
+          "kaynak": "DEM",
+          "hedef": "Duesseldorf",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 390.473,
+          "x2": 530,
+          "y2": 174.098,
+          "cpx1": 420,
+          "cpy1": 390.473,
+          "cpx2": 420,
+          "cpy2": 174.098,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 46,
+          "kaynak": "GBP",
+          "hedef": "Gloucestershire",
+          "değer": 422.28999888151884,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 468.484,
+          "x2": 530,
+          "y2": 359.844,
+          "cpx1": 420,
+          "cpy1": 468.484,
+          "cpx2": 420,
+          "cpy2": 359.844,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 47,
+          "kaynak": "Distinguish",
+          "hedef": "GBP",
+          "değer": 10384.949975416064,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 421.62,
+          "x2": 290,
+          "y2": 446.689,
+          "cpx1": 180,
+          "cpy1": 421.62,
+          "cpx2": 180,
+          "cpy2": 446.689,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              159,
+              65,
+              62,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 48,
+          "kaynak": "FRF",
+          "hedef": "Roissy en Brie",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 356.001,
+          "x2": 530,
+          "y2": 42.358,
+          "cpx1": 420,
+          "cpy1": 356.001,
+          "cpx2": 420,
+          "cpy2": 42.358,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 49,
+          "kaynak": "GBP",
+          "hedef": "West Sussex",
+          "değer": 592.1700052022934,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 461.823,
+          "x2": 530,
+          "y2": 385.183,
+          "cpx1": 420,
+          "cpy1": 461.823,
+          "cpx2": 420,
+          "cpy2": 385.183,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 50,
+          "kaynak": "CAD",
+          "hedef": "Cliffside",
+          "değer": 2906.2699892893434,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 429.49,
+          "x2": 530,
+          "y2": 506.345,
+          "cpx1": 420,
+          "cpy1": 429.49,
+          "cpx2": 420,
+          "cpy2": 506.345,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 51,
+          "kaynak": "GBP",
+          "hedef": "Newcastle upon Tyne",
+          "değer": 1448.2899911925197,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 427.274,
+          "x2": 530,
+          "y2": 446.635,
+          "cpx1": 420,
+          "cpy1": 427.274,
+          "cpx2": 420,
+          "cpy2": 446.635,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 52,
+          "kaynak": "GBP",
+          "hedef": "Runcorn",
+          "değer": 1120.4800013303757,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 455.469,
+          "x2": 530,
+          "y2": 402.829,
+          "cpx1": 420,
+          "cpy1": 455.469,
+          "cpx2": 420,
+          "cpy2": 402.829,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 53,
+          "kaynak": "GBP",
+          "hedef": "W. York",
+          "değer": 612.1199932694435,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 474.213,
+          "x2": 530,
+          "y2": 333.573,
+          "cpx1": 420,
+          "cpy1": 474.213,
+          "cpx2": 420,
+          "cpy2": 333.573,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 54,
+          "kaynak": "DEM",
+          "hedef": "Kiel",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 383.356,
+          "x2": 530,
+          "y2": 230.982,
+          "cpx1": 420,
+          "cpy1": 383.356,
+          "cpx2": 420,
+          "cpy2": 230.982,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 55,
+          "kaynak": "GBP",
+          "hedef": "Woolston",
+          "değer": 833.3199937939644,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 444.263,
+          "x2": 530,
+          "y2": 423.623,
+          "cpx1": 420,
+          "cpy1": 444.263,
+          "cpx2": 420,
+          "cpy2": 423.623,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 56,
+          "kaynak": "Distinguish",
+          "hedef": "CAD",
+          "değer": 6950.059956334531,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 389.845,
+          "x2": 290,
+          "y2": 460.61,
+          "cpx1": 180,
+          "cpy1": 389.845,
+          "cpx2": 180,
+          "cpy2": 460.61,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              159,
+              65,
+              62,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 57,
+          "kaynak": "DEM",
+          "hedef": "Frankfurt",
+          "değer": 715.6799926757812,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 375.144,
+          "x2": 530,
+          "y2": 294.77,
+          "cpx1": 420,
+          "cpy1": 375.144,
+          "cpx2": 420,
+          "cpy2": 294.77,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 58,
+          "kaynak": "CAD",
+          "hedef": "Colma",
+          "değer": 0.2199999988079071,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 477.041,
+          "x2": 530,
+          "y2": 458.868,
+          "cpx1": 420,
+          "cpy1": 477.041,
+          "cpx2": 420,
+          "cpy2": 458.868,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 59,
+          "kaynak": "DEM",
+          "hedef": "Essen",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 380.071,
+          "x2": 530,
+          "y2": 259.697,
+          "cpx1": 420,
+          "cpy1": 380.071,
+          "cpx2": 420,
+          "cpy2": 259.697,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 60,
+          "kaynak": "FRF",
+          "hedef": "Chatou",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 353.264,
+          "x2": 530,
+          "y2": 63.62,
+          "cpx1": 420,
+          "cpy1": 353.264,
+          "cpx2": 420,
+          "cpy2": 63.62,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 61,
+          "kaynak": "GBP",
+          "hedef": "Cheltenham",
+          "değer": 573.0499979257584,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 460.011,
+          "x2": 530,
+          "y2": 391.371,
+          "cpx1": 420,
+          "cpy1": 460.011,
+          "cpx2": 420,
+          "cpy2": 391.371,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 62,
+          "kaynak": "SuperiorCard",
+          "hedef": "GBP",
+          "değer": 8228.39999615401,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 450.988,
+          "x2": 290,
+          "y2": 390.312,
+          "cpx1": 180,
+          "cpy1": 450.988,
+          "cpx2": 180,
+          "cpy2": 390.312,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              128,
+              155,
+              72,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 63,
+          "kaynak": "CAD",
+          "hedef": "Haney",
+          "değer": 2310.4499812424183,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 420.598,
+          "x2": 530,
+          "y2": 509.308,
+          "cpx1": 420,
+          "cpy1": 420.598,
+          "cpx2": 420,
+          "cpy2": 509.308,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 64,
+          "kaynak": "FRF",
+          "hedef": "Saint Ouen",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 348.337,
+          "x2": 530,
+          "y2": 114.693,
+          "cpx1": 420,
+          "cpy1": 348.337,
+          "cpx2": 420,
+          "cpy2": 114.693,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 65,
+          "kaynak": "CAD",
+          "hedef": "Chalk Riber",
+          "değer": 0.9200000166893005,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 477.04,
+          "x2": 530,
+          "y2": 466.868,
+          "cpx1": 420,
+          "cpy1": 477.04,
+          "cpx2": 420,
+          "cpy2": 466.868,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 66,
+          "kaynak": "DEM",
+          "hedef": "Salzgitter",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 382.261,
+          "x2": 530,
+          "y2": 245.887,
+          "cpx1": 420,
+          "cpy1": 382.261,
+          "cpx2": 420,
+          "cpy2": 245.887,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 67,
+          "kaynak": "ColonialVoice",
+          "hedef": "FRF",
+          "değer": 1610.2799835205078,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 449.539,
+          "x2": 290,
+          "y2": 343.957,
+          "cpx1": 180,
+          "cpy1": 449.539,
+          "cpx2": 180,
+          "cpy2": 343.957,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 68,
+          "kaynak": "DEM",
+          "hedef": "Stuttgart",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 377.334,
+          "x2": 530,
+          "y2": 280.96,
+          "cpx1": 420,
+          "cpy1": 377.334,
+          "cpx2": 420,
+          "cpy2": 280.96,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 69,
+          "kaynak": "FRF",
+          "hedef": "Saint-Denis",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 357.096,
+          "x2": 530,
+          "y2": 27.453,
+          "cpx1": 420,
+          "cpy1": 357.096,
+          "cpx2": 420,
+          "cpy2": 27.453,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 70,
+          "kaynak": "CAD",
+          "hedef": "Royal Oak",
+          "değer": 2128.459992274642,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 469.879,
+          "x2": 530,
+          "y2": 499.707,
+          "cpx1": 420,
+          "cpy1": 469.879,
+          "cpx2": 420,
+          "cpy2": 499.707,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 71,
+          "kaynak": "FRF",
+          "hedef": "Les Ulis",
+          "değer": 715.6799926757812,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 346.147,
+          "x2": 530,
+          "y2": 136.502,
+          "cpx1": 420,
+          "cpy1": 346.147,
+          "cpx2": 420,
+          "cpy2": 136.502,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 72,
+          "kaynak": "FRF",
+          "hedef": "Drancy",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 351.074,
+          "x2": 530,
+          "y2": 85.431,
+          "cpx1": 420,
+          "cpy1": 351.074,
+          "cpx2": 420,
+          "cpy2": 85.431,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 73,
+          "kaynak": "GBP",
+          "hedef": "Esher-Molesey",
+          "değer": 911.4700058028102,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 458.258,
+          "x2": 530,
+          "y2": 397.618,
+          "cpx1": 420,
+          "cpy1": 458.258,
+          "cpx2": 420,
+          "cpy2": 397.618,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 74,
+          "kaynak": "SuperiorCard",
+          "hedef": "CAD",
+          "değer": 7388.099954992533,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 425.812,
+          "x2": 290,
+          "y2": 415.151,
+          "cpx1": 180,
+          "cpy1": 425.812,
+          "cpx2": 180,
+          "cpy2": 415.151,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              128,
+              155,
+              72,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 75,
+          "kaynak": "GBP",
+          "hedef": "Bury",
+          "değer": 903.9400005489588,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 441.713,
+          "x2": 530,
+          "y2": 429.073,
+          "cpx1": 420,
+          "cpy1": 441.713,
+          "cpx2": 420,
+          "cpy2": 429.073,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 76,
+          "kaynak": "GBP",
+          "hedef": "Watford",
+          "değer": 1326.5300009772182,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 431.333,
+          "x2": 530,
+          "y2": 442.693,
+          "cpx1": 420,
+          "cpy1": 431.333,
+          "cpx2": 420,
+          "cpy2": 442.693,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 77,
+          "kaynak": "CAD",
+          "hedef": "Victoria",
+          "değer": 827.3899968340993,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 475.929,
+          "x2": 530,
+          "y2": 489.756,
+          "cpx1": 420,
+          "cpy1": 475.929,
+          "cpx2": 420,
+          "cpy2": 489.756,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 78,
+          "kaynak": "DEM",
+          "hedef": "Saarbrücken",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 388.83,
+          "x2": 530,
+          "y2": 188.456,
+          "cpx1": 420,
+          "cpy1": 388.83,
+          "cpx2": 420,
+          "cpy2": 188.456,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 79,
+          "kaynak": "GBP",
+          "hedef": "Lancaster",
+          "değer": 685.6899967193604,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 446.361,
+          "x2": 530,
+          "y2": 417.721,
+          "cpx1": 420,
+          "cpy1": 446.361,
+          "cpx2": 420,
+          "cpy2": 417.721,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 80,
+          "kaynak": "FRF",
+          "hedef": "Pantin",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 346.694,
+          "x2": 530,
+          "y2": 129.049,
+          "cpx1": 420,
+          "cpy1": 346.694,
+          "cpx2": 420,
+          "cpy2": 129.049,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 81,
+          "kaynak": "CAD",
+          "hedef": "Newton",
+          "değer": 1781.909985654056,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 439.731,
+          "x2": 530,
+          "y2": 505.452,
+          "cpx1": 420,
+          "cpy1": 439.731,
+          "cpx2": 420,
+          "cpy2": 505.452,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 82,
+          "kaynak": "GBP",
+          "hedef": "Oxon",
+          "değer": 493.6499986946583,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 470.657,
+          "x2": 530,
+          "y2": 346.018,
+          "cpx1": 420,
+          "cpy1": 470.657,
+          "cpx2": 420,
+          "cpy2": 346.018,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 83,
+          "kaynak": "CAD",
+          "hedef": "Calgary",
+          "değer": 361.3899962902069,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 477.035,
+          "x2": 530,
+          "y2": 482.862,
+          "cpx1": 420,
+          "cpy1": 477.035,
+          "cpx2": 420,
+          "cpy2": 482.862,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 84,
+          "kaynak": "DEM",
+          "hedef": "Münster",
+          "değer": 715.6799926757812,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 371.312,
+          "x2": 530,
+          "y2": 306.938,
+          "cpx1": 420,
+          "cpy1": 371.312,
+          "cpx2": 420,
+          "cpy2": 306.938,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 85,
+          "kaynak": "DEM",
+          "hedef": "Grevenbroich",
+          "değer": 536.7599945068359,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 372.954,
+          "x2": 530,
+          "y2": 300.58,
+          "cpx1": 420,
+          "cpy1": 372.954,
+          "cpx2": 420,
+          "cpy2": 300.58,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 86,
+          "kaynak": "DEM",
+          "hedef": "Paderborn",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 376.239,
+          "x2": 530,
+          "y2": 287.865,
+          "cpx1": 420,
+          "cpy1": 376.239,
+          "cpx2": 420,
+          "cpy2": 287.865,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 87,
+          "kaynak": "GBP",
+          "hedef": "York",
+          "değer": 3172.9999914616346,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 401.216,
+          "x2": 530,
+          "y2": 460.577,
+          "cpx1": 420,
+          "cpy1": 401.216,
+          "cpx2": 420,
+          "cpy2": 460.577,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 88,
+          "kaynak": "CAD",
+          "hedef": "Metchosin",
+          "değer": 1750.7899813987315,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 450.787,
+          "x2": 530,
+          "y2": 503.701,
+          "cpx1": 420,
+          "cpy1": 450.787,
+          "cpx2": 420,
+          "cpy2": 503.701,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 89,
+          "kaynak": "FRF",
+          "hedef": "Suresnes",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 350.527,
+          "x2": 530,
+          "y2": 92.883,
+          "cpx1": 420,
+          "cpy1": 350.527,
+          "cpx2": 420,
+          "cpy2": 92.883,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 90,
+          "kaynak": "FRF",
+          "hedef": "Versailles",
+          "değer": 894.5999908447266,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 342.315,
+          "x2": 530,
+          "y2": 156.67,
+          "cpx1": 420,
+          "cpy1": 342.315,
+          "cpx2": 420,
+          "cpy2": 156.67,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 91,
+          "kaynak": "DEM",
+          "hedef": "Erlangen",
+          "değer": 536.7599945068359,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 381.713,
+          "x2": 530,
+          "y2": 253.339,
+          "cpx1": 420,
+          "cpy1": 381.713,
+          "cpx2": 420,
+          "cpy2": 253.339,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 92,
+          "kaynak": "CAD",
+          "hedef": "Lebanon",
+          "değer": 0.8700000047683716,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 477.037,
+          "x2": 530,
+          "y2": 474.865,
+          "cpx1": 420,
+          "cpy1": 477.037,
+          "cpx2": 420,
+          "cpy2": 474.865,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 93,
+          "kaynak": "GBP",
+          "hedef": "Wokingham",
+          "değer": 812.6600027084351,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 466.615,
+          "x2": 530,
+          "y2": 373.975,
+          "cpx1": 420,
+          "cpy1": 466.615,
+          "cpx2": 420,
+          "cpy2": 373.975,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 94,
+          "kaynak": "GBP",
+          "hedef": "Cambridge",
+          "değer": 500.36999743431807,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 475.744,
+          "x2": 530,
+          "y2": 327.104,
+          "cpx1": 420,
+          "cpy1": 475.744,
+          "cpx2": 420,
+          "cpy2": 327.104,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 95,
+          "kaynak": "ColonialVoice",
+          "hedef": "GBP",
+          "değer": 8040.7799860313535,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 439.137,
+          "x2": 290,
+          "y2": 414.914,
+          "cpx1": 180,
+          "cpy1": 439.137,
+          "cpx2": 180,
+          "cpy2": 414.914,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 96,
+          "kaynak": "FRF",
+          "hedef": "Saint Germain en Laye",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 356.548,
+          "x2": 530,
+          "y2": 34.905,
+          "cpx1": 420,
+          "cpy1": 356.548,
+          "cpx2": 420,
+          "cpy2": 34.905,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 97,
+          "kaynak": "FRF",
+          "hedef": "Metz",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 357.643,
+          "x2": 530,
+          "y2": 20,
+          "cpx1": 420,
+          "cpy1": 357.643,
+          "cpx2": 420,
+          "cpy2": 20,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 98,
+          "kaynak": "FRF",
+          "hedef": "Orleans",
+          "değer": 357.8399963378906,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 355.454,
+          "x2": 530,
+          "y2": 49.81,
+          "cpx1": 420,
+          "cpy1": 355.454,
+          "cpx2": 420,
+          "cpy2": 49.81,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              91,
+              163,
+              59,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 99,
+          "kaynak": "GBP",
+          "hedef": "Milton Keynes",
+          "değer": 1648.2200061008334,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 418.481,
+          "x2": 530,
+          "y2": 453.841,
+          "cpx1": 420,
+          "cpy1": 418.481,
+          "cpx2": 420,
+          "cpy2": 453.841,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 100,
+          "kaynak": "GBP",
+          "hedef": "Warrington",
+          "değer": 2162.8300000429153,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 407.834,
+          "x2": 530,
+          "y2": 459.194,
+          "cpx1": 420,
+          "cpy1": 407.834,
+          "cpx2": 420,
+          "cpy2": 459.194,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 101,
+          "kaynak": "CAD",
+          "hedef": "N. Vancouver",
+          "değer": 1862.4599857926369,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 445.43,
+          "x2": 530,
+          "y2": 503.795,
+          "cpx1": 420,
+          "cpy1": 445.43,
+          "cpx2": 420,
+          "cpy2": 503.795,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 102,
+          "kaynak": "DEM",
+          "hedef": "Hannover",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 384.451,
+          "x2": 530,
+          "y2": 216.077,
+          "cpx1": 420,
+          "cpy1": 384.451,
+          "cpx2": 420,
+          "cpy2": 216.077,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 103,
+          "kaynak": "Vista",
+          "hedef": "GBP",
+          "değer": 9497.539981640875,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 425.904,
+          "x2": 290,
+          "y2": 475.749,
+          "cpx1": 180,
+          "cpy1": 425.904,
+          "cpx2": 180,
+          "cpy2": 475.749,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              106,
+              82,
+              134,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 104,
+          "kaynak": "DEM",
+          "hedef": "Werne",
+          "değer": 178.9199981689453,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 391.02,
+          "x2": 530,
+          "y2": 166.646,
+          "cpx1": 420,
+          "cpy1": 391.02,
+          "cpx2": 420,
+          "cpy2": 166.646,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              78,
+              52,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 105,
+          "kaynak": "ColonialVoice",
+          "hedef": "DEM",
+          "değer": 1789.1999816894531,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 444.612,
+          "x2": 290,
+          "y2": 377.334,
+          "cpx1": 180,
+          "cpy1": 444.612,
+          "cpx2": 180,
+          "cpy2": 377.334,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 106,
+          "kaynak": "ColonialVoice",
+          "hedef": "CAD",
+          "değer": 7907.36997512728,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 414.535,
+          "x2": 290,
+          "y2": 439.345,
+          "cpx1": 180,
+          "cpy1": 414.535,
+          "cpx2": 180,
+          "cpy2": 439.345,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              64,
+              105,
+              157,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 107,
+          "kaynak": "GBP",
+          "hedef": "Gateshead",
+          "değer": 1425.7099913656712,
+          "yön": "horizontal",
+          "x1": 310,
+          "y1": 422.843,
+          "x2": 530,
+          "y2": 450.203,
+          "cpx1": 420,
+          "cpy1": 422.843,
+          "cpx2": 420,
+          "cpy2": 450.203,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              195,
+              45,
+              46,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 108,
+          "kaynak": "Vista",
+          "hedef": "DEM",
+          "değer": 1968.1199798583984,
+          "yön": "horizontal",
+          "x1": 70,
+          "y1": 431.926,
+          "x2": 290,
+          "y2": 391.02,
+          "cpx1": 180,
+          "cpy1": 431.926,
+          "cpx2": 180,
+          "cpy2": 391.02,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              106,
+              82,
+              134,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        }
+      ]
+    }
+  ]
+}

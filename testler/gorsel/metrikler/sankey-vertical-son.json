@@ -1,0 +1,45 @@
+{
+  "id": "sankey-vertical",
+  "senaryo": "statik",
+  "kare": "son",
+  "eşikler": {
+    "pixelmatch": 0.1,
+    "değişenPikselOranı": 0.01,
+    "ssim": 0.99
+  },
+  "geçti": true,
+  "değişen_piksel": 42,
+  "değişen_piksel_oranı": 0.00015555555555555556,
+  "ssim": 0.9993773103627744,
+  "ham": {
+    "geçti": true,
+    "değişen_piksel": 146,
+    "değişen_piksel_oranı": 0.0005407407407407407,
+    "ssim": 0.9992437958083427
+  },
+  "tipografi_normalizasyonu": {
+    "gaussian_sigma": 0.8,
+    "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+  },
+  "yapısal_kontroller": [
+    {
+      "ad": "sankey_düğüm_ve_bağ_geometrisi",
+      "geçti": true,
+      "açıklama": "Her Sankey düğüm kutusu ile bağlantı şeridinin veri kimliği, değer/derinlik, Bézier kontrol noktaları, kalınlığı, etkin RGBA dolgusu; ayrıca etiket tabanı, dönüşü ve fontu kilitli ECharts sahnesiyle eşleşmeli",
+      "beklenen_düğüm": 6,
+      "gerçek_düğüm": 6,
+      "beklenen_bağ": 6,
+      "gerçek_bağ": 6,
+      "karşılaştırılan_alan": 204,
+      "uyuşmazlıklar": []
+    }
+  ],
+  "dosyalar": {
+    "referans": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-vertical.png",
+    "gerçek": "testler/gorsel/gerçek/default/sankey-vertical.png",
+    "fark": "testler/gorsel/fark/default/sankey-vertical.png",
+    "normalize_fark": "testler/gorsel/fark/default/sankey-vertical-tipografi.png",
+    "sahne": "testler/gorsel/sahneler/sankey-vertical.json",
+    "referans_sahne": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sahneler/sankey-vertical.json"
+  }
+}

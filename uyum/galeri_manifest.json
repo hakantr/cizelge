@@ -1036,7 +1036,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-simple.ts",
     "kaynak_sha256": "c9f572fad7663c281ec837b6395981734531be8cbe6b6a3b17f3be7b6fbd9af5",
-    "cizelge_fixture": "examples/sankey.rs",
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -1047,7 +1047,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "kısmi",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -1061,14 +1061,57 @@
     ],
     "kanıt": {
       "api": "kısmi",
-      "statik_görsel": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
       "animasyon": "kısmi",
       "etkileşim": "kısmi",
       "erişilebilirlik": "kısmi",
       "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 13,
+          "değişen_piksel_oranı": 0.00004814814814814815,
+          "ssim": 0.9997484216248628,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-simple.png",
+            "sha256": "986cd7da814727762974827bc6f1ccbd5360389ad94cad6f0fb4f83c4ce83cac"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-simple.png",
+            "sha256": "05e9bfb5a619a5e1272864a11b64470eb0fb47b07940712914e3648171c373e9"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-simple.png",
+            "sha256": "66ea096be86dd9291ac1be0aa0888d838e72797041a105940a71fa23fc3eb588"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 61,
+            "değişen_piksel_oranı": 0.00022592592592592591,
+            "ssim": 0.9995864902465431
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-simple-tipografi.png",
+            "sha256": "7c3a74a3caa86260fd1b856787417de270124924a356863551a2b00710baaa98"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-simple.json",
+            "sha256": "8a4c3348802b5ede2cf12f419a9ac37ba8443332112390b002b37476904678d3"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-simple-son.json",
+            "sha256": "dc94205ce7c2df4cafc08ac895bf5345cbadffc3c89e0472c4f64b4f32cb831d"
+          }
+        }
+      ]
     }
   },
   {
@@ -2828,7 +2871,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-vertical.ts",
     "kaynak_sha256": "fa8861ba43e950cf780f6bffd453aeb1d837e2bab445eed3eab04e4297c5bfc9",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -2840,7 +2883,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -2853,15 +2896,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 42,
+          "değişen_piksel_oranı": 0.00015555555555555556,
+          "ssim": 0.9993773103627744,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-vertical.png",
+            "sha256": "619a3284ab48272bf767e7cd5224c4c18e222cadca5e3fe7a09f2d35f09572e3"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-vertical.png",
+            "sha256": "ee8396bea753e20848e96ab4d0625fc93e3726345f28f1df058fe9aac02b289c"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-vertical.png",
+            "sha256": "a996f73720db344c48b64821b8bff88faadf3b265d2b18992b7909106ea474fa"
+          },
+          "ham": {
+            "geçti": true,
+            "değişen_piksel": 146,
+            "değişen_piksel_oranı": 0.0005407407407407407,
+            "ssim": 0.9992437958083427
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-vertical-tipografi.png",
+            "sha256": "e89e01073d7aecdd4040043e96dc6c6a7c5b0a04a1d1a65a39e2bbcf2db027ec"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-vertical.json",
+            "sha256": "3c99e463ba8940196800c85a1753266f3d69b67de74732252c34522b79539d4b"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-vertical-son.json",
+            "sha256": "80a6f34280f2c05849134376d14fd4d716fff52d084402b9ff808083beb2c1e4"
+          }
+        }
+      ]
     }
   },
   {
@@ -5789,7 +5875,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-itemstyle.ts",
     "kaynak_sha256": "9ef70d1152bb9ecc7d64057dbc9408adc9c526bd19904bd34a485e97e01aab20",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -5801,7 +5887,7 @@
     "actions": [],
     "events": [],
     "dış_varlıklar": [],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5814,15 +5900,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1635,
+          "değişen_piksel_oranı": 0.006055555555555555,
+          "ssim": 0.9931023302009919,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-itemstyle.png",
+            "sha256": "6233f2929dd27a3318b83cdb772fb48ca0560f003aeb15d7f20bcd44d2daf44b"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-itemstyle.png",
+            "sha256": "a3f80ffbb081f9d02de57a3767c3c39bd6637e017fd21048efcb5a62ed5c1eca"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-itemstyle.png",
+            "sha256": "066c11c4cc820e60d1ee2882b23840e4a1b3a4a2cbc50e1085041b8acea33a0c"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 5431,
+            "değişen_piksel_oranı": 0.020114814814814815,
+            "ssim": 0.9901188109860946
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-itemstyle-tipografi.png",
+            "sha256": "f5d4537760367b05539e722f0c37247ea84c2bbb0be7ffc2814b963a319dde8d"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-itemstyle.json",
+            "sha256": "32e3674dabbb56683cbf343068f4bd5e186f81e3db8c64a5ecfe6f429580dde6"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-itemstyle-son.json",
+            "sha256": "f4f7845ddd2f0cc1c4fe11d3843deb6854045be517c225f3141bccad12a016f1"
+          }
+        }
+      ]
     }
   },
   {
@@ -5847,7 +5976,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-levels.ts",
     "kaynak_sha256": "cb9862b40398d34df130025aad4201485007b56b0a51da59f050f30ad5a99a68",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -5861,7 +5990,7 @@
     "dış_varlıklar": [
       "/data/asset/data/product.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -5874,15 +6003,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1330,
+          "değişen_piksel_oranı": 0.004925925925925926,
+          "ssim": 0.9919856916345142,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-levels.png",
+            "sha256": "808e1998a2766895bfb20ae9c482fe4303c4e8b6dcf8f14a415b1f79220cb51f"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-levels.png",
+            "sha256": "8f530c48940c86225c311bc38b40168cee17632cb2789a6dd8529d9de8cb440c"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-levels.png",
+            "sha256": "c77d31c91ff682a34bca4641f3e9817ddfb7cd4fa8c23192b883553925f36cf4"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 4378,
+            "değişen_piksel_oranı": 0.016214814814814814,
+            "ssim": 0.9891596960875606
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-levels-tipografi.png",
+            "sha256": "67cdf555370960542361e5719d2d63e131642b82d3b0d82854dfaa3e448554a0"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-levels.json",
+            "sha256": "231d11f35cba0746a7cffbdfed75a08cb6fe96d2a658ebbd930025b11f943f5e"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-levels-son.json",
+            "sha256": "3e5f54586968877440441c4ab09d07403cbe6e6fa2de5daa973a0f66f716a0cc"
+          }
+        }
+      ]
     }
   },
   {
@@ -9220,7 +9392,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-energy.ts",
     "kaynak_sha256": "f90c66860ecc12f371414e29826260be5e2350c0de6ac361f042e3804bfeb8c2",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -9234,7 +9406,7 @@
     "dış_varlıklar": [
       "/data/asset/data/energy.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -9247,15 +9419,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1752,
+          "değişen_piksel_oranı": 0.006488888888888889,
+          "ssim": 0.9927463130152492,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-energy.png",
+            "sha256": "47d71c10149aacab64ec9af2dc4c1492fb734226e63dc3a1b00a9a8d2ee0e78a"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-energy.png",
+            "sha256": "cfdbd40a3eb83661f8dab06ed32344c217903659ff6067186c11206ea1883e31"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-energy.png",
+            "sha256": "669d76c328b8ad112b0f33f377a498b36d837e141505ba660983d74a5a20a47f"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 6037,
+            "değişen_piksel_oranı": 0.02235925925925926,
+            "ssim": 0.9891287941844468
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-energy-tipografi.png",
+            "sha256": "2f540196c98480a38c7c63dfa0c4d6acb9163b8b214fc91b119523901fba0179"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-energy.json",
+            "sha256": "5b3f82aa293e1f74beb6bdfb0417dc44a420c763f41406348fcad2e1c4f63731"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-energy-son.json",
+            "sha256": "310dc74b00e0ae0873071bd34b8075549b62088bbcf09a8bbb0c57ae8166bf2e"
+          }
+        }
+      ]
     }
   },
   {
@@ -9280,7 +9495,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-nodeAlign-left.ts",
     "kaynak_sha256": "5be89274257ff6ee1339f69823ade91bd4c849b4e68687755c37b189b86f362a",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -9294,7 +9509,7 @@
     "dış_varlıklar": [
       "/data/asset/data/energy.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -9307,15 +9522,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 1896,
+          "değişen_piksel_oranı": 0.007022222222222222,
+          "ssim": 0.9932482151098477,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-nodeAlign-left.png",
+            "sha256": "d13aebd5aa57290ace421009183c35e42d7b26539753c3a950cacb67e4da3948"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-nodeAlign-left.png",
+            "sha256": "80d73c1f2d2adc733c53938121e099c06576635e2599d245e1719908abb4d6c6"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-nodeAlign-left.png",
+            "sha256": "a9266ad6854e6bce09f471b7a8e19ff6c2d01b84123946e329834a426924c0a4"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 6401,
+            "değişen_piksel_oranı": 0.023707407407407406,
+            "ssim": 0.98918735892977
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-nodeAlign-left-tipografi.png",
+            "sha256": "0fe545710a6368986563c07e6c5662c3b73f24c90f0f63d9becb1c5f9ebc2cc1"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-nodeAlign-left.json",
+            "sha256": "92277ca21a5eb13c140603f61a64f1c9d6933e2c8f4cf88552a1654f34407666"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-nodeAlign-left-son.json",
+            "sha256": "1c6737a6ee581abe555cc57cf926e17e2349e0ad5977886837465a688e40a279"
+          }
+        }
+      ]
     }
   },
   {
@@ -9340,7 +9598,7 @@
     "videoEnd": null,
     "kaynak": "public/examples/ts/sankey-nodeAlign-right.ts",
     "kaynak_sha256": "2207f075d6f292a106f21b1cfc781c91907c0e764226ebd90038496ac299ad6c",
-    "cizelge_fixture": null,
+    "cizelge_fixture": "examples/uyum_fixture.rs#sankey_resmi",
     "seriler": [
       "sankey"
     ],
@@ -9354,7 +9612,7 @@
     "dış_varlıklar": [
       "/data/asset/data/energy.json"
     ],
-    "kapsam_durumu": "yok",
+    "kapsam_durumu": "uygulandı_kanıt_bekliyor",
     "kapsam_gerekçeleri": [
       "çekirdek_2b_geo_dışı"
     ],
@@ -9367,15 +9625,58 @@
       4
     ],
     "kanıt": {
-      "api": "yok",
-      "statik_görsel": "yok",
-      "animasyon": "yok",
-      "etkileşim": "yok",
-      "erişilebilirlik": "yok",
-      "performans": "yok"
+      "api": "kısmi",
+      "statik_görsel": "tam_kanıtlı",
+      "animasyon": "kısmi",
+      "etkileşim": "kısmi",
+      "erişilebilirlik": "kısmi",
+      "performans": "kısmi"
     },
     "çıktılar": {
-      "kareler": []
+      "kareler": [
+        {
+          "ad": "son",
+          "senaryo": "statik",
+          "geçti": true,
+          "değişen_piksel": 2280,
+          "değişen_piksel_oranı": 0.008444444444444444,
+          "ssim": 0.9924230973737543,
+          "referans": {
+            "yol": "testler/gorsel/referans/74e9e09a0b5687fdd34319121ac73b3022d1483c/default/sankey-nodeAlign-right.png",
+            "sha256": "0ddf717002a928104f2b334c15a23aba2909b2b2294321f0d5409b1eed8cd72d"
+          },
+          "gerçek": {
+            "yol": "testler/gorsel/gerçek/default/sankey-nodeAlign-right.png",
+            "sha256": "62dca4c2a71f68c8849db1eef57821ebf9c61e7311c0e3ba8ef0e505848255e2"
+          },
+          "fark": {
+            "yol": "testler/gorsel/fark/default/sankey-nodeAlign-right.png",
+            "sha256": "164db2e506c3f4fd7e3c75a01dd05131947be5e22fd71d15b3db0141165de8c9"
+          },
+          "ham": {
+            "geçti": false,
+            "değişen_piksel": 6397,
+            "değişen_piksel_oranı": 0.02369259259259259,
+            "ssim": 0.988832845481708
+          },
+          "tipografi_normalizasyonu": {
+            "gaussian_sigma": 0.8,
+            "açıklama": "İki görüntüye de aynı Gauss çekirdeği uygulanır; maske ve eşik değişikliği yoktur."
+          },
+          "normalize_fark": {
+            "yol": "testler/gorsel/fark/default/sankey-nodeAlign-right-tipografi.png",
+            "sha256": "af5e84a1dc04e203785d4fb8228356cf23412a0391adda0fad881566c25e9190"
+          },
+          "sahne": {
+            "yol": "testler/gorsel/sahneler/sankey-nodeAlign-right.json",
+            "sha256": "527cc903557cd373af4a5bdbdadc4a89807bdcb09f792d921f16dcd80839ba36"
+          },
+          "metrik": {
+            "yol": "testler/gorsel/metrikler/sankey-nodeAlign-right-son.json",
+            "sha256": "5f955401f64d3f86d7fefc497e1312e05421f29d6900d2c73375d2e6344eed9b"
+          }
+        }
+      ]
     }
   },
   {

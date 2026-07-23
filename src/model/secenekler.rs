@@ -1631,6 +1631,121 @@ impl GrafikSeçenekleri {
                     }
                 }
             }
+            if let Seri::Sankey(sankey) = seri {
+                if let Some(takvim_sırası) = sankey.takvim_sırası {
+                    if self.takvimler.get(takvim_sırası).is_none() {
+                        return Err(BilesenHatasi::EksikVeri {
+                            bileşen: "calendar",
+                            sıra: takvim_sırası,
+                        });
+                    }
+                    if !sankey.takvim_koordinatı.is_some_and(f64::is_finite) {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sankey.coord",
+                            ayrıntı: "takvim Sankey'i sonlu bir tarih koordinatı taşımalı"
+                                .to_owned(),
+                        });
+                    }
+                } else if sankey.takvim_koordinatı.is_some() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sankey.coordinateSystem",
+                        ayrıntı: "takvim koordinatı bir calendarIndex ile bağlanmalı".to_owned(),
+                    });
+                }
+                if let Some(matris_sırası) = sankey.matris_sırası
+                    && self.tüm_matrisler().nth(matris_sırası).is_none()
+                {
+                    return Err(BilesenHatasi::EksikVeri {
+                        bileşen: "matrix",
+                        sıra: matris_sırası,
+                    });
+                }
+                if sankey.matris_sırası.is_some() && sankey.matris_koordinatı.is_none() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sankey.coord",
+                        ayrıntı: "Matrix Sankey'i bir hücre/aralık koordinatı taşımalı"
+                            .to_owned(),
+                    });
+                }
+                if sankey.matris_sırası.is_none() && sankey.matris_koordinatı.is_some() {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sankey.coordinateSystem",
+                        ayrıntı: "Matrix koordinatı bir matrixIndex ile bağlanmalı".to_owned(),
+                    });
+                }
+                if !sankey.düğüm_genişliği.is_finite()
+                    || sankey.düğüm_genişliği < 0.0
+                    || !sankey.düğüm_boşluğu.is_finite()
+                    || sankey.düğüm_boşluğu < 0.0
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sankey.nodeWidth/nodeGap",
+                        ayrıntı: "düğüm genişliği ve boşluğu sonlu, negatif olmayan sayı olmalı"
+                            .to_owned(),
+                    });
+                }
+                if !sankey.yakınlaştırma.is_finite()
+                    || sankey.yakınlaştırma <= 0.0
+                    || !sankey.en_küçük_ölçek.is_finite()
+                    || !sankey.en_büyük_ölçek.is_finite()
+                    || sankey.en_küçük_ölçek <= 0.0
+                    || sankey.en_büyük_ölçek < sankey.en_küçük_ölçek
+                {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sankey.zoom/scaleLimit",
+                        ayrıntı:
+                            "yakınlaştırma ve ölçek sınırları pozitif, sonlu ve sıralı olmalı"
+                                .to_owned(),
+                    });
+                }
+
+                let mut adlar = std::collections::HashSet::new();
+                for (sıra, düğüm) in sankey.düğümler.iter().enumerate() {
+                    if düğüm.ad.is_empty() || !adlar.insert(düğüm.ad.as_str()) {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sankey.data.name",
+                            ayrıntı: format!("{sıra}. düğüm adı boş ya da yinelenmiş"),
+                        });
+                    }
+                    if düğüm
+                        .değer
+                        .is_some_and(|değer| !değer.is_finite() || değer < 0.0)
+                    {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sankey.data.value",
+                            ayrıntı: format!("{sıra}. düğüm değeri geçersiz"),
+                        });
+                    }
+                }
+                for (sıra, bağ) in sankey.bağlar.iter().enumerate() {
+                    if !bağ.değer.is_finite() || bağ.değer < 0.0 {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sankey.links.value",
+                            ayrıntı: format!(
+                                "{sıra}. bağ değeri sonlu ve negatif olmayan olmalı"
+                            ),
+                        });
+                    }
+                    if !adlar.contains(bağ.kaynak.as_str()) || !adlar.contains(bağ.hedef.as_str())
+                    {
+                        return Err(BilesenHatasi::GeçersizSeçenek {
+                            alan: "series.sankey.links.source/target",
+                            ayrıntı: format!("{sıra}. bağ bilinmeyen düğüme başvuruyor"),
+                        });
+                    }
+                }
+                let palet = |sıra: usize| self.palet_rengi(sıra);
+                if let Err(hata) = crate::grafik::sankey::sankey_yerleşimi(
+                    sankey,
+                    crate::koordinat::Dikdörtgen::yeni(0.0, 0.0, 1000.0, 600.0),
+                    &palet,
+                ) {
+                    return Err(BilesenHatasi::GeçersizSeçenek {
+                        alan: "series.sankey.data/links",
+                        ayrıntı: hata.to_string(),
+                    });
+                }
+            }
             if let Seri::Hatlar(hatlar) = seri {
                 match hatlar.koordinat_sistemi {
                     crate::model::hatlar::HatKoordinatSistemi::Kutupsal
@@ -2305,6 +2420,44 @@ mod testler {
             .matris(MatrisKoordinatı::yeni())
             .seri(crate::model::seri::AğaçHaritasıSerisi::yeni().matris_hücresi(0usize, 0usize));
         assert!(geçerli.doğrula().is_ok());
+    }
+
+    #[test]
+    fn sankey_view_calendar_ve_matrix_kutu_koordinatlarini_dogrular() {
+        let seri = || {
+            crate::model::sankey::SankeySerisi::yeni()
+                .düğümler(["A", "B"])
+                .bağlar([("A", "B", 1.0)])
+        };
+        let eksik_takvim = GrafikSeçenekleri::yeni().seri(seri().takvim_hücresi(0.0));
+        assert!(matches!(
+            eksik_takvim.doğrula(),
+            Err(crate::hata::BilesenHatasi::EksikVeri {
+                bileşen: "calendar",
+                sıra: 0
+            })
+        ));
+
+        let eksik_koordinat = GrafikSeçenekleri::yeni()
+            .matris(MatrisKoordinatı::yeni())
+            .seri(seri().matris_sırası(0));
+        assert!(matches!(
+            eksik_koordinat.doğrula(),
+            Err(crate::hata::BilesenHatasi::GeçersizSeçenek {
+                alan: "series.sankey.coord",
+                ..
+            })
+        ));
+
+        let geçerli_matris = GrafikSeçenekleri::yeni()
+            .matris(MatrisKoordinatı::yeni())
+            .seri(seri().matris_hücresi(0usize, 0usize));
+        assert!(geçerli_matris.doğrula().is_ok());
+
+        let geçerli_takvim = GrafikSeçenekleri::yeni()
+            .takvim(crate::model::takvim::TakvimKoordinatı::yıl(1970))
+            .seri(seri().takvim_hücresi(0.0));
+        assert!(geçerli_takvim.doğrula().is_ok());
     }
 
     #[test]

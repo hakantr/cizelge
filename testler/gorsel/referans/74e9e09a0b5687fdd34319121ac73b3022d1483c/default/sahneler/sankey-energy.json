@@ -1,0 +1,3348 @@
+{
+  "şema_sürümü": 1,
+  "tür": "sankey",
+  "koordinat_adımı": 0.001,
+  "seriler": [
+    {
+      "seri_sırası": 0,
+      "alan": {
+        "x": 35,
+        "y": 26.25,
+        "genişlik": 525,
+        "yükseklik": 472.5
+      },
+      "düğümler": [
+        {
+          "veri_sırası": 0,
+          "ad": "Agricultural 'waste'",
+          "değer": 124.729,
+          "derinlik": 0,
+          "x": 35,
+          "y": 157.555,
+          "genişlik": 20,
+          "yükseklik": 14.072,
+          "renk": [
+            151,
+            183,
+            104,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Agricultural 'waste'",
+          "etiket_x": 60,
+          "etiket_y": 164.591,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 1,
+          "ad": "Bio-conversion",
+          "değer": 388.925,
+          "derinlik": 1,
+          "x": 107.143,
+          "y": 140.787,
+          "genişlik": 20,
+          "yükseklik": 43.88,
+          "renk": [
+            118,
+            98,
+            106,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Bio-conversion",
+          "etiket_x": 132.143,
+          "etiket_y": 162.727,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 2,
+          "ad": "Liquid",
+          "değer": 647.587,
+          "derinlik": 2,
+          "x": 179.286,
+          "y": 399.734,
+          "genişlik": 20,
+          "yükseklik": 73.063,
+          "renk": [
+            83,
+            164,
+            180,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Liquid",
+          "etiket_x": 204.286,
+          "etiket_y": 436.266,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 3,
+          "ad": "Losses",
+          "değer": 878.325,
+          "derinlik": 7,
+          "x": 540,
+          "y": 74.099,
+          "genişlik": 20,
+          "yükseklik": 99.096,
+          "renk": [
+            255,
+            205,
+            15,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Losses",
+          "etiket_x": 565,
+          "etiket_y": 123.648,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 4,
+          "ad": "Solid",
+          "değer": 447.48,
+          "derinlik": 2,
+          "x": 179.286,
+          "y": 154.7,
+          "genişlik": 20,
+          "yükseklik": 50.487,
+          "renk": [
+            177,
+            122,
+            93,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Solid",
+          "etiket_x": 204.286,
+          "etiket_y": 179.943,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 5,
+          "ad": "Gas",
+          "değer": 204.09699999999998,
+          "derinlik": 2,
+          "x": 179.286,
+          "y": 213.187,
+          "genişlik": 20,
+          "yükseklik": 23.027,
+          "renk": [
+            167,
+            194,
+            61,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Gas",
+          "etiket_x": 204.286,
+          "etiket_y": 224.7,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 6,
+          "ad": "Biofuel imports",
+          "değer": 35,
+          "derinlik": 0,
+          "x": 35,
+          "y": 494.801,
+          "genişlik": 20,
+          "yükseklik": 3.949,
+          "renk": [
+            98,
+            130,
+            191,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Biofuel imports",
+          "etiket_x": 60,
+          "etiket_y": 496.776,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 7,
+          "ad": "Biomass imports",
+          "değer": 35,
+          "derinlik": 0,
+          "x": 35,
+          "y": 211.284,
+          "genişlik": 20,
+          "yükseklik": 3.949,
+          "renk": [
+            98,
+            130,
+            191,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Biomass imports",
+          "etiket_x": 60,
+          "etiket_y": 213.259,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 8,
+          "ad": "Coal imports",
+          "değer": 11.606,
+          "derinlik": 0,
+          "x": 35,
+          "y": 238.45,
+          "genişlik": 20,
+          "yükseklik": 1.309,
+          "renk": [
+            84,
+            116,
+            214,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Coal imports",
+          "etiket_x": 60,
+          "etiket_y": 239.105,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 9,
+          "ad": "Coal",
+          "değer": 75.571,
+          "derinlik": 1,
+          "x": 107.143,
+          "y": 219.357,
+          "genişlik": 20,
+          "yükseklik": 8.526,
+          "renk": [
+            122,
+            154,
+            152,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Coal",
+          "etiket_x": 132.143,
+          "etiket_y": 223.62,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 10,
+          "ad": "Coal reserves",
+          "değer": 63.965,
+          "derinlik": 0,
+          "x": 35,
+          "y": 223.233,
+          "genişlik": 20,
+          "yükseklik": 7.217,
+          "renk": [
+            115,
+            147,
+            163,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Coal reserves",
+          "etiket_x": 60,
+          "etiket_y": 226.841,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 11,
+          "ad": "District heating",
+          "değer": 79.329,
+          "derinlik": 4,
+          "x": 323.571,
+          "y": 277.808,
+          "genişlik": 20,
+          "yükseklik": 8.95,
+          "renk": [
+            124,
+            156,
+            148,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "District heating",
+          "etiket_x": 348.571,
+          "etiket_y": 282.283,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 12,
+          "ad": "Industry",
+          "değer": 568.927,
+          "derinlik": 7,
+          "x": 540,
+          "y": 237.684,
+          "genişlik": 20,
+          "yükseklik": 64.189,
+          "renk": [
+            193,
+            157,
+            114,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Industry",
+          "etiket_x": 565,
+          "etiket_y": 269.778,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 13,
+          "ad": "Heating and cooling - commercial",
+          "değer": 134.164,
+          "derinlik": 7,
+          "x": 540,
+          "y": 359.866,
+          "genişlik": 20,
+          "yükseklik": 15.137,
+          "renk": [
+            156,
+            188,
+            95,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Heating and cooling - commercial",
+          "etiket_x": 565,
+          "etiket_y": 367.434,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 14,
+          "ad": "Heating and cooling - homes",
+          "değer": 372.199,
+          "derinlik": 7,
+          "x": 540,
+          "y": 309.873,
+          "genişlik": 20,
+          "yükseklik": 41.993,
+          "renk": [
+            101,
+            91,
+            110,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Heating and cooling - homes",
+          "etiket_x": 565,
+          "etiket_y": 330.869,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 15,
+          "ad": "Electricity grid",
+          "değer": 918.6070000000002,
+          "derinlik": 4,
+          "x": 323.571,
+          "y": 166.167,
+          "genişlik": 20,
+          "yükseklik": 103.641,
+          "renk": [
+            254,
+            179,
+            45,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Electricity grid",
+          "etiket_x": 348.571,
+          "etiket_y": 217.987,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 16,
+          "ad": "Over generation / exports",
+          "değer": 104.453,
+          "derinlik": 7,
+          "x": 540,
+          "y": 181.196,
+          "genişlik": 20,
+          "yükseklik": 11.785,
+          "renk": [
+            139,
+            171,
+            123,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Over generation / exports",
+          "etiket_x": 565,
+          "etiket_y": 187.088,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 17,
+          "ad": "H2 conversion",
+          "değer": 27.14,
+          "derinlik": 5,
+          "x": 395.714,
+          "y": 237.781,
+          "genişlik": 20,
+          "yükseklik": 3.062,
+          "renk": [
+            93,
+            125,
+            199,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "H2 conversion",
+          "etiket_x": 420.714,
+          "etiket_y": 239.312,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 18,
+          "ad": "Road transport",
+          "değer": 194.529,
+          "derinlik": 7,
+          "x": 540,
+          "y": 401.632,
+          "genişlik": 20,
+          "yükseklik": 21.948,
+          "renk": [
+            172,
+            201,
+            58,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Road transport",
+          "etiket_x": 565,
+          "etiket_y": 412.606,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 19,
+          "ad": "Agriculture",
+          "değer": 11.03,
+          "derinlik": 7,
+          "x": 540,
+          "y": 383.003,
+          "genişlik": 20,
+          "yükseklik": 1.244,
+          "renk": [
+            84,
+            116,
+            215,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Agriculture",
+          "etiket_x": 565,
+          "etiket_y": 383.625,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 20,
+          "ad": "Rail transport",
+          "değer": 12.276,
+          "derinlik": 7,
+          "x": 540,
+          "y": 392.247,
+          "genişlik": 20,
+          "yükseklik": 1.385,
+          "renk": [
+            85,
+            117,
+            213,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Rail transport",
+          "etiket_x": 565,
+          "etiket_y": 392.94,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 21,
+          "ad": "Lighting & appliances - commercial",
+          "değer": 90.008,
+          "derinlik": 7,
+          "x": 540,
+          "y": 219.529,
+          "genişlik": 20,
+          "yükseklik": 10.155,
+          "renk": [
+            130,
+            162,
+            138,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Lighting & appliances - commercial",
+          "etiket_x": 565,
+          "etiket_y": 224.606,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 22,
+          "ad": "Lighting & appliances - homes",
+          "değer": 93.494,
+          "derinlik": 7,
+          "x": 540,
+          "y": 200.981,
+          "genişlik": 20,
+          "yükseklik": 10.548,
+          "renk": [
+            132,
+            164,
+            134,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Lighting & appliances - homes",
+          "etiket_x": 565,
+          "etiket_y": 206.255,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 23,
+          "ad": "Gas imports",
+          "değer": 40.719,
+          "derinlik": 0,
+          "x": 35,
+          "y": 265.037,
+          "genişlik": 20,
+          "yükseklik": 4.594,
+          "renk": [
+            101,
+            133,
+            186,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Gas imports",
+          "etiket_x": 60,
+          "etiket_y": 267.334,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 24,
+          "ad": "Ngas",
+          "değer": 122.952,
+          "derinlik": 1,
+          "x": 107.143,
+          "y": 242.713,
+          "genişlik": 20,
+          "yükseklik": 13.872,
+          "renk": [
+            150,
+            182,
+            105,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Ngas",
+          "etiket_x": 132.143,
+          "etiket_y": 249.649,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 25,
+          "ad": "Gas reserves",
+          "değer": 82.233,
+          "derinlik": 0,
+          "x": 35,
+          "y": 247.759,
+          "genişlik": 20,
+          "yükseklik": 9.278,
+          "renk": [
+            126,
+            158,
+            145,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Gas reserves",
+          "etiket_x": 60,
+          "etiket_y": 252.398,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 26,
+          "ad": "Thermal generation",
+          "değer": 1391.989,
+          "derinlik": 3,
+          "x": 251.429,
+          "y": 54.763,
+          "genişlik": 20,
+          "yükseklik": 157.05,
+          "renk": [
+            63,
+            190,
+            149,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Thermal generation",
+          "etiket_x": 276.429,
+          "etiket_y": 133.288,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 27,
+          "ad": "Geothermal",
+          "değer": 7.013,
+          "derinlik": 0,
+          "x": 35,
+          "y": 328.424,
+          "genişlik": 20,
+          "yükseklik": 0.791,
+          "renk": [
+            82,
+            114,
+            218,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Geothermal",
+          "etiket_x": 60,
+          "etiket_y": 328.82,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 28,
+          "ad": "H2",
+          "değer": 20.897,
+          "derinlik": 6,
+          "x": 467.857,
+          "y": 275.411,
+          "genişlik": 20,
+          "yükseklik": 2.358,
+          "renk": [
+            90,
+            122,
+            205,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "H2",
+          "etiket_x": 492.857,
+          "etiket_y": 276.589,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 29,
+          "ad": "Hydro",
+          "değer": 6.995,
+          "derinlik": 0,
+          "x": 35,
+          "y": 337.215,
+          "genişlik": 20,
+          "yükseklik": 0.789,
+          "renk": [
+            82,
+            114,
+            218,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Hydro",
+          "etiket_x": 60,
+          "etiket_y": 337.61,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 30,
+          "ad": "International shipping",
+          "değer": 128.69,
+          "derinlik": 7,
+          "x": 540,
+          "y": 462.852,
+          "genişlik": 20,
+          "yükseklik": 14.519,
+          "renk": [
+            153,
+            185,
+            100,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "International shipping",
+          "etiket_x": 565,
+          "etiket_y": 470.111,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 31,
+          "ad": "Domestic aviation",
+          "değer": 14.458,
+          "derinlik": 7,
+          "x": 540,
+          "y": 497.119,
+          "genişlik": 20,
+          "yükseklik": 1.631,
+          "renk": [
+            86,
+            118,
+            211,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Domestic aviation",
+          "etiket_x": 565,
+          "etiket_y": 497.934,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 32,
+          "ad": "International aviation",
+          "değer": 206.267,
+          "derinlik": 7,
+          "x": 540,
+          "y": 431.58,
+          "genişlik": 20,
+          "yükseklik": 23.272,
+          "renk": [
+            165,
+            193,
+            62,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "International aviation",
+          "etiket_x": 565,
+          "etiket_y": 443.216,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 33,
+          "ad": "National navigation",
+          "değer": 33.218,
+          "derinlik": 7,
+          "x": 540,
+          "y": 485.371,
+          "genişlik": 20,
+          "yükseklik": 3.748,
+          "renk": [
+            97,
+            129,
+            193,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "National navigation",
+          "etiket_x": 565,
+          "etiket_y": 487.245,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 34,
+          "ad": "Marine algae",
+          "değer": 4.375,
+          "derinlik": 0,
+          "x": 35,
+          "y": 202.791,
+          "genişlik": 20,
+          "yükseklik": 0.494,
+          "renk": [
+            80,
+            112,
+            221,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Marine algae",
+          "etiket_x": 60,
+          "etiket_y": 203.037,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 35,
+          "ad": "Nuclear",
+          "değer": 839.978,
+          "derinlik": 0,
+          "x": 35,
+          "y": 26.25,
+          "genişlik": 20,
+          "yükseklik": 94.77,
+          "renk": [
+            211,
+            202,
+            49,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Nuclear",
+          "etiket_x": 60,
+          "etiket_y": 73.635,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 36,
+          "ad": "Oil imports",
+          "değer": 504.287,
+          "derinlik": 0,
+          "x": 35,
+          "y": 409.754,
+          "genişlik": 20,
+          "yükseklik": 56.896,
+          "renk": [
+            234,
+            145,
+            81,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Oil imports",
+          "etiket_x": 60,
+          "etiket_y": 438.202,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 37,
+          "ad": "Oil",
+          "değer": 611.99,
+          "derinlik": 1,
+          "x": 107.143,
+          "y": 405.437,
+          "genişlik": 20,
+          "yükseklik": 69.047,
+          "renk": [
+            133,
+            161,
+            150,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Oil",
+          "etiket_x": 132.143,
+          "etiket_y": 439.96,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 38,
+          "ad": "Oil reserves",
+          "değer": 107.703,
+          "derinlik": 0,
+          "x": 35,
+          "y": 474.65,
+          "genişlik": 20,
+          "yükseklik": 12.152,
+          "renk": [
+            141,
+            173,
+            120,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Oil reserves",
+          "etiket_x": 60,
+          "etiket_y": 480.725,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 39,
+          "ad": "Other waste",
+          "değer": 134.397,
+          "derinlik": 0,
+          "x": 35,
+          "y": 179.627,
+          "genişlik": 20,
+          "yükseklik": 15.163,
+          "renk": [
+            156,
+            188,
+            94,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Other waste",
+          "etiket_x": 60,
+          "etiket_y": 187.209,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 40,
+          "ad": "Pumped heat",
+          "değer": 263.698,
+          "derinlik": 0,
+          "x": 35,
+          "y": 372.002,
+          "genişlik": 20,
+          "yükseklik": 29.752,
+          "renk": [
+            132,
+            149,
+            83,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Pumped heat",
+          "etiket_x": 60,
+          "etiket_y": 386.878,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 41,
+          "ad": "Solar PV",
+          "değer": 59.901,
+          "derinlik": 1,
+          "x": 107.143,
+          "y": 332.317,
+          "genişlik": 20,
+          "yükseklik": 6.758,
+          "renk": [
+            113,
+            145,
+            167,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Solar PV",
+          "etiket_x": 132.143,
+          "etiket_y": 335.696,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 42,
+          "ad": "Solar Thermal",
+          "değer": 19.263,
+          "derinlik": 1,
+          "x": 107.143,
+          "y": 352.277,
+          "genişlik": 20,
+          "yükseklik": 2.173,
+          "renk": [
+            89,
+            121,
+            206,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Solar Thermal",
+          "etiket_x": 132.143,
+          "etiket_y": 353.364,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 43,
+          "ad": "Solar",
+          "değer": 79.164,
+          "derinlik": 0,
+          "x": 35,
+          "y": 355.071,
+          "genişlik": 20,
+          "yükseklik": 8.932,
+          "renk": [
+            124,
+            156,
+            148,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Solar",
+          "etiket_x": 60,
+          "etiket_y": 359.537,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 44,
+          "ad": "Tidal",
+          "değer": 9.452,
+          "derinlik": 0,
+          "x": 35,
+          "y": 346.004,
+          "genişlik": 20,
+          "yükseklik": 1.066,
+          "renk": [
+            83,
+            115,
+            216,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Tidal",
+          "etiket_x": 60,
+          "etiket_y": 346.538,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 45,
+          "ad": "UK land based bioenergy",
+          "değer": 182.01,
+          "derinlik": 0,
+          "x": 35,
+          "y": 129.02,
+          "genişlik": 20,
+          "yükseklik": 20.535,
+          "renk": [
+            180,
+            211,
+            53,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "UK land based bioenergy",
+          "etiket_x": 60,
+          "etiket_y": 139.287,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 46,
+          "ad": "Wave",
+          "değer": 19.013,
+          "derinlik": 0,
+          "x": 35,
+          "y": 318.279,
+          "genişlik": 20,
+          "yükseklik": 2.145,
+          "renk": [
+            89,
+            121,
+            207,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Wave",
+          "etiket_x": 60,
+          "etiket_y": 319.351,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        },
+        {
+          "veri_sırası": 47,
+          "ad": "Wind",
+          "değer": 289.366,
+          "derinlik": 0,
+          "x": 35,
+          "y": 277.631,
+          "genişlik": 20,
+          "yükseklik": 32.647,
+          "renk": [
+            116,
+            130,
+            92,
+            255
+          ],
+          "kenarlık_rengi": null,
+          "kenarlık_kalınlığı": 0,
+          "etiket_göster": true,
+          "etiket_metni": "Wind",
+          "etiket_x": 60,
+          "etiket_y": 293.955,
+          "etiket_dönüşü": 0,
+          "etiket_fontu": "normal normal 12px sans-serif"
+        }
+      ],
+      "bağlar": [
+        {
+          "veri_sırası": 0,
+          "kaynak": "Agricultural 'waste'",
+          "hedef": "Bio-conversion",
+          "değer": 124.729,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 157.555,
+          "x2": 107.143,
+          "y2": 161.322,
+          "cpx1": 81.071,
+          "cpy1": 157.555,
+          "cpx2": 81.071,
+          "cpy2": 161.322,
+          "kalınlık": 14.072,
+          "renkler": [
+            [
+              151,
+              183,
+              104,
+              51
+            ],
+            [
+              118,
+              98,
+              106,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 1,
+          "kaynak": "Bio-conversion",
+          "hedef": "Liquid",
+          "değer": 0.597,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 184.599,
+          "x2": 179.286,
+          "y2": 399.734,
+          "cpx1": 153.214,
+          "cpy1": 184.599,
+          "cpx2": 153.214,
+          "cpy2": 399.734,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              118,
+              98,
+              106,
+              51
+            ],
+            [
+              83,
+              164,
+              180,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 2,
+          "kaynak": "Bio-conversion",
+          "hedef": "Losses",
+          "değer": 26.862,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 140.787,
+          "x2": 540,
+          "y2": 162.907,
+          "cpx1": 333.571,
+          "cpy1": 140.787,
+          "cpx2": 333.571,
+          "cpy2": 162.907,
+          "kalınlık": 3.031,
+          "renkler": [
+            [
+              118,
+              98,
+              106,
+              51
+            ],
+            [
+              255,
+              205,
+              15,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 3,
+          "kaynak": "Bio-conversion",
+          "hedef": "Solid",
+          "değer": 280.322,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 143.817,
+          "x2": 179.286,
+          "y2": 154.7,
+          "cpx1": 153.214,
+          "cpy1": 143.817,
+          "cpx2": 153.214,
+          "cpy2": 154.7,
+          "kalınlık": 31.627,
+          "renkler": [
+            [
+              118,
+              98,
+              106,
+              51
+            ],
+            [
+              177,
+              122,
+              93,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 4,
+          "kaynak": "Bio-conversion",
+          "hedef": "Gas",
+          "değer": 81.144,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 175.444,
+          "x2": 179.286,
+          "y2": 213.187,
+          "cpx1": 153.214,
+          "cpy1": 175.444,
+          "cpx2": 153.214,
+          "cpy2": 213.187,
+          "kalınlık": 9.155,
+          "renkler": [
+            [
+              118,
+              98,
+              106,
+              51
+            ],
+            [
+              167,
+              194,
+              61,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 5,
+          "kaynak": "Biofuel imports",
+          "hedef": "Liquid",
+          "değer": 35,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 494.801,
+          "x2": 179.286,
+          "y2": 468.849,
+          "cpx1": 117.143,
+          "cpy1": 494.801,
+          "cpx2": 117.143,
+          "cpy2": 468.849,
+          "kalınlık": 3.949,
+          "renkler": [
+            [
+              98,
+              130,
+              191,
+              51
+            ],
+            [
+              83,
+              164,
+              180,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 6,
+          "kaynak": "Biomass imports",
+          "hedef": "Solid",
+          "değer": 35,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 211.284,
+          "x2": 179.286,
+          "y2": 192.712,
+          "cpx1": 117.143,
+          "cpy1": 211.284,
+          "cpx2": 117.143,
+          "cpy2": 192.712,
+          "kalınlık": 3.949,
+          "renkler": [
+            [
+              98,
+              130,
+              191,
+              51
+            ],
+            [
+              177,
+              122,
+              93,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 7,
+          "kaynak": "Coal imports",
+          "hedef": "Coal",
+          "değer": 11.606,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 238.45,
+          "x2": 107.143,
+          "y2": 226.573,
+          "cpx1": 81.071,
+          "cpy1": 238.45,
+          "cpx2": 81.071,
+          "cpy2": 226.573,
+          "kalınlık": 1.309,
+          "renkler": [
+            [
+              84,
+              116,
+              214,
+              51
+            ],
+            [
+              122,
+              154,
+              152,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 8,
+          "kaynak": "Coal reserves",
+          "hedef": "Coal",
+          "değer": 63.965,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 223.233,
+          "x2": 107.143,
+          "y2": 219.357,
+          "cpx1": 81.071,
+          "cpy1": 223.233,
+          "cpx2": 81.071,
+          "cpy2": 219.357,
+          "kalınlık": 7.217,
+          "renkler": [
+            [
+              115,
+              147,
+              163,
+              51
+            ],
+            [
+              122,
+              154,
+              152,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 9,
+          "kaynak": "Coal",
+          "hedef": "Solid",
+          "değer": 75.571,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 219.357,
+          "x2": 179.286,
+          "y2": 196.66,
+          "cpx1": 153.214,
+          "cpy1": 219.357,
+          "cpx2": 153.214,
+          "cpy2": 196.66,
+          "kalınlık": 8.526,
+          "renkler": [
+            [
+              122,
+              154,
+              152,
+              51
+            ],
+            [
+              177,
+              122,
+              93,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 10,
+          "kaynak": "District heating",
+          "hedef": "Industry",
+          "değer": 10.639,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 277.808,
+          "x2": 540,
+          "y2": 287.013,
+          "cpx1": 441.786,
+          "cpy1": 277.808,
+          "cpx2": 441.786,
+          "cpy2": 287.013,
+          "kalınlık": 1.2,
+          "renkler": [
+            [
+              124,
+              156,
+              148,
+              51
+            ],
+            [
+              193,
+              157,
+              114,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 11,
+          "kaynak": "District heating",
+          "hedef": "Heating and cooling - commercial",
+          "değer": 22.505,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 284.219,
+          "x2": 540,
+          "y2": 364.49,
+          "cpx1": 441.786,
+          "cpy1": 284.219,
+          "cpx2": 441.786,
+          "cpy2": 364.49,
+          "kalınlık": 2.539,
+          "renkler": [
+            [
+              124,
+              156,
+              148,
+              51
+            ],
+            [
+              156,
+              188,
+              95,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 12,
+          "kaynak": "District heating",
+          "hedef": "Heating and cooling - homes",
+          "değer": 46.184,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 279.008,
+          "x2": 540,
+          "y2": 322.704,
+          "cpx1": 441.786,
+          "cpy1": 279.008,
+          "cpx2": 441.786,
+          "cpy2": 322.704,
+          "kalınlık": 5.211,
+          "renkler": [
+            [
+              124,
+              156,
+              148,
+              51
+            ],
+            [
+              101,
+              91,
+              110,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 13,
+          "kaynak": "Electricity grid",
+          "hedef": "Over generation / exports",
+          "değer": 104.453,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 172.563,
+          "x2": 540,
+          "y2": 181.196,
+          "cpx1": 441.786,
+          "cpy1": 172.563,
+          "cpx2": 441.786,
+          "cpy2": 181.196,
+          "kalınlık": 11.785,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              139,
+              171,
+              123,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 14,
+          "kaynak": "Electricity grid",
+          "hedef": "Heating and cooling - homes",
+          "değer": 113.726,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 246.718,
+          "x2": 540,
+          "y2": 309.873,
+          "cpx1": 441.786,
+          "cpy1": 246.718,
+          "cpx2": 441.786,
+          "cpy2": 309.873,
+          "kalınlık": 12.831,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              101,
+              91,
+              110,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 15,
+          "kaynak": "Electricity grid",
+          "hedef": "H2 conversion",
+          "değer": 27.14,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 243.656,
+          "x2": 395.714,
+          "y2": 237.781,
+          "cpx1": 369.643,
+          "cpy1": 243.656,
+          "cpx2": 369.643,
+          "cpy2": 237.781,
+          "kalınlık": 3.062,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              93,
+              125,
+              199,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 16,
+          "kaynak": "Electricity grid",
+          "hedef": "Industry",
+          "değer": 342.165,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 205.051,
+          "x2": 540,
+          "y2": 242.928,
+          "cpx1": 441.786,
+          "cpy1": 205.051,
+          "cpx2": 441.786,
+          "cpy2": 242.928,
+          "kalınlık": 38.604,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              193,
+              157,
+              114,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 17,
+          "kaynak": "Electricity grid",
+          "hedef": "Road transport",
+          "değer": 37.797,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 265.543,
+          "x2": 540,
+          "y2": 401.632,
+          "cpx1": 441.786,
+          "cpy1": 265.543,
+          "cpx2": 441.786,
+          "cpy2": 401.632,
+          "kalınlık": 4.264,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              172,
+              201,
+              58,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 18,
+          "kaynak": "Electricity grid",
+          "hedef": "Agriculture",
+          "değer": 4.412,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 264.158,
+          "x2": 540,
+          "y2": 383.102,
+          "cpx1": 441.786,
+          "cpy1": 264.158,
+          "cpx2": 441.786,
+          "cpy2": 383.102,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              84,
+              116,
+              215,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 19,
+          "kaynak": "Electricity grid",
+          "hedef": "Heating and cooling - commercial",
+          "değer": 40.858,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 259.549,
+          "x2": 540,
+          "y2": 359.866,
+          "cpx1": 441.786,
+          "cpy1": 259.549,
+          "cpx2": 441.786,
+          "cpy2": 359.866,
+          "kalınlık": 4.61,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              156,
+              188,
+              95,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 20,
+          "kaynak": "Electricity grid",
+          "hedef": "Losses",
+          "değer": 56.691,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 166.167,
+          "x2": 540,
+          "y2": 165.937,
+          "cpx1": 441.786,
+          "cpy1": 166.167,
+          "cpx2": 441.786,
+          "cpy2": 165.937,
+          "kalınlık": 6.396,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              255,
+              205,
+              15,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 21,
+          "kaynak": "Electricity grid",
+          "hedef": "Rail transport",
+          "değer": 7.863,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 264.656,
+          "x2": 540,
+          "y2": 392.247,
+          "cpx1": 441.786,
+          "cpy1": 264.656,
+          "cpx2": 441.786,
+          "cpy2": 392.247,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              85,
+              117,
+              213,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 22,
+          "kaynak": "Electricity grid",
+          "hedef": "Lighting & appliances - commercial",
+          "değer": 90.008,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 194.896,
+          "x2": 540,
+          "y2": 219.529,
+          "cpx1": 441.786,
+          "cpy1": 194.896,
+          "cpx2": 441.786,
+          "cpy2": 219.529,
+          "kalınlık": 10.155,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              130,
+              162,
+              138,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 23,
+          "kaynak": "Electricity grid",
+          "hedef": "Lighting & appliances - homes",
+          "değer": 93.494,
+          "yön": "horizontal",
+          "x1": 343.571,
+          "y1": 184.348,
+          "x2": 540,
+          "y2": 200.981,
+          "cpx1": 441.786,
+          "cpy1": 184.348,
+          "cpx2": 441.786,
+          "cpy2": 200.981,
+          "kalınlık": 10.548,
+          "renkler": [
+            [
+              254,
+              179,
+              45,
+              51
+            ],
+            [
+              132,
+              164,
+              134,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 24,
+          "kaynak": "Gas imports",
+          "hedef": "Ngas",
+          "değer": 40.719,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 265.037,
+          "x2": 107.143,
+          "y2": 251.991,
+          "cpx1": 81.071,
+          "cpy1": 265.037,
+          "cpx2": 81.071,
+          "cpy2": 251.991,
+          "kalınlık": 4.594,
+          "renkler": [
+            [
+              101,
+              133,
+              186,
+              51
+            ],
+            [
+              150,
+              182,
+              105,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 25,
+          "kaynak": "Gas reserves",
+          "hedef": "Ngas",
+          "değer": 82.233,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 247.759,
+          "x2": 107.143,
+          "y2": 242.713,
+          "cpx1": 81.071,
+          "cpy1": 247.759,
+          "cpx2": 81.071,
+          "cpy2": 242.713,
+          "kalınlık": 9.278,
+          "renkler": [
+            [
+              126,
+              158,
+              145,
+              51
+            ],
+            [
+              150,
+              182,
+              105,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 26,
+          "kaynak": "Gas",
+          "hedef": "Heating and cooling - commercial",
+          "değer": 0.129,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 235.963,
+          "x2": 540,
+          "y2": 364.476,
+          "cpx1": 369.643,
+          "cpy1": 235.963,
+          "cpx2": 369.643,
+          "cpy2": 364.476,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              167,
+              194,
+              61,
+              51
+            ],
+            [
+              156,
+              188,
+              95,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 27,
+          "kaynak": "Gas",
+          "hedef": "Losses",
+          "değer": 1.401,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 230.324,
+          "x2": 540,
+          "y2": 172.333,
+          "cpx1": 369.643,
+          "cpy1": 230.324,
+          "cpx2": 369.643,
+          "cpy2": 172.333,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              167,
+              194,
+              61,
+              51
+            ],
+            [
+              255,
+              205,
+              15,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 28,
+          "kaynak": "Gas",
+          "hedef": "Thermal generation",
+          "değer": 151.891,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 213.187,
+          "x2": 251.429,
+          "y2": 194.676,
+          "cpx1": 225.357,
+          "cpy1": 213.187,
+          "cpx2": 225.357,
+          "cpy2": 194.676,
+          "kalınlık": 17.137,
+          "renkler": [
+            [
+              167,
+              194,
+              61,
+              51
+            ],
+            [
+              63,
+              190,
+              149,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 29,
+          "kaynak": "Gas",
+          "hedef": "Agriculture",
+          "değer": 2.096,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 235.977,
+          "x2": 540,
+          "y2": 383.6,
+          "cpx1": 369.643,
+          "cpy1": 235.977,
+          "cpx2": 369.643,
+          "cpy2": 383.6,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              167,
+              194,
+              61,
+              51
+            ],
+            [
+              84,
+              116,
+              215,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 30,
+          "kaynak": "Gas",
+          "hedef": "Industry",
+          "değer": 48.58,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 230.482,
+          "x2": 540,
+          "y2": 281.532,
+          "cpx1": 369.643,
+          "cpy1": 230.482,
+          "cpx2": 369.643,
+          "cpy2": 281.532,
+          "kalınlık": 5.481,
+          "renkler": [
+            [
+              167,
+              194,
+              61,
+              51
+            ],
+            [
+              193,
+              157,
+              114,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 31,
+          "kaynak": "Geothermal",
+          "hedef": "Electricity grid",
+          "değer": 7.013,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 328.424,
+          "x2": 323.571,
+          "y2": 260.252,
+          "cpx1": 189.286,
+          "cpy1": 328.424,
+          "cpx2": 189.286,
+          "cpy2": 260.252,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              82,
+              114,
+              218,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 32,
+          "kaynak": "H2 conversion",
+          "hedef": "H2",
+          "değer": 20.897,
+          "yön": "horizontal",
+          "x1": 415.714,
+          "y1": 238.486,
+          "x2": 467.857,
+          "y2": 275.411,
+          "cpx1": 441.786,
+          "cpy1": 238.486,
+          "cpx2": 441.786,
+          "cpy2": 275.411,
+          "kalınlık": 2.358,
+          "renkler": [
+            [
+              93,
+              125,
+              199,
+              51
+            ],
+            [
+              90,
+              122,
+              205,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 33,
+          "kaynak": "H2 conversion",
+          "hedef": "Losses",
+          "değer": 6.242,
+          "yön": "horizontal",
+          "x1": 415.714,
+          "y1": 237.781,
+          "x2": 540,
+          "y2": 172.491,
+          "cpx1": 477.857,
+          "cpy1": 237.781,
+          "cpx2": 477.857,
+          "cpy2": 172.491,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              93,
+              125,
+              199,
+              51
+            ],
+            [
+              255,
+              205,
+              15,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 34,
+          "kaynak": "H2",
+          "hedef": "Road transport",
+          "değer": 20.897,
+          "yön": "horizontal",
+          "x1": 487.857,
+          "y1": 275.411,
+          "x2": 540,
+          "y2": 405.897,
+          "cpx1": 513.929,
+          "cpy1": 275.411,
+          "cpx2": 513.929,
+          "cpy2": 405.897,
+          "kalınlık": 2.358,
+          "renkler": [
+            [
+              90,
+              122,
+              205,
+              51
+            ],
+            [
+              172,
+              201,
+              58,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 35,
+          "kaynak": "Hydro",
+          "hedef": "Electricity grid",
+          "değer": 6.995,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 337.215,
+          "x2": 323.571,
+          "y2": 267.801,
+          "cpx1": 189.286,
+          "cpy1": 337.215,
+          "cpx2": 189.286,
+          "cpy2": 267.801,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              82,
+              114,
+              218,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 36,
+          "kaynak": "Liquid",
+          "hedef": "Industry",
+          "değer": 121.066,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 399.734,
+          "x2": 540,
+          "y2": 288.214,
+          "cpx1": 369.643,
+          "cpy1": 399.734,
+          "cpx2": 369.643,
+          "cpy2": 288.214,
+          "kalınlık": 13.659,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              193,
+              157,
+              114,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 37,
+          "kaynak": "Liquid",
+          "hedef": "International shipping",
+          "değer": 128.69,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 452.899,
+          "x2": 540,
+          "y2": 462.852,
+          "cpx1": 369.643,
+          "cpy1": 452.899,
+          "cpx2": 369.643,
+          "cpy2": 462.852,
+          "kalınlık": 14.519,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              153,
+              185,
+              100,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 38,
+          "kaynak": "Liquid",
+          "hedef": "Road transport",
+          "değer": 135.835,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 414.302,
+          "x2": 540,
+          "y2": 408.254,
+          "cpx1": 369.643,
+          "cpy1": 414.302,
+          "cpx2": 369.643,
+          "cpy2": 408.254,
+          "kalınlık": 15.325,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              172,
+              201,
+              58,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 39,
+          "kaynak": "Liquid",
+          "hedef": "Domestic aviation",
+          "değer": 14.458,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 471.166,
+          "x2": 540,
+          "y2": 497.119,
+          "cpx1": 369.643,
+          "cpy1": 471.166,
+          "cpx2": 369.643,
+          "cpy2": 497.119,
+          "kalınlık": 1.631,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              86,
+              118,
+              211,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 40,
+          "kaynak": "Liquid",
+          "hedef": "International aviation",
+          "değer": 206.267,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 429.627,
+          "x2": 540,
+          "y2": 431.58,
+          "cpx1": 369.643,
+          "cpy1": 429.627,
+          "cpx2": 369.643,
+          "cpy2": 431.58,
+          "kalınlık": 23.272,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              165,
+              193,
+              62,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 41,
+          "kaynak": "Liquid",
+          "hedef": "Agriculture",
+          "değer": 3.64,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 413.393,
+          "x2": 540,
+          "y2": 383.836,
+          "cpx1": 369.643,
+          "cpy1": 413.393,
+          "cpx2": 369.643,
+          "cpy2": 383.836,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              84,
+              116,
+              215,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 42,
+          "kaynak": "Liquid",
+          "hedef": "National navigation",
+          "değer": 33.218,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 467.419,
+          "x2": 540,
+          "y2": 485.371,
+          "cpx1": 369.643,
+          "cpy1": 467.419,
+          "cpx2": 369.643,
+          "cpy2": 485.371,
+          "kalınlık": 3.748,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              97,
+              129,
+              193,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 43,
+          "kaynak": "Liquid",
+          "hedef": "Rail transport",
+          "değer": 4.413,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 413.804,
+          "x2": 540,
+          "y2": 393.134,
+          "cpx1": 369.643,
+          "cpy1": 413.804,
+          "cpx2": 369.643,
+          "cpy2": 393.134,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              83,
+              164,
+              180,
+              51
+            ],
+            [
+              85,
+              117,
+              213,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 44,
+          "kaynak": "Marine algae",
+          "hedef": "Bio-conversion",
+          "değer": 4.375,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 202.791,
+          "x2": 107.143,
+          "y2": 184.173,
+          "cpx1": 81.071,
+          "cpy1": 202.791,
+          "cpx2": 81.071,
+          "cpy2": 184.173,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              80,
+              112,
+              221,
+              51
+            ],
+            [
+              118,
+              98,
+              106,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 45,
+          "kaynak": "Ngas",
+          "hedef": "Gas",
+          "değer": 122.952,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 242.713,
+          "x2": 179.286,
+          "y2": 222.342,
+          "cpx1": 153.214,
+          "cpy1": 242.713,
+          "cpx2": 153.214,
+          "cpy2": 222.342,
+          "kalınlık": 13.872,
+          "renkler": [
+            [
+              150,
+              182,
+              105,
+              51
+            ],
+            [
+              167,
+              194,
+              61,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 46,
+          "kaynak": "Nuclear",
+          "hedef": "Thermal generation",
+          "değer": 839.978,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 26.25,
+          "x2": 251.429,
+          "y2": 54.763,
+          "cpx1": 153.214,
+          "cpy1": 26.25,
+          "cpx2": 153.214,
+          "cpy2": 54.763,
+          "kalınlık": 94.77,
+          "renkler": [
+            [
+              211,
+              202,
+              49,
+              51
+            ],
+            [
+              63,
+              190,
+              149,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 47,
+          "kaynak": "Oil imports",
+          "hedef": "Oil",
+          "değer": 504.287,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 409.754,
+          "x2": 107.143,
+          "y2": 405.437,
+          "cpx1": 81.071,
+          "cpy1": 409.754,
+          "cpx2": 81.071,
+          "cpy2": 405.437,
+          "kalınlık": 56.896,
+          "renkler": [
+            [
+              234,
+              145,
+              81,
+              51
+            ],
+            [
+              133,
+              161,
+              150,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 48,
+          "kaynak": "Oil reserves",
+          "hedef": "Oil",
+          "değer": 107.703,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 474.65,
+          "x2": 107.143,
+          "y2": 462.332,
+          "cpx1": 81.071,
+          "cpy1": 474.65,
+          "cpx2": 81.071,
+          "cpy2": 462.332,
+          "kalınlık": 12.152,
+          "renkler": [
+            [
+              141,
+              173,
+              120,
+              51
+            ],
+            [
+              133,
+              161,
+              150,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 49,
+          "kaynak": "Oil",
+          "hedef": "Liquid",
+          "değer": 611.99,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 405.437,
+          "x2": 179.286,
+          "y2": 399.802,
+          "cpx1": 153.214,
+          "cpy1": 405.437,
+          "cpx2": 153.214,
+          "cpy2": 399.802,
+          "kalınlık": 69.047,
+          "renkler": [
+            [
+              133,
+              161,
+              150,
+              51
+            ],
+            [
+              83,
+              164,
+              180,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 50,
+          "kaynak": "Other waste",
+          "hedef": "Solid",
+          "değer": 56.587,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 188.406,
+          "x2": 179.286,
+          "y2": 186.327,
+          "cpx1": 117.143,
+          "cpy1": 188.406,
+          "cpx2": 117.143,
+          "cpy2": 186.327,
+          "kalınlık": 6.384,
+          "renkler": [
+            [
+              156,
+              188,
+              94,
+              51
+            ],
+            [
+              177,
+              122,
+              93,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 51,
+          "kaynak": "Other waste",
+          "hedef": "Bio-conversion",
+          "değer": 77.81,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 179.627,
+          "x2": 107.143,
+          "y2": 175.394,
+          "cpx1": 81.071,
+          "cpy1": 179.627,
+          "cpx2": 81.071,
+          "cpy2": 175.394,
+          "kalınlık": 8.779,
+          "renkler": [
+            [
+              156,
+              188,
+              94,
+              51
+            ],
+            [
+              118,
+              98,
+              106,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 52,
+          "kaynak": "Pumped heat",
+          "hedef": "Heating and cooling - homes",
+          "değer": 193.026,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 372.002,
+          "x2": 540,
+          "y2": 330.088,
+          "cpx1": 297.5,
+          "cpy1": 372.002,
+          "cpx2": 297.5,
+          "cpy2": 330.088,
+          "kalınlık": 21.778,
+          "renkler": [
+            [
+              132,
+              149,
+              83,
+              51
+            ],
+            [
+              101,
+              91,
+              110,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 53,
+          "kaynak": "Pumped heat",
+          "hedef": "Heating and cooling - commercial",
+          "değer": 70.672,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 393.78,
+          "x2": 540,
+          "y2": 367.029,
+          "cpx1": 297.5,
+          "cpy1": 393.78,
+          "cpx2": 297.5,
+          "cpy2": 367.029,
+          "kalınlık": 7.974,
+          "renkler": [
+            [
+              132,
+              149,
+              83,
+              51
+            ],
+            [
+              156,
+              188,
+              95,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 54,
+          "kaynak": "Solar PV",
+          "hedef": "Electricity grid",
+          "değer": 59.901,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 332.317,
+          "x2": 323.571,
+          "y2": 261.043,
+          "cpx1": 225.357,
+          "cpy1": 332.317,
+          "cpx2": 225.357,
+          "cpy2": 261.043,
+          "kalınlık": 6.758,
+          "renkler": [
+            [
+              113,
+              145,
+              167,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 55,
+          "kaynak": "Solar Thermal",
+          "hedef": "Heating and cooling - homes",
+          "değer": 19.263,
+          "yön": "horizontal",
+          "x1": 127.143,
+          "y1": 352.277,
+          "x2": 540,
+          "y2": 327.914,
+          "cpx1": 333.571,
+          "cpy1": 352.277,
+          "cpx2": 333.571,
+          "cpy2": 327.914,
+          "kalınlık": 2.173,
+          "renkler": [
+            [
+              89,
+              121,
+              206,
+              51
+            ],
+            [
+              101,
+              91,
+              110,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 56,
+          "kaynak": "Solar",
+          "hedef": "Solar Thermal",
+          "değer": 19.263,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 361.829,
+          "x2": 107.143,
+          "y2": 352.277,
+          "cpx1": 81.071,
+          "cpy1": 361.829,
+          "cpx2": 81.071,
+          "cpy2": 352.277,
+          "kalınlık": 2.173,
+          "renkler": [
+            [
+              124,
+              156,
+              148,
+              51
+            ],
+            [
+              89,
+              121,
+              206,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 57,
+          "kaynak": "Solar",
+          "hedef": "Solar PV",
+          "değer": 59.901,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 355.071,
+          "x2": 107.143,
+          "y2": 332.317,
+          "cpx1": 81.071,
+          "cpy1": 355.071,
+          "cpx2": 81.071,
+          "cpy2": 332.317,
+          "kalınlık": 6.758,
+          "renkler": [
+            [
+              124,
+              156,
+              148,
+              51
+            ],
+            [
+              113,
+              145,
+              167,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 58,
+          "kaynak": "Solid",
+          "hedef": "Agriculture",
+          "değer": 0.882,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 205.087,
+          "x2": 540,
+          "y2": 383.003,
+          "cpx1": 369.643,
+          "cpy1": 205.087,
+          "cpx2": 369.643,
+          "cpy2": 383.003,
+          "kalınlık": 1,
+          "renkler": [
+            [
+              177,
+              122,
+              93,
+              51
+            ],
+            [
+              84,
+              116,
+              215,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 59,
+          "kaynak": "Solid",
+          "hedef": "Thermal generation",
+          "değer": 400.12,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 154.7,
+          "x2": 251.429,
+          "y2": 149.533,
+          "cpx1": 225.357,
+          "cpy1": 154.7,
+          "cpx2": 225.357,
+          "cpy2": 149.533,
+          "kalınlık": 45.143,
+          "renkler": [
+            [
+              177,
+              122,
+              93,
+              51
+            ],
+            [
+              63,
+              190,
+              149,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 60,
+          "kaynak": "Solid",
+          "hedef": "Industry",
+          "değer": 46.477,
+          "yön": "horizontal",
+          "x1": 199.286,
+          "y1": 199.843,
+          "x2": 540,
+          "y2": 237.684,
+          "cpx1": 369.643,
+          "cpy1": 199.843,
+          "cpx2": 369.643,
+          "cpy2": 237.684,
+          "kalınlık": 5.244,
+          "renkler": [
+            [
+              177,
+              122,
+              93,
+              51
+            ],
+            [
+              193,
+              157,
+              114,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 61,
+          "kaynak": "Thermal generation",
+          "hedef": "Electricity grid",
+          "değer": 525.531,
+          "yön": "horizontal",
+          "x1": 271.429,
+          "y1": 143.57,
+          "x2": 323.571,
+          "y2": 166.167,
+          "cpx1": 297.5,
+          "cpy1": 143.57,
+          "cpx2": 297.5,
+          "cpy2": 166.167,
+          "kalınlık": 59.293,
+          "renkler": [
+            [
+              63,
+              190,
+              149,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 62,
+          "kaynak": "Thermal generation",
+          "hedef": "Losses",
+          "değer": 787.129,
+          "yön": "horizontal",
+          "x1": 271.429,
+          "y1": 54.763,
+          "x2": 540,
+          "y2": 74.099,
+          "cpx1": 405.714,
+          "cpy1": 54.763,
+          "cpx2": 405.714,
+          "cpy2": 74.099,
+          "kalınlık": 88.807,
+          "renkler": [
+            [
+              63,
+              190,
+              149,
+              51
+            ],
+            [
+              255,
+              205,
+              15,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 63,
+          "kaynak": "Thermal generation",
+          "hedef": "District heating",
+          "değer": 79.329,
+          "yön": "horizontal",
+          "x1": 271.429,
+          "y1": 202.863,
+          "x2": 323.571,
+          "y2": 277.808,
+          "cpx1": 297.5,
+          "cpy1": 202.863,
+          "cpx2": 297.5,
+          "cpy2": 277.808,
+          "kalınlık": 8.95,
+          "renkler": [
+            [
+              63,
+              190,
+              149,
+              51
+            ],
+            [
+              124,
+              156,
+              148,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 64,
+          "kaynak": "Tidal",
+          "hedef": "Electricity grid",
+          "değer": 9.452,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 346.004,
+          "x2": 323.571,
+          "y2": 268.591,
+          "cpx1": 189.286,
+          "cpy1": 346.004,
+          "cpx2": 189.286,
+          "cpy2": 268.591,
+          "kalınlık": 1.066,
+          "renkler": [
+            [
+              83,
+              115,
+              216,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 65,
+          "kaynak": "UK land based bioenergy",
+          "hedef": "Bio-conversion",
+          "değer": 182.01,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 129.02,
+          "x2": 107.143,
+          "y2": 140.787,
+          "cpx1": 81.071,
+          "cpy1": 129.02,
+          "cpx2": 81.071,
+          "cpy2": 140.787,
+          "kalınlık": 20.535,
+          "renkler": [
+            [
+              180,
+              211,
+              53,
+              51
+            ],
+            [
+              118,
+              98,
+              106,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 66,
+          "kaynak": "Wave",
+          "hedef": "Electricity grid",
+          "değer": 19.013,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 318.279,
+          "x2": 323.571,
+          "y2": 258.107,
+          "cpx1": 189.286,
+          "cpy1": 318.279,
+          "cpx2": 189.286,
+          "cpy2": 258.107,
+          "kalınlık": 2.145,
+          "renkler": [
+            [
+              89,
+              121,
+              207,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        },
+        {
+          "veri_sırası": 67,
+          "kaynak": "Wind",
+          "hedef": "Electricity grid",
+          "değer": 289.366,
+          "yön": "horizontal",
+          "x1": 55,
+          "y1": 277.631,
+          "x2": 323.571,
+          "y2": 225.459,
+          "cpx1": 189.286,
+          "cpy1": 277.631,
+          "cpx2": 189.286,
+          "cpy2": 225.459,
+          "kalınlık": 32.647,
+          "renkler": [
+            [
+              116,
+              130,
+              92,
+              51
+            ],
+            [
+              254,
+              179,
+              45,
+              51
+            ]
+          ],
+          "etiket_göster": false,
+          "etiket_metni": ""
+        }
+      ]
+    }
+  ]
+}
